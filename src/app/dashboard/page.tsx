@@ -1,3 +1,4 @@
+import Sidebar from '@/components/ui/custom/sidebar'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/login/actions'
 import { Button } from '@/components/ui/button'
@@ -10,9 +11,20 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Preparar datos del usuario para el sidebar
+  const userData = {
+    user_name: user?.user_metadata?.user_name || user?.email?.split('@')[0] || 'Usuario',
+    full_name: user?.user_metadata?.full_name || user?.email || ''
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="flex">
+      {/* Renderizar el Sidebar */}
+      <Sidebar userData={userData} />
+      
+      {/* Contenido principal con margen izquierdo para el sidebar */}
+      <main className="ml-64 flex-1 min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8">
+        <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/60 p-6 mb-8">
           <div className="flex items-center justify-between">
@@ -98,7 +110,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key`}
             </p>
           </div>
         </div>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
