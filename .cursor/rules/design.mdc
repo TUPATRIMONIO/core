@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+
+# Reglas de Diseño - TuPatrimonio
+
+## Tipografía
+- **Fuente Principal**: Quicksand
+  - Usar Quicksand para todos los textos del proyecto (headings, body, botones, etc.)
+  - Importar desde Google Fonts
+
+## Paleta de Colores
+
+### Fondos
+- **Background Light**: `#f7f7f7` - Para tema claro y fondos principales
+- **Background Dark**: `#4a4a4a` - Para tema oscuro y elementos contrastantes
+
+### Elementos UI
+- **Lines**: `#7a7a7a` - Para bordes, separadores y líneas divisorias
+- **Buttons**: `#800039` - Color principal para botones y CTAs
+- **Button Hover**: `#a50049` - Estado hover para botones interactivos
+
+## Implementación
+- Usar estos colores como variables CSS custom properties
+- Aplicar Quicksand como font-family principal en Tailwind CSS
+- Mantener consistencia en toda la aplicación
+- Considerar accesibilidad y contraste en la implementación

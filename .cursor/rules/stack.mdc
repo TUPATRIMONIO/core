@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+
+# Stack de Tecnologías
+
+Para este proyecto utilizaremos el siguiente stack de tecnologías:
+
+- **Next.js** - Framework de React para desarrollo web
+- **Tailwind CSS** - Framework de CSS utilitario para diseño
+- **Supabase** - Backend como servicio para base de datos y autenticación
+
+## Directrices de Implementación
+
+- Usar Next.js App Router (app directory)
+- Implementar diseños con Tailwind CSS siguiendo principios de diseño moderno
+- Configurar Supabase para manejo de datos y autenticación de usuarios
+- Mantener código limpio y bien estructurado
