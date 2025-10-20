@@ -3,12 +3,12 @@
 import React, { useState } from 'react'
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { signIn, signUp } from './actions'
+import { signIn, signUp, signInWithGitHub } from './actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/custom/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Eye, EyeOff, User, Mail, Lock, ArrowRight, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, User, Mail, Lock, ArrowRight, UserPlus, Github } from 'lucide-react'
 
 type AuthMode = 'login' | 'register'
 
@@ -24,6 +24,41 @@ interface FormErrors {
   password?: string
   confirmPassword?: string
   general?: string
+}
+
+// Componente para el botón de GitHub
+function GitHubButton() {
+  const [loading, setLoading] = useState(false)
+  
+  const handleGitHubSignIn = async () => {
+    setLoading(true)
+    try {
+      await signInWithGitHub()
+    } catch (error) {
+      setLoading(false)
+      console.error('Error with GitHub sign in:', error)
+    }
+  }
+  
+  return (
+    <Button
+      onClick={handleGitHubSignIn}
+      disabled={loading}
+      className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+    >
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+          Conectando...
+        </div>
+      ) : (
+        <div className="flex items-center justify-center">
+          <Github className="w-5 h-5 mr-3" />
+          Continuar con GitHub
+        </div>
+      )}
+    </Button>
+  )
 }
 
 // Componente para el botón de envío
@@ -95,10 +130,21 @@ export default function LoginPage() {
     }
   }, [currentState])
 
+  // Manejar errores de OAuth desde URL
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlError = urlParams.get('error')
+    if (urlError) {
+      setErrors({ general: urlError })
+      // Limpiar la URL sin recargar la página
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f7f7f7] via-[#f0f0f0] to-[#e8e8e8] flex items-center justify-center p-4">
       {/* Fondo con gradiente sutil */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 via-transparent to-gray-600/5" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#800039]/5 via-transparent to-[#4a4a4a]/5" />
       
       {/* Card principal */}
       <div className="relative w-full max-w-md">
@@ -163,6 +209,23 @@ export default function LoginPage() {
               <UserPlus className="w-4 h-4 inline mr-2" />
               Registrarse
             </button>
+          </div>
+
+          {/* Botón de GitHub */}
+          <div className="mb-6">
+            <GitHubButton />
+          </div>
+
+          {/* Separador */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#7a7a7a]/30" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-[#7a7a7a] font-medium">
+                o continúa con email
+              </span>
+            </div>
           </div>
 
           {/* Formulario */}

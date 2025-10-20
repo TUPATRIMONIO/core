@@ -108,7 +108,7 @@ export async function signUp(prevState: AuthResult | null, formData: FormData): 
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}auth/callback`,
       },
     })
 
@@ -152,6 +152,34 @@ export async function signUp(prevState: AuthResult | null, formData: FormData): 
   }
 }
 
+// Acción para iniciar sesión con GitHub OAuth
+export async function signInWithGitHub(): Promise<void> {
+  const supabase = await createClient()
+  
+  // Construir URL del callback eliminando barras duplicadas
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const callbackUrl = `${baseUrl.replace(/\/$/, '')}/auth/callback`
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: {
+      redirectTo: callbackUrl,
+    },
+  })
+
+  if (error) {
+    console.error('Error signing in with GitHub:', error)
+    redirect('/login?error=Error al iniciar sesión con GitHub')
+  }
+
+  if (data.url) {
+    redirect(data.url)
+  }
+  
+  // Si llegamos aquí sin URL, hay un problema
+  redirect('/login?error=Error al iniciar sesión con GitHub')
+}
+
 // Acción para cerrar sesión
 export async function signOut(): Promise<void> {
   try {
@@ -189,7 +217,7 @@ export async function resetPassword(prevState: AuthResult | null, formData: Form
     const supabase = await createClient()
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}auth/reset-password`,
     })
 
     if (error) {
