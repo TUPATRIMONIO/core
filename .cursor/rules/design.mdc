@@ -4,24 +4,52 @@ alwaysApply: true
 
 # Reglas de Diseño - TuPatrimonio
 
+## Sistema de Estilos Base
+- **SIEMPRE seguir** las variables CSS definidas en `@globals.css`
+- Utilizar las variables CSS personalizadas con prefijo `--tp-` (TuPatrimonio)
+- Respetar el sistema de colores, sombras y gradientes predefinidos
+
+## Componentes UI
+- **SIEMPRE usar componentes de Shadcn UI**: https://ui.shadcn.com/docs/components
+- Personalizar los componentes usando las variables CSS de `@globals.css`
+- Mantener la consistencia con el design system establecido
+
 ## Tipografía
 - **Fuente Principal**: Quicksand
   - Usar Quicksand para todos los textos del proyecto (headings, body, botones, etc.)
-  - Importar desde Google Fonts
+  - Ya configurada en `@globals.css` como `--font-quicksand`
+  - Aplicar con Tailwind: `font-sans` o `font-quicksand`
 
-## Paleta de Colores
+## Paleta de Colores (Variables CSS)
 
 ### Fondos
-- **Background Light**: `#f7f7f7` - Para tema claro y fondos principales
-- **Background Dark**: `#4a4a4a` - Para tema oscuro y elementos contrastantes
+- **Background Light**: `var(--tp-background-light)` - `#f7f7f7`
+- **Background Dark**: `var(--tp-background-dark)` - `#4a4a4a`
+- Variaciones con opacidad disponibles: `--tp-bg-light-10`, `--tp-bg-dark-20`, etc.
 
 ### Elementos UI
-- **Lines**: `#7a7a7a` - Para bordes, separadores y líneas divisorias
-- **Buttons**: `#800039` - Color principal para botones y CTAs
-- **Button Hover**: `#a50049` - Estado hover para botones interactivos
+- **Lines/Bordes**: `var(--tp-lines)` - `#7a7a7a`
+- **Buttons Primary**: `var(--tp-buttons)` - `#800039`
+- **Button Hover**: `var(--tp-buttons-hover)` - `#a50049`
+- Variaciones con opacidad: `--tp-buttons-20`, `--tp-lines-30`, etc.
+
+### Uso en Tailwind CSS
+```css
+/* Ejemplos de uso en clases Tailwind */
+bg-[var(--tp-buttons)]        /* Botón principal */
+bg-[var(--tp-background-light)] /* Fondo claro */
+border-[var(--tp-lines-30)]     /* Borde sutil */
+text-[var(--tp-buttons)]        /* Texto color brand */
+```
+
+## Gradientes y Efectos
+- Usar gradientes predefinidos: `var(--tp-gradient-primary)`, `var(--tp-gradient-background)`
+- Sombras consistentes: `var(--tp-shadow-md)`, `var(--tp-shadow-xl)`
+- Border radius: `var(--tp-radius-lg)`, `var(--tp-radius-xl)`
 
 ## Implementación
-- Usar estos colores como variables CSS custom properties
-- Aplicar Quicksand como font-family principal en Tailwind CSS
-- Mantener consistencia en toda la aplicación
-- Considerar accesibilidad y contraste en la implementación
+- **Prioridad 1**: Componentes Shadcn UI personalizados
+- **Prioridad 2**: Variables CSS de `@globals.css`
+- **Prioridad 3**: Clases Tailwind complementarias
+- Mantener accesibilidad y contraste en toda la implementación
+- Consultar `@globals.css` para todas las variables disponibles

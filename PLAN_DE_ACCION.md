@@ -3,7 +3,7 @@
 ## 📋 Información del Proyecto
 
 ### Stack Tecnológico
-- **Backend:** Supabase (PostgreSQL + Auth + Storage + Realtime)
+- **Backend:** Supabase (PostgreSQL + Auth + Storage + Realtime + pgvector)
 - **Frontend:** Next.js 14+ (App Router) + TailwindCSS
 - **Deployment:** Netlify
 - **Lenguaje:** TypeScript
@@ -16,6 +16,7 @@
 - **Verificación:** Veriff (biometría + documentos)
 - **Storage:** AWS S3 o Firebase Storage
 - **SEO Tools:** Google Search Console, Ahrefs/SEMrush, Schema.org
+- **IA:** OpenAI API / Anthropic Claude API
 
 ### Principios de Diseño
 - **Base de datos ligera:** Mínima documentación almacenada, usar referencias a storage
@@ -24,6 +25,7 @@
 - **Event-driven:** Arquitectura basada en eventos para desacoplamiento
 - **Seguridad:** RLS en todas las tablas, encriptación en reposo
 - **SEO-first:** Contenido optimizado para motores de búsqueda y IA
+- **AI schemas separados:** Customer Service y Document Review como servicios independientes
 
 ---
 
@@ -51,6 +53,8 @@ tupatrimonio.app/
 ├── /firmas-electronicas (landing específica)
 ├── /verificacion-identidad (landing específica)
 ├── /notaria-digital (landing específica)
+├── /asistente-ia (landing específica) ← NUEVO
+├── /revision-documentos-ia (landing específica) ← NUEVO
 ├── /precios
 ├── /blog/
 │   ├── /blog/[slug]
@@ -259,21 +263,29 @@ Primarias (High Intent):
 - "firmar documentos online" [480/mes, KD: 38]
 - "notaría digital" [320/mes, KD: 35]
 - "verificación de identidad online" [210/mes, KD: 40]
+- "chatbot con IA para empresas" [180/mes, KD: 45] ← NUEVO
+- "revisión automática de contratos" [120/mes, KD: 38] ← NUEVO
 
 Secundarias (Medium Intent):
 - "cómo firmar un pdf" [1200/mes, KD: 25]
 - "qué es firma electrónica avanzada" [390/mes, KD: 28]
 - "documentos notariales digitales" [170/mes, KD: 30]
+- "asistente virtual inteligente" [850/mes, KD: 40] ← NUEVO
+- "IA para revisar documentos legales" [90/mes, KD: 35] ← NUEVO
 
 Long-tail (High Conversion):
 - "mejor software firma electrónica empresas" [90/mes, KD: 22]
 - "firma electrónica con validez legal chile" [110/mes, KD: 26]
 - "automatizar firma de contratos" [50/mes, KD: 18]
+- "chatbot IA atención al cliente 24/7" [70/mes, KD: 30] ← NUEVO
+- "software IA revisar contratos" [60/mes, KD: 28] ← NUEVO
 
 Informational (Top of Funnel):
 - "tipos de firma electrónica" [820/mes, KD: 20]
 - "diferencia firma digital y electrónica" [590/mes, KD: 22]
 - "requisitos firma electrónica" [280/mes, KD: 24]
+- "cómo funciona un chatbot con IA" [620/mes, KD: 22] ← NUEVO
+- "IA para análisis de documentos" [340/mes, KD: 25] ← NUEVO
 ```
 
 #### Content Clusters:
@@ -310,7 +322,31 @@ Supporting content:
 - "Notaría Tradicional vs Notaría Digital: Comparativa"
 ```
 
-#### Calendario Editorial (Primeras 12 semanas):
+**Cluster 4: IA para Atención al Cliente (Pillar)** ← NUEVO
+```
+Pillar: "Chatbots con IA: La Revolución en Atención al Cliente 2025"
+Supporting content:
+- "Cómo Implementar un Chatbot con IA en tu Empresa"
+- "Chatbot vs Asistente Virtual: Diferencias y Ventajas"
+- "ROI de un Chatbot: Cuánto Ahorras en Atención al Cliente"
+- "Casos de Éxito: Empresas que Mejoraron su Atención con IA"
+- "Chatbots en Chile: Marco Legal y Mejores Prácticas"
+- "Integrar Chatbot IA con WhatsApp Business"
+```
+
+**Cluster 5: IA para Revisión de Documentos (Pillar)** ← NUEVO
+```
+Pillar: "IA para Análisis de Documentos: Guía Completa 2025"
+Supporting content:
+- "Cómo la IA Revoluciona la Revisión de Contratos"
+- "Análisis Automático de Contratos: Ahorro de Tiempo y Dinero"
+- "Red Flags en Contratos: Cómo la IA las Detecta"
+- "IA vs Abogado: Cuándo Usar Cada Uno"
+- "Compliance Automatizado con IA"
+- "Extracción de Datos de Documentos con IA"
+```
+
+#### Calendario Editorial (Primeras 16 semanas):
 
 ```
 Semana 1-2:
@@ -342,6 +378,16 @@ Semana 11-12:
 - Pillar article: Notaría Digital (4500+ palabras)
 - Supporting: "Documentos Notarizables Online"
 - Comparativa: "Notaría Digital vs Tradicional"
+
+Semana 13-14: ← NUEVO
+- Pillar article: Chatbots con IA (5000+ palabras)
+- Supporting: "Cómo Implementar un Chatbot con IA"
+- Blog: "ROI de Chatbots: Casos Reales con Números"
+
+Semana 15-16: ← NUEVO
+- Pillar article: IA para Análisis de Documentos (4500+ palabras)
+- Supporting: "Cómo la IA Revoluciona Revisión de Contratos"
+- Tutorial: "Análisis Automático de Contratos Paso a Paso"
 ```
 
 ---
@@ -357,7 +403,7 @@ Semana 11-12:
 Estructura:
 - Hero: Value prop clara + CTA principal
 - Social proof: Logos clientes + testimonios
-- Features: 3-4 beneficios principales
+- Features: 5-6 beneficios principales (incluir IA)
 - How it works: 3 pasos simples
 - Use cases: Tabs con diferentes industrias
 - Pricing preview: Link a página de precios
@@ -365,9 +411,9 @@ Estructura:
 - Final CTA: "Empieza Gratis"
 
 SEO:
-- Meta title: "TuPatrimonio - Firma Electrónica y Verificación de Identidad Digital | Chile"
-- Meta desc: "Firma documentos online con validez legal. Verificación de identidad biométrica. Notaría digital. Prueba gratis 30 días. +500 empresas confían en nosotros."
-- H1: "Digitaliza tus Documentos con Firma Electrónica Legal en Chile"
+- Meta title: "TuPatrimonio - Firma Electrónica, IA y Verificación Digital | Chile"
+- Meta desc: "Firma documentos online, chatbot IA 24/7, revisión automática de contratos. Verificación biométrica. Prueba gratis 30 días. +500 empresas confían."
+- H1: "Digitaliza tus Procesos con IA: Firmas, Verificación y Más"
 ```
 
 **2. Landing: Firmas Electrónicas (`/firmas-electronicas`)**
@@ -411,15 +457,94 @@ Estructura:
 - Comparativa de precios
 ```
 
-**5. Página de Precios (`/precios`)**
+**5. Landing: Asistente IA (`/asistente-ia`)** ← NUEVO
+```
+Enfoque: Automatización de atención al cliente
+Keywords: "chatbot con IA", "asistente virtual inteligente", "atención 24/7"
+
+Estructura:
+- Hero: "Atiende a tus Clientes 24/7 con IA"
+- Pain points: Costos de soporte, tiempos de respuesta
+- Solution: Chatbot que aprende de tu negocio
+- Features específicas:
+  * Respuestas instantáneas
+  * Aprende de tu documentación
+  * Múltiples canales (web, WhatsApp, Slack)
+  * Escalamiento a humanos cuando necesario
+  * Analytics de conversaciones
+- Demo interactivo: Widget de chat funcionando
+- Pricing específico: Por conversación o flat fee
+- ROI calculator: "Cuánto ahorrarás en soporte"
+- Casos de uso por industria
+- Testimonios con métricas (% reducción tickets)
+- FAQ sobre implementación
+- CTA: "Prueba el Asistente IA Gratis"
+
+Content additions:
+- Video: "Configura tu Chatbot en 10 Minutos"
+- Whitepaper: "El Futuro de la Atención al Cliente con IA"
+- Template: "Knowledge Base para Entrenar tu Chatbot"
+```
+
+**6. Landing: Revisión Documentos IA (`/revision-documentos-ia`)** ← NUEVO
+```
+Enfoque: Automatización de análisis legal/contractual
+Keywords: "revisión automática contratos", "IA análisis documentos", "compliance automatizado"
+
+Estructura:
+- Hero: "Analiza Contratos en Minutos, No en Horas"
+- Pain points: Costos de abogados, tiempo de revisión, errores humanos
+- Solution: IA que detecta riesgos y extrae datos clave
+- Features específicas:
+  * Detección de red flags
+  * Extracción de cláusulas clave
+  * Análisis de riesgo automatizado
+  * Comparación de versiones
+  * Compliance checks
+  * Reportes ejecutivos
+- Demo visual: Documento antes/después con anotaciones
+- Tipos de documentos soportados
+- Pricing: Por documento o suscripción mensual
+- Precisión y confiabilidad (% de exactitud)
+- Seguridad y confidencialidad
+- Casos de uso:
+  * Equipos legales
+  * Procurement
+  * Real estate
+  * Startups
+- Comparativa: "IA + Abogado vs Solo Abogado"
+- Testimonios con tiempo ahorrado
+- FAQ sobre precisión y limitaciones
+- CTA: "Analiza tu Primer Contrato Gratis"
+
+Content additions:
+- Video: "Cómo la IA Revisa un Contrato Paso a Paso"
+- eBook: "Guía de Red Flags en Contratos Comerciales"
+- Checklist: "Qué Revisar en un Contrato de SaaS"
+```
+
+**7. Página de Precios (`/precios`)**
 ```
 Estructura:
 - Tabla comparativa de planes
 - Toggle: Mensual/Anual (con descuento)
+- NUEVO: Tabs por servicio (Firmas, IA Chat, IA Review, etc.)
 - Calculator: Estimar costo según uso
 - FAQ sobre facturación
 - CTA por plan
 - Opción "Hablar con Ventas" para Enterprise
+
+Pricing IA Services:
+- Chatbot IA:
+  * Starter: 100 conversaciones/mes - $29/mes
+  * Pro: 1,000 conversaciones/mes - $199/mes
+  * Enterprise: Ilimitado - Custom
+  
+- Revisión IA:
+  * Pay as you go: $5 por documento
+  * Plan 50: 50 documentos/mes - $199/mes
+  * Plan 200: 200 documentos/mes - $599/mes
+  * Enterprise: Volumen - Custom
 
 SEO considerations:
 - Schema markup para Offers
@@ -450,6 +575,8 @@ SEO considerations:
    - Firma Electrónica
    - Verificación de Identidad
    - Notaría Digital
+   - Inteligencia Artificial ← NUEVO
+   - Automatización ← NUEVO
    - Compliance
    - Casos de Éxito
    - Guías y Tutoriales
@@ -466,6 +593,7 @@ SEO considerations:
    - Table of contents (para posts largos)
    - Code syntax highlighting (para tutoriales técnicos)
    - Download resources (PDFs, templates)
+   - Interactive demos (para posts de IA)
    ```
 
 4. **Template de Blog Post Optimizado**
@@ -496,6 +624,8 @@ SEO considerations:
    Crear páginas FAQ específicas con schema FAQPage:
    - "Preguntas Frecuentes sobre Firma Electrónica"
    - "FAQ: Verificación de Identidad Digital"
+   - "FAQ: Chatbots con Inteligencia Artificial" ← NUEVO
+   - "FAQ: Revisión Automática de Contratos con IA" ← NUEVO
    
    Las IA's priorizan contenido estructurado en Q&A format
    ```
@@ -503,9 +633,11 @@ SEO considerations:
 2. **Authoritative Content Signals**
    ```
    - Citar fuentes legales oficiales
+   - Referencias a papers de IA (OpenAI, Anthropic)
    - Incluir fechas de actualización
    - Mostrar expertise: bio de autores con credenciales
    - Enlaces a legislación chilena (.gob.cl)
+   - Estudios de caso con datos verificables
    ```
 
 3. **Clear, Direct Answers**
@@ -517,19 +649,21 @@ SEO considerations:
    - Ejemplo práctico
    
    Ejemplo:
-   "¿Qué es una firma electrónica avanzada?
+   "¿Qué tan precisa es la IA en revisar contratos?
    
-   Una firma electrónica avanzada es un tipo de firma digital 
-   que permite identificar de manera única al firmante y detectar 
-   cualquier cambio posterior en el documento firmado. 
+   Los sistemas de IA para revisión de contratos alcanzan una 
+   precisión del 85-95% en la detección de cláusulas estándar 
+   y red flags comunes, según estudios de 2024.
    
-   Características principales:
-   - Vinculada únicamente al firmante
-   - Permite identificar al firmante
-   - Creada con medios bajo control exclusivo del firmante
-   - Detecta alteraciones posteriores
+   Factores que afectan la precisión:
+   - Calidad del entrenamiento del modelo
+   - Tipo de contrato (estandarizado vs personalizado)
+   - Complejidad del lenguaje legal
+   - Idioma del documento
    
-   En Chile, está regulada por la Ley 19.799..."
+   En TuPatrimonio utilizamos Claude 3.5 Sonnet para análisis 
+   legal, logrando 92% de precisión en contratos comerciales 
+   estándar..."
    ```
 
 4. **Knowledge Panels**
@@ -545,9 +679,10 @@ SEO considerations:
 5. **Entities y Topical Authority**
    ```
    - Usar consistently términos técnicos correctos
-   - Crear glosario de términos
+   - Crear glosario de términos (incluir términos de IA)
    - Link interno entre términos relacionados
    - Cubrir exhaustivamente cada subtopic
+   - Definir claramente: Machine Learning, NLP, LLM, RAG, etc.
    ```
 
 ---
@@ -562,7 +697,7 @@ SEO considerations:
    ```
    - LCP < 2.5s: Optimizar featured images, lazy loading
    - FID < 100ms: Code splitting, defer non-critical JS
-   - CLS < 0.1: Size de imágenes explícito, reservar espacio para ads
+   - CLS < 0.1: Size de imágenes explícito, reservar espacio para widgets
    ```
 
 2. **Mobile-First**
@@ -607,9 +742,9 @@ SEO considerations:
 
 1. **Digital PR**
    ```
-   - Press release sobre el lanzamiento
+   - Press release sobre el lanzamiento (enfatizar IA)
    - Pitch a TechCrunch LATAM, Contxto, otros
-   - Entrevistas en podcasts del sector
+   - Entrevistas en podcasts del sector (legaltech + AI)
    ```
 
 2. **Guest Posting**
@@ -618,17 +753,23 @@ SEO considerations:
    - Blogs de legaltech
    - Publicaciones de transformación digital
    - Blogs de SaaS B2B
+   - Blogs de IA y automatización ← NUEVO
    
-   Pitch: "5 Formas en que la Firma Digital Acelera Ventas"
+   Pitch examples:
+   - "5 Formas en que la Firma Digital Acelera Ventas"
+   - "Cómo la IA Reduce Costos de Atención al Cliente en 60%" ← NUEVO
+   - "El Futuro del Análisis de Contratos: IA vs Humanos" ← NUEVO
    ```
 
 3. **Resource Link Building**
    ```
    Crear recursos linkables:
    - "Estado de la Digitalización en Chile 2025" (report con data)
+   - "Benchmark: IA en Atención al Cliente LATAM 2025" ← NUEVO
    - Infografías compartibles
-   - Calculadoras interactivas (ROI, ahorro de tiempo)
+   - Calculadoras interactivas (ROI firma, ROI chatbot, ahorro revisión contratos)
    - Templates gratuitos (contrato de NDA para firma)
+   - "Prompts para Análisis de Contratos con IA" (recurso único) ← NUEVO
    ```
 
 4. **Partnerships**
@@ -636,6 +777,7 @@ SEO considerations:
    - Co-marketing con SaaS complementarios (CRM, ERP)
    - Integraciones mencionadas en sus blogs
    - Webinars conjuntos
+   - Partners de IA (OpenAI, Anthropic - si aplica)
    ```
 
 5. **Local SEO (si aplica)**
@@ -643,6 +785,7 @@ SEO considerations:
    - Google Business Profile
    - Directorios de startups chilenas
    - Listados en marketplaces de software
+   - Listados en directorios de AI tools ← NUEVO
    ```
 
 ---
@@ -663,12 +806,15 @@ SEO considerations:
    - download_resource
    - video_play / video_complete
    - outbound_link_click
+   - chatbot_interaction ← NUEVO
+   - demo_ai_interaction ← NUEVO
    
    Conversions:
    - sign_up
    - contact_form_submit
    - pricing_page_view
    - demo_request
+   - ai_demo_completed ← NUEVO
    ```
 
 2. **Google Search Console**
@@ -684,6 +830,7 @@ SEO considerations:
    - Heatmaps
    - Session recordings
    - Surveys / feedback polls
+   - Focus en landing pages de IA
    ```
 
 4. **SEO Monitoring**
@@ -699,6 +846,7 @@ SEO considerations:
    - Backlinks (nuevos y perdidos)
    - Domain Authority
    - Indexed pages
+   - CTR por keyword
    ```
 
 ---
@@ -711,10 +859,18 @@ SEO considerations:
 
 1. **Lead Magnets**
    ```
+   General:
    - eBook: "Guía Completa de Digitalización de Documentos"
    - Checklist: "Cómo Elegir Software de Firma Electrónica"
    - Template: "Contrato de Confidencialidad para Firmar"
    - Webinar: "Demostración en Vivo de Firma Electrónica"
+   
+   IA-específicos: ← NUEVO
+   - eBook: "Implementar IA en tu Empresa: Guía Práctica 2025"
+   - Template: "100 Prompts para Entrenar tu Chatbot"
+   - Checklist: "Red Flags en Contratos: Qué Buscar"
+   - Webinar: "IA para Análisis de Contratos: Demo en Vivo"
+   - Calculator: "ROI de Automatizar Atención con IA"
    ```
 
 2. **CTAs Estratégicos**
@@ -722,6 +878,11 @@ SEO considerations:
    Primary CTA: "Empieza Gratis" (no credit card required)
    Secondary CTA: "Ver Demo" (video o calendario)
    Tertiary CTA: "Hablar con Ventas"
+   
+   IA-specific CTAs: ← NUEVO
+   - "Prueba el Chatbot IA"
+   - "Analiza un Contrato Gratis"
+   - "Ver Demo Interactiva"
    
    Placement:
    - Above the fold
@@ -738,6 +899,7 @@ SEO considerations:
    - Reviews de G2/Capterra (embedded)
    - Contador de usuarios/documentos firmados
    - Trust badges (certificaciones, seguridad)
+   - Métricas de IA: "X conversaciones atendidas", "X contratos analizados"
    ```
 
 4. **Forms Optimization**
@@ -748,6 +910,18 @@ SEO considerations:
    - Single column layout
    - Clear value prop sobre el form
    - Privacy assurance
+   
+   Demo request (para IA services):
+   - Email, Nombre, Empresa, Tamaño empresa
+   - "¿Qué te interesa?" → Multiple select
+   ```
+
+5. **Interactive Demos** ← NUEVO
+   ```
+   - Widget de chatbot funcionando en landing
+   - Upload documento sample → ver análisis IA
+   - Calculadoras interactivas
+   - Comparison tools interactivos
    ```
 
 ---
@@ -758,15 +932,15 @@ SEO considerations:
 
 ✅ **Marketing Website Live:**
 - Homepage
-- 3 Landing pages específicas (firmas, verificación, notaría)
-- Página de precios
+- 5 Landing pages específicas (firmas, verificación, notaría, chatbot IA, revisión IA)
+- Página de precios (con pricing de servicios IA)
 - Sección legal (términos, privacidad)
 
 ✅ **Blog Operacional:**
-- 8-12 posts publicados
-- 1-2 pillar articles
+- 10-14 posts publicados (incluir 2-3 sobre IA)
+- 2 pillar articles (1 puede ser sobre IA)
 - CMS configurado
-- Pipeline de contenido para 3 meses
+- Pipeline de contenido para 4 meses
 
 ✅ **SEO Foundation:**
 - Technical SEO impecable (Lighthouse > 95)
@@ -775,14 +949,14 @@ SEO considerations:
 - Google Search Console configurado
 
 ✅ **Content Assets:**
-- 2-3 lead magnets (eBooks, templates)
-- 1 calculadora interactiva
+- 3-4 lead magnets (eBooks, templates, incluir 1-2 de IA)
+- 2 calculadoras interactivas (ROI firma + ROI chatbot)
 - Biblioteca de recursos iniciada
 
 ✅ **Early Traction:**
 - 50-100 visitas orgánicas diarias (optimista)
-- 10-20 signups para early access
-- Rankings top 20 para 3-5 keywords
+- 15-25 signups para early access
+- Rankings top 20 para 5-7 keywords (incluir keywords IA)
 - 5-10 backlinks de calidad
 
 ---
@@ -793,14 +967,16 @@ SEO considerations:
 - [ ] Website live y sin errores técnicos
 - [ ] 100% pages indexed en Google
 - [ ] Lighthouse score > 90 en todas las páginas
-- [ ] 8+ blog posts publicados
+- [ ] 10-14 blog posts publicados
 - [ ] 50+ organic visits (cualquier cantidad es inicio)
+- [ ] Landing pages de IA con demos funcionales
 
 **Mes 3 (mientras desarrollas Fase 1-2):**
 - [ ] 500+ organic visits/mes
-- [ ] Rankings top 10 para 2-3 long-tail keywords
+- [ ] Rankings top 10 para 3-4 long-tail keywords
 - [ ] 100+ signups para waitlist
 - [ ] 10+ backlinks de DA > 30
+- [ ] 2-3 keywords de IA rankeando top 20
 
 **Mes 6 (mientras desarrollas Fase 3-5):**
 - [ ] 2,000+ organic visits/mes
@@ -808,6 +984,7 @@ SEO considerations:
 - [ ] 500+ waitlist
 - [ ] Featured snippet para 1+ query
 - [ ] 30+ backlinks de calidad
+- [ ] Keywords de IA rankeando top 10
 
 ---
 
@@ -817,36 +994,36 @@ SEO considerations:
 
 ### 1.1 Configuración Inicial del Proyecto
 
-**Objetivo:** Establecer la base técnica del proyecto
+**Objetivo:** Establecer la base técnica del proyecto (simplificada)
 
 #### Tareas:
-1. **Setup de Repositorio**
-   - Inicializar monorepo (opción: Turborepo o pnpm workspaces)
-   - Configurar ESLint, Prettier, Husky
-   - Setup de CI/CD con GitHub Actions
-   - Configurar ambientes: dev, staging, production
-   - **Separar marketing site de app:** 
+1. **Setup de Repositorio Simple**
+   - Monorepo con npm workspaces
+   - ESLint + Prettier básico
+   - **Deploy automático**: Netlify + Supabase manejan CI/CD
+   - **Estructura simple:** 
      ```
-     /apps/marketing (lo de Fase 0, ya deployado)
-     /apps/web (nueva app, app.tupatrimonio.app)
+     /apps/marketing (tupatrimonio.app)
+     /apps/web (app.tupatrimonio.app)
+     /packages/* (compartidos)
      ```
 
-2. **Configuración de Supabase**
+2. **Configuración de Supabase (Simplificada)**
    - Crear proyecto en Supabase
-   - Configurar schemas según arquitectura definida
+   - **Conectar con GitHub** para migraciones automáticas
+   - **Habilitar pgvector extension** (para embeddings de IA)
    - Habilitar Row Level Security (RLS)
    - Configurar Storage buckets con políticas de acceso
-   - Setup de funciones Edge (si necesario)
 
-3. **Configuración de Next.js para App**
+3. **Configuración de Next.js - Monorepo Simple**
    ```
    /apps/web                    # Aplicación principal (app.tupatrimonio.app)
-   /apps/marketing              # Marketing site (tupatrimonio.app) - YA EXISTE
-   /apps/api                    # API routes adicionales (opcional)
-   /packages/ui                 # Componentes compartidos
+   /apps/marketing              # Marketing site (tupatrimonio.app)
+   /packages/ui                 # Componentes compartidos Shadcn/UI
    /packages/database           # Types de Supabase
    /packages/utils              # Utilidades compartidas
    /packages/config             # Configuraciones compartidas
+   /packages/ai                 # Utilidades de IA (futuro)
    ```
 
 4. **Variables de Entorno**
@@ -866,6 +1043,12 @@ SEO considerations:
    VERIFF_API_KEY
    AWS_ACCESS_KEY_ID / FIREBASE_CONFIG
 
+   # IA Services ← NUEVO
+   OPENAI_API_KEY
+   ANTHROPIC_API_KEY
+   OPENAI_ORG_ID
+   AI_MODEL_DEFAULT=claude-3-5-sonnet-20241022
+
    # App
    NEXT_PUBLIC_APP_URL
    NEXT_PUBLIC_MARKETING_URL
@@ -875,73 +1058,652 @@ SEO considerations:
 
 ### 1.2 Modelado de Base de Datos - Schema Core
 
-*(Contenido igual que antes)*
+**Objetivo:** Implementar el corazón del sistema multi-tenant
+
+#### Implementación:
+1. **Crear schema `core`**
+   ```sql
+   -- Tablas principales:
+   - users (integración con Supabase Auth)
+   - organizations
+   - organization_users (relación M:N)
+   - teams
+   - team_members
+   - roles
+   - permissions (JSONB)
+   - applications
+   - organization_applications
+   - subscription_plans
+   - organization_subscriptions
+   - invitations
+   - api_keys (con hash)
+   - system_events
+   ```
+
+2. **Implementar RLS Policies**
+   - Usuario solo ve sus organizaciones
+   - Usuario solo ve miembros de sus organizaciones
+   - Solo org_admin puede modificar configuraciones
+   - Solo org_owner puede eliminar organización
+
+3. **Crear Functions y Triggers**
+   - `create_organization()`: Crea org + asigna owner
+   - `invite_user()`: Genera token + envía invitación
+   - `accept_invitation()`: Agrega usuario a org
+   - `update_user_last_seen()`: Trigger automático
+
+4. **Seeders para Testing**
+   - Datos de prueba para roles estándar
+   - Aplicaciones del ecosistema (incluir ai_customer_service y ai_document_review)
+   - Planes de suscripción
+   - Organización platform (TuPatrimonio.app)
 
 ### 1.3 Sistema de Autenticación
 
-*(Contenido igual que antes)*
+**Objetivo:** Auth robusto con Supabase + Twilio
+
+#### Implementación:
+1. **Configurar Supabase Auth**
+   - Email + Password
+   - Magic Links
+   - OAuth providers (Google, LinkedIn)
+   - SMS via Twilio (custom provider)
+
+2. **Middleware de Next.js (Simple)**
+   ```typescript
+   // middleware.ts
+   - Verificar sesión en cada request
+   - Redireccionar rutas protegidas
+   - Inyectar org_id en headers para RLS
+   ```
+
+3. **Auth Helpers**
+   ```typescript
+   - getSession()
+   - getCurrentUser()
+   - getCurrentOrganization()
+   - hasPermission()
+   - switchOrganization()
+   ```
+
+4. **Páginas de Auth**
+   - `/login`
+   - `/register`
+   - `/verify-email`
+   - `/reset-password`
+   - `/accept-invitation/:token`
 
 ### 1.4 Dashboard Base y Navegación
 
-*(Contenido igual que antes, pero ahora en app.tupatrimonio.app)*
+**Objetivo:** UI foundation con cambio de contexto organizacional
 
-**Nota Importante:** Ahora tienes dos sitios:
-- `tupatrimonio.app` → Marketing site (SEO, blog, landings)
-- `app.tupatrimonio.app` → Aplicación (requiere login)
+#### Implementación:
+1. **Layout Principal**
+   - Sidebar con navegación (incluir secciones de IA)
+   - Organization Switcher (dropdown)
+   - User menu
+   - Notification bell (placeholder)
+
+2. **Dashboard Home**
+   - Widgets de métricas básicas
+   - Actividad reciente
+   - Quick actions (incluir "Hablar con IA" y "Analizar documento")
+
+3. **Componentes Base (Shadcn/UI)**
+   ```
+   - Button, Input, Select, Checkbox, etc.
+   - DataTable (con sorting, filtering, pagination)
+   - Modal, Sheet, Dialog
+   - Toast notifications
+   - Command palette (Cmd+K)
+   - Chat widget component (para customer service) ← NUEVO
+   - Document viewer component (para review results) ← NUEVO
+   ```
+
+4. **Configuración de Temas**
+   - Light/Dark mode
+   - Persistencia en user.preferences
 
 ---
 
 ## 🔧 Fase 2: Sistema de Créditos y Facturación (Semanas 11-16)
 
-*(Contenido igual que antes)*
+### 2.1 Schema Credits + Billing
+
+**Objetivo:** Sistema de monetización completo
+
+#### Implementación:
+1. **Crear schemas `credits` y `billing`**
+   ```sql
+   Credits:
+   - credit_accounts
+   - credit_transactions
+   - credit_packages
+   - credit_prices (incluir precios para servicios IA) ← ACTUALIZADO
+
+   Billing:
+   - payment_methods
+   - invoices
+   - invoice_line_items
+   - payments
+   - tax_rates
+   ```
+
+2. **Credit Prices para IA Services** ← NUEVO
+   ```sql
+   -- Precios específicos para servicios de IA
+   INSERT INTO credits.credit_prices (service_code, application_code, operation, credit_cost) VALUES
+   ('ai_chat_message', 'ai_customer_service', 'send_message', 0.5),
+   ('ai_chat_message_kb', 'ai_customer_service', 'send_message_with_kb', 1.0),
+   ('ai_document_review_page', 'ai_document_review', 'review_page', 2.0),
+   ('ai_document_review_full', 'ai_document_review', 'review_document', 10.0),
+   ('ai_document_compare', 'ai_document_review', 'compare_documents', 15.0);
+   ```
+
+3. **Integración Stripe**
+   ```typescript
+   - setupIntent para guardar payment methods
+   - Webhooks: payment_intent.succeeded, customer.subscription.*
+   - Manejo de 3D Secure
+   - Sincronización de invoices
+   ```
+
+4. **Integración dLocal Go**
+   ```typescript
+   - Flujo para LATAM
+   - Métodos locales: Khipu, Mercado Pago, etc.
+   - Webhooks para confirmaciones
+   - Fallback a Stripe si dLocal falla
+   ```
+
+5. **Lógica de Créditos**
+   ```typescript
+   - reserveCredits(): Bloquea créditos antes de operación
+   - confirmCredits(): Confirma uso después de éxito
+   - releaseCredits(): Libera si falla operación
+   - reloadCredits(): Desde suscripción o compra
+   - calculateAICost(): Calcula costo basado en tokens/páginas ← NUEVO
+   ```
+
+### 2.2 UI de Facturación
+
+**Objetivo:** Experiencia de usuario para gestión de pagos
+
+#### Páginas:
+1. **`/billing/overview`**
+   - Balance de créditos
+   - Próxima factura
+   - Métodos de pago guardados
+   - Usage por servicio (incluir desglose de IA)
+
+2. **`/billing/purchase-credits`**
+   - Paquetes disponibles
+   - Calculadora de créditos (con estimación de uso IA)
+   - Checkout flow
+
+3. **`/billing/invoices`**
+   - Lista de facturas
+   - Descarga PDF
+   - Historial de pagos
+
+4. **`/billing/payment-methods`**
+   - Agregar/Eliminar métodos
+   - Marcar como default
+
+5. **`/billing/subscription`**
+   - Plan actual
+   - Upgrade/Downgrade
+   - Cancelación
+
+6. **`/billing/usage`** ← NUEVO
+   - Gráficos de uso por servicio
+   - Breakdown de créditos consumidos
+   - Proyección de gasto mensual
+   - Export de data
 
 **Paralelamente durante Fase 2:**
-- Continuar publicando 2 blog posts/semana
+- Continuar publicando 2 blog posts/semana (incluir 1 sobre IA cada 2 semanas)
 - Optimizar landings según analytics
 - Responder comentarios y engagement en blog
-- Guest posting (1-2 artículos)
+- Guest posting (1-2 artículos, uno sobre IA)
 
 ---
 
 ## 📧 Fase 3: Comunicaciones y CRM (Semanas 17-22)
 
-*(Contenido igual que antes)*
+### 3.1 Schema Communications
+
+**Objetivo:** Sistema completo de comunicación con usuarios
+
+#### Implementación:
+1. **Crear schema `communications`**
+   ```sql
+   - contacts
+   - contact_activities
+   - contact_lists
+   - contact_list_members
+   - message_templates
+   - campaigns
+   - messages
+   - message_events
+   - user_notifications
+   - sales_pipelines
+   - deals
+   ```
+
+2. **Integración SendGrid**
+   ```typescript
+   - Wrapper para API de SendGrid
+   - Sistema de templates (almacenar localmente, enviar variables)
+   - Procesar webhooks: delivered, opened, clicked, bounced
+   - Retry logic con exponential backoff
+   - Rate limiting según plan de SendGrid
+   ```
+
+3. **Motor de Templates**
+   ```typescript
+   - Template engine (Handlebars o similar)
+   - Variables dinámicas: {{user.name}}, {{organization.credits}}
+   - Versionado de templates
+   - Preview antes de enviar
+   ```
+
+4. **Sistema de Notificaciones**
+   ```typescript
+   - createNotification(): In-app + opcional email/SMS
+   - markAsRead()
+   - Supabase Realtime para notificaciones live
+   - Agrupación de notificaciones similares
+   - Notificaciones específicas de IA (ej: "Tu análisis está listo") ← NUEVO
+   ```
+
+### 3.2 UI de CRM
+
+**Objetivo:** Herramientas de gestión de contactos y ventas
+
+#### Páginas:
+1. **`/crm/contacts`**
+   - Lista con filtros avanzados
+   - Importar desde CSV
+   - Enriquecimiento de datos
+   - Tag: "interesado_en_ai", "usa_chatbot", etc. ← NUEVO
+
+2. **`/crm/contacts/:id`**
+   - Perfil de contacto
+   - Timeline de actividades
+   - Deals asociados
+   - Enviar email/SMS
+   - Uso de servicios de IA (si aplica) ← NUEVO
+
+3. **`/crm/campaigns`**
+   - Crear campaña
+   - Segmentación de audiencia (incluir "usuarios de IA")
+   - A/B testing (futuro)
+   - Analytics de campaña
+
+4. **`/crm/pipelines`**
+   - Kanban de deals
+   - Drag & drop entre stages
+   - Métricas de conversión
+
+5. **`/settings/email-templates`**
+   - CRUD de templates
+   - Editor visual
+   - Variables disponibles
 
 **Paralelamente durante Fase 3:**
-- Lanzar primer pillar content piece
+- Lanzar primer pillar content piece sobre IA
 - Comenzar link building activo
-- Crear primer lead magnet interactivo
+- Crear primer lead magnet interactivo (calculadora ROI chatbot)
 - A/B testing de CTAs en landings
 
 ---
 
 ## ⚙️ Fase 4: Workflows y Manejo de Errores (Semanas 23-28)
 
-*(Contenido igual que antes)*
+### 4.1 Schema Workflows
+
+**Objetivo:** Sistema de automatización tipo Make.com
+
+#### Implementación:
+1. **Crear schema `workflows`**
+   ```sql
+   - workflows
+   - workflow_executions
+   - workflow_execution_steps
+   - error_logs
+   - service_health
+   - circuit_breakers
+   - retry_queue
+   - webhooks
+   - webhook_deliveries
+   ```
+
+2. **Motor de Ejecución**
+   ```typescript
+   WorkflowEngine:
+   - Interpreta JSON definition
+   - Ejecuta nodos secuencialmente/paralelo
+   - Maneja condiciones y branches
+   - Implementa circuit breakers
+   - Retry logic con backoff
+   - Timeout handling
+   ```
+
+3. **Tipos de Nodos**
+   ```typescript
+   - Trigger: webhook, schedule, event, manual
+   - Action: api_call, email, create_record, update_record
+   - Condition: if/else basado en datos
+   - Transform: mapear/transformar datos
+   - Delay: esperar X tiempo
+   - Loop: iterar sobre array
+   - AI Action: call_chatbot, analyze_document ← NUEVO
+   ```
+
+4. **Monitoreo de Servicios**
+   ```typescript
+   HealthCheck Service:
+   - Ping cada servicio externo cada 5min (incluir APIs de IA)
+   - Registrar en service_health
+   - Abrir circuit breaker si falla threshold
+   - Alertar a admins
+   - Dashboard de estado
+   ```
+
+5. **Sistema de Reintentos**
+   ```typescript
+   RetryQueue Processor:
+   - Job queue (BullMQ o similar)
+   - Procesar retry_queue periódicamente
+   - Estrategias: immediate, linear, exponential
+   - Max attempts configurable
+   - Dead letter queue para fallos permanentes
+   ```
+
+### 4.2 UI de Workflows
+
+**Objetivo:** Visual workflow builder
+
+#### Páginas:
+1. **`/workflows`**
+   - Lista de workflows
+   - Filtros por status/trigger
+   - Quick actions
+   - Templates pre-hechos (incluir templates con IA) ← NUEVO
+
+2. **`/workflows/builder`**
+   - Drag & drop node-based editor (React Flow)
+   - Panel de nodos disponibles (incluir nodos de IA)
+   - Configuración por nodo
+   - Test workflow
+   - Save & Activate
+
+3. **`/workflows/:id/executions`**
+   - Historial de ejecuciones
+   - Timeline de pasos
+   - Logs detallados (incluir tokens usados si hay IA)
+   - Retry manual
+
+4. **`/monitoring/services`**
+   - Dashboard de salud
+   - Circuit breakers status
+   - Error rate por servicio (incluir OpenAI/Anthropic)
+   - Latency graphs
+
+5. **`/monitoring/errors`**
+   - Log explorer
+   - Filtros por severity/service
+   - Marcar como resuelto
+   - Export logs
+
+**Workflow Templates Sugeridos con IA:** ← NUEVO
+```
+1. "Auto-responder con IA"
+   Trigger: Nuevo mensaje en chat
+   → Analizar intención con IA
+   → Si confianza > 80%: Responder automáticamente
+   → Si confianza < 80%: Transferir a humano
+
+2. "Análisis de contrato + notificación"
+   Trigger: Nuevo documento subido
+   → Analizar con IA Document Review
+   → Si riesgo > "medium": Notificar equipo legal
+   → Crear tarea en CRM
+
+3. "Seguimiento inteligente de leads"
+   Trigger: Lead descarga recurso
+   → Analizar comportamiento con IA
+   → Enviar email personalizado según perfil
+   → Asignar a sales rep apropiado
+```
 
 **Paralelamente durante Fase 4:**
-- Segundo cluster de contenido
+- Segundo cluster de contenido (sobre IA)
 - Case studies de beta users
-- Webinar o demo en vivo
+- Webinar o demo en vivo (enfoque en automatización con IA)
 - Actualizar contenido según feedback
 
 ---
 
 ## 📁 Fase 5: Gestión de Archivos y Storage (Semanas 29-33)
 
-*(Contenido igual que antes)*
+### 5.1 Schema Files + Integración Storage
+
+**Objetivo:** Sistema centralizado de archivos con versionado
+
+#### Implementación:
+1. **Crear schema `files`**
+   ```sql
+   - file_storage
+   - file_versions
+   - file_shares
+   ```
+
+2. **Abstracción de Storage**
+   ```typescript
+   StorageProvider Interface:
+   - upload(file, path)
+   - download(path)
+   - delete(path)
+   - getSignedUrl(path, expiresIn)
+   - listVersions(path)
+
+   Implementaciones:
+   - SupabaseStorageProvider
+   - S3StorageProvider
+   - FirebaseStorageProvider
+   ```
+
+3. **Versionado Automático**
+   ```typescript
+   - Cada update crea nueva versión
+   - Mantener X versiones (configurable)
+   - Limpieza automática de versiones antiguas
+   - Restaurar versión anterior
+   ```
+
+4. **Seguridad de Archivos**
+   ```typescript
+   - Virus scanning (ClamAV via Lambda/Cloud Function)
+   - Encriptación en reposo (KMS)
+   - Signed URLs con expiración
+   - Watermarks para documentos sensibles
+   ```
+
+5. **Optimizaciones**
+   ```typescript
+   - Compresión de imágenes
+   - Generación de thumbnails
+   - CDN para archivos públicos
+   - Lazy loading en frontend
+   - OCR para documentos (preparación para IA Review) ← NUEVO
+   ```
+
+### 5.2 UI de Gestión de Archivos
+
+**Objetivo:** Drive-like experience
+
+#### Páginas:
+1. **`/files`**
+   - Vista de lista/grid
+   - Drag & drop upload
+   - Carpetas virtuales (tags)
+   - Preview modal
+   - Quick actions: "Analizar con IA" ← NUEVO
+
+2. **`/files/:id`**
+   - Detalles del archivo
+   - Historial de versiones
+   - Compartir con usuarios/links
+   - Actividad reciente
+   - Análisis de IA (si aplica) ← NUEVO
 
 ---
 
 ## 🔐 Fase 6: Auditoría y Compliance (Semanas 34-38)
 
-*(Contenido igual que antes)*
+### 6.1 Schema Audit
+
+**Objetivo:** Trazabilidad completa para compliance
+
+#### Implementación:
+1. **Crear schema `audit`**
+   ```sql
+   - audit_logs
+   - compliance_documents
+   - user_consents
+   - data_retention_policies
+   ```
+
+2. **Audit Logging Automático**
+   ```typescript
+   - Middleware que registra toda acción sensible
+   - Trigger en BD para cambios críticos
+   - Capturar: user, org, action, resource, changes, IP, timestamp
+   - Inmutable: solo INSERT
+   - Registrar uso de IA (qué modelo, tokens, prompts si corresponde) ← NUEVO
+   ```
+
+3. **Compliance Tools**
+   ```typescript
+   - Exportar datos de usuario (GDPR)
+   - Anonimizar usuario
+   - Eliminar datos según retention policy
+   - Generar reporte de compliance
+   - Auditoría de uso de IA (transparencia) ← NUEVO
+   ```
+
+4. **Gestión de Consentimientos**
+   ```typescript
+   - Banner de cookies
+   - Términos y condiciones con versionado
+   - Registro de aceptación con IP y timestamp
+   - Revocación de consentimientos
+   - Consentimiento de uso de IA para análisis ← NUEVO
+   ```
+
+### 6.2 UI de Auditoría
+
+**Objetivo:** Herramientas para compliance officers
+
+#### Páginas:
+1. **`/audit/logs`**
+   - Log explorer avanzado
+   - Filtros: user, resource, date range, action
+   - Export a CSV/JSON
+   - Filtro específico: "AI usage" ← NUEVO
+
+2. **`/audit/data-requests`**
+   - GDPR requests
+   - Procesar solicitudes de datos
+   - Timeline de procesamiento
+
+3. **`/settings/compliance`**
+   - Políticas de retención
+   - Documentos legales activos
+   - Estadísticas de consentimientos
+   - Transparency report (uso de IA) ← NUEVO
 
 ---
 
 ## 🎯 Fase 7: Servicios de Negocio - Firmas Electrónicas (Semanas 39-46)
 
-*(Contenido igual que antes)*
+### 7.1 Schema Signatures + Integración Veriff
+
+**Objetivo:** Primer servicio core del ecosistema
+
+#### Implementación:
+1. **Crear schema `signatures`**
+   ```sql
+   - signature_documents
+   - signature_signers
+   - signature_workflows
+   - signature_templates
+   - signature_certificates
+   ```
+
+2. **Integración Veriff**
+   ```typescript
+   - Iniciar sesión de verificación
+   - Webhook para resultados
+   - Almacenar evidencias en files schema
+   - Link con user en core schema
+   ```
+
+3. **Flujo de Firma**
+   ```typescript
+   CreateSignatureRequest:
+   1. Upload documento → files schema
+   2. Agregar firmantes
+   3. (Opcional) Verificar identidad con Veriff
+   4. Enviar invitaciones → communications schema
+   5. Tracking de firmas
+   6. Generar certificado final
+   7. Notarizar (si aplica) → notary schema
+   8. Consumir créditos → credits schema
+   ```
+
+4. **Tipos de Firma**
+   ```typescript
+   - Firma Simple (email verification)
+   - Firma Avanzada (SMS OTP via Twilio)
+   - Firma con Certificado (integración CA)
+   - Firma Biométrica (Veriff)
+   ```
+
+### 7.2 UI de Firmas
+
+**Objetivo:** Experiencia fluida de firma de documentos
+
+#### Páginas:
+1. **`/signatures`**
+   - Documentos pendientes/completados
+   - Crear nuevo documento
+   - Templates
+
+2. **`/signatures/new`**
+   - Upload documento
+   - Agregar firmantes
+   - Configurar orden de firma
+   - Establecer deadline
+   - Preview
+
+3. **`/signatures/:id`**
+   - Estado del documento
+   - Tracking de firmantes
+   - Preview del documento
+   - Descargar certificado
+
+4. **`/sign/:token`**
+   - Página pública para firmar
+   - Verificación de identidad
+   - Canvas de firma
+   - Confirmar firma
+
+5. **`/settings/signature-templates`**
+   - Templates de documentos
+   - Campos predefinidos
 
 **Nota:** Al lanzar este servicio, actualizar:
 - Landing de firmas con features reales
@@ -951,107 +1713,1792 @@ SEO considerations:
 
 ---
 
-## 🔍 Fase 8: Servicios Complementarios (Semanas 47-58)
+## 🔍 Fase 8: Servicios Complementarios (Semanas 47-60)
 
-*(Contenido igual que antes)*
+### 8.1 App-Verifications (Semanas 47-49)
+
+**Objetivo:** Sistema de verificación de identidad standalone
+
+#### Implementación:
+1. **Schema `verifications`**
+   ```sql
+   - verification_requests
+   - verification_results
+   - verification_documents
+   - identity_records
+   ```
+
+2. **Lógica de Negocio**
+   - Crear request → llamar Veriff
+   - Procesar webhooks
+   - Almacenar resultados + evidencia
+   - Marcar user como verificado en core schema
+
+3. **API Endpoints**
+   ```typescript
+   POST /api/verifications/start
+   GET /api/verifications/:id/status
+   GET /api/verifications/:id/result
+   ```
+
+### 8.2 App-Notary (Semanas 50-52)
+
+**Objetivo:** Servicios notariales digitales
+
+#### Implementación:
+1. **Schema `notary`**
+   ```sql
+   - notary_certificates
+   - notary_timestamps
+   - notary_chains
+   ```
+
+2. **Lógica de Negocio**
+   - Timestamp notarial
+   - Hash del documento
+   - Blockchain anchoring (opcional)
+   - Certificado de autenticidad
+
+### 8.3 App-Documents Editor (Semanas 53-55)
+
+**Objetivo:** Editor colaborativo de documentos
+
+#### Implementación:
+1. **Schema `documents`**
+   ```sql
+   - documents
+   - document_collaborators
+   - document_comments
+   - document_versions (linked to files schema)
+   ```
+
+2. **Editor**
+   - Integrar TipTap o similar
+   - Colaboración en tiempo real (Supabase Realtime)
+   - Track changes
+   - Comentarios
+
+### 8.4 App-Real Estate Consulting (Semanas 56-57)
+
+**Objetivo:** CRM específico para inmobiliarias
+
+#### Implementación:
+1. **Schema `real_estate`**
+   ```sql
+   - properties
+   - property_visits
+   - property_offers
+   - property_documents
+   ```
+
+2. **Features específicas**
+   - Catálogo de propiedades
+   - Gestión de visitas
+   - Pipeline de ofertas
+   - Documentos asociados
+
+### 8.5 App-Property Administration (Semanas 58-60)
+
+**Objetivo:** Gestión de arriendos y condominios
+
+#### Implementación:
+1. **Schema `property_admin`**
+   ```sql
+   - rental_contracts
+   - tenants
+   - payment_schedules
+   - maintenance_requests
+   - common_expenses
+   ```
 
 ---
 
-## 📊 Fase 9: Analytics y Reportes (Semanas 59-65)
+## 🤖 **Fase 9: Servicios de IA - Customer Service (Semanas 61-66)**
 
-*(Contenido igual que antes)*
+### **Objetivo:** Chatbot inteligente 24/7 para atención al cliente
+
+Esta es una fase crítica ya que es uno de los diferenciadores principales del producto.
+
+### 9.1 Schema AI Customer Service
+
+**Objetivo:** Base de datos para chatbot conversacional
+
+#### Implementación:
+
+1. **Crear schema `ai_customer_service`**
+   ```sql
+   -- Habilitar pgvector extension primero
+   CREATE EXTENSION IF NOT EXISTS vector;
+   
+   -- Tablas principales
+   - chatbot_configurations
+   - knowledge_bases
+   - knowledge_base_chunks (con columna VECTOR)
+   - conversations
+   - conversation_messages
+   - conversation_feedback
+   - chatbot_analytics
+   ```
+
+2. **Configuración de pgvector**
+   ```sql
+   -- Índice para búsqueda vectorial eficiente
+   CREATE INDEX ON ai_customer_service.knowledge_base_chunks 
+   USING ivfflat (embedding vector_cosine_ops)
+   WITH (lists = 100);
+   ```
+
+3. **Integración OpenAI/Anthropic**
+   ```typescript
+   AIProvider Interface:
+   - chat(messages, model, options)
+   - embed(text, model)
+   - streamChat(messages, model, onChunk)
+   
+   Implementaciones:
+   - OpenAIProvider (GPT-4)
+   - AnthropicProvider (Claude 3.5 Sonnet) - RECOMENDADO
+   
+   Razones para Claude:
+   - Mejor comprensión de contexto largo
+   - Menos alucinaciones
+   - Mejor en español
+   - Más económico para uso intensivo
+   ```
+
+4. **Sistema RAG (Retrieval Augmented Generation)**
+   ```typescript
+   RAGEngine:
+   - ingestDocument(document) → chunks → embeddings
+   - searchSimilar(query, topK) → relevant chunks
+   - buildContext(chunks) → formatted context
+   - generateResponse(query, context) → answer
+   
+   Pipeline:
+   1. Usuario pregunta
+   2. Embed pregunta
+   3. Buscar chunks similares (cosine similarity)
+   4. Construir contexto con top 5 chunks
+   5. Enviar a LLM con contexto
+   6. Recibir respuesta fundamentada
+   ```
+
+5. **Knowledge Base Management**
+   ```typescript
+   KnowledgeBaseService:
+   - addDocument(file) → parse → chunk → embed → store
+   - updateDocument(id, newContent)
+   - deleteDocument(id)
+   - syncFromURL(url) → scrape → process
+   - syncFromNotion(notionPageId)
+   
+   Chunking strategies:
+   - Fixed size: 500 tokens con 50 overlap
+   - Semantic: Por párrafos/secciones
+   - Recursive: Dividir recursivamente si muy grande
+   ```
+
+6. **Conversation Management**
+   ```typescript
+   ConversationService:
+   - startConversation(userId, channel)
+   - sendMessage(conversationId, content)
+   - getHistory(conversationId, limit)
+   - transferToHuman(conversationId, reason)
+   - endConversation(conversationId)
+   
+   Features:
+   - Context window management (últimos 10 mensajes)
+   - Intent detection
+   - Sentiment analysis
+   - Escalation triggers
+   ```
+
+7. **Channels Integration**
+   ```typescript
+   Channels a soportar:
+   - Web Widget (embeddable)
+   - WhatsApp Business (Twilio)
+   - Slack
+   - Telegram (futuro)
+   - Email (futuro)
+   
+   Abstracción:
+   ChannelAdapter Interface:
+   - sendMessage(to, message)
+   - receiveMessage(webhook)
+   - supports(messageType)
+   ```
+
+### 9.2 UI de AI Customer Service
+
+**Objetivo:** Configuración y monitoreo del chatbot
+
+#### Páginas:
+
+1. **`/ai/chat/dashboard`**
+   ```
+   Métricas principales:
+   - Conversaciones hoy/semana/mes
+   - Tasa de resolución (AI vs humano)
+   - Tiempo promedio de respuesta
+   - Satisfaction score
+   - Top intents detectados
+   - Gráficos de uso por hora
+   ```
+
+2. **`/ai/chat/conversations`**
+   ```
+   Features:
+   - Lista de conversaciones (filtros: estado, channel, fecha)
+   - Live conversations (en tiempo real)
+   - Takeover: Admin puede tomar control
+   - Transcript export
+   - Tags y categorización
+   ```
+
+3. **`/ai/chat/conversations/:id`**
+   ```
+   Vista detallada:
+   - Transcript completo
+   - Metadata: duración, mensajes, canal
+   - Intent tracking
+   - Sentiment timeline
+   - Sources used (qué chunks de KB)
+   - Feedback del usuario
+   - Actions: Transfer, Close, Add note
+   ```
+
+4. **`/ai/chat/knowledge-base`**
+   ```
+   Gestión de conocimiento:
+   - Lista de documentos/URLs ingresados
+   - Upload nuevo documento
+   - Sync desde URL (scheduled)
+   - Integración Notion
+   - Previsualizar chunks
+   - Test search (debugging)
+   - Analytics: chunks más usados
+   ```
+
+5. **`/ai/chat/knowledge-base/:id`**
+   ```
+   Detalle de documento:
+   - Metadata
+   - Content preview
+   - Chunks breakdown
+   - Usage stats
+   - Re-index button
+   - Delete con confirmación
+   ```
+
+6. **`/ai/chat/settings`**
+   ```
+   Configuración del chatbot:
+   
+   General:
+   - Nombre del bot
+   - Avatar
+   - Bienvenida
+   - Horario de operación
+   
+   AI Configuration:
+   - Model selection (GPT-4, Claude 3.5)
+   - Temperature (0-1)
+   - Max tokens
+   - System prompt customization
+   
+   Personality:
+   - Tone (profesional, casual, friendly)
+   - Language (es-CL, es-MX, en)
+   - Custom instructions
+   
+   Escalation Rules:
+   - Confidence threshold para transferir
+   - Keywords que disparan transferencia
+   - Usuarios/equipos para asignar
+   
+   Channels:
+   - Enable/disable por canal
+   - Configuración específica (WhatsApp number, etc.)
+   ```
+
+7. **`/ai/chat/training`**
+   ```
+   Mejora continua:
+   - Conversaciones para revisar
+   - Thumbs up/down feedback
+   - Correcciones sugeridas
+   - Add to training set
+   - Fine-tuning dashboard (futuro)
+   ```
+
+8. **`/ai/chat/widget`**
+   ```
+   Configuración del widget embebible:
+   - Customización visual (colores, posición)
+   - Configuración de behavior
+   - Code snippet para copiar
+   - Preview en vivo
+   ```
+
+### 9.3 Widget Embebible
+
+**Objetivo:** Chatbot fácil de integrar en cualquier sitio
+
+#### Implementación:
+
+```html
+<!-- Código que el cliente pega en su sitio -->
+<script src="https://cdn.tupatrimonio.app/ai-chat-widget.js"></script>
+<script>
+  TuPatrimonioChat.init({
+    organizationId: 'org_123',
+    chatbotId: 'bot_456',
+    position: 'bottom-right', // o 'bottom-left'
+    theme: 'light', // o 'dark'
+    primaryColor: '#0070f3',
+    locale: 'es-CL'
+  })
+</script>
+```
+
+**Features del widget:**
+- Bubble indicator (para abrir chat)
+- Chat window con historial
+- Typing indicators
+- Message status (sent, delivered, read)
+- File attachments (si está habilitado)
+- Emoji support
+- Responsive
+- Accessibility (ARIA labels, keyboard navigation)
+
+### 9.4 Lógica de Negocio Avanzada
+
+#### Implementación:
+
+1. **Intent Detection**
+   ```typescript
+   // Detectar intención del usuario
+   const intents = {
+     'pricing_inquiry': ['precio', 'costo', 'cuánto cuesta', 'plan'],
+     'technical_support': ['error', 'no funciona', 'problema', 'bug'],
+     'sales_inquiry': ['comprar', 'contratar', 'demo', 'prueba'],
+     'cancellation': ['cancelar', 'dar de baja', 'terminar suscripción']
+   }
+   
+   function detectIntent(message: string): Intent {
+     // Usar embeddings similarity o keyword matching
+     // Priorizar intents que requieren escalación
+   }
+   ```
+
+2. **Confidence Scoring**
+   ```typescript
+   function shouldEscalate(response: AIResponse): boolean {
+     if (response.confidence < 0.6) return true
+     if (detectSensitiveTopic(response.message)) return true
+     if (userRequestsHuman(response.userMessage)) return true
+     return false
+   }
+   ```
+
+3. **Context Management**
+   ```typescript
+   // Mantener contexto relevante sin explotar token limit
+   function buildConversationContext(
+     conversationId: string,
+     maxMessages: number = 10
+   ): Message[] {
+     const messages = getRecentMessages(conversationId, maxMessages)
+     
+     // Summarize older messages if needed
+     if (messages.length > maxMessages) {
+       const summary = summarizeMessages(messages.slice(0, -maxMessages))
+       return [
+         { role: 'system', content: `Resumen de conversación previa: ${summary}` },
+         ...messages.slice(-maxMessages)
+       ]
+     }
+     
+     return messages
+   }
+   ```
+
+4. **Cost Tracking**
+   ```typescript
+   async function trackAIUsage(
+     conversationId: string,
+     messageId: string,
+     tokensUsed: { prompt: number, completion: number }
+   ) {
+     const totalTokens = tokensUsed.prompt + tokensUsed.completion
+     const creditCost = calculateCreditCost(totalTokens, hasKBSearch)
+     
+     await reserveAndConfirmCredits(organizationId, creditCost, {
+       service: 'ai_customer_service',
+       operation: 'send_message',
+       metadata: { conversationId, messageId, tokensUsed }
+     })
+   }
+   ```
+
+### 9.5 Testing y Quality Assurance
+
+#### Test Suite:
+
+```typescript
+// Test de knowledge base
+test('Knowledge base retrieval', async () => {
+  const query = "¿Cuál es el precio del plan Pro?"
+  const results = await searchKnowledgeBase(query, topK: 3)
+  
+  expect(results).toHaveLength(3)
+  expect(results[0].similarity).toBeGreaterThan(0.7)
+  expect(results[0].content).toContain('plan Pro')
+})
+
+// Test de respuesta
+test('AI generates relevant response', async () => {
+  const context = getRelevantChunks("pricing question")
+  const response = await generateResponse(userMessage, context)
+  
+  expect(response.confidence).toBeGreaterThan(0.7)
+  expect(response.message).not.toContain('[PLACEHOLDER]')
+  expect(response.sources).toHaveLength.greaterThan(0)
+})
+
+// Test de escalación
+test('Escalates low confidence responses', async () => {
+  const response = { confidence: 0.5, message: '...' }
+  expect(shouldEscalate(response)).toBe(true)
+})
+```
+
+### 9.6 Monitoring y Observability
+
+#### Métricas a Trackear:
+
+```typescript
+// Performance metrics
+- Average response time
+- P95, P99 response times
+- Token usage per conversation
+- Cost per conversation
+
+// Quality metrics
+- Confidence score distribution
+- Escalation rate
+- CSAT score
+- Resolution rate
+
+// Usage metrics
+- Conversations per hour
+- Messages per conversation
+- Active conversations
+- Channel distribution
+
+// Error tracking
+- API failures (OpenAI/Anthropic)
+- Embedding failures
+- Knowledge base search failures
+- Widget loading errors
+```
+
+### 9.7 Optimizaciones
+
+#### Implementar:
+
+1. **Caching**
+   ```typescript
+   // Cache de embeddings frecuentes
+   const embeddingCache = new Map<string, number[]>()
+   
+   // Cache de respuestas a preguntas comunes
+   const responseCache = new TTLCache({
+     ttl: 3600, // 1 hora
+     maxSize: 1000
+   })
+   ```
+
+2. **Streaming Responses**
+   ```typescript
+   // Para mejor UX, hacer streaming de respuestas
+   async function* streamChatResponse(prompt: string) {
+     const stream = await anthropic.messages.stream({
+       model: 'claude-3-5-sonnet-20241022',
+       messages: [{ role: 'user', content: prompt }],
+       max_tokens: 1024,
+     })
+     
+     for await (const chunk of stream) {
+       if (chunk.type === 'content_block_delta') {
+         yield chunk.delta.text
+       }
+     }
+   }
+   ```
+
+3. **Batch Processing**
+   ```typescript
+   // Procesar embeddings en batch para eficiencia
+   async function batchEmbed(texts: string[]): Promise<number[][]> {
+     const batchSize = 20
+     const batches = chunk(texts, batchSize)
+     
+     const results = await Promise.all(
+       batches.map(batch => openai.embeddings.create({
+         model: 'text-embedding-ada-002',
+         input: batch
+       }))
+     )
+     
+     return results.flatMap(r => r.data.map(d => d.embedding))
+   }
+   ```
+
+**Paralelamente durante Fase 9:**
+- Blog posts sobre el lanzamiento del chatbot IA
+- Case study de beta users usando chatbot
+- Video tutorial: "Configura tu chatbot en 10 minutos"
+- Actualizar landing de AI Customer Service con features reales
 
 ---
 
-## 🔌 Fase 10: Integraciones y API Pública (Semanas 66-72)
+## 🤖 **Fase 10: Servicios de IA - Document Review (Semanas 67-74)**
 
-*(Contenido igual que antes)*
+### **Objetivo:** Análisis automático de documentos legales/comerciales con IA
 
-**Nota:** Crear documentación pública de API como parte del SEO strategy:
-- `/developers` con documentación interactiva
-- Blog posts sobre "Cómo integrar X con TuPatrimonio"
-- OpenAPI spec público (buen para SEO técnico)
+### 10.1 Schema AI Document Review
+
+**Objetivo:** Base de datos para análisis de documentos
+
+#### Implementación:
+
+1. **Crear schema `ai_document_review`**
+   ```sql
+   - review_templates
+   - document_reviews
+   - review_results
+   - review_annotations
+   - review_feedback
+   - review_comparisons
+   - training_feedback
+   ```
+
+2. **No necesita pgvector** (diferente approach que chatbot)
+   - Análisis más estructurado
+   - Usa prompts específicos por tipo de documento
+   - Focus en extracción y análisis, no en búsqueda semántica
+
+3. **Integración con Vision Models**
+   ```typescript
+   // Para documentos escaneados o PDFs complejos
+   AIVisionProvider Interface:
+   - analyzeDocument(file, instructions)
+   - extractText(file)
+   - extractTables(file)
+   - detectLayout(file)
+   
+   Implementaciones:
+   - GPT-4-Vision (OpenAI)
+   - Claude 3 Opus (mejor para documentos largos)
+   ```
+
+4. **Document Processing Pipeline**
+   ```typescript
+   DocumentReviewPipeline:
+   
+   1. Upload & Validation
+      - Verificar formato (PDF, DOCX, images)
+      - Validar tamaño (max 50MB)
+      - Extraer metadata
+   
+   2. Text Extraction
+      - Si PDF: usar pdf.js o pdfplumber
+      - Si DOCX: usar mammoth
+      - Si imagen: OCR con Tesseract o Vision API
+      - Preservar estructura (headers, lists, tables)
+   
+   3. Preprocessing
+      - Limpiar texto
+      - Identificar secciones
+      - Extraer tablas
+      - Detectar idioma
+   
+   4. AI Analysis
+      - Seleccionar template apropiado
+      - Construir prompt con criteria
+      - Enviar a LLM (Claude 3.5 Sonnet recomendado)
+      - Parse structured response
+   
+   5. Post-processing
+      - Calcular risk score
+      - Generar anotaciones
+      - Extraer red flags
+      - Crear recomendaciones
+   
+   6. Storage
+      - Guardar resultados
+      - Link a documento original
+      - Generar PDF report
+   ```
+
+5. **Template System**
+   ```typescript
+   ReviewTemplate {
+     name: "Revisión de Contrato Comercial",
+     documentType: "contract",
+     reviewCriteria: {
+       sectionsToExtract: [
+         "payment_terms",
+         "delivery_terms",
+         "warranties",
+         "liability_limits",
+         "termination_clauses",
+         "dispute_resolution"
+       ],
+       redFlags: [
+         {
+           id: "unlimited_liability",
+           pattern: /liability.{0,50}unlimited/i,
+           severity: "critical",
+           description: "Contrato establece responsabilidad ilimitada"
+         },
+         {
+           id: "auto_renewal",
+           pattern: /auto.{0,20}renew/i,
+           severity: "high",
+           description: "Cláusula de renovación automática"
+         }
+       ],
+       complianceChecks: [
+         "gdpr_mention",
+         "force_majeure_clause",
+         "intellectual_property_rights"
+       ]
+     },
+     promptTemplate: `
+       Analiza el siguiente contrato comercial.
+       
+       Documento:
+       {document_text}
+       
+       Por favor:
+       1. Extrae las siguientes secciones: {sections}
+       2. Identifica cualquier red flag de esta lista: {red_flags}
+       3. Verifica cumplimiento de: {compliance_checks}
+       4. Asigna un risk score (0-100)
+       5. Proporciona recomendaciones
+       
+       Responde en formato JSON estructurado.
+     `
+   }
+   ```
+
+6. **AI Analysis Logic**
+   ```typescript
+   async function analyzeDocument(
+     documentId: string,
+     templateId: string
+   ): Promise<ReviewResult> {
+     
+     // 1. Get document and template
+     const doc = await getDocument(documentId)
+     const template = await getTemplate(templateId)
+     
+     // 2. Extract text
+     const text = await extractText(doc.file)
+     
+     // 3. Build prompt
+     const prompt = buildPrompt(template, text)
+     
+     // 4. Call AI (chunked if document is long)
+     const chunks = splitIntoChunks(text, maxTokens: 100000)
+     const analyses = await Promise.all(
+       chunks.map(chunk => 
+         claude.messages.create({
+           model: 'claude-3-5-sonnet-20241022',
+           max_tokens: 4096,
+           messages: [{
+             role: 'user',
+             content: prompt.replace('{document_text}', chunk)
+           }]
+         })
+       )
+     )
+     
+     // 5. Merge and structure results
+     const mergedResult = mergeAnalyses(analyses)
+     const structuredResult = parseAIResponse(mergedResult)
+     
+     // 6. Calculate scores
+     structuredResult.overallScore = calculateRiskScore(structuredResult)
+     structuredResult.riskLevel = categorizeRisk(structuredResult.overallScore)
+     
+     // 7. Generate annotations
+     const annotations = generateAnnotations(structuredResult, doc)
+     
+     return {
+       ...structuredResult,
+       annotations,
+       metadata: {
+         tokensUsed: calculateTokens(analyses),
+         processingTime: Date.now() - startTime,
+         aiModel: 'claude-3-5-sonnet'
+       }
+     }
+   }
+   ```
+
+7. **Structured Output Parsing**
+   ```typescript
+   interface AIReviewResponse {
+     extracted_sections: {
+       [key: string]: {
+         content: string
+         location: string // "Section 5.2, Page 8"
+         analysis: string
+       }
+     }
+     red_flags: Array<{
+       type: string
+       severity: 'low' | 'medium' | 'high' | 'critical'
+       location: string
+       description: string
+       recommendation: string
+     }>
+     compliance_status: {
+       [key: string]: {
+         compliant: boolean
+         details: string
+       }
+     }
+     risk_assessment: {
+       overall_score: number // 0-100
+       category_scores: {
+         financial_risk: number
+         legal_risk: number
+         operational_risk: number
+       }
+       justification: string
+     }
+     recommendations: Array<{
+       priority: 'low' | 'medium' | 'high'
+       action: string
+       rationale: string
+     }>
+   }
+   ```
+
+### 10.2 UI de AI Document Review
+
+**Objetivo:** Análisis visual e interactivo de documentos
+
+#### Páginas:
+
+1. **`/ai/review/dashboard`**
+   ```
+   Métricas principales:
+   - Documentos analizados hoy/semana/mes
+   - Average risk score
+   - Top red flags detectados
+   - Tiempo promedio de análisis
+   - Distribución por tipo de documento
+   - Satisfaction score de usuarios
+   ```
+
+2. **`/ai/review/reviews`**
+   ```
+   Lista de revisiones:
+   - Filtros: status, risk level, document type, date
+   - Columnas: Documento, Tipo, Risk Score, Status, Fecha
+   - Quick actions: Ver, Re-analizar, Exportar
+   - Bulk actions: Comparar, Exportar múltiples
+   ```
+
+3. **`/ai/review/new`**
+   ```
+   Iniciar nueva revisión:
+   
+   Step 1: Upload
+   - Drag & drop o seleccionar archivo
+   - Múltiples archivos soportados
+   - Preview del documento
+   
+   Step 2: Select Template
+   - Grid de templates disponibles
+   - "Contrato Comercial", "NDA", "Arrendamiento", etc.
+   - Preview de qué se analizará
+   
+   Step 3: Configure (opcional)
+   - Ajustar criteria específicos
+   - Agregar custom red flags
+   - Set priority
+   
+   Step 4: Review & Submit
+   - Resumen de configuración
+   - Estimación de tiempo/costo
+   - Submit
+   ```
+
+4. **`/ai/review/reviews/:id`**
+   ```
+   Vista de resultados (dos paneles):
+   
+   Panel Izquierdo: Documento
+   - PDF viewer o document renderer
+   - Anotaciones highlighteadas
+   - Click en anotación → scroll a ubicación
+   - Zoom, navegación por páginas
+   
+   Panel Derecho: Análisis
+   
+   Tab "Overview":
+   - Risk Score (visual gauge)
+   - Executive Summary
+   - Key Findings (top 3-5)
+   - Quick Stats
+   
+   Tab "Sections":
+   - Accordion de secciones extraídas
+   - Cada sección:
+     * Contenido extraído
+     * Análisis
+     * Location en documento
+     * Risk indicator
+   
+   Tab "Red Flags":
+   - Lista de issues encontrados
+   - Agrupados por severity
+   - Cada flag:
+     * Descripción
+     * Ubicación (clickeable)
+     * Recomendación
+     * Mark as "Reviewed" o "False Positive"
+   
+   Tab "Recommendations":
+   - Lista priorizada de acciones
+   - Checkbox para marcar completadas
+   - Assign to team member
+   - Add notes
+   
+   Tab "Compliance":
+   - Checklist de compliance items
+   - Status por item
+   - Details/evidence
+   
+   Actions:
+   - Download PDF Report
+   - Share with team
+   - Request Human Review (escalar a abogado)
+   - Compare with another version
+   - Re-analyze with different template
+   ```
+
+5. **`/ai/review/reviews/:id/annotate`**
+   ```
+   Vista de anotación (fullscreen):
+   - Document viewer grande
+   - Toolbar de anotación:
+     * Add comment
+     * Highlight text
+     * Add sticky note
+     * Draw rectangle/circle
+   - AI annotations en un color
+   - User annotations en otro color
+   - Sidebar con lista de annotations
+   - Save & Export
+   ```
+
+6. **`/ai/review/compare`**
+   ```
+   Comparar documentos:
+   - Seleccionar 2-3 documentos
+   - Side-by-side view
+   - Diff highlighting
+   - AI analysis de diferencias
+   - "What changed?" summary
+   - Risk comparison table
+   ```
+
+7. **`/ai/review/templates`**
+   ```
+   Gestión de templates:
+   - Lista de templates (system + custom)
+   - Create new template:
+     * Name, description
+     * Document type
+     * Sections to extract (list)
+     * Red flags patterns (list)
+     * Compliance checks (list)
+     * Custom prompt instructions
+   - Edit existing
+   - Duplicate
+   - Test template (upload sample doc)
+   - Usage stats por template
+   ```
+
+8. **`/ai/review/templates/:id/edit`**
+   ```
+   Editor de template:
+   - Visual builder
+   - Add/remove sections
+   - Define red flag patterns (regex or plain text)
+   - Configure compliance checks
+   - Prompt preview
+   - Test section (run on sample)
+   - Save & Activate
+   ```
+
+9. **`/ai/review/training`**
+   ```
+   Feedback loop para mejorar:
+   - Reviews que necesitan corrección
+   - User feedback: "Was this accurate?"
+   - Corrections:
+     * Mark false positive
+     * Add missed red flag
+     * Correct extraction
+   - Training dataset builder
+   - Trigger re-training (futuro: fine-tuning)
+   ```
+
+10. **`/ai/review/settings`**
+    ```
+    Configuración:
+    
+    General:
+    - Default template
+    - Auto-analyze on upload
+    - Notification preferences
+    
+    AI Configuration:
+    - Model selection (Claude 3.5, GPT-4, etc.)
+    - Temperature
+    - Max tokens per analysis
+    - Confidence threshold
+    
+    Cost Controls:
+    - Budget limits
+    - Approval required for documents > X pages
+    - Rate limiting
+    
+    Integrations:
+    - Google Drive: Auto-analyze new docs
+    - Dropbox
+    - Email: Forward contracts for analysis
+    ```
+
+### 10.3 PDF Report Generation
+
+**Objetivo:** Reportes profesionales exportables
+
+#### Implementación:
+
+```typescript
+async function generatePDFReport(reviewId: string): Promise<Buffer> {
+  const review = await getReview(reviewId)
+  const result = await getReviewResult(reviewId)
+  
+  // Usar biblioteca como PDFKit o Puppeteer
+  const pdf = new PDFDocument()
+  
+  // Header
+  pdf.image('logo.png', 50, 45, { width: 50 })
+  pdf.fontSize(20).text('Análisis de Documento con IA', 120, 50)
+  
+  // Executive Summary
+  pdf.moveDown()
+  pdf.fontSize(16).text('Resumen Ejecutivo')
+  pdf.fontSize(12).text(result.summary)
+  
+  // Risk Score
+  pdf.moveDown()
+  pdf.fontSize(16).text('Nivel de Riesgo')
+  // Visual gauge o color-coded box
+  pdf.rect(50, pdf.y, 200, 30)
+    .fillAndStroke(getRiskColor(result.riskLevel), '#000')
+  pdf.fontSize(12).text(`Score: ${result.overallScore}/100`)
+  
+  // Sections
+  pdf.addPage()
+  pdf.fontSize(16).text('Secciones Analizadas')
+  for (const [key, section] of Object.entries(result.extractedData)) {
+    pdf.fontSize(14).text(key)
+    pdf.fontSize(10).text(section.content)
+    pdf.moveDown()
+  }
+  
+  // Red Flags
+  pdf.addPage()
+  pdf.fontSize(16).text('Red Flags Detectados')
+  for (const flag of result.redFlags) {
+    pdf.fontSize(12)
+      .fillColor(getSeverityColor(flag.severity))
+      .text(`[${flag.severity.toUpperCase()}] ${flag.description}`)
+    pdf.fillColor('#000')
+      .fontSize(10)
+      .text(`Ubicación: ${flag.location}`)
+      .text(`Recomendación: ${flag.recommendation}`)
+    pdf.moveDown()
+  }
+  
+  // Recommendations
+  pdf.addPage()
+  pdf.fontSize(16).text('Recomendaciones')
+  // ... similar structure
+  
+  // Footer
+  pdf.fontSize(8)
+    .text(`Generado por TuPatrimonio.app - ${new Date().toLocaleDateString()}`, 
+          50, pdf.page.height - 50)
+  
+  return pdf.pipe(/* output stream */)
+}
+```
+
+### 10.4 Advanced Features
+
+#### Implementar:
+
+1. **Batch Processing**
+   ```typescript
+   // Para procesar múltiples documentos en paralelo
+   async function batchReview(
+     fileIds: string[],
+     templateId: string
+   ): Promise<BatchReviewJob> {
+     const jobId = generateId()
+     
+     // Queue jobs
+     for (const fileId of fileIds) {
+       await queue.add('document-review', {
+         jobId,
+         fileId,
+         templateId
+       })
+     }
+     
+     return { jobId, status: 'queued', total: fileIds.length }
+   }
+   ```
+
+2. **Version Comparison**
+   ```typescript
+   async function compareVersions(
+     docId1: string,
+     docId2: string
+   ): Promise<ComparisonResult> {
+     const [review1, review2] = await Promise.all([
+       getReview(docId1),
+       getReview(docId2)
+     ])
+     
+     // AI-powered diff
+     const diffAnalysis = await claude.messages.create({
+       model: 'claude-3-5-sonnet-20241022',
+       messages: [{
+         role: 'user',
+         content: `
+           Compara estas dos versiones de contrato y explica qué cambió:
+           
+           Versión 1:
+           ${review1.documentText}
+           
+           Versión 2:
+           ${review2.documentText}
+           
+           Enfócate en cambios significativos en términos, condiciones, riesgos.
+         `
+       }]
+     })
+     
+     return {
+       changes: parseDiffAnalysis(diffAnalysis),
+       riskDelta: review2.overallScore - review1.overallScore,
+       newRedFlags: findNewRedFlags(review1, review2)
+     }
+   }
+   ```
+
+3. **Custom Red Flag Training**
+   ```typescript
+   // Permitir a usuarios entrenar patrones específicos
+   interface CustomRedFlag {
+     organizationId: string
+     name: string
+     pattern: string // regex o descripción en lenguaje natural
+     severity: 'low' | 'medium' | 'high' | 'critical'
+     examples: string[] // ejemplos de texto que deberían matchear
+   }
+   
+   // El sistema aprende de feedback y ajusta detección
+   ```
+
+### 10.5 Cost Optimization
+
+#### Estrategias:
+
+```typescript
+// 1. Smart chunking - solo analizar secciones relevantes
+function smartChunk(document: string, template: Template): string[] {
+  // Usar modelo más barato para identificar secciones relevantes
+  const sectionMap = identifySections(document) // GPT-3.5-turbo
+  
+  // Luego usar Claude 3.5 solo en secciones importantes
+  const relevantSections = template.sectionsToExtract
+    .map(section => sectionMap[section])
+    .filter(Boolean)
+  
+  return relevantSections
+}
+
+// 2. Caching de análisis comunes
+const analysisCache = new Map<string, ReviewResult>()
+
+function getCacheKey(document: string, template: string): string {
+  return `${hashDocument(document)}_${template}`
+}
+
+// 3. Progressive analysis
+// Análisis rápido (barato) primero, profundo solo si se solicita
+async function progressiveReview(docId: string) {
+  // Paso 1: Quick scan (GPT-3.5)
+  const quickScan = await quickAnalysis(docId)
+  
+  if (quickScan.riskScore > 70 || userRequestsDeep) {
+    // Paso 2: Deep analysis (Claude 3.5 Opus)
+    return await deepAnalysis(docId)
+  }
+  
+  return quickScan
+}
+```
+
+### 10.6 Testing
+
+#### Test Suite:
+
+```typescript
+describe('Document Review', () => {
+  test('extracts payment terms correctly', async () => {
+    const sample = loadSampleContract('commercial.pdf')
+    const result = await analyzeDocument(sample, 'commercial_template')
+    
+    expect(result.extractedData.payment_terms).toBeDefined()
+    expect(result.extractedData.payment_terms.content).toContain('Net 30')
+  })
+  
+  test('detects unlimited liability red flag', async () => {
+    const sample = loadSampleContract('high_risk.pdf')
+    const result = await analyzeDocument(sample, 'commercial_template')
+    
+    const unlimitedLiabilityFlag = result.redFlags.find(
+      f => f.type === 'unlimited_liability'
+    )
+    expect(unlimitedLiabilityFlag).toBeDefined()
+    expect(unlimitedLiabilityFlag.severity).toBe('critical')
+  })
+  
+  test('calculates risk score accurately', async () => {
+    const lowRiskDoc = loadSampleContract('low_risk.pdf')
+    const highRiskDoc = loadSampleContract('high_risk.pdf')
+    
+    const [lowResult, highResult] = await Promise.all([
+      analyzeDocument(lowRiskDoc, 'commercial_template'),
+      analyzeDocument(highRiskDoc, 'commercial_template')
+    ])
+    
+    expect(lowResult.overallScore).toBeLessThan(40)
+    expect(highResult.overallScore).toBeGreaterThan(70)
+  })
+})
+```
+
+**Paralelamente durante Fase 10:**
+- Blog posts sobre lanzamiento de Document Review
+- Case studies con métricas reales (tiempo ahorrado, errores evitados)
+- Webinar: "Cómo la IA Revoluciona la Revisión de Contratos"
+- Actualizar landing de AI Document Review con demos reales
 
 ---
 
-## 🚀 Fase 11: Optimización y Escalabilidad (Semanas 73-79)
+## 📊 Fase 11: Analytics y Reportes (Semanas 75-81)
 
-*(Contenido igual que antes)*
+### 11.1 Schema Analytics
+
+**Objetivo:** Data-driven decision making
+
+#### Implementación:
+1. **Crear schema `analytics`**
+   ```sql
+   - usage_metrics (particionado por fecha)
+   - usage_aggregates
+   - user_activity_summary
+   - revenue_metrics
+   - ai_usage_metrics ← NUEVO (métricas específicas de IA)
+   - report_templates
+   - scheduled_reports
+   - generated_reports
+   ```
+
+2. **AI Usage Metrics** ← NUEVO
+   ```sql
+   CREATE TABLE analytics.ai_usage_metrics (
+     id UUID PRIMARY KEY,
+     organization_id UUID REFERENCES core.organizations,
+     service_type TEXT, -- 'customer_service' o 'document_review'
+     date DATE,
+     
+     -- Customer Service metrics
+     total_conversations INTEGER,
+     messages_sent INTEGER,
+     ai_responses INTEGER,
+     human_escalations INTEGER,
+     avg_confidence_score DECIMAL,
+     
+     -- Document Review metrics
+     documents_analyzed INTEGER,
+     pages_analyzed INTEGER,
+     red_flags_detected INTEGER,
+     avg_risk_score DECIMAL,
+     
+     -- Cost metrics
+     total_tokens_used BIGINT,
+     total_credits_consumed DECIMAL,
+     
+     created_at TIMESTAMP DEFAULT NOW()
+   );
+   ```
+
+3. **Data Collection**
+   ```typescript
+   - Event tracking en frontend
+   - Server-side tracking
+   - Batch insert para performance
+   - Agregaciones periódicas (cron jobs)
+   - Track AI model usage y costos
+   ```
+
+4. **Dashboards**
+   ```typescript
+   - Organization dashboard (sus métricas + uso de IA)
+   - Platform dashboard (métricas globales + ROI de IA)
+   - AI-specific dashboards
+   - Gráficos con Recharts/Chart.js
+   - Export a Excel/PDF
+   ```
+
+### 11.2 UI de Analytics
+
+**Objetivo:** Insights accionables
+
+#### Páginas:
+1. **`/analytics/overview`**
+   ```
+   KPIs principales:
+   - Total users, organizations
+   - MRR/ARR
+   - Active services
+   - Usage trends
+   - AI adoption metrics ← NUEVO
+   ```
+
+2. **`/analytics/usage`**
+   ```
+   - Uso por aplicación
+   - Usuarios más activos
+   - Features más usadas
+   - AI services breakdown ← NUEVO
+     * Conversaciones atendidas
+     * Documentos analizados
+     * Tokens consumidos
+     * Cost per service
+   ```
+
+3. **`/analytics/revenue`**
+   ```
+   - MRR/ARR
+   - Churn rate
+   - Customer LTV
+   - Revenue by service (incluir IA)
+   - Forecast
+   ```
+
+4. **`/analytics/ai`** ← NUEVO
+   ```
+   Dashboard específico de IA:
+   
+   Customer Service:
+   - Conversations handled by AI vs humans
+   - Resolution rate
+   - Average confidence score
+   - Top intents
+   - Escalation reasons
+   - Cost per conversation
+   
+   Document Review:
+   - Documents analyzed
+   - Average risk score distribution
+   - Top red flags detected
+   - Processing time trends
+   - Cost per document
+   - Accuracy feedback
+   
+   ROI Calculator:
+   - Time saved (estimated)
+   - Cost savings (vs manual)
+   - Efficiency gains
+   ```
+
+5. **`/analytics/reports`**
+   ```
+   - Reportes programados
+   - Crear nuevo reporte
+   - Historial
+   - Templates (incluir templates de IA)
+   ```
 
 ---
 
-## 🎨 Fase 12: UX/UI Polish y Features Finales (Semanas 80-86)
+## 🔌 Fase 12: Integraciones y API Pública (Semanas 82-88)
 
-*(Contenido igual que antes)*
+### 12.1 Schema Integrations
+
+**Objetivo:** Conectar con ecosistema externo
+
+#### Implementación:
+1. **Crear schema `integrations`**
+   ```sql
+   - integration_providers
+   - organization_integrations
+   - integration_sync_logs
+   ```
+
+2. **Conectores Pre-built**
+   ```typescript
+   - Google Drive
+   - Dropbox
+   - Zapier
+   - Make.com
+   - Slack
+   - Microsoft Teams
+   - Notion (para Knowledge Base) ← NUEVO
+   ```
+
+3. **OAuth Flow**
+   ```typescript
+   - Iniciar OAuth
+   - Callback handling
+   - Refresh tokens
+   - Almacenar credentials encriptados
+   ```
+
+### 12.2 API Pública
+
+**Objetivo:** API REST completa para B2B
+
+#### Implementación:
+1. **Documentación OpenAPI**
+   - Swagger/Redoc
+   - SDK generation
+   - Postman collection
+
+2. **Endpoints por Servicio**
+   ```
+   /api/v1/signatures/*
+   /api/v1/verifications/*
+   /api/v1/notary/*
+   /api/v1/documents/*
+   /api/v1/credits/*
+   /api/v1/organizations/*
+   /api/v1/ai/chat/* ← NUEVO
+   /api/v1/ai/review/* ← NUEVO
+   ```
+
+3. **AI API Endpoints** ← NUEVO
+   ```typescript
+   // Customer Service API
+   POST /api/v1/ai/chat/conversations
+   POST /api/v1/ai/chat/conversations/:id/messages
+   GET  /api/v1/ai/chat/conversations/:id
+   GET  /api/v1/ai/chat/conversations/:id/history
+   POST /api/v1/ai/chat/knowledge-base/ingest
+   
+   // Document Review API
+   POST /api/v1/ai/review/analyze
+   GET  /api/v1/ai/review/:id/status
+   GET  /api/v1/ai/review/:id/results
+   POST /api/v1/ai/review/compare
+   GET  /api/v1/ai/review/templates
+   ```
+
+4. **Rate Limiting**
+   ```typescript
+   - Por API key
+   - Por plan de suscripción
+   - Redis para contadores
+   - Headers: X-RateLimit-*
+   - Rate limits más altos para AI endpoints (son más costosos)
+   ```
+
+5. **Webhooks Salientes**
+   ```typescript
+   - Configurar endpoints
+   - Retry logic
+   - HMAC signatures
+   - Event types configurables
+   - Eventos de IA:
+     * ai.chat.conversation.completed
+     * ai.review.analysis.completed
+     * ai.review.high_risk_detected
+   ```
+
+### 12.3 Developer Portal
+
+**Objetivo:** Self-service para developers
+
+#### Páginas:
+1. **`/developers/api-keys`**
+   - Crear/revocar API keys
+   - Usage por key
+   - Scopes y permisos
+
+2. **`/developers/webhooks`**
+   - Configurar webhooks
+   - Test endpoints
+   - Delivery logs
+
+3. **`/developers/docs`**
+   - Documentación interactiva
+   - Code examples (incluir ejemplos de IA)
+   - Changelog
+   - Sandbox para testing
+
+4. **`/developers/playground`** ← NUEVO
+   ```
+   Interactive API playground:
+   - Test AI Chat API
+   - Test Document Review API
+   - Ver responses en tiempo real
+   - Code generation
+   ```
 
 ---
 
-## 📱 Fase 13: Mobile App (Opcional - Semanas 87-98)
+## 🚀 Fase 13: Optimización y Escalabilidad (Semanas 89-95)
 
-*(Contenido igual que antes)*
+### 13.1 Performance
+
+**Objetivo:** Sub-second response times
+
+#### Tareas:
+1. **Database Optimization**
+   ```sql
+   - Analizar slow queries
+   - Agregar índices faltantes (especialmente en tablas de IA)
+   - Optimizar RLS policies
+   - Implementar materialized views
+   - Particionamiento de tablas grandes (usage_metrics, conversations)
+   ```
+
+2. **Caching Strategy**
+   ```typescript
+   - Redis para:
+     * Session data
+     * API responses frecuentes
+     * Rate limiting counters
+     * Real-time presence
+     * AI embeddings cache ← NUEVO
+     * Common AI responses cache ← NUEVO
+   - Next.js ISR para páginas públicas
+   - CDN para static assets
+   ```
+
+3. **Frontend Performance**
+   ```typescript
+   - Code splitting por ruta
+   - Lazy loading de componentes pesados (especialmente document viewer)
+   - Image optimization (next/image)
+   - Virtualización de listas largas
+   - Bundle size analysis
+   ```
+
+4. **AI Performance Optimization** ← NUEVO
+   ```typescript
+   - Batch embedding generation
+   - Streaming responses (mejor UX)
+   - Progressive analysis (quick → deep)
+   - Smart chunking (solo procesar lo necesario)
+   - Model selection basado en complejidad
+   - Fallback a modelos más baratos cuando sea posible
+   ```
+
+### 13.2 Monitoring y Observabilidad
+
+**Objetivo:** Detectar problemas antes que usuarios
+
+#### Implementación:
+1. **APM**
+   ```typescript
+   - Integrar Sentry (errors)
+   - New Relic o Datadog (performance)
+   - LogRocket (session replay)
+   ```
+
+2. **Logging**
+   ```typescript
+   - Structured logging (JSON)
+   - Log levels apropiados
+   - Correlation IDs
+   - Integrar con Papertrail/LogDNA
+   - AI-specific logs (model used, tokens, latency)
+   ```
+
+3. **Alerting**
+   ```typescript
+   - Error rate > threshold
+   - Response time > threshold
+   - Service health down
+   - Credits balance low
+   - AI API failures ← NUEVO
+   - AI cost spikes ← NUEVO
+   - Enviar a Slack/PagerDuty
+   ```
+
+4. **AI Monitoring** ← NUEVO
+   ```typescript
+   Dashboards específicos:
+   - Token usage trends
+   - Cost per request
+   - Model latency
+   - Error rates por provider
+   - Quality metrics (confidence, satisfaction)
+   ```
+
+### 13.3 Testing
+
+**Objetivo:** Confianza en deployments
+
+#### Estrategia:
+1. **Unit Tests**
+   ```typescript
+   - Utils y funciones puras
+   - Business logic
+   - AI helper functions
+   - Coverage > 70%
+   ```
+
+2. **Integration Tests**
+   ```typescript
+   - API endpoints
+   - Database operations
+   - Service integrations (mocked)
+   - AI pipelines (mocked)
+   ```
+
+3. **E2E Tests**
+   ```typescript
+   - Playwright/Cypress
+   - Critical user flows
+   - Include AI features (mock AI responses)
+   - Smoke tests en staging
+   ```
+
+4. **Load Testing**
+   ```typescript
+   - k6 scripts
+   - Test escenarios reales
+   - Include AI endpoints
+   - Identificar bottlenecks
+   ```
+
+5. **AI Testing** ← NUEVO
+   ```typescript
+   - Regression tests con sample documents
+   - Accuracy benchmarking
+   - Cost monitoring en tests
+   - A/B testing de prompts
+   ```
 
 ---
 
-## 🎯 Fase 14: Go-to-Market (Semanas 99-105)
+## 🎨 Fase 14: UX/UI Polish y Features Finales (Semanas 96-102)
 
-### 14.1 Preparación para Lanzamiento
+### 14.1 Refinamiento de UI
+
+**Objetivo:** Experiencia delightful
+
+#### Tareas:
+1. **Micro-interactions**
+   - Animaciones suaves (Framer Motion)
+   - Loading skeletons (especialmente para AI responses)
+   - Empty states informativos
+   - Error states amigables
+   - Typing indicators en chat
+
+2. **Responsive Design**
+   - Mobile-first approach
+   - Tablet optimization
+   - Desktop enhancements
+
+3. **Accessibility**
+   - ARIA labels
+   - Keyboard navigation
+   - Screen reader testing
+   - WCAG 2.1 AA compliance
+
+4. **Onboarding**
+   - Welcome tour (incluir features de IA)
+   - Tooltips contextuales
+   - Sample data
+   - Interactive tutorials
+   - "Try AI" prompts en empty states
+
+### 14.2 Features Finales
+
+**Objetivo:** Nice-to-haves que marcan diferencia
+
+#### Lista:
+1. **Command Palette (Cmd+K)**
+   - Búsqueda global
+   - Quick actions (incluir "Ask AI", "Analyze Document")
+   - Navigation rápida
+
+2. **Advanced Search**
+   - Full-text search (PostgreSQL)
+   - Filtros combinables
+   - Saved searches
+   - AI-powered search (semantic)
+
+3. **Bulk Operations**
+   - Select multiple
+   - Batch actions (incluir batch document review)
+   - Progress tracking
+
+4. **Export/Import**
+   - CSV/Excel export
+   - PDF generation
+   - Bulk import con validation
+
+5. **Activity Feed**
+   - Timeline de cambios
+   - Filtros por tipo
+   - Notificaciones agrupadas
+   - AI activity (análisis completados, chats atendidos)
+
+6. **Collaboration Features** ← NUEVO
+   - Comments on documents
+   - @mentions
+   - Share AI analysis with team
+   - Collaborative annotation
+
+---
+
+## 📱 Fase 15: Mobile App (Opcional - Semanas 103-114)
+
+### 15.1 React Native App
+
+**Objetivo:** Experiencia móvil nativa
+
+#### Consideraciones:
+- Expo framework
+- Shared business logic con web
+- Push notifications (Firebase)
+- Offline-first approach
+- Biometric authentication
+
+#### Features prioritarias mobile:
+- Chat con AI (notificaciones push)
+- Ver análisis de documentos
+- Firmar documentos
+- Notifications dashboard
+- Camera para capturar documentos → enviar a AI Review
+
+---
+
+## 🎯 Fase 16: Go-to-Market (Semanas 115-121)
+
+### 16.1 Preparación para Lanzamiento
 
 **Objetivo:** Launch ready
 
 #### Checklist:
 1. **Legal**
-   - Términos de servicio (ya en marketing site)
-   - Privacy policy (ya en marketing site)
-   - Cookie policy (ya en marketing site)
+   - Términos de servicio (actualizados con uso de IA)
+   - Privacy policy (incluir procesamiento de datos por IA)
+   - Cookie policy
    - GDPR compliance
+   - AI Ethics policy
 
 2. **Marketing Site Evolution**
    - Actualizar con features reales (no "coming soon")
-   - Agregar demo interactivo
-   - Customer success stories reales
-   - Optimizar según 6+ meses de data SEO
+   - Agregar demos interactivos de IA
+   - Customer success stories reales (con métricas de IA)
+   - Optimizar según 12+ meses de data SEO
 
 3. **Content Milestone**
    ```
    A esta altura deberías tener:
-   - 50+ blog posts
-   - 5+ pillar articles
-   - 3+ downloadable resources
-   - 10+ video tutorials
-   - Rankings top 3 para varias keywords
-   - 5,000+ organic visits/mes
+   - 80+ blog posts
+   - 7+ pillar articles (2 sobre IA)
+   - 5+ downloadable resources
+   - 15+ video tutorials (incluir varios de IA)
+   - Rankings top 3 para varias keywords (incluir IA)
+   - 10,000+ organic visits/mes
    ```
 
 4. **Launch PR**
-   - Press release a medios tech
-   - Product Hunt launch
+   ```
+   - Press release a medios tech (enfatizar IA como diferenciador)
+   - Product Hunt launch (destacar AI features)
    - LinkedIn announcement
-   - Email a waitlist (500+ personas)
-   - Webinar de lanzamiento
+   - Email a waitlist (1000+ personas)
+   - Webinar de lanzamiento (demo en vivo de IA)
+   - Launch en comunidades de IA (Hacker News, etc.)
+   ```
 
 5. **Support**
    - Help center (Intercom/Zendesk)
-   - Live chat
+   - Live chat (con AI bot como first line)
    - Email templates
-   - Onboarding videos
+   - Onboarding videos (incluir tutoriales de IA)
 
 6. **Analytics**
    - Google Analytics 4 (ya configurado)
    - Mixpanel/Amplitude
    - Conversion tracking completo
    - Cohort analysis setup
+   - AI usage funnels
 
-### 14.2 Public Launch
+### 16.2 Public Launch
 
 **Objetivo:** Convertir tráfico orgánico en customers
 
 **Ventaja competitiva:** Llegas al launch con:
-- ✅ SEO maduro (6+ meses de antigüedad)
-- ✅ 5,000+ visitas orgánicas/mes
-- ✅ 500+ waitlist
-- ✅ Content library de 50+ posts
-- ✅ Authority establecida
+- ✅ SEO maduro (12+ meses de antigüedad)
+- ✅ 10,000+ visitas orgánicas/mes
+- ✅ 1,000+ waitlist
+- ✅ Content library de 80+ posts
+- ✅ Authority establecida (incluir en IA)
 - ✅ Backlink profile sólido
+- ✅ **Diferenciadores de IA probados y funcionando**
+
+#### Launch Day Strategy:
+```
+T-7 días: Email a waitlist (teaser)
+T-3 días: Soft launch para early adopters
+T-0: Public launch
+  - Product Hunt
+  - Hacker News
+  - LinkedIn
+  - Twitter/X
+  - Paid ads (boost inicial)
+T+1: Follow-up content
+T+7: First case study
+T+30: Launch retrospective
+```
 
 ---
 
@@ -1059,17 +3506,18 @@ SEO considerations:
 
 ### Fase 0 (Semanas 1-4):
 - Website live con Lighthouse > 95
-- 8-12 blog posts publicados
+- 10-14 blog posts publicados (incluir 2 sobre IA)
 - 100% páginas indexadas
 - 50+ organic visits (baseline)
+- Landings de IA con demos funcionales
 
 ### Durante Fases 1-6 (Semanas 5-38):
 **Marketing parallels:**
 - Mes 3: 500+ organic visits/mes
 - Mes 6: 2,000+ organic visits/mes
-- Rankings top 10 para 5+ keywords
-- 100+ signups waitlist
-- 20+ quality backlinks
+- Rankings top 10 para 5+ keywords (incluir 2 de IA)
+- 150+ signups waitlist
+- 25+ quality backlinks
 
 **Desarrollo:**
 - Foundation completa (auth, credits, billing)
@@ -1077,26 +3525,35 @@ SEO considerations:
 - Workflows funcionales
 - Compliance ready
 
-### Durante Fases 7-13 (Semanas 39-98):
+### Durante Fases 7-12 (Semanas 39-88):
 **Marketing parallels:**
 - Mes 9: 5,000+ organic visits/mes
 - Mes 12: 10,000+ organic visits/mes
 - Rankings top 5 para keyword principal
-- 500+ waitlist
+- Rankings top 10 para keywords de IA
+- 1,000+ waitlist
 - Featured snippets
-- 50+ backlinks DA > 30
+- 60+ backlinks DA > 30
 
 **Desarrollo:**
-- Servicios core operacionales
+- Servicios core operacionales (firmas, verificación, notaría)
+- **AI Customer Service live y probado**
+- **AI Document Review live y probado**
 - API pública documentada
-- Mobile app (opcional)
-- Integraciones clave
+- Analytics completo
 
-### Fase 14 - Launch (Semanas 99-105):
-- 10,000+ organic visits/mes
-- 10-15% signup rate (1,000-1,500 signups/mes orgánico)
-- Rankings dominantes
+### Fases 13-14 - Optimization (Semanas 89-102):
+- Performance optimizada
+- AI costs optimizados
+- UX refinado
+- Tests comprehensivos
+
+### Fase 16 - Launch (Semanas 115-121):
+- 15,000+ organic visits/mes
+- 15-20% signup rate (2,000-3,000 signups/mes orgánico)
+- Rankings dominantes (incluir IA)
 - Thought leadership establecido
+- **AI services con adoption > 40% de usuarios**
 
 ---
 
@@ -1107,43 +3564,47 @@ SEO considerations:
 2. Fase 1-2: Foundation + Credits
 3. Fase 3: Comunicaciones básicas
 4. Fase 7: Signatures (servicio core)
-5. Seguridad completa
+5. **Fase 9: AI Customer Service** (diferenciador clave)
+6. **Fase 10: AI Document Review** (diferenciador clave)
+7. Seguridad completa
 
 ### High Priority:
 - Fase 4: Workflows
 - Fase 5: Files
 - Fase 6: Audit
-- Fase 10: API pública
+- Fase 12: API pública
 - **Contenido continuo (paralelo a todo)**
 
 ### Medium Priority:
 - Otros servicios (8.x)
-- Fase 9: Analytics
-- Fase 11: Optimization
+- Fase 11: Analytics
+- Fase 13: Optimization
 
 ### Nice to Have:
-- Fase 13: Mobile app
+- Fase 15: Mobile app
 - Integraciones avanzadas
-- AI features avanzados
+- AI features avanzados (fine-tuning, custom models)
 
 ---
 
 ## 🔄 **Proceso Paralelo: Content y SEO (Continuo)**
 
-Mientras desarrollas las Fases 1-14, mantén este ritmo:
+Mientras desarrollas las Fases 1-16, mantén este ritmo:
 
 ### Mensual:
 - 8 blog posts (2/semana)
+  * 6 posts tradicionales
+  * 2 posts sobre IA
 - 1 pillar content piece o guía larga
 - 2 actualizaciones de contenido existente
 - 1 guest post o PR initiative
 - Análisis de rankings y ajustes
 
 ### Trimestral:
-- 1 lead magnet nuevo (eBook, template, calculator)
+- 1 lead magnet nuevo (incluir 1 de IA cada 2 trimestres)
 - Content audit y actualización
 - Backlink campaign
-- Video content (tutoriales)
+- Video content (tutoriales, incluir demos de IA)
 
 ### Semestral:
 - Comprehensive SEO audit
@@ -1153,92 +3614,194 @@ Mientras desarrollas las Fases 1-14, mantén este ritmo:
 
 ---
 
-## 🎓 **Notas Adicionales para el Desarrollador**
+## 🛠️ **Stack Tecnológico Final Completo**
 
-### Separación de Concerns:
-```typescript
-// Marketing site (tupatrimonio.app)
-- Next.js con ISR para blog
-- Headless CMS (Contentful)
-- Optimizado para SEO
-- No requiere auth
-- Deploy: Netlify
+### Frontend:
+- Next.js 14+ (App Router)
+- React 18
+- TypeScript
+- TailwindCSS
+- Shadcn/UI
+- React Flow (workflow builder)
+- TipTap (document editor)
+- PDF.js (document viewer)
+- Framer Motion (animations)
 
-// App (app.tupatrimonio.app)
-- Next.js con SSR
-- Supabase backend
-- Optimizado para UX
-- Requiere auth
-- Deploy: Netlify (separado)
-```
+### Backend:
+- Supabase (PostgreSQL + Auth + Storage + Realtime)
+- pgvector extension (for AI embeddings)
+- Supabase Edge Functions
 
-### Cross-linking Strategy:
-```
-Marketing site → App:
-- CTAs en blog llevan a signup
-- Landing pages → app signup
-- Resource downloads → app signup
+### AI & ML:
+- Anthropic Claude API (primary - customer service & document review)
+- OpenAI API (secondary/fallback)
+- Embeddings: text-embedding-ada-002 (OpenAI)
+- Vector search: pgvector
 
-App → Marketing site:
-- Help links → blog/guides
-- Learn more → landing pages
-- Logout → marketing homepage
-```
+### Services:
+- Stripe (payments)
+- dLocal Go (LATAM payments)
+- SendGrid (email)
+- Twilio (SMS/auth)
+- Veriff (identity verification)
+- AWS S3 / Firebase Storage (files)
 
-### Shared Components:
-```typescript
-// packages/ui
-- Mismo design system
-- Misma tipografía y colores
-- Componentes reutilizables
-- Pero: Marketing es estático, App es dinámico
-```
+### DevOps:
+- GitHub Actions (CI/CD)
+- Netlify (hosting)
+- Redis (caching)
+- BullMQ (job queues)
+
+### Monitoring:
+- Sentry (error tracking)
+- New Relic / Datadog (APM)
+- LogRocket (session replay)
+- Papertrail (logs)
+
+### CMS & Content:
+- Contentful / Sanity (marketing content)
 
 ---
 
 ## ✅ **Checklist de Launch Actualizado**
 
-### Pre-Launch (Semana 98):
-- [ ] Marketing site optimizado y actualizado
-- [ ] 50+ blog posts publicados
-- [ ] 5,000+ organic visits/mes
-- [ ] 500+ waitlist confirmed
+### Pre-Launch (Semana 114):
+- [ ] Marketing site optimizado y actualizado (incluir IA)
+- [ ] 80+ blog posts publicados
+- [ ] 10,000+ organic visits/mes
+- [ ] 1,000+ waitlist confirmed
 - [ ] App completamente funcional
-- [ ] Beta testing completado
+- [ ] **AI Customer Service funcionando (>90% uptime en beta)**
+- [ ] **AI Document Review funcionando (>90% accuracy en tests)**
+- [ ] Beta testing completado (incluir feedback de AI features)
 - [ ] Security audit passed
-- [ ] Legal docs finalizados
+- [ ] Legal docs finalizados (incluir AI ethics)
+- [ ] AI costs under control y predecibles
 
-### Launch Week (Semana 99):
+### Launch Week (Semana 115):
 - [ ] Email a waitlist (batch sending)
-- [ ] Press release enviado
+- [ ] Press release enviado (enfatizar IA)
 - [ ] Product Hunt launch
 - [ ] Social media campaign
-- [ ] Webinar de demostración
+- [ ] Webinar de demostración (demo en vivo de AI)
 - [ ] Paid ads (boost inicial)
+- [ ] Monitoring 24/7
 
-### Post-Launch (Semanas 100-105):
+### Post-Launch (Semanas 116-121):
 - [ ] Monitoring intensivo
 - [ ] Respuesta rápida a feedback
 - [ ] Hotfixes según necesidad
 - [ ] Content actualizaciones
-- [ ] Case studies de primeros clientes
+- [ ] Case studies de primeros clientes (incluir ROI de IA)
 - [ ] Optimization basada en data
+- [ ] AI model fine-tuning basado en feedback real
 
 ---
 
-**🎉 Resultado Final:**
+## 🎓 **Notas Finales para el Desarrollador**
+
+### Principios a Seguir:
+1. **DRY pero pragmático:** Reutilizar código, pero no over-engineer
+2. **Type-safe:** TypeScript estricto, aprovechar Supabase types
+3. **Progressive enhancement:** Funciona sin JS, mejor con JS
+4. **Mobile-first:** Diseñar primero para móvil
+5. **Accessible:** Todos los usuarios cuentan
+6. **Fast by default:** Performance no es opcional
+7. **Secure by design:** Seguridad desde el inicio
+8. **Data-driven:** Medir antes de optimizar
+9. **AI-responsible:** Transparencia en uso de IA, no sobre-prometer
+10. **Cost-conscious:** Monitorear costs de IA constantemente
+
+### Code Style:
+- Prettier + ESLint config compartida
+- Conventional Commits
+- Descriptive variable names
+- Comments para "why", no "what"
+- Max function length: ~50 lines
+
+### Git Workflow:
+- Feature branches
+- PR reviews obligatorios
+- CI/CD automático
+- Semantic versioning
+
+### AI Development Best Practices:
+```typescript
+// 1. Siempre manejar errores de API
+try {
+  const response = await claude.messages.create({...})
+} catch (error) {
+  if (error.status === 529) {
+    // Overloaded, retry
+  } else if (error.status === 429) {
+    // Rate limited, backoff
+  }
+  // Log y fallback
+}
+
+// 2. Siempre trackear costs
+await trackAIUsage({
+  tokens: response.usage,
+  model: 'claude-3-5-sonnet',
+  organizationId
+})
+
+// 3. Implementar timeouts
+const response = await Promise.race([
+  claude.messages.create({...}),
+  timeout(30000) // 30s max
+])
+
+// 4. Cache cuando sea posible
+const cached = await getCachedEmbedding(text)
+if (cached) return cached
+
+// 5. Usar streaming para mejor UX
+for await (const chunk of stream) {
+  yield chunk.delta.text
+}
+```
+
+---
+
+## 🎉 **Resultado Final**
 
 Llegas al lanzamiento público con:
-1. ✅ **Producto robusto y testeado**
-2. ✅ **Tráfico orgánico establecido** (10K+ visits/mes)
-3. ✅ **Authority en el nicho**
-4. ✅ **Waitlist de clientes potenciales**
-5. ✅ **Content library rica**
-6. ✅ **SEO dominante**
-7. ✅ **Cost per acquisition bajo** (orgánico)
 
-Esto te pone en una posición mucho más fuerte que lanzar sin presencia digital establecida. El SEO es una inversión a largo plazo que comienza a dar frutos justamente cuando tu producto está listo para escalar.
+### Producto:
+1. ✅ **Plataforma robusta y testeada**
+2. ✅ **5+ servicios funcionando** (firmas, verificación, notaría, documentos, real estate, property admin)
+3. ✅ **2 servicios de IA diferenciadores** (chatbot + document review)
+4. ✅ **API pública documentada**
+5. ✅ **Mobile responsive** (+ app nativa opcional)
+
+### Marketing:
+1. ✅ **Tráfico orgánico establecido** (15K+ visits/mes)
+2. ✅ **Authority en el nicho** (incluir IA)
+3. ✅ **Waitlist de clientes potenciales** (1,000+)
+4. ✅ **Content library rica** (80+ posts)
+5. ✅ **SEO dominante** (top 3-5 para keywords principales)
+6. ✅ **Backlink profile sólido** (60+ high DA)
+
+### Negocio:
+1. ✅ **Sistema de monetización completo**
+2. ✅ **Analytics comprehensivo**
+3. ✅ **Compliance ready**
+4. ✅ **Cost per acquisition bajo** (orgánico)
+5. ✅ **Unit economics saludables**
+6. ✅ **AI costs optimizados y predecibles**
+
+### Diferenciación:
+1. ✅ **Ecosistema completo** (no solo una herramienta)
+2. ✅ **IA integrada nativamente** (no un add-on)
+3. ✅ **Multi-tenant desde el core**
+4. ✅ **API-first architecture**
+5. ✅ **Enfoque LATAM** (pricing, compliance, idioma)
 
 ---
 
-**Nota Final:** Esta hoja de ruta actualizada maximiza el ROI de tu tiempo de desarrollo. Mientras construyes el producto (6-12 meses), simultáneamente construyes tu canal de adquisición orgánica. Al momento del launch, no estás empezando de cero en marketing.
+**🚀 Esto te pone en una posición extremadamente competitiva. No solo tienes un producto técnicamente sólido, sino que llegas con tracción de marketing, diferenciadores claros (IA), y un ecosistema completo que aumenta el valor percibido y reduce el churn.**
+
+**La inversión en SEO desde el inicio (Fase 0) te da 12+ meses de ventaja vs competidores que lancen sin presencia digital. Y los servicios de IA te posicionan como innovador, no como "me-too".**
+
+**¡Éxito con el proyecto! 🎉**
