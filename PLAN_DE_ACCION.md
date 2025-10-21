@@ -14,7 +14,7 @@
 - **Email:** SendGrid (solo API, templates propios)
 - **Auth/SMS:** Twilio
 - **Verificación:** Veriff (biometría + documentos)
-- **Storage:** AWS S3 o Firebase Storage
+- **Storage:** Supabase Storage (integrado)
 - **SEO Tools:** Google Search Console, Ahrefs/SEMrush, Schema.org
 - **IA:** OpenAI API / Anthropic Claude API
 
@@ -143,22 +143,18 @@ tupatrimonio.app/
    // FAQs: FAQPage
    ```
 
-3. **Performance Optimization**
+3. **Performance (Netlify Automático)**
    ```typescript
-   // Implementar:
+   // Netlify maneja automáticamente:
    - Next.js Image optimization
    - Font optimization (next/font)
-   - Code splitting automático
-   - ISR (Incremental Static Regeneration) para blog
-   - Edge caching con Netlify
-   - Lazy loading de componentes pesados
+   - Bundle optimization y Code splitting
+   - Edge caching global
+   - ISR (Incremental Static Regeneration)
    
-   // Targets:
-   - Lighthouse Score > 95
-   - Core Web Vitals: Todos en verde
-   - First Contentful Paint < 1.8s
-   - Largest Contentful Paint < 2.5s
-   - Cumulative Layout Shift < 0.1
+   // Solo configurar:
+   - Lazy loading de componentes pesados
+   - Core Web Vitals monitoring
    ```
 
 4. **Sitemap y Robots.txt Dinámicos**
@@ -693,11 +689,14 @@ SEO considerations:
 
 #### Implementar:
 
-1. **Core Web Vitals**
+1. **Core Web Vitals (Netlify Automático)**
    ```
-   - LCP < 2.5s: Optimizar featured images, lazy loading
-   - FID < 100ms: Code splitting, defer non-critical JS
-   - CLS < 0.1: Size de imágenes explícito, reservar espacio para widgets
+   // Netlify optimiza automáticamente:
+   - LCP: Image optimization + CDN
+   - FID: Code splitting óptimo
+   - CLS: Layout optimization
+   
+   // Solo monitorear con Lighthouse
    ```
 
 2. **Mobile-First**
@@ -988,9 +987,196 @@ SEO considerations:
 
 ---
 
-## 🏗️ Fase 1: Fundación (Semanas 5-10)
+## 🌐 **FASE 0: Marketing Web + SEO Foundation (Semanas 1-4)** - **INICIANDO** 🚀
+
+### **Objetivo:** Establecer presencia digital y SEO foundation mientras desarrollamos el backend
+
+**¿Por qué Fase 0 primero?**
+1. **SEO toma 3-6 meses** en mostrar resultados
+2. **Genera tráfico orgánico** mientras desarrollas el backend
+3. **Valida messaging** y value proposition
+4. **Construye waitlist** de early adopters
+5. **$0 en herramientas adicionales** (usa Supabase existente)
+
+### 0.1 **Implementación Híbrida: Supabase + Hardcodeado**
+
+**Decisión Arquitectónica:**
+- **Landing Pages**: Hardcodeadas (performance + SEO óptimo) 
+- **Blog**: Supabase tables (dinámico, $0 extra cost)
+- **Sin CMS externo**: Speed to market + control total
+
+```sql
+-- Blog table en Supabase
+CREATE TABLE blog_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  content TEXT NOT NULL,
+  excerpt TEXT,
+  category TEXT,
+  published BOOLEAN DEFAULT false,
+  published_at TIMESTAMPTZ DEFAULT NOW(),
+  seo_title TEXT,
+  seo_description TEXT
+);
+```
+
+### 0.2 **Landing Pages a Crear (Hardcodeadas)**
+
+1. **Homepage** (`/`) - Value proposition + servicios + CTA
+2. **Firmas Electrónicas** (`/firmas-electronicas`) - SEO keyword: "firma electrónica chile"
+3. **Verificación Identidad** (`/verificacion-identidad`) - Para compliance/fintechs
+4. **Notaría Digital** (`/notaria-digital`) - Disruption modelo tradicional
+5. **Precios** (`/precios`) - Planes B2C/B2B diferenciados
+6. **Legal** (`/legal/*`) - Términos, privacidad, cookies
+
+### 0.3 **Blog Operacional (Supabase)**
+
+```
+Estructura:
+/blog - Index con posts recientes
+/blog/[slug] - Post individual  
+/blog/categoria/[categoria] - Archive por categoría
+
+Categorías iniciales:
+- Firma Electrónica
+- Verificación de Identidad  
+- Notaría Digital
+- Compliance
+- Guías y Tutoriales
+```
+
+### 0.4 **SEO Foundation**
+
+- Metadata API configurada
+- Structured data (Schema.org JSON-LD)
+- Sitemap XML dinámico (incluye posts de Supabase)
+- OpenGraph + Twitter Cards
+- Performance optimization (automático con Netlify)
+
+### 0.5 **Timeline Fase 0 (3 semanas)**
+
+```
+Semana 1: Structure + Landing Pages
+- Monorepo setup
+- Homepage + 3 landing principales
+- SEO básico
+
+Semana 2: Blog + Content  
+- Blog con Supabase
+- 5-6 posts iniciales
+- Structured data
+
+Semana 3: Deploy + Analytics
+- Netlify deploy
+- DNS tupatrimonio.app
+- Analytics + forms
+
+Al completar Fase 0:
+✅ Marketing site live
+✅ 6 landing pages SEO-optimizadas 
+✅ Blog operacional
+✅ Foundation para tráfico orgánico
+✅ Waitlist funcionando
+```
+
+---
+
+## 🏗️ Fase 1: Fundación (Semanas 5-8) - **DESPUÉS DE FASE 0** 📋
 
 **Nota:** Esta fase ahora comienza en semana 5, permitiendo que el SEO trabaje mientras desarrollas.
+
+### 📊 **Estado Actual del Proyecto (21 Octubre 2025):**
+
+#### ✅ **COMPLETADO HOY (21 Oct 2025):**
+- ✅ Proyecto Supabase configurado y funcionando 
+- ✅ **Migración 1**: `20251021120052_enable-pgvector.sql` 
+  - pgvector extension habilitado para servicios de IA
+  - Preparado para embeddings de chatbot y análisis de documentos
+  
+- ✅ **Migración 2**: `20251021120854_schema-core.sql` - **FOUNDATION COMPLETA**
+  - 📊 **13 tablas principales** implementadas
+  - 🏢 **Multi-tenancy nativo**: organizations como partición principal
+  - 👥 **Sistema de usuarios**: Integración con Supabase Auth + perfiles extendidos  
+  - 🛡️ **Roles jerárquicos**: Con permisos JSONB flexibles
+  - 🔗 **Relaciones M:N**: organization_users con roles por organización
+  - 👨‍👩‍👧‍👦 **Equipos**: Colaboración interna en organizaciones
+  - 🎯 **Ecosistema de apps**: Sistema para habilitar servicios por organización
+  - 💳 **Suscripciones**: Base completa para monetización con Stripe
+  - 📧 **Invitaciones**: Sistema de invitaciones con tokens y expiración
+  - 🔑 **API Keys**: Claves hasheadas con scopes y rate limiting
+  - 📝 **Audit trail**: system_events para trazabilidad completa
+  - ⚡ **Performance**: 20+ índices optimizados + triggers automáticos
+  - 🛡️ **Validaciones**: Constraints robustos + ENUMs consistentes
+  - 📚 **Documentación**: Comentarios completos en todas las tablas
+
+#### 🔄 **CAMBIO DE PRIORIDAD - FASE 0 PRIMERO:**
+- 🔄 **Fase 0: Marketing Web + SEO Foundation** (INICIANDO AHORA)
+  - Marketing site con Supabase + Hardcodeado
+  - Landing pages SEO-optimizadas
+  - Blog operacional
+  - Foundation para tráfico orgánico
+
+#### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
+- 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)
+- 📋 Configuración de Storage buckets
+- 📋 Integración GitHub para migraciones automáticas
+
+#### 📋 **ROADMAP DE MIGRACIONES PENDIENTES:**
+```
+✅ Migración 1: 20251021120052_enable-pgvector.sql
+✅ Migración 2: 20251021120854_schema-core.sql
+🔄 Migración 3: schema-credits-billing.sql (EN PROGRESO)
+📋 Migración 4: schema-services.sql (communications, workflows, files, audit)
+📋 Migración 5: schema-business.sql (signatures, verifications, notary, documents)
+📋 Migración 6: schema-ai.sql (ai_customer_service, ai_document_review con VECTOR)
+📋 Migración 7: schema-analytics.sql (usage_metrics, ai_usage_metrics)
+📋 Migración 8: rls-policies.sql (seguridad multi-tenant)
+📋 Migración 9: functions-triggers.sql (lógica de negocio)
+📋 Migración 10: seed-data.sql (datos iniciales)
+```
+
+#### 🎯 **TO-DO FASE 0 - PRIORIDAD INMEDIATA:**
+
+**1. Marketing Site Foundation (Semana 1)**
+   - [ ] Crear estructura de monorepo con apps/marketing
+   - [ ] Setup Next.js + TailwindCSS + Shadcn/UI compartido
+   - [ ] Configurar variables CSS y fuente Quicksand
+   - [ ] Setup SEO básico (metadata API, sitemap, robots.txt)
+
+**2. Landing Pages Hardcodeadas (Semana 1-2)**
+   - [ ] Homepage con value proposition y CTA
+   - [ ] Landing `/firmas-electronicas` SEO-optimizada
+   - [ ] Landing `/verificacion-identidad` 
+   - [ ] Landing `/notaria-digital`
+   - [ ] Página `/precios` con planes B2C/B2B
+   - [ ] Páginas legales (/legal/terminos, /privacidad, /cookies)
+
+**3. Blog con Supabase (Semana 2)**
+   - [ ] Crear tabla `blog_posts` en Supabase
+   - [ ] Implementar páginas dinámicas del blog (/blog, /blog/[slug])
+   - [ ] Sistema de categorías
+   - [ ] (Opcional) Admin básico para gestionar posts
+
+**4. Contenido y SEO (Semana 2-3)**
+   - [ ] Crear contenido para todas las landing pages
+   - [ ] Escribir 5-6 blog posts iniciales
+   - [ ] Implementar structured data (Schema.org)
+   - [ ] Sitemap dinámico (incluye posts de Supabase)
+
+**5. Deploy y Analytics (Semana 3)**
+   - [ ] Configurar deploy en Netlify
+   - [ ] DNS `tupatrimonio.app`
+   - [ ] Google Analytics 4 + Search Console
+   - [ ] Formularios de contacto/waitlist
+
+**DESPUÉS DE FASE 0 (Regresar a Fase 1):**
+- [ ] Completar migración 3: Schemas credits + billing
+- [ ] Setup apps/web con dashboard híbrido B2C/B2B
+- [ ] RLS policies y functions
+- [ ] Storage buckets y GitHub integration
+
+---
 
 ### 1.1 Configuración Inicial del Proyecto
 
@@ -1008,12 +1194,13 @@ SEO considerations:
      /packages/* (compartidos)
      ```
 
-2. **Configuración de Supabase (Simplificada)**
-   - Crear proyecto en Supabase
-   - **Conectar con GitHub** para migraciones automáticas
-   - **Habilitar pgvector extension** (para embeddings de IA)
-   - Habilitar Row Level Security (RLS)
-   - Configurar Storage buckets con políticas de acceso
+2. **✅ Configuración de Supabase (COMPLETADO)**
+   - ✅ Proyecto creado en Supabase
+   - ✅ **pgvector extension habilitado** (migración aplicada)
+   - ✅ **Schema CORE creado** con todas las tablas multi-tenant
+   - 🔄 Conectar con GitHub para migraciones automáticas (PENDIENTE)
+   - 🔄 Configurar Storage buckets con políticas de acceso (PENDIENTE)
+   - 🔄 Implementar Row Level Security (RLS) (PENDIENTE)
 
 3. **Configuración de Next.js - Monorepo Simple**
    ```
@@ -1056,47 +1243,187 @@ SEO considerations:
    ENCRYPTION_KEY
    ```
 
-### 1.2 Modelado de Base de Datos - Schema Core
+### 1.2 ✅ Modelado de Base de Datos - Schema Core (COMPLETADO)
 
-**Objetivo:** Implementar el corazón del sistema multi-tenant
+**Objetivo:** ✅ Implementar el corazón del sistema multi-tenant híbrido B2C + B2B
 
-#### Implementación:
-1. **Crear schema `core`**
+#### 🏢➕🏠 **Modelo Híbrido B2C + B2B** ← ACTUALIZADO
+
+**Concepto Principal:** 
+Mismo sistema para usuarios individuales (B2C) y empresas (B2B) usando "organizaciones personales" automáticas.
+
+##### **Tipos de Organizaciones:**
+```sql
+-- Modificación requerida al schema
+ALTER TABLE core.organizations 
+ADD COLUMN org_type TEXT DEFAULT 'business' 
+CHECK (org_type IN ('personal', 'business', 'platform'));
+
+ALTER TABLE core.organization_users
+ADD COLUMN is_personal_org BOOLEAN DEFAULT false;
+```
+
+##### **Organización Platform (Super Admin):**
+```sql
+-- Organización especial para administradores de la plataforma
+INSERT INTO core.organizations (
+  name: "TuPatrimonio Platform",
+  slug: "tupatrimonio-platform", 
+  org_type: "platform",
+  settings: {
+    "is_platform_org": true,
+    "system_organization": true,
+    "can_access_all_orgs": true
+  }
+)
+```
+
+##### **Roles de Plataforma:**
+```sql
+-- Roles específicos para la organización platform
+core.roles:
+1. "platform_super_admin" → Acceso total al sistema
+2. "platform_admin" → Soporte técnico  
+3. "platform_billing" → Solo facturación y pagos
+```
+
+##### **Flujos de Usuario:**
+
+**B2C (Usuario Individual):**
+- Al registrarse: Sistema crea automáticamente "organización personal"
+- Usuario = owner de su org personal  
+- UI simplificada (sin gestión de equipos)
+- Planes: Personal Free ($0), Pro ($9), Business ($29)
+
+**B2B (Empresa):**
+- Al registrarse: Crea organización empresarial
+- Puede invitar usuarios con roles
+- UI completa (teams, admin, etc.)
+- Planes: Team Starter ($49), Business ($199), Enterprise (Custom)
+
+**Platform Admin (Nosotros):**
+- Organización especial "TuPatrimonio Platform"
+- Vista "de Dios" de todo el sistema
+- Puede acceder a cualquier organización para soporte
+
+##### **Registro con Intención Clara:**
+```typescript
+// Pantalla de registro con opciones claras
+¿Cómo vas a usar TuPatrimonio?
+
+🏠 Uso Personal
+   "Para mis documentos personales, freelance o proyectos individuales"
+    
+🏢 Uso Empresarial  
+   "Para mi empresa o equipo de trabajo"
+    
+🔗 Tengo una invitación
+   "Alguien me invitó a su organización"
+```
+
+##### **Ventajas del Modelo Híbrido:**
+✅ Misma arquitectura para ambos segmentos
+✅ Usuario B2C puede "upgradear" a B2B  
+✅ Mercado más amplio (individuales + empresas)
+✅ Sistema de créditos/IA unificado
+✅ No duplicar código ni infraestructura
+
+#### ✅ Implementación COMPLETADA:
+1. **✅ Schema `core` CREADO** - Migración: `20251021120854_schema-core.sql`
    ```sql
-   -- Tablas principales:
-   - users (integración con Supabase Auth)
-   - organizations
-   - organization_users (relación M:N)
-   - teams
-   - team_members
-   - roles
-   - permissions (JSONB)
-   - applications
-   - organization_applications
-   - subscription_plans
-   - organization_subscriptions
-   - invitations
-   - api_keys (con hash)
-   - system_events
+   ✅ COMPLETADO - 13 tablas principales:
+   - users (integración con Supabase Auth + perfil extendido)
+   - organizations (multi-tenant base con settings JSONB)
+   - organization_users (relación M:N con roles)
+   - teams + team_members (colaboración)
+   - roles (jerarquía + permisos JSONB)
+   - applications (servicios del ecosistema) 
+   - organization_applications (apps habilitadas por org)
+   - subscription_plans + organization_subscriptions (monetización)
+   - invitations (sistema de invitaciones con tokens)
+   - api_keys (claves hasheadas con scopes)
+   - system_events (audit trail completo)
+   
+   BONUS implementado:
+   - ✅ 5 ENUMs para status consistentes
+   - ✅ 20+ índices optimizados para performance
+   - ✅ Triggers automáticos para updated_at
+   - ✅ Constraints robustos con validaciones
+   - ✅ Documentación completa con comentarios
    ```
 
-2. **Implementar RLS Policies**
+#### 🔄 PRÓXIMOS PASOS TÉCNICOS (Consolidado desde Setup):
+
+**2. Configuración Supabase Completa:**
+   - 🔄 Conectar con GitHub para migraciones automáticas
+   - 🔄 Configurar Storage buckets:
+     * `documents` (privado, RLS)
+     * `public-assets` (público) 
+     * `ai-training-data` (privado)
+
+**3. RLS Policies (Multi-tenant Híbrido):**
    - Usuario solo ve sus organizaciones
-   - Usuario solo ve miembros de sus organizaciones
+   - Usuario solo ve miembros de sus organizaciones  
    - Solo org_admin puede modificar configuraciones
    - Solo org_owner puede eliminar organización
+   - Platform admin puede acceder a todas las orgs
 
-3. **Crear Functions y Triggers**
-   - `create_organization()`: Crea org + asigna owner
+**4. Functions y Triggers:**
+   - `create_organization()`: Crea org + asigna owner + detecta tipo
    - `invite_user()`: Genera token + envía invitación
    - `accept_invitation()`: Agrega usuario a org
    - `update_user_last_seen()`: Trigger automático
+   - Functions para manejo de créditos
 
-4. **Seeders para Testing**
-   - Datos de prueba para roles estándar
+**5. Datos Semilla:**
+   - Roles estándar (incluir roles platform: platform_super_admin, platform_admin, platform_billing)
    - Aplicaciones del ecosistema (incluir ai_customer_service y ai_document_review)
-   - Planes de suscripción
-   - Organización platform (TuPatrimonio.app)
+   - Planes de suscripción diferenciados B2C/B2B
+   - **Organización platform "TuPatrimonio Platform"**
+   - Super admin inicial
+   - Credit prices para servicios IA
+
+**6. Stack y Configuración:**
+   ```
+   GitHub → Netlify (Frontend + CI/CD automático)
+   GitHub → Supabase (Database + migraciones automáticas)
+   
+   Monorepo Structure:
+   /apps/marketing      # Marketing site (tupatrimonio.app)
+   /apps/web           # App principal (app.tupatrimonio.app) 
+   /packages/ui        # Componentes compartidos Shadcn/UI
+   /packages/database  # Types de Supabase
+   /packages/utils     # Utilidades compartidas
+   /packages/config    # Configuraciones
+   /packages/ai        # Utilidades de IA (futuro)
+   ```
+
+**7. Variables de Entorno Esenciales:**
+   ```bash
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   SUPABASE_SERVICE_ROLE_KEY=
+   
+   # IA Services
+   OPENAI_API_KEY=
+   ANTHROPIC_API_KEY=
+   AI_MODEL_DEFAULT=claude-3-5-sonnet-20241022
+   
+   # App URLs
+   NEXT_PUBLIC_APP_URL=https://app.tupatrimonio.app
+   NEXT_PUBLIC_MARKETING_URL=https://tupatrimonio.app
+   
+   # Platform Configuration
+   PLATFORM_ORG_ID=
+   DEFAULT_PERSONAL_ORG_SETTINGS={}
+   
+   # Servicios externos (placeholder)
+   STRIPE_SECRET_KEY=
+   SENDGRID_API_KEY=
+   TWILIO_ACCOUNT_SID=
+   VERIFF_API_KEY=
+   ```
 
 ### 1.3 Sistema de Autenticación
 
@@ -1166,14 +1493,17 @@ SEO considerations:
 
 ---
 
-## 🔧 Fase 2: Sistema de Créditos y Facturación (Semanas 11-16)
+## 🔧 Fase 2: Sistema de Créditos y Facturación (Semanas 11-16) 
 
-### 2.1 Schema Credits + Billing
+**Nota:** ✅ Schema core ya completado, podemos proceder directamente con credits + billing
+
+### 2.1 Schema Credits + Billing - **PRÓXIMO EN COLA** 🔄
 
 **Objetivo:** Sistema de monetización completo
 
 #### Implementación:
-1. **Crear schemas `credits` y `billing`**
+1. **✅ Schema `core` YA COMPLETADO** (organizations, subscription_plans, organization_subscriptions)
+2. **🔄 Crear schemas `credits` y `billing`** - **SIGUIENTE MIGRACIÓN**
    ```sql
    Credits:
    - credit_accounts
@@ -1531,13 +1861,15 @@ SEO considerations:
    - Watermarks para documentos sensibles
    ```
 
-5. **Optimizaciones**
+5. **Optimizaciones (Supabase + Netlify Automático)**
    ```typescript
+   // Automático con Supabase Storage:
    - Compresión de imágenes
    - Generación de thumbnails
-   - CDN para archivos públicos
-   - Lazy loading en frontend
-   - OCR para documentos (preparación para IA Review) ← NUEVO
+   - CDN global automático
+   
+   // Configurar manualmente:
+   - OCR para documentos (preparación para IA Review)
    ```
 
 ### 5.2 UI de Gestión de Archivos
@@ -2050,7 +2382,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
 
 ```html
 <!-- Código que el cliente pega en su sitio -->
-<script src="https://cdn.tupatrimonio.app/ai-chat-widget.js"></script>
+<script src="https://tupatrimonio.app/widgets/ai-chat-widget.js"></script>
 <script>
   TuPatrimonioChat.init({
     organizationId: 'org_123',
@@ -3203,26 +3535,25 @@ describe('Document Review', () => {
    - Particionamiento de tablas grandes (usage_metrics, conversations)
    ```
 
-2. **Caching Strategy**
+2. **Caching Strategy (Simplificado)**
    ```typescript
-   - Redis para:
-     * Session data
-     * API responses frecuentes
-     * Rate limiting counters
-     * Real-time presence
-     * AI embeddings cache ← NUEVO
-     * Common AI responses cache ← NUEVO
-   - Next.js ISR para páginas públicas
-   - CDN para static assets
+   - Redis (solo si necesario):
+     * AI embeddings cache
+     * Common AI responses cache
+   - Next.js optimización automática (Netlify)
+   - CDN global automático (Netlify)
    ```
 
-3. **Frontend Performance**
+3. **Frontend Performance (Netlify Automático)**
    ```typescript
-   - Code splitting por ruta
-   - Lazy loading de componentes pesados (especialmente document viewer)
-   - Image optimization (next/image)
-   - Virtualización de listas largas
-   - Bundle size analysis
+   // Netlify maneja automáticamente:
+   - Code splitting óptimo
+   - Image optimization
+   - Bundle optimization
+   
+   // Solo configurar manualmente:
+   - Lazy loading de componentes pesados
+   - Virtualización de listas largas (si necesario)
    ```
 
 4. **AI Performance Optimization** ← NUEVO
@@ -3614,116 +3945,97 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 
 ---
 
-## 🛠️ **Stack Tecnológico Final Completo**
+## 🛠️ **Stack Tecnológico Final Simplificado**
 
 ### Frontend:
 - Next.js 14+ (App Router)
 - React 18
 - TypeScript
-- TailwindCSS
-- Shadcn/UI
+- TailwindCSS + Shadcn/UI
 - React Flow (workflow builder)
 - TipTap (document editor)
 - PDF.js (document viewer)
-- Framer Motion (animations)
 
-### Backend:
+### Backend (Todo en Supabase):
 - Supabase (PostgreSQL + Auth + Storage + Realtime)
-- pgvector extension (for AI embeddings)
-- Supabase Edge Functions
+- pgvector extension (AI embeddings)
+- Supabase Edge Functions (si necesario)
 
 ### AI & ML:
-- Anthropic Claude API (primary - customer service & document review)
+- Anthropic Claude API (primary)
 - OpenAI API (secondary/fallback)
-- Embeddings: text-embedding-ada-002 (OpenAI)
-- Vector search: pgvector
+- Vector search: pgvector integrado
 
-### Services:
-- Stripe (payments)
-- dLocal Go (LATAM payments)
+### Servicios Externos:
+- Stripe + dLocal Go (pagos)
 - SendGrid (email)
 - Twilio (SMS/auth)
 - Veriff (identity verification)
-- AWS S3 / Firebase Storage (files)
 
-### DevOps:
-- GitHub Actions (CI/CD)
-- Netlify (hosting)
-- Redis (caching)
-- BullMQ (job queues)
+### Deploy y Hosting (Ultra Simple):
+- **Netlify**: Frontend + CI/CD automático
+- **Supabase**: Backend + Migraciones automáticas
+- **DNS**: Solo configurar dominios
 
-### Monitoring:
-- Sentry (error tracking)
-- New Relic / Datadog (APM)
-- LogRocket (session replay)
-- Papertrail (logs)
+### Monitoring (Básico):
+- Sentry (errors)
+- Supabase Analytics (built-in)
 
-### CMS & Content:
-- Contentful / Sanity (marketing content)
+### CMS:
+- Contentful/Sanity (marketing content)
 
 ---
 
-## ✅ **Checklist de Launch Actualizado**
+## ✅ **Checklist de Launch Simplificado**
 
-### Pre-Launch (Semana 114):
-- [ ] Marketing site optimizado y actualizado (incluir IA)
-- [ ] 80+ blog posts publicados
-- [ ] 10,000+ organic visits/mes
-- [ ] 1,000+ waitlist confirmed
-- [ ] App completamente funcional
-- [ ] **AI Customer Service funcionando (>90% uptime en beta)**
-- [ ] **AI Document Review funcionando (>90% accuracy en tests)**
-- [ ] Beta testing completado (incluir feedback de AI features)
-- [ ] Security audit passed
-- [ ] Legal docs finalizados (incluir AI ethics)
-- [ ] AI costs under control y predecibles
+### Pre-Launch:
+- [ ] **Base de datos completa** (todas las migraciones aplicadas)
+- [ ] **Marketing site optimizado** (SEO + contenido)
+- [ ] **App funcional** con servicios core
+- [ ] **AI Customer Service** funcionando (chatbot)
+- [ ] **AI Document Review** funcionando (análisis)
+- [ ] **Testing completo** (funcional + performance)
+- [ ] **Legal docs** finalizados
+- [ ] **Costos controlados** (especialmente IA)
 
-### Launch Week (Semana 115):
-- [ ] Email a waitlist (batch sending)
-- [ ] Press release enviado (enfatizar IA)
-- [ ] Product Hunt launch
-- [ ] Social media campaign
-- [ ] Webinar de demostración (demo en vivo de AI)
-- [ ] Paid ads (boost inicial)
-- [ ] Monitoring 24/7
+### Launch:
+- [ ] **Deploy a producción** (automático con Netlify)
+- [ ] **Email a waitlist**
+- [ ] **Product Hunt launch**
+- [ ] **Contenido de lanzamiento** (blog, social media)
+- [ ] **Monitoring básico** activo
 
-### Post-Launch (Semanas 116-121):
-- [ ] Monitoring intensivo
-- [ ] Respuesta rápida a feedback
-- [ ] Hotfixes según necesidad
-- [ ] Content actualizaciones
-- [ ] Case studies de primeros clientes (incluir ROI de IA)
-- [ ] Optimization basada en data
-- [ ] AI model fine-tuning basado en feedback real
+### Post-Launch:
+- [ ] **Feedback loop** activo
+- [ ] **Hotfixes** según necesidad  
+- [ ] **Case studies** reales
+- [ ] **Optimización** basada en datos
+- [ ] **Scaling** según demanda
 
 ---
 
-## 🎓 **Notas Finales para el Desarrollador**
+## 🎓 **Principios de Desarrollo Simplificados**
 
-### Principios a Seguir:
-1. **DRY pero pragmático:** Reutilizar código, pero no over-engineer
-2. **Type-safe:** TypeScript estricto, aprovechar Supabase types
-3. **Progressive enhancement:** Funciona sin JS, mejor con JS
-4. **Mobile-first:** Diseñar primero para móvil
-5. **Accessible:** Todos los usuarios cuentan
-6. **Fast by default:** Performance no es opcional
-7. **Secure by design:** Seguridad desde el inicio
-8. **Data-driven:** Medir antes de optimizar
-9. **AI-responsible:** Transparencia en uso de IA, no sobre-prometer
-10. **Cost-conscious:** Monitorear costs de IA constantemente
+### Filosofía Core:
+1. **Simple pero robusto:** Evitar over-engineering
+2. **Type-safe:** TypeScript + Supabase types automáticos
+3. **Mobile-first:** Responsive desde el inicio
+4. **Fast by default:** Aprovechar optimizaciones automáticas
+5. **Secure by design:** RLS + validaciones desde día 1
+6. **AI-responsible:** Transparencia + control de costos
+7. **Data-driven:** Medir lo importante, no todo
 
-### Code Style:
-- Prettier + ESLint config compartida
-- Conventional Commits
-- Descriptive variable names
-- Comments para "why", no "what"
-- Max function length: ~50 lines
+### Stack Ultra-Simple:
+- **Backend:** Solo Supabase (base de datos + auth + storage)
+- **Frontend:** Next.js + Tailwind + Shadcn/UI
+- **Deploy:** Solo Netlify (maneja todo automáticamente)
+- **No necesitas:** Docker, CI/CD complex, CDN manual, SSL config
 
-### Git Workflow:
-- Feature branches
-- PR reviews obligatorios
-- CI/CD automático
-- Semantic versioning
+### Flujo de Desarrollo:
+1. **Codigo** → Push a GitHub
+2. **Deploy automático** → Netlify
+3. **Migraciones** → Supabase automático
+4. **Monitoreo** → Supabase dashboard
 
 ### AI Development Best Practices:
 ```typescript
@@ -3764,44 +4076,45 @@ for await (const chunk of stream) {
 
 ---
 
-## 🎉 **Resultado Final**
+## 🎉 **Resultado Final Simplificado**
 
-Llegas al lanzamiento público con:
+Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 
-### Producto:
-1. ✅ **Plataforma robusta y testeada**
-2. ✅ **5+ servicios funcionando** (firmas, verificación, notaría, documentos, real estate, property admin)
-3. ✅ **2 servicios de IA diferenciadores** (chatbot + document review)
-4. ✅ **API pública documentada**
-5. ✅ **Mobile responsive** (+ app nativa opcional)
+### Producto (Simple pero Completo):
+1. ✅ **Base robusta multi-tenant** (Supabase)
+2. ✅ **Servicios core** (firmas, verificación, notaría)
+3. ✅ **IA diferenciadora** (chatbot + document review)
+4. ✅ **API nativa** (Supabase automático)
+5. ✅ **Mobile responsive** (Next.js + Tailwind)
 
-### Marketing:
-1. ✅ **Tráfico orgánico establecido** (15K+ visits/mes)
-2. ✅ **Authority en el nicho** (incluir IA)
-3. ✅ **Waitlist de clientes potenciales** (1,000+)
-4. ✅ **Content library rica** (80+ posts)
-5. ✅ **SEO dominante** (top 3-5 para keywords principales)
-6. ✅ **Backlink profile sólido** (60+ high DA)
+### Marketing (SEO-First):
+1. ✅ **Tráfico orgánico** creciendo desde día 1
+2. ✅ **Authority establecida** (contenido + backlinks)
+3. ✅ **Waitlist cualificada**
+4. ✅ **Content library** rica
+5. ✅ **Keywords dominantes** (incluir IA)
 
-### Negocio:
-1. ✅ **Sistema de monetización completo**
-2. ✅ **Analytics comprehensivo**
-3. ✅ **Compliance ready**
-4. ✅ **Cost per acquisition bajo** (orgánico)
-5. ✅ **Unit economics saludables**
-6. ✅ **AI costs optimizados y predecibles**
+### Tecnología (Ultra-Simple):
+1. ✅ **Solo 3 servicios principales**:
+   - GitHub (código)
+   - Netlify (frontend + deploy)
+   - Supabase (backend completo)
+2. ✅ **Deploy automático** (sin configuración)
+3. ✅ **Escalabilidad nativa** (Supabase + Netlify)
+4. ✅ **Costos predecibles**
+5. ✅ **Mantenimiento mínimo**
 
-### Diferenciación:
-1. ✅ **Ecosistema completo** (no solo una herramienta)
-2. ✅ **IA integrada nativamente** (no un add-on)
-3. ✅ **Multi-tenant desde el core**
-4. ✅ **API-first architecture**
-5. ✅ **Enfoque LATAM** (pricing, compliance, idioma)
+### Ventajas Competitivas:
+1. ✅ **Time-to-market ultra rápido**
+2. ✅ **IA como diferenciador principal**
+3. ✅ **SEO head-start** (12+ meses de ventaja)
+4. ✅ **Arquitectura que escala automáticamente**
+5. ✅ **Stack que cualquier developer puede mantener**
 
 ---
 
-**🚀 Esto te pone en una posición extremadamente competitiva. No solo tienes un producto técnicamente sólido, sino que llegas con tracción de marketing, diferenciadores claros (IA), y un ecosistema completo que aumenta el valor percibido y reduce el churn.**
+**🚀 Con esta arquitectura simplificada tienes lo mejor de ambos mundos: la robustez de un sistema enterprise pero la simplicidad de un startup. Puedes enfocarte en construir features y conseguir clientes, no en mantener infraestructura.**
 
-**La inversión en SEO desde el inicio (Fase 0) te da 12+ meses de ventaja vs competidores que lancen sin presencia digital. Y los servicios de IA te posicionan como innovador, no como "me-too".**
+**Tu ventaja competitiva está en los servicios de IA y el SEO foundation, no en complejidad técnica innecesaria.**
 
-**¡Éxito con el proyecto! 🎉**
+**¡A ejecutar! 🎯**

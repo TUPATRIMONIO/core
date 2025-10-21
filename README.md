@@ -1,37 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏢 TuPatrimonio - Ecosistema de Servicios Legales Digitales
 
-## Getting Started
+Plataforma multi-tenant B2C + B2B que combina servicios legales tradicionales con IA avanzada.
 
+## 🎯 Características Principales
 
-First, run the development server:
+- **🏠 B2C**: Usuarios individuales con organizaciones personales
+- **🏢 B2B**: Empresas con gestión de equipos y colaboración
+- **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
+- **✍️ Servicios Core**: Firmas electrónicas, verificación de identidad, notaría digital
+
+## 🛠️ Stack Tecnológico
+
+- **Frontend**: Next.js 14+ (App Router) + TailwindCSS + Shadcn/UI
+- **Backend**: Supabase (PostgreSQL + Auth + Storage + pgvector)
+- **Deploy**: Netlify (automático)
+- **IA**: Anthropic Claude + OpenAI (secondary)
+
+## 🚀 Desarrollo
 
 ```bash
+# Instalar dependencias
+npm install
+
+# Desarrollo local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Estructura del Proyecto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+/src
+├── /app            # App Router (Next.js 14+)
+├── /components     # Componentes UI (Shadcn/UI)
+├── /lib            # Utilidades y configuraciones
+└── /hooks          # React hooks personalizados
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+/supabase
+├── /migrations     # Migraciones de base de datos
+└── config.toml     # Configuración de Supabase
+```
 
-## Learn More
+## 📚 Documentación
 
-To learn more about Next.js, take a look at the following resources:
+- **[PLAN_DE_ACCION.md](./PLAN_DE_ACCION.md)**: Plan completo del proyecto, roadmap y estado actual
+- **[DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)**: Variables CSS, paleta de colores y componentes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 URLs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Marketing**: `https://tupatrimonio.app`
+- **Aplicación**: `https://app.tupatrimonio.app`
 
-## Deploy on Vercel
+## ⚙️ Configuración
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ver `PLAN_DE_ACCION.md` para:
+- Setup de Supabase
+- Variables de entorno
+- Configuración de deploy
+- Estado actual del desarrollo
