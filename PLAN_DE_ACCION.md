@@ -1110,12 +1110,25 @@ Al completar Fase 0:
   - 🛡️ **Validaciones**: Constraints robustos + ENUMs consistentes
   - 📚 **Documentación**: Comentarios completos en todas las tablas
 
-#### 🔄 **CAMBIO DE PRIORIDAD - FASE 0 PRIMERO:**
-- 🔄 **Fase 0: Marketing Web + SEO Foundation** (INICIANDO AHORA)
-  - Marketing site con Supabase + Hardcodeado
-  - Landing pages SEO-optimizadas
-  - Blog operacional
-  - Foundation para tráfico orgánico
+#### 🔄 **FASE 0: Marketing Web + SEO Foundation** - **EN PROGRESO** 
+- ✅ **Schema marketing completo CREADO** (21 Oct 2025)
+  - 8 tablas implementadas: blog_posts, categories, waitlist, contact, faqs, testimonials, newsletter, case_studies
+  - RLS policies, índices optimizados, datos iniciales
+  - Lead capture y social proof preparados
+- ✅ **Monorepo estructura COMPLETADA** (21 Oct 2025)
+  - apps/web: Aplicación principal migrada
+  - apps/marketing: Nueva aplicación para marketing site
+  - Workspaces configurados, Next.js 14+, Shadcn/UI
+- ✅ **Marketing site foundation COMPLETADO** (21 Oct 2025)
+  - Homepage con hero, servicios, social proof y CTAs
+  - Landing page firmas-electronicas (ejemplo SEO-optimizado)
+  - Blog dinámico funcionando con Supabase
+  - Sitemap dinámico + robots.txt
+  - Servidor ejecutándose en puerto 3001
+- 🔄 **Landing pages restantes** (en progreso)
+  - verificacion-identidad, notaria-digital, precios, legal
+  - Formularios de waitlist y contacto
+  - Contenido inicial y SEO técnico completo
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)

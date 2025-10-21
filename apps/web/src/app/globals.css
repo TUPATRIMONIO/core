@@ -1,0 +1,246 @@
+/* 
+ * TuPatrimonio App - Sistema de Estilos Centralizado
+ * Este archivo contiene todas las variables CSS y configuraciones de estilo
+ * para mantener consistencia visual en toda la aplicación.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-quicksand);
+  --font-mono: var(--font-geist-mono);
+  --font-quicksand: var(--font-quicksand);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #f7f7f7;
+  --foreground: oklch(0.147 0.004 49.25);
+  
+  /*
+   * ============================================================================
+   * TUPATRIMONIO DESIGN SYSTEM - Variables CSS Personalizadas
+   * ============================================================================
+   * 
+   * Este sistema centraliza todos los colores, espaciados, sombras y efectos
+   * para mantener consistencia visual en toda la aplicación.
+   * 
+   * CÓMO USAR EN TAILWIND:
+   * - Colores: bg-tp-primary, text-tp-lines, border-tp-primary-20
+   * - Gradientes: bg-tp-gradient-primary, bg-tp-gradient-background
+   * - Sombras: shadow-tp-md, shadow-tp-xl
+   * - Bordes: rounded-tp-lg, border-tp-lines-30
+   * 
+   * CÓMO USAR EN CSS PURO:
+   * - background: var(--tp-buttons);
+   * - color: var(--tp-lines);
+   * - box-shadow: var(--tp-shadow-lg);
+   * 
+   * ============================================================================
+   */
+
+  /* COLORES BASE DEL BRAND */
+  --tp-background-light: #f7f7f7;
+  --tp-background-dark: #4a4a4a;
+  --tp-lines: #7a7a7a;
+  --tp-buttons: #800039;
+  --tp-buttons-hover: #a50049;
+  
+  /* VARIACIONES CON OPACIDAD - Background Light
+     Uso: bg-tp-bg-light-20 para fondos sutiles */
+  --tp-bg-light-5: #f7f7f70d;    /* 5% opacity */
+  --tp-bg-light-10: #f7f7f71a;   /* 10% opacity */
+  --tp-bg-light-20: #f7f7f733;   /* 20% opacity */
+  --tp-bg-light-30: #f7f7f74d;   /* 30% opacity */
+  --tp-bg-light-40: #f7f7f766;   /* 40% opacity */
+  --tp-bg-light-50: #f7f7f780;   /* 50% opacity */
+  --tp-bg-light-60: #f7f7f799;   /* 60% opacity */
+  --tp-bg-light-80: #f7f7f7cc;   /* 80% opacity */
+  
+  /* VARIACIONES CON OPACIDAD - Background Dark
+     Uso: bg-tp-bg-dark-10 para elementos de contraste sutil */
+  --tp-bg-dark-5: #4a4a4a0d;     /* 5% opacity */
+  --tp-bg-dark-10: #4a4a4a1a;    /* 10% opacity */
+  --tp-bg-dark-20: #4a4a4a33;    /* 20% opacity */
+  --tp-bg-dark-30: #4a4a4a4d;    /* 30% opacity */
+  --tp-bg-dark-40: #4a4a4a66;    /* 40% opacity */
+  --tp-bg-dark-50: #4a4a4a80;    /* 50% opacity */
+  
+  /* VARIACIONES CON OPACIDAD - Lines/Gray  
+     Uso: border-tp-lines-30 para bordes sutiles */
+  --tp-lines-10: #7a7a7a1a;      /* 10% opacity */
+  --tp-lines-20: #7a7a7a33;      /* 20% opacity */
+  --tp-lines-30: #7a7a7a4d;      /* 30% opacity */
+  --tp-lines-50: #7a7a7a80;      /* 50% opacity */
+  
+  /* VARIACIONES CON OPACIDAD - Buttons Primary
+     Uso: bg-tp-primary-20 para efectos de hover o focus */
+  --tp-buttons-5: #8000390d;     /* 5% opacity */
+  --tp-buttons-10: #8000391a;    /* 10% opacity */
+  --tp-buttons-20: #80003933;    /* 20% opacity */
+  --tp-buttons-30: #8000394d;    /* 30% opacity */
+  
+  /* COLORES ADICIONALES DEL SISTEMA
+     Colores base para textos, fondos y elementos UI */
+  --tp-white: #ffffff;
+  --tp-white-80: #ffffffcc;      /* 80% opacity */
+  --tp-white-60: #ffffff99;      /* 60% opacity */
+  --tp-white-50: #ffffff80;      /* 50% opacity */
+  --tp-white-40: #ffffff66;      /* 40% opacity */
+  
+  --tp-gray-50: #f9fafb;
+  --tp-gray-100: #f3f4f6;
+  --tp-gray-200: #e5e7eb;
+  --tp-gray-600: #4b5563;
+  --tp-gray-700: #374151;
+  --tp-gray-900: #111827;
+  
+  /* ESTADOS DE FEEDBACK
+     Para mensajes de éxito, error, advertencia e información */
+  --tp-success: #10b981;
+  --tp-success-light: #d1fae5;
+  --tp-success-border: #a7f3d0;
+  --tp-error: #ef4444;
+  --tp-error-light: #fef2f2;
+  --tp-error-border: #fecaca;
+  --tp-warning: #f59e0b;
+  --tp-info: #3b82f6;
+  
+  /* GRADIENTES PREDEFINIDOS
+     Uso: bg-tp-gradient-primary para botones, bg-tp-gradient-background para fondos */
+  --tp-gradient-primary: linear-gradient(135deg, var(--tp-buttons) 0%, var(--tp-buttons-hover) 100%);
+  --tp-gradient-background: linear-gradient(135deg, var(--tp-background-light) 0%, #f0f0f0 50%, #e8e8e8 100%);
+  --tp-gradient-background-dark: linear-gradient(135deg, var(--tp-background-dark) 0%, #3a3a3a 100%);
+  --tp-gradient-subtle: linear-gradient(135deg, var(--tp-buttons-5) 0%, transparent 50%, var(--tp-bg-dark-5) 100%);
+  
+  /* SOMBRAS Y EFECTOS
+     Uso: shadow-tp-md para cards, shadow-tp-xl para modales */
+  --tp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --tp-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --tp-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  
+  /* EFECTOS DE BLUR
+     Uso: backdrop-blur-tp-md para elementos glass morphism */
+  --tp-backdrop-sm: blur(4px);
+  --tp-backdrop-md: blur(8px);
+  --tp-backdrop-lg: blur(16px);
+  
+  /* BORDER RADIUS CONSISTENTE  
+     Uso: rounded-tp-lg para cards, rounded-tp-2xl para modales */
+  --tp-radius-sm: 0.375rem;
+  --tp-radius-md: 0.5rem;
+  --tp-radius-lg: 0.75rem;
+  --tp-radius-xl: 1rem;
+  --tp-radius-2xl: 1.5rem;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.147 0.004 49.25);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.147 0.004 49.25);
+  --primary: #800039;
+  --primary-foreground: oklch(0.985 0.001 106.423);
+  --secondary: oklch(0.97 0.001 106.424);
+  --secondary-foreground: oklch(0.216 0.006 56.043);
+  --muted: oklch(0.97 0.001 106.424);
+  --muted-foreground: oklch(0.553 0.013 58.071);
+  --accent: oklch(0.97 0.001 106.424);
+  --accent-foreground: oklch(0.216 0.006 56.043);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.923 0.003 48.717);
+  --input: oklch(0.923 0.003 48.717);
+  --ring: oklch(0.709 0.01 56.259);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0.001 106.423);
+  --sidebar-foreground: oklch(0.147 0.004 49.25);
+  --sidebar-primary: oklch(0.216 0.006 56.043);
+  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: oklch(0.97 0.001 106.424);
+  --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
+  --sidebar-border: oklch(0.923 0.003 48.717);
+  --sidebar-ring: oklch(0.709 0.01 56.259);
+}
+
+.dark {
+  --background: #4a4a4a;
+  --foreground: oklch(0.985 0.001 106.423);
+  --card: oklch(0.216 0.006 56.043);
+  --card-foreground: oklch(0.985 0.001 106.423);
+  --popover: oklch(0.216 0.006 56.043);
+  --popover-foreground: oklch(0.985 0.001 106.423);
+  --primary: oklch(0.923 0.003 48.717);
+  --primary-foreground: oklch(0.216 0.006 56.043);
+  --secondary: oklch(0.268 0.007 34.298);
+  --secondary-foreground: oklch(0.985 0.001 106.423);
+  --muted: oklch(0.268 0.007 34.298);
+  --muted-foreground: oklch(0.709 0.01 56.259);
+  --accent: oklch(0.268 0.007 34.298);
+  --accent-foreground: oklch(0.985 0.001 106.423);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.553 0.013 58.071);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.216 0.006 56.043);
+  --sidebar-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-accent: oklch(0.268 0.007 34.298);
+  --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.553 0.013 58.071);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
