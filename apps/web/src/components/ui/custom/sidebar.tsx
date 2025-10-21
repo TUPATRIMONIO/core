@@ -1,7 +1,7 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { Instagram, Dribbble, PartyPopper, LogOut, Save } from "lucide-react"
-import {signOut, updateProfile} from "@/app/login/actions"
+import { Instagram, Dribbble, PartyPopper, LogOut } from "lucide-react"
+import {signOut} from "@/app/login/actions"
 import { useState } from 'react';
 import { Input } from "./input"
 
@@ -28,7 +28,8 @@ export default function Sidebar({ userData }: SidebarProps) {
   const [tempUsername, setTempUsername] = useState(userData?.user_name || '');
 
   const handleSave = async () => {
-    await updateProfile({ user_name: tempUsername })
+    // TODO: Implementar updateProfile function
+    // await updateProfile({ user_name: tempUsername })
     setIsEditing(false);
   }
 
@@ -43,13 +44,15 @@ export default function Sidebar({ userData }: SidebarProps) {
               onChange={(e) => setTempUsername(e.target.value)}
               className="text-3xl font-bold bg-transparent border-b border-white/30 focus:outline-none flex-1 min-w-0"
             />
+            {/* TODO: Implementar funcionalidad de guardar
             <button
               type="button"
               className="rounded-full p-1 hover:bg-gray-200"
               onClick={handleSave}
             >
-              <Save className="h-4 w-4" />
+              Guardar
             </button>
+            */}
           </>
         ) : (
           <h1

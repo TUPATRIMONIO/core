@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronLeft, Share2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface BlogPostPageProps {
   params: {
@@ -171,9 +172,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Featured Image */}
           {post.featured_image_url && (
             <div className="mb-8">
-              <img 
+              <Image 
                 src={post.featured_image_url} 
                 alt={post.title}
+                width={800}
+                height={400}
                 className="w-full h-64 md:h-96 object-cover rounded-xl"
               />
             </div>

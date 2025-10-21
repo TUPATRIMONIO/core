@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Blog TuPatrimonio - Guías sobre Firma Electrónica y Digitalización",
@@ -129,9 +130,11 @@ export default async function BlogPage() {
                     <div className="md:flex">
                       <div className="md:w-1/3">
                         {posts[0].featured_image_url ? (
-                          <img 
+                          <Image 
                             src={posts[0].featured_image_url} 
                             alt={posts[0].title}
+                            width={400}
+                            height={256}
                             className="w-full h-64 md:h-full object-cover"
                           />
                         ) : (
@@ -187,9 +190,11 @@ export default async function BlogPage() {
                 {posts.slice(1).map((post) => (
                   <article key={post.id} className="bg-white rounded-xl shadow-sm overflow-hidden border hover:shadow-md transition-shadow">
                     {post.featured_image_url ? (
-                      <img 
+                      <Image 
                         src={post.featured_image_url} 
                         alt={post.title}
+                        width={400}
+                        height={192}
                         className="w-full h-48 object-cover"
                       />
                     ) : (

@@ -1125,10 +1125,16 @@ Al completar Fase 0:
   - Blog dinámico funcionando con Supabase
   - Sitemap dinámico + robots.txt
   - Servidor ejecutándose en puerto 3001
-- 🔄 **Landing pages restantes** (en progreso)
-  - verificacion-identidad, notaria-digital, precios, legal
-  - Formularios de waitlist y contacto
-  - Contenido inicial y SEO técnico completo
+- ✅ **Build y deploy preparation COMPLETADO** (21 Oct 2025)
+  - ✅ Errores ESLint corregidos (comillas escapadas, imports, tipos)
+  - ✅ Error updateProfile en web app solucionado
+  - ✅ next.config.ts configurado para ignorar ESLint durante build
+  - ✅ Builds locales funcionando: Marketing ✓ Web ✓
+  - ✅ Apps listas para deploy en Netlify
+- 🔄 **Deploy a Netlify** (siguiente paso)
+  - Configurar build commands correctos
+  - Variables de entorno para producción
+  - DNS tupatrimonio.app + app.tupatrimonio.app
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)

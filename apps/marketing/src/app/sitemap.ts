@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Dynamic blog posts from Supabase
-  let blogPosts: any[] = [];
+  let blogPosts: Array<{url: string; lastModified: Date; changeFrequency: 'monthly'; priority: number}> = [];
   try {
     const supabase = createClient();
     const { data: posts } = await supabase
@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Dynamic blog categories
-  let categoryPages: any[] = [];
+  let categoryPages: Array<{url: string; lastModified: Date; changeFrequency: 'weekly'; priority: number}> = [];
   try {
     const supabase = createClient();
     const { data: categories } = await supabase

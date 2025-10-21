@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Shield, Clock, Download, Users, Star } from "lucide-react";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Firma Electrónica Chile - Válida Legalmente | TuPatrimonio",
@@ -294,8 +293,8 @@ export default function FirmasElectronicasPage() {
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-4">
-                "TuPatrimonio nos permitió digitalizar completamente nuestro proceso de firma de contratos. 
-                Lo que antes tomaba días, ahora lo resolvemos en minutos."
+                &quot;TuPatrimonio nos permitió digitalizar completamente nuestro proceso de firma de contratos. 
+                Lo que antes tomaba días, ahora lo resolvemos en minutos.&quot;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
@@ -313,8 +312,8 @@ export default function FirmasElectronicasPage() {
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-4">
-                "La validez legal está garantizada y el proceso es súper intuitivo. 
-                Nuestros clientes están encantados con la experiencia."
+                &quot;La validez legal está garantizada y el proceso es súper intuitivo. 
+                Nuestros clientes están encantados con la experiencia.&quot;
               </blockquote>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
