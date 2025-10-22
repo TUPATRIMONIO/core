@@ -1088,7 +1088,7 @@ Al completar Fase 0:
 
 ### 📊 **Estado Actual del Proyecto (21 Octubre 2025):**
 
-#### ✅ **COMPLETADO HOY (21 Oct 2025):**
+#### ✅ **COMPLETADO (Oct 2025):**
 - ✅ Proyecto Supabase configurado y funcionando 
 - ✅ **Migración 1**: `20251021120052_enable-pgvector.sql` 
   - pgvector extension habilitado para servicios de IA
@@ -1109,6 +1109,15 @@ Al completar Fase 0:
   - ⚡ **Performance**: 20+ índices optimizados + triggers automáticos
   - 🛡️ **Validaciones**: Constraints robustos + ENUMs consistentes
   - 📚 **Documentación**: Comentarios completos en todas las tablas
+
+- ✅ **Migración 3**: `20251021194734_schema-marketing.sql` - **MARKETING FOUNDATION COMPLETA**
+  - 🌐 **8 tablas marketing**: blog_posts, categories, waitlist, contact, faqs, testimonials, newsletter, case_studies
+  - 📝 **Blog dinámico**: Sistema completo con categorías y SEO
+  - 📧 **Lead capture**: Formularios de waitlist y contacto preparados
+  - 🏆 **Social proof**: Testimonials con ratings y gestión
+  - 📊 **Analytics ready**: Tracking de engagement y métricas
+  - 🛡️ **RLS policies**: Seguridad pública para lectura, autenticado para gestión
+  - ⚡ **Performance**: 20+ índices optimizados para marketing queries
 
 #### 🔄 **FASE 0: Marketing Web + SEO Foundation** - **EN PROGRESO** 
 - ✅ **Schema marketing completo CREADO** (21 Oct 2025)
@@ -1131,10 +1140,13 @@ Al completar Fase 0:
   - ✅ next.config.ts configurado para ignorar ESLint durante build
   - ✅ Builds locales funcionando: Marketing ✓ Web ✓
   - ✅ Apps listas para deploy en Netlify
-- 🔄 **Deploy a Netlify** (siguiente paso)
-  - Configurar build commands correctos
-  - Variables de entorno para producción
-  - DNS tupatrimonio.app + app.tupatrimonio.app
+- ✅ **Deploy a Netlify COMPLETADO** (21 Oct 2025)
+  - ✅ Marketing site deployado exitosamente
+  - ✅ Web app deployada exitosamente  
+  - ✅ Monorepo funcionando en producción
+  - ✅ Build commands y publish directories configurados correctamente
+  - ✅ Variables de entorno configuradas
+  - ✅ **Ambas apps live en Netlify** 🚀
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)
@@ -1155,41 +1167,109 @@ Al completar Fase 0:
 📋 Migración 10: seed-data.sql (datos iniciales)
 ```
 
-#### 🎯 **TO-DO FASE 0 - PRIORIDAD INMEDIATA:**
+#### ✅ **PROGRESO FASE 0 - ACTUALIZADO (21 Oct 2025):**
 
-**1. Marketing Site Foundation (Semana 1)**
-   - [ ] Crear estructura de monorepo con apps/marketing
-   - [ ] Setup Next.js + TailwindCSS + Shadcn/UI compartido
-   - [ ] Configurar variables CSS y fuente Quicksand
-   - [ ] Setup SEO básico (metadata API, sitemap, robots.txt)
+**✅ COMPLETADO HOY (21 Oct 2025):**
 
-**2. Landing Pages Hardcodeadas (Semana 1-2)**
-   - [ ] Homepage con value proposition y CTA
-   - [ ] Landing `/firmas-electronicas` SEO-optimizada
-   - [ ] Landing `/verificacion-identidad` 
-   - [ ] Landing `/notaria-digital`
-   - [ ] Página `/precios` con planes B2C/B2B
-   - [ ] Páginas legales (/legal/terminos, /privacidad, /cookies)
+**1. Marketing Site Foundation (Semana 1) - COMPLETADO**
+   - ✅ Crear estructura de monorepo con apps/marketing
+   - ✅ Setup Next.js + TailwindCSS + Shadcn/UI compartido
+   - ✅ Configurar variables CSS y fuente Quicksand
+   - ✅ Setup SEO básico (metadata API, sitemap, robots.txt)
 
-**3. Blog con Supabase (Semana 2)**
-   - [ ] Crear tabla `blog_posts` en Supabase
-   - [ ] Implementar páginas dinámicas del blog (/blog, /blog/[slug])
-   - [ ] Sistema de categorías
-   - [ ] (Opcional) Admin básico para gestionar posts
+**2. Landing Pages Base - COMPLETADO**
+   - ✅ Homepage con value proposition y CTA
+   - ✅ Landing `/firmas-electronicas` SEO-optimizada (ejemplo completo)
+   - 📋 Landing `/verificacion-identidad` (PENDIENTE)
+   - 📋 Landing `/notaria-digital` (PENDIENTE)
+   - 📋 Página `/precios` con planes B2C/B2B (PENDIENTE)
+   - 📋 Páginas legales (/legal/terminos, /privacidad, /cookies) (PENDIENTE)
 
-**4. Contenido y SEO (Semana 2-3)**
-   - [ ] Crear contenido para todas las landing pages
-   - [ ] Escribir 5-6 blog posts iniciales
-   - [ ] Implementar structured data (Schema.org)
-   - [ ] Sitemap dinámico (incluye posts de Supabase)
+**3. Blog con Supabase - COMPLETADO**
+   - ✅ Schema `marketing` completo creado (8 tablas)
+   - ✅ Implementar páginas dinámicas del blog (/blog, /blog/[slug])
+   - ✅ Sistema de categorías funcionando
+   - 📋 Admin básico para gestionar posts (OPCIONAL)
 
-**5. Deploy y Analytics (Semana 3)**
-   - [ ] Configurar deploy en Netlify
-   - [ ] DNS `tupatrimonio.app`
+**4. Deploy Infrastructure - COMPLETADO**
+   - ✅ **Ambas apps deployadas exitosamente en Netlify**
+   - ✅ Build commands y publish directories configurados
+   - ✅ Variables de entorno funcionando
+   - ✅ Monorepo en producción
+
+#### 🚀 **PRÓXIMOS PASOS PARA MAÑANA (Completar Fase 0):**
+
+**📋 PRIORIDAD 1: Completar Landing Pages (2-3 horas)**
+   - [ ] Crear `/verificacion-identidad/page.tsx`
+   - [ ] Crear `/notaria-digital/page.tsx`
+   - [ ] Crear `/precios/page.tsx` con planes B2C/B2B diferenciados
+   - [ ] Crear páginas legales (`/legal/terminos`, `/legal/privacidad`, `/legal/cookies`)
+
+**📋 PRIORIDAD 2: Formularios Lead Capture (1-2 horas)**
+   - [ ] Implementar formulario waitlist conectado a `marketing.waitlist_subscribers`
+   - [ ] Implementar formulario contacto conectado a `marketing.contact_messages`
+   - [ ] Agregar formularios en homepage y landing pages
+
+**📋 PRIORIDAD 3: Contenido Inicial (3-4 horas)**
+   - [ ] Escribir 3-4 blog posts iniciales sobre servicios tradicionales
+   - [ ] Insertar posts en tabla `marketing.blog_posts`
+   - [ ] Verificar que blog muestre contenido real
+
+**📋 PRIORIDAD 4: SEO y DNS Final (1-2 horas)**
+   - [ ] Configurar dominios personalizados en Netlify:
+     * tupatrimonio.app → marketing site
+     * app.tupatrimonio.app → web app
    - [ ] Google Analytics 4 + Search Console
-   - [ ] Formularios de contacto/waitlist
+   - [ ] Structured data (Schema.org JSON-LD)
 
-**DESPUÉS DE FASE 0 (Regresar a Fase 1):**
+**ESTIMADO TOTAL: 7-11 horas para completar Fase 0**
+
+#### 📝 **NOTAS IMPORTANTES PARA CONTINUAR MAÑANA:**
+
+**🌐 URLs de Desarrollo:**
+- **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing`)
+- **Web Local**: `http://localhost:3000` (comando: `npm run dev` desde raíz)
+- **Supabase Local Studio**: `http://localhost:54323`
+- **Netlify Marketing**: [URL de tu deploy en Netlify]
+- **Netlify Web**: [URL de tu deploy en Netlify]
+
+**📂 Estructura del Proyecto:**
+```
+/apps/marketing  # Marketing site (tupatrimonio.app)
+├── /src/app
+│   ├── page.tsx             ✅ Homepage COMPLETADA
+│   ├── /firmas-electronicas ✅ Landing COMPLETADA (usar como template)
+│   ├── /blog                ✅ Blog dinámico COMPLETADO
+│   └── sitemap.ts + robots.ts ✅ SEO básico COMPLETADO
+
+/apps/web        # App principal (app.tupatrimonio.app)
+└── [Dashboard y auth ya implementados]
+```
+
+**🗄️ Base de Datos:**
+- **Schema core**: 13 tablas ✅ COMPLETO
+- **Schema marketing**: 8 tablas ✅ COMPLETO
+- **Datos de prueba**: Categorías + FAQs + Testimonials ✅ INSERTADOS
+
+**🎯 Siguiente Task**: Crear las 3 landing pages restantes usando `/firmas-electronicas` como template
+
+#### 🎉 **LOGRO DEL DÍA (21 Oct 2025):**
+**EN UNA SOLA SESIÓN IMPLEMENTAMOS:**
+- ✅ **Schema marketing completo** (8 tablas enterprise-grade)
+- ✅ **Monorepo structure** (apps/marketing + apps/web)
+- ✅ **Marketing site funcionando** (homepage + blog + landing ejemplo)
+- ✅ **Deploy exitoso en Netlify** (ambas apps en producción)
+- ✅ **Foundation SEO** (sitemap dinámico, robots.txt, metadata API)
+- ✅ **Arquitectura escalable** lista para content y formularios
+
+**📈 PROGRESO FASE 0: ~60% COMPLETADO en 1 día**
+
+**🎯 OBJETIVO MAÑANA: Completar Fase 0 (landing pages + formularios + contenido)**
+**⏱️ TIEMPO ESTIMADO: 7-11 horas para terminar marketing site completo**
+
+**📅 Última actualización: 21 Octubre 2025, 6:50 PM**
+
+**DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
 - [ ] Completar migración 3: Schemas credits + billing
 - [ ] Setup apps/web con dashboard híbrido B2C/B2B
 - [ ] RLS policies y functions
