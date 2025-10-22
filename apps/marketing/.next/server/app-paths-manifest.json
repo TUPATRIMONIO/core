@@ -1,7 +1,5 @@
 {
   "/page": "app/page.js",
-  "/cl/firmas-electronicas/page": "app/cl/firmas-electronicas/page.js",
-  "/mx/firmas-electronicas/page": "app/mx/firmas-electronicas/page.js",
   "/co/firmas-electronicas/page": "app/co/firmas-electronicas/page.js",
   "/cl/page": "app/cl/page.js",
   "/co/page": "app/co/page.js",
