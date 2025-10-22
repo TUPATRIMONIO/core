@@ -31,10 +31,10 @@ export default function PreciosRedirect() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-2xl shadow-lg border p-8 text-center">
-          <DollarSign className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-6" />
+          <DollarSign className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-6" />
           
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Precios TuPatrimonio
+            Precios <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h1>
           
           <p className="text-gray-600 mb-8">

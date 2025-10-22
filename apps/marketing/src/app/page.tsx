@@ -11,7 +11,7 @@ export default function HomePage() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Digitaliza tus Procesos
-              <span className="text-[var(--tp-buttons)]"> Legales</span>
+              <span className="text-[var(--tp-brand)]"> Legales</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Firmas electrónicas válidas, verificación de identidad biométrica y notaría digital. 
@@ -61,7 +61,7 @@ export default function HomePage() {
             {/* Firma Electrónica */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Firmas Electrónicas</h3>
               <p className="text-gray-600 mb-4">
@@ -77,7 +77,7 @@ export default function HomePage() {
             {/* Verificación de Identidad */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Verificación de Identidad</h3>
               <p className="text-gray-600 mb-4">
@@ -93,7 +93,7 @@ export default function HomePage() {
             {/* Notaría Digital */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Clock className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Notaría Digital</h3>
               <p className="text-gray-600 mb-4">
@@ -128,7 +128,7 @@ export default function HomePage() {
           </div>
           
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Empresas que confían en TuPatrimonio
+            Empresas que confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
           
           {/* Placeholder para logos de clientes */}

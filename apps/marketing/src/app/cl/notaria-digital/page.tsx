@@ -39,7 +39,7 @@ export default function NotariaDigitalPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                <span className="text-[var(--tp-buttons)]">Notaría Digital</span><br />
+                <span className="text-[var(--tp-brand)]">Notaría Digital</span><br />
                 Sin Filas, Sin Esperas
               </h1>
               <p className="text-xl text-gray-600 mb-8">
@@ -78,7 +78,7 @@ export default function NotariaDigitalPage() {
             <div className="relative">
               {/* Placeholder para imagen/video */}
               <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl p-8 text-center">
-                <Stamp className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-4" />
+                <Stamp className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
                 <p className="text-gray-700 font-medium">Proceso 100% Digital</p>
                 <p className="text-sm text-gray-600">Validez legal garantizada</p>
               </div>
@@ -246,7 +246,7 @@ export default function NotariaDigitalPage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">1</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">1</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Sube Documento</h3>
               <p className="text-gray-600">
@@ -257,7 +257,7 @@ export default function NotariaDigitalPage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">2</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">2</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Verifica Identidad</h3>
               <p className="text-gray-600">
@@ -268,7 +268,7 @@ export default function NotariaDigitalPage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">3</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">3</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Certificación Digital</h3>
               <p className="text-gray-600">
@@ -279,7 +279,7 @@ export default function NotariaDigitalPage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">4</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">4</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Documento Listo</h3>
               <p className="text-gray-600">

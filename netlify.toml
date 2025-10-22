@@ -1,0 +1,166 @@
+# Configuración Netlify para TuPatrimonio
+# Habilita detección automática de ubicación y redirects por país
+
+[build]
+  # Configuración de build para marketing app por defecto
+  command = "npm run build:marketing"
+  publish = "apps/marketing/.next"
+  
+  # Variables de entorno para build
+  [build.environment]
+    NODE_VERSION = "18"
+    NEXT_TELEMETRY_DISABLED = "1"
+
+# Headers globales con información de geolocalización
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Headers de seguridad
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Netlify agrega automáticamente estos headers de geolocalización:
+    # x-nf-country-code - Código ISO del país (CL, MX, CO)
+    # x-nf-geo-city - Ciudad del usuario  
+    # x-nf-geo-subdivision-1-iso-code - Región/Estado
+
+# Redirects específicos por país para marketing (backup de edge functions)
+# Solo se ejecutan si las edge functions fallan
+
+# Firmas Electrónicas
+[[redirects]]
+  from = "/firmas-electronicas"
+  to = "/cl/firmas-electronicas"
+  status = 302
+  country = ["CL"]
+
+[[redirects]]
+  from = "/firmas-electronicas"
+  to = "/mx/firmas-electronicas" 
+  status = 302
+  country = ["MX"]
+
+[[redirects]]
+  from = "/firmas-electronicas"
+  to = "/co/firmas-electronicas"
+  status = 302
+  country = ["CO"]
+
+# Notaría Digital
+[[redirects]]
+  from = "/notaria-digital"
+  to = "/cl/notaria-digital"
+  status = 302
+  country = ["CL"]
+
+[[redirects]]
+  from = "/notaria-digital"
+  to = "/mx/notaria-digital"
+  status = 302
+  country = ["MX"]
+
+[[redirects]]
+  from = "/notaria-digital"
+  to = "/co/notaria-digital"
+  status = 302
+  country = ["CO"]
+
+# Verificación de Identidad
+[[redirects]]
+  from = "/verificacion-identidad"
+  to = "/cl/verificacion-identidad"
+  status = 302
+  country = ["CL"]
+
+[[redirects]]
+  from = "/verificacion-identidad"
+  to = "/mx/verificacion-identidad"
+  status = 302
+  country = ["MX"]
+
+[[redirects]]
+  from = "/verificacion-identidad"
+  to = "/co/verificacion-identidad"
+  status = 302
+  country = ["CO"]
+
+# Precios
+[[redirects]]
+  from = "/precios"
+  to = "/cl/precios"
+  status = 302
+  country = ["CL"]
+
+[[redirects]]
+  from = "/precios"
+  to = "/mx/precios"
+  status = 302
+  country = ["MX"]
+
+[[redirects]]
+  from = "/precios"
+  to = "/co/precios"
+  status = 302
+  country = ["CO"]
+
+# Fallback redirects (si no se detecta país soportado)
+[[redirects]]
+  from = "/firmas-electronicas"
+  to = "/cl/firmas-electronicas"
+  status = 302
+
+[[redirects]]
+  from = "/notaria-digital"
+  to = "/cl/notaria-digital"
+  status = 302
+
+[[redirects]]
+  from = "/verificacion-identidad"
+  to = "/cl/verificacion-identidad"
+  status = 302
+
+[[redirects]]
+  from = "/precios"
+  to = "/cl/precios"
+  status = 302
+
+# Configuración para Edge Functions
+[[edge_functions]]
+  function = "country-redirect"
+  path = "/firmas-electronicas"
+
+[[edge_functions]]
+  function = "country-redirect"
+  path = "/notaria-digital"
+
+[[edge_functions]]
+  function = "country-redirect"
+  path = "/verificacion-identidad"
+
+[[edge_functions]]
+  function = "country-redirect"
+  path = "/precios"
+
+# Headers específicos para la función de detección
+[[headers]]
+  for = "/.netlify/functions/detect-country"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, OPTIONS"
+    Cache-Control = "public, max-age=300"
+
+# Configuración para apps múltiples (si se necesita)
+[context.web]
+  command = "npm run build:web"
+  publish = "apps/web/.next"
+
+[context.marketing]
+  command = "npm run build:marketing"
+  publish = "apps/marketing/.next"
+
+# Configuración de desarrollo
+[context.dev]
+  command = "npm run dev:marketing"

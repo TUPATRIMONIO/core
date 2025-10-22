@@ -1,0 +1,23 @@
+{
+  "name": "@tupatrimonio/ui",
+  "version": "1.0.0",
+  "description": "Sistema de estilos y UI compartido para TuPatrimonio",
+  "main": "index.js",
+  "files": [
+    "globals.css",
+    "index.js"
+  ],
+  "scripts": {
+    "build": "echo 'UI package ready'",
+    "dev": "echo 'UI package in development mode'"
+  },
+  "keywords": [
+    "ui",
+    "styles",
+    "css",
+    "design-system",
+    "tupatrimonio"
+  ],
+  "author": "TuPatrimonio Team",
+  "license": "MIT"
+}

@@ -33,7 +33,7 @@ export default function ChilePage() {
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="w-4 h-4 text-[var(--tp-buttons)]" />
               <span className="font-medium text-gray-700">Estás viendo TuPatrimonio para</span>
-              <span className="font-bold text-[var(--tp-buttons)]">Chile 🇨🇱</span>
+              <span className="font-bold text-[var(--tp-brand)]">Chile 🇨🇱</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <span>¿Otro país?</span>
@@ -51,7 +51,7 @@ export default function ChilePage() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Servicios Legales Digitales
-              <span className="text-[var(--tp-buttons)]"> para Chile</span>
+              <span className="text-[var(--tp-brand)]"> para Chile</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
               Firma electrónica con validez legal según <strong>Ley 19.799</strong>, verificación de identidad KYC y 
@@ -106,7 +106,7 @@ export default function ChilePage() {
             {/* Firma Electrónica Chile */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Firma Electrónica</h3>
               <p className="text-gray-600 mb-4">
@@ -126,7 +126,7 @@ export default function ChilePage() {
             {/* Verificación KYC Chile */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">KYC & Verificación</h3>
               <p className="text-gray-600 mb-4">
@@ -146,7 +146,7 @@ export default function ChilePage() {
             {/* Notaría Digital Chile */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Briefcase className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Notaría Digital</h3>
               <p className="text-gray-600 mb-4">
@@ -219,7 +219,7 @@ export default function ChilePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">
-            Empresas Chilenas que Confían en TuPatrimonio
+            Empresas Chilenas que Confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
           
           {/* Placeholder para logos de empresas chilenas */}
@@ -236,15 +236,15 @@ export default function ChilePage() {
           <div className="bg-gray-50 rounded-2xl p-8">
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-buttons)] mb-2">+500</div>
+                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+500</div>
                 <p className="text-gray-600">Empresas chilenas</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-buttons)] mb-2">+15,000</div>
+                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+15,000</div>
                 <p className="text-gray-600">Documentos firmados</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-buttons)] mb-2">99.8%</div>
+                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">99.8%</div>
                 <p className="text-gray-600">Uptime garantizado</p>
               </div>
             </div>

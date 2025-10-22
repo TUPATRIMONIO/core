@@ -39,7 +39,7 @@ export default function VerificacionIdentidadPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                <span className="text-[var(--tp-buttons)]">Verificación de Identidad</span><br />
+                <span className="text-[var(--tp-brand)]">Verificación de Identidad</span><br />
                 Digital en 3 Minutos
               </h1>
               <p className="text-xl text-gray-600 mb-8">
@@ -78,7 +78,7 @@ export default function VerificacionIdentidadPage() {
             <div className="relative">
               {/* Placeholder para imagen/video */}
               <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-8 text-center">
-                <Fingerprint className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-4" />
+                <Fingerprint className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
                 <p className="text-gray-700 font-medium">Verificación Biométrica</p>
                 <p className="text-sm text-gray-600">Selfie + Documento en vivo</p>
               </div>
@@ -210,7 +210,7 @@ export default function VerificacionIdentidadPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">1</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">1</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Captura de Documento</h3>
               <p className="text-gray-600">
@@ -221,7 +221,7 @@ export default function VerificacionIdentidadPage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">2</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">2</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Selfie Biométrica</h3>
               <p className="text-gray-600">
@@ -232,7 +232,7 @@ export default function VerificacionIdentidadPage() {
             
             <div className="text-center">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-[var(--tp-buttons)]">3</span>
+                <span className="text-2xl font-bold text-[var(--tp-brand)]">3</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Resultado Instantáneo</h3>
               <p className="text-gray-600">

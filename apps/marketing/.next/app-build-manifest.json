@@ -11,15 +11,25 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/firmas-electronicas/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/firmas-electronicas/page.js"
-    ],
     "/cl/firmas-electronicas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/cl/firmas-electronicas/page.js"
+    ],
+    "/mx/firmas-electronicas/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/mx/firmas-electronicas/page.js"
+    ],
+    "/co/firmas-electronicas/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/co/firmas-electronicas/page.js"
+    ],
+    "/cl/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/cl/page.js"
     ],
     "/co/page": [
       "static/chunks/webpack.js",
@@ -30,11 +40,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/mx/page.js"
-    ],
-    "/cl/contacto/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/cl/contacto/page.js"
     ]
   }
 }

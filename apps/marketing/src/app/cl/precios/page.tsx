@@ -217,7 +217,7 @@ export default function PreciosPage() {
             {/* Team Starter */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8">
               <div className="text-center mb-8">
-                <Users className="w-8 h-8 text-[var(--tp-buttons)] mx-auto mb-3" />
+                <Users className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Team Starter</h3>
                 <p className="text-gray-600">Para equipos pequeños</p>
                 <div className="mt-6">
@@ -268,7 +268,7 @@ export default function PreciosPage() {
               </div>
               
               <div className="text-center mb-8">
-                <Building className="w-8 h-8 text-[var(--tp-buttons)] mx-auto mb-3" />
+                <Building className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Business</h3>
                 <p className="text-gray-600">Para empresas medianas</p>
                 <div className="mt-6">

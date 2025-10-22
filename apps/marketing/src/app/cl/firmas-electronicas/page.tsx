@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import { CountrySelector } from '../../../../../../packages/location/src/components/CountrySelector';
 import { CheckCircle, Shield, Clock, Download, Users, Star } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -9,10 +10,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Firma Electrónica Chile - Válida Legalmente | TuPatrimonio",
     description: "Firma documentos online con validez legal en Chile. Reduce tiempos en 90%, cumple Ley 19.799.",
-    url: "https://tupatrimonio.app/firmas-electronicas",
+    url: "https://tupatrimonio.app/cl/firmas-electronicas",
     images: [
       {
-        url: "/firmas-electronicas-og.jpg",
+        url: "/firmas-electronicas-chile-og.jpg",
         width: 1200,
         height: 630,
         alt: "Firma Electrónica Chile - TuPatrimonio"
@@ -23,23 +24,36 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Firma Electrónica Chile - Válida Legalmente",
     description: "Firma documentos online con validez legal. Reduce tiempos en 90%, cumple Ley 19.799. Prueba gratis.",
-    images: ["/firmas-electronicas-og.jpg"],
+    images: ["/firmas-electronicas-chile-og.jpg"],
   },
   alternates: {
-    canonical: "https://tupatrimonio.app/firmas-electronicas",
+    canonical: "https://tupatrimonio.app/cl/firmas-electronicas",
   },
 };
 
-export default function FirmasElectronicasPage() {
+export default function FirmasElectronicasChilePage() {
   return (
     <div className="min-h-screen">
+      {/* Header con selector de país */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-[var(--tp-brand)]">TuPatrimonio Chile</h1>
+            <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
+              🇨🇱 Chile
+            </span>
+          </div>
+          <CountrySelector variant="minimal" />
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                <span className="text-[var(--tp-buttons)]">Firma Electrónica</span><br />
+                <span className="text-[var(--tp-brand)]">Firma Electrónica</span><br />
                 Válida Legalmente en Chile
               </h1>
               <p className="text-xl text-gray-600 mb-8">
@@ -76,9 +90,8 @@ export default function FirmasElectronicasPage() {
             </div>
             
             <div className="relative">
-              {/* Placeholder para imagen/video */}
               <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-8 text-center">
-                <Download className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-4" />
+                <Download className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
                 <p className="text-gray-600">Video demostración</p>
                 <p className="text-sm text-gray-500">Cómo firmar en 3 pasos simples</p>
               </div>
@@ -124,7 +137,7 @@ export default function FirmasElectronicasPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$0.50</p>
+                <p className="text-2xl font-bold text-gray-900">$500 CLP</p>
                 <p className="text-sm text-gray-600">por documento</p>
               </div>
             </div>
@@ -138,7 +151,7 @@ export default function FirmasElectronicasPage() {
               </div>
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[var(--tp-buttons)]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-6 h-6 text-[var(--tp-buttons)]" />
+                  <Shield className="w-6 h-6 text-[var(--tp-brand)]" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">Firma Avanzada</h3>
                 <p className="text-gray-600 mt-2">Para documentos comerciales</p>
@@ -158,7 +171,7 @@ export default function FirmasElectronicasPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$2.50</p>
+                <p className="text-2xl font-bold text-gray-900">$2.500 CLP</p>
                 <p className="text-sm text-gray-600">por documento</p>
               </div>
             </div>
@@ -187,7 +200,7 @@ export default function FirmasElectronicasPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$8.50</p>
+                <p className="text-2xl font-bold text-gray-900">$8.500 CLP</p>
                 <p className="text-sm text-gray-600">por documento</p>
               </div>
             </div>
@@ -195,179 +208,47 @@ export default function FirmasElectronicasPage() {
         </div>
       </section>
 
-      {/* Beneficios */}
+      {/* Marco Legal Chileno */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              ¿Por qué elegir TuPatrimonio?
+              Marco Legal en Chile
             </h2>
             <p className="text-xl text-gray-600">
-              La solución más completa y confiable del mercado
+              Cumplimos con toda la legislación chilena vigente
             </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-[var(--tp-buttons)]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">100% Legal</h3>
-              <p className="text-gray-600">Cumple Ley 19.799 y normativas chilenas</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-[var(--tp-buttons)]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Súper Rápido</h3>
-              <p className="text-gray-600">Reduce tiempo de firma en 90%</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-[var(--tp-buttons)]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Para Equipos</h3>
-              <p className="text-gray-600">Gestión centralizada y colaborativa</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Download className="w-8 h-8 text-[var(--tp-buttons)]" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Fácil Integración</h3>
-              <p className="text-gray-600">API REST y webhooks incluidos</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Casos de Uso */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Documentos que Puedes Firmar
-            </h2>
-            <p className="text-xl text-gray-600">
-              Desde contratos simples hasta documentos legales complejos
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              "Contratos de Trabajo",
-              "NDAs y Confidencialidad", 
-              "Contratos Comerciales",
-              "Poderes Legales",
-              "Contratos de Arriendo",
-              "Acuerdos de Servicios",
-              "Contratos de Venta",
-              "Documentos Notariales",
-              "Actas de Reuniones"
-            ].map((documento, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-[var(--tp-buttons)] flex-shrink-0" />
-                <span className="font-medium text-gray-900">{documento}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonios */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Lo que Dicen Nuestros Clientes
-            </h2>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <blockquote className="text-gray-700 mb-4">
-                &quot;TuPatrimonio nos permitió digitalizar completamente nuestro proceso de firma de contratos. 
-                Lo que antes tomaba días, ahora lo resolvemos en minutos.&quot;
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div>
-                  <div className="font-medium text-gray-900">María González</div>
-                  <div className="text-sm text-gray-600">CEO, StartupTech SpA</div>
-                </div>
-              </div>
+            <div className="bg-white p-8 rounded-xl shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Ley 19.799 - Firma Electrónica
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Establece el marco legal para el uso de firmas electrónicas en Chile, 
+                garantizando su validez jurídica equivalente a la firma manuscrita.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• Validez legal equivalente a firma manuscrita</li>
+                <li>• Requisitos técnicos de seguridad</li>
+                <li>• Certificación por entidades autorizadas</li>
+              </ul>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <blockquote className="text-gray-700 mb-4">
-                &quot;La validez legal está garantizada y el proceso es súper intuitivo. 
-                Nuestros clientes están encantados con la experiencia.&quot;
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div>
-                  <div className="font-medium text-gray-900">Carlos Mendoza</div>
-                  <div className="text-sm text-gray-600">Socio, Legal Corp</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Preguntas Frecuentes
-            </h2>
-          </div>
-          
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ¿Tiene validez legal la firma electrónica en Chile?
+            <div className="bg-white p-8 rounded-xl shadow-sm">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Decreto 181/2002 - Reglamento
               </h3>
-              <p className="text-gray-600">
-                Sí, las firmas electrónicas tienen plena validez legal en Chile según la Ley 19.799 
-                sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación. 
-                TuPatrimonio cumple con todos los requisitos técnicos y legales establecidos.
+              <p className="text-gray-600 mb-4">
+                Reglamenta los aspectos técnicos y operativos de las firmas electrónicas, 
+                definiendo los estándares de seguridad requeridos.
               </p>
-            </div>
-            
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ¿Qué documentos puedo firmar electrónicamente?
-              </h3>
-              <p className="text-gray-600">
-                Puedes firmar la mayoría de documentos comerciales y civiles, incluyendo contratos, 
-                NDAs, poderes, acuerdos comerciales y más. Solo algunos documentos específicos como 
-                testamentos requieren firma presencial según la ley chilena.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                ¿Cómo garantizan la seguridad?
-              </h3>
-              <p className="text-gray-600">
-                Utilizamos encriptación end-to-end, certificados digitales, verificación de identidad 
-                biométrica y cumplimos con estándares internacionales de seguridad. 
-                Cada firma incluye un certificado de autenticidad verificable.
-              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• Estándares técnicos de implementación</li>
+                <li>• Procedimientos de certificación</li>
+                <li>• Requisitos para entidades certificadoras</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -380,7 +261,7 @@ export default function FirmasElectronicasPage() {
             Comienza a Firmar Digitalmente Hoy
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Únete a más de 500 empresas que ya transformaron sus procesos
+            Únete a más de 500 empresas chilenas que ya transformaron sus procesos
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 

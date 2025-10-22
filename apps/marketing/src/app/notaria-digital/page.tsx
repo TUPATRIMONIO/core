@@ -31,7 +31,7 @@ export default function NotariaDigitalRedirect() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-2xl shadow-lg border p-8 text-center">
-          <Stamp className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-6" />
+          <Stamp className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-6" />
           
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Notaría Digital
