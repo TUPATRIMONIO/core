@@ -1,0 +1,75 @@
+# Configuración Netlify para TuPatrimonio Web App
+# Sitio: app.tupatrimonio.app
+
+[build]
+  # Configuración de build para web app
+  command = "npm run build:web"
+  publish = "apps/web/.next"
+  
+  # Variables de entorno para build
+  [build.environment]
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
+
+# Headers de seguridad para la web app
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Headers de cache para assets
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Headers específicos para páginas HTML
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Headers para la API de Next.js
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+# Redirects para rutas de autenticación
+[[redirects]]
+  from = "/signin"
+  to = "/login"
+  status = 301
+
+[[redirects]]
+  from = "/signup" 
+  to = "/login"
+  status = 301
+
+# Redirect desde raíz al dashboard (si usuario autenticado)
+# Esto se maneja en la app, pero como backup
+[[redirects]]
+  from = "/"
+  to = "/dashboard"
+  status = 200
+  conditions = {Cookie = ["sb-*"]}
+
+# Redirect por defecto al login si no hay sesión
+[[redirects]]
+  from = "/"
+  to = "/login"
+  status = 200
+
+# Manejo de rutas 404 para SPA
+[[redirects]]
+  from = "/*"
+  to = "/404"
+  status = 404
+
+# Configuración específica para la web app
+# No necesita Edge Functions de geolocalización (esas son solo para marketing)
+
+# Variables de entorno específicas para web app se configuran en Netlify UI:
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# SUPABASE_SERVICE_ROLE_KEY (si se necesita)

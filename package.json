@@ -11,6 +11,7 @@
     "dev:marketing": "npm run build:location && npm run dev --workspace=apps/marketing",
     "build": "npm run build:location && npm run build --workspaces --if-present",
     "build:web": "npm run build:location && npm run build --workspace=apps/web",
+    "build:web-standalone": "npm run build --workspace=apps/web",
     "build:marketing": "npm run build:location && npm run build --workspace=apps/marketing",
     "build:location": "npm run build --workspace=packages/location",
     "start": "npm run start --workspace=apps/web",

@@ -149,7 +149,7 @@ export default function NotariaDigitalPage() {
             {/* Notaría Digital */}
             <div className="bg-green-50 border-2 border-green-200 rounded-xl p-8">
               <div className="text-center mb-6">
-                <Stamp className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+                <Stamp className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-gray-900">Notaría Digital TuPatrimonio</h3>
               </div>
               <ul className="space-y-4">
@@ -217,7 +217,7 @@ export default function NotariaDigitalPage() {
               { icon: DollarSign, title: "Documentos Financieros", desc: "Pagarés, garantías, avales" }
             ].map((documento, index) => (
               <div key={index} className="bg-white p-6 rounded-xl shadow-sm border hover:border-[var(--tp-buttons)] transition-colors">
-                <documento.icon className="w-8 h-8 text-[var(--tp-buttons)] mb-4" />
+                <documento.icon className="w-8 h-8 text-[var(--tp-brand)] mb-4" />
                 <h4 className="text-lg font-bold text-gray-900 mb-2">{documento.title}</h4>
                 <p className="text-gray-600 text-sm">{documento.desc}</p>
               </div>
@@ -305,7 +305,7 @@ export default function NotariaDigitalPage() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <Clock className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <Clock className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Ahorro de Tiempo</h3>
               <p className="text-gray-600">
                 De 3+ horas a 15 minutos. Sin viajes, sin esperas, sin citas.
@@ -313,7 +313,7 @@ export default function NotariaDigitalPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <DollarSign className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <DollarSign className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Menor Costo</h3>
               <p className="text-gray-600">
                 60% más barato que notaría tradicional. Sin costos ocultos.
@@ -321,7 +321,7 @@ export default function NotariaDigitalPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <Shield className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <Shield className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Mayor Seguridad</h3>
               <p className="text-gray-600">
                 Verificación biométrica y trazabilidad blockchain.
@@ -337,7 +337,7 @@ export default function NotariaDigitalPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <FileText className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <FileText className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Copia Digital</h3>
               <p className="text-gray-600">
                 Acceso inmediato a tu documento desde cualquier dispositivo.
@@ -345,7 +345,7 @@ export default function NotariaDigitalPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <CheckCircle className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <CheckCircle className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Misma Validez Legal</h3>
               <p className="text-gray-600">
                 100% válido legalmente, reconocido por tribunales.

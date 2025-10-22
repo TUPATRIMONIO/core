@@ -1,184 +1,200 @@
 # 🚀 Guía de Deployment - TuPatrimonio
 
-## Netlify Deployment
+## Configuración Dual de Sites
 
-### Configuración Automática
-El proyecto incluye `netlify.toml` con configuración completa para:
-- Build automático de marketing app
-- Edge Functions para detección de ubicación
-- Redirects por país como backup
-- Headers de geolocalización automáticos
+TuPatrimonio usa **2 sites separados** en Netlify para optimal performance:
 
-### Setup en Netlify Dashboard
+### 📱 Site 1: Marketing App
+- **Domain**: `tupatrimonio.app`
+- **Config file**: `netlify.toml` 
+- **Purpose**: Landing pages, SEO, blog, conversión
 
-#### 1. Configuración Básica
-- **Base directory**: `/` (raíz del repo)
+### 💼 Site 2: Web App  
+- **Domain**: `app.tupatrimonio.app`
+- **Config file**: `netlify-web.toml`
+- **Purpose**: Dashboard, autenticación, funcionalidad
+
+## Marketing App Deployment
+
+### Configuración en Netlify
+- **Base directory**: `/`
 - **Build command**: `npm run build:marketing`
 - **Publish directory**: `apps/marketing/.next`
-- **Node.js version**: `18` (automático desde netlify.toml)
+- **Config file**: `netlify.toml`
 
-#### 2. Variables de Entorno
-```
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aqui
-NODE_VERSION=18
-NEXT_TELEMETRY_DISABLED=1
-```
-
-#### 3. Build & Deploy Settings
-```toml
-# Ya configurado en netlify.toml
-[build]
-  command = "npm run build:marketing"
-  publish = "apps/marketing/.next"
-```
-
-## 🌍 Sistema de Geolocalización
-
-### Funciones Netlify Incluidas
-
-#### Edge Functions (Súper Rápidas)
-- `netlify/edge-functions/country-redirect.ts`
-- Se ejecutan en el edge de Netlify
-- Redirects automáticos por país
-- Latencia < 50ms
-
-#### Functions Normales (Backup)
-- `netlify/functions/detect-country.ts` 
-- API para detección por IP
-- Fallback si Edge Functions fallan
-
-### Headers Automáticos
-Netlify proporciona automáticamente:
-```
-x-nf-country-code: CL        # Código ISO del país
-x-nf-geo-city: Santiago      # Ciudad detectada  
-x-nf-geo-subdivision-1-iso-code: RM  # Región/Estado
-```
-
-## 📊 Configuraciones por Ambiente
-
-### Development (Local)
-- **Puerto 3001**: Marketing app
-- **Puerto 3000**: Web app  
-- **Detección**: Por navegador (timezone, idioma)
-- **Netlify Functions**: No disponibles localmente
-
-### Production (Netlify)
-- **Detección**: Por IP real via headers Netlify
-- **Edge Functions**: Activas y súper rápidas
-- **Redirects**: Automáticos e instantáneos
-- **Caché**: Headers cacheados 5 minutos
-
-## 🔧 Verificación Post-Deploy
-
-### 1. URLs a Probar
-```bash
-# Landing genérica (debe detectar país y redirect)
-https://tu-sitio.netlify.app/firmas-electronicas
-
-# Páginas específicas por país  
-https://tu-sitio.netlify.app/cl/firmas-electronicas
-https://tu-sitio.netlify.app/mx/firmas-electronicas
-https://tu-sitio.netlify.app/co/firmas-electronicas
-```
-
-### 2. API de Detección
-```bash
-# Debe responder JSON con país detectado
-https://tu-sitio.netlify.app/.netlify/functions/detect-country
-
-# Respuesta esperada:
-{
-  "country": "cl",
-  "city": "Santiago", 
-  "source": "netlify",
-  "supported": true
-}
-```
-
-### 3. Funcionalidades
-- [ ] **Auto-redirect** funciona desde landing genérica
-- [ ] **Selector de país** aparece y funciona
-- [ ] **Confirmación** antes de cambiar de página país
-- [ ] **Persistencia** de preferencia manual
-- [ ] **Colores correctos** (gris botones, vino marca)
-
-## ⚠️ Posibles Issues y Soluciones
-
-### Build Errors
-```bash
-# Error: Can't resolve packages
-Causa: Package location no compilado
-Solución: npm run build:location se ejecuta automáticamente
-```
-
-### Edge Functions Not Working
-```bash
-# Síntoma: No redirect automático
-Causa: Edge Functions solo en producción
-Solución: Normal en development, usar redirects de backup
-```
+### Características Específicas
+- ✅ **Edge Functions** para detección de ubicación
+- ✅ **Redirects automáticos** por país
+- ✅ **Headers de geolocalización**
+- ✅ **SEO optimizado** por país
 
 ### Variables de Entorno
 ```bash
-# Error: Supabase connection failed
-Causa: Variables no configuradas en Netlify
-Solución: Configurar en Site Settings > Environment variables
+NODE_VERSION=20
+NEXT_TELEMETRY_DISABLED=1
+NEXT_PUBLIC_SUPABASE_URL=https://proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 ```
 
-### Geolocation Headers Missing
+## Web App Deployment  
+
+### Configuración en Netlify
+- **Base directory**: `/`
+- **Build command**: `npm run build:web`
+- **Publish directory**: `apps/web/.next`
+- **Config file**: `netlify-web.toml`
+
+### Características Específicas
+- ✅ **Dashboard funcional** con autenticación
+- ✅ **Personalización automática** por país
+- ✅ **Performance optimizado** para interacción
+- ✅ **Redirects de auth** incluidos
+
+### Variables de Entorno
 ```bash
-# Síntoma: Siempre detecta Chile
-Causa: Headers geo no disponibles
-Solución: Normal en algunas regiones, fallback funciona
+NODE_VERSION=20
+NEXT_TELEMETRY_DISABLED=1
+NEXT_PUBLIC_SUPABASE_URL=https://proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 ```
 
-## 🔄 Deploy de Cambios
+## 🔧 Setup en Netlify Dashboard
 
-### Deploy Automático
+### Site 1: Marketing (tupatrimonio.app)
+1. **Team Settings > Sites** → **Add new site**
+2. **Connect to Git** → Seleccionar tu repositorio
+3. **Site configuration**:
+   ```
+   Base directory: /
+   Build command: npm run build:marketing  
+   Publish directory: apps/marketing/.next
+   ```
+4. **Advanced build settings** → **Add build file: netlify.toml**
+
+### Site 2: Web App (app.tupatrimonio.app)  
+1. **Team Settings > Sites** → **Add new site**
+2. **Connect to Git** → Mismo repositorio (diferente configuración)
+3. **Site configuration**:
+   ```
+   Base directory: /
+   Build command: npm run build:web
+   Publish directory: apps/web/.next  
+   ```
+4. **Advanced build settings** → **Add build file: netlify-web.toml**
+
+## 🌐 Domain Configuration
+
+### Custom Domains
+- **Marketing**: `tupatrimonio.app` (site 1)
+- **Web App**: `app.tupatrimonio.app` (site 2)
+
+### DNS Configuration
+```
+# En tu proveedor DNS
+A     tupatrimonio.app        → 75.2.60.5 (Netlify)
+CNAME app.tupatrimonio.app   → [site-2].netlify.app
+```
+
+## 🔄 Workflow de Deploy
+
+### Marketing App
 ```bash
-# Push a main/desarrollo
-git push origin desarrollo
+# Push a main branch
+git push origin main
 
-# Netlify hace build automático
-# 1. npm run build:location (compila packages)
-# 2. npm run build:marketing (build app)
-# 3. Deploy a CDN global
+# Netlify Site 1:
+1. Detecta cambios
+2. npm run build:marketing
+3. Deploys a tupatrimonio.app
+4. Edge Functions activas
 ```
 
-### Deploy Manual (Si es necesario)
+### Web App
 ```bash
-# En Netlify Dashboard > Deploys
-# Click "Trigger deploy" > "Deploy site"
+# Push a main branch  
+git push origin main
+
+# Netlify Site 2:
+1. Detecta cambios (mismo repo)
+2. npm run build:web  
+3. Deploys a app.tupatrimonio.app
+4. Solo funcionalidad de dashboard
 ```
 
-## 📈 Monitoreo
+## ⚠️ Diferencias Importantes
 
-### Analytics a Revisar
-- **Detección de países**: ¿Qué países detecta más?
-- **Uso del selector**: ¿Los usuarios cambian país manualmente?
-- **Bounce rate** de redirects automáticos
-- **Performance** de Edge Functions
+### Marketing App (tupatrimonio.app)
+- ✅ **Edge Functions** para geo-redirección
+- ✅ **Múltiples redirects** por país  
+- ✅ **Headers de geolocalización**
+- ✅ **Optimizado para SEO**
 
-### Logs Útiles
-- **Netlify Functions Log**: Para debugging de detección
-- **Deploy Logs**: Para errors de build
-- **Analytics**: Tráfico por país detectado
+### Web App (app.tupatrimonio.app)
+- ✅ **Auth redirects** (/signin → /login)
+- ✅ **Dashboard routing** (/ → /dashboard si autenticado)
+- ✅ **Performance optimizado** para interacción
+- ✅ **No geo-functions** (detección interna solo)
 
-## 🌐 Consideraciones Internacionales
+## 🔧 Build Commands Utilizados
 
-### Agregar Nuevo País
-1. **Actualizar** `packages/location/src/CountryConfig.ts`
-2. **Crear** páginas específicas en `/[nuevo-pais]/`
-3. **Agregar** a Edge Function y redirects
-4. **Crear** contenido localizado (precios, regulaciones)
+### En package.json raíz:
+```json
+{
+  "scripts": {
+    "build:marketing": "npm run build:location && npm run build --workspace=apps/marketing",
+    "build:web": "npm run build:location && npm run build --workspace=apps/web"
+  }
+}
+```
 
-### SEO por País
-- Cada país tiene metadata específica
-- URLs únicas: `/cl/servicio` vs `/mx/servicio`
-- hreflang automático entre versiones
+### Secuencia de Build:
+1. **Compilar packages** (`build:location`)
+2. **Build app específica** (marketing o web)
+3. **Next.js optimizations** automáticas
+4. **Deploy a CDN** respectivo
+
+## 📊 Verificación Post-Deploy
+
+### Marketing App (tupatrimonio.app)
+- [ ] **Auto-redirect** desde `/firmas-electronicas`
+- [ ] **Selector de país** funcional
+- [ ] **Edge Functions**: `/.netlify/functions/detect-country`
+- [ ] **Colores correctos** (gris + vino)
+
+### Web App (app.tupatrimonio.app) 
+- [ ] **Login** funcional → `/login`
+- [ ] **Dashboard** accesible después de auth
+- [ ] **Selector de país** en header del dashboard
+- [ ] **Precios localizados** según país detectado
+- [ ] **No errores** de imports o CSS
+
+## 🐛 Troubleshooting
+
+### Error: "Module not found"
+```bash
+# Causa: Package location no compilado antes de app
+# Solución: build:location se ejecuta automáticamente
+```
+
+### Error: "Edge Functions not working"
+```bash
+# Solo aplica a marketing app
+# Web app no necesita edge functions
+```
+
+### Error: "CSS not loading"  
+```bash
+# Verificar ruta relativa a packages/ui/globals.css
+# Marketing: ../../../../packages/ui/globals.css
+# Web: ../../../../packages/ui/globals.css
+```
 
 ---
 
-**Sistema completamente configurado para deploy automático en Netlify** ✅
+**Ambos sites están listos para deploy independiente** 🚀
+
+### Next Steps:
+1. ✅ **Marketing site ya funcionando** en `tupatrimonio.app`
+2. 🚧 **Web site**: Usar `netlify-web.toml` en configuración
+3. ✅ **Dominios**: Configurar app.tupatrimonio.app → Site 2
