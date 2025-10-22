@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Shield, Clock, DollarSign, Users, Star, Building, FileText, Stamp } from "lucide-react";
+import { CheckCircle, Shield, Clock, DollarSign, Users, Star, Building, FileText, Stamp, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Notaría Digital Chile - Notarización Online Válida | TuPatrimonio",
@@ -329,7 +329,7 @@ export default function NotariaDigitalPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-sm text-center">
-              <Zap className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
+              <Zap className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">Disponibilidad 24/7</h3>
               <p className="text-gray-600">
                 Notariza cuando quieras, desde donde quieras.

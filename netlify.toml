@@ -8,7 +8,7 @@
   
   # Variables de entorno para build
   [build.environment]
-    NODE_VERSION = "18"
+    NODE_VERSION = "20"
     NEXT_TELEMETRY_DISABLED = "1"
 
 # Headers globales con información de geolocalización
