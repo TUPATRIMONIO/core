@@ -6,59 +6,110 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Static pages
   const staticPages = [
+    // Homepage global
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 1,
     },
+    
+    // Country homepages
     {
-      url: `${baseUrl}/firmas-electronicas`,
+      url: `${baseUrl}/cl`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
+      changeFrequency: 'daily' as const,
+      priority: 0.95,
     },
     {
-      url: `${baseUrl}/verificacion-identidad`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/notaria-digital`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/precios`,
+      url: `${baseUrl}/co`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/mx`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    
+    // Generic redirects (lower priority)
+    {
+      url: `${baseUrl}/firmas-electronicas`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/verificacion-identidad`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/notaria-digital`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    
+    // Chile-specific pages (high priority)
+    {
+      url: `${baseUrl}/cl/firmas-electronicas`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/cl/verificacion-identidad`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/cl/notaria-digital`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/cl/precios`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/cl/contacto`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/cl/legal/terminos`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/cl/legal/privacidad`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/cl/legal/cookies`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    },
+    
+    // Blog (shared across countries)
     {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/legal/terminos`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/legal/privacidad`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/legal/cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
     },
   ];
 

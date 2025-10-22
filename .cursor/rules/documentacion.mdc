@@ -1,0 +1,131 @@
+---
+description: Mantiene organizada la documentación del proyecto siguiendo la estructura unificada implementada
+globs: 
+  - "*.md"
+  - "docs/**/*.md"
+  - "README*"
+alwaysApply: true
+---
+
+# Reglas para Organización de Documentación (.md)
+
+## 📁 ESTRUCTURA OBLIGATORIA
+
+**NUNCA crear archivos .md en la raíz** excepto README.md principal.
+
+### ✅ Estructura Correcta
+```
+/
+├── README.md                    # ← ÚNICO archivo .md en raíz
+└── docs/
+    ├── DEVELOPMENT.md          # Setup, APIs, troubleshooting
+    ├── DEPLOYMENT.md           # Configuración production  
+    ├── ARCHITECTURE.md         # Decisiones técnicas
+    └── archived/               # Solo archivos históricos
+        ├── README.md           # Explica contenido archivado
+        └── [archivos-historicos].md
+```
+
+## 🚫 PROHIBIDO CREAR
+
+- ❌ `GUIDE-*.md`, `HOW-TO-*.md`, `SETUP-*.md` en raíz
+- ❌ `*-README.md`, `README-*.md` adicionales
+- ❌ Archivos de planes (`*.plan.md`) en raíz
+- ❌ Documentación específica (`*-GUIDE.md`) en raíz
+- ❌ Archivos temporales de mejoras en raíz
+
+## ✅ DÓNDE CREAR NUEVA DOCUMENTACIÓN
+
+### Para Nueva Funcionalidad
+**SIEMPRE actualizar documentos existentes** antes de crear nuevos:
+
+1. **Funcionalidad general**: Agregar a `README.md` principal
+2. **Setup/APIs**: Agregar a `docs/DEVELOPMENT.md`
+3. **Configuración deploy**: Agregar a `docs/DEPLOYMENT.md`
+4. **Decisiones técnicas**: Agregar a `docs/ARCHITECTURE.md`
+
+### Si REALMENTE Necesitas Nuevo Archivo
+Solo si es documentación completamente nueva y específica:
+```
+docs/
+├── NUEVAFUNCIONALIDAD.md      # ✅ En docs/, no en raíz
+└── integrations/              # ✅ Subcarpeta para APIs, etc.
+    └── EXTERNAL-API.md
+```
+
+## 📝 REGLAS DE CONTENIDO
+
+### README.md Principal
+**DEBE contener siempre:**
+- Descripción del proyecto
+- Stack tecnológico  
+- Estructura de carpetas
+- Comandos de desarrollo
+- Características principales
+- Enlaces a documentación detallada
+
+### docs/DEVELOPMENT.md
+**PARA:**
+- Setup paso a paso
+- Comandos npm
+- APIs de packages compartidos
+- Troubleshooting common issues
+- Debugging guides
+
+### docs/DEPLOYMENT.md
+**PARA:**
+- Configuración Netlify/Vercel
+- Variables de entorno
+- Verificación post-deploy
+- Comandos de build
+- Issues de producción
+
+### docs/ARCHITECTURE.md
+**PARA:**
+- Decisiones técnicas importantes
+- ¿Por qué elegimos X sobre Y?
+- Pros/cons de enfoques
+- Future considerations
+- Technical debt conocido
+
+## 🔄 PROCESO PARA CAMBIOS
+
+### Actualizando Documentación Existente
+1. **Identifica** qué tipo de información vas a agregar
+2. **Actualiza** el archivo correspondiente en docs/
+3. **NO crear** archivo nuevo a menos que sea absolutamente necesario
+
+### Archivando Documentación Obsoleta
+Si un documento se vuelve histórico:
+```bash
+# Mover a archived/ con timestamp
+mv DOCUMENTO.md docs/archived/DOCUMENTO-YYYY-MM.md
+
+# Actualizar docs/archived/README.md para explicar contenido
+```
+
+## ⚠️ MANTENER SIEMPRE ACTUALIZADO
+
+### Al Agregar Funcionalidades
+- ✅ **README.md**: Agregar a "Características Principales"
+- ✅ **docs/DEVELOPMENT.md**: Agregar APIs y setup necesario
+- ✅ **docs/DEPLOYMENT.md**: Agregar configuración si es necesaria
+
+### Al Cambiar Arquitectura
+- ✅ **docs/ARCHITECTURE.md**: Documentar decisión y razonamiento
+- ✅ **README.md**: Actualizar stack tecnológico si aplica
+
+### Al Cambiar Build/Deploy
+- ✅ **docs/DEPLOYMENT.md**: Actualizar configuración
+- ✅ **docs/DEVELOPMENT.md**: Actualizar comandos si aplican
+
+## 🎯 OBJETIVO DE ESTAS REGLAS
+
+1. **Single source of truth** para cada tipo de información
+2. **Fácil navegación** para nuevos desarrolladores
+3. **Información actualizada** y sin duplicaciones
+4. **Estructura profesional** y mantenible
+
+---
+
+**RECORDAR: Antes de crear nuevo .md, preguntarse: ¿Puedo agregar esto a un archivo existente en docs/?**

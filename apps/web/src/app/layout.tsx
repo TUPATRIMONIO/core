@@ -1,7 +1,8 @@
 import type {Metadata} from "next";
 import {Geist, Geist_Mono, Quicksand} from "next/font/google";
 import { cn } from "@/lib/utils";
-import "./globals.css";
+import { LocationProvider } from '../components/LocationProvider';
+import "../../../../../packages/ui/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +36,11 @@ export default function RootLayout({
       `${geistSans.variable} ${geistMono.variable} ${quicksand.variable} antialiased`
     )}>
       <body className="bg-background text-foreground">
-        <main className="min-h-screen flex flex-col items-center">
-          {children}
-        </main>
+        <LocationProvider>
+          <main className="min-h-screen flex flex-col items-center">
+            {children}
+          </main>
+        </LocationProvider>
       </body>
     </html>
   );

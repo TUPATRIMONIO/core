@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Shield, Clock, Users } from "lucide-react";
+import { CheckCircle, Shield, Clock, Users, Globe } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -11,23 +11,36 @@ export default function HomePage() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Digitaliza tus Procesos
-              <span className="text-[var(--tp-buttons)]"> Legales</span>
+              <span className="text-[var(--tp-brand)]"> Legales</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Firmas electrónicas válidas, verificación de identidad biométrica y notaría digital. 
               Todo en una plataforma segura y fácil de usar.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white px-8 py-4 text-lg"
-              >
-                Empieza Gratis
-              </Button>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
-                Ver Demo
-              </Button>
-            </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/cl">
+                  <Button 
+                    size="lg" 
+                    className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white px-8 py-4 text-lg"
+                  >
+                    Empieza Gratis en Chile
+                  </Button>
+                </Link>
+                <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+                  Ver Demo
+                </Button>
+              </div>
+              
+              {/* Country Selector */}
+              <div className="mt-8">
+                <div className="inline-flex items-center gap-2 text-sm text-gray-600 bg-white/80 rounded-full px-4 py-2">
+                  <Globe className="w-4 h-4" />
+                  <span>También disponible en:</span>
+                  <Link href="/co" className="text-[var(--tp-buttons)] hover:underline font-medium">Colombia</Link>
+                  <span>•</span>
+                  <Link href="/mx" className="text-[var(--tp-buttons)] hover:underline font-medium">México</Link>
+                </div>
+              </div>
           </div>
         </div>
       </section>
@@ -48,13 +61,13 @@ export default function HomePage() {
             {/* Firma Electrónica */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Firmas Electrónicas</h3>
               <p className="text-gray-600 mb-4">
                 Firma documentos de forma segura y con validez legal. Reduce tiempos de gestión en un 90%.
               </p>
-              <Link href="/firmas-electronicas">
+              <Link href="/cl/firmas-electronicas">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
@@ -64,13 +77,13 @@ export default function HomePage() {
             {/* Verificación de Identidad */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Verificación de Identidad</h3>
               <p className="text-gray-600 mb-4">
                 Verifica usuarios con biometría y documentos oficiales en menos de 3 minutos.
               </p>
-              <Link href="/verificacion-identidad">
+              <Link href="/cl/verificacion-identidad">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
@@ -80,13 +93,13 @@ export default function HomePage() {
             {/* Notaría Digital */}
             <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-[var(--tp-buttons)]" />
+                <Clock className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Notaría Digital</h3>
               <p className="text-gray-600 mb-4">
                 Notariza documentos online con validez legal completa. Sin filas ni trámites presenciales.
               </p>
-              <Link href="/notaria-digital">
+              <Link href="/cl/notaria-digital">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
@@ -115,7 +128,7 @@ export default function HomePage() {
           </div>
           
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Empresas que confían en TuPatrimonio
+            Empresas que confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
           
           {/* Placeholder para logos de clientes */}
