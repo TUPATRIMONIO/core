@@ -1,0 +1,86 @@
+# Configuración Netlify - TuPatrimonio Web App  
+# Sitio: app.tupatrimonio.app
+# Purpose: Dashboard, autenticación, funcionalidad privada
+
+[build]
+  command = "npm install && npm run build:location && npm run build"
+  publish = ".next"
+  
+  [build.environment]
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
+
+# Headers de seguridad para aplicación privada
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Headers específicos para dashboard (privado)
+[[headers]]
+  for = "/dashboard/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "private, no-cache, no-store"
+
+# Headers para páginas de autenticación
+[[headers]]
+  for = "/login/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[[headers]]
+  for = "/auth/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+# Redirects para rutas de autenticación
+[[redirects]]
+  from = "/signin"
+  to = "/login"
+  status = 301
+
+[[redirects]]
+  from = "/signup" 
+  to = "/login"
+  status = 301
+
+[[redirects]]
+  from = "/register"
+  to = "/login"
+  status = 301
+
+# Redirect desde raíz basado en autenticación
+# Si hay cookie de sesión, ir al dashboard
+[[redirects]]
+  from = "/"
+  to = "/dashboard"
+  status = 200
+  conditions = {Cookie = ["sb-*"]}
+
+# Si no hay sesión, ir al login
+[[redirects]]
+  from = "/"
+  to = "/login"
+  status = 200
+
+# Proteger rutas que requieren autenticación
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/login"
+  status = 302
+  conditions = {Cookie = ["!sb-*"]}
+
+# Manejo de 404 para SPA
+[[redirects]]
+  from = "/*"
+  to = "/404"
+  status = 404
+
+# Variables de entorno se configuran en Netlify Dashboard:
+# NEXT_PUBLIC_SUPABASE_URL=tu_url
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_key
+# SUPABASE_SERVICE_ROLE_KEY=tu_service_key (opcional)

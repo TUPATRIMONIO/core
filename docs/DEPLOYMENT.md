@@ -61,7 +61,7 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 
 ## 🔧 Setup en Netlify Dashboard
 
-### Site 1: Marketing (tupatrimonio.app)
+### Site 1: Marketing (tupatrimonio.app) - apps/marketing/netlify.toml
 1. **Team Settings > Sites** → **Add new site**
 2. **Connect to Git** → Seleccionar tu repositorio
 3. **Site configuration**:
@@ -72,7 +72,7 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
    ```
 4. **Advanced build settings** → **Add build file: netlify.toml**
 
-### Site 2: Web App (app.tupatrimonio.app)  
+### Site 2: Web App (app.tupatrimonio.app) - apps/web/netlify.toml  
 1. **Team Settings > Sites** → **Add new site**
 2. **Connect to Git** → Mismo repositorio (diferente configuración)
 3. **Site configuration**:
