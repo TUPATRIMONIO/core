@@ -1147,6 +1147,21 @@ Al completar Fase 0:
   - ✅ Build commands y publish directories configurados correctamente
   - ✅ Variables de entorno configuradas
   - ✅ **Ambas apps live en Netlify** 🚀
+- ✅ **Estructura Internacional COMPLETADA** (22 Oct 2025)
+  - ✅ Reestructuración por países: /cl/, /co/, /mx/
+  - ✅ Content Chile migrado a /cl/ con legislación local
+  - ✅ Páginas Colombia y México (próximamente) creadas
+  - ✅ Redirects automáticos con detección de país
+  - ✅ Sitemap actualizado para SEO internacional
+  - ✅ Hreflang y metadata por país configurados
+  - ✅ **Marketing site preparado para expansión LATAM** 🌎
+- ✅ **Formularios Lead Capture COMPLETADOS** (22 Oct 2025)
+  - ✅ WaitlistForm component conectado a marketing.waitlist_subscribers
+  - ✅ ContactForm component conectado a marketing.contact_messages
+  - ✅ Formularios integrados en páginas Colombia y México
+  - ✅ Página de contacto específica para Chile (/cl/contacto)
+  - ✅ Tracking por país y fuente de leads
+  - ✅ **Lead capture funcionando en producción** 📧
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)
@@ -1199,30 +1214,34 @@ Al completar Fase 0:
 
 #### 🚀 **PRÓXIMOS PASOS PARA MAÑANA (Completar Fase 0):**
 
-**📋 PRIORIDAD 1: Completar Landing Pages (2-3 horas)**
-   - [ ] Crear `/verificacion-identidad/page.tsx`
-   - [ ] Crear `/notaria-digital/page.tsx`
-   - [ ] Crear `/precios/page.tsx` con planes B2C/B2B diferenciados
-   - [ ] Crear páginas legales (`/legal/terminos`, `/legal/privacidad`, `/legal/cookies`)
+**✅ COMPLETADO (22 Oct 2025):**
+   - ✅ Todas las landing pages creadas y organizadas por países
+   - ✅ Estructura internacional /cl/, /co/, /mx/ implementada
+   - ✅ Formularios lead capture conectados a Supabase
+   - ✅ Páginas legales (términos, privacidad, cookies) para Chile
+   - ✅ Redirects automáticos con detección de país
+   - ✅ Página de contacto específica (/cl/contacto)
 
-**📋 PRIORIDAD 2: Formularios Lead Capture (1-2 horas)**
-   - [ ] Implementar formulario waitlist conectado a `marketing.waitlist_subscribers`
-   - [ ] Implementar formulario contacto conectado a `marketing.contact_messages`
-   - [ ] Agregar formularios en homepage y landing pages
+**📋 RESTANTE PARA COMPLETAR FASE 0:**
 
-**📋 PRIORIDAD 3: Contenido Inicial (3-4 horas)**
-   - [ ] Escribir 3-4 blog posts iniciales sobre servicios tradicionales
-   - [ ] Insertar posts en tabla `marketing.blog_posts`
-   - [ ] Verificar que blog muestre contenido real
+**PRIORIDAD 1: Contenido Inicial (2-3 horas)**
+   - [ ] Escribir 3-4 blog posts sobre servicios (firma, verificación, notaría)
+   - [ ] Insertar posts en `marketing.blog_posts` usando Supabase Studio
+   - [ ] Verificar que blog muestre contenido real en producción
 
-**📋 PRIORIDAD 4: SEO y DNS Final (1-2 horas)**
+**PRIORIDAD 2: SEO y Analytics Final (1-2 horas)**  
    - [ ] Configurar dominios personalizados en Netlify:
      * tupatrimonio.app → marketing site
      * app.tupatrimonio.app → web app
    - [ ] Google Analytics 4 + Search Console
-   - [ ] Structured data (Schema.org JSON-LD)
+   - [ ] Structured data básico (Organization, WebSite)
 
-**ESTIMADO TOTAL: 7-11 horas para completar Fase 0**
+**OPCIONAL (Puede ir a Fase 1):**
+   - [ ] Admin panel básico para gestionar blog posts
+   - [ ] Newsletter signup component
+
+**📈 PROGRESO FASE 0: ~85% COMPLETADO**
+**🕒 ESTIMADO RESTANTE: 2-4 horas para completar Fase 0**
 
 #### 📝 **NOTAS IMPORTANTES PARA CONTINUAR MAÑANA:**
 
@@ -1233,17 +1252,35 @@ Al completar Fase 0:
 - **Netlify Marketing**: [URL de tu deploy en Netlify]
 - **Netlify Web**: [URL de tu deploy en Netlify]
 
-**📂 Estructura del Proyecto:**
+**📂 Estructura del Proyecto (Actualizada):**
 ```
 /apps/marketing  # Marketing site (tupatrimonio.app)
 ├── /src/app
-│   ├── page.tsx             ✅ Homepage COMPLETADA
-│   ├── /firmas-electronicas ✅ Landing COMPLETADA (usar como template)
-│   ├── /blog                ✅ Blog dinámico COMPLETADO
-│   └── sitemap.ts + robots.ts ✅ SEO básico COMPLETADO
+│   ├── page.tsx                 ✅ Homepage global con selector países
+│   ├── /cl/                     ✅ Chile - COMPLETO
+│   │   ├── page.tsx             ✅ Landing Chile con legislación local  
+│   │   ├── /firmas-electronicas ✅ Content específico Ley 19.799
+│   │   ├── /verificacion-identidad ✅ KYC con regulaciones CMF
+│   │   ├── /notaria-digital     ✅ Código civil chileno
+│   │   ├── /precios             ✅ Planes en CLP
+│   │   ├── /legal/              ✅ Términos, privacidad, cookies Chile
+│   │   └── /contacto            ✅ Contacto con formulario conectado
+│   ├── /co/                     ✅ Colombia - PRÓXIMAMENTE
+│   │   └── page.tsx             ✅ Waitlist Ley 527/1999, precios COP
+│   ├── /mx/                     ✅ México - PRÓXIMAMENTE  
+│   │   └── page.tsx             ✅ Waitlist NOM-151-SCFI, precios MXN
+│   ├── /firmas-electronicas     ✅ Redirect automático por país
+│   ├── /verificacion-identidad  ✅ Redirect automático por país
+│   ├── /notaria-digital         ✅ Redirect automático por país
+│   ├── /precios                 ✅ Redirect automático por país
+│   ├── /blog/                   ✅ Blog compartido entre países
+│   │   ├── page.tsx             ✅ Lista dinámica con categorías
+│   │   └── [slug]/page.tsx      ✅ Posts individuales con SEO
+│   ├── sitemap.ts               ✅ SEO internacional + países
+│   └── robots.ts                ✅ Optimizado para crawling
 
 /apps/web        # App principal (app.tupatrimonio.app)
-└── [Dashboard y auth ya implementados]
+└── [Dashboard híbrido B2C/B2B - Fase 1]
 ```
 
 **🗄️ Base de Datos:**
@@ -1251,23 +1288,35 @@ Al completar Fase 0:
 - **Schema marketing**: 8 tablas ✅ COMPLETO
 - **Datos de prueba**: Categorías + FAQs + Testimonials ✅ INSERTADOS
 
-**🎯 Siguiente Task**: Crear las 3 landing pages restantes usando `/firmas-electronicas` como template
+**🎯 Siguiente Task**: Escribir contenido para blog y finalizar SEO + DNS
 
-#### 🎉 **LOGRO DEL DÍA (21 Oct 2025):**
-**EN UNA SOLA SESIÓN IMPLEMENTAMOS:**
-- ✅ **Schema marketing completo** (8 tablas enterprise-grade)
-- ✅ **Monorepo structure** (apps/marketing + apps/web)
-- ✅ **Marketing site funcionando** (homepage + blog + landing ejemplo)
-- ✅ **Deploy exitoso en Netlify** (ambas apps en producción)
-- ✅ **Foundation SEO** (sitemap dinámico, robots.txt, metadata API)
-- ✅ **Arquitectura escalable** lista para content y formularios
+#### 🎉 **LOGROS DE LAS SESIONES (21-22 Oct 2025):**
 
-**📈 PROGRESO FASE 0: ~60% COMPLETADO en 1 día**
+**🗄️ BACKEND & FOUNDATION:**
+- ✅ **3 schemas completos** (core: 13 tablas + marketing: 8 tablas + pgvector)
+- ✅ **Modelo híbrido B2C + B2B** documentado e implementado
+- ✅ **Monorepo enterprise** (apps/marketing + apps/web + packages)
+- ✅ **Deploy pipeline completo** en Netlify con workspaces
 
-**🎯 OBJETIVO MAÑANA: Completar Fase 0 (landing pages + formularios + contenido)**
-**⏱️ TIEMPO ESTIMADO: 7-11 horas para terminar marketing site completo**
+**🌍 MARKETING SITE INTERNACIONAL:**
+- ✅ **Estructura por países** /cl/, /co/, /mx/ con content localizado
+- ✅ **6 landing pages Chile** (homepage, firmas, verificación, notaría, precios, legal)
+- ✅ **Páginas próximamente** para Colombia y México con waitlists
+- ✅ **Blog dinámico** conectado a Supabase (categorías + posts)
+- ✅ **SEO internacional** (hreflang, sitemap por países, redirects)
 
-**📅 Última actualización: 21 Octubre 2025, 6:50 PM**
+**📧 LEAD CAPTURE SYSTEM:**
+- ✅ **WaitlistForm + ContactForm** components funcionando
+- ✅ **Formularios conectados** a marketing schema (waitlist_subscribers + contact_messages)
+- ✅ **Tracking por país** y fuente de leads
+- ✅ **Páginas de contacto** específicas por mercado
+
+**📈 PROGRESO FASE 0: ~85% COMPLETADO en 2 sesiones**
+
+**🎯 OBJETIVO RESTANTE: Finalizar Fase 0 (contenido + SEO + DNS)**
+**⏱️ TIEMPO ESTIMADO: 2-4 horas para terminar marketing site completo**
+
+**📅 Última actualización: 22 Octubre 2025, 10:30 AM**
 
 **DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
 - [ ] Completar migración 3: Schemas credits + billing

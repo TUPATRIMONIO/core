@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Shield, Clock, Users } from "lucide-react";
+import { CheckCircle, Shield, Clock, Users, Globe } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -17,17 +17,30 @@ export default function HomePage() {
               Firmas electrónicas válidas, verificación de identidad biométrica y notaría digital. 
               Todo en una plataforma segura y fácil de usar.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white px-8 py-4 text-lg"
-              >
-                Empieza Gratis
-              </Button>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
-                Ver Demo
-              </Button>
-            </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/cl">
+                  <Button 
+                    size="lg" 
+                    className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white px-8 py-4 text-lg"
+                  >
+                    Empieza Gratis en Chile
+                  </Button>
+                </Link>
+                <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+                  Ver Demo
+                </Button>
+              </div>
+              
+              {/* Country Selector */}
+              <div className="mt-8">
+                <div className="inline-flex items-center gap-2 text-sm text-gray-600 bg-white/80 rounded-full px-4 py-2">
+                  <Globe className="w-4 h-4" />
+                  <span>También disponible en:</span>
+                  <Link href="/co" className="text-[var(--tp-buttons)] hover:underline font-medium">Colombia</Link>
+                  <span>•</span>
+                  <Link href="/mx" className="text-[var(--tp-buttons)] hover:underline font-medium">México</Link>
+                </div>
+              </div>
           </div>
         </div>
       </section>
@@ -54,7 +67,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-4">
                 Firma documentos de forma segura y con validez legal. Reduce tiempos de gestión en un 90%.
               </p>
-              <Link href="/firmas-electronicas">
+              <Link href="/cl/firmas-electronicas">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
@@ -70,7 +83,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-4">
                 Verifica usuarios con biometría y documentos oficiales en menos de 3 minutos.
               </p>
-              <Link href="/verificacion-identidad">
+              <Link href="/cl/verificacion-identidad">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
@@ -86,7 +99,7 @@ export default function HomePage() {
               <p className="text-gray-600 mb-4">
                 Notariza documentos online con validez legal completa. Sin filas ni trámites presenciales.
               </p>
-              <Link href="/notaria-digital">
+              <Link href="/cl/notaria-digital">
                 <Button variant="outline" className="w-full">
                   Conocer Más
                 </Button>
