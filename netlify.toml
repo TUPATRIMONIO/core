@@ -152,15 +152,80 @@
     Access-Control-Allow-Methods = "GET, OPTIONS"
     Cache-Control = "public, max-age=300"
 
-# Configuración para apps múltiples (si se necesita)
+# =====================================================
+# CONFIGURACIÓN POR CONTEXTS - APPS MÚLTIPLES
+# =====================================================
+
+# Context para WEB APP (app.tupatrimonio.app)
+# Usar en Site 2 de Netlify
 [context.web]
   command = "npm run build:web"
   publish = "apps/web/.next"
+  
+  [context.web.environment]
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
 
+# Context para MARKETING (tupatrimonio.app)  
+# Usar en Site 1 de Netlify
 [context.marketing]
   command = "npm run build:marketing"
   publish = "apps/marketing/.next"
+  
+  [context.marketing.environment]
+    NODE_VERSION = "20"
+    NEXT_TELEMETRY_DISABLED = "1"
 
-# Configuración de desarrollo
+# Context para DEVELOPMENT (branches de desarrollo)
 [context.dev]
-  command = "npm run dev:marketing"
+  command = "npm run build:marketing"
+  publish = "apps/marketing/.next"
+
+# Context para BRANCH-DEPLOY (cualquier branch que no sea main)
+[context.branch-deploy]
+  command = "npm run build:marketing"
+  publish = "apps/marketing/.next"
+
+# =====================================================
+# HEADERS ESPECÍFICOS PARA WEB APP
+# =====================================================
+
+# Headers para proteger dashboard (solo context.web)
+[[headers]]
+  for = "/dashboard/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "private, no-cache, no-store"
+
+[[headers]]
+  for = "/login/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+# =====================================================
+# REDIRECTS PARA WEB APP (Solo Site 2)
+# =====================================================
+
+# Redirects de conveniencia para auth
+[[redirects]]
+  from = "/signin"
+  to = "/login"
+  status = 301
+
+[[redirects]]
+  from = "/signup" 
+  to = "/login"
+  status = 301
+
+# Redirect inteligente desde raíz
+[[redirects]]
+  from = "/"
+  to = "/dashboard"
+  status = 200
+  conditions = {Cookie = ["sb-*"]}
+
+# Fallback al login si no hay sesión
+[[redirects]]
+  from = "/"
+  to = "/login"
+  status = 200
