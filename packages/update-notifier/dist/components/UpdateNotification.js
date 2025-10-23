@@ -38,10 +38,24 @@ exports.UpdateNotification = UpdateNotification;
 /**
  * Componente de notificación de actualización
  * Muestra una notificación en la esquina superior derecha cuando hay una nueva versión
+ * Usa componentes de shadcn/ui para un diseño profesional
  */
 const react_1 = __importStar(require("react"));
 const useUpdateDetection_1 = require("../hooks/useUpdateDetection");
 const COUNTDOWN_SECONDS = 10;
+// Componentes shadcn/ui inline para evitar dependencias
+// En producción, estos se importarían desde @/components/ui
+const Alert = ({ className = '', children, ...props }) => (react_1.default.createElement("div", { role: "alert", className: `relative w-full rounded-lg border px-4 py-3 text-sm ${className}`, ...props }, children));
+const AlertTitle = ({ className = '', children, ...props }) => (react_1.default.createElement("h5", { className: `mb-1 font-medium leading-none tracking-tight ${className}`, ...props }, children));
+const AlertDescription = ({ className = '', children, ...props }) => (react_1.default.createElement("div", { className: `text-sm [&_p]:leading-relaxed ${className}`, ...props }, children));
+const Button = ({ className = '', variant = 'default', children, ...props }) => {
+    const variants = {
+        default: 'bg-[var(--tp-brand)] text-white hover:bg-[var(--tp-brand-light)] focus-visible:ring-[var(--tp-brand-20)]',
+        outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]',
+        ghost: 'hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]'
+    };
+    return (react_1.default.createElement("button", { className: `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 font-quicksand ${variants[variant]} ${className}`, ...props }, children));
+};
 function UpdateNotification() {
     const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = (0, useUpdateDetection_1.useUpdateDetection)();
     const [countdown, setCountdown] = (0, react_1.useState)(COUNTDOWN_SECONDS);
@@ -96,38 +110,68 @@ function UpdateNotification() {
             }
           }
 
+          @keyframes tp-pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.7;
+            }
+          }
+
           .tp-animate-slide-in {
-            animation: tp-slide-in 0.3s ease-out;
+            animation: tp-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+
+          .tp-pulse {
+            animation: tp-pulse 2s ease-in-out infinite;
           }
         `
             } }),
-        react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-96 bg-[var(--tp-background-light)] rounded-lg shadow-lg border border-[var(--tp-lines-30)] overflow-hidden tp-animate-slide-in", role: "alert", "aria-live": "assertive" },
-            react_1.default.createElement("div", { className: "h-1 bg-[var(--tp-lines-20)]" },
-                react_1.default.createElement("div", { className: "h-full bg-[var(--tp-brand)] transition-all duration-1000 ease-linear", style: { width: `${progress}%` } })),
-            react_1.default.createElement("div", { className: "p-4" },
-                react_1.default.createElement("div", { className: "flex items-start justify-between mb-3" },
-                    react_1.default.createElement("div", { className: "flex items-center gap-2" },
-                        react_1.default.createElement("svg", { className: "w-5 h-5 text-[var(--tp-brand)]", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            react_1.default.createElement("path", { d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })),
-                        react_1.default.createElement("h3", { className: "font-semibold text-[var(--tp-background-dark)] font-quicksand" }, "Nueva versi\u00F3n disponible")),
-                    react_1.default.createElement("button", { onClick: handleDismiss, className: "text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors", "aria-label": "Cerrar notificaci\u00F3n" },
-                        react_1.default.createElement("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
-                            react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M6 18L18 6M6 6l12 12" })))),
-                react_1.default.createElement("p", { className: "text-sm text-[var(--tp-lines)] mb-4 font-quicksand" },
-                    "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
-                    ' ',
-                    react_1.default.createElement("span", { className: "font-semibold text-[var(--tp-brand)]" }, countdown),
-                    " segundo",
-                    countdown !== 1 ? 's' : '',
-                    "."),
-                newVersion && (react_1.default.createElement("div", { className: "text-xs text-[var(--tp-lines-60)] mb-4 p-2 bg-[var(--tp-bg-light-50)] rounded font-quicksand" },
-                    react_1.default.createElement("div", null,
-                        "Versi\u00F3n actual: ",
-                        newVersion.version),
-                    react_1.default.createElement("div", { className: "text-[10px] mt-1" },
-                        "Desplegado: ",
-                        new Date(newVersion.deployedAt).toLocaleString('es-CL')))),
-                react_1.default.createElement("div", { className: "flex gap-2" },
-                    react_1.default.createElement("button", { onClick: handleUpdateNow, className: "flex-1 px-4 py-2 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white rounded-md text-sm font-medium transition-colors font-quicksand" }, "Actualizar ahora"),
-                    react_1.default.createElement("button", { onClick: handlePostpone, className: "flex-1 px-4 py-2 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white rounded-md text-sm font-medium transition-colors font-quicksand" }, "Posponer"))))));
+        react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-[420px] tp-animate-slide-in" },
+            react_1.default.createElement(Alert, { className: "bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm" },
+                react_1.default.createElement("div", { className: "absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden" },
+                    react_1.default.createElement("div", { className: "h-full bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] transition-all duration-1000 ease-linear", style: { width: `${progress}%` } })),
+                react_1.default.createElement("div", { className: "flex items-start gap-3 pt-2" },
+                    react_1.default.createElement("div", { className: "flex-shrink-0 mt-0.5" },
+                        react_1.default.createElement("div", { className: "relative" },
+                            react_1.default.createElement("div", { className: "absolute inset-0 bg-[var(--tp-brand-10)] rounded-full blur-md tp-pulse" }),
+                            react_1.default.createElement("svg", { className: "w-5 h-5 text-[var(--tp-brand)] relative z-10", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                react_1.default.createElement("path", { d: "M13 10V3L4 14h7v7l9-11h-7z" })))),
+                    react_1.default.createElement("div", { className: "flex-1 space-y-2" },
+                        react_1.default.createElement("div", { className: "flex items-start justify-between gap-2" },
+                            react_1.default.createElement(AlertTitle, { className: "text-[var(--tp-background-dark)] font-quicksand text-base" }, "Nueva versi\u00F3n disponible"),
+                            react_1.default.createElement("button", { onClick: handleDismiss, className: "text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]", "aria-label": "Cerrar notificaci\u00F3n" },
+                                react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                                    react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })))),
+                        react_1.default.createElement(AlertDescription, { className: "text-[var(--tp-lines)] font-quicksand" },
+                            react_1.default.createElement("p", { className: "mb-3" },
+                                "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
+                                ' ',
+                                react_1.default.createElement("span", { className: "font-semibold text-[var(--tp-brand)] inline-flex items-center justify-center min-w-[24px]" }, countdown),
+                                ' ',
+                                "segundo",
+                                countdown !== 1 ? 's' : '',
+                                "."),
+                            newVersion && (react_1.default.createElement("div", { className: "text-xs text-[var(--tp-lines-60)] mb-3 p-2.5 bg-[var(--tp-bg-light-50)] rounded-md border border-[var(--tp-lines-10)]" },
+                                react_1.default.createElement("div", { className: "flex items-center justify-between" },
+                                    react_1.default.createElement("span", { className: "font-medium" }, "Build ID:"),
+                                    react_1.default.createElement("span", { className: "font-mono" }, newVersion.buildId)),
+                                react_1.default.createElement("div", { className: "flex items-center justify-between mt-1" },
+                                    react_1.default.createElement("span", { className: "font-medium" }, "Desplegado:"),
+                                    react_1.default.createElement("span", { className: "text-[10px]" }, new Date(newVersion.deployedAt).toLocaleString('es-CL', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }))))),
+                            react_1.default.createElement("div", { className: "flex gap-2" },
+                                react_1.default.createElement(Button, { onClick: handleUpdateNow, variant: "default", className: "flex-1" },
+                                    react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                                        react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })),
+                                    "Actualizar ahora"),
+                                react_1.default.createElement(Button, { onClick: handlePostpone, variant: "outline", className: "flex-1" },
+                                    react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                                        react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" })),
+                                    "Posponer")))))))));
 }
