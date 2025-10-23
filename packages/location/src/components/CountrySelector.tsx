@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from '../hooks/useLocation';
 import { getSupportedCountries } from '../CountryConfig';
 import { ChevronDown, Globe, MapPin, CheckCircle, RotateCcw, Loader2 } from 'lucide-react';
@@ -118,27 +118,28 @@ export function CountrySelector({
           <ChevronDown className="w-3 h-3" />
         </button>
 
-      {isOpen && (
-        <CountrySelectorDropdown
-          countries={countries}
-          currentCountry={country}
-          source={source}
-          onCountrySelect={handleCountrySelect}
-          onResetToAuto={handleResetToAuto}
-          isManualSelection={isManualSelection}
-          onClose={() => setIsOpen(false)}
-        />
-      )}
+        {isOpen && (
+          <CountrySelectorDropdown
+            countries={countries}
+            currentCountry={country}
+            source={source}
+            onCountrySelect={handleCountrySelect}
+            onResetToAuto={handleResetToAuto}
+            isManualSelection={isManualSelection}
+            onClose={() => setIsOpen(false)}
+            variant={variant}
+          />
+        )}
 
-      {/* Modal de confirmación de navegación */}
-      {showNavigationDialog && (
-        <NavigationConfirmDialog
-          pendingCountry={countries.find(c => c.code === pendingCountryChange)}
-          onConfirm={handleConfirmNavigation}
-          onCancel={handleCancelNavigation}
-        />
-      )}
-    </div>
+        {/* Modal de confirmación de navegación */}
+        {showNavigationDialog && (
+          <NavigationConfirmDialog
+            pendingCountry={countries.find(c => c.code === pendingCountryChange)}
+            onConfirm={handleConfirmNavigation}
+            onCancel={handleCancelNavigation}
+          />
+        )}
+      </div>
     );
   }
 
@@ -165,6 +166,7 @@ export function CountrySelector({
           onResetToAuto={handleResetToAuto}
           isManualSelection={isManualSelection}
           onClose={() => setIsOpen(false)}
+          variant={variant}
         />
       )}
 
@@ -188,6 +190,7 @@ interface CountrySelectorDropdownProps {
   onResetToAuto: () => void;
   isManualSelection: boolean;
   onClose: () => void;
+  variant?: 'button' | 'minimal' | 'header';
 }
 
 function CountrySelectorDropdown({ 
@@ -197,18 +200,118 @@ function CountrySelectorDropdown({
   onCountrySelect, 
   onResetToAuto, 
   isManualSelection,
-  onClose 
+  onClose,
+  variant = 'button'
 }: CountrySelectorDropdownProps) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [styles, setStyles] = useState<React.CSSProperties>({
+    position: 'fixed',
+    opacity: 0, // Ocultar hasta que se calcule la posición
+  });
+  
+  const [position, setPosition] = useState<{
+    horizontal: 'left' | 'right';
+    vertical: 'top' | 'bottom';
+  }>({ 
+    horizontal: variant === 'minimal' ? 'left' : 'right', 
+    vertical: 'bottom' 
+  });
+
+  useEffect(() => {
+    if (!dropdownRef.current) return;
+    
+    const dropdown = dropdownRef.current;
+    const parent = dropdown.parentElement;
+    if (!parent) return;
+
+    const calculatePosition = () => {
+      const triggerRect = parent.getBoundingClientRect();
+      const dropdownWidth = 288; // w-72 = 288px
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const margin = 20;
+      const spacing = 8; // Espacio entre trigger y dropdown
+      
+      let leftPosition: number;
+      let topPosition: number;
+      
+      if (variant === 'minimal') {
+        // Para headers, siempre extender hacia la izquierda desde el borde derecho del trigger
+        leftPosition = triggerRect.right - dropdownWidth;
+        setPosition(prev => ({ ...prev, horizontal: 'left' }));
+      } else {
+        // Para otros variants, calcular según espacio disponible
+        const spaceOnRight = viewportWidth - triggerRect.right;
+        const spaceOnLeft = triggerRect.left;
+        const wouldOverflowRight = spaceOnRight < (dropdownWidth + margin);
+        const hasSpaceOnLeft = spaceOnLeft >= (dropdownWidth + margin);
+        
+        if (wouldOverflowRight && hasSpaceOnLeft) {
+          // Abrir hacia la izquierda
+          leftPosition = triggerRect.right - dropdownWidth;
+          setPosition(prev => ({ ...prev, horizontal: 'left' }));
+        } else {
+          // Abrir hacia la derecha (default)
+          leftPosition = triggerRect.left;
+          setPosition(prev => ({ ...prev, horizontal: 'right' }));
+        }
+      }
+      
+      // Clamp horizontal al viewport con margen
+      leftPosition = Math.max(margin, Math.min(leftPosition, viewportWidth - dropdownWidth - margin));
+      
+      // Calcular posición vertical (por defecto abajo)
+      topPosition = triggerRect.bottom + spacing;
+      
+      // Verificar si se sale por abajo
+      const dropdownHeight = dropdown.offsetHeight || 350; // Estimado
+      if (topPosition + dropdownHeight > viewportHeight - margin) {
+        // Abrir hacia arriba
+        topPosition = triggerRect.top - dropdownHeight - spacing;
+        setPosition(prev => ({ ...prev, vertical: 'top' }));
+      } else {
+        setPosition(prev => ({ ...prev, vertical: 'bottom' }));
+      }
+      
+      // Clamp vertical al viewport
+      topPosition = Math.max(margin, Math.min(topPosition, viewportHeight - margin));
+      
+      setStyles({
+        position: 'fixed',
+        top: topPosition,
+        left: leftPosition,
+        width: dropdownWidth,
+        opacity: 1, // Mostrar después de calcular
+      });
+    };
+
+    // Calcular posición inicial
+    requestAnimationFrame(calculatePosition);
+    
+    // Recalcular en resize y scroll
+    window.addEventListener('resize', calculatePosition);
+    window.addEventListener('scroll', calculatePosition, true);
+    
+    return () => {
+      window.removeEventListener('resize', calculatePosition);
+      window.removeEventListener('scroll', calculatePosition, true);
+    };
+  }, [variant]);
+
   return (
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 z-40" 
+        className="fixed inset-0 z-[9998]" 
         onClick={onClose}
       />
       
       {/* Dropdown content */}
-      <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+      <div 
+        ref={dropdownRef} 
+        className="bg-white border border-gray-200 rounded-lg shadow-lg z-[9999] max-h-[calc(100vh-80px)] overflow-y-auto"
+        style={styles}
+      >
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center gap-2 mb-4">
@@ -302,10 +405,10 @@ function NavigationConfirmDialog({ pendingCountry, onConfirm, onCancel }: Naviga
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 z-50" />
+      <div className="fixed inset-0 bg-black/50 z-[9998]" />
       
       {/* Dialog */}
-      <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="fixed inset-0 flex items-center justify-center z-[9999]">
         <div className="bg-white rounded-lg shadow-xl border max-w-md w-full mx-4 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-[var(--tp-buttons-10)] rounded-full flex items-center justify-center">

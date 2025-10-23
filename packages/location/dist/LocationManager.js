@@ -68,7 +68,7 @@ export class LocationManager {
      */
     static resetToAutoDetection() {
         this.removeFromStorage(this.PREFERENCE_KEY);
-        this.dispatchCountryChangeEvent(null, 'auto');
+        this.dispatchCountryChangeEvent(null, 'fallback');
     }
     /**
      * Detecta país automáticamente usando múltiples métodos
@@ -169,7 +169,7 @@ export class LocationManager {
                     'MXN': 'mx',
                     'COP': 'co'
                 };
-                if (currencyMap[currency]) {
+                if (currency && currencyMap[currency]) {
                     return currencyMap[currency];
                 }
             }

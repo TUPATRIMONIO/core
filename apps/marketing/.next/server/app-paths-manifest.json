@@ -1,4 +1,7 @@
 {
+  "/firmas-electronicas/page": "app/firmas-electronicas/page.js",
   "/page": "app/page.js",
-  "/co/page": "app/co/page.js"
+  "/cl/contacto/page": "app/cl/contacto/page.js",
+  "/co/firmas-electronicas/page": "app/co/firmas-electronicas/page.js",
+  "/cl/firmas-electronicas/page": "app/cl/firmas-electronicas/page.js"
 }

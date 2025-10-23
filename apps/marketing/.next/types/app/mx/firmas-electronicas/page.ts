@@ -1,8 +1,8 @@
-// File: D:\Aplicaciones-Desarrollos\TuPatrimonio Apps\tupatrimonio-app\apps\marketing\src\app\co\page.tsx
-import * as entry from '../../../../src/app/co/page.js'
+// File: D:\Aplicaciones-Desarrollos\TuPatrimonio Apps\tupatrimonio-app\apps\marketing\src\app\mx\firmas-electronicas\page.tsx
+import * as entry from '../../../../../src/app/mx/firmas-electronicas/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../src/app/co/page.js')
+type TEntry = typeof import('../../../../../src/app/mx/firmas-electronicas/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
