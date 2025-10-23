@@ -42,14 +42,14 @@ const Button = ({
   ...props 
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'ghost' }) => {
   const variants = {
-    default: 'bg-[var(--tp-brand)] text-white hover:bg-[var(--tp-brand-light)] focus-visible:ring-[var(--tp-brand-20)]',
-    outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]',
-    ghost: 'hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]'
+    default: 'bg-[var(--tp-buttons)] text-white hover:bg-[var(--tp-buttons-hover)] focus-visible:ring-ring focus-visible:ring-[3px]',
+    outline: 'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+    ghost: 'hover:bg-accent hover:text-accent-foreground'
   };
   
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 font-quicksand ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 outline-none ${variants[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -184,34 +184,14 @@ export function UpdateNotification() {
                 </button>
               </div>
 
-              <AlertDescription className="text-[var(--tp-lines)] font-quicksand">
-                <p className="mb-3">
+              <AlertDescription className="text-[var(--tp-lines)]">
+                <p className="mb-4">
                   Hay una actualización disponible. La página se actualizará automáticamente en{' '}
                   <span className="font-semibold text-[var(--tp-brand)] inline-flex items-center justify-center min-w-[24px]">
                     {countdown}
                   </span>{' '}
                   segundo{countdown !== 1 ? 's' : ''}.
                 </p>
-
-                {newVersion && (
-                  <div className="text-xs text-[var(--tp-lines-60)] mb-3 p-2.5 bg-[var(--tp-bg-light-50)] rounded-md border border-[var(--tp-lines-10)]">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Build ID:</span>
-                      <span className="font-mono">{newVersion.buildId}</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="font-medium">Desplegado:</span>
-                      <span className="text-[10px]">
-                        {new Date(newVersion.deployedAt).toLocaleString('es-CL', {
-                          day: '2-digit',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 {/* Botones de acción */}
                 <div className="flex gap-2">

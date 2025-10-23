@@ -50,11 +50,11 @@ const AlertTitle = ({ className = '', children, ...props }) => (react_1.default.
 const AlertDescription = ({ className = '', children, ...props }) => (react_1.default.createElement("div", { className: `text-sm [&_p]:leading-relaxed ${className}`, ...props }, children));
 const Button = ({ className = '', variant = 'default', children, ...props }) => {
     const variants = {
-        default: 'bg-[var(--tp-brand)] text-white hover:bg-[var(--tp-brand-light)] focus-visible:ring-[var(--tp-brand-20)]',
-        outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]',
-        ghost: 'hover:bg-[var(--tp-bg-light-50)] text-[var(--tp-background-dark)]'
+        default: 'bg-[var(--tp-buttons)] text-white hover:bg-[var(--tp-buttons-hover)] focus-visible:ring-ring focus-visible:ring-[3px]',
+        outline: 'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
+        ghost: 'hover:bg-accent hover:text-accent-foreground'
     };
-    return (react_1.default.createElement("button", { className: `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 font-quicksand ${variants[variant]} ${className}`, ...props }, children));
+    return (react_1.default.createElement("button", { className: `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 outline-none ${variants[variant]} ${className}`, ...props }, children));
 };
 function UpdateNotification() {
     const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = (0, useUpdateDetection_1.useUpdateDetection)();
@@ -144,8 +144,8 @@ function UpdateNotification() {
                             react_1.default.createElement("button", { onClick: handleDismiss, className: "text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]", "aria-label": "Cerrar notificaci\u00F3n" },
                                 react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
                                     react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })))),
-                        react_1.default.createElement(AlertDescription, { className: "text-[var(--tp-lines)] font-quicksand" },
-                            react_1.default.createElement("p", { className: "mb-3" },
+                        react_1.default.createElement(AlertDescription, { className: "text-[var(--tp-lines)]" },
+                            react_1.default.createElement("p", { className: "mb-4" },
                                 "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
                                 ' ',
                                 react_1.default.createElement("span", { className: "font-semibold text-[var(--tp-brand)] inline-flex items-center justify-center min-w-[24px]" }, countdown),
@@ -153,18 +153,6 @@ function UpdateNotification() {
                                 "segundo",
                                 countdown !== 1 ? 's' : '',
                                 "."),
-                            newVersion && (react_1.default.createElement("div", { className: "text-xs text-[var(--tp-lines-60)] mb-3 p-2.5 bg-[var(--tp-bg-light-50)] rounded-md border border-[var(--tp-lines-10)]" },
-                                react_1.default.createElement("div", { className: "flex items-center justify-between" },
-                                    react_1.default.createElement("span", { className: "font-medium" }, "Build ID:"),
-                                    react_1.default.createElement("span", { className: "font-mono" }, newVersion.buildId)),
-                                react_1.default.createElement("div", { className: "flex items-center justify-between mt-1" },
-                                    react_1.default.createElement("span", { className: "font-medium" }, "Desplegado:"),
-                                    react_1.default.createElement("span", { className: "text-[10px]" }, new Date(newVersion.deployedAt).toLocaleString('es-CL', {
-                                        day: '2-digit',
-                                        month: 'short',
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                    }))))),
                             react_1.default.createElement("div", { className: "flex gap-2" },
                                 react_1.default.createElement(Button, { onClick: handleUpdateNow, variant: "default", className: "flex-1" },
                                     react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
