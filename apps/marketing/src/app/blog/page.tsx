@@ -21,7 +21,7 @@ async function getBlogPosts() {
   
   try {
     const { data: posts, error } = await supabase
-      .from('blog_posts')
+      .from('marketing.blog_posts')
       .select(`
         id,
         title,
@@ -59,7 +59,7 @@ async function getBlogCategories() {
   
   try {
     const { data: categories, error } = await supabase
-      .from('blog_categories')
+      .from('marketing.blog_categories')
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });

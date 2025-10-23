@@ -118,7 +118,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: posts } = await supabase
-      .from('blog_posts')
+      .from('marketing.blog_posts')
       .select('slug, updated_at, published_at')
       .eq('published', true)
       .order('published_at', { ascending: false });
@@ -141,7 +141,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: categories } = await supabase
-      .from('blog_categories')
+      .from('marketing.blog_categories')
       .select('slug')
       .eq('is_active', true);
 

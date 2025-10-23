@@ -17,7 +17,7 @@ async function getBlogPost(slug: string) {
   
   try {
     const { data: post, error } = await supabase
-      .from('blog_posts')
+      .from('marketing.blog_posts')
       .select(`
         id,
         title,
@@ -47,7 +47,7 @@ async function getBlogPost(slug: string) {
 
     // Increment view count
     await supabase
-      .from('blog_posts')
+      .from('marketing.blog_posts')
       .update({ view_count: (post.view_count || 0) + 1 })
       .eq('id', post.id);
 

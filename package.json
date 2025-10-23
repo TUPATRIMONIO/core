@@ -21,6 +21,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "eslint": "^9",
+    "supabase": "^2.53.6",
     "typescript": "^5"
   }
 }

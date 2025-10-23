@@ -44,7 +44,7 @@ export default function ContactForm({
       const supabase = createClient();
       
       const { data, error } = await supabase
-        .from('contact_messages')
+        .from('marketing.contact_messages')
         .insert({
           name: name.trim(),
           email: email.trim(),

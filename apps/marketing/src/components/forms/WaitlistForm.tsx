@@ -35,7 +35,7 @@ export default function WaitlistForm({ country, source = 'homepage', className =
       const supabase = createClient();
       
       const { data, error } = await supabase
-        .from('waitlist_subscribers')
+        .from('marketing.waitlist_subscribers')
         .insert({
           email: email.trim(),
           first_name: firstName.trim() || null,
