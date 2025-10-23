@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
+import { UpdateNotification } from '@tupatrimonio/update-notifier';
+import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import "../../../../packages/ui/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -68,7 +70,9 @@ export default function RootLayout({
   return (
     <html lang="es-CL">
       <body className={inter.className}>
+        <ServiceWorkerRegistration />
         <LocationProvider>
+          <UpdateNotification />
           <main>{children}</main>
         </LocationProvider>
       </body>

@@ -2,6 +2,8 @@ import type {Metadata} from "next";
 import {Geist, Geist_Mono, Quicksand} from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
+import { UpdateNotification } from '@tupatrimonio/update-notifier';
+import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import "../../../../packages/ui/globals.css";
 
 const geistSans = Geist({
@@ -36,7 +38,9 @@ export default function RootLayout({
       `${geistSans.variable} ${geistMono.variable} ${quicksand.variable} antialiased`
     )}>
       <body className="bg-background text-foreground">
+        <ServiceWorkerRegistration />
         <LocationProvider>
+          <UpdateNotification />
           <main className="min-h-screen flex flex-col items-center">
             {children}
           </main>
