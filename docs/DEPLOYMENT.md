@@ -49,6 +49,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 - ✅ **Personalización automática** por país
 - ✅ **Performance optimizado** para interacción
 - ✅ **Redirects de auth** incluidos
+- ✅ **Progressive Web App (PWA)** instalable y offline
+- ✅ **Actualizaciones automáticas** con notificación
 
 ### Variables de Entorno
 ```bash
@@ -168,6 +170,74 @@ git push origin main
 - [ ] **Selector de país** en header del dashboard
 - [ ] **Precios localizados** según país detectado
 - [ ] **No errores** de imports o CSS
+- [ ] **PWA instalable** desde navegador (ícono en barra)
+- [ ] **Manifest accesible** → `/manifest.json`
+- [ ] **Service Worker** registrado → DevTools Application
+- [ ] **Funciona offline** → Test con DevTools Network Offline
+
+## 📱 PWA Deployment (Web App)
+
+### Pre-Deploy: Generar Íconos
+```bash
+cd apps/web
+
+# 1. Colocar ícono base
+cp tu-icono.png public/icons/icon-base.png
+
+# 2. Generar todos los tamaños
+npm run generate-icons
+
+# 3. Verificar
+ls public/icons/
+```
+
+### Build Automático
+El build de Next.js incluye automáticamente:
+- ✅ `manifest.json` → Servido en `/manifest.json`
+- ✅ `sw.js` → Service Worker registrado
+- ✅ `version.json` → Generado en cada build para detección de updates
+- ✅ Todos los íconos en `/icons/*`
+
+### Verificación PWA Post-Deploy
+
+#### Lighthouse Audit
+```bash
+# Chrome DevTools → Lighthouse
+# Ejecutar audit con categoría "Progressive Web App"
+# Score esperado: 90+
+```
+
+#### Manual Testing
+1. **Instalabilidad**:
+   - Abrir sitio en móvil/desktop
+   - Verificar ícono de instalación en barra
+   - Instalar y verificar funcionamiento
+
+2. **Offline**:
+   - Instalar PWA
+   - Desconectar internet
+   - Verificar que páginas visitadas cargan
+   - Verificar página offline personalizada
+
+3. **Actualizaciones**:
+   - Hacer nuevo deploy
+   - App debe detectar actualización automáticamente
+   - Notificación con countdown debe aparecer
+
+### Netlify Headers para PWA
+Ya configurados en `netlify.toml`:
+```toml
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+```
 
 ## 🐛 Troubleshooting
 
@@ -175,6 +245,34 @@ git push origin main
 ```bash
 # Causa: Package location no compilado antes de app
 # Solución: build:location se ejecuta automáticamente
+```
+
+### PWA: Íconos no aparecen
+```bash
+# Causa: Íconos no generados antes del deploy
+# Solución:
+cd apps/web
+npm run generate-icons
+git add public/icons/
+git commit -m "add: PWA icons"
+git push
+```
+
+### PWA: Service Worker no funciona
+```bash
+# Verificar en producción (no funciona en npm run dev)
+# Debe ser HTTPS o localhost
+# Revisar DevTools → Application → Service Workers
+```
+
+### PWA: No se puede instalar
+```bash
+# Verificar:
+1. HTTPS activo en producción ✓
+2. manifest.json accesible ✓
+3. Service Worker registrado ✓
+4. Al menos un ícono 192x192px ✓
+5. start_url accesible ✓
 ```
 
 ### Error: "Edge Functions not working"

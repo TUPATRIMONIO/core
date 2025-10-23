@@ -25,6 +25,29 @@ const quicksand = Quicksand({
 export const metadata: Metadata = {
   title: "TuPatrimonio - Gestión de Patrimonio Personal",
   description: "Plataforma para gestionar y hacer seguimiento de tu patrimonio personal",
+  manifest: "/manifest.json",
+  themeColor: "#800039",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TuPatrimonio",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: "cover",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({

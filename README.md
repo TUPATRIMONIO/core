@@ -110,6 +110,22 @@ npm run dev                 # http://localhost:3000
 npm run build
 ```
 
+### Setup PWA (Web App)
+```bash
+cd apps/web
+
+# 1. Colocar ícono base (512x512px)
+cp tu-icono.png public/icons/icon-base.png
+
+# 2. Generar íconos en todos los tamaños
+npm run generate-icons
+
+# 3. Test PWA en producción local
+npm run pwa:test             # http://localhost:3000
+```
+
+Ver guía completa: `apps/web/QUICK-START-PWA.md`
+
 ### Build Scripts
 ```bash
 npm run build:location      # Compilar package location
@@ -167,6 +183,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_key_anonima
 - ✅ **Dashboard responsivo** con información localizada
 - ✅ **Selector de país** en header para cambiar configuración
 - ✅ **Autenticación** integrada con Supabase
+- ✅ **Progressive Web App (PWA)** instalable y funciona offline
+- ✅ **Actualizaciones automáticas** con notificación al usuario
 
 ### Funcionalidades Compartidas
 - ✅ **Detección de ubicación** híbrida (IP + navegador)

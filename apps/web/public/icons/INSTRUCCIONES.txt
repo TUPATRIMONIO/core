@@ -1,0 +1,96 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║   📱 INSTRUCCIONES - Colocar Ícono Base para PWA           ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+PASO 1: Guardar tu ícono aquí
+────────────────────────────────────────────────────────────────
+
+Guarda el ícono circular de TuPatrimonio (el que adjuntaste) 
+en ESTA CARPETA con el nombre:
+
+    icon-base.png
+
+Ruta completa:
+    apps/web/public/icons/icon-base.png
+
+
+REQUISITOS del ícono:
+────────────────────────────────────────────────────────────────
+✓ Formato: PNG
+✓ Tamaño recomendado: 512x512px o mayor
+✓ Fondo: Transparente o con color #800039 (vino de TuPatrimonio)
+
+
+PASO 2: Instalar dependencias
+────────────────────────────────────────────────────────────────
+
+Abre una terminal en: apps/web/
+
+Ejecuta:
+    npm install
+
+
+PASO 3: Generar todos los íconos
+────────────────────────────────────────────────────────────────
+
+En la misma terminal, ejecuta:
+    npm run generate-icons
+
+Esto generará automáticamente:
+✓ icon-72x72.png
+✓ icon-96x96.png
+✓ icon-128x128.png
+✓ icon-144x144.png
+✓ icon-152x152.png
+✓ icon-192x192.png
+✓ icon-384x384.png
+✓ icon-512x512.png
+✓ apple-touch-icon.png
+✓ favicon-16x16.png
+✓ favicon-32x32.png
+✓ favicon.ico (en /public/)
+
+
+PASO 4: Test
+────────────────────────────────────────────────────────────────
+
+Para probar la PWA localmente:
+    npm run pwa:test
+
+Luego abre: http://localhost:3000
+
+En Chrome DevTools:
+- Ve a Application tab
+- Verifica que Manifest muestra todos los íconos
+- Verifica que Service Worker está registrado
+
+
+PASO 5: Deploy
+────────────────────────────────────────────────────────────────
+
+Hacer commit y push:
+    git add .
+    git commit -m "feat: agregar íconos PWA"
+    git push
+
+¡Netlify detectará todo automáticamente!
+
+
+═══════════════════════════════════════════════════════════════
+
+AYUDA ADICIONAL:
+- Ver: apps/web/QUICK-START-PWA.md
+- Ver: apps/web/README-PWA.md
+- Ver: apps/web/PWA-IMPLEMENTATION-SUMMARY.md
+
+TROUBLESHOOTING:
+- Si sharp no se instala: npm install sharp --save-dev
+- Si no encuentra icon-base.png: verificar ruta exacta
+- Si Service Worker no funciona: solo funciona en producción
+
+═══════════════════════════════════════════════════════════════
+
+¡Listo! Tu PWA estará completamente funcional. 🎉
+

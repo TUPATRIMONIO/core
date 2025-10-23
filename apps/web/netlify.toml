@@ -28,6 +28,34 @@
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "private, no-cache, no-store"
 
+# Headers para PWA - Service Worker
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Service-Worker-Allowed = "/"
+    Content-Type = "application/javascript"
+
+# Headers para PWA - Manifest
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+    Cache-Control = "public, max-age=3600"
+
+# Headers para PWA - Version
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Content-Type = "application/json"
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Headers para PWA - Íconos
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # Headers para páginas de autenticación
 [[headers]]
   for = "/login/*"

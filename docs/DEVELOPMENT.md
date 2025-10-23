@@ -155,14 +155,35 @@ src/app/
 ```bash
 cd apps/web  
 npm run dev                 # Puerto 3000
+npm run generate-icons     # Generar íconos PWA
+npm run pwa:test           # Test PWA (build + start)
 
 # Estructura importante:
 src/app/
 ├── dashboard/              # Dashboard principal
 ├── login/                  # Sistema de auth
 ├── auth/callback/          # OAuth callback
-└── layout.tsx             # Layout con LocationProvider
+├── offline/               # Página offline PWA
+└── layout.tsx             # Layout con LocationProvider + PWA
 ```
+
+#### PWA Setup
+```bash
+# 1. Colocar ícono base (512x512px PNG)
+cp tu-icono.png apps/web/public/icons/icon-base.png
+
+# 2. Instalar dependencias
+cd apps/web
+npm install
+
+# 3. Generar todos los íconos
+npm run generate-icons
+
+# 4. Test en producción local
+npm run pwa:test
+```
+
+Ver documentación completa en `apps/web/README-PWA.md`
 
 ## 🚦 Testing
 
@@ -202,6 +223,23 @@ import "../../../../packages/ui/globals.css";
 ```bash
 # Normal - Solo funcionan en producción Netlify
 # Localmente usa fallback a detección por navegador
+```
+
+#### PWA: Service Worker no se registra
+```bash
+# El Service Worker solo funciona en:
+# - Producción (NODE_ENV=production)
+# - HTTPS o localhost
+# - Para testing: npm run pwa:test
+```
+
+#### PWA: Íconos no aparecen
+```bash
+# Solución: Generar íconos desde ícono base
+npm run generate-icons
+
+# Verificar que existan en:
+ls apps/web/public/icons/
 ```
 
 ## 📝 Agregando Nuevas Páginas por País
