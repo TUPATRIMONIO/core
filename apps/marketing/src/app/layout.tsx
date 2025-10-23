@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
+import { VersionNotificationProvider } from '../components/VersionNotificationProvider';
 import "../../../../packages/ui/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -67,7 +68,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es-CL">
+      <head>
+        {/* Meta tags para información de build */}
+        <meta name="build-timestamp" content={process.env.BUILD_TIMESTAMP || Date.now().toString()} />
+        <meta name="app-version" content={process.env.npm_package_version || '0.1.0'} />
+      </head>
       <body className={inter.className}>
+        <VersionNotificationProvider />
         <LocationProvider>
           <main>{children}</main>
         </LocationProvider>

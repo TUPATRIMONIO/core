@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {Geist, Geist_Mono, Quicksand} from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
+import { VersionNotificationProvider } from '../components/VersionNotificationProvider';
 import "../../../../packages/ui/globals.css";
 
 const geistSans = Geist({
@@ -35,7 +36,13 @@ export default function RootLayout({
       "min-h-screen bg-background font-quicksand antialiased",
       `${geistSans.variable} ${geistMono.variable} ${quicksand.variable} antialiased`
     )}>
+      <head>
+        {/* Meta tags para información de build */}
+        <meta name="build-timestamp" content={process.env.BUILD_TIMESTAMP || Date.now().toString()} />
+        <meta name="app-version" content={process.env.npm_package_version || '0.1.0'} />
+      </head>
       <body className="bg-background text-foreground">
+        <VersionNotificationProvider />
         <LocationProvider>
           <main className="min-h-screen flex flex-col items-center">
             {children}
