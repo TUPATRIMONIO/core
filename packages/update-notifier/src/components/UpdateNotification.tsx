@@ -96,7 +96,7 @@ export function UpdateNotification() {
       }} />
       
       <div className="fixed top-4 right-4 z-50 w-[420px] tp-animate-slide-in">
-        <Alert className="bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm">
+        <Alert className="!grid-cols-1 !gap-0 bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm">
           {/* Barra de progreso superior */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden">
             <div
@@ -126,7 +126,7 @@ export function UpdateNotification() {
 
             <div className="flex-1 space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <AlertTitle className="text-[var(--tp-background-dark)] font-quicksand text-base">
+                <AlertTitle className="!col-start-auto text-[var(--tp-background-dark)] font-quicksand text-base">
                   Nueva versión disponible
                 </AlertTitle>
                 <button
@@ -140,7 +140,7 @@ export function UpdateNotification() {
                 </button>
               </div>
 
-              <AlertDescription className="text-[var(--tp-lines)]">
+              <AlertDescription className="!col-start-auto text-[var(--tp-lines)]">
                 <p className="mb-4">
                   Hay una actualización disponible. La página se actualizará automáticamente en{' '}
                   <span className="font-semibold text-[var(--tp-brand)] inline-flex items-center justify-center min-w-[24px]">
