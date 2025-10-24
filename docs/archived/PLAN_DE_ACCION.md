@@ -1162,24 +1162,35 @@ Al completar Fase 0:
   - ✅ Página de contacto específica para Chile (/cl/contacto)
   - ✅ Tracking por país y fuente de leads
   - ✅ **Lead capture funcionando en producción** 📧
+- ✅ **Sistema de Storage para Imágenes del Blog COMPLETADO** (24 Oct 2025)
+  - ✅ 6 buckets de storage públicos creados en Supabase
+  - ✅ Políticas RLS configuradas (lectura pública, escritura autenticada)
+  - ✅ Package @tupatrimonio/utils con helpers de imágenes
+  - ✅ Integración en marketing app con blog-images.ts
+  - ✅ Campos adicionales en BD (icon_url, content_images)
+  - ✅ Placeholders SVG para fallbacks
+  - ✅ Documentación completa en DEVELOPMENT.md
+  - ✅ **Sistema completo de gestión de imágenes con optimización** 📸
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)
-- 📋 Configuración de Storage buckets
 - 📋 Integración GitHub para migraciones automáticas
 
 #### 📋 **ROADMAP DE MIGRACIONES PENDIENTES:**
 ```
 ✅ Migración 1: 20251021120052_enable-pgvector.sql
 ✅ Migración 2: 20251021120854_schema-core.sql
-🔄 Migración 3: schema-credits-billing.sql (EN PROGRESO)
-📋 Migración 4: schema-services.sql (communications, workflows, files, audit)
-📋 Migración 5: schema-business.sql (signatures, verifications, notary, documents)
-📋 Migración 6: schema-ai.sql (ai_customer_service, ai_document_review con VECTOR)
-📋 Migración 7: schema-analytics.sql (usage_metrics, ai_usage_metrics)
-📋 Migración 8: rls-policies.sql (seguridad multi-tenant)
-📋 Migración 9: functions-triggers.sql (lógica de negocio)
-📋 Migración 10: seed-data.sql (datos iniciales)
+✅ Migración 3: 20251021194734_schema-marketing.sql
+✅ Migración 4: 20251024190000_blog-storage-setup.sql (STORAGE BUCKETS)
+✅ Migración 5: 20251024191000_add-image-fields-marketing.sql (IMAGE FIELDS)
+📋 Migración 6: schema-credits-billing.sql (PENDIENTE)
+📋 Migración 7: schema-services.sql (communications, workflows, files, audit)
+📋 Migración 8: schema-business.sql (signatures, verifications, notary, documents)
+📋 Migración 9: schema-ai.sql (ai_customer_service, ai_document_review con VECTOR)
+📋 Migración 10: schema-analytics.sql (usage_metrics, ai_usage_metrics)
+📋 Migración 11: rls-policies.sql (seguridad multi-tenant)
+📋 Migración 12: functions-triggers.sql (lógica de negocio)
+📋 Migración 13: seed-data.sql (datos iniciales)
 ```
 
 #### ✅ **PROGRESO FASE 0 - ACTUALIZADO (21 Oct 2025):**
@@ -1285,18 +1296,27 @@ Al completar Fase 0:
 
 **🗄️ Base de Datos:**
 - **Schema core**: 13 tablas ✅ COMPLETO
-- **Schema marketing**: 8 tablas ✅ COMPLETO
+- **Schema marketing**: 8 tablas ✅ COMPLETO (+ campos de imágenes)
+- **Storage buckets**: 6 buckets para blog ✅ COMPLETO
 - **Datos de prueba**: Categorías + FAQs + Testimonials ✅ INSERTADOS
+
+**📦 Packages Compartidos:**
+- **@tupatrimonio/location**: Sistema de ubicación ✅ COMPLETO
+- **@tupatrimonio/ui**: Componentes Shadcn/UI ✅ COMPLETO
+- **@tupatrimonio/utils**: Helpers de imágenes ✅ COMPLETO
+- **@tupatrimonio/update-notifier**: Notificaciones de actualizaciones ✅ COMPLETO
 
 **🎯 Siguiente Task**: Escribir contenido para blog y finalizar SEO + DNS
 
-#### 🎉 **LOGROS DE LAS SESIONES (21-22 Oct 2025):**
+#### 🎉 **LOGROS DE LAS SESIONES (21-24 Oct 2025):**
 
 **🗄️ BACKEND & FOUNDATION:**
-- ✅ **3 schemas completos** (core: 13 tablas + marketing: 8 tablas + pgvector)
+- ✅ **5 migraciones aplicadas** (pgvector + core + marketing + storage + image fields)
+- ✅ **3 schemas completos** (core: 13 tablas + marketing: 8 tablas + storage: 6 buckets)
 - ✅ **Modelo híbrido B2C + B2B** documentado e implementado
 - ✅ **Monorepo enterprise** (apps/marketing + apps/web + packages)
 - ✅ **Deploy pipeline completo** en Netlify con workspaces
+- ✅ **4 packages compartidos** (location + ui + utils + update-notifier)
 
 **🌍 MARKETING SITE INTERNACIONAL:**
 - ✅ **Estructura por países** /cl/, /co/, /mx/ con content localizado
@@ -1311,12 +1331,20 @@ Al completar Fase 0:
 - ✅ **Tracking por país** y fuente de leads
 - ✅ **Páginas de contacto** específicas por mercado
 
-**📈 PROGRESO FASE 0: ~85% COMPLETADO en 2 sesiones**
+**📸 SISTEMA DE IMÁGENES DEL BLOG:**
+- ✅ **6 buckets de storage** organizados por propósito (featured, content, categories, authors, thumbnails, meta)
+- ✅ **Package @tupatrimonio/utils** con helpers completos de optimización
+- ✅ **Transformaciones automáticas** (resize, format, quality) via Supabase
+- ✅ **Campos adicionales en BD** (icon_url en categories, content_images en posts)
+- ✅ **Documentación completa** con ejemplos y workflow
+- ✅ **Placeholders SVG** para fallbacks
+
+**📈 PROGRESO FASE 0: ~90% COMPLETADO en 3 sesiones**
 
 **🎯 OBJETIVO RESTANTE: Finalizar Fase 0 (contenido + SEO + DNS)**
 **⏱️ TIEMPO ESTIMADO: 2-4 horas para terminar marketing site completo**
 
-**📅 Última actualización: 22 Octubre 2025, 10:30 AM**
+**📅 Última actualización: 24 Octubre 2025, 7:00 PM**
 
 **DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
 - [ ] Completar migración 3: Schemas credits + billing

@@ -185,6 +185,212 @@ npm run pwa:test
 
 Ver documentación completa en `apps/web/README-PWA.md`
 
+## 📸 Sistema de Imágenes del Blog
+
+### Estructura de Storage en Supabase
+
+El blog utiliza 6 buckets organizados en Supabase Storage:
+
+| Bucket | Propósito | Tamaño Max | Formatos |
+|--------|-----------|------------|----------|
+| `blog-featured` | Imágenes destacadas de artículos | 5MB | jpg, png, webp, gif |
+| `blog-content` | Imágenes dentro del contenido | 3MB | jpg, png, webp, gif |
+| `blog-categories` | Iconos de categorías | 1MB | jpg, png, webp, svg |
+| `blog-authors` | Avatares de autores | 1MB | jpg, png, webp |
+| `blog-thumbnails` | Miniaturas optimizadas | 2MB | jpg, png, webp |
+| `blog-meta` | Imágenes para SEO (og:image) | 2MB | jpg, png, webp |
+
+**Acceso:** Todos los buckets son públicos para lectura. Solo usuarios autenticados pueden subir/modificar.
+
+### Convenciones de Nomenclatura
+
+Seguir estas convenciones al subir imágenes manualmente:
+
+```
+Featured:   {slug}-featured.webp
+Content:    {slug}-content-1.webp, {slug}-content-2.webp, ...
+Category:   {category-slug}-icon.webp
+Author:     {author-slug}-avatar.webp
+Meta:       {slug}-og.webp
+```
+
+**Ejemplos:**
+```
+guia-firma-electronica-chile-featured.webp
+guia-firma-electronica-chile-content-1.webp
+guia-firma-electronica-chile-content-2.webp
+firma-electronica-icon.webp
+maria-gonzalez-avatar.webp
+guia-firma-electronica-chile-og.webp
+```
+
+### Tamaños Recomendados
+
+| Tipo | Dimensiones | Formato Preferido |
+|------|-------------|-------------------|
+| Featured | 1200×630 px | WebP |
+| Content | 800×600 px | WebP |
+| Category Icon | 256×256 px | WebP o SVG |
+| Author Avatar | 200×200 px | WebP |
+| Meta (OG Image) | 1200×630 px | WebP |
+| Thumbnail | 300×200 px | WebP |
+
+**Tip:** Usa WebP para mejor compresión sin pérdida de calidad.
+
+### Subir Imágenes Manualmente
+
+#### Desde Supabase Dashboard:
+
+1. Ir a **Storage** en el panel de Supabase
+2. Seleccionar el bucket apropiado (ej: `blog-featured`)
+3. Click en **Upload file**
+4. Seleccionar la imagen siguiendo convenciones de nomenclatura
+5. Confirmar upload
+
+#### URLs Generadas:
+
+Las imágenes públicas estarán disponibles en:
+```
+https://[project].supabase.co/storage/v1/object/public/blog-featured/guia-firma-electronica-chile-featured.webp
+```
+
+### Uso en Código
+
+#### Helper Functions
+
+```typescript
+import { 
+  getFeaturedImageUrl,
+  getContentImageUrl,
+  getCategoryIconUrl,
+  getBlogImageUrl 
+} from '@/lib/blog-images';
+
+// Imagen destacada (optimizada)
+const featuredUrl = getFeaturedImageUrl('guia-firma-electronica-chile', 'medium');
+
+// Imagen de contenido
+const contentUrl = getContentImageUrl('guia-firma-electronica-chile', 1, 'large');
+
+// Icono de categoría
+const iconUrl = getCategoryIconUrl('firma-electronica');
+
+// URL directa con transformaciones
+const customUrl = getBlogImageUrl(
+  'featured', 
+  'guia-firma-electronica-chile-featured.webp',
+  'medium',  // thumbnail | small | medium | large | full
+  80         // quality (1-100)
+);
+```
+
+#### En Componentes con Next.js Image
+
+```typescript
+import Image from 'next/image';
+import { getBlogImageProps } from '@/lib/blog-images';
+
+export function BlogCard({ post }) {
+  const imageProps = getBlogImageProps(
+    post.featured_image_url,
+    post.title,
+    'medium'
+  );
+
+  return (
+    <article>
+      <Image {...imageProps} />
+      <h2>{post.title}</h2>
+    </article>
+  );
+}
+```
+
+#### Fallback para Imágenes Faltantes
+
+```typescript
+import { getImageUrlWithFallback } from '@/lib/blog-images';
+
+// Si featured_image_url es null, usa placeholder
+const safeUrl = getImageUrlWithFallback(
+  post.featured_image_url,
+  'featured'  // 'featured' | 'avatar' | 'icon'
+);
+```
+
+### Campos en Base de Datos
+
+#### blog_posts
+
+```sql
+-- Campo existente
+featured_image_url TEXT  -- URL completa de Supabase Storage
+
+-- Campo nuevo (agregado en migración)
+content_images JSONB DEFAULT '[]'  -- Metadatos de imágenes en contenido
+```
+
+Ejemplo de `content_images`:
+```json
+[
+  {
+    "url": "https://[project].supabase.co/storage/v1/object/public/blog-content/guia-firma-electronica-chile-content-1.webp",
+    "alt": "Ejemplo de firma electrónica",
+    "caption": "Proceso de firma paso a paso",
+    "order": 1,
+    "width": 800,
+    "height": 600
+  }
+]
+```
+
+#### blog_categories
+
+```sql
+-- Campo nuevo (agregado en migración)
+icon_url TEXT  -- URL del icono de la categoría
+```
+
+### Optimización Automática
+
+Las URLs generadas con helpers incluyen transformaciones de Supabase:
+
+- **Resize:** Ajuste automático al tamaño solicitado
+- **Format:** Conversión a WebP para mejor compresión
+- **Quality:** Compresión ajustable (default 80%)
+- **Lazy Loading:** Compatible con Next.js Image
+
+```typescript
+// Esto genera una URL optimizada automáticamente:
+getBlogImageUrl('featured', 'imagen.jpg', 'medium')
+
+// URL resultante incluye transformaciones:
+// .../storage/v1/render/image/public/blog-featured/imagen.jpg?width=600&quality=80&format=webp
+```
+
+### Workflow Completo
+
+1. **Crear artículo en BD:**
+```sql
+INSERT INTO marketing.blog_posts (title, slug, content, ...) 
+VALUES ('Mi Artículo', 'mi-articulo', '...', ...);
+```
+
+2. **Subir imagen destacada:**
+   - Ir a Storage > `blog-featured`
+   - Upload: `mi-articulo-featured.webp` (1200×630 px)
+
+3. **Actualizar URL en BD:**
+```sql
+UPDATE marketing.blog_posts
+SET featured_image_url = 'https://[project].supabase.co/storage/v1/object/public/blog-featured/mi-articulo-featured.webp'
+WHERE slug = 'mi-articulo';
+```
+
+4. **Verificar en Frontend:**
+   - La imagen aparecerá automáticamente optimizada
+   - Fallback se muestra si URL es null
+
 ## 🚦 Testing
 
 ### Verificar Sistema de Ubicación

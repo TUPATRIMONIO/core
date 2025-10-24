@@ -1,0 +1,27 @@
+{
+  "name": "@tupatrimonio/utils",
+  "version": "1.0.0",
+  "description": "Utilidades compartidas para TuPatrimonio",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./image-helpers": {
+      "types": "./dist/image-helpers.d.ts",
+      "default": "./dist/image-helpers.js"
+    }
+  }
+}
+
