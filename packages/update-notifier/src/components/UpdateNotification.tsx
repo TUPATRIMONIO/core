@@ -42,7 +42,7 @@ const Button = ({
   ...props 
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'ghost' }) => {
   const variants = {
-    default: 'bg-[var(--tp-brand)] text-white hover:bg-[var(--tp-brand-light)] focus-visible:ring-ring focus-visible:ring-[3px]',
+    default: 'bg-[var(--tp-buttons)] text-white hover:bg-[var(--tp-buttons-hover)] focus-visible:ring-ring focus-visible:ring-[3px]',
     outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]',
     ghost: 'hover:bg-accent hover:text-accent-foreground'
   };
