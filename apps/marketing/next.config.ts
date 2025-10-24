@@ -11,7 +11,25 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // Ignorar warnings TS
   },
   images: {
-    domains: ['localhost'], // Para imágenes locales
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '54321',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '54321',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
   generateBuildId: async () => {
     // Generar un ID único basado en timestamp
