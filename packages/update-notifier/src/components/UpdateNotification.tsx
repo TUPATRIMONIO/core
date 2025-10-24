@@ -95,8 +95,8 @@ export function UpdateNotification() {
         `
       }} />
       
-      <div className="fixed top-4 right-4 z-50 w-[420px] tp-animate-slide-in">
-        <Alert className="!grid-cols-1 !gap-0 bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm">
+      <div className="fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in">
+        <Alert className="bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl">
           {/* Barra de progreso superior */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden">
             <div
@@ -105,76 +105,72 @@ export function UpdateNotification() {
             />
           </div>
 
-          <div className="flex items-start gap-3 pt-2">
-            {/* Icono con animación */}
-            <div className="flex-shrink-0 mt-0.5">
-              <div className="relative">
-                <div className="absolute inset-0 bg-[var(--tp-brand-10)] rounded-full blur-md tp-pulse"></div>
-                <svg
-                  className="w-5 h-5 text-[var(--tp-brand)] relative z-10"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <AlertTitle className="!col-start-auto text-[var(--tp-background-dark)] font-quicksand text-base">
-                  Nueva versión disponible
-                </AlertTitle>
-                <button
-                  onClick={handleDismiss}
-                  className="text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]"
-                  aria-label="Cerrar notificación"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <AlertDescription className="!col-start-auto text-[var(--tp-lines)]">
-                <p className="mb-4">
-                  Hay una actualización disponible. La página se actualizará automáticamente en{' '}
-                  <span className="font-semibold text-[var(--tp-brand)] inline-flex items-center justify-center min-w-[24px]">
-                    {countdown}
-                  </span>{' '}
-                  segundo{countdown !== 1 ? 's' : ''}.
-                </p>
-
-                {/* Botones de acción */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleUpdateNow}
-                    variant="default"
-                    className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Actualizar ahora
-                  </Button>
-                  <Button
-                    onClick={handlePostpone}
-                    variant="outline"
-                    className="flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Posponer
-                  </Button>
-                </div>
-              </AlertDescription>
-            </div>
+          {/* Ícono del rayo - estructura correcta de shadcn/ui */}
+          <div className="relative flex-shrink-0">
+            <div className="absolute inset-0 bg-[var(--tp-brand-10)] rounded-full blur-md tp-pulse"></div>
+            <svg
+              className="text-[var(--tp-brand)] relative z-10"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
+
+          {/* Botón de cerrar */}
+          <button
+            onClick={handleDismiss}
+            className="absolute top-3 right-3 text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]"
+            aria-label="Cerrar notificación"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <AlertTitle className="text-[var(--tp-background-dark)] font-quicksand text-base mb-2 pr-6">
+            Nueva versión disponible
+          </AlertTitle>
+
+          <AlertDescription className="text-[var(--tp-lines)] space-y-3">
+            <p>
+              Hay una actualización disponible. La página se actualizará automáticamente en{' '}
+              <span className="font-semibold text-[var(--tp-brand)]">
+                {countdown}
+              </span>{' '}
+              segundo{countdown !== 1 ? 's' : ''}.
+            </p>
+
+            {/* Botones de acción */}
+            <div className="flex gap-2 pt-1">
+              <Button
+                onClick={handleUpdateNow}
+                variant="default"
+                size="sm"
+                className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Actualizar ahora
+              </Button>
+              <Button
+                onClick={handlePostpone}
+                variant="outline"
+                size="sm"
+                className="flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Posponer
+              </Button>
+            </div>
+          </AlertDescription>
         </Alert>
       </div>
     </>
