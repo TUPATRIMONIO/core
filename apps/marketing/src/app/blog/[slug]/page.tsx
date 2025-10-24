@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronLeft, Share2 } from "lucide-react";
@@ -13,11 +13,11 @@ interface BlogPostPageProps {
 }
 
 async function getBlogPost(slug: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     const { data: post, error } = await supabase
-      .from('marketing.blog_posts')
+      .from('blog_posts')
       .select(`
         id,
         title,
@@ -30,7 +30,8 @@ async function getBlogPost(slug: string) {
         view_count,
         seo_title,
         seo_description,
-        blog_categories (
+        category_id,
+        blog_categories!category_id (
           name,
           slug,
           color
@@ -47,7 +48,7 @@ async function getBlogPost(slug: string) {
 
     // Increment view count
     await supabase
-      .from('marketing.blog_posts')
+      .from('blog_posts')
       .update({ view_count: (post.view_count || 0) + 1 })
       .eq('id', post.id);
 
@@ -59,7 +60,8 @@ async function getBlogPost(slug: string) {
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const post = await getBlogPost(params.slug);
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
   if (!post) {
     return {
@@ -73,7 +75,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     openGraph: {
       title: post.seo_title || post.title,
       description: post.seo_description || post.excerpt,
-      url: `https://tupatrimonio.app/blog/${params.slug}`,
+      url: `https://tupatrimonio.app/blog/${slug}`,
       images: post.featured_image_url ? [
         {
           url: post.featured_image_url,
@@ -96,7 +98,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await getBlogPost(params.slug);
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
   if (!post) {
     notFound();

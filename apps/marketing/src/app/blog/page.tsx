@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 };
 
 async function getBlogPosts() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     const { data: posts, error } = await supabase
-      .from('marketing.blog_posts')
+      .from('blog_posts')
       .select(`
         id,
         title,
@@ -32,7 +32,8 @@ async function getBlogPosts() {
         published_at,
         reading_time,
         view_count,
-        blog_categories (
+        category_id,
+        blog_categories!category_id (
           name,
           slug,
           color
@@ -55,11 +56,11 @@ async function getBlogPosts() {
 }
 
 async function getBlogCategories() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   try {
     const { data: categories, error } = await supabase
-      .from('marketing.blog_categories')
+      .from('blog_categories')
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
