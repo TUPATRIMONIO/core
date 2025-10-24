@@ -128,7 +128,7 @@ function UpdateNotification() {
                 react_1.default.createElement("button", { onClick: handleDismiss, className: "absolute top-3 right-3 text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]", "aria-label": "Cerrar notificaci\u00F3n" },
                     react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
                         react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }))),
-                react_1.default.createElement(ui_1.AlertTitle, { className: "text-[var(--tp-background-dark)] font-josefin-sans text-base mb-2 pr-6" }, "Nueva versi\u00F3n disponible"),
+                react_1.default.createElement(ui_1.AlertTitle, { className: "text-[var(--tp-background-dark)] font-plus-jakarta-sans text-base mb-2 pr-6" }, "Nueva versi\u00F3n disponible"),
                 react_1.default.createElement(ui_1.AlertDescription, { className: "text-[var(--tp-lines)] space-y-3" },
                     react_1.default.createElement("p", null,
                         "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
