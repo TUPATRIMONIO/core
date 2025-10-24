@@ -2,21 +2,40 @@
   "name": "@tupatrimonio/ui",
   "version": "1.0.0",
   "description": "Sistema de estilos y UI compartido para TuPatrimonio",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "globals.css",
-    "index.js"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "echo 'UI package ready'",
-    "dev": "echo 'UI package in development mode'"
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "ui",
     "styles",
     "css",
     "design-system",
-    "tupatrimonio"
+    "tupatrimonio",
+    "shadcn",
+    "components"
   ],
   "author": "TuPatrimonio Team",
   "license": "MIT"

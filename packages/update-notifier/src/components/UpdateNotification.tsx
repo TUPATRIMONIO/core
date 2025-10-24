@@ -8,54 +8,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useUpdateDetection } from '../hooks/useUpdateDetection';
+import { Alert, AlertTitle, AlertDescription } from '@tupatrimonio/ui';
+import { Button } from '@tupatrimonio/ui';
 
 const COUNTDOWN_SECONDS = 10;
-
-// Componentes shadcn/ui inline para evitar dependencias
-// En producción, estos se importarían desde @/components/ui
-const Alert = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    role="alert"
-    className={`relative w-full rounded-lg border px-4 py-3 text-sm ${className}`}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-const AlertTitle = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <h5 className={`mb-1 font-medium leading-none tracking-tight ${className}`} {...props}>
-    {children}
-  </h5>
-);
-
-const AlertDescription = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={`text-sm [&_p]:leading-relaxed ${className}`} {...props}>
-    {children}
-  </div>
-);
-
-const Button = ({ 
-  className = '', 
-  variant = 'default',
-  children, 
-  ...props 
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'ghost' }) => {
-  const variants = {
-    default: 'bg-[var(--tp-buttons)] text-white hover:bg-[var(--tp-buttons-hover)] focus-visible:ring-ring focus-visible:ring-[3px]',
-    outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]',
-    ghost: 'hover:bg-accent hover:text-accent-foreground'
-  };
-  
-  return (
-    <button
-      className={`inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 outline-none ${variants[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
 
 export function UpdateNotification() {
   const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = useUpdateDetection();
@@ -198,7 +154,7 @@ export function UpdateNotification() {
                   <Button
                     onClick={handleUpdateNow}
                     variant="default"
-                    className="flex-1"
+                    className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -208,7 +164,7 @@ export function UpdateNotification() {
                   <Button
                     onClick={handlePostpone}
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

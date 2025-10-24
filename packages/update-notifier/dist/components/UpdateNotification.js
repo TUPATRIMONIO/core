@@ -42,20 +42,9 @@ exports.UpdateNotification = UpdateNotification;
  */
 const react_1 = __importStar(require("react"));
 const useUpdateDetection_1 = require("../hooks/useUpdateDetection");
+const ui_1 = require("@tupatrimonio/ui");
+const ui_2 = require("@tupatrimonio/ui");
 const COUNTDOWN_SECONDS = 10;
-// Componentes shadcn/ui inline para evitar dependencias
-// En producción, estos se importarían desde @/components/ui
-const Alert = ({ className = '', children, ...props }) => (react_1.default.createElement("div", { role: "alert", className: `relative w-full rounded-lg border px-4 py-3 text-sm ${className}`, ...props }, children));
-const AlertTitle = ({ className = '', children, ...props }) => (react_1.default.createElement("h5", { className: `mb-1 font-medium leading-none tracking-tight ${className}`, ...props }, children));
-const AlertDescription = ({ className = '', children, ...props }) => (react_1.default.createElement("div", { className: `text-sm [&_p]:leading-relaxed ${className}`, ...props }, children));
-const Button = ({ className = '', variant = 'default', children, ...props }) => {
-    const variants = {
-        default: 'bg-[var(--tp-buttons)] text-white hover:bg-[var(--tp-buttons-hover)] focus-visible:ring-ring focus-visible:ring-[3px]',
-        outline: 'border border-[var(--tp-lines-30)] bg-transparent hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]',
-        ghost: 'hover:bg-accent hover:text-accent-foreground'
-    };
-    return (react_1.default.createElement("button", { className: `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 outline-none ${variants[variant]} ${className}`, ...props }, children));
-};
 function UpdateNotification() {
     const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = (0, useUpdateDetection_1.useUpdateDetection)();
     const [countdown, setCountdown] = (0, react_1.useState)(COUNTDOWN_SECONDS);
@@ -129,7 +118,7 @@ function UpdateNotification() {
         `
             } }),
         react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-[420px] tp-animate-slide-in" },
-            react_1.default.createElement(Alert, { className: "bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm" },
+            react_1.default.createElement(ui_1.Alert, { className: "bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl backdrop-blur-sm" },
                 react_1.default.createElement("div", { className: "absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden" },
                     react_1.default.createElement("div", { className: "h-full bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] transition-all duration-1000 ease-linear", style: { width: `${progress}%` } })),
                 react_1.default.createElement("div", { className: "flex items-start gap-3 pt-2" },
@@ -140,11 +129,11 @@ function UpdateNotification() {
                                 react_1.default.createElement("path", { d: "M13 10V3L4 14h7v7l9-11h-7z" })))),
                     react_1.default.createElement("div", { className: "flex-1 space-y-2" },
                         react_1.default.createElement("div", { className: "flex items-start justify-between gap-2" },
-                            react_1.default.createElement(AlertTitle, { className: "text-[var(--tp-background-dark)] font-quicksand text-base" }, "Nueva versi\u00F3n disponible"),
+                            react_1.default.createElement(ui_1.AlertTitle, { className: "text-[var(--tp-background-dark)] font-quicksand text-base" }, "Nueva versi\u00F3n disponible"),
                             react_1.default.createElement("button", { onClick: handleDismiss, className: "text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]", "aria-label": "Cerrar notificaci\u00F3n" },
                                 react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
                                     react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" })))),
-                        react_1.default.createElement(AlertDescription, { className: "text-[var(--tp-lines)]" },
+                        react_1.default.createElement(ui_1.AlertDescription, { className: "text-[var(--tp-lines)]" },
                             react_1.default.createElement("p", { className: "mb-4" },
                                 "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
                                 ' ',
@@ -154,11 +143,11 @@ function UpdateNotification() {
                                 countdown !== 1 ? 's' : '',
                                 "."),
                             react_1.default.createElement("div", { className: "flex gap-2" },
-                                react_1.default.createElement(Button, { onClick: handleUpdateNow, variant: "default", className: "flex-1" },
+                                react_1.default.createElement(ui_2.Button, { onClick: handleUpdateNow, variant: "default", className: "flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white" },
                                     react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
                                         react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })),
                                     "Actualizar ahora"),
-                                react_1.default.createElement(Button, { onClick: handlePostpone, variant: "outline", className: "flex-1" },
+                                react_1.default.createElement(ui_2.Button, { onClick: handlePostpone, variant: "outline", className: "flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]" },
                                     react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
                                         react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" })),
                                     "Posponer")))))))));
