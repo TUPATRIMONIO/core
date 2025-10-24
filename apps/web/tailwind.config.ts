@@ -154,7 +154,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        quicksand: ["var(--font-quicksand)"],
+        "josefin-sans": ["var(--font-josefin-sans)"],
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },

@@ -132,7 +132,7 @@ export function UpdateNotification() {
             </svg>
           </button>
 
-          <AlertTitle className="text-[var(--tp-background-dark)] font-quicksand text-base mb-2 pr-6">
+          <AlertTitle className="text-[var(--tp-background-dark)] font-josefin-sans text-base mb-2 pr-6">
             Nueva versión disponible
           </AlertTitle>
 

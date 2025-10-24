@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Quicksand } from 'next/font/google';
+import { Josefin_Sans } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import "../../../../packages/ui/globals.css";
 
-const quicksand = Quicksand({
+const josefinSans = Josefin_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
@@ -71,8 +71,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL" className="font-quicksand antialiased">
-      <body className={quicksand.className}>
+    <html lang="es-CL" className="antialiased">
+      <body className={josefinSans.className}>
         <ServiceWorkerRegistration />
         <LocationProvider>
           <UpdateNotification />

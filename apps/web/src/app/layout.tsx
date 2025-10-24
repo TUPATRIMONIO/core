@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {Geist, Geist_Mono, Quicksand} from "next/font/google";
+import {Geist, Geist_Mono, Josefin_Sans} from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const quicksand = Quicksand({
-  variable: "--font-quicksand",
+const josefinSans = Josefin_Sans({
+  variable: "--font-josefin-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 });
@@ -57,10 +57,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={cn(
-      "min-h-screen bg-background font-quicksand antialiased",
-      `${geistSans.variable} ${geistMono.variable} ${quicksand.variable} antialiased`
+      "min-h-screen bg-background antialiased",
+      `${geistSans.variable} ${geistMono.variable} ${josefinSans.variable} antialiased`
     )}>
-      <body className="bg-background text-foreground">
+      <body className={cn("bg-background text-foreground", josefinSans.className)}>
         <ServiceWorkerRegistration />
         <LocationProvider>
           <UpdateNotification />
