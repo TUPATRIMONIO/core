@@ -12,7 +12,7 @@ export default function Home() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">TuPatrimonio</h1>
-          <p className="text-lg text-gray-600 mb-8">Gestión de tu patrimonio</p>
+          <p className="text-lg text-gray-600 mb-8">Gestión inteligentede tu patrimonio</p>
         </div>
 
         <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/60 p-8 max-w-md w-full">
