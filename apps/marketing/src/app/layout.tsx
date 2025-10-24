@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from 'next/font/google';
+import { Quicksand } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import "../../../../packages/ui/globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://tupatrimonio.app'),
@@ -68,8 +71,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL">
-      <body className={inter.className}>
+    <html lang="es-CL" className="font-quicksand antialiased">
+      <body className={quicksand.className}>
         <ServiceWorkerRegistration />
         <LocationProvider>
           <UpdateNotification />
