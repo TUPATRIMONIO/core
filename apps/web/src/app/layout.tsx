@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {Geist, Geist_Mono, Plus_Jakarta_Sans} from "next/font/google";
+import {Geist, Geist_Mono, Outfit} from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
@@ -16,10 +16,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-plus-jakarta-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -58,9 +57,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={cn(
       "min-h-screen bg-background antialiased",
-      `${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} antialiased`
+      `${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`
     )}>
-      <body className={cn("bg-background text-foreground", plusJakartaSans.className)}>
+      <body className={cn("bg-background text-foreground", outfit.className)}>
         <ServiceWorkerRegistration />
         <LocationProvider>
           <UpdateNotification />

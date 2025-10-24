@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import "../../../../packages/ui/globals.css";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -72,7 +71,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es-CL" className="antialiased">
-      <body className={plusJakartaSans.className}>
+      <body className={outfit.className}>
         <ServiceWorkerRegistration />
         <LocationProvider>
           <UpdateNotification />
