@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronLeft, Share2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { MarkdownContent } from "@/components/MarkdownContent";
 
 interface BlogPostPageProps {
   params: {
@@ -187,20 +188,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Content */}
           <div className="bg-white rounded-xl p-8 shadow-sm border">
-            <div 
-              className="prose prose-lg prose-gray max-w-none
-                prose-headings:text-gray-900 
-                prose-headings:font-bold
-                prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
-                prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
-                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-                prose-a:text-[var(--tp-buttons)] prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-gray-900 prose-strong:font-semibold
-                prose-ul:my-4 prose-ol:my-4
-                prose-li:text-gray-700 prose-li:my-1
-              "
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+            <MarkdownContent content={post.content} />
           </div>
 
           {/* Bottom CTA */}
