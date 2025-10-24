@@ -514,6 +514,88 @@ git add .
 git commit -m "feat: nueva funcionalidad"
 ```
 
+## 🔐 Sistema de Roles y Permisos
+
+### Organización Platform
+
+El sistema usa una organización especial "TuPatrimonio Platform" para administrar permisos del equipo interno.
+
+**Tipos de organizaciones:**
+- `personal`: Usuarios individuales (B2C)
+- `business`: Empresas (B2B)
+- `platform`: Equipo TuPatrimonio (acceso administrativo)
+
+### Roles de Plataforma
+
+| Rol | Slug | Nivel | Permisos |
+|-----|------|-------|----------|
+| Platform Super Admin | `platform_super_admin` | 10 | Acceso total al sistema |
+| Marketing Admin | `marketing_admin` | 7 | Gestión de contenido marketing |
+
+### Permisos del Blog
+
+**Lectura pública:** Cualquier usuario puede leer posts publicados
+
+**Gestión (crear/editar/eliminar):** Solo admins de plataforma
+- Blog posts
+- Categorías
+- FAQs
+- Testimonios
+- Case studies
+- Newsletter subscribers (vista)
+- Contact messages (vista)
+- Waitlist subscribers (vista)
+
+### Storage Buckets y Permisos
+
+| Bucket | Tipo | Lectura | Escritura |
+|--------|------|---------|-----------|
+| `marketing-images` | Público | Todos | Platform admins |
+| `public-assets` | Público | Todos | Platform admins |
+| `documents` | Privado | Owner + admins | Owner + admins |
+| `ai-training-data` | Privado | Platform admins | Platform admins |
+
+### Setup de Usuarios Admin
+
+**⚠️ Ejecutar después de aplicar migración `20251024190000_platform-organization-setup.sql`**
+
+Ver guía completa en: `supabase/SETUP-ADMIN-USERS.md`
+
+**Pasos rápidos:**
+1. Aplicar migración
+2. Crear usuario en Supabase Auth Dashboard
+3. Ejecutar SQL para vincular a org platform (ver `setup-admin-example.sql`)
+4. Verificar con `SELECT marketing.is_platform_admin()`
+
+### Verificar Permisos
+
+```sql
+-- Ver tus roles
+SELECT 
+  o.name as organization,
+  r.name as role,
+  ou.status
+FROM core.organization_users ou
+JOIN core.organizations o ON o.id = ou.organization_id
+JOIN core.roles r ON r.id = ou.role_id
+WHERE ou.user_id = auth.uid();
+
+-- Verificar si eres admin platform
+SELECT marketing.is_platform_admin();  -- Debe retornar true
+```
+
+### Troubleshooting Permisos
+
+**"No puedo crear posts en el blog"**
+- Verifica que `marketing.is_platform_admin()` retorna `true`
+- Verifica que estás en la org platform con rol apropiado
+- Ver política RLS: `SELECT * FROM pg_policies WHERE tablename = 'blog_posts'`
+
+**"Storage rechaza mis uploads"**
+- Verifica permisos del bucket: `SELECT * FROM storage.policies WHERE bucket_id = 'marketing-images'`
+- Confirma que eres platform admin
+- Ver buckets: `SELECT * FROM storage.buckets`
+
 ---
 
 **Para más detalles**: Ver `docs/DEPLOYMENT.md` para deploy o `docs/ARCHITECTURE.md` para decisiones técnicas.
