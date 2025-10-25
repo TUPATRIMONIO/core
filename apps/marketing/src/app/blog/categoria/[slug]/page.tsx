@@ -17,6 +17,7 @@ async function getCategoryBySlug(slug: string) {
   
   try {
     const { data: category, error } = await supabase
+      .schema('marketing')
       .from('blog_categories')
       .select('*')
       .eq('slug', slug)
@@ -40,6 +41,7 @@ async function getPostsByCategory(categoryId: string) {
   
   try {
     const { data: posts, error } = await supabase
+      .schema('marketing')
       .from('blog_posts')
       .select(`
         id,
@@ -52,7 +54,7 @@ async function getPostsByCategory(categoryId: string) {
         reading_time,
         view_count,
         category_id,
-        blog_categories!category_id (
+        blog_categories (
           name,
           slug,
           color

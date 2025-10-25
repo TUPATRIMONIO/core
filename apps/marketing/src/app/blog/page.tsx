@@ -21,6 +21,7 @@ async function getBlogPosts() {
   
   try {
     const { data: posts, error } = await supabase
+      .schema('marketing')
       .from('blog_posts')
       .select(`
         id,
@@ -33,7 +34,7 @@ async function getBlogPosts() {
         reading_time,
         view_count,
         category_id,
-        blog_categories!category_id (
+        blog_categories (
           name,
           slug,
           color
@@ -60,6 +61,7 @@ async function getBlogCategories() {
   
   try {
     const { data: categories, error } = await supabase
+      .schema('marketing')
       .from('blog_categories')
       .select('*')
       .eq('is_active', true)

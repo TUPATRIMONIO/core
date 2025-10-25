@@ -18,6 +18,7 @@ async function getBlogPost(slug: string) {
   
   try {
     const { data: post, error } = await supabase
+      .schema('marketing')
       .from('blog_posts')
       .select(`
         id,
@@ -32,7 +33,7 @@ async function getBlogPost(slug: string) {
         seo_title,
         seo_description,
         category_id,
-        blog_categories!category_id (
+        blog_categories (
           name,
           slug,
           color
@@ -49,6 +50,7 @@ async function getBlogPost(slug: string) {
 
     // Increment view count
     await supabase
+      .schema('marketing')
       .from('blog_posts')
       .update({ view_count: (post.view_count || 0) + 1 })
       .eq('id', post.id);
@@ -126,12 +128,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <header className="mb-8">
             {post.blog_categories && (
               <div className="mb-4">
-                <Link href={`/blog/categoria/${post.blog_categories.slug}`}>
+                <Link href={`/blog/categoria/${(post.blog_categories as any).slug}`}>
                   <span 
                     className="text-sm px-3 py-1 rounded-full text-white hover:opacity-80 transition-opacity"
-                    style={{ backgroundColor: post.blog_categories.color }}
+                    style={{ backgroundColor: (post.blog_categories as any).color }}
                   >
-                    {post.blog_categories.name}
+                    {(post.blog_categories as any).name}
                   </span>
                 </Link>
               </div>
