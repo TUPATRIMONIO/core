@@ -177,7 +177,7 @@ export default function BlogPostEditor({ post, mode }: BlogPostEditorProps) {
               placeholder="url-del-post"
             />
             <p className="text-sm text-gray-500">
-              URL: /blog/{formData.slug}
+              URL: /blog/{categories.find(c => c.id === formData.category_id)?.slug || 'general'}/{formData.slug}
             </p>
           </div>
 

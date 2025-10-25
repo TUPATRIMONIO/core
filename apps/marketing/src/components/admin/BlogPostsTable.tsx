@@ -37,6 +37,7 @@ interface BlogPost {
   author_name: string
   blog_categories?: {
     name: string
+    slug: string
   }
 }
 
@@ -112,7 +113,10 @@ export default function BlogPostsTable({ posts }: BlogPostsTableProps) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Link href={`/blog/${post.slug}`} target="_blank">
+                  <Link 
+                    href={`/blog/${post.blog_categories?.slug || 'general'}/${post.slug}`} 
+                    target="_blank"
+                  >
                     <Button variant="ghost" size="sm">
                       <Eye className="w-4 h-4" />
                     </Button>

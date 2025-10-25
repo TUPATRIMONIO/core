@@ -9,11 +9,12 @@ import { MarkdownContent } from "@/components/MarkdownContent";
 
 interface BlogPostPageProps {
   params: {
+    category: string;
     slug: string;
   };
 }
 
-async function getBlogPost(slug: string) {
+async function getBlogPost(slug: string, categorySlug: string) {
   const supabase = await createClient();
   
   try {
@@ -48,6 +49,13 @@ async function getBlogPost(slug: string) {
       return null;
     }
 
+    // Verificar que la categoría coincida (o que sea "general" para posts sin categoría)
+    const postCategorySlug = (post.blog_categories as any)?.slug || 'general';
+    if (postCategorySlug !== categorySlug) {
+      console.error('Category mismatch');
+      return null;
+    }
+
     // Increment view count
     await supabase
       .schema('marketing')
@@ -63,8 +71,8 @@ async function getBlogPost(slug: string) {
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const { slug, category } = await params;
+  const post = await getBlogPost(slug, category);
 
   if (!post) {
     return {
@@ -78,7 +86,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     openGraph: {
       title: post.seo_title || post.title,
       description: post.seo_description || post.excerpt,
-      url: `https://tupatrimonio.app/blog/${slug}`,
+      url: `https://tupatrimonio.app/blog/${category}/${slug}`,
       images: post.featured_image_url ? [
         {
           url: post.featured_image_url,
@@ -101,12 +109,16 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const { slug, category } = await params;
+  const post = await getBlogPost(slug, category);
 
   if (!post) {
     notFound();
   }
+
+  const categorySlug = (post.blog_categories as any)?.slug || 'general';
+  const categoryName = (post.blog_categories as any)?.name || 'General';
+  const categoryColor = (post.blog_categories as any)?.color || '#800039';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,18 +138,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <header className="mb-8">
-            {post.blog_categories && (
-              <div className="mb-4">
-                <Link href={`/blog/categoria/${(post.blog_categories as any).slug}`}>
-                  <span 
-                    className="text-sm px-3 py-1 rounded-full text-white hover:opacity-80 transition-opacity"
-                    style={{ backgroundColor: (post.blog_categories as any).color }}
-                  >
-                    {(post.blog_categories as any).name}
-                  </span>
-                </Link>
-              </div>
-            )}
+            <div className="mb-4">
+              <Link href={`/blog/categoria/${categorySlug}`}>
+                <span 
+                  className="text-sm px-3 py-1 rounded-full text-white hover:opacity-80 transition-opacity"
+                  style={{ backgroundColor: categoryColor }}
+                >
+                  {categoryName}
+                </span>
+              </Link>
+            </div>
             
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               {post.title}
@@ -220,3 +230,4 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     </div>
   );
 }
+

@@ -118,18 +118,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: posts } = await supabase
-      .from('marketing.blog_posts')
-      .select('slug, updated_at, published_at')
+      .schema('marketing')
+      .from('blog_posts')
+      .select(`
+        slug,
+        updated_at,
+        published_at,
+        blog_categories (slug)
+      `)
       .eq('published', true)
       .order('published_at', { ascending: false });
 
     if (posts) {
-      blogPosts = posts.map(post => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(post.updated_at || post.published_at),
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-      }));
+      blogPosts = posts.map(post => {
+        const categorySlug = (post.blog_categories as any)?.slug || 'general';
+        return {
+          url: `${baseUrl}/blog/${categorySlug}/${post.slug}`,
+          lastModified: new Date(post.updated_at || post.published_at),
+          changeFrequency: 'monthly' as const,
+          priority: 0.7,
+        };
+      });
     }
   } catch (error) {
     console.error('Error generating sitemap for blog posts:', error);
@@ -141,7 +150,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: categories } = await supabase
-      .from('marketing.blog_categories')
+      .schema('marketing')
+      .from('blog_categories')
       .select('slug')
       .eq('is_active', true);
 

@@ -197,7 +197,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         <span>{post.reading_time || 5} min</span>
                       </div>
                     </div>
-                    <Link href={`/blog/${post.slug}`}>
+                    <Link href={`/blog/${(post.blog_categories as any)?.slug || 'general'}/${post.slug}`}>
                       <Button variant="outline" size="sm" className="w-full">
                         Leer Más
                       </Button>

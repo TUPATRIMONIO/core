@@ -176,7 +176,7 @@ export default async function BlogPage() {
                             {new Date(posts[0].published_at).toLocaleDateString('es-CL')}
                           </span>
                         </div>
-                        <Link href={`/blog/${posts[0].slug}`}>
+                        <Link href={`/blog/${(posts[0].blog_categories as any)?.slug || 'general'}/${posts[0].slug}`}>
                           <Button className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
                             Leer Artículo
                             <ChevronRight className="w-4 h-4 ml-2" />
@@ -229,7 +229,7 @@ export default async function BlogPage() {
                           <span>{post.reading_time || 5} min</span>
                         </div>
                       </div>
-                      <Link href={`/blog/${post.slug}`}>
+                      <Link href={`/blog/${(post.blog_categories as any)?.slug || 'general'}/${post.slug}`}>
                         <Button variant="outline" size="sm" className="w-full">
                           Leer Más
                         </Button>
