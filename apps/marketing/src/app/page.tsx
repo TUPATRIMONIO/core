@@ -1,10 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Shield, Clock, Users, Globe } from "lucide-react";
 import Link from "next/link";
+import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from "@/components/StructuredData";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
+      {/* Structured Data para SEO */}
+      <StructuredData data={generateOrganizationSchema()} />
+      <StructuredData data={generateWebSiteSchema()} />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

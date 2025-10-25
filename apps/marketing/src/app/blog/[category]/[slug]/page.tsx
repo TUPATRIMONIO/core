@@ -6,6 +6,7 @@ import { Clock, User, ChevronLeft, Share2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import { StructuredData, generateArticleSchema, generateBreadcrumbSchema } from "@/components/StructuredData";
 
 interface BlogPostPageProps {
   params: {
@@ -120,8 +121,32 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const categoryName = (post.blog_categories as any)?.name || 'General';
   const categoryColor = (post.blog_categories as any)?.color || '#800039';
 
+  // Structured Data para SEO
+  const articleSchema = generateArticleSchema({
+    title: post.title,
+    excerpt: post.excerpt,
+    author_name: post.author_name,
+    published_at: post.published_at,
+    featured_image_url: post.featured_image_url,
+    seo_description: post.seo_description,
+    content: post.content,
+    reading_time: post.reading_time,
+    category: categoryName,
+    slug: slug,
+    categorySlug: categorySlug
+  })
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Blog", url: "https://tupatrimonio.app/blog" },
+    { name: categoryName, url: `https://tupatrimonio.app/blog/categoria/${categorySlug}` },
+    { name: post.title }
+  ])
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Structured Data para SEO */}
+      <StructuredData data={articleSchema} />
+      <StructuredData data={breadcrumbSchema} />
       {/* Back Navigation */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
