@@ -54,7 +54,11 @@ export default function AdminSidebar() {
       <nav className="space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+          // Verificación más específica para evitar que /admin/blog y /admin/blog/categories estén activos al mismo tiempo
+          const isActive = pathname === item.href || 
+            (pathname.startsWith(item.href + '/') && 
+             // Si es /admin/blog, solo activar si no es una subruta específica como categories
+             !(item.href === '/admin/blog' && pathname.includes('/categories')))
           
           return (
             <Link
