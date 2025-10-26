@@ -596,6 +596,117 @@ SELECT marketing.is_platform_admin();  -- Debe retornar true
 - Confirma que eres platform admin
 - Ver buckets: `SELECT * FROM storage.buckets`
 
+## 📊 Google Analytics 4 y Search Console
+
+### Configuración Inicial
+
+#### 1. Crear Propiedad en Google Analytics 4
+
+**Importante:** Crear propiedad nueva para `tupatrimonio.app` (separada del `.io` existente)
+
+1. Ir a https://analytics.google.com
+2. Click en **Admin** (engranaje abajo a la izquierda)
+3. En "Property", click **Create Property**
+4. Configurar:
+   - Property name: `TuPatrimonio Marketing`
+   - Reporting time zone: `(GMT-04:00) Santiago`
+   - Currency: `Chilean Peso (CLP)`
+5. Business info → Industry: `Technology` o `Legal Services`
+6. Click **Create**
+7. Crear **Web Data Stream**:
+   - URL: `https://tupatrimonio.app`
+   - Stream name: `Marketing Site`
+   - ✅ Enhanced measurement (dejar activado)
+8. **Copiar Measurement ID** (formato: `G-XXXXXXXXXX`)
+
+#### 2. Configurar en el Proyecto
+
+Agregar variables de entorno en Netlify:
+
+**Variable:** `NEXT_PUBLIC_GA_MEASUREMENT_ID`  
+**Value:** `G-XXXXXXXXXX` (tu Measurement ID)
+
+**Variable:** `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`  
+**Value:** El código de verificación de Search Console (ver paso 3)
+
+#### 3. Configurar Google Search Console
+
+1. Ir a https://search.google.com/search-console
+2. Click **Add property** → Seleccionar **URL prefix**
+3. Ingresar: `https://tupatrimonio.app`
+4. **Método de verificación:** HTML tag
+5. Copiar el código de verificación (el valor del `content` attribute)
+6. Agregar como variable de entorno (paso 2)
+7. Después del deploy, volver y click **Verify**
+8. **Submit sitemap:** En Search Console → Sitemaps → Agregar `sitemap.xml`
+
+### Eventos Personalizados
+
+El sistema trackea automáticamente estos eventos:
+
+| Evento | Descripción | Parámetros |
+|--------|-------------|------------|
+| `form_submit` | Submit de formularios | `form_name`, `country`, `use_case` |
+| `cta_click` | Click en CTAs principales | `cta_text`, `cta_location` |
+| `page_view` | Vistas de página | Automático por GA4 |
+
+### Agregar Tracking Personalizado
+
+```typescript
+// En cualquier componente client-side
+import { trackEvent } from '@/lib/analytics';
+
+// Trackear evento custom
+trackEvent('button_click', {
+  button_id: 'hero-cta',
+  page: 'homepage'
+});
+
+// Trackear conversión
+trackEvent('conversion', {
+  conversion_type: 'signup',
+  value: 0
+});
+```
+
+### Verificación
+
+**GA4 en tiempo real:**
+1. Ir a Google Analytics
+2. Reports → Realtime
+3. Abrir tupatrimonio.app en otra pestaña
+4. Deberías aparecer en el mapa en tiempo real
+
+**Search Console:**
+1. Verificar propiedad (después del deploy)
+2. Esperar 24-48hrs para primeros datos
+3. Verificar que sitemap fue procesado
+
+### Debugging
+
+**Analytics no aparece:**
+- Verificar que estás en producción (no funciona en localhost)
+- Verificar variable de entorno en Netlify
+- Abrir DevTools → Console, buscar errores de gtag
+- Verificar en Network tab que se carga `gtag/js`
+
+**Search Console no verifica:**
+- Verificar que la variable de entorno está configurada
+- Hacer redeploy después de agregar la variable
+- Verificar el meta tag en el HTML source de la página
+
+### Structured Data
+
+El sitio incluye automáticamente:
+- **Organization schema** (todas las páginas)
+- **WebSite schema** (todas las páginas)
+- **Article schema** (posts del blog)
+- **Breadcrumb schema** (donde aplique)
+
+**Validar structured data:**
+- https://search.google.com/test/rich-results
+- https://validator.schema.org/
+
 ---
 
 **Para más detalles**: Ver `docs/DEPLOYMENT.md` para deploy o `docs/ARCHITECTURE.md` para decisiones técnicas.

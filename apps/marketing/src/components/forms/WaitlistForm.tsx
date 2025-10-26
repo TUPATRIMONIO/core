@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
+import { trackEvent } from '@/lib/analytics';
 
 interface WaitlistFormProps {
   country: 'cl' | 'co' | 'mx';
@@ -58,6 +59,15 @@ export default function WaitlistForm({ country, source = 'homepage', className =
       }
 
       setIsSuccess(true);
+      
+      // Track successful submission
+      trackEvent('form_submit', {
+        form_name: 'waitlist',
+        country: country,
+        use_case: useCase,
+        source: source,
+        has_company: !!company.trim()
+      });
       
       // Reset form
       setEmail('');

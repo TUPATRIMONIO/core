@@ -3,6 +3,8 @@ import { Outfit } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
+import { GoogleAnalytics } from '../components/GoogleAnalytics';
+import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '../components/StructuredData';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -62,6 +64,11 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  // Google Search Console verification
+  // Reemplazar "PASTE_YOUR_VERIFICATION_CODE_HERE" con el código que te da Google
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+  },
 };
 
 export default function RootLayout({
@@ -71,8 +78,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es-CL" className="antialiased">
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={outfit.className}>
         <ServiceWorkerRegistration />
+        
+        {/* Structured Data for SEO */}
+        <StructuredData data={generateOrganizationSchema()} />
+        <StructuredData data={generateWebSiteSchema()} />
+        
         <LocationProvider>
           <UpdateNotification />
           <main>{children}</main>

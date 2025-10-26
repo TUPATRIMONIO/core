@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2, AlertCircle, Send } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
+import { trackEvent } from '@/lib/analytics';
 
 interface ContactFormProps {
   formType?: 'general' | 'demo' | 'support' | 'sales' | 'partnership';
@@ -63,6 +64,14 @@ export default function ContactForm({
       }
 
       setIsSuccess(true);
+      
+      // Track successful submission
+      trackEvent('form_submit', {
+        form_name: 'contact',
+        form_type: formType,
+        has_company: !!company.trim(),
+        has_subject: !!subject.trim()
+      });
       
       // Reset form
       setName('');
