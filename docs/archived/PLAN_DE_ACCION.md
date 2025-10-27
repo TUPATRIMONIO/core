@@ -1217,6 +1217,17 @@ Al completar Fase 0:
   - ✅ Sin errores de linting
   - ✅ Compatible con Netlify build process
   - ✅ **Listo para deploy en producción** 🚀
+- ✅ **Favicons Personalizados COMPLETADOS** (27 Oct 2025)
+  - ✅ Favicons diferenciados para marketing y web apps
+  - ✅ Descargadas imágenes desde Supabase Storage (512x512px)
+  - ✅ Generados múltiples formatos para soporte completo:
+    * favicon.ico (32x32)
+    * icon.png (32x32 para navegadores modernos)
+    * apple-icon.png (180x180 para iOS)
+  - ✅ Archivos colocados en apps/marketing/src/app/ y apps/web/src/app/
+  - ✅ Metadata actualizada en ambos layout.tsx
+  - ✅ Script automatizado con sharp para generación
+  - ✅ **Branding visual completo en ambas aplicaciones** 🎨
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 **Migración 3**: Schemas credits + billing (después de Fase 0)
@@ -1295,7 +1306,7 @@ Al completar Fase 0:
    - [x] URLs SEO-friendly con categorías ✅ COMPLETADO
    - [ ] Escribir 3-4 blog posts sobre servicios (firma, verificación, notaría)
 
-**PRIORIDAD 2: SEO y Analytics Final (1-2 horas)**  
+**PRIORIDAD 2: SEO y Analytics Final**  
    - [x] Configurar dominios personalizados en Netlify: ✅ COMPLETADO
      * tupatrimonio.app → marketing site ✅
      * app.tupatrimonio.app → web app ✅
@@ -1304,23 +1315,44 @@ Al completar Fase 0:
      * WebSite schema en homepage ✅
      * Article schema en posts del blog ✅
      * BreadcrumbList en posts del blog ✅
-   - [ ] Google Analytics 4 + Search Console
+   - [x] Google Analytics 4 + Search Console ✅ COMPLETADO (27 Oct)
 
-**OPCIONAL (Puede ir a Fase 1):**
-   - [x] Admin panel básico para gestionar blog posts ✅ COMPLETADO (25 Oct)
+**PRIORIDAD 3: Branding Visual**
+   - [x] Favicons personalizados para ambas apps ✅ COMPLETADO (27 Oct)
+     * Marketing app: favicon diferenciado ✅
+     * Web app: favicon diferenciado ✅
+     * Múltiples formatos (ico, png, apple-icon) ✅
+     * Metadata configurada en layouts ✅
+
+**MOVIDO A FASE 1:**
    - [ ] Newsletter signup component
 
-**📈 PROGRESO FASE 0: ~95% COMPLETADO**
-**🕒 ESTIMADO RESTANTE: 1-2 horas para completar Fase 0**
+**📈 PROGRESO FASE 0: ~99.9% COMPLETADO**
+**🕒 ESTIMADO RESTANTE: 4-6 horas para completar Fase 0 (solo contenido blog)**
 
 #### 📝 **NOTAS IMPORTANTES PARA CONTINUAR MAÑANA:**
 
 **🌐 URLs de Desarrollo:**
-- **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing`)
+- **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing` desde raíz)
 - **Web Local**: `http://localhost:3000` (comando: `npm run dev` desde raíz)
 - **Supabase Local Studio**: `http://localhost:54323`
-- **Netlify Marketing**: [URL de tu deploy en Netlify]
-- **Netlify Web**: [URL de tu deploy en Netlify]
+- **Netlify Marketing**: https://tupatrimonio.app
+- **Netlify Web**: https://app.tupatrimonio.app
+
+**📝 Comandos Útiles:**
+```bash
+# Desarrollo
+npm run dev              # Web app (puerto 3000)
+npm run dev:marketing    # Marketing app (puerto 3001)
+
+# Build
+npm run build            # Ambas apps + packages
+npm run build:marketing  # Solo marketing
+npm run build:web        # Solo web
+
+# Build packages compartidos
+npm run build:packages   # Todos los packages
+```
 
 **📂 Estructura del Proyecto (Actualizada):**
 ```
@@ -1438,12 +1470,23 @@ Al completar Fase 0:
 - ✅ **Schema marketing** explícito en todas las queries
 - ✅ **Gestión sin Supabase Studio** - 100% desde frontend
 
-**📈 PROGRESO FASE 0: ~99.5% COMPLETADO en 4 sesiones**
+**🎨 BRANDING Y ANALYTICS:**
+- ✅ **Google Analytics 4** configurado y recabando datos
+- ✅ **Google Search Console** configurado y verificado
+- ✅ **Favicons personalizados** en ambas apps (marketing + web)
+  - Descarga automática desde Supabase Storage
+  - Generación con Sharp en múltiples formatos (ico, png, apple-icon)
+  - Metadata configurada en layout.tsx
+  - Branding visual diferenciado por aplicación
 
-**🎯 ÚNICO RESTANTE: Google Analytics 4 + Search Console**
-**⏱️ TIEMPO ESTIMADO: 15-30 minutos para cerrar Fase 0 al 100%**
+**📈 PROGRESO FASE 0: ~99.9% COMPLETADO en 5 sesiones**
 
-**📅 Última actualización: 25 Octubre 2025, 2:00 AM**
+**✅ Google Analytics 4 + Search Console: COMPLETADOS**
+**✅ Favicons personalizados: COMPLETADOS**
+**🎯 ÚNICO RESTANTE: Contenido de blog (3-4 posts definitivos)**
+**⏱️ TIEMPO ESTIMADO: 4-6 horas para cerrar Fase 0 al 100%**
+
+**📅 Última actualización: 27 Octubre 2025, 3:35 PM**
 
 **DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
 - [ ] Completar migración 3: Schemas credits + billing
