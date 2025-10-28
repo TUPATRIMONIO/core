@@ -50,7 +50,7 @@ export default function HomePage() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               Hazlo fácil, rápido y{" "}
               <span className="text-[var(--tp-brand)] relative inline-block">
-                Confiable
+                confiable
                 <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 200 12" fill="none">
                   <path d="M2 10C50 5 150 5 198 10" stroke="var(--tp-brand)" strokeWidth="3" strokeLinecap="round"/>
                 </svg>
