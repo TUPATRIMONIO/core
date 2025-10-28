@@ -74,6 +74,8 @@ function CountrySelectorDropdown({ countries, currentCountry, source, onCountryS
     const [styles, setStyles] = useState({
         position: 'fixed',
         opacity: 0, // Ocultar hasta que se calcule la posición
+        maxHeight: 'calc(100vh - 80px)', // Valor inicial
+        overflowY: 'auto'
     });
     const [position, setPosition] = useState({
         horizontal: variant === 'minimal' ? 'left' : 'right',
@@ -133,11 +135,19 @@ function CountrySelectorDropdown({ countries, currentCountry, source, onCountryS
             }
             // Clamp vertical al viewport
             topPosition = Math.max(margin, Math.min(topPosition, viewportHeight - margin));
+            // Calcular maxHeight dinámico basado en posición vertical
+            const currentVerticalPosition = position.vertical === 'top' ? 'top' : 'bottom';
+            const availableHeight = currentVerticalPosition === 'top'
+                ? topPosition - margin
+                : viewportHeight - topPosition - margin;
+            const maxHeight = Math.max(200, Math.min(availableHeight, 600)); // Min 200px, Max 600px
             setStyles({
                 position: 'fixed',
                 top: topPosition,
                 left: leftPosition,
                 width: dropdownWidth,
+                maxHeight: `${maxHeight}px`,
+                overflowY: 'auto',
                 opacity: 1, // Mostrar después de calcular
             });
         };
@@ -151,7 +161,7 @@ function CountrySelectorDropdown({ countries, currentCountry, source, onCountryS
             window.removeEventListener('scroll', calculatePosition, true);
         };
     }, [variant]);
-    return (_jsxs(_Fragment, { children: [_jsx("div", { className: "fixed inset-0 z-[9998]", onClick: onClose }), _jsx("div", { ref: dropdownRef, className: "bg-white border border-gray-200 rounded-lg shadow-lg z-[9999] max-h-[calc(100vh-80px)] overflow-y-auto", style: styles, children: _jsxs("div", { className: "p-4", children: [_jsxs("div", { className: "flex items-center gap-2 mb-4", children: [_jsx(Globe, { className: "w-5 h-5 text-gray-600" }), _jsx("h3", { className: "text-lg font-semibold", children: "Selecciona tu Pa\u00EDs" })] }), _jsx("div", { className: "bg-gray-50 rounded-lg p-3 mb-4", children: _jsxs("div", { className: "flex items-center gap-2 text-sm", children: [_jsx(MapPin, { className: "w-4 h-4 text-gray-500" }), _jsx("span", { children: source === 'manual' ? (_jsx("span", { className: "text-[var(--tp-buttons)]", children: "Pa\u00EDs seleccionado manualmente" })) : source === 'netlify' ? (_jsx("span", { className: "text-[var(--tp-success)]", children: "Pa\u00EDs detectado por IP" })) : source === 'browser' ? (_jsx("span", { className: "text-[var(--tp-success)]", children: "Pa\u00EDs detectado por navegador" })) : (_jsx("span", { className: "text-gray-600", children: "Pa\u00EDs por defecto" })) })] }) }), _jsx("div", { className: "space-y-2 mb-4", children: countries.map((countryOption) => {
+    return (_jsxs(_Fragment, { children: [_jsx("div", { className: "fixed inset-0 z-[9998]", onClick: onClose }), _jsx("div", { ref: dropdownRef, className: "bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]", style: styles, children: _jsxs("div", { className: "p-4", children: [_jsxs("div", { className: "flex items-center gap-2 mb-4", children: [_jsx(Globe, { className: "w-5 h-5 text-gray-600" }), _jsx("h3", { className: "text-lg font-semibold", children: "Selecciona tu Pa\u00EDs" })] }), _jsx("div", { className: "bg-gray-50 rounded-lg p-3 mb-4", children: _jsxs("div", { className: "flex items-center gap-2 text-sm", children: [_jsx(MapPin, { className: "w-4 h-4 text-gray-500" }), _jsx("span", { children: source === 'manual' ? (_jsx("span", { className: "text-[var(--tp-buttons)]", children: "Pa\u00EDs seleccionado manualmente" })) : source === 'netlify' ? (_jsx("span", { className: "text-[var(--tp-success)]", children: "Pa\u00EDs detectado por IP" })) : source === 'browser' ? (_jsx("span", { className: "text-[var(--tp-success)]", children: "Pa\u00EDs detectado por navegador" })) : (_jsx("span", { className: "text-gray-600", children: "Pa\u00EDs por defecto" })) })] }) }), _jsx("div", { className: "space-y-2 mb-4", children: countries.map((countryOption) => {
                                 const isAvailable = countryOption.available;
                                 const isCurrentCountry = countryOption.code === currentCountry;
                                 return (_jsxs("button", { onClick: () => onCountrySelect(countryOption.code), disabled: !isAvailable && !isCurrentCountry, className: `w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${isCurrentCountry

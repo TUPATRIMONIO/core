@@ -207,6 +207,8 @@ function CountrySelectorDropdown({
   const [styles, setStyles] = useState<React.CSSProperties>({
     position: 'fixed',
     opacity: 0, // Ocultar hasta que se calcule la posición
+    maxHeight: 'calc(100vh - 80px)', // Valor inicial
+    overflowY: 'auto'
   });
   
   const [position, setPosition] = useState<{
@@ -276,11 +278,21 @@ function CountrySelectorDropdown({
       // Clamp vertical al viewport
       topPosition = Math.max(margin, Math.min(topPosition, viewportHeight - margin));
       
+      // Calcular maxHeight dinámico basado en posición vertical
+      const currentVerticalPosition = position.vertical === 'top' ? 'top' : 'bottom';
+      const availableHeight = currentVerticalPosition === 'top' 
+        ? topPosition - margin
+        : viewportHeight - topPosition - margin;
+      
+      const maxHeight = Math.max(200, Math.min(availableHeight, 600)); // Min 200px, Max 600px
+      
       setStyles({
         position: 'fixed',
         top: topPosition,
         left: leftPosition,
         width: dropdownWidth,
+        maxHeight: `${maxHeight}px`,
+        overflowY: 'auto',
         opacity: 1, // Mostrar después de calcular
       });
     };
@@ -309,7 +321,7 @@ function CountrySelectorDropdown({
       {/* Dropdown content */}
       <div 
         ref={dropdownRef} 
-        className="bg-white border border-gray-200 rounded-lg shadow-lg z-[9999] max-h-[calc(100vh-80px)] overflow-y-auto"
+        className="bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
         style={styles}
       >
         <div className="p-4">
