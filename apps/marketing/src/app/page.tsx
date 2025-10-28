@@ -42,7 +42,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-[var(--tp-brand-20)] mb-6">
               <div className="w-2 h-2 bg-[var(--tp-brand)] rounded-full animate-pulse" />
               <span className="text-sm font-medium text-[var(--tp-brand)]">
-                Plataforma Legal Digital Líder en Latinoamérica
+                Plataforma Legal Digital para Latinoamérica
               </span>
             </div>
 
