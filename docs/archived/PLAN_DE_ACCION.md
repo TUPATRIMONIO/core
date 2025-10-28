@@ -1581,6 +1581,16 @@ npm run build:packages   # Todos los packages
   - Variables de entorno
   - Diferencias Netlify vs Vercel
   - Troubleshooting
+- ✅ **Sistema de Notificaciones de Actualización COMPLETADO** (28 Oct 2025)
+  - ✅ **Problema identificado y solucionado**: Archivos version.json estáticos no estaban siendo servidos (404)
+  - ✅ **API Routes dinámicas implementadas**: `/src/app/version.json/route.ts` en ambas apps
+  - ✅ **Packages rebuildeados**: update-notifier y ui con mejoras incluidas
+  - ✅ **Testing completo**: Sistema funcionando con logging limpio
+  - ✅ **Configuración simplificada**: Removida lógica compleja de generación de archivos estáticos
+  - ✅ **Documentación organizada**: Documentación movida a `docs/update-notifications/`
+  - ✅ **Sistema limpio y funcional**: Consola sin logs verbosos, funcionamiento silencioso
+  - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas aplicaciones
+  - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles técnicos
 
 **📈 PROGRESO FASE 0: ~99.9% COMPLETADO en 6 sesiones**
 

@@ -19,7 +19,6 @@ export async function GET() {
       app: 'web'
     };
     
-    console.log('📡 [API /version.json] Serving version info:', versionInfo);
     
     return NextResponse.json(versionInfo, {
       status: 200,
@@ -35,7 +34,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('❌ [API /version.json] Error generating version info:', error);
     
     // Fallback version en caso de error
     return NextResponse.json({

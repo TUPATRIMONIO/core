@@ -4,6 +4,9 @@ Esta carpeta contiene documentación histórica que fue relevante durante el des
 
 ## 📁 Contenido
 
+### 📂 Subcarpetas
+- **pwa/**: Documentación histórica PWA (Progressive Web App) - Oct 2025
+
 ### Planes de Desarrollo (Históricos)
 - **PLAN_DE_ACCION.md**: Hoja de ruta original completa (4,268 líneas)
 - **fase-0-marketing-seo-updated.plan.md**: Plan específico de fase 0
@@ -12,6 +15,11 @@ Esta carpeta contiene documentación histórica que fue relevante durante el des
 - **README-LOCATION.md**: Doc sistema ubicación (ahora en README principal)
 - **COLOR-SYSTEM-GUIDE.md**: Guía de colores (ahora en docs/DEVELOPMENT.md)
 - **ARCHITECTURE-IMPROVEMENTS.md**: Mejoras implementadas (ahora en README)
+
+### Sesiones de Desarrollo Archivadas (28 Oct 2025)
+- **RESTRUCTURACION-URLS-COMPLETADO.md**: Documentación restructuración URLs
+- **SESION-28-OCT-2024-RESUMEN.md**: Resumen sesión 28 octubre
+- **RESUMEN-FIXES-APLICADOS.md**: Fixes aplicados en web app
 
 ## 🔄 Estado Actual
 
