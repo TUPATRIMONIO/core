@@ -1,11 +1,77 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/client';
+import { getPublicPagesForSitemap } from '@/lib/page-management';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://tupatrimonio.app';
   
-  // Static pages
-  const staticPages = [
+  // Función para determinar prioridad y frecuencia por ruta
+  function getPriorityByRoute(route: string): { changeFrequency: 'daily' | 'weekly' | 'monthly'; priority: number } {
+    // Homepage principal
+    if (route === '/') return { changeFrequency: 'daily', priority: 1.0 };
+    
+    // Country homepages
+    if (route.match(/^\/[a-z]{2}$/)) {
+      if (route === '/cl') return { changeFrequency: 'daily', priority: 0.95 };
+      return { changeFrequency: 'weekly', priority: 0.8 };
+    }
+    
+    // Service pages por país
+    if (route.includes('/firmas-electronicas') || route.includes('/verificacion-identidad') || route.includes('/notaria-digital')) {
+      return route.startsWith('/cl') 
+        ? { changeFrequency: 'weekly', priority: 0.9 }
+        : { changeFrequency: 'monthly', priority: 0.6 };
+    }
+    
+    // Pricing pages
+    if (route.includes('/precios')) {
+      return route.startsWith('/cl')
+        ? { changeFrequency: 'weekly', priority: 0.85 }
+        : { changeFrequency: 'monthly', priority: 0.7 };
+    }
+    
+    // Contact pages
+    if (route.includes('/contacto')) {
+      return { changeFrequency: 'weekly', priority: 0.8 };
+    }
+    
+    // Blog
+    if (route.startsWith('/blog')) {
+      if (route === '/blog') return { changeFrequency: 'daily', priority: 0.8 };
+      return { changeFrequency: 'monthly', priority: 0.7 };
+    }
+    
+    // Legal pages
+    if (route.includes('/legal/')) {
+      return { changeFrequency: 'monthly', priority: 0.3 };
+    }
+    
+    // Generic/redirect pages
+    if (['/firmas-electronicas', '/verificacion-identidad', '/notaria-digital'].includes(route)) {
+      return { changeFrequency: 'monthly', priority: 0.6 };
+    }
+    
+    // Default
+    return { changeFrequency: 'monthly', priority: 0.5 };
+  }
+
+  // Obtener páginas públicas del sistema de gestión
+  let managedPages: Array<{url: string; lastModified: Date; changeFrequency: 'daily' | 'weekly' | 'monthly'; priority: number}> = [];
+  
+  try {
+    const publicPages = await getPublicPagesForSitemap();
+    managedPages = publicPages.map(page => ({
+      url: `${baseUrl}${page.route_path}`,
+      lastModified: new Date(page.updated_at),
+      changeFrequency: getPriorityByRoute(page.route_path).changeFrequency,
+      priority: getPriorityByRoute(page.route_path).priority,
+    }));
+  } catch (error) {
+    console.error('Error getting managed pages for sitemap:', error);
+  }
+  
+  // Si no hay páginas gestionadas, usar páginas estáticas como fallback
+  const fallbackStaticPages = managedPages.length === 0 ? [
     // Homepage global
     {
       url: baseUrl,
@@ -14,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     
-    // Country homepages
+    // Chile-specific pages (high priority) - solo las que sabemos que están públicas
     {
       url: `${baseUrl}/cl`,
       lastModified: new Date(),
@@ -22,53 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.95,
     },
     {
-      url: `${baseUrl}/co`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/mx`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    
-    // Generic redirects (lower priority)
-    {
-      url: `${baseUrl}/firmas-electronicas`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/verificacion-identidad`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/notaria-digital`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    
-    // Chile-specific pages (high priority)
-    {
       url: `${baseUrl}/cl/firmas-electronicas`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/cl/verificacion-identidad`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/cl/notaria-digital`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
@@ -86,40 +106,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/cl/legal/terminos`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/cl/legal/privacidad`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/cl/legal/cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    
-    // Blog (shared across countries)
-    {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.8,
     },
-  ];
+  ] : [];
 
   // Dynamic blog posts from Supabase
   let blogPosts: Array<{url: string; lastModified: Date; changeFrequency: 'monthly'; priority: number}> = [];
   try {
     const supabase = createClient();
     const { data: posts } = await supabase
-      .schema('marketing')
-      .from('blog_posts')
+      .from('marketing.blog_posts')
       .select(`
         slug,
         updated_at,
@@ -150,8 +149,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: categories } = await supabase
-      .schema('marketing')
-      .from('blog_categories')
+      .from('marketing.blog_categories')
       .select('slug')
       .eq('is_active', true);
 
@@ -169,7 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   return [
-    ...staticPages,
+    ...(managedPages.length > 0 ? managedPages : fallbackStaticPages),
     ...blogPosts,
     ...categoryPages,
   ];

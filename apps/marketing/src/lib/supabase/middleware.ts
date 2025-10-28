@@ -1,9 +1,16 @@
+/**
+ * Cliente Supabase para Middleware
+ * Maneja la autenticación y sesiones en el middleware de Next.js
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+export function createClient(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   })
 
   const supabase = createServerClient(
@@ -16,44 +23,18 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            response.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  // Refrescar la sesión del usuario si existe
-  // IMPORTANTE: Obtener usuario debe ser una operación de solo lectura, 
-  // no debe escribir en la sesión. Usar getUser() en lugar de getSession() 
-  // para evitar issues con las cookies.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Proteger rutas que requieren autenticación
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // No hay usuario y no está en login/auth, redirigir a login
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  // Si está autenticado y trata de acceder a login, redirigir a dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    return NextResponse.redirect(url)
-  }
-
-  return supabaseResponse
+  return { supabase, response }
 }
-

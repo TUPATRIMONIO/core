@@ -61,8 +61,27 @@ export async function updateSession(request: NextRequest) {
       // No autenticado, redirigir a login
       const url = request.nextUrl.clone()
       url.pathname = '/login'
+      url.searchParams.set('redirect', pathname)
       return NextResponse.redirect(url)
     }
+
+    // Verificar si tiene acceso admin para rutas específicas de administración
+    const adminRoutes = ['/dashboard/pages', '/dashboard/blog', '/dashboard/users'];
+    const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
+
+    if (isAdminRoute) {
+      const { data: hasAdminAccess, error } = await supabase.rpc('can_access_admin', {
+        user_id: user.id
+      });
+
+      if (error || !hasAdminAccess) {
+        // No tiene acceso admin, redirigir al dashboard principal
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
+    }
+
     // Usuario autenticado, permitir acceso
     return supabaseResponse
   }

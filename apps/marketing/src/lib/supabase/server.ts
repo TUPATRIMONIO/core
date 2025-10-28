@@ -1,3 +1,8 @@
+/**
+ * Cliente Supabase para Server Actions y Server Components
+ * Maneja autenticación en el lado del servidor
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -27,4 +32,3 @@ export async function createClient() {
     }
   )
 }
-

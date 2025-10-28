@@ -3,6 +3,7 @@ import { CountryRouteWrapper } from '@/components/CountryRouteWrapper';
 import { CountryPricingTable } from '@/components/CountryPricingTable';
 import { ComingSoonCountry } from '@/components/ComingSoonCountry';
 import { getCountryConfig } from '@tupatrimonio/location';
+import { CountryPageWrapper } from '@/components/PageAccessWrapper';
 import { notFound } from 'next/navigation';
 
 const ALLOWED_COUNTRIES = ['cl', 'mx', 'co', 'pe', 'ar'];
@@ -242,16 +243,22 @@ export default async function PreciosPaisPage({ params }: PageProps) {
   const plans = PRICING_DATA[country] || PRICING_DATA.cl;
 
   return (
-    <CountryRouteWrapper country={country} showCountryHeader={true}>
-      <div className="py-20">
-        <CountryPricingTable
-          country={country}
-          plans={plans}
-          title="Planes y Precios"
-          description="Elige el plan que mejor se adapte a tus necesidades. Sin permanencia, cancela cuando quieras."
-        />
-      </div>
-    </CountryRouteWrapper>
+    <CountryPageWrapper 
+      countryCode={country} 
+      pageType="precios"
+      showAdminControls={true}
+    >
+      <CountryRouteWrapper country={country} showCountryHeader={true}>
+        <div className="py-20">
+          <CountryPricingTable
+            country={country}
+            plans={plans}
+            title="Planes y Precios"
+            description="Elige el plan que mejor se adapte a tus necesidades. Sin permanencia, cancela cuando quieras."
+          />
+        </div>
+      </CountryRouteWrapper>
+    </CountryPageWrapper>
   );
 }
 

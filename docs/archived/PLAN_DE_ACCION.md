@@ -1589,6 +1589,14 @@ npm run build:packages   # Todos los packages
   - ✅ **Configuración simplificada**: Removida lógica compleja de generación de archivos estáticos
   - ✅ **Documentación organizada**: Documentación movida a `docs/update-notifications/`
   - ✅ **Sistema limpio y funcional**: Consola sin logs verbosos, funcionamiento silencioso
+  - ✅ **BUG FIX CRÍTICO - BUCLE INFINITO SOLUCIONADO** (28 Oct 2025)
+    * **PROBLEMA**: API routes generaban versión nueva con `Date.now()` en cada request
+    * **CAUSA**: Cada verificación de actualización detectaba nueva versión → popup infinito
+    * **SOLUCIÓN**: Cambié a versiones estables usando `SERVER_START_TIME` y `BUILD_ID` 
+    * **IMPLEMENTACIÓN**: Variables generadas al iniciar servidor (no per request)
+    * **ARCHIVOS**: `apps/marketing/src/app/version.json/route.ts` + `apps/web/src/app/version.json/route.ts`
+    * **LÓGICA**: Usa `process.env.VERCEL_GIT_COMMIT_SHA` o `NEXT_BUILD_ID` como base
+    * **RESULTADO**: Popup solo aparece con deployments reales, no bucle infinito
   - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas aplicaciones
   - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles técnicos
 

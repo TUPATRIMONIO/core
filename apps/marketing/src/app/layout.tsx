@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
-import { UpdateNotification } from '@tupatrimonio/update-notifier';
+import { ConditionalUpdateNotification } from '../components/ConditionalUpdateNotification';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '../components/StructuredData';
@@ -94,7 +94,7 @@ export default function RootLayout({
         <StructuredData data={generateWebSiteSchema()} />
         
         <LocationProvider>
-          <UpdateNotification />
+          <ConditionalUpdateNotification />
           <main>{children}</main>
         </LocationProvider>
       </body>

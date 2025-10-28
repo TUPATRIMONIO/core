@@ -64,36 +64,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Verificar autenticación en rutas /admin
-  if (pathname.startsWith('/admin')) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    // Si no hay sesión, redirect a login
-    if (!session) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
-
-    // Verificar si es platform admin
-    const { data: isPlatformAdmin, error } = await supabase.rpc(
-      'is_platform_admin'
-    )
-
-    if (error || !isPlatformAdmin) {
-      // No es admin, redirect a home
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
+  // La app marketing ya no tiene admin - solo contenido público
+  // La verificación de acceso a páginas se maneja en los componentes PageAccessWrapper
 
   return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    '/admin/:path*',
     '/:country(cl|mx|co|pe|ar)/:path*',
     // Rutas que necesitan redirect por país
     '/firmas-electronicas',

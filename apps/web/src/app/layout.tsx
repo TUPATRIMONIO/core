@@ -1,4 +1,4 @@
-import type {Metadata} from "next";
+import type {Metadata, Viewport} from "next";
 import {Geist, Geist_Mono, Outfit} from "next/font/google";
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
@@ -26,24 +26,25 @@ export const metadata: Metadata = {
   title: "TuPatrimonio - Gestión de Patrimonio Personal",
   description: "Plataforma para gestionar y hacer seguimiento de tu patrimonio personal",
   manifest: "/manifest.json",
-  themeColor: "#800039",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "TuPatrimonio",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-    viewportFit: "cover",
   },
   icons: {
     icon: '/icon.png',
     shortcut: '/favicon.ico',
     apple: '/apple-icon.png',
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+  themeColor: "#800039",
 };
 
 export default function RootLayout({
