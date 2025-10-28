@@ -41,7 +41,7 @@ export function BlogPostsList() {
 
   const [filters, setFilters] = useState<BlogFilters>({
     published: undefined,
-    category_id: '',
+    category_id: undefined,
     search: ''
   });
 
@@ -52,7 +52,6 @@ export function BlogPostsList() {
   useEffect(() => {
     if (isAdmin) {
       fetchCategories();
-      fetchPosts(filters);
     }
   }, [isAdmin]);
 
@@ -70,7 +69,7 @@ export function BlogPostsList() {
       fetchPosts(filters);
       setCurrentPage(1);
     }
-  }, [filters]);
+  }, [isAdmin, filters.published, filters.category_id, filters.search]);
 
   const handleDeletePost = async (id: string, title: string) => {
     if (!confirm(`¿Eliminar el post "${title}"?`)) return;

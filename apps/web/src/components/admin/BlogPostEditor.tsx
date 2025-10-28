@@ -60,7 +60,7 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
     content: '',
     excerpt: '',
     featured_image_url: '',
-    category_id: '',
+    category_id: undefined,
     author_name: 'TuPatrimonio Team',
     published: false,
     seo_title: '',
@@ -85,13 +85,10 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
     }
   }, [isAdmin, postId, mode]);
 
-  // Auto-calcular tiempo de lectura cuando cambia el contenido
-  useEffect(() => {
-    if (formData.content) {
-      const readingTime = calculateReadingTime(formData.content);
-      setFormData((prev) => ({ ...prev, reading_time: readingTime }));
-    }
-  }, [formData.content]);
+  // Calcular tiempo de lectura dinámicamente
+  const currentReadingTime = formData.content 
+    ? calculateReadingTime(formData.content) 
+    : 1;
 
   const loadPost = async () => {
     if (!postId) return;
@@ -155,12 +152,19 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
     setSuccess(false);
 
     try {
+      // Calcular tiempo de lectura antes de guardar
+      const readingTime = calculateReadingTime(formData.content);
+      const postData = {
+        ...formData,
+        reading_time: readingTime
+      };
+
       let result;
 
       if (mode === 'edit' && postId) {
-        result = await updatePost(postId, formData);
+        result = await updatePost(postId, postData);
       } else {
-        result = await createPost(formData);
+        result = await createPost(postData);
       }
 
       if (result.success) {
@@ -356,7 +360,7 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>{charCount} caracteres</span>
-                    <span>{formData.reading_time} min de lectura</span>
+                    <span>{currentReadingTime} min de lectura</span>
                   </div>
                 </div>
               ) : (
@@ -452,16 +456,15 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
+                <Label htmlFor="category">Categoría (opcional)</Label>
                 <Select
                   value={formData.category_id}
                   onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
+                    <SelectValue placeholder="Sin categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sin categoría</SelectItem>
                     {categories
                       .filter((cat) => cat.is_active)
                       .map((category) => (
@@ -545,7 +548,7 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tiempo de lectura:</span>
-                <span className="font-medium">{formData.reading_time} min</span>
+                <span className="font-medium">{currentReadingTime} min</span>
               </div>
             </CardContent>
           </Card>
