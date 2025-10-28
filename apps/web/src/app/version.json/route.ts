@@ -7,15 +7,20 @@ import { NextResponse } from 'next/server';
  * GET /version.json
  * Retorna: { version, buildId, deployedAt }
  */
+
+// Versión estática generada al iniciar el servidor (no en cada request)
+const SERVER_START_TIME = Date.now();
+const BUILD_ID = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || 
+                 process.env.NEXT_BUILD_ID || 
+                 `web-${SERVER_START_TIME.toString().slice(-8)}`;
+
 export async function GET() {
   try {
-    // Generar información de versión dinámica
+    // Generar información de versión ESTABLE
     const versionInfo = {
-      version: `${Date.now()}`,
-      buildId: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || 
-               process.env.NEXT_BUILD_ID || 
-               `web-${Date.now().toString().slice(-8)}`,
-      deployedAt: new Date().toISOString(),
+      version: BUILD_ID, // Usar buildId como version para estabilidad
+      buildId: BUILD_ID,
+      deployedAt: new Date(SERVER_START_TIME).toISOString(),
       app: 'web'
     };
     
@@ -37,9 +42,9 @@ export async function GET() {
     
     // Fallback version en caso de error
     return NextResponse.json({
-      version: `${Date.now()}`,
-      buildId: 'error-fallback',
-      deployedAt: new Date().toISOString(),
+      version: BUILD_ID,
+      buildId: BUILD_ID,
+      deployedAt: new Date(SERVER_START_TIME).toISOString(),
       app: 'web',
       error: true
     }, {

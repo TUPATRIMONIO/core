@@ -14,6 +14,58 @@ exports.fetchLatestVersion = fetchLatestVersion;
 const STORAGE_KEY = 'tp-app-version';
 const DISMISSED_KEY = 'tp-update-dismissed';
 /**
+ * DEBUGGING UTILITIES - Solo disponibles en development
+ * Consola limpia en producción, utilidades de testing en development
+ */
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    window.TuPatrimonioUpdateDebug = {
+        /**
+         * Fuerza mostrar el popup de actualización
+         */
+        forceShowUpdateNotification: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(DISMISSED_KEY);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                version: '1000000000000',
+                buildId: 'old-test-version',
+                deployedAt: '2024-01-01T00:00:00.000Z'
+            }));
+            console.log('🧪 Versión antigua establecida. Recarga la página para ver el popup.');
+        },
+        /**
+         * Muestra información de debugging
+         */
+        showDebugInfo: async () => {
+            const current = localStorage.getItem(STORAGE_KEY);
+            const dismissed = localStorage.getItem(DISMISSED_KEY);
+            console.log('💾 Versión almacenada:', current ? JSON.parse(current) : null);
+            console.log('🚫 Versión descartada:', dismissed);
+            try {
+                const response = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-cache' });
+                const serverVersion = await response.json();
+                console.log('🌐 Versión del servidor:', serverVersion);
+                if (current) {
+                    const currentParsed = JSON.parse(current);
+                    const hasChanged = currentParsed.buildId !== serverVersion.buildId || currentParsed.version !== serverVersion.version;
+                    console.log('🔄 ¿Hay cambios?', hasChanged);
+                }
+            }
+            catch (error) {
+                console.error('❌ Error al obtener versión del servidor:', error);
+            }
+        },
+        /**
+         * Limpia storage de actualizaciones
+         */
+        clearStorage: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(DISMISSED_KEY);
+            console.log('🧹 Storage de actualizaciones limpiado');
+        }
+    };
+    console.log('🛠️ [DEV] Utilidades de debugging disponibles en: window.TuPatrimonioUpdateDebug');
+}
+/**
  * Obtiene la versión actual almacenada en localStorage
  */
 function getCurrentVersion() {
