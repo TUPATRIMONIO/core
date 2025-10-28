@@ -52,6 +52,7 @@ export function BlogPostsList() {
   useEffect(() => {
     if (isAdmin) {
       fetchCategories();
+      fetchPosts(filters); // Cargar posts al inicio
     }
   }, [isAdmin]);
 
@@ -69,7 +70,7 @@ export function BlogPostsList() {
       fetchPosts(filters);
       setCurrentPage(1);
     }
-  }, [isAdmin, filters.published, filters.category_id, filters.search]);
+  }, [filters.published, filters.category_id, filters.search]);
 
   const handleDeletePost = async (id: string, title: string) => {
     if (!confirm(`¿Eliminar el post "${title}"?`)) return;
@@ -222,7 +223,7 @@ export function BlogPostsList() {
                   <SelectItem value="all">Todas las categorías</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
-                      {category.name}
+                      {category.name} {!category.is_active && '(Inactiva)'}
                     </SelectItem>
                   ))}
                 </SelectContent>

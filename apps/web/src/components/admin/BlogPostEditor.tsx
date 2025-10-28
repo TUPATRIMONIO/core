@@ -85,10 +85,8 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
     }
   }, [isAdmin, postId, mode]);
 
-  // Calcular tiempo de lectura dinámicamente
-  const currentReadingTime = formData.content 
-    ? calculateReadingTime(formData.content) 
-    : 1;
+  // Calcular tiempo de lectura dinámicamente basado en el contenido actual
+  const currentReadingTime = calculateReadingTime(formData.content || '');
 
   const loadPost = async () => {
     if (!postId) return;
@@ -97,6 +95,9 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
     const post = await getPost(postId);
 
     if (post) {
+      // Recalcular tiempo de lectura basado en el contenido actual
+      const calculatedReadingTime = calculateReadingTime(post.content);
+      
       setFormData({
         title: post.title,
         slug: post.slug,
@@ -108,7 +109,7 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
         published: post.published,
         seo_title: post.seo_title || '',
         seo_description: post.seo_description || '',
-        reading_time: post.reading_time || 5
+        reading_time: calculatedReadingTime
       });
     } else {
       setError('No se pudo cargar el post');
@@ -465,19 +466,20 @@ export function BlogPostEditor({ postId, mode = 'create' }: BlogPostEditorProps)
                     <SelectValue placeholder="Sin categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories
-                      .filter((cat) => cat.is_active)
-                      .map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            {category.name}
-                          </div>
-                        </SelectItem>
-                      ))}
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                          {!category.is_active && (
+                            <span className="text-xs text-gray-400">(Inactiva)</span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

@@ -519,11 +519,67 @@ export function generateSlug(title: string): string {
 
 /**
  * Helper para calcular tiempo de lectura aproximado
+ * Basado en 200 palabras por minuto (estándar de lectura)
+ * Limpia Markdown y cuenta solo palabras reales
  */
 export function calculateReadingTime(content: string): number {
+  if (!content || content.trim().length === 0) {
+    return 1;
+  }
+
+  // Limpiar el contenido de Markdown
+  let cleanContent = content;
+
+  // 1. Eliminar bloques de código (```...```)
+  cleanContent = cleanContent.replace(/```[\s\S]*?```/g, '');
+  
+  // 2. Eliminar código inline (`...`)
+  cleanContent = cleanContent.replace(/`[^`]*`/g, '');
+  
+  // 3. Eliminar imágenes ![alt](url)
+  cleanContent = cleanContent.replace(/!\[([^\]]*)\]\([^\)]*\)/g, '$1');
+  
+  // 4. Eliminar enlaces pero mantener el texto [texto](url)
+  cleanContent = cleanContent.replace(/\[([^\]]+)\]\([^\)]*\)/g, '$1');
+  
+  // 5. Eliminar encabezados # ## ### etc.
+  cleanContent = cleanContent.replace(/^#{1,6}\s+/gm, '');
+  
+  // 6. Eliminar énfasis (**bold**, *italic*, __bold__, _italic_)
+  cleanContent = cleanContent.replace(/(\*\*|__)(.*?)\1/g, '$2');
+  cleanContent = cleanContent.replace(/(\*|_)(.*?)\1/g, '$2');
+  
+  // 7. Eliminar listas (-, *, +, números)
+  cleanContent = cleanContent.replace(/^[\s]*[-*+]\s+/gm, '');
+  cleanContent = cleanContent.replace(/^[\s]*\d+\.\s+/gm, '');
+  
+  // 8. Eliminar blockquotes (>)
+  cleanContent = cleanContent.replace(/^>\s+/gm, '');
+  
+  // 9. Eliminar líneas horizontales (---, ***, ___)
+  cleanContent = cleanContent.replace(/^[-*_]{3,}$/gm, '');
+  
+  // 10. Eliminar HTML tags si los hay
+  cleanContent = cleanContent.replace(/<[^>]*>/g, '');
+  
+  // 11. Eliminar múltiples espacios, tabs y saltos de línea
+  cleanContent = cleanContent.replace(/\s+/g, ' ').trim();
+
+  // Contar palabras reales (separadas por espacios)
+  const words = cleanContent.split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+
+  // Si no hay palabras, retornar 1 minuto
+  if (wordCount === 0) {
+    return 1;
+  }
+
+  // Cálculo: 200 palabras por minuto es el estándar
+  // Para contenido técnico puedes ajustar a 180-200
   const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  const minutes = Math.ceil(words / wordsPerMinute);
-  return Math.max(1, minutes); // Mínimo 1 minuto
+  const minutes = wordCount / wordsPerMinute;
+
+  // Redondear al minuto más cercano, mínimo 1 minuto
+  return Math.max(1, Math.round(minutes));
 }
 
