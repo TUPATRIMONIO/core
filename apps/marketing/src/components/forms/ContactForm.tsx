@@ -13,7 +13,7 @@ interface ContactFormProps {
   className?: string;
 }
 
-export default function ContactForm({ 
+export function ContactForm({ 
   formType = 'general', 
   title = "Contáctanos",
   description = "Déjanos un mensaje y te responderemos en menos de 24 horas",

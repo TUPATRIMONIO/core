@@ -31,6 +31,64 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Redirects para URLs antiguas
+  async redirects() {
+    return [
+      // Redirigir páginas antiguas de servicios a verticales
+      {
+        source: '/firmas-electronicas',
+        destination: '/legal-tech/firma-electronica',
+        permanent: true,
+      },
+      {
+        source: '/notaria-digital',
+        destination: '/legal-tech/tramites-notariales',
+        permanent: true,
+      },
+      {
+        source: '/verificacion-identidad',
+        destination: '/cl/verificacion-identidad', // Por defecto a Chile
+        permanent: false,
+      },
+      // Redirigir servicios por país a nuevas rutas
+      {
+        source: '/cl/firmas-electronicas',
+        destination: '/legal-tech/firma-electronica',
+        permanent: true,
+      },
+      {
+        source: '/cl/notaria-digital',
+        destination: '/legal-tech/tramites-notariales',
+        permanent: true,
+      },
+      {
+        source: '/mx/firmas-electronicas',
+        destination: '/legal-tech/firma-electronica',
+        permanent: true,
+      },
+      {
+        source: '/co/firmas-electronicas',
+        destination: '/legal-tech/firma-electronica',
+        permanent: true,
+      },
+      // Redirigir páginas legales antiguas
+      {
+        source: '/cl/legal/terminos',
+        destination: '/terminos-y-condiciones',
+        permanent: true,
+      },
+      {
+        source: '/cl/legal/privacidad',
+        destination: '/politica-privacidad',
+        permanent: true,
+      },
+      {
+        source: '/cl/legal/cookies',
+        destination: '/politica-privacidad',
+        permanent: true,
+      },
+    ];
+  },
   generateBuildId: async () => {
     // Generar un ID único basado en timestamp
     const timestamp = Date.now();
