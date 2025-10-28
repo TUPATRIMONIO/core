@@ -18,26 +18,49 @@ Por lo tanto:
 - ❌ Intentaba escribir en `/public/version.json` (no existe)
 - ✅ Debería escribir en `apps/web/public/version.json`
 
-## ✅ Solución Implementada
+## ✅ Solución Implementada (Actualizada - 28 Oct 2024)
 
-### Cambios en `apps/web/next.config.ts` y `apps/marketing/next.config.ts`
+### Problema con `__dirname` en ESM
+
+El uso directo de `__dirname` no funciona porque Next.js usa **ES Modules** donde `__dirname` no está definido.
+
+### Solución Final: ESM Compatible + Estrategias Múltiples
 
 ```typescript
-// ❌ ANTES (no funcionaba en Vercel):
-const publicDir = join(process.cwd(), 'public');
+// Importar utilidades necesarias para ESM
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-// ✅ DESPUÉS (funciona en Vercel):
-const publicDir = join(__dirname, 'public');
+// Recrear __dirname en contexto ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 ```
 
-**Ventajas:**
-- `__dirname` siempre apunta al directorio donde está el archivo de config
-- Funciona en Vercel, Netlify, desarrollo local, etc.
-- Incluye fallback para compatibilidad
+**Estrategia Múltiple de Fallback:**
 
-### Código Completo con Fallback
+El código ahora intenta **3 métodos diferentes** en orden hasta que uno funcione:
+
+1. **ESM __dirname**: `join(__dirname, 'public')` - Para builds locales y Vercel moderno
+2. **process.cwd() directo**: `join(process.cwd(), 'public')` - Para contextos simples
+3. **process.cwd() con ruta completa**: `join(process.cwd(), 'apps', 'web', 'public')` - Para monorepos
+
+**Ventajas:**
+- ✅ Compatible con ES Modules
+- ✅ Funciona en Vercel, local, y cualquier entorno
+- ✅ Logs detallados de cada intento
+- ✅ Crea directorio automáticamente si no existe
+- ✅ Si todos fallan, muestra error claro
+
+### Código Completo Implementado
 
 ```typescript
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// Fix para ESM: __dirname no existe en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 generateBuildId: async () => {
   const timestamp = Date.now();
   const hash = createHash('sha256')
@@ -51,26 +74,40 @@ generateBuildId: async () => {
     deployedAt: new Date().toISOString(),
   };
 
-  // FIX para Vercel: usar __dirname
-  const publicDir = join(__dirname, 'public');
-  const versionPath = join(publicDir, 'version.json');
+  console.log('🔧 [Web App] Generando version.json...');
+  console.log('📍 __dirname:', __dirname);
+  console.log('📍 process.cwd():', process.cwd());
   
-  try {
-    writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
-    console.log('✅ [Web App] version.json generated:', versionInfo);
-    console.log('📂 Ubicación:', versionPath);
-  } catch (error) {
-    console.error('❌ [Web App] Error generating version.json:', error);
-    
-    // Fallback para desarrollo local
+  // ESTRATEGIA MÚLTIPLE: intentar 3 métodos diferentes
+  const strategies = [
+    { name: 'ESM __dirname', dir: join(__dirname, 'public') },
+    { name: 'process.cwd() directo', dir: join(process.cwd(), 'public') },
+    { name: 'process.cwd() con apps/web', dir: join(process.cwd(), 'apps', 'web', 'public') },
+  ];
+
+  let success = false;
+  
+  for (const strategy of strategies) {
     try {
-      const fallbackDir = join(process.cwd(), 'public');
-      const fallbackPath = join(fallbackDir, 'version.json');
-      writeFileSync(fallbackPath, JSON.stringify(versionInfo, null, 2));
-      console.log('✅ version.json generado en fallback:', fallbackPath);
-    } catch (fallbackError) {
-      console.error('❌ Fallback también falló:', fallbackError);
+      const versionPath = join(strategy.dir, 'version.json');
+      
+      // Crear directorio si no existe
+      if (!existsSync(strategy.dir)) {
+        mkdirSync(strategy.dir, { recursive: true });
+      }
+      
+      writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
+      console.log(`✅ [${strategy.name}] version.json generado exitosamente`);
+      console.log(`📂 Ubicación: ${versionPath}`);
+      success = true;
+      break;
+    } catch (error) {
+      console.log(`⚠️ [${strategy.name}] Falló:`, error.message);
     }
+  }
+  
+  if (!success) {
+    console.error('❌ TODAS las estrategias fallaron');
   }
 
   return hash;
@@ -103,11 +140,22 @@ Deberías ver algo como:
 
 ### 2. Verificar en Vercel Build Logs
 
-Después del deploy, en los logs de Vercel busca:
+Después del deploy, en **Vercel Dashboard → Deployments → [tu deploy] → Build Logs**, busca estas líneas:
+
 ```
-✅ [Web App] version.json generated: { version: '...', buildId: '...', deployedAt: '...' }
+🔧 [Web App] Generando version.json...
+📍 __dirname: /vercel/path0/apps/web
+📍 process.cwd(): /vercel/path0
+
+✅ [ESM __dirname] version.json generado exitosamente
 📂 Ubicación: /vercel/path0/apps/web/public/version.json
+📄 Contenido: { version: '...', buildId: '...', deployedAt: '...' }
 ```
+
+**Si NO ves estos logs:**
+- ❌ El archivo no se generó
+- Busca mensajes de error: `❌ [Web App] TODAS las estrategias fallaron`
+- Reporta el problema con los logs completos
 
 ### 3. Verificar en Producción
 

@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
-import { writeFileSync } from "fs";
-import { join } from "path";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { join, dirname } from "path";
 import { createHash } from "crypto";
+import { fileURLToPath } from "url";
+
+// Fix para ESM: __dirname no existe en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -104,28 +109,52 @@ const nextConfig: NextConfig = {
       deployedAt: new Date().toISOString(),
     };
 
-    // FIX para Vercel: usar __dirname para obtener el directorio correcto
-    // En Vercel con monorepo, process.cwd() apunta al root, no a apps/marketing
-    const publicDir = join(__dirname, 'public');
-    const versionPath = join(publicDir, 'version.json');
+    console.log('🔧 [Marketing App] Generando version.json...');
+    console.log('📍 __dirname:', __dirname);
+    console.log('📍 process.cwd():', process.cwd());
     
-    try {
-      writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
-      console.log('✅ [Marketing App] version.json generated:', versionInfo);
-      console.log('📂 Ubicación:', versionPath);
-    } catch (error) {
-      console.error('❌ [Marketing App] Error generating version.json:', error);
-      console.error('📂 Intentando escribir en:', versionPath);
-      
-      // Fallback: intentar con process.cwd() para desarrollo local
+    // ESTRATEGIA MÚLTIPLE: intentar varios métodos para asegurar que funcione
+    const strategies = [
+      {
+        name: 'ESM __dirname',
+        dir: join(__dirname, 'public'),
+      },
+      {
+        name: 'process.cwd() directo',
+        dir: join(process.cwd(), 'public'),
+      },
+      {
+        name: 'process.cwd() con apps/marketing',
+        dir: join(process.cwd(), 'apps', 'marketing', 'public'),
+      },
+    ];
+
+    let success = false;
+    
+    for (const strategy of strategies) {
       try {
-        const fallbackDir = join(process.cwd(), 'public');
-        const fallbackPath = join(fallbackDir, 'version.json');
-        writeFileSync(fallbackPath, JSON.stringify(versionInfo, null, 2));
-        console.log('✅ [Marketing App] version.json generado en fallback:', fallbackPath);
-      } catch (fallbackError) {
-        console.error('❌ [Marketing App] Fallback también falló:', fallbackError);
+        const versionPath = join(strategy.dir, 'version.json');
+        
+        // Asegurar que el directorio existe
+        if (!existsSync(strategy.dir)) {
+          console.log(`📁 Creando directorio: ${strategy.dir}`);
+          mkdirSync(strategy.dir, { recursive: true });
+        }
+        
+        writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
+        console.log(`✅ [${strategy.name}] version.json generado exitosamente`);
+        console.log(`📂 Ubicación: ${versionPath}`);
+        console.log(`📄 Contenido:`, versionInfo);
+        success = true;
+        break; // Salir del loop si tuvo éxito
+      } catch (error) {
+        console.log(`⚠️ [${strategy.name}] Falló:`, error instanceof Error ? error.message : error);
       }
+    }
+    
+    if (!success) {
+      console.error('❌ [Marketing App] TODAS las estrategias fallaron para generar version.json');
+      console.error('⚠️ El sistema de notificaciones de actualización NO funcionará');
     }
 
     return hash;

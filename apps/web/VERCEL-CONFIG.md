@@ -172,11 +172,17 @@ curl https://app.tupatrimonio.app/version.json
 
 **Test rápido del popup:**
 ```javascript
-// En DevTools Console
-localStorage.setItem('app-version', '1000000000000')
-location.reload()
+// En DevTools Console (usar la key correcta con prefijo tp-)
+localStorage.setItem('tp-app-version', JSON.stringify({
+  version: '1000000000000',
+  buildId: 'oldversion',
+  deployedAt: '2024-01-01T00:00:00.000Z'
+}));
+location.reload();
 // Deberías ver el popup inmediatamente
 ```
+
+**Nota importante:** El sistema usa `tp-app-version` (con prefijo), NO `app-version`
 
 ### Service Worker no actualiza
 - Verificar `/version.json` se genera en cada build
