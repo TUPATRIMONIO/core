@@ -1,12 +1,5 @@
 import type { NextConfig } from "next";
-import { writeFileSync, existsSync, mkdirSync } from "fs";
-import { join, dirname } from "path";
 import { createHash } from "crypto";
-import { fileURLToPath } from "url";
-
-// Fix para ESM: __dirname no existe en módulos ES
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -175,60 +168,9 @@ const nextConfig: NextConfig = {
       .digest('hex')
       .substring(0, 12);
     
-    // Crear version.json
-    const versionInfo = {
-      version: `${timestamp}`,
-      buildId: hash,
-      deployedAt: new Date().toISOString(),
-    };
-
-    console.log('🔧 [Web App] Generando version.json...');
-    console.log('📍 __dirname:', __dirname);
-    console.log('📍 process.cwd():', process.cwd());
-    
-    // ESTRATEGIA MÚLTIPLE: intentar varios métodos para asegurar que funcione
-    const strategies = [
-      {
-        name: 'ESM __dirname',
-        dir: join(__dirname, 'public'),
-      },
-      {
-        name: 'process.cwd() directo',
-        dir: join(process.cwd(), 'public'),
-      },
-      {
-        name: 'process.cwd() con apps/web',
-        dir: join(process.cwd(), 'apps', 'web', 'public'),
-      },
-    ];
-
-    let success = false;
-    
-    for (const strategy of strategies) {
-      try {
-        const versionPath = join(strategy.dir, 'version.json');
-        
-        // Asegurar que el directorio existe
-        if (!existsSync(strategy.dir)) {
-          console.log(`📁 Creando directorio: ${strategy.dir}`);
-          mkdirSync(strategy.dir, { recursive: true });
-        }
-        
-        writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
-        console.log(`✅ [${strategy.name}] version.json generado exitosamente`);
-        console.log(`📂 Ubicación: ${versionPath}`);
-        console.log(`📄 Contenido:`, versionInfo);
-        success = true;
-        break; // Salir del loop si tuvo éxito
-      } catch (error) {
-        console.log(`⚠️ [${strategy.name}] Falló:`, error instanceof Error ? error.message : error);
-      }
-    }
-    
-    if (!success) {
-      console.error('❌ [Web App] TODAS las estrategias fallaron para generar version.json');
-      console.error('⚠️ El sistema de notificaciones de actualización NO funcionará');
-    }
+    console.log('🔧 [Web App] Generando Build ID:', hash);
+    console.log('📅 [Web App] Timestamp:', timestamp);
+    console.log('✨ [Web App] Version info ahora se sirve via API Route /version.json');
 
     return hash;
   },

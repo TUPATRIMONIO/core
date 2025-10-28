@@ -109,12 +109,36 @@ Error checking for updates: [object Object]
 - ✨ `TESTING-UPDATE-NOTIFICATIONS.md` (instrucciones completas)
 - ✨ `RESUMEN-FIXES-NOTIFICACIONES.md` (este archivo)
 
+## 🚀 Solución Final Implementada: API Routes
+
+### ✨ **Cambio Crítico - API Routes Dinámicas**
+
+**Problema identificado**: Los archivos estáticos `version.json` no estaban siendo servidos en producción (errores 404).
+
+**Solución aplicada**: 
+- ✅ **API Routes creadas**: `/src/app/version.json/route.ts` en ambas apps
+- ✅ **Generación dinámica**: Version info generada en cada request
+- ✅ **Headers optimizados**: No-cache garantizado
+- ✅ **Error handling**: Fallbacks automáticos
+- ✅ **Logging integrado**: Debugging en cada request
+
+### 📁 **Archivos Añadidos**
+- `apps/marketing/src/app/version.json/route.ts` 
+- `apps/web/src/app/version.json/route.ts`
+- `VERSION-JSON-API-ROUTES-IMPLEMENTATION.md`
+
+### 🧹 **Limpieza Realizada**  
+- Removida lógica compleja de generación de archivos estáticos
+- Simplificados `next.config.ts` (solo BuildId generation)
+- Eliminados imports innecesarios
+
 ## 🎯 Próximos Pasos
 
-1. **Deploy de cambios** en ambas aplicaciones
-2. **Testing con logs detallados** usando instrucciones en `TESTING-UPDATE-NOTIFICATIONS.md`
-3. **Validación en producción** con deploy real
-4. **Limpieza opcional** de logs verbose después de confirmar que funciona
+1. **Deploy de cambios** con API Routes en ambas aplicaciones
+2. **Verificación inmediata**: `curl https://tupatrimonio.app/version.json` (debe retornar JSON)
+3. **Testing con logs detallados** usando `TESTING-UPDATE-NOTIFICATIONS.md`
+4. **Validación completa** - popup debe aparecer automáticamente
+5. **Limpieza opcional** de logs verbose después de confirmar que funciona
 
 ## 🏆 Resultado Esperado
 

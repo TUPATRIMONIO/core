@@ -27,12 +27,12 @@
 
 ## 🚀 Instrucciones de Testing en Producción
 
-### Paso 1: Deploy de Cambios
+### Paso 1: Deploy de Cambios con API Routes
 
 1. **Commit y push de cambios:**
    ```bash
    git add .
-   git commit -m "fix: implementar mejoras sistema notificaciones actualización"
+   git commit -m "feat: implementar API Routes para version.json - solución definitiva notificaciones"
    git push
    ```
 
@@ -40,7 +40,23 @@
    - Deploy de `apps/marketing`
    - Deploy de `apps/web`
 
-### Paso 2: Testing con Logs Detallados
+### Paso 2: Verificación Inmediata de API Routes
+
+**ANTES de testear el frontend, verificar que los API Routes funcionan:**
+
+```bash
+# Marketing App
+curl https://tupatrimonio.app/version.json
+# ✅ DEBE retornar: {"version":"...","buildId":"...","deployedAt":"...","app":"marketing"}
+
+# Web App  
+curl https://app.tupatrimonio.app/version.json
+# ✅ DEBE retornar: {"version":"...","buildId":"...","deployedAt":"...","app":"web"}
+```
+
+**Si alguno retorna HTML o 404, hay un problema con el deploy.**
+
+### Paso 3: Testing con Logs Detallados
 
 1. **Abrir aplicaciones en producción:**
    - Marketing: https://tupatrimonio.app
@@ -48,11 +64,12 @@
 
 2. **Abrir DevTools → Console**
 
-3. **Verificar que no hay errores iniciales**
+3. **Verificar que no hay errores iniciales:**
    - Buscar logs que empiecen con `[UpdateNotifier]`
-   - Verificar que se ejecuta la verificación inicial
+   - **VERIFICAR**: Ya no debe haber errores 404 en version.json
+   - **DEBE VER**: Response status: 200 (en lugar de 404)
 
-### Paso 3: Testing Manual con Utilidades de Debugging
+### Paso 4: Testing Manual con Utilidades de Debugging
 
 En la consola del navegador, ejecutar:
 
@@ -68,7 +85,7 @@ TuPatrimonioUpdateDebug.forceShowUpdateNotification()
 TuPatrimonioUpdateDebug.clearUpdateStorage()
 ```
 
-### Paso 4: Testing Real con Nuevo Deploy
+### Paso 5: Testing Real con Nuevo Deploy
 
 1. **Hacer un cambio pequeño en el código**
    - Cambiar un texto o comentario
