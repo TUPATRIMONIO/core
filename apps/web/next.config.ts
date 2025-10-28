@@ -177,15 +177,28 @@ const nextConfig: NextConfig = {
       deployedAt: new Date().toISOString(),
     };
 
-    // Guardar en public para que sea accesible
-    const publicDir = join(process.cwd(), 'public');
+    // FIX para Vercel: usar __dirname para obtener el directorio correcto
+    // En Vercel con monorepo, process.cwd() apunta al root, no a apps/web
+    const publicDir = join(__dirname, 'public');
     const versionPath = join(publicDir, 'version.json');
     
     try {
       writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
-      console.log('✅ version.json generated:', versionInfo);
+      console.log('✅ [Web App] version.json generated:', versionInfo);
+      console.log('📂 Ubicación:', versionPath);
     } catch (error) {
-      console.error('❌ Error generating version.json:', error);
+      console.error('❌ [Web App] Error generating version.json:', error);
+      console.error('📂 Intentando escribir en:', versionPath);
+      
+      // Fallback: intentar con process.cwd() para desarrollo local
+      try {
+        const fallbackDir = join(process.cwd(), 'public');
+        const fallbackPath = join(fallbackDir, 'version.json');
+        writeFileSync(fallbackPath, JSON.stringify(versionInfo, null, 2));
+        console.log('✅ [Web App] version.json generado en fallback:', fallbackPath);
+      } catch (fallbackError) {
+        console.error('❌ [Web App] Fallback también falló:', fallbackError);
+      }
     }
 
     return hash;

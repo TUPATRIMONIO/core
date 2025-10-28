@@ -157,6 +157,27 @@ npm run dev
 ✅ **Normal** - GA solo funciona en producción (`NODE_ENV=production`)  
 En desarrollo verás logs en consola: `📊 Analytics Event (dev)`
 
+### Popup de actualización no aparece
+**Causa:** `version.json` no se genera correctamente en Vercel
+
+**Solución aplicada:**
+- ✅ Actualizado `next.config.ts` para usar `__dirname` en lugar de `process.cwd()`
+- ✅ Incluye fallback automático para desarrollo
+- ✅ Ver `VERCEL-UPDATE-NOTIFIER-FIX.md` para detalles completos
+
+**Verificar en producción:**
+```bash
+curl https://app.tupatrimonio.app/version.json
+```
+
+**Test rápido del popup:**
+```javascript
+// En DevTools Console
+localStorage.setItem('app-version', '1000000000000')
+location.reload()
+// Deberías ver el popup inmediatamente
+```
+
 ### Service Worker no actualiza
 - Verificar `/version.json` se genera en cada build
 - Verificar headers de cache en `/version.json` (no-cache)
