@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { CountrySelector } from '../../../../../../packages/location/src/components/CountrySelector';
+import { CountrySelector } from '@tupatrimonio/location';
 import { CheckCircle, Shield, Clock, Download, Users, Star } from "lucide-react";
 
 export const metadata: Metadata = {

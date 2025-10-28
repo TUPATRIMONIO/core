@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, Shield, Clock, Users, MapPin, Building, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { CountryRouteWrapper, useCountryConfig } from "@/components/CountryRouteWrapper";
+import { ComingSoonCountry } from "@/components/ComingSoonCountry";
+import { getCountryConfig } from "@tupatrimonio/location";
 import { notFound } from "next/navigation";
 
 // Países permitidos
@@ -77,6 +79,21 @@ export default async function CountryPage({ params }: PageProps) {
   // Validar país
   if (!ALLOWED_COUNTRIES.includes(country)) {
     notFound();
+  }
+
+  // Obtener configuración del país
+  const countryConfig = getCountryConfig(country);
+  
+  // Si el país no está disponible, mostrar página "Próximamente"
+  if (countryConfig && !countryConfig.available) {
+    return (
+      <ComingSoonCountry
+        countryCode={countryConfig.code}
+        countryName={countryConfig.name}
+        countryFlag={countryConfig.flag}
+        launchDate={countryConfig.launchDate}
+      />
+    );
   }
 
   const countryNames: Record<string, string> = {

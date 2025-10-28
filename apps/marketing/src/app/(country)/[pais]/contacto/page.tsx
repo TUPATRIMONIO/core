@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactForm } from '@/components/forms/ContactForm';
 import { CountryRouteWrapper } from '@/components/CountryRouteWrapper';
+import { ComingSoonCountry } from '@/components/ComingSoonCountry';
+import { getCountryConfig } from '@tupatrimonio/location';
 import { Mail, MessageCircle, Phone, MapPin } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -64,6 +66,21 @@ export default async function ContactoPaisPage({ params }: PageProps) {
 
   if (!ALLOWED_COUNTRIES.includes(country)) {
     notFound();
+  }
+
+  // Obtener configuración del país
+  const countryConfig = getCountryConfig(country);
+  
+  // Si el país no está disponible, mostrar página "Próximamente"
+  if (countryConfig && !countryConfig.available) {
+    return (
+      <ComingSoonCountry
+        countryCode={countryConfig.code}
+        countryName={countryConfig.name}
+        countryFlag={countryConfig.flag}
+        launchDate={countryConfig.launchDate}
+      />
+    );
   }
 
   const countryNames: Record<string, string> = {

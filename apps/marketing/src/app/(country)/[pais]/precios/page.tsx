@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { CountryRouteWrapper } from '@/components/CountryRouteWrapper';
 import { CountryPricingTable } from '@/components/CountryPricingTable';
+import { ComingSoonCountry } from '@/components/ComingSoonCountry';
+import { getCountryConfig } from '@tupatrimonio/location';
 import { notFound } from 'next/navigation';
 
 const ALLOWED_COUNTRIES = ['cl', 'mx', 'co', 'pe', 'ar'];
@@ -220,6 +222,21 @@ export default async function PreciosPaisPage({ params }: PageProps) {
 
   if (!ALLOWED_COUNTRIES.includes(country)) {
     notFound();
+  }
+
+  // Obtener configuración del país
+  const countryConfig = getCountryConfig(country);
+  
+  // Si el país no está disponible, mostrar página "Próximamente"
+  if (countryConfig && !countryConfig.available) {
+    return (
+      <ComingSoonCountry
+        countryCode={countryConfig.code}
+        countryName={countryConfig.name}
+        countryFlag={countryConfig.flag}
+        launchDate={countryConfig.launchDate}
+      />
+    );
   }
 
   const plans = PRICING_DATA[country] || PRICING_DATA.cl;

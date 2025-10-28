@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from "@/components/StructuredData";
-import { CountrySelector } from "../../../../packages/location/src/components/CountrySelector";
+import { CountrySelector } from "@tupatrimonio/location";
 
 export default function HomePage() {
   return (
@@ -100,7 +100,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-[var(--tp-success)]" />
-                <span>Chile, Colombia, México</span>
+                <span>Disponible en Chile 🇨🇱 · Pronto en más países</span>
               </div>
             </div>
           </div>
@@ -414,7 +414,7 @@ export default function HomePage() {
           <div className="text-center text-white/60 text-sm">
             <p>Copyright © 2025 TuPatrimonio. Todos los derechos reservados.</p>
             <p className="mt-2">
-              Plataforma de servicios legales digitales con presencia en Chile, Colombia y México
+              Plataforma de servicios legales digitales. Operativo en Chile 🇨🇱 · Próximamente en más países de Latinoamérica
             </p>
           </div>
         </div>

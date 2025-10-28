@@ -9,7 +9,8 @@ export const SUPPORTED_COUNTRIES = {
         currency: 'CLP',
         locale: 'es-CL',
         timezone: 'America/Santiago',
-        supported: true
+        supported: true,
+        available: true // ✅ OPERATIVO
     },
     mx: {
         code: 'mx',
@@ -18,7 +19,9 @@ export const SUPPORTED_COUNTRIES = {
         currency: 'MXN',
         locale: 'es-MX',
         timezone: 'America/Mexico_City',
-        supported: true
+        supported: true,
+        available: false, // 🚀 PRÓXIMAMENTE
+        launchDate: 'Q2 2025'
     },
     co: {
         code: 'co',
@@ -27,7 +30,31 @@ export const SUPPORTED_COUNTRIES = {
         currency: 'COP',
         locale: 'es-CO',
         timezone: 'America/Bogota',
-        supported: true
+        supported: true,
+        available: false, // 🚀 PRÓXIMAMENTE
+        launchDate: 'Q2 2025'
+    },
+    pe: {
+        code: 'pe',
+        name: 'Perú',
+        flag: '🇵🇪',
+        currency: 'PEN',
+        locale: 'es-PE',
+        timezone: 'America/Lima',
+        supported: true,
+        available: false, // 🚀 PRÓXIMAMENTE
+        launchDate: 'Q3 2025'
+    },
+    ar: {
+        code: 'ar',
+        name: 'Argentina',
+        flag: '🇦🇷',
+        currency: 'ARS',
+        locale: 'es-AR',
+        timezone: 'America/Argentina/Buenos_Aires',
+        supported: true,
+        available: false, // 🚀 PRÓXIMAMENTE
+        launchDate: 'Q3 2025'
     }
 };
 export const DEFAULT_COUNTRY = 'cl';

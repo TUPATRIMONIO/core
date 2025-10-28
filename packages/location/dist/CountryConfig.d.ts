@@ -9,6 +9,8 @@ export interface CountryConfig {
     locale: string;
     timezone: string;
     supported: boolean;
+    available: boolean;
+    launchDate?: string;
 }
 export declare const SUPPORTED_COUNTRIES: Record<string, CountryConfig>;
 export declare const DEFAULT_COUNTRY = "cl";

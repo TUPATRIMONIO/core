@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { LocationResult, LocationManager } from '../../../../packages/location/src/LocationManager';
+import { LocationResult, LocationManager } from '@tupatrimonio/location';
 
 interface LocationContextType extends LocationResult {
   isLoading: boolean;

@@ -1,9 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { useLocation } from '../../../../../packages/location/src/hooks/useLocation';
-import { CountrySelector } from '../../../../../packages/location/src/components/CountrySelector';
-import { getSupportedCountries } from '../../../../../packages/location/src/CountryConfig';
+import { useLocation, CountrySelector, getSupportedCountries } from '@tupatrimonio/location';
 import { Button } from "@/components/ui/button";
 import { Globe, ArrowRight, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";

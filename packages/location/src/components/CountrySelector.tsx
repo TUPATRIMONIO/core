@@ -339,36 +339,55 @@ function CountrySelectorDropdown({
 
           {/* Lista de países */}
           <div className="space-y-2 mb-4">
-            {countries.map((countryOption) => (
-              <button
-                key={countryOption.code}
-                onClick={() => onCountrySelect(countryOption.code)}
-                className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all hover:shadow-sm ${
-                  countryOption.code === currentCountry
-                    ? 'border-[var(--tp-buttons)] bg-[var(--tp-buttons-5)]'
-                    : 'border-gray-200 hover:border-[var(--tp-buttons-20)]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{countryOption.flag}</span>
-                  <div className="text-left">
-                    <div className="font-medium text-gray-900">{countryOption.name}</div>
-                    <div className="text-xs text-gray-500">
-                      Precios en {countryOption.currency}
+            {countries.map((countryOption) => {
+              const isAvailable = countryOption.available;
+              const isCurrentCountry = countryOption.code === currentCountry;
+              
+              return (
+                <button
+                  key={countryOption.code}
+                  onClick={() => onCountrySelect(countryOption.code)}
+                  disabled={!isAvailable && !isCurrentCountry}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                    isCurrentCountry
+                      ? 'border-[var(--tp-buttons)] bg-[var(--tp-buttons-5)]'
+                      : isAvailable
+                      ? 'border-gray-200 hover:border-[var(--tp-buttons-20)] hover:shadow-sm cursor-pointer'
+                      : 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                  }`}
+                  title={!isAvailable ? `Próximamente disponible${countryOption.launchDate ? ` (${countryOption.launchDate})` : ''}` : ''}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{countryOption.flag}</span>
+                    <div className="text-left">
+                      <div className={`font-medium ${isAvailable ? 'text-gray-900' : 'text-gray-500'}`}>
+                        {countryOption.name}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {isAvailable ? (
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                            Disponible
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full font-medium">
+                            Próximamente {countryOption.launchDate && `(${countryOption.launchDate})`}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                {countryOption.code === currentCountry && (
-                  <div className="flex items-center gap-1 text-[var(--tp-buttons)]">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="text-xs font-medium">
-                      {isManualSelection ? 'Seleccionado' : 'Detectado'}
-                    </span>
-                  </div>
-                )}
-              </button>
-            ))}
+                  
+                  {isCurrentCountry && (
+                    <div className="flex items-center gap-1 text-[var(--tp-buttons)]">
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="text-xs font-medium">
+                        {isManualSelection ? 'Seleccionado' : 'Detectado'}
+                      </span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Opción para resetear a detección automática */}

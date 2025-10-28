@@ -32,6 +32,28 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Lógica de redirect por país para páginas específicas (Vercel geo-routing)
+  const needsCountryRedirect = [
+    '/firmas-electronicas',
+    '/notaria-digital', 
+    '/verificacion-identidad',
+    '/precios'
+  ].includes(pathname);
+
+  if (needsCountryRedirect) {
+    // Vercel proporciona headers de geolocalización
+    const country = request.geo?.country?.toLowerCase() || 
+                   request.headers.get('x-vercel-ip-country')?.toLowerCase();
+    
+    const supportedCountries = ['cl', 'mx', 'co'];
+    const targetCountry = supportedCountries.includes(country || '') 
+      ? country 
+      : 'cl';
+
+    const newUrl = new URL(`/${targetCountry}${pathname}${request.nextUrl.search}`, request.url);
+    return NextResponse.redirect(newUrl, 302);
+  }
+
   // Validar parámetros de país en rutas dinámicas
   const paisMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
   if (paisMatch) {
@@ -73,6 +95,11 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/:country(cl|mx|co|pe|ar)/:path*',
+    // Rutas que necesitan redirect por país
+    '/firmas-electronicas',
+    '/notaria-digital',
+    '/verificacion-identidad', 
+    '/precios',
   ],
 }
 

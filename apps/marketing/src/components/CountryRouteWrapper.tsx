@@ -5,54 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Globe } from 'lucide-react';
-
-interface CountryConfig {
-  code: string;
-  name: string;
-  flag: string;
-  currency: string;
-  locale: string;
-}
-
-const COUNTRIES: Record<string, CountryConfig> = {
-  cl: {
-    code: 'cl',
-    name: 'Chile',
-    flag: '🇨🇱',
-    currency: 'CLP',
-    locale: 'es-CL',
-  },
-  mx: {
-    code: 'mx',
-    name: 'México',
-    flag: '🇲🇽',
-    currency: 'MXN',
-    locale: 'es-MX',
-  },
-  co: {
-    code: 'co',
-    name: 'Colombia',
-    flag: '🇨🇴',
-    currency: 'COP',
-    locale: 'es-CO',
-  },
-  pe: {
-    code: 'pe',
-    name: 'Perú',
-    flag: '🇵🇪',
-    currency: 'PEN',
-    locale: 'es-PE',
-  },
-  ar: {
-    code: 'ar',
-    name: 'Argentina',
-    flag: '🇦🇷',
-    currency: 'ARS',
-    locale: 'es-AR',
-  },
-};
-
-const OTHER_COUNTRIES = ['mx', 'co', 'pe', 'ar', 'cl'];
+import { getSupportedCountries, getCountryConfig, type CountryConfig } from '@tupatrimonio/location';
 
 interface CountryRouteWrapperProps {
   /**
@@ -79,8 +32,9 @@ export function CountryRouteWrapper({
   showCountryHeader = true,
   className = '',
 }: CountryRouteWrapperProps) {
-  const currentCountry = COUNTRIES[country.toLowerCase()] || COUNTRIES.cl;
-  const otherCountries = OTHER_COUNTRIES.filter(c => c !== country);
+  const allCountries = getSupportedCountries();
+  const currentCountry = getCountryConfig(country.toLowerCase()) || getCountryConfig('cl')!;
+  const otherCountries = allCountries.filter(c => c.code !== country.toLowerCase());
 
   return (
     <div className={className}>
@@ -103,23 +57,25 @@ export function CountryRouteWrapper({
               {/* Selector de otros países */}
               <div className="flex items-center gap-3">
                 <Globe className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Cambiar país:</span>
-                <div className="flex items-center gap-2">
-                  {otherCountries.slice(0, 3).map((countryCode) => {
-                    const c = COUNTRIES[countryCode];
-                    return (
-                      <Link key={countryCode} href={`/${countryCode}`}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-[var(--tp-buttons)] hover:bg-[var(--tp-brand-10)] hover:text-[var(--tp-brand)] px-2"
-                          title={c.name}
-                        >
-                          {c.flag} {c.name}
-                        </Button>
-                      </Link>
-                    );
-                  })}
+                <span className="text-sm text-gray-600">Otros países:</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {otherCountries.map((c) => (
+                    <Link key={c.code} href={`/${c.code}`}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`hover:bg-[var(--tp-brand-10)] hover:text-[var(--tp-brand)] px-2 ${
+                          c.available ? 'text-[var(--tp-buttons)]' : 'text-gray-400'
+                        }`}
+                        title={c.available ? c.name : `${c.name} - Próximamente`}
+                      >
+                        {c.flag} {c.name}
+                        {!c.available && (
+                          <span className="ml-1 text-xs">✨</span>
+                        )}
+                      </Button>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
@@ -136,14 +92,14 @@ export function CountryRouteWrapper({
  * Hook para obtener la configuración del país actual
  */
 export function useCountryConfig(country: string): CountryConfig {
-  return COUNTRIES[country.toLowerCase()] || COUNTRIES.cl;
+  return getCountryConfig(country.toLowerCase()) || getCountryConfig('cl')!;
 }
 
 /**
  * Helper para formatear moneda según el país
  */
 export function formatCurrency(amount: number, country: string): string {
-  const config = COUNTRIES[country.toLowerCase()] || COUNTRIES.cl;
+  const config = getCountryConfig(country.toLowerCase()) || getCountryConfig('cl')!;
   return new Intl.NumberFormat(config.locale, {
     style: 'currency',
     currency: config.currency,
