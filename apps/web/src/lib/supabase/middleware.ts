@@ -35,22 +35,49 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Proteger rutas que requieren autenticación
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // No hay usuario y no está en login/auth, redirigir a login
+  const { pathname } = request.nextUrl
+  
+  // Rutas públicas que no requieren autenticación
+  const publicRoutes = ['/login', '/auth', '/404']
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+
+  // Manejo de la raíz (/)
+  if (pathname === '/') {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    if (user) {
+      // Usuario autenticado, ir al dashboard
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    } else {
+      // No autenticado, ir al login
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Proteger rutas del dashboard (requieren autenticación)
+  if (pathname.startsWith('/dashboard')) {
+    if (!user) {
+      // No autenticado, redirigir a login
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    // Usuario autenticado, permitir acceso
+    return supabaseResponse
   }
 
   // Si está autenticado y trata de acceder a login, redirigir a dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  if (user && pathname.startsWith('/login')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  // Proteger otras rutas (todo excepto rutas públicas)
+  if (!user && !isPublicRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 

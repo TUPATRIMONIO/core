@@ -2,25 +2,25 @@
 
 ## Configuración Dual de Sites
 
-TuPatrimonio usa **2 sites separados** en Netlify para optimal performance:
+TuPatrimonio usa **2 projects separados** en Vercel para optimal performance:
 
-### 📱 Site 1: Marketing App
+### 📱 Project 1: Marketing App
 - **Domain**: `tupatrimonio.app`
-- **Config file**: `netlify.toml` 
+- **Config file**: `next.config.ts` (apps/marketing)
 - **Purpose**: Landing pages, SEO, blog, conversión
 
-### 💼 Site 2: Web App  
+### 💼 Project 2: Web App  
 - **Domain**: `app.tupatrimonio.app`
-- **Config file**: `netlify-web.toml`
+- **Config file**: `next.config.ts` (apps/web)
 - **Purpose**: Dashboard, autenticación, funcionalidad
 
 ## Marketing App Deployment
 
-### Configuración en Netlify
-- **Base directory**: `/`
-- **Build command**: `npm run build:marketing`
-- **Publish directory**: `apps/marketing/.next`
-- **Config file**: `netlify.toml`
+### Configuración en Vercel
+- **Root directory**: `apps/marketing`
+- **Build command**: `npm run build`
+- **Output directory**: `.next`
+- **Install command**: `npm install --prefix ../.. && npm run build:packages --prefix ../..`
 
 ### Características Específicas
 - ✅ **Edge Functions** para detección de ubicación
@@ -38,11 +38,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 
 ## Web App Deployment  
 
-### Configuración en Netlify
-- **Base directory**: `/`
-- **Build command**: `npm run build:web`
-- **Publish directory**: `apps/web/.next`
-- **Config file**: `netlify-web.toml`
+### Configuración en Vercel
+- **Root directory**: `apps/web`
+- **Build command**: `npm run build`
+- **Output directory**: `.next`
+- **Install command**: `npm install --prefix ../.. && npm run build:packages --prefix ../..`
 
 ### Características Específicas
 - ✅ **Dashboard funcional** con autenticación
@@ -61,12 +61,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_anon_key
 SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 ```
 
-## 🔧 Setup en Netlify Dashboard
+## 🔧 Setup en Vercel Dashboard
 
-### Site 1: Marketing (tupatrimonio.app) - apps/marketing/netlify.toml
-1. **Team Settings > Sites** → **Add new site**
-2. **Connect to Git** → Seleccionar tu repositorio
-3. **Site configuration**:
+### Project 1: Marketing (tupatrimonio.app)
+1. **New Project** → Importar tu repositorio desde GitHub
+2. **Framework Preset**: Next.js
+3. **Root Directory**: `apps/marketing`
+4. **Build Settings**:
    ```
    Base directory: /
    Build command: npm run build:marketing  
@@ -93,9 +94,9 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 
 ### DNS Configuration
 ```
-# En tu proveedor DNS
-A     tupatrimonio.app        → 75.2.60.5 (Netlify)
-CNAME app.tupatrimonio.app   → [site-2].netlify.app
+# En Vercel Dashboard  
+# Vercel proporciona automáticamente los registros DNS necesarios
+# Solo necesitas agregar los dominios en Settings → Domains
 ```
 
 ## 🔄 Workflow de Deploy
@@ -105,7 +106,7 @@ CNAME app.tupatrimonio.app   → [site-2].netlify.app
 # Push a main branch
 git push origin main
 
-# Netlify Site 1:
+# Vercel Project 1:
 1. Detecta cambios
 2. npm run build:marketing
 3. Deploys a tupatrimonio.app
@@ -117,7 +118,7 @@ git push origin main
 # Push a main branch  
 git push origin main
 
-# Netlify Site 2:
+# Vercel Project 2:
 1. Detecta cambios (mismo repo)
 2. npm run build:web  
 3. Deploys a app.tupatrimonio.app
@@ -224,13 +225,22 @@ El build de Next.js incluye automáticamente:
    - App debe detectar actualización automáticamente
    - Notificación con countdown debe aparecer
 
-### Netlify Headers para PWA
-Ya configurados en `netlify.toml`:
-```toml
-[[headers]]
-  for = "/sw.js"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+### Headers para PWA (configurados en next.config.ts)
+Ya configurados en `apps/web/next.config.ts`:
+```typescript
+async headers() {
+  return [
+    {
+      source: '/sw.js',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, max-age=0, must-revalidate',
+        },
+      ],
+    },
+  ];
+}
     Service-Worker-Allowed = "/"
 
 [[headers]]

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
+import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import "../../../../packages/ui/globals.css";
 
 const geistSans = Geist({
@@ -55,6 +56,9 @@ export default function RootLayout({
       "min-h-screen bg-background antialiased",
       `${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`
     )}>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={cn("bg-background text-foreground", outfit.className)}>
         <ServiceWorkerRegistration />
         <LocationProvider>

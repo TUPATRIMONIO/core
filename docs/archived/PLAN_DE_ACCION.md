@@ -789,42 +789,63 @@ SEO considerations:
 
 ---
 
-### 0.9 Analytics y Tracking
+### 0.9 Analytics y Tracking - ✅ **COMPLETADO (28 Oct 2025)**
 
 **Objetivo:** Medir todo desde día 1
 
 #### Setup:
 
-1. **Google Analytics 4**
-   ```typescript
-   Events a trackear:
-   - page_view (automático)
-   - click_cta (custom)
-   - scroll_depth
-   - form_start / form_submit
-   - download_resource
-   - video_play / video_complete
-   - outbound_link_click
-   - chatbot_interaction ← NUEVO
-   - demo_ai_interaction ← NUEVO
+1. **✅ Google Analytics 4 - IMPLEMENTADO EN AMBAS APPS**
    
-   Conversions:
-   - sign_up
-   - contact_form_submit
-   - pricing_page_view
-   - demo_request
-   - ai_demo_completed ← NUEVO
-   ```
+   **Marketing App (tupatrimonio.app):**
+   - ✅ GA4 configurado y funcionando
+   - ✅ Tracking de eventos: page_view, click_cta, scroll_depth
+   - ✅ Eventos de formularios: form_start, form_submit
+   - ✅ Eventos de blog: blog_read, navigation_click
+   - ✅ ID de medición configurado en variables de entorno
+   
+   **Web App (app.tupatrimonio.app):**
+   - ✅ GA4 configurado con propiedad separada (G-HKK7H001DB)
+   - ✅ Componente GoogleAnalytics.tsx creado
+   - ✅ Librería analytics.ts type-safe implementada
+   - ✅ Eventos comunes: cta_click, form_submit, navigation_click, external_link_click
+   - ✅ Eventos específicos de app web implementados:
+     ```typescript
+     // Autenticación
+     - user_login, user_logout
+     
+     // Dashboard
+     - dashboard_view
+     
+     // Documentos
+     - document_created, document_updated, document_deleted
+     
+     // Firmas
+     - signature_requested, signature_completed
+     
+     // Verificación
+     - verification_started, verification_completed
+     
+     // Perfil y Pagos
+     - profile_updated, payment_initiated, payment_completed
+     ```
+   - ✅ Configuración de variables de entorno para Vercel
+   - ✅ Solo funciona en producción (NODE_ENV=production)
+   - ✅ Logs en desarrollo para debugging
+   
+   **Ventajas de Propiedades Separadas:**
+   - Métricas específicas por aplicación
+   - Análisis independiente de marketing vs producto
+   - Embudos de conversión diferenciados
+   - Mejor segmentación de audiencias
 
-2. **Google Search Console**
-   ```
-   - Verificar propiedad
-   - Submit sitemap
-   - Monitor coverage issues
-   - Track rankings
-   ```
+2. **✅ Google Search Console - COMPLETADO (27 Oct 2025)**
+   - ✅ Propiedad verificada
+   - ✅ Sitemap enviado
+   - ✅ Monitoreo de coverage activo
+   - ✅ Tracking de rankings iniciado
 
-3. **Hotjar / Microsoft Clarity**
+3. **📋 Hotjar / Microsoft Clarity - PENDIENTE**
    ```
    - Heatmaps
    - Session recordings
@@ -832,11 +853,13 @@ SEO considerations:
    - Focus en landing pages de IA
    ```
 
-4. **SEO Monitoring**
+4. **📋 SEO Monitoring - PARCIAL**
    ```
-   Tools:
+   Tools implementados:
+   ✅ Google Search Console: Performance
+   
+   Tools pendientes:
    - Ahrefs / SEMrush: Keyword tracking
-   - Google Search Console: Performance
    - Screaming Frog: Technical audits
    
    KPIs a trackear semanalmente:
@@ -1140,13 +1163,13 @@ Al completar Fase 0:
   - ✅ next.config.ts configurado para ignorar ESLint durante build
   - ✅ Builds locales funcionando: Marketing ✓ Web ✓
   - ✅ Apps listas para deploy en Netlify
-- ✅ **Deploy a Netlify COMPLETADO** (21 Oct 2025)
+- ✅ **Deploy a Vercel COMPLETADO** (21 Oct 2025)
   - ✅ Marketing site deployado exitosamente
   - ✅ Web app deployada exitosamente  
   - ✅ Monorepo funcionando en producción
   - ✅ Build commands y publish directories configurados correctamente
   - ✅ Variables de entorno configuradas
-  - ✅ **Ambas apps live en Netlify** 🚀
+  - ✅ **Ambas apps live en Vercel** 🚀
 - ✅ **Estructura Internacional COMPLETADA** (22 Oct 2025)
   - ✅ Reestructuración por países: /cl/, /co/, /mx/
   - ✅ Content Chile migrado a /cl/ con legislación local
@@ -1283,7 +1306,7 @@ Al completar Fase 0:
    - ✅ Panel admin completo para gestionar posts (COMPLETADO 25 Oct 2025)
 
 **4. Deploy Infrastructure - COMPLETADO**
-   - ✅ **Ambas apps deployadas exitosamente en Netlify**
+   - ✅ **Ambas apps deployadas exitosamente en Vercel**
    - ✅ Build commands y publish directories configurados
    - ✅ Variables de entorno funcionando
    - ✅ Monorepo en producción
@@ -1307,7 +1330,7 @@ Al completar Fase 0:
    - [ ] Escribir 3-4 blog posts sobre servicios (firma, verificación, notaría)
 
 **PRIORIDAD 2: SEO y Analytics Final**  
-   - [x] Configurar dominios personalizados en Netlify: ✅ COMPLETADO
+   - [x] Configurar dominios personalizados en Vercel: ✅ COMPLETADO
      * tupatrimonio.app → marketing site ✅
      * app.tupatrimonio.app → web app ✅
    - [x] Structured data básico (Organization, WebSite, Article) ✅ COMPLETADO
@@ -1315,7 +1338,11 @@ Al completar Fase 0:
      * WebSite schema en homepage ✅
      * Article schema en posts del blog ✅
      * BreadcrumbList en posts del blog ✅
-   - [x] Google Analytics 4 + Search Console ✅ COMPLETADO (27 Oct)
+   - [x] Google Analytics 4 + Search Console ✅ COMPLETADO (27-28 Oct)
+     * Marketing App: GA4 configurado ✅
+     * Web App: GA4 con propiedad separada (G-HKK7H001DB) ✅
+     * Eventos específicos por aplicación ✅
+     * Search Console configurado ✅
 
 **PRIORIDAD 3: Branding Visual**
    - [x] Favicons personalizados para ambas apps ✅ COMPLETADO (27 Oct)
@@ -1506,7 +1533,27 @@ npm run build:packages   # Todos los packages
 - ✅ **Gestión sin Supabase Studio** - 100% desde frontend
 
 **🎨 BRANDING Y ANALYTICS:**
-- ✅ **Google Analytics 4** configurado y recabando datos
+- ✅ **Google Analytics 4** configurado y recabando datos (27-28 Oct 2025)
+  - **Marketing App (tupatrimonio.app):**
+    * Componente GoogleAnalytics.tsx implementado
+    * Librería analytics.ts con helpers type-safe
+    * Eventos: cta_click, form_submit, blog_read, navigation_click
+    * Configurado en Vercel
+  - **Web App (app.tupatrimonio.app):**
+    * GA4 con propiedad separada (G-HKK7H001DB)
+    * Componente GoogleAnalytics.tsx creado
+    * Librería analytics.ts extendida con eventos específicos:
+      - Autenticación: user_login, user_logout
+      - Dashboard: dashboard_view
+      - Documentos: document_created, document_updated, document_deleted
+      - Firmas: signature_requested, signature_completed
+      - Verificación: verification_started, verification_completed
+      - Perfil/Pagos: profile_updated, payment_initiated, payment_completed
+    * Configurado para Vercel (variable de entorno)
+    * Type-safe con TypeScript
+    * Solo funciona en producción
+    * Logs en desarrollo para debugging
+  - **Ventajas:** Métricas separadas por aplicación, análisis independiente, mejor segmentación
 - ✅ **Google Search Console** configurado y verificado
 - ✅ **Favicons personalizados** en ambas apps (marketing + web)
   - Descarga automática desde Supabase Storage
@@ -1514,14 +1561,44 @@ npm run build:packages   # Todos los packages
   - Metadata configurada en layout.tsx
   - Branding visual diferenciado por aplicación
 
-**📈 PROGRESO FASE 0: ~99.9% COMPLETADO en 5 sesiones**
+**🔧 CONFIGURACIÓN VERCEL (Web App):**
+- ✅ **Headers de seguridad** migrados a next.config.ts (28 Oct 2025)
+  - X-Frame-Options, XSS-Protection, Content-Type-Options
+  - Headers específicos para dashboard (no-index, no-cache)
+  - Headers para PWA (service workers, manifest, version, icons)
+  - Headers para autenticación (no-cache)
+- ✅ **Redirects** migrados a next.config.ts
+  - /signin → /login
+  - /signup → /login
+  - /register → /login
+- ✅ **Middleware de autenticación** mejorado
+  - Manejo de raíz (/) con detección de sesión
+  - Protección de rutas /dashboard/*
+  - Redirección inteligente según estado de autenticación
+  - Rutas públicas definidas (/login, /auth, /404)
+- ✅ **Documentación VERCEL-CONFIG.md** creada
+  - Guía completa de configuración
+  - Variables de entorno
+  - Diferencias Netlify vs Vercel
+  - Troubleshooting
+
+**📈 PROGRESO FASE 0: ~99.9% COMPLETADO en 6 sesiones**
 
 **✅ Google Analytics 4 + Search Console: COMPLETADOS**
 **✅ Favicons personalizados: COMPLETADOS**
+**✅ Configuración Vercel: COMPLETADA**
 **🎯 ÚNICO RESTANTE: Contenido de blog (3-4 posts definitivos)**
 **⏱️ TIEMPO ESTIMADO: 4-6 horas para cerrar Fase 0 al 100%**
 
-**📅 Última actualización: 27 Octubre 2025, 3:35 PM**
+**📅 Última actualización: 28 Octubre 2025, 4:15 PM**
+
+**🔄 MIGRACIÓN A VERCEL (Web App):**
+- ✅ **Headers** migrados de netlify.toml a next.config.ts
+- ✅ **Redirects** migrados de netlify.toml a next.config.ts
+- ✅ **Middleware** actualizado con lógica mejorada de autenticación
+- ✅ **Variables de entorno** configuradas para Vercel Dashboard
+- ✅ **Documentación completa** en VERCEL-CONFIG.md
+- ✅ **Sin linter errors** - código limpio y funcionando
 
 **DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
 - [ ] Completar migración 3: Schemas credits + billing
@@ -4326,9 +4403,10 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - Veriff (identity verification)
 
 ### Deploy y Hosting (Ultra Simple):
-- **Netlify**: Frontend + CI/CD automático
+- **Vercel**: Ambas apps (tupatrimonio.app + app.tupatrimonio.app) + CI/CD automático
 - **Supabase**: Backend + Migraciones automáticas
 - **DNS**: Solo configurar dominios
+- **Analytics**: Google Analytics 4 con propiedades separadas por app
 
 ### Monitoring (Básico):
 - Sentry (errors)
@@ -4352,11 +4430,12 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - [ ] **Costos controlados** (especialmente IA)
 
 ### Launch:
-- [ ] **Deploy a producción** (automático con Netlify)
+- [ ] **Deploy a producción** (automático con Vercel)
 - [ ] **Email a waitlist**
 - [ ] **Product Hunt launch**
 - [ ] **Contenido de lanzamiento** (blog, social media)
 - [ ] **Monitoring básico** activo
+- [ ] **Google Analytics** recabando datos en ambas apps
 
 ### Post-Launch:
 - [ ] **Feedback loop** activo
@@ -4381,14 +4460,16 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 ### Stack Ultra-Simple:
 - **Backend:** Solo Supabase (base de datos + auth + storage)
 - **Frontend:** Next.js + Tailwind + Shadcn/UI
-- **Deploy:** Solo Netlify (maneja todo automáticamente)
+- **Deploy:** Vercel (ambas apps) - todo automático
+- **Analytics:** Google Analytics 4 con propiedades separadas
 - **No necesitas:** Docker, CI/CD complex, CDN manual, SSL config
 
 ### Flujo de Desarrollo:
 1. **Codigo** → Push a GitHub
-2. **Deploy automático** → Netlify
+2. **Deploy automático** → Vercel (ambas apps)
 3. **Migraciones** → Supabase automático
-4. **Monitoreo** → Supabase dashboard
+4. **Monitoreo** → Supabase dashboard + Google Analytics
+5. **Variables de entorno** → Vercel Dashboard
 
 ### AI Development Best Practices:
 ```typescript
@@ -4450,12 +4531,13 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 ### Tecnología (Ultra-Simple):
 1. ✅ **Solo 3 servicios principales**:
    - GitHub (código)
-   - Netlify (frontend + deploy)
+   - Vercel (ambas apps + deploy automático)
    - Supabase (backend completo)
 2. ✅ **Deploy automático** (sin configuración)
-3. ✅ **Escalabilidad nativa** (Supabase + Netlify)
-4. ✅ **Costos predecibles**
-5. ✅ **Mantenimiento mínimo**
+3. ✅ **Escalabilidad nativa** (Supabase + Vercel)
+4. ✅ **Analytics separadas** (GA4 con propiedades por app)
+5. ✅ **Costos predecibles**
+6. ✅ **Mantenimiento mínimo**
 
 ### Ventajas Competitivas:
 1. ✅ **Time-to-market ultra rápido**

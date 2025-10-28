@@ -22,15 +22,15 @@ apps/web/         # Dashboard, auth, funcionalidad (privado)
 
 ## 🌍 Sistema de Ubicación
 
-### ¿Por qué Netlify Edge Functions?
+### Sistema de Detección de Ubicación
 **Alternativas evaluadas:**
 - ❌ **APIs terceros**: Límites, costos, dependencias
 - ❌ **Solo navegador**: Menos preciso (~70%)
-- ✅ **Netlify Edge**: Gratuito, 95% precisión, sin límites
+- ✅ **Vercel Edge + Browser**: Preciso y sin límites
 
 ### Estrategia Híbrida
 ```
-1. Netlify IP Detection (95% precisión) 
+1. Vercel Geo Detection (headers automáticos)
    ↓ fallback si falla
 2. Browser Detection (zona horaria, idioma)
    ↓ fallback si falla  
@@ -101,9 +101,10 @@ index.js           # Future: componentes UI compartidos
 
 ## 🔄 Deployment Strategy
 
-### ¿Por qué Netlify?
-- **Edge Functions gratuitas** para geolocalización
-- **Headers automáticos** de país (sin configuración)
+### ¿Por qué Vercel?
+- **Edge Functions integradas** con Next.js
+- **Headers automáticos** de geolocalización
+- **Deploy automático** desde GitHub
 - **CDN global** con baja latencia
 - **Build automático** desde git
 - **Preview deploys** para branches
@@ -112,7 +113,7 @@ index.js           # Future: componentes UI compartidos
 ```
 1. npm run build:location     # Compila packages TypeScript
 2. npm run build:marketing    # Next.js build con packages
-3. Netlify deploys            # Edge + Functions + Static
+3. Vercel deploys             # Edge + Middleware + Static
 ```
 
 ## 🎯 Performance Considerations
