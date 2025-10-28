@@ -48,7 +48,7 @@ export default function HomePage() {
 
             {/* Headline Principal */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-              Hazlo fácil, rápido y{" "}
+              Hazlo Fácil, rápido y{" "}
               <span className="text-[var(--tp-brand)] relative inline-block">
                 confiable
                 <svg className="absolute -bottom-2 left-0 w-full" height="12" viewBox="0 0 200 12" fill="none">
