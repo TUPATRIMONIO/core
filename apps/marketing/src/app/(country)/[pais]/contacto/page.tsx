@@ -4,7 +4,6 @@ import { ContactForm } from '@/components/forms/ContactForm';
 import { CountryRouteWrapper } from '@/components/CountryRouteWrapper';
 import { ComingSoonCountry } from '@/components/ComingSoonCountry';
 import { getCountryConfig } from '@tupatrimonio/location';
-import { CountryPageWrapper } from '@/components/PageAccessWrapper';
 import { Mail, MessageCircle, Phone, MapPin } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -100,12 +99,7 @@ export default async function ContactoPaisPage({ params }: PageProps) {
   const contactInfo = CONTACT_INFO[country];
 
   return (
-    <CountryPageWrapper 
-      countryCode={country} 
-      pageType="contacto"
-      showAdminControls={true}
-    >
-      <CountryRouteWrapper country={country} showCountryHeader={true}>
+    <CountryRouteWrapper country={country} showCountryHeader={true}>
         <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
@@ -122,7 +116,7 @@ export default async function ContactoPaisPage({ params }: PageProps) {
             <div className="grid lg:grid-cols-2 gap-12 items-start">
               {/* Formulario de Contacto */}
               <div>
-                <ContactForm country={country} />
+                <ContactForm />
               </div>
 
               {/* Información de Contacto */}
@@ -209,6 +203,5 @@ export default async function ContactoPaisPage({ params }: PageProps) {
           </div>
         </div>
       </CountryRouteWrapper>
-    </CountryPageWrapper>
   );
 }

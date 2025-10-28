@@ -18,12 +18,10 @@ import {
 import Link from "next/link";
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from "@/components/StructuredData";
 import { CountrySelector } from "@tupatrimonio/location";
-import { PageAccessWrapper } from "@/components/PageAccessWrapper";
 
 export default function HomePage() {
   return (
-    <PageAccessWrapper routePath="/" showAdminIndicators={true}>
-      <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
         {/* Structured Data para SEO */}
         <StructuredData data={generateOrganizationSchema()} />
         <StructuredData data={generateWebSiteSchema()} />
@@ -421,7 +419,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-      </div>
-    </PageAccessWrapper>
+    </div>
   );
 }
