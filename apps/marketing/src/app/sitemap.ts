@@ -100,10 +100,68 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/cl/contacto`,
+      url: `${baseUrl}/cl/notaria-digital`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/cl/verificacion-identidad`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    
+    // Otros países (Próximamente)
+    {
+      url: `${baseUrl}/mx`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/co`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/pe`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ar`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    
+    // Páginas globales
+    {
+      url: `${baseUrl}/contacto`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/legal/terminos`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/legal/cookies`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/legal/privacidad`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
     },
     {
       url: `${baseUrl}/blog`,
@@ -166,9 +224,62 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Continue without categories if there's an error
   }
 
+  // Knowledge Base articles
+  let kbArticles: Array<{url: string; lastModified: Date; changeFrequency: 'monthly'; priority: number}> = [];
+  try {
+    const supabase = createClient();
+    const { data: articles } = await supabase
+      .from('marketing.kb_articles')
+      .select(`
+        slug,
+        updated_at,
+        published_at,
+        kb_categories (slug)
+      `)
+      .eq('published', true)
+      .order('published_at', { ascending: false });
+
+    if (articles) {
+      kbArticles = articles.map(article => {
+        const categorySlug = (article.kb_categories as any)?.slug || 'general';
+        return {
+          url: `${baseUrl}/base-conocimiento/${categorySlug}/${article.slug}`,
+          lastModified: new Date(article.updated_at || article.published_at),
+          changeFrequency: 'monthly' as const,
+          priority: 0.7,
+        };
+      });
+    }
+  } catch (error) {
+    console.error('Error generating sitemap for KB articles:', error);
+  }
+
+  // Knowledge Base categories
+  let kbCategories: Array<{url: string; lastModified: Date; changeFrequency: 'weekly'; priority: number}> = [];
+  try {
+    const supabase = createClient();
+    const { data: kbCats } = await supabase
+      .from('marketing.kb_categories')
+      .select('slug')
+      .eq('is_active', true);
+
+    if (kbCats) {
+      kbCategories = kbCats.map(category => ({
+        url: `${baseUrl}/base-conocimiento/categoria/${category.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
+    }
+  } catch (error) {
+    console.error('Error generating sitemap for KB categories:', error);
+  }
+
   return [
     ...(managedPages.length > 0 ? managedPages : fallbackStaticPages),
     ...blogPosts,
     ...categoryPages,
+    ...kbArticles,
+    ...kbCategories,
   ];
 }

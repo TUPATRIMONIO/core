@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  /*
   // Redirects para URLs antiguas
   async redirects() {
     return [
@@ -87,6 +88,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  */
   generateBuildId: async () => {
     // Generar un ID único basado en timestamp
     const timestamp = Date.now();

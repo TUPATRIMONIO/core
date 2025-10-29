@@ -45,8 +45,9 @@ export async function middleware(request: NextRequest) {
     const country = request.geo?.country?.toLowerCase() || 
                    request.headers.get('x-vercel-ip-country')?.toLowerCase();
     
-    const supportedCountries = ['cl', 'mx', 'co'];
-    const targetCountry = supportedCountries.includes(country || '') 
+    // Solo Chile está operativo actualmente, otros países en "Próximamente"
+    const operationalCountries = ['cl'];
+    const targetCountry = operationalCountries.includes(country || '') 
       ? country 
       : 'cl';
 

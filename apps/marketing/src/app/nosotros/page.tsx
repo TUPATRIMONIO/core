@@ -229,7 +229,7 @@ export default function NosotrosPage() {
             Únete a cientos de empresas que ya confían en TuPatrimonio
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/empezar">
+            <Link href="https://app.tupatrimonio.app">
               <Button 
                 size="lg"
                 className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-8 py-6 text-lg"
