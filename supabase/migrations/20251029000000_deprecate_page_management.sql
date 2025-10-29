@@ -14,7 +14,7 @@
 --
 -- ================================
 
-/*
+
 
 -- Eliminar políticas RLS primero
 DROP POLICY IF EXISTS "page_management_public_read" ON marketing.page_management;
@@ -37,7 +37,7 @@ BEGIN
   RAISE NOTICE 'ℹ️  El dashboard lee desde la API: /api/pages-config';
 END $$;
 
-*/
+
 
 -- Placeholder para que el archivo sea válido SQL
 SELECT 'Migración comentada - No hace cambios' AS status;
