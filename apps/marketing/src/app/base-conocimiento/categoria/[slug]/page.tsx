@@ -24,7 +24,8 @@ export default async function KBCategoryPage({ params }: PageProps) {
   const supabase = await createClient();
   
   const { data: category } = await supabase
-    .from('marketing.kb_categories')
+    .schema('marketing')
+    .from('kb_categories')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
@@ -33,7 +34,8 @@ export default async function KBCategoryPage({ params }: PageProps) {
   if (!category) notFound();
 
   const { data: articles } = await supabase
-    .from('marketing.kb_articles')
+    .schema('marketing')
+    .from('kb_articles')
     .select('*')
     .eq('category_id', category.id)
     .eq('published', true)

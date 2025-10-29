@@ -23,7 +23,8 @@ export default async function BaseConocimientoPage() {
     
     // Obtener categorías activas
     const { data: categoriesData } = await supabase
-      .from('marketing.kb_categories')
+      .schema('marketing')
+      .from('kb_categories')
       .select('*')
       .eq('is_active', true)
       .order('sort_order');
@@ -32,7 +33,8 @@ export default async function BaseConocimientoPage() {
 
     // Obtener artículos destacados
     const { data: featuredData } = await supabase
-      .from('marketing.kb_articles')
+      .schema('marketing')
+      .from('kb_articles')
       .select(`
         id,
         title,

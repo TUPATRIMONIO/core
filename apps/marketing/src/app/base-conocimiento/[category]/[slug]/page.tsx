@@ -22,7 +22,8 @@ export default async function KBArticlePage({ params }: PageProps) {
   
   const supabase = await createClient();
   const { data: article } = await supabase
-    .from('marketing.kb_articles')
+    .schema('marketing')
+    .from('kb_articles')
     .select(`
       *,
       kb_categories (name, slug, color)
