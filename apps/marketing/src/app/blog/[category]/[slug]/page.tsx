@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createBuildTimeClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronLeft, Share2 } from "lucide-react";
@@ -125,7 +125,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 // ⚡ ISR: Pre-generar los 50 posts más vistos
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  // Usar cliente sin cookies para build time
+  const supabase = createBuildTimeClient();
   
   try {
     const { data: posts, error } = await supabase

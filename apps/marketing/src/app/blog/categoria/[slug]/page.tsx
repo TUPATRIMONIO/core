@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createBuildTimeClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
@@ -114,7 +114,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 // ⚡ ISR: Pre-generar todas las categorías activas
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  // Usar cliente sin cookies para build time
+  const supabase = createBuildTimeClient();
   
   try {
     const { data: categories, error } = await supabase
