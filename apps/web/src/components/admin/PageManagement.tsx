@@ -89,6 +89,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
       case 'public': return <Globe className="h-4 w-4 text-green-600" />;
       case 'draft': return <FileText className="h-4 w-4 text-yellow-600" />;
       case 'private': return <Lock className="h-4 w-4 text-red-600" />;
+      case 'coming-soon': return <Settings className="h-4 w-4 text-blue-600" />;
       default: return <FileText className="h-4 w-4 text-gray-400" />;
     }
   };
@@ -98,6 +99,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
       case 'public': return 'default';
       case 'draft': return 'secondary';  
       case 'private': return 'destructive';
+      case 'coming-soon': return 'outline';
       default: return 'outline';
     }
   };
@@ -181,6 +183,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
                         <SelectItem value="all">Todos los estados</SelectItem>
                         <SelectItem value="public">Público</SelectItem>
                         <SelectItem value="draft">Borrador</SelectItem>
+                        <SelectItem value="coming-soon">Próximamente</SelectItem>
                         <SelectItem value="private">Privado</SelectItem>
                       </SelectContent>
                     </Select>
@@ -271,12 +274,14 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
                         <Switch 
                           checked={page.seo_index}
                           onCheckedChange={() => toggleSeoIndex(page.route_path)}
+                          disabled
                         />
                         <span className="text-xs text-gray-500">SEO</span>
                         
                         <Select 
                           value={page.status} 
                           onValueChange={(value) => updatePageStatus(page.route_path, value)}
+                          disabled
                         >
                           <SelectTrigger className="w-32">
                             <SelectValue />
@@ -284,6 +289,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
                           <SelectContent>
                             <SelectItem value="public">Público</SelectItem>
                             <SelectItem value="draft">Borrador</SelectItem>
+                            <SelectItem value="coming-soon">Próximamente</SelectItem>
                             <SelectItem value="private">Privado</SelectItem>
                           </SelectContent>
                         </Select>
@@ -314,7 +320,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
         </TabsContent>
 
         <TabsContent value="analytics">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total de Páginas</CardTitle>
@@ -332,6 +338,16 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{stats?.public_pages || 0}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Próximamente</CardTitle>
+                <Settings className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{stats?.coming_soon_pages || 0}</div>
               </CardContent>
             </Card>
 

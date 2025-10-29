@@ -6,11 +6,14 @@
  * - Control de indexación SEO
  * - Permisos de acceso por rol de usuario
  * - Gestión por país y sección
+ * 
+ * NOTA: Las páginas estáticas se leen desde la API de marketing (page-config.ts)
+ * en lugar de la base de datos. Esta es la fuente de verdad única.
  */
 
 import { createClient } from '@/lib/supabase/client';
 
-export type PageStatus = 'public' | 'draft' | 'private';
+export type PageStatus = 'public' | 'draft' | 'private' | 'coming-soon';
 export type UserRole = 'public' | 'editor' | 'admin' | 'super_admin';
 
 export interface PageConfig {
@@ -210,6 +213,7 @@ export class PageManagement {
 
   /**
    * Obtiene todas las páginas con su configuración
+   * Lee desde la API proxy que conecta con marketing (page-config.ts)
    */
   async getAllPages(filters?: { 
     status?: PageStatus; 
@@ -217,30 +221,33 @@ export class PageManagement {
     section?: string; 
   }): Promise<PageConfig[]> {
     try {
-      let query = this.supabase
-        .schema('marketing')
-        .from('page_management')
-        .select('*')
-        .order('route_path');
+      // Consultar API proxy local (evita problemas de CORS)
+      const response = await fetch('/api/pages-config', {
+        cache: 'no-store', // Siempre obtener datos frescos
+      });
 
-      if (filters?.status) {
-        query = query.eq('status', filters.status);
-      }
-      if (filters?.country_code) {
-        query = query.eq('country_code', filters.country_code);
-      }
-      if (filters?.section) {
-        query = query.eq('section', filters.section);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error getting all pages:', error);
+      if (!response.ok) {
+        console.error('Error fetching pages config:', response.statusText);
         return [];
       }
 
-      return data || [];
+      let pages: PageConfig[] = await response.json();
+
+      // Aplicar filtros si existen
+      if (filters?.status) {
+        pages = pages.filter(p => p.status === filters.status);
+      }
+      if (filters?.country_code) {
+        pages = pages.filter(p => p.country_code === filters.country_code);
+      }
+      if (filters?.section) {
+        pages = pages.filter(p => p.section === filters.section);
+      }
+
+      // Ordenar por ruta
+      pages.sort((a, b) => a.route_path.localeCompare(b.route_path));
+
+      return pages;
     } catch (error) {
       console.error('Error in getAllPages:', error);
       return [];
@@ -278,41 +285,41 @@ export class PageManagement {
 
   /**
    * Obtiene estadísticas del sistema
+   * Calcula stats desde los datos de la API
    */
   async getStats(): Promise<{
     total_pages: number;
     public_pages: number;
     draft_pages: number;
     private_pages: number;
+    coming_soon_pages: number;
     indexed_pages: number;
     by_country: Record<string, number>;
     by_section: Record<string, number>;
   }> {
     try {
-      const { data, error } = await this.supabase
-        .schema('marketing')
-        .from('page_management')
-        .select('status, country_code, section, seo_index');
+      // Obtener todas las páginas desde la API
+      const pages = await this.getAllPages();
 
-      if (error) {
-        console.error('Error getting stats:', error);
+      if (!pages || pages.length === 0) {
         return {
           total_pages: 0,
           public_pages: 0,
           draft_pages: 0,
           private_pages: 0,
+          coming_soon_pages: 0,
           indexed_pages: 0,
           by_country: {},
           by_section: {}
         };
       }
 
-      const pages = data || [];
       const stats = {
         total_pages: pages.length,
         public_pages: pages.filter(p => p.status === 'public').length,
         draft_pages: pages.filter(p => p.status === 'draft').length,
         private_pages: pages.filter(p => p.status === 'private').length,
+        coming_soon_pages: pages.filter(p => p.status === 'coming-soon').length,
         indexed_pages: pages.filter(p => p.seo_index).length,
         by_country: {} as Record<string, number>,
         by_section: {} as Record<string, number>
@@ -336,6 +343,7 @@ export class PageManagement {
         public_pages: 0,
         draft_pages: 0,
         private_pages: 0,
+        coming_soon_pages: 0,
         indexed_pages: 0,
         by_country: {},
         by_section: {}
