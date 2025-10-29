@@ -1,5 +1,31 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
+> **📅 Última actualización:** 29 Octubre 2025  
+> **📊 Estado:** Fase 0 en progreso (~85% completado)  
+> **🎯 Próximo milestone:** Completar sistema de autenticación y contenido real
+
+## 🚨 Cambios Recientes (29 Oct 2025)
+
+### Actualización de Prioridades Fase 0:
+
+Se han identificado **dos tareas críticas pendientes** antes de pasar a Fase 1:
+
+1. **Sistema de Autenticación Completo** (1 semana)
+   - Configurar verificación de correo electrónico
+   - Implementar OAuth providers (Google, LinkedIn)
+   - Agregar Magic Links (passwordless)
+   - Mejorar flujo de onboarding
+
+2. **Contenido Real para Producción** (1-2 semanas)
+   - Migrar contenido del sitio actual en producción
+   - Actualizar landing pages con información definitiva
+   - Migrar posts del blog existente
+   - Optimizar contenido para SEO
+
+**Estimación revisada:** 2-3 semanas adicionales antes de iniciar Fase 1
+
+---
+
 ## 📋 Información del Proyecto
 
 ### Stack Tecnológico
@@ -1351,13 +1377,31 @@ Al completar Fase 0:
 
 **📋 RESTANTE PARA COMPLETAR FASE 0:**
 
-**PRIORIDAD 1: Contenido Inicial**
-   - [x] Sistema para gestionar posts (Admin Panel ✅ COMPLETADO)
-   - [x] Blog con posts funcionando correctamente ✅ COMPLETADO
-   - [x] URLs SEO-friendly con categorías ✅ COMPLETADO
-   - [ ] Escribir 3-4 blog posts sobre servicios (firma, verificación, notaría)
+**PRIORIDAD 1: Sistema de Autenticación Completo** ← NUEVO
+   - [ ] **Consolidar sistema de login/registro**
+     * Configurar verificación de correo electrónico
+     * Implementar Magic Links (login sin contraseña)
+     * Agregar OAuth providers (Google, LinkedIn)
+     * Configurar SMS OTP via Twilio (opcional)
+     * Mejorar flujo de onboarding post-registro
+     * Testing completo del flujo de autenticación
+     * Documentar proceso para usuarios
 
-**PRIORIDAD 2: SEO y Analytics Final**  
+**PRIORIDAD 2: Contenido Real para Producción** ← NUEVO
+   - [ ] **Landing pages con contenido definitivo**
+     * Homepage: Copiar contenido de sitio actual en producción
+     * Landing firmas electrónicas: Contenido real y actualizado
+     * Landing verificación identidad: Contenido real
+     * Landing notaría digital: Contenido real
+     * Página de precios: Planes y precios definitivos
+     * Páginas legales: Términos, privacidad actualizados
+   - [ ] **Blog con contenido migrado**
+     * Migrar posts existentes del sitio actual
+     * Revisar y actualizar contenido obsoleto
+     * Optimizar imágenes y SEO
+     * 3-4 posts nuevos sobre servicios
+
+**PRIORIDAD 3: SEO y Analytics Final**  
    - [x] Configurar dominios personalizados en Vercel: ✅ COMPLETADO
      * tupatrimonio.app → marketing site ✅
      * app.tupatrimonio.app → web app ✅
@@ -1372,7 +1416,7 @@ Al completar Fase 0:
      * Eventos específicos por aplicación ✅
      * Search Console configurado ✅
 
-**PRIORIDAD 3: Branding Visual**
+**PRIORIDAD 4: Branding Visual**
    - [x] Favicons personalizados para ambas apps ✅ COMPLETADO (27 Oct)
      * Marketing app: favicon diferenciado ✅
      * Web app: favicon diferenciado ✅
@@ -1394,8 +1438,10 @@ Al completar Fase 0:
   - ✅ Build exitoso sin errores
   - ✅ **Arquitectura URL escalable y SEO-friendly completa** 🗺️
 
-**📈 PROGRESO FASE 0: ~99.9% COMPLETADO**
-**🕒 ESTIMADO RESTANTE: 4-6 horas para completar Fase 0 (solo contenido blog)**
+**📈 PROGRESO FASE 0: ~85% COMPLETADO**
+**🕒 ESTIMADO RESTANTE: 2-3 semanas para completar Fase 0**
+  - Sistema de login completo: 1 semana
+  - Contenido real (landing pages + blog): 1-2 semanas
 
 **🎯 ÚLTIMAS MEJORAS (28 Oct 2025):**
 - ✅ **Admin del blog centralizado** en apps/web/dashboard/blog
@@ -1655,15 +1701,29 @@ npm run build:packages   # Todos los packages
   - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas aplicaciones
   - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles técnicos
 
-**📈 PROGRESO FASE 0: ~99.9% COMPLETADO en 6 sesiones**
+**📈 PROGRESO FASE 0: ~85% COMPLETADO en 7 sesiones**
 
-**✅ Google Analytics 4 + Search Console: COMPLETADOS**
-**✅ Favicons personalizados: COMPLETADOS**
-**✅ Configuración Vercel: COMPLETADA**
-**🎯 ÚNICO RESTANTE: Contenido de blog (3-4 posts definitivos)**
-**⏱️ TIEMPO ESTIMADO: 4-6 horas para cerrar Fase 0 al 100%**
+**✅ COMPLETADOS RECIENTEMENTE:**
+- ✅ Google Analytics 4 + Search Console
+- ✅ Favicons personalizados
+- ✅ Configuración Vercel
+- ✅ Arquitectura de URLs y routing
 
-**📅 Última actualización: 28 Octubre 2025, 6:45 PM**
+**📋 PENDIENTES CRÍTICOS PARA COMPLETAR FASE 0:**
+1. **Sistema de Login Consolidado** (1 semana)
+   - Verificación de correo electrónico
+   - OAuth providers (Google, LinkedIn)
+   - Magic Links
+   - SMS OTP via Twilio (opcional)
+   
+2. **Contenido Real para Producción** (1-2 semanas)
+   - Migrar contenido de sitio actual
+   - Landing pages con información definitiva
+   - Blog posts migrados y optimizados
+
+**⏱️ TIEMPO ESTIMADO: 2-3 semanas para completar Fase 0 al 100%**
+
+**📅 Última actualización: 29 Octubre 2025**
 
 **🔄 MIGRACIÓN A VERCEL (Web App):**
 - ✅ **Headers** migrados de netlify.toml a next.config.ts
@@ -1673,11 +1733,21 @@ npm run build:packages   # Todos los packages
 - ✅ **Documentación completa** en VERCEL-CONFIG.md
 - ✅ **Sin linter errors** - código limpio y funcionando
 
-**DESPUÉS DE FASE 0 (Regresar a Fase 1 Backend):**
+**📋 DESPUÉS DE COMPLETAR FASE 0 → INICIAR FASE 1 (Backend Foundation):**
+- [ ] **Sistema de Autenticación Consolidado** ✅ (Prioridad 1 Fase 0)
+- [ ] **Contenido Real en Producción** ✅ (Prioridad 2 Fase 0)
 - [ ] Completar migración 3: Schemas credits + billing
 - [ ] Setup apps/web con dashboard híbrido B2C/B2B
 - [ ] RLS policies y functions
 - [ ] Storage buckets y GitHub integration
+
+**🎯 CRITERIOS PARA PASAR A FASE 1:**
+1. ✅ Sistema de login funcionando completamente (verificación email, OAuth)
+2. ✅ Contenido real migrado de sitio actual en producción
+3. ✅ Landing pages con información definitiva
+4. ✅ Blog con posts migrados y optimizados
+5. ✅ SEO y analytics funcionando correctamente (YA COMPLETADO)
+6. ✅ Testing de experiencia de usuario completo
 
 ---
 
@@ -1928,40 +1998,116 @@ core.roles:
    VERIFF_API_KEY=
    ```
 
-### 1.3 Sistema de Autenticación
+### 1.3 Sistema de Autenticación - **FASE 0 PENDIENTE** 🔄
 
-**Objetivo:** Auth robusto con Supabase + Twilio
+**Objetivo:** Auth robusto con múltiples métodos y verificación completa
 
-#### Implementación:
-1. **Configurar Supabase Auth**
-   - Email + Password
-   - Magic Links
-   - OAuth providers (Google, LinkedIn)
-   - SMS via Twilio (custom provider)
+#### 📋 Estado Actual:
+- ✅ Login básico con email/password funcionando
+- ❌ **Verificación de email incompleta** (se solicita pero no está configurada)
+- ❌ Magic Links no implementados
+- ❌ OAuth providers no configurados
+- ❌ SMS OTP no implementado
 
-2. **Middleware de Next.js (Simple)**
+#### 🎯 Tareas Pendientes (PRIORIDAD 1 - FASE 0):
+
+1. **✅ Configurar Verificación de Email en Supabase**
    ```typescript
-   // middleware.ts
-   - Verificar sesión en cada request
-   - Redireccionar rutas protegidas
+   Pasos:
+   - Configurar email templates en Supabase Dashboard
+   - Personalizar template de verificación con branding TuPatrimonio
+   - Configurar redirect URL después de verificación
+   - Implementar página /verify-email con estado de verificación
+   - Testing completo del flujo de verificación
+   - Documentar proceso para usuarios
+   ```
+
+2. **✅ Implementar Magic Links (Passwordless)**
+   ```typescript
+   - Configurar Supabase Auth para magic links
+   - Crear UI para solicitar magic link
+   - Email template para magic link
+   - Página de confirmación /auth/confirm
+   - Testing del flujo completo
+   ```
+
+3. **✅ Agregar OAuth Providers**
+   ```typescript
+   Providers a implementar:
+   - Google OAuth (prioridad alta - más usado)
+   - LinkedIn OAuth (para B2B)
+   
+   Configuración:
+   - Crear apps en Google Cloud Console
+   - Crear app en LinkedIn Developers
+   - Configurar redirect URLs en Supabase
+   - Implementar botones de OAuth en /login y /register
+   - Manejar callback en /auth/callback
+   - Vincular OAuth accounts a organizaciones existentes
+   ```
+
+4. **⚠️ SMS OTP via Twilio (Opcional - Baja Prioridad)**
+   ```typescript
+   - Configurar Twilio account
+   - Implementar custom auth provider
+   - UI para ingresar número telefónico
+   - Flujo de verificación SMS
+   - Rate limiting para prevenir spam
+   ```
+
+5. **✅ Mejorar Flujo de Onboarding Post-Registro**
+   ```typescript
+   - Página de bienvenida después del registro
+   - Guía rápida de primeros pasos
+   - Detectar si viene de OAuth o email/password
+   - Redirección inteligente según tipo de usuario (B2C vs B2B)
+   ```
+
+6. **Middleware de Next.js (Mejorado)**
+   ```typescript
+   // middleware.ts - Actualizar
+   - Verificar sesión en cada request ✅ (ya implementado)
+   - Redireccionar rutas protegidas ✅ (ya implementado)
    - Inyectar org_id en headers para RLS
+   - Manejar usuarios no verificados
+   - Redirect a /verify-email si no está verificado
    ```
 
-3. **Auth Helpers**
+7. **Auth Helpers (Completar)**
    ```typescript
-   - getSession()
-   - getCurrentUser()
-   - getCurrentOrganization()
-   - hasPermission()
-   - switchOrganization()
+   - getSession() ✅ (ya implementado)
+   - getCurrentUser() ✅ (ya implementado)
+   - getCurrentOrganization() ⚠️ (implementar)
+   - hasPermission() ⚠️ (implementar)
+   - switchOrganization() ⚠️ (implementar)
+   - isEmailVerified() ⚠️ (implementar)
    ```
 
-4. **Páginas de Auth**
-   - `/login`
-   - `/register`
-   - `/verify-email`
-   - `/reset-password`
-   - `/accept-invitation/:token`
+8. **Páginas de Auth (Completar y Mejorar)**
+   - `/login` ✅ (existente, mejorar con OAuth buttons)
+   - `/register` ⚠️ (crear o mejorar)
+   - `/verify-email` ❌ (crear)
+   - `/reset-password` ❌ (crear)
+   - `/accept-invitation/:token` ❌ (crear para Fase 1)
+   - `/auth/callback` ✅ (existente, verificar funcionamiento)
+   - `/auth/confirm` ❌ (crear para magic links)
+
+#### ⏱️ Estimación de Tiempo:
+- Verificación de email: 1-2 días
+- Magic Links: 1 día
+- OAuth (Google + LinkedIn): 2-3 días
+- Mejoras UI y testing: 1-2 días
+- **Total: ~1 semana**
+
+#### 🎯 Criterio de Completitud:
+- ✅ Usuario puede registrarse y verificar email
+- ✅ Usuario puede hacer login con Google
+- ✅ Usuario puede hacer login con LinkedIn
+- ✅ Usuario puede usar magic link (opcional pero recomendado)
+- ✅ Flujo de onboarding claro y sin fricciones
+- ✅ Middleware maneja correctamente todos los estados
+- ✅ Testing completo de todos los flujos
+- ✅ Documentación para usuarios
 
 ### 1.4 Dashboard Base y Navegación
 

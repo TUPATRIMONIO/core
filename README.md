@@ -2,6 +2,10 @@
 
 Ecosistema multi-tenant B2C + B2B que digitaliza procesos legales con IA avanzada, detección automática de ubicación por país y sistema de estilos centralizado.
 
+> **📊 Estado del Proyecto:** Fase 0 en progreso (~85% completado)  
+> **📅 Última actualización:** 29 Octubre 2025  
+> **📋 Ver pendientes:** [`docs/FASE-0-PENDIENTES.md`](docs/FASE-0-PENDIENTES.md)
+
 ## 🎯 Características Principales
 
 - **🌍 Detección de País Automática**: Sistema por IP usando Netlify + selección manual
@@ -222,13 +226,29 @@ npm run build:web         # Solo web app
 npm run lint              # Lint todas las apps
 ```
 
-## 🎯 Próximos Pasos
+## 🎯 Próximos Pasos - Completar Fase 0
 
-1. **Deploy inicial** en Netlify con configuración actual
-2. **Verificar** detección de ubicación en producción  
-3. **Configurar** variables de entorno de Supabase
-4. **Monitorear** analytics de detección por país
-5. **Expandir** contenido para México y Colombia
+### Prioridad 1: Sistema de Autenticación (1 semana)
+1. **Configurar verificación de correo electrónico** en Supabase
+2. **Implementar OAuth** (Google + LinkedIn)
+3. **Agregar Magic Links** para login sin contraseña
+4. **Mejorar flujo de onboarding** post-registro
+5. **Testing exhaustivo** de todos los flujos
+
+### Prioridad 2: Contenido Real (1-2 semanas)
+1. **Migrar contenido** del sitio actual en producción
+2. **Actualizar landing pages** con información definitiva
+3. **Migrar posts del blog** existente (10-15 posts)
+4. **Crear posts nuevos** (3-4 sobre servicios core)
+5. **Optimizar SEO** en todo el sitio
+
+### Una vez completado → Iniciar Fase 1 (Backend Foundation)
+- Schema credits + billing
+- Dashboard híbrido B2C/B2B
+- RLS policies completas
+- Storage buckets adicionales
+
+📖 **Ver detalles completos:** [`docs/FASE-0-PENDIENTES.md`](docs/FASE-0-PENDIENTES.md)
 
 ## 📚 Documentación Adicional
 
