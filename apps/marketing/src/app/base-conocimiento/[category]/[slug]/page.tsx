@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Clock, Eye, ThumbsUp } from 'lucide-react';
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function KBArticlePage({ params }: PageProps) {
   const { category, slug } = await params;
   
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: article } = await supabase
     .from('marketing.kb_articles')
     .select(`

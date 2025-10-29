@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Search, Star, TrendingUp } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Base de Conocimiento - TuPatrimonio | Centro de Ayuda',
@@ -19,7 +19,7 @@ export default async function BaseConocimientoPage() {
   let featuredArticles: any[] = [];
 
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Obtener categorías activas
     const { data: categoriesData } = await supabase

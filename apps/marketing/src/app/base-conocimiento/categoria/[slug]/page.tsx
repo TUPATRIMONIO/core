@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function KBCategoryPage({ params }: PageProps) {
   const { slug } = await params;
   
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const { data: category } = await supabase
     .from('marketing.kb_categories')
