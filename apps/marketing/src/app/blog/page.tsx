@@ -5,10 +5,24 @@ import { Clock, User, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+// ⚡ ISR: Revalidar cada 30 minutos
+export const revalidate = 1800;
+
 export const metadata: Metadata = {
   title: "Blog TuPatrimonio - Guías sobre Firma Electrónica y Digitalización",
   description: "Aprende sobre firma electrónica, verificación de identidad, notaría digital y digitalización de procesos. Guías prácticas y casos de éxito.",
   keywords: ["blog firma electrónica", "guías digitalización", "tutoriales notaría digital", "casos de éxito"],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: "Blog TuPatrimonio - Guías sobre Digitalización Legal",
     description: "Aprende sobre firma electrónica, verificación de identidad y digitalización de procesos legales.",

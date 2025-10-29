@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,33 @@ import {
 import Link from "next/link";
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from "@/components/StructuredData";
 import { CountrySelector } from "@tupatrimonio/location";
+import { getPageConfig } from "@/lib/page-config";
+
+// Metadata optimizado con configuración desde page-config
+const pageConfig = getPageConfig('/');
+
+export const metadata: Metadata = {
+  title: "TuPatrimonio - Firmas Electrónicas, Verificación Digital y Notaría Online",
+  description: "Digitaliza tus procesos legales con TuPatrimonio: firmas electrónicas válidas, verificación de identidad biométrica y servicios notariales 100% online. Prueba gratis.",
+  keywords: ["firma electrónica", "verificación identidad", "notaría digital", "Chile", "documentos digitales"],
+  robots: {
+    index: pageConfig.seoIndex,
+    follow: pageConfig.seoIndex,
+    googleBot: {
+      index: pageConfig.seoIndex,
+      follow: pageConfig.seoIndex,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'TuPatrimonio - Servicios Legales Digitales con IA',
+    description: 'Firmas electrónicas, verificación de identidad y notaría digital. Digitaliza tus procesos legales de forma segura y eficiente.',
+    url: 'https://tupatrimonio.app',
+    locale: 'es_CL',
+  },
+};
 
 export default function HomePage() {
   return (

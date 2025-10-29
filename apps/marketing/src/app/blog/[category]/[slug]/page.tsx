@@ -8,6 +8,9 @@ import Image from "next/image";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { StructuredData, generateArticleSchema, generateBreadcrumbSchema } from "@/components/StructuredData";
 
+// ⚡ ISR: Revalidar cada 1 hora
+export const revalidate = 3600;
+
 interface BlogPostPageProps {
   params: {
     category: string;
@@ -84,6 +87,17 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   return {
     title: post.seo_title || post.title,
     description: post.seo_description || post.excerpt,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: post.seo_title || post.title,
       description: post.seo_description || post.excerpt,
@@ -107,6 +121,33 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       images: post.featured_image_url ? [post.featured_image_url] : [],
     },
   };
+}
+
+// ⚡ ISR: Pre-generar los 50 posts más vistos
+export async function generateStaticParams() {
+  const supabase = await createClient();
+  
+  try {
+    const { data: posts, error } = await supabase
+      .schema('marketing')
+      .from('blog_posts')
+      .select('slug, blog_categories(slug)')
+      .eq('published', true)
+      .order('view_count', { ascending: false })
+      .limit(50);
+
+    if (error || !posts) {
+      return [];
+    }
+
+    return posts.map((post: any) => ({
+      category: post.blog_categories?.slug || 'general',
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {

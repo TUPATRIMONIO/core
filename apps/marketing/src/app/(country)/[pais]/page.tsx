@@ -7,6 +7,7 @@ import { CountryRouteWrapper, useCountryConfig } from "@/components/CountryRoute
 import { ComingSoonCountry } from "@/components/ComingSoonCountry";
 import { getCountryConfig } from "@tupatrimonio/location";
 import { notFound } from "next/navigation";
+import { getPageConfig } from "@/lib/page-config";
 
 // Países permitidos
 const ALLOWED_COUNTRIES = ['cl', 'mx', 'co', 'pe', 'ar'];
@@ -51,15 +52,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!ALLOWED_COUNTRIES.includes(country)) {
     return {
       title: 'País no disponible - TuPatrimonio',
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
   const meta = COUNTRY_METADATA[country];
   
+  // Obtener configuración SEO desde page-config.ts
+  const routePath = `/${country}`;
+  const pageConfig = getPageConfig(routePath);
+  
   return {
     title: meta.title,
     description: meta.description,
     keywords: meta.keywords,
+    robots: {
+      index: pageConfig.seoIndex,
+      follow: pageConfig.seoIndex,
+      googleBot: {
+        index: pageConfig.seoIndex,
+        follow: pageConfig.seoIndex,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: meta.title,
       description: meta.description,

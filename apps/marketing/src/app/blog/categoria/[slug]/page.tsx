@@ -6,6 +6,9 @@ import { Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
+// ⚡ ISR: Revalidar cada 1 hora
+export const revalidate = 3600;
+
 interface CategoryPageProps {
   params: {
     slug: string;
@@ -90,12 +93,47 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: `${category.name} - Blog TuPatrimonio`,
     description: category.description || `Artículos sobre ${category.name}. Guías, tutoriales y casos de éxito en TuPatrimonio.`,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: `${category.name} - Blog TuPatrimonio`,
       description: category.description || `Artículos sobre ${category.name}`,
       url: `https://tupatrimonio.app/blog/categoria/${slug}`,
     },
   };
+}
+
+// ⚡ ISR: Pre-generar todas las categorías activas
+export async function generateStaticParams() {
+  const supabase = await createClient();
+  
+  try {
+    const { data: categories, error } = await supabase
+      .schema('marketing')
+      .from('blog_categories')
+      .select('slug')
+      .eq('is_active', true);
+
+    if (error || !categories) {
+      return [];
+    }
+
+    return categories.map((cat) => ({
+      slug: cat.slug,
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

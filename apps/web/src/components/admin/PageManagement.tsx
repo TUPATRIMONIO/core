@@ -115,20 +115,23 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Alerta informativa */}
+      <Alert className="mb-8 bg-blue-50 border-blue-200">
+        <Shield className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-900">
+          <strong>Modo Auditoría:</strong> Esta página es de solo lectura. La configuración de páginas se gestiona desde el código en <code className="bg-blue-100 px-2 py-1 rounded text-sm">apps/marketing/src/lib/page-config.ts</code>
+        </AlertDescription>
+      </Alert>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Gestión de Páginas
+            Gestión de Páginas (Solo Lectura)
           </h1>
           <p className="text-gray-600">
-            Controla la visibilidad, SEO y permisos de todas las páginas del sitio marketing
+            Visualiza la configuración actual de páginas del sitio marketing
           </p>
         </div>
-        
-        <Button onClick={() => setShowAddForm(true)} className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar Página
-        </Button>
       </div>
 
       <Tabs defaultValue="pages" className="space-y-6">
@@ -170,7 +173,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
 
                   <div>
                     <Label htmlFor="status">Estado</Label>
-                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, status: value as PageStatus }))}>
+                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, status: value === 'all' ? undefined : value as PageStatus }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Todos los estados" />
                       </SelectTrigger>
@@ -185,7 +188,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
 
                   <div>
                     <Label htmlFor="country">País</Label>
-                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, country: value }))}>
+                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, country: value === 'all' ? undefined : value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Todos los países" />
                       </SelectTrigger>
@@ -202,7 +205,7 @@ export function PageManagementDashboard({ initialPages = [] }: PageManagementDas
 
                   <div>
                     <Label htmlFor="section">Sección</Label>
-                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, section: value }))}>
+                    <Select onValueChange={(value) => setFilter(prev => ({ ...prev, section: value === 'all' ? undefined : value }))}>
                       <SelectTrigger>
                         <SelectValue placeholder="Todas las secciones" />
                       </SelectTrigger>

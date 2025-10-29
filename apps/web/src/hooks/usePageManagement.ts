@@ -30,12 +30,17 @@ export function useIsAdmin() {
         return;
       }
 
-      // Usar la función RPC para verificar acceso admin
-      const { data: hasAccess } = await supabase.rpc('can_access_admin', {
+      // Usar la función RPC can_access_admin que bypasea RLS con SECURITY DEFINER
+      const { data: hasAccess, error } = await supabase.rpc('can_access_admin', {
         user_id: user.id
       });
 
-      setIsAdmin(hasAccess || false);
+      if (error) {
+        console.error('Error calling can_access_admin:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(hasAccess || false);
+      }
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
