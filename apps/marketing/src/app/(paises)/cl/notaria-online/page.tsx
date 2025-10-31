@@ -194,7 +194,7 @@ export default function NotariaOnlineChilePage() {
                     <Clock className="w-4 h-4 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Documento Listo en 24 Horas</p>
+                    <p className="font-semibold text-gray-900">Documento Listo en &lt; 24 Horas</p>
                     <p className="text-sm text-gray-600">94% procesados en menos de 6 horas</p>
                   </div>
                 </div>
@@ -261,149 +261,124 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* SECCIÓN 2: TABLA DE PRECIOS */}
-        <section id="precios" className="py-20 bg-white">
+        {/* SECCIÓN 2: COMPARACIÓN DE BENEFICIOS */}
+        <section id="beneficios" className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Precios de Notaría Online en Chile 2025: Tabla Comparativa
+                ¿Por qué elegir Notaría Online en Chile?
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Transparencia total. Compara nuestros precios con notarías físicas tradicionales y descubre cuánto puedes ahorrar.
+                Descubre las ventajas reales de hacer tus trámites notariales 100% online vs. visitar una notaría física tradicional.
               </p>
             </div>
 
-            {/* Tabla de precios */}
+            {/* Tabla de comparación de beneficios */}
             <div className="overflow-x-auto mb-12">
               <table className="w-full border-collapse bg-white shadow-lg rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-[var(--tp-brand)]">
-                    <th className="px-6 py-4 text-left text-white font-bold text-lg">Servicio</th>
+                    <th className="px-6 py-4 text-left text-white font-bold text-lg">Aspecto</th>
                     <th className="px-6 py-4 text-center text-white font-bold text-lg">Notaría Online<br />(TuPatrimonio)</th>
-                    <th className="px-6 py-4 text-center text-white font-bold text-lg">Notaría Física<br />(Promedio)</th>
-                    <th className="px-6 py-4 text-center text-white font-bold text-lg">Tu Ahorro</th>
+                    <th className="px-6 py-4 text-center text-white font-bold text-lg">Notaría Física<br />(Tradicional)</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">Autorización de firma (1 firmante)</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">⏱️ Tiempo de gestión</td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-2xl font-bold text-[var(--tp-brand)]">$6.990</span>
+                      <span className="text-xl font-bold text-green-600">Menos de 24 horas</span>
+                      <p className="text-sm text-gray-600 mt-1">Trámite completo desde tu casa</p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-medium text-gray-600 line-through">$25.000 - $40.000</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-bold text-green-600">75-83%</span>
-                      <p className="text-sm text-gray-500">$18.000 - $33.000</p>
+                      <span className="text-xl font-medium text-gray-600">3-7 días hábiles</span>
+                      <p className="text-sm text-gray-500 mt-1">Múltiples visitas presenciales</p>
                     </td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">Protocolización notarial</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">📍 Ubicación y desplazamiento</td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-2xl font-bold text-[var(--tp-brand)]">$14.990</span>
+                      <span className="text-xl font-bold text-green-600">0 traslados</span>
+                      <p className="text-sm text-gray-600 mt-1">100% desde donde estés</p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-medium text-gray-600 line-through">$80.000 - $120.000</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-bold text-green-600">82-87%</span>
-                      <p className="text-sm text-gray-500">$65.000 - $105.000</p>
+                      <span className="text-xl font-medium text-gray-600">2-3 visitas mínimo</span>
+                      <p className="text-sm text-gray-500 mt-1">Tráfico, estacionamiento, tiempo perdido</p>
                     </td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">Copia certificada digital</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">🕐 Horario de atención</td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-2xl font-bold text-[var(--tp-brand)]">$4.990</span>
+                      <span className="text-xl font-bold text-green-600">24/7</span>
+                      <p className="text-sm text-gray-600 mt-1">Envía tu solicitud cuando quieras</p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-medium text-gray-600 line-through">$15.000 - $25.000</span>
+                      <span className="text-xl font-medium text-gray-600">Lun-Vie 9:00-17:00</span>
+                      <p className="text-sm text-gray-500 mt-1">Debes pedir permiso en tu trabajo</p>
+                    </td>
+                  </tr>
+                  <tr className="border-b hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">📱 Seguimiento del trámite</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xl font-bold text-green-600">Tiempo real</span>
+                      <p className="text-sm text-gray-600 mt-1">Notificaciones por WhatsApp y correo</p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-bold text-green-600">70-80%</span>
-                      <p className="text-sm text-gray-500">$10.000 - $20.000</p>
+                      <span className="text-xl font-medium text-gray-600">Debes llamar/ir</span>
+                      <p className="text-sm text-gray-500 mt-1">Sin visibilidad del proceso</p>
+                    </td>
+                  </tr>
+                  <tr className="border-b hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">📄 Entrega de documentos</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xl font-bold text-green-600">Instantánea digital</span>
+                      <p className="text-sm text-gray-600 mt-1">Descarga inmediata + envío email</p>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xl font-medium text-gray-600">Retiro presencial</span>
+                      <p className="text-sm text-gray-500 mt-1">Otra visita para buscar documentos</p>
+                    </td>
+                  </tr>
+                  <tr className="border-b hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">✅ Validez legal</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xl font-bold text-green-600">100% legal</span>
+                      <p className="text-sm text-gray-600 mt-1">Autorizada por Ley 19.799 (Firma Electrónica Avanzada)</p>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="text-xl font-medium text-gray-600">100% legal</span>
+                      <p className="text-sm text-gray-500 mt-1">Firma manuscrita tradicional</p>
                     </td>
                   </tr>
                   <tr className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">Contrato de arriendo (2 firmantes)</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">🤝 Experiencia del cliente</td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-2xl font-bold text-[var(--tp-brand)]">$11.990</span>
+                      <span className="text-xl font-bold text-green-600">Tranquilidad total</span>
+                      <p className="text-sm text-gray-600 mt-1">Soporte proactivo y acompañamiento</p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-medium text-gray-600 line-through">$45.000 - $80.000</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-bold text-green-600">73-85%</span>
-                      <p className="text-sm text-gray-500">$33.000 - $68.000</p>
+                      <span className="text-xl font-medium text-gray-600">Variable</span>
+                      <p className="text-sm text-gray-500 mt-1">Largas esperas, poca comunicación</p>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            {/* Calculadora de ahorro */}
-            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-8 mb-12 border border-[var(--tp-brand-20)]">
-              <div className="text-center mb-6">
-                <DollarSign className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Calculadora de Ahorro</h3>
-                <p className="text-gray-600">Descubre cuánto puedes ahorrar con nuestra notaría online</p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
-                  <p className="text-sm text-gray-600 mb-2">Si firmas 1 documento:</p>
-                  <p className="text-3xl font-bold text-[var(--tp-brand)] mb-1">$6.990</p>
-                  <p className="text-sm text-green-600 font-medium">Ahorras ~$20.000</p>
-                </div>
-                <div className="bg-white rounded-lg p-6 text-center shadow-sm border-2 border-[var(--tp-brand)]">
-                  <div className="text-xs bg-[var(--tp-brand)] text-white px-2 py-1 rounded-full inline-block mb-2">MÁS POPULAR</div>
-                  <p className="text-sm text-gray-600 mb-2">Si firmas 5 documentos:</p>
-                  <p className="text-3xl font-bold text-[var(--tp-brand)] mb-1">$29.950</p>
-                  <p className="text-sm text-green-600 font-medium">Ahorras ~$100.000</p>
-                </div>
-                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
-                  <p className="text-sm text-gray-600 mb-2">Si firmas 10 documentos:</p>
-                  <p className="text-3xl font-bold text-[var(--tp-brand)] mb-1">$55.910</p>
-                  <p className="text-sm text-green-600 font-medium">Ahorras ~$200.000</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Párrafo explicativo */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 max-w-5xl mx-auto">
-              <div className="flex gap-4">
-                <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
-                <div className="text-gray-700 leading-relaxed">
-                  <h3 className="font-bold text-xl text-gray-900 mb-3">¿Por qué las notarías físicas cobran hasta 40 veces más?</h3>
-                  <p className="mb-4">
-                    Según un estudio de la <strong>Fiscalía Nacional Económica (FNE) de 2018</strong>, las notarías físicas en Chile cobran 
-                    hasta <strong>40 veces más</strong> que el precio máximo establecido por decreto desde 1998. Por ejemplo, una promesa de 
-                    compraventa que legalmente debería costar $5.500 puede llegar a <strong>$120.000 en comunas como Lo Barnechea</strong>.
-                  </p>
-                  <p className="mb-4">
-                    Las notarías online como TuPatrimonio operamos con <strong>costos operacionales 85% menores</strong> al no mantener 
-                    oficinas físicas costosas, equipos de atención presencial ni horarios limitados. Este ahorro lo trasladamos directamente 
-                    al usuario final.
-                  </p>
-                  <p className="mb-4">
-                    Nuestra firma electrónica avanzada cumple la <strong>Ley 19.799</strong> que desde 2002 otorga la misma validez jurídica 
-                    que la firma manuscrita. Cada documento incluye certificación digital, timbre de tiempo y registro en blockchain para 
-                    máxima seguridad.
-                  </p>
-                  <p className="font-semibold text-[var(--tp-brand)]">
-                    Nuestros precios son 73% más económicos que el promedio del mercado ($24.990) y 85% más baratos que notarías físicas.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center mt-8">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-8 py-6 text-lg"
+            {/* Llamado a la acción después de la tabla */}
+            <div className="text-center mt-12 p-8 bg-gradient-to-r from-[var(--tp-brand-light)] to-[var(--tp-brand)] rounded-2xl">
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                ¿Listo para hacer tus trámites de forma más inteligente?
+              </h3>
+              <p className="text-lg text-white/90 mb-6 max-w-2xl mx-auto">
+                Miles de personas ya eligieron la tranquilidad de lo digital. Únete a ellos y experimenta la diferencia.
+              </p>
+              <a 
+                href="#servicios" 
+                className="inline-block bg-white text-[var(--tp-brand)] px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
               >
-                Ver Todos los Documentos Disponibles
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+                Ver Servicios Disponibles
+              </a>
             </div>
           </div>
         </section>
