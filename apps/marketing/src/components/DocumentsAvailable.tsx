@@ -460,7 +460,7 @@ export default function DocumentsAvailable({
             Documentos Notariales Online Disponibles
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Más de 150 tipos de documentos legales con validez en todo Chile
+            Más del 90% de documentos legales con validez en todo Chile
           </p>
         </div>
 

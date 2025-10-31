@@ -11,7 +11,7 @@ import DocumentsAvailable from "@/components/DocumentsAvailable";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
-  description: "La notaría online más económica de Chile. Autorización notarial desde $6.990 con validez legal. +60k documentos firmados. Firma electrónica avanzada certificada. Disponible 24/7.",
+  description: "Gestión de servicios notariales online, la más económica de Chile. Autorización notarial desde $6.990 con validez legal. +60k documentos gestionados. Firma electrónica avanzada certificada. Disponible 24/7.",
   keywords: "notaría online, firma electrónica Chile, notaría virtual, contrato arriendo online, autorización notarial, protocolización online, notaría digital Chile, firma documentos online",
   openGraph: {
     title: "Notaría Online en Chile | Firma Documentos desde $6.990",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LegalService",
-  "name": "TuPatrimonio - Notaría Online Chile",
-  "description": "Servicios de notaría online con validez legal en todo Chile. Firma electrónica avanzada certificada según Ley 19.799.",
+  "name": "TuPatrimonio - Gestión de Servicios Notariales Online Chile",
+  "description": "Gestión de servicios notariales online con validez legal en todo Chile. Firma electrónica avanzada certificada según Ley 19.799.",
   "url": "https://tupatrimonio.app/cl/notaria-online",
   "image": "https://tupatrimonio.app/images/notaria-online-chile.jpg",
   "priceRange": "$6.990 - $32.990 CLP",
@@ -87,10 +87,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "¿Cuál es la mejor notaría online de Chile?",
+      "name": "¿Cuál es el mejor gestor de servicios notariales online de Chile?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "TuPatrimonio es la notaría online más completa de Chile con precios desde $6.990, seguro legal incluido por 1 año, +160.000 usuarios y 4.9/5 estrellas en reseñas. Ofrece autorización notarial, protocolización y firma electrónica avanzada certificada con validez legal en todo el país bajo la Ley 19.799. A diferencia de la competencia, incluye descuentos por volumen de hasta $8.000, acepta documentos de extranjeros con pasaporte y ofrece reembolso 100% si el documento es rechazado."
+        "text": "TuPatrimonio es el gestor de servicios notariales online más completo de Chile con precios desde $6.990, cobertura legal incluida sin tope, +160.000 usuarios y 4.9/5 estrellas en reseñas. Ofrece gestión de autorización notarial, protocolización y firma electrónica avanzada certificada con validez legal en todo el país bajo la Ley 19.799. A diferencia de la competencia, incluye descuentos por volumen de hasta $8.000, acepta documentos de extranjeros con pasaporte y ofrece reembolso 100% si el documento es rechazado."
       }
     },
     {
@@ -172,9 +172,9 @@ export default function NotariaOnlineChilePage() {
 
               {/* Subtítulo H2 */}
               <h2 className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-                Certificación notarial con validez legal en todo Chile, en menos de <strong>24 horas</strong>. <br></br> 
+                Gestionamos tu certificación notarial con validez legal en todo Chile, en menos de <strong>24 horas</strong>. <br></br> 
                 Firma electrónica simple y avanzada. Copia Legalizada, Protocolización y Firma Autorizada por Notario (FAN®). <br></br>
-                Más de <strong>60.000 documentos firmados</strong>. 
+                Más de <strong>60.000 documentos gestionados</strong>. 
                 Firmas avanzadas certificadas por la Subsecretaría de Economía según <strong>Ley 19.799</strong>.
               </h2>
 
@@ -203,8 +203,8 @@ export default function NotariaOnlineChilePage() {
                     <Shield className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Seguro Legal Incluido 1 Año</p>
-                    <p className="text-sm text-gray-600">Único en Chile con protección incluida</p>
+                    <p className="font-semibold text-gray-900">Cobertura Legal Sin Tope</p>
+                    <p className="text-sm text-gray-600">Únicos en Chile con protección incluida</p>
                   </div>
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function NotariaOnlineChilePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Cómo Funciona Nuestra Notaría Online: 4 Pasos Simples
+                Cómo Funciona Nuestro Servicio de Gestión Notarial Online: 4 Simples Pasos
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Proceso 100% digital, seguro y validado legalmente. De 5 minutos a 24 horas máximo.
@@ -545,9 +545,9 @@ export default function NotariaOnlineChilePage() {
                     <td className="px-6 py-4 text-center text-gray-600">3 - 24 horas</td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">Seguro legal incluido</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">Cobertura legal incluida</td>
                     <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-semibold text-green-600">Sí (1 año)</span>
+                      <span className="font-semibold text-green-600">Sí (sin tope)</span>
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">No</td>
@@ -587,15 +587,15 @@ export default function NotariaOnlineChilePage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Seguro Legal Incluido por 1 Año</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Cobertura Legal Incluida Sin Tope</h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Somos la <strong>única notaría online en Chile</strong> que incluye un seguro legal de cobertura de hasta 
-                  <strong> $5.000.000 CLP</strong> por 1 año completo en cada documento firmado.
+                  Somos los <strong>únicos gestores de servicios notariales online en Chile</strong> que incluyen una 
+                  <strong> cobertura legal sin tope de monto</strong> en cada documento procesado.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
-                  Te protegemos contra rechazos administrativos injustificados, problemas de validación y cualquier controversia 
-                  legal relacionada con la firma electrónica. Si tu documento es rechazado por una institución, cubrimos los 
-                  costos de corrección y re-envío, además de asesoría legal especializada.
+                  Esta protección legal cubre al gestor del pedido (tú) o a quien decidas ceder su beneficio, en caso de 
+                  incumplimiento relacionado con el proceso de gestión notarial. Incluye asesoría legal especializada y 
+                  respaldo en controversias.
                 </p>
               </div>
 
@@ -617,17 +617,17 @@ export default function NotariaOnlineChilePage() {
 
               <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)]">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Globe className="w-8 h-8 text-white" />
+                  <FileCheck className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Acepta Pasaportes de Cualquier País</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">+90% de Documentos Privados de Chile  </h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Ideal para <strong>extranjeros residiendo en Chile</strong> o <strong>chilenos en el exterior</strong>. 
-                  Aceptamos pasaportes de cualquier nacionalidad, sin necesidad de RUT chileno para comenzar.
+                  <strong>Más del 90% de los documentos privados en Chile</strong> se pueden gestionar completamente de forma online, 
+                  sin necesidad de presencia física en notaría. Contratos, poderes, autorizaciones y más.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
-                  Nuestro sistema de verificación biométrica internacional funciona con documentos de más de 150 países. 
-                  Miles de expatriados han firmado contratos de arriendo, promesas de compraventa y poderes notariales desde 
-                  el extranjero sin necesidad de viajar a Chile.
+                  Solo necesitas tu cédula o pasaporte, tu documento en PDF y conexión a internet. En menos de 24 horas tendrás 
+                  tu documento firmado con plena validez legal. <strong>Sin traslados, sin filas, sin pérdida de tiempo.</strong> 
+                  Tu tranquilidad, desde donde estés.
                 </p>
               </div>
             </div>
@@ -753,7 +753,7 @@ export default function NotariaOnlineChilePage() {
                 </h3>
                 <div className="pl-10 space-y-3 text-gray-700 leading-relaxed">
                   <p>
-                    Los documentos firmados con nuestra notaría online son aceptados en <strong>todas las instituciones 
+                    Los documentos gestionados a través de nuestro servicio son aceptados en <strong>todas las instituciones 
                     públicas y privadas de Chile</strong> que reconocen la Ley 19.799. Casos de uso verificados:
                   </p>
 
@@ -1267,10 +1267,10 @@ export default function NotariaOnlineChilePage() {
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
                       <strong>NO hay costos ocultos ni suscripciones mensuales</strong>. Pagas únicamente por cada documento 
-                      que firmes. El precio publicado incluye: firma electrónica avanzada certificada, revisión legal, 
-                      autorización notarial, certificado digital, timbre de tiempo, registro en blockchain, descarga ilimitada 
-                      y seguro legal por 1 año. Los únicos costos adicionales opcionales son: servicio express 2 horas (+$5.000) 
-                      y certificación apostillada para uso internacional (+$8.000).
+                      que gestiones. El precio publicado incluye: gestión completa del proceso, firma electrónica avanzada certificada, 
+                      revisión legal, autorización notarial, certificado digital, timbre de tiempo, registro en blockchain, descarga 
+                      ilimitada y cobertura legal sin tope. Los únicos costos adicionales opcionales son: servicio express 2 horas 
+                      (+$5.000) y certificación apostillada para uso internacional (+$8.000).
                     </p>
                   </div>
 
@@ -1320,7 +1320,8 @@ export default function NotariaOnlineChilePage() {
                       incompleta del usuario, ofrecemos <strong>corrección gratuita y re-envío sin costo</strong>. Nuestro 
                       equipo legal revisa cada documento antes de enviar a notaría (tasa de rechazo: 0.3%). En los pocos casos 
                       de rechazo, contactamos al cliente en menos de 2 horas, corregimos el error y re-enviamos el mismo día. 
-                      Además, el seguro legal incluido cubre hasta $5.000.000 en caso de controversias.
+                      Además, la cobertura legal incluida protege al cliente sin tope de monto en caso de incumplimiento en el 
+                      proceso de gestión.
                     </p>
                   </div>
 
@@ -1386,8 +1387,8 @@ export default function NotariaOnlineChilePage() {
                       de tiempo oficial), integridad del documento (cualquier alteración invalida la firma), y cadena de custodia 
                       digital completa. Si alguien cuestiona la firma, puede verificarla en: 1) Portal de verificación de la 
                       certificadora, 2) Blockchain público donde está registrada, 3) Peritaje forense digital por tribunal. 
-                      <strong>El seguro legal incluido cubre hasta $5.000.000</strong> en defensa legal si alguien cuestiona 
-                      la validez sin fundamento.
+                      <strong>La cobertura legal incluida protege sin tope de monto</strong> en caso de incumplimiento en el 
+                      proceso de gestión del servicio notarial.
                     </p>
                   </div>
 
@@ -1532,14 +1533,14 @@ export default function NotariaOnlineChilePage() {
                       ¿Qué respaldo tengo si algo sale mal?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      <strong>Triple respaldo</strong>: 1) <strong>Seguro legal incluido</strong> por 1 año que cubre hasta 
-                      $5.000.000 CLP en caso de controversias, rechazo injustificado, o defensa legal, 2) <strong>Garantía 
-                      de reembolso 100%</strong> si el documento es rechazado por error nuestro (0.3% de casos), 3) 
-                      <strong>Respaldo técnico permanente:</strong> tus documentos se almacenan cifrados por 10 años mínimo 
-                      con descargas ilimitadas, backups en 3 ubicaciones geográficas, y registro en blockchain permanente. 
-                      Además, mantenemos <strong>$50.000.000 en póliza de seguro de responsabilidad civil profesional</strong> 
-                      que cubre cualquier error u omisión de nuestro equipo legal. Soporte al cliente: WhatsApp, email y 
-                      teléfono con respuesta &lt;2 horas hábiles.
+                      <strong>Triple respaldo</strong>: 1) <strong>Cobertura legal incluida sin tope</strong> que protege al 
+                      cliente en caso de incumplimiento en el proceso de gestión notarial, con posibilidad de ceder este beneficio 
+                      a quien decidas, 2) <strong>Garantía de reembolso 100%</strong> si el documento es rechazado por error 
+                      nuestro (0.3% de casos), 3) <strong>Respaldo técnico permanente:</strong> tus documentos se almacenan 
+                      cifrados por 10 años mínimo con descargas ilimitadas, backups en 3 ubicaciones geográficas, y registro en 
+                      blockchain permanente. Además, mantenemos <strong>$50.000.000 en póliza de seguro de responsabilidad civil 
+                      profesional</strong> que cubre cualquier error u omisión de nuestro equipo. Soporte al cliente: WhatsApp, 
+                      email y teléfono con respuesta &lt;2 horas hábiles.
                     </p>
                   </div>
                 </div>
@@ -2300,7 +2301,7 @@ export default function NotariaOnlineChilePage() {
                 Comienza a Firmar tus Documentos Legales Hoy Mismo
               </h2>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
-                Únete a más de 160.000 usuarios que ya confían en la notaría online más económica y segura de Chile
+                Únete a más de 160.000 usuarios que ya confían en el servicio de gestión notarial online más económico y seguro de Chile
               </p>
             </div>
 
@@ -2330,7 +2331,7 @@ export default function NotariaOnlineChilePage() {
                   </li>
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Seguro legal incluido 1 año</span>
+                    <span>Cobertura legal incluida sin tope</span>
                   </li>
                 </ul>
 
@@ -2407,7 +2408,7 @@ export default function NotariaOnlineChilePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                <span>Seguro legal incluido</span>
+                <span>Cobertura legal sin tope</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 fill-white" />
