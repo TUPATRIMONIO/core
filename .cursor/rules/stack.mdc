@@ -16,3 +16,7 @@ Para este proyecto utilizaremos el siguiente stack de tecnologías:
 - Implementar diseños con Tailwind CSS siguiendo principios de diseño moderno
 - Configurar Supabase para manejo de datos y autenticación de usuarios
 - Mantener código limpio y bien estructurado
+
+## Enlaces
+- Utiliza la etiqueta a en lugar de link
+- En los enlaces salientes utiliza siempre rel="noopener noreferrer nofollow"

@@ -7,7 +7,6 @@ import {
   BadgeCheck, DollarSign, Timer, FileCheck, BookOpen, MapPin,
   Briefcase
 } from "lucide-react";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -211,7 +210,7 @@ export default function NotariaOnlineChilePage() {
 
               {/* CTA Principal */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                <Link href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/">
+                <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" rel="noopener noreferrer nofollow">
                     <Button 
                     size="lg" 
                     className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
@@ -219,8 +218,8 @@ export default function NotariaOnlineChilePage() {
                     <FileSignature className="w-5 h-5 mr-2" />
                     Firma tu Documento Ahora
                     </Button>
-                </Link>
-                <Link href="#como-funciona">
+                </a>
+                <a href="#como-funciona">
                   <Button 
                     variant="outline" 
                     size="lg" 
@@ -229,7 +228,7 @@ export default function NotariaOnlineChilePage() {
                     Ver Precios y Documentos
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
-                </Link>
+                </a>
               </div>
 
               <p className="text-sm text-gray-500">
@@ -375,6 +374,7 @@ export default function NotariaOnlineChilePage() {
               </p>
               <a 
                 href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" 
+                rel="noopener noreferrer nofollow"
                 className="inline-block bg-white text-[var(--tp-brand)] px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
               >
                 Comenzar Ahora
@@ -413,7 +413,7 @@ export default function NotariaOnlineChilePage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Elige tu documento</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Selecciona entre más de 50 tipos de documentos legales en nuestro catálogo. Puedes usar nuestras 
+                    Puedes usar nuestras 
                     plantillas automatizadas o subir tu propio documento. Contratos de arriendo, promesas de compraventa, 
                     poderes, declaraciones juradas y mucho más.
                   </p>
@@ -433,7 +433,7 @@ export default function NotariaOnlineChilePage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Completa y firma electrónicamente</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Ingresa los datos requeridos en nuestro formulario intuitivo. Firma con validación biométrica facial, 
+                    Firma con validación biométrica facial, 
                     Clave Única o firma electrónica avanzada certificada. Todo el proceso toma menos de 5 minutos y 
                     funciona desde cualquier dispositivo.
                   </p>
@@ -453,9 +453,9 @@ export default function NotariaOnlineChilePage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Envío a notaría asociada</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Tu documento se envía automáticamente a nuestra red de notarías certificadas en todo Chile. 
-                    Nuestros notarios revisan y validan el documento en 1-4 horas hábiles. Trabajamos con notarías 
-                    oficiales registradas y reconocidas por el Estado.
+                    Tu documento se envía automáticamente a nuestra red de notarías. 
+                    Nuestros notarios revisan y validan el documento en 1-4 horas hábiles. Trabajamos con las mejores
+                    notarías de Chile.
                   </p>
                 </div>
               </div>
@@ -471,10 +471,10 @@ export default function NotariaOnlineChilePage() {
                   <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Download className="w-8 h-8 text-purple-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Recibe documento en 24 horas</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Recibe tu documento</h3>
                   <p className="text-gray-600 leading-relaxed">
-                    Recibe tu documento notariado por email con certificado digital oficial. Descarga ilimitada, 
-                    respaldo permanente en blockchain y validez legal en todo Chile. Listo para usar en cualquier 
+                    Recibe tu documento notariado por email en &lt; 24 horas. Descarga ilimitada, 
+                    respaldo permanente y validez legal en todo Chile. Listo para usar en cualquier 
                     trámite público o privado inmediatamente.
                   </p>
                 </div>
@@ -482,14 +482,16 @@ export default function NotariaOnlineChilePage() {
             </div>
 
             <div className="mt-12 text-center">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg"
-              >
-                Comenzar Ahora - Gratis
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <p className="text-sm text-gray-500 mt-3">No requiere tarjeta de crédito • Paga solo por documento firmado</p>
+              <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" rel="noopener noreferrer nofollow">
+                <Button 
+                  size="lg" 
+                  className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg"
+                >
+                  Comenzar Ahora - Gratis
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </a>
+              <p className="text-sm text-gray-500 mt-3">Paga solo por documento finalizado</p>
             </div>
           </div>
         </section>
@@ -531,7 +533,7 @@ export default function NotariaOnlineChilePage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[var(--tp-brand)]">{doc.price}</p>
-                        <Link href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</Link>
+                        <a href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</a>
                       </div>
                     </div>
                   ))}
@@ -559,7 +561,7 @@ export default function NotariaOnlineChilePage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[var(--tp-brand)]">{doc.price}</p>
-                        <Link href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</Link>
+                        <a href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</a>
                       </div>
                     </div>
                   ))}
@@ -587,7 +589,7 @@ export default function NotariaOnlineChilePage() {
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-[var(--tp-brand)]">{doc.price}</p>
-                        <Link href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</Link>
+                        <a href="#" className="text-xs text-[var(--tp-brand)] hover:underline">Ver plantilla</a>
                       </div>
                     </div>
                   ))}
@@ -1924,7 +1926,7 @@ export default function NotariaOnlineChilePage() {
 
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               {/* Artículo 1 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                     <FileSignature className="w-16 h-16 text-white" />
@@ -1949,10 +1951,10 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               {/* Artículo 2 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                     <Scale className="w-16 h-16 text-white" />
@@ -1977,10 +1979,10 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               {/* Artículo 3 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
                     <AlertCircle className="w-16 h-16 text-white" />
@@ -2005,10 +2007,10 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               {/* Artículo 4 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
                     <Building className="w-16 h-16 text-white" />
@@ -2033,10 +2035,10 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               {/* Artículo 5 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                     <Globe className="w-16 h-16 text-white" />
@@ -2061,10 +2063,10 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
 
               {/* Artículo 6 */}
-              <Link href="#" className="group">
+              <a href="#" className="group">
                 <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
                   <div className="aspect-video bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                     <BookOpen className="w-16 h-16 text-white" />
@@ -2089,7 +2091,7 @@ export default function NotariaOnlineChilePage() {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </a>
             </div>
 
             <div className="text-center">
@@ -2163,7 +2165,7 @@ export default function NotariaOnlineChilePage() {
                 </Button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
-                  ✓ Gratis crear cuenta • ✓ Paga solo por documento
+                  ✓ Paga solo por documento finalizado
                 </p>
               </div>
 
