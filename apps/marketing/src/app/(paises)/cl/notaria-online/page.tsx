@@ -220,7 +220,7 @@ export default function NotariaOnlineChilePage() {
                     Firma tu Documento Ahora
                     </Button>
                 </Link>
-                <Link href="#precios">
+                <Link href="#como-funciona">
                   <Button 
                     variant="outline" 
                     size="lg" 
@@ -374,17 +374,17 @@ export default function NotariaOnlineChilePage() {
                 Miles de personas ya eligieron la tranquilidad de lo digital. Únete a ellos y experimenta la diferencia.
               </p>
               <a 
-                href="#servicios" 
+                href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" 
                 className="inline-block bg-white text-[var(--tp-brand)] px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg"
               >
-                Ver Servicios Disponibles
+                Comenzar Ahora
               </a>
             </div>
           </div>
         </section>
 
         {/* SECCIÓN 3: PROCESO PASO A PASO */}
-        <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
+        <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
