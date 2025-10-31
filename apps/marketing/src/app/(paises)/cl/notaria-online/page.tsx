@@ -677,7 +677,7 @@ export default function NotariaOnlineChilePage() {
                     <li>Entidades financieras (bancos, cooperativas, cajas de compensación)</li>
                     <li>Universidades e instituciones educacionales</li>
                     <li>Empresas privadas y empleadores</li>
-                    <li>Notarías físicas para protocolización adicional</li>
+                    <li>Notarías físicas</li>
                   </ul>
                   <p className="font-semibold text-[var(--tp-brand)] mt-4">
                     Hemos procesado más de 60.000 documentos que han sido aceptados exitosamente en trámites legales, 
@@ -740,7 +740,7 @@ export default function NotariaOnlineChilePage() {
                   <p>
                     <strong>¿Cuándo es obligatoria cada tipo?</strong> Para contratos de arriendo, promesas de compraventa, 
                     mandatos, poderes y cualquier acto jurídico con consecuencias patrimoniales, se recomienda 
-                    <strong> usar siempre Firma Electrónica Avanzada</strong> para eliminar cualquier cuestionamiento posterior.
+                    <strong> usar Firma Electrónica Avanzada</strong> para eliminar cualquier cuestionamiento posterior.
                   </p>
                 </div>
               </div>
@@ -788,29 +788,6 @@ export default function NotariaOnlineChilePage() {
                       </ul>
                     </div>
                   </div>
-
-                  <div className="bg-amber-50 rounded-xl p-6 border border-amber-200 my-4">
-                    <h4 className="font-bold text-gray-900 mb-2">Testimonios Reales de Uso</h4>
-                    <div className="space-y-3 text-sm">
-                      <p>
-                        <strong>Banco Estado:</strong> "Firmé mi contrato de arriendo online con TuPatrimonio y lo presenté 
-                        para solicitar un crédito hipotecario. Fue aceptado sin problemas." - Carolina M., Santiago
-                      </p>
-                      <p>
-                        <strong>Universidad de Chile:</strong> "Necesitaba un poder notarial para que mi madre realizara un 
-                        trámite de matrícula. Lo firmé desde España y fue validado completamente." - José L., Barcelona
-                      </p>
-                      <p>
-                        <strong>SII (Servicio de Impuestos Internos):</strong> "Protocolizamos más de 200 contratos con 
-                        TuPatrimonio para declarar arriendos. Todos fueron aceptados en abril." - Inmobiliaria Los Andes
-                      </p>
-                    </div>
-                  </div>
-
-                  <p className="font-semibold text-[var(--tp-brand)]">
-                    Tasa de aceptación: 99.7% en primera presentación. En el 0.3% restante, ofrecemos corrección gratuita 
-                    y re-envío sin costo adicional.
-                  </p>
                 </div>
               </div>
 
@@ -853,8 +830,8 @@ export default function NotariaOnlineChilePage() {
                       <li className="flex items-start gap-2">
                         <span className="text-red-600 font-bold">✗</span>
                         <div>
-                          <strong>Constitución de sociedades anónimas:</strong> Aunque sociedades de responsabilidad limitada 
-                          pueden constituirse digitalmente, las S.A. requieren escritura pública presencial.
+                          <strong>Finiquitos de trabajo:</strong> Auqnue los empleadores puden firmar de forma electrónica, 
+                          el trabajador debe firmar presencialmente.
                         </div>
                       </li>
                     </ul>
@@ -907,15 +884,7 @@ export default function NotariaOnlineChilePage() {
               </div>
             </div>
 
-            <div className="text-center mt-12">
-              <div className="inline-flex items-center gap-3 px-8 py-4 bg-[var(--tp-brand-10)] rounded-2xl border-2 border-[var(--tp-brand-20)]">
-                <Lock className="w-8 h-8 text-[var(--tp-brand)]" />
-                <div className="text-left">
-                  <p className="font-bold text-gray-900">Certificado Oficial</p>
-                  <p className="text-sm text-gray-600">Subsecretaría de Economía - Ley 19.799</p>
-                </div>
-              </div>
-            </div>
+
           </div>
         </section>
 
