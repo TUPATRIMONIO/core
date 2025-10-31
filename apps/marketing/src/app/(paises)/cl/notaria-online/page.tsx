@@ -505,10 +505,10 @@ export default function NotariaOnlineChilePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                ¿Por Qué Elegir TuPatrimonio?
+                Lo Que Nos Hace Únicos en Notaría Online
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Comparación transparente con las principales notarías online de Chile
+                Comparación de características con otras plataformas del mercado
               </p>
             </div>
 
@@ -524,28 +524,25 @@ export default function NotariaOnlineChilePage() {
                         <span>TuPatrimonio</span>
                       </div>
                     </th>
-                    <th className="px-6 py-4 text-center text-white font-bold">FirmaVirtual</th>
-                    <th className="px-6 py-4 text-center text-white font-bold">Firma.cl</th>
+                    <th className="px-6 py-4 text-center text-white font-bold">Otros Proveedores</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
                   <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">Precio autorización firma</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="text-xl font-bold text-green-600">$6.990</span>
-                      <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-600">$24.990</td>
-                    <td className="px-6 py-4 text-center text-gray-600">$4.390</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">Tiempo entrega</td>
                     <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-semibold text-gray-900">24 hrs</span>
+                      <span className="font-semibold text-green-600">&lt; 24 hrs</span>
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
-                    <td className="px-6 py-4 text-center text-gray-600">24-48 hrs</td>
-                    <td className="px-6 py-4 text-center text-gray-600">48 hrs</td>
+                    <td className="px-6 py-4 text-center text-gray-600">24 - 48 hrs</td>
+                  </tr>
+                  <tr className="border-b hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium text-gray-900">Tiempo de asistencia</td>
+                    <td className="px-6 py-4 text-center bg-green-50">
+                      <span className="font-semibold text-green-600">&lt; 20 minutos</span>
+                      <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
+                    </td>
+                    <td className="px-6 py-4 text-center text-gray-600">3 - 24 horas</td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">Seguro legal incluido</td>
@@ -554,43 +551,31 @@ export default function NotariaOnlineChilePage() {
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">No</td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">Descuentos por volumen</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">Descuentos por alianzas</td>
                     <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-semibold text-green-600">Hasta $8.000</span>
+                      <span className="font-semibold text-green-600">Sí, disponibles</span>
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">No</td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
                   </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">Acepta documentos internacionales</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-semibold text-green-600">Sí</span>
-                      <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
-                  </tr>
+                
                   <tr className="border-b hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">Revisión legal previa</td>
                     <td className="px-6 py-4 text-center bg-green-50">
                       <span className="font-semibold text-green-600">Sí</span>
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
-                    <td className="px-6 py-4 text-center text-gray-600">Sí</td>
+                    <td className="px-6 py-4 text-center text-gray-600">Variable</td>
                   </tr>
                   <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">Reembolso si rechazado</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">Reembolso si es rechazado</td>
                     <td className="px-6 py-4 text-center bg-green-50">
                       <span className="font-semibold text-green-600">100%</span>
                       <Check className="w-5 h-5 text-green-600 inline-block ml-2" />
                     </td>
-                    <td className="px-6 py-4 text-center text-gray-600">Parcial</td>
-                    <td className="px-6 py-4 text-center text-gray-400">No</td>
+                    <td className="px-6 py-4 text-center text-gray-600">Variable</td>
                   </tr>
                 </tbody>
               </table>
@@ -618,15 +603,15 @@ export default function NotariaOnlineChilePage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <DollarSign className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">La Notaría Online Más Económica de Chile</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Transparencia y Accesibilidad Total</h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Con precios desde <strong>$6.990</strong>, somos <strong>72% más económicos</strong> que el promedio del mercado 
-                  de notarías online ($24.990) y <strong>85% más baratos</strong> que notarías físicas tradicionales.
+                  <strong>Sin costos ocultos, sin letra pequeña, sin sorpresas.</strong> Nuestro modelo 100% digital nos permite 
+                  ofrecer servicios notariales accesibles para todos, eliminando las barreras de las notarías tradicionales.
                 </p>
                 <p className="text-gray-600 leading-relaxed">
-                  Según el <strong>Decreto Supremo de 1998</strong>, el valor legal máximo de una autorización notarial es $5.500. 
-                  Sin embargo, las notarías físicas cobran hasta $40.000 por el mismo servicio. Nuestro modelo digital nos permite 
-                  ofrecer precios justos manteniendo la más alta calidad y validez legal.
+                  Sabes exactamente lo que pagas desde el primer momento. Nuestros precios son claros, fijos y predecibles. 
+                  No cobramos por "imprevistos" ni agregamos cargos administrativos sorpresa. Tu tranquilidad financiera es 
+                  parte de nuestro compromiso contigo.
                 </p>
               </div>
 
