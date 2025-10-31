@@ -8,6 +8,7 @@ import {
   Briefcase
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
+import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -889,172 +890,6 @@ export default function NotariaOnlineChilePage() {
         </section>
 
         {/* Continuará con más secciones... Debido al límite de caracteres, dividiré el contenido */}
-        
-        {/* SECCIÓN 7: CASOS DE USO ESPECÍFICOS */}
-        <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Soluciones de Notaría Online por Industria
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Adaptamos nuestros servicios a las necesidades específicas de cada sector
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Para Inmobiliarias */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)] hover:shadow-2xl transition-shadow">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Building className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-                  Para Inmobiliarias y Corredores de Propiedades
-                </h3>
-                
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Contratos de arriendo masivos:</strong> Firma 100+ contratos en un día</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Promesas de compraventa:</strong> Acelera tus cierres de negocio</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Mandatos de administración:</strong> Gestión sin papeles</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Descuentos por volumen:</strong> Hasta $8.000 por documento</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Integración API:</strong> Conecta con tu CRM inmobiliario</span>
-                  </li>
-                </ul>
-
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-6">
-                  <p className="text-sm font-semibold text-blue-900 mb-2">Caso de Éxito:</p>
-                  <p className="text-sm text-blue-800">
-                    "Inmobiliaria Los Andes firmó <strong>500 contratos de arriendo</strong> en 1 mes, 
-                    ahorrando <strong>$12.500.000 CLP</strong> vs notarías físicas y reduciendo tiempo de proceso en 95%."
-                  </p>
-                  <p className="text-xs text-blue-700 mt-2">— Carlos Muñoz, Gerente Operaciones</p>
-                </div>
-
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)]"
-                >
-                  Solicitar Demo Inmobiliaria
-                </Button>
-              </div>
-
-              {/* Para Empresas y RR.HH. */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)] hover:shadow-2xl transition-shadow">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Briefcase className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-                  Para Empresas y Recursos Humanos
-                </h3>
-                
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Contratos de trabajo:</strong> Onboarding 100% digital</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Finiquitos laborales:</strong> Sin esperas ni desplazamientos</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Anexos de contrato:</strong> Modificaciones instantáneas</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>NDAs y confidencialidad:</strong> Protege tu información</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Teletrabajo internacional:</strong> Contrata desde cualquier país</span>
-                  </li>
-                </ul>
-
-                <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-6">
-                  <p className="text-sm font-semibold text-green-900 mb-2">Caso de Éxito:</p>
-                  <p className="text-sm text-green-800">
-                    "Startup FinTech Santiago digitalizó <strong>100% su proceso de onboarding</strong>. 
-                    Ahora contratan empleados en <strong>24 horas</strong> vs 7 días antes. Ahorro: $4.500.000/año."
-                  </p>
-                  <p className="text-xs text-green-700 mt-2">— Andrea Silva, Head of HR</p>
-                </div>
-
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)]"
-                >
-                  Solicitar Demo Empresas
-                </Button>
-              </div>
-
-              {/* Para Particulares y Expatriados */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)] hover:shadow-2xl transition-shadow">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Globe className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
-                  Para Particulares y Expatriados
-                </h3>
-                
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Declaraciones juradas:</strong> Para trámites personales</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Poderes desde el extranjero:</strong> Gestiona trámites en Chile</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Autorizaciones de viaje:</strong> Para menores de edad</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Compraventa de vehículos:</strong> Vende o compra sin notaría física</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
-                    <span><strong>Sin RUT:</strong> Acepta pasaporte de cualquier país</span>
-                  </li>
-                </ul>
-
-                <div className="bg-purple-50 rounded-xl p-4 border border-purple-200 mb-6">
-                  <p className="text-sm font-semibold text-purple-900 mb-2">Caso de Éxito:</p>
-                  <p className="text-sm text-purple-800">
-                    "Chileno residiendo en España vendió su auto en Santiago <strong>sin volver a Chile</strong>. 
-                    Firmó el poder notarial online y su hermana completó el trámite. Ahorro: $2.000 en pasajes."
-                  </p>
-                  <p className="text-xs text-purple-700 mt-2">— Roberto Pérez, Madrid</p>
-                </div>
-
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)]"
-                >
-                  Comenzar Ahora
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* SECCIÓN 8: SOCIAL PROOF MASIVO */}
         <section className="py-20 bg-white">
@@ -1074,85 +909,15 @@ export default function NotariaOnlineChilePage() {
                   ))}
                 </div>
                 <div className="text-left">
-                  <p className="text-3xl font-bold text-gray-900">4.9/5</p>
-                  <p className="text-sm text-gray-600">2,847 reseñas verificadas en Google</p>
+                  <p className="text-3xl font-bold text-gray-900">4.8/5</p>
+                  <p className="text-sm text-gray-600">+500 reseñas verificadas en Google</p>
                 </div>
               </div>
             </div>
 
-            {/* Grid de testimonios */}
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {/* Testimonio 1 */}
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-[var(--tp-brand-20)] rounded-full flex items-center justify-center text-2xl font-bold text-[var(--tp-brand)]">
-                    MG
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">María González</p>
-                    <p className="text-sm text-gray-600">Psicóloga, Santiago</p>
-                    <div className="flex mt-1">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-3">
-                  "Necesitaba firmar un <strong>contrato de arriendo urgente</strong> porque viajo mañana. 
-                  En <strong>3 horas</strong> ya tenía el contrato protocolizado y se lo envié a mi arrendataria. 
-                  Me ahorré <strong>$35.000</strong> y un día completo de trámites."
-                </p>
-                <p className="text-sm text-gray-500 italic">Documento: Contrato de arriendo (2 firmantes)</p>
-              </div>
-
-              {/* Testimonio 2 */}
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl font-bold text-blue-600">
-                    JL
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Jorge López</p>
-                    <p className="text-sm text-gray-600">Gerente TI, Concepción</p>
-                    <div className="flex mt-1">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-3">
-                  "Nuestra empresa necesitaba firmar <strong>80 contratos de trabajo</strong> para nuevos empleados. 
-                  Con TuPatrimonio lo hicimos en <strong>2 días</strong> vs 3 semanas que tardábamos antes. 
-                  Ahorramos <strong>$2.400.000</strong> en costos notariales. Increíble servicio."
-                </p>
-                <p className="text-sm text-gray-500 italic">Documento: Contratos laborales masivos</p>
-              </div>
-
-              {/* Testimonio 3 */}
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-2xl font-bold text-green-600">
-                    CR
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Camila Rojas</p>
-                    <p className="text-sm text-gray-600">Ingeniera, Valparaíso</p>
-                    <div className="flex mt-1">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star key={star} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-700 leading-relaxed mb-3">
-                  "Estaba en Alemania y necesitaba vender mi departamento en Chile. Firmé el <strong>poder 
-                  notarial online</strong> a las 11 PM hora alemana. Mi abogado lo recibió en la mañana 
-                  y cerró la venta. <strong>No tuve que viajar</strong> a Chile. Ahorré $1.500 en pasajes."
-                </p>
-                <p className="text-sm text-gray-500 italic">Documento: Poder especial de venta</p>
-              </div>
+            {/* Carousel de reseñas de Google */}
+            <div className="mb-12">
+              <GoogleReviewsCarousel />
             </div>
 
             {/* Métricas destacadas */}
