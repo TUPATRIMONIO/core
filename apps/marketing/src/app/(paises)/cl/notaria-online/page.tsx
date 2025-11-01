@@ -8,7 +8,7 @@ import {
   Briefcase
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
-import Script from "next/script";
+import TrustindexWidget from "@/components/TrustindexWidget";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -257,6 +257,25 @@ export default function NotariaOnlineChilePage() {
                   </div>
                   <p className="text-xs text-gray-600 font-medium">4.8/5 Estrellas<br />+500 Reseñas</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECCIÓN: OPINIONES DE CLIENTES REALES */}
+        <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Lo que dicen nuestros clientes
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Opiniones reales de usuarios que confiaron en nosotros para sus trámites notariales
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-full max-w-5xl">
+                <TrustindexWidget />
               </div>
             </div>
           </div>
@@ -916,11 +935,10 @@ export default function NotariaOnlineChilePage() {
             </div>
 
             {/* Widget de Trustindex - Reseñas de Google */}
-            <div className="mb-12">
-              <Script
-                src="https://cdn.trustindex.io/loader.js?aa245a3245d22309f4501b6f6d"
-                strategy="lazyOnload"
-              />
+            <div className="mb-12 flex justify-center">
+              <div className="w-full max-w-5xl">
+                <TrustindexWidget />
+              </div>
             </div>
 
             {/* Métricas destacadas */}

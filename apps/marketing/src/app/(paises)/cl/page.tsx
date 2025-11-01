@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Shield, Clock, Users, MapPin, Building, Briefcase } from "lucide-react";
 import Link from "next/link";
+import TrustindexWidget from "@/components/TrustindexWidget";
 
 export const metadata: Metadata = {
   title: "TuPatrimonio Chile - Servicios Legales Digitales | Firma Electrónica, KYC, Notaría",
@@ -85,6 +86,25 @@ export default function ChilePage() {
                 <Building className="w-4 h-4 text-green-600" />
                 <span>+200 empresas chilenas</span>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN: OPINIONES DE CLIENTES REALES */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Clientes satisfechos en toda Chile
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Opiniones verificadas de empresas y personas que confían en TuPatrimonio
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div className="w-full max-w-5xl">
+              <TrustindexWidget />
             </div>
           </div>
         </div>
@@ -246,6 +266,23 @@ export default function ChilePage() {
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">99.8%</div>
                 <p className="text-gray-600">Uptime garantizado</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Widget de opiniones de Google */}
+          <div className="mt-16">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Opiniones verificadas de Google
+              </h3>
+              <p className="text-gray-600">
+                Lee lo que dicen nuestros clientes sobre su experiencia
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <div className="w-full max-w-5xl">
+                <TrustindexWidget />
               </div>
             </div>
           </div>

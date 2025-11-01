@@ -139,18 +139,18 @@ Ubicación: `packages/ui/globals.css`
 
 La app marketing muestra reseñas de Google usando **Trustindex**, un servicio profesional que:
 
-✅ **50+ reseñas reales** de Google automáticamente
-✅ **Actualización automática** cada 24 horas
-✅ **Carousel integrado** y responsive
-✅ **Sin configuración compleja** - solo un script
-✅ **Filtrado de 5 estrellas** automático
+✅ **50+ reseñas reales** de Google automáticamente  
+✅ **Actualización automática** cada 24 horas  
+✅ **Carousel integrado** y responsive  
+✅ **Sin configuración compleja** - solo un widget  
+✅ **Filtrado de 5 estrellas** automático  
 ✅ **Optimizado y confiable**
 
 ### Implementación
 
 **Componente:** `src/components/TrustindexWidget.tsx`
 
-El widget se carga automáticamente usando el script de Trustindex:
+El componente carga el script de Trustindex y maneja la inicialización automática del widget:
 
 ```tsx
 import TrustindexWidget from '@/components/TrustindexWidget';
@@ -158,17 +158,34 @@ import TrustindexWidget from '@/components/TrustindexWidget';
 <TrustindexWidget />
 ```
 
-### Configuración (ya está lista)
+### Cómo Funciona
 
-El widget usa el ID configurado en Trustindex. Si necesitas cambiar el widget:
+Basado en la solución de [Stack Overflow para widgets de terceros en Next.js](https://stackoverflow.com/questions/52476769/trustpilot-trustboxes-in-next-js):
 
+1. El componente carga el script de Trustindex dinámicamente
+2. Espera a que el script se cargue completamente
+3. Inicializa el widget en el contenedor
+4. Trustindex inyecta automáticamente las reseñas
+
+### Configuración
+
+El widget ID está configurado en el componente (`aa245a3245d22309f4501b6f6d`).
+
+Para cambiarlo:
 1. Edita `src/components/TrustindexWidget.tsx`
 2. Cambia el `widgetId` por el nuevo de tu dashboard de Trustindex
+
+### Verificación de Dominio
+
+Si el widget no aparece en localhost:
+1. Ve a tu dashboard de Trustindex
+2. Configuración del widget → Allowed domains
+3. Agrega `localhost` o cambia a "All domains"
 
 ### Ventajas de Trustindex
 
 - **Sin APIs de Google que configurar** - Trustindex maneja todo
-- **Sin OAuth** - No necesitas autenticación compleja
+- **Sin OAuth** - No necesitas autenticación compleja  
 - **Sin límites** - Acceso a todas las reseñas
 - **Profesional** - Widget optimizado y mantenido
 - **Soporte** - Trustindex ofrece soporte técnico
