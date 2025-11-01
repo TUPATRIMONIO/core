@@ -133,6 +133,50 @@ Ubicación: `packages/ui/globals.css`
 <div className="bg-[var(--tp-brand-5)] border border-[var(--tp-brand-20)]">
 ```
 
+## 🌟 Reseñas de Google - Trustindex
+
+### Integración con Trustindex
+
+La app marketing muestra reseñas de Google usando **Trustindex**, un servicio profesional que:
+
+✅ **50+ reseñas reales** de Google automáticamente
+✅ **Actualización automática** cada 24 horas
+✅ **Carousel integrado** y responsive
+✅ **Sin configuración compleja** - solo un script
+✅ **Filtrado de 5 estrellas** automático
+✅ **Optimizado y confiable**
+
+### Implementación
+
+**Componente:** `src/components/TrustindexWidget.tsx`
+
+El widget se carga automáticamente usando el script de Trustindex:
+
+```tsx
+import TrustindexWidget from '@/components/TrustindexWidget';
+
+<TrustindexWidget />
+```
+
+### Configuración (ya está lista)
+
+El widget usa el ID configurado en Trustindex. Si necesitas cambiar el widget:
+
+1. Edita `src/components/TrustindexWidget.tsx`
+2. Cambia el `widgetId` por el nuevo de tu dashboard de Trustindex
+
+### Ventajas de Trustindex
+
+- **Sin APIs de Google que configurar** - Trustindex maneja todo
+- **Sin OAuth** - No necesitas autenticación compleja
+- **Sin límites** - Acceso a todas las reseñas
+- **Profesional** - Widget optimizado y mantenido
+- **Soporte** - Trustindex ofrece soporte técnico
+
+### Costo
+
+Trustindex tiene planes desde gratis hasta premium. El widget actual usa el plan configurado en tu cuenta de Trustindex.
+
 ## 🔧 Desarrollo por Aplicación
 
 ### Marketing App (`apps/marketing`)

@@ -8,7 +8,7 @@ import {
   Briefcase
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
-import TrustindexWidget from "@/components/TrustindexWidget";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -917,7 +917,10 @@ export default function NotariaOnlineChilePage() {
 
             {/* Widget de Trustindex - Reseñas de Google */}
             <div className="mb-12">
-              <TrustindexWidget />
+              <Script
+                src="https://cdn.trustindex.io/loader.js?aa245a3245d22309f4501b6f6d"
+                strategy="lazyOnload"
+              />
             </div>
 
             {/* Métricas destacadas */}
