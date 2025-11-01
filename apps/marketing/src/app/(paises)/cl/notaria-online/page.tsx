@@ -8,7 +8,7 @@ import {
   Briefcase
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
-import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
+import TrustindexWidget from "@/components/TrustindexWidget";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -915,9 +915,9 @@ export default function NotariaOnlineChilePage() {
               </div>
             </div>
 
-            {/* Carousel de reseñas de Google */}
+            {/* Widget de Trustindex - Reseñas de Google */}
             <div className="mb-12">
-              <GoogleReviewsCarousel />
+              <TrustindexWidget />
             </div>
 
             {/* Métricas destacadas */}
