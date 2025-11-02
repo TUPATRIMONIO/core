@@ -80,7 +80,7 @@ export default function NotariaDigitalRedirect() {
           )}
           
           <div className="space-y-4">
-            <Link href="/cl/notaria-digital">
+            <Link href="/cl/notaria-online">
               <Button className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white">
                 <span className="mr-2">🇨🇱</span>
                 Chile

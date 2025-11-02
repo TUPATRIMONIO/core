@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/cl/notaria-digital',
+        source: '/cl/notaria-online',
         destination: '/legal-tech/tramites-notariales',
         permanent: true,
       },

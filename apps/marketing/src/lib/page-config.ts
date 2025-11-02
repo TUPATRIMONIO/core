@@ -63,7 +63,7 @@ export const PAGE_CONFIG: Record<string, PageConfigEntry> = {
     section: 'kyc',
     notes: 'KYC para Chile'
   },
-  '/cl/notaria-digital': { 
+  '/cl/notaria-online': { 
     seoIndex: true, 
     status: 'public',
     section: 'notaria',

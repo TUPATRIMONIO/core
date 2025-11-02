@@ -156,7 +156,7 @@ export default function ChilePage() {
               <div className="text-sm text-gray-500 mb-4">
                 Desde $6.000 CLP por notarización
               </div>
-              <Link href="/cl/notaria-digital">
+              <Link href="/cl/notaria-online">
                 <Button variant="outline" className="w-full">
                   Ver Notaría Chile
                 </Button>

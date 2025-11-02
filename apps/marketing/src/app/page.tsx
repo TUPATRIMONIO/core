@@ -248,7 +248,7 @@ export default function HomePage() {
                     <span className="text-sm text-gray-600">100% remoto</span>
                   </li>
                 </ul>
-                <Link href="/cl/notaria-digital">
+                <Link href="/cl/notaria-online">
                   <Button variant="outline" className="w-full group-hover:bg-[var(--tp-brand-light)] group-hover:text-white group-hover:border-[var(--tp-brand-light)] transition-all">
                     Conocer Más
                   </Button>

@@ -51,7 +51,7 @@
 # Notaría Digital
 [[redirects]]
   from = "/notaria-digital"
-  to = "/cl/notaria-digital"
+  to = "/cl/notaria-online"
   status = 302
   country = ["CL"]
 
@@ -113,7 +113,7 @@
 
 [[redirects]]
   from = "/notaria-digital"
-  to = "/cl/notaria-digital"
+  to = "/cl/notaria-online"
   status = 302
 
 [[redirects]]

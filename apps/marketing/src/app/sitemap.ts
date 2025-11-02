@@ -100,7 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/cl/notaria-digital`,
+      url: `${baseUrl}/cl/notaria-online`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
