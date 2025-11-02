@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Star, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useGoogleReviews } from '@/hooks/useGoogleReviews';
 
 // Interfaces
 interface Review {
@@ -12,18 +13,7 @@ interface Review {
   rating: number;
   relative_time_description: string;
   text: string;
-  time: number;
-}
-
-interface ApiResponse {
-  reviews: Review[];
-  place_info?: {
-    rating: number;
-    total_reviews: number;
-    five_star_count: number;
-  };
-  fallback: boolean;
-  error?: string;
+  time: number | string;
 }
 
 // Testimonios estáticos como fallback
@@ -55,11 +45,27 @@ const FALLBACK_TESTIMONIALS: Review[] = [
 ];
 
 export default function GoogleReviewsCarousel() {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Usar el hook de reseñas de Google
+  const { 
+    reviews: apiReviews, 
+    loading, 
+    error: apiError 
+  } = useGoogleReviews({ 
+    limit: 50,
+    minRating: 5,
+    featuredOnly: false 
+  });
+
+  // Usar reseñas de la API o fallback si hay error o no hay reseñas
+  const reviews = apiError || apiReviews.length === 0 
+    ? FALLBACK_TESTIMONIALS 
+    : apiReviews;
+
+  // Determinar si mostrar el mensaje de error (usando fallback)
+  const showFallbackBadge = apiError || apiReviews.length === 0;
 
   // Detectar tamaño de pantalla
   useEffect(() => {
@@ -71,33 +77,6 @@ export default function GoogleReviewsCarousel() {
     window.addEventListener('resize', checkMobile);
     
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Fetch reviews
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch('/api/google-reviews');
-        const data: ApiResponse = await response.json();
-
-        if (data.fallback || !data.reviews || data.reviews.length === 0) {
-          // Usar testimonios de fallback
-          setReviews(FALLBACK_TESTIMONIALS);
-          setError(data.fallback);
-        } else {
-          setReviews(data.reviews);
-          setError(false);
-        }
-      } catch (err) {
-        console.error('Error fetching reviews:', err);
-        setReviews(FALLBACK_TESTIMONIALS);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReviews();
   }, []);
 
   // Número de reseñas visibles según el tamaño de pantalla
@@ -168,7 +147,7 @@ export default function GoogleReviewsCarousel() {
   return (
     <div className="relative">
       {/* Badge de estado */}
-      {error && (
+      {showFallbackBadge && (
         <div className="mb-4 flex items-center justify-center gap-2 text-sm text-gray-600">
           <AlertCircle className="w-4 h-4" />
           <span>Mostrando testimonios destacados</span>
@@ -191,20 +170,24 @@ export default function GoogleReviewsCarousel() {
 
         {/* Grid de reseñas */}
         <div className="grid md:grid-cols-3 gap-8">
-          {visibleReviews.map((review, idx) => (
-            <div
-              key={`${review.author_name}-${review.time}-${idx}`}
-              className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200 transition-all hover:shadow-xl"
-            >
-              {/* Header con foto y nombre */}
-              <div className="flex items-center gap-4 mb-4">
-                {review.profile_photo_url ? (
-                  <img
-                    src={review.profile_photo_url}
-                    alt={review.author_name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                ) : (
+          {visibleReviews.map((review, idx) => {
+            // Usar profile_photo_url o author_photo_url según disponibilidad
+            const photoUrl = review.profile_photo_url || (review as any).author_photo_url;
+            
+            return (
+              <div
+                key={`${review.author_name}-${review.time}-${idx}`}
+                className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200 transition-all hover:shadow-xl"
+              >
+                {/* Header con foto y nombre */}
+                <div className="flex items-center gap-4 mb-4">
+                  {photoUrl ? (
+                    <img
+                      src={photoUrl}
+                      alt={review.author_name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
                   <div
                     className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${getAvatarColor(
                       review.author_name
@@ -238,7 +221,8 @@ export default function GoogleReviewsCarousel() {
                   : review.text}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Botón siguiente */}
@@ -286,7 +270,7 @@ export default function GoogleReviewsCarousel() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Reseñas verificadas de Google
+          Click aquí para ver más reseñas verificadas de Google
         </a>
       </div>
     </div>
