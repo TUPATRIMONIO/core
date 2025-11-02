@@ -707,6 +707,226 @@ El sitio incluye automáticamente:
 - https://search.google.com/test/rich-results
 - https://validator.schema.org/
 
+## ⭐ Sistema de Reseñas de Google
+
+### Overview
+
+El sistema de reseñas integra Google Places API (New) para mostrar reseñas reales en tiempo real, con almacenamiento en Supabase para mejor control y performance.
+
+### Arquitectura
+
+```
+Google Places API → /api/reviews/sync → Supabase (marketing.google_reviews)
+                                              ↓
+                    /api/reviews ← useGoogleReviews() ← GoogleReviewsCarousel
+                    /api/google-stats ← useGoogleStats() ← GoogleStatsDisplay
+```
+
+### APIs Disponibles
+
+#### 1. `/api/google-stats` - Estadísticas en Tiempo Real
+
+Obtiene rating y total de reseñas directamente de Google.
+
+**Cache:** 12 horas
+
+**Ejemplo de uso:**
+```typescript
+import { useGoogleStats } from '@/hooks/useGoogleStats';
+
+const { stats, loading, error } = useGoogleStats();
+
+// stats = { rating: 4.8, total_reviews: 550, place_name: "TuPatrimonio" }
+```
+
+#### 2. `/api/reviews` - Reseñas Almacenadas
+
+Obtiene reseñas desde Supabase (sincronizadas previamente).
+
+**Parámetros:**
+- `limit` (número, max 50): Cantidad de reseñas
+- `min_rating` (1-5): Rating mínimo
+- `featured` (boolean): Solo destacadas
+
+**Cache:** 1 hora
+
+**Ejemplo de uso:**
+```typescript
+import { useGoogleReviews } from '@/hooks/useGoogleReviews';
+
+const { reviews, stats, loading } = useGoogleReviews({
+  limit: 50,
+  minRating: 5,
+  featuredOnly: false
+});
+```
+
+#### 3. `/api/reviews/sync` - Sincronización
+
+Sincroniza reseñas de Google Places API a Supabase.
+
+**Métodos:**
+- `POST /api/reviews/sync` - Sincroniza si han pasado >24h
+- `POST /api/reviews/sync?force=true` - Fuerza sincronización
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "stats": {
+    "reviews_fetched": 5,
+    "reviews_new": 5,
+    "reviews_updated": 0,
+    "reviews_skipped": 0
+  },
+  "google_rating": 4.8,
+  "google_total_reviews": 550
+}
+```
+
+### Componentes
+
+#### GoogleReviewsCarousel
+Carrusel de reseñas con navegación. Muestra hasta 50 reseñas almacenadas.
+
+```tsx
+import GoogleReviewsCarousel from '@/components/GoogleReviewsCarousel';
+
+<GoogleReviewsCarousel />
+```
+
+#### GoogleStatsDisplay
+Componentes client-side para mostrar métricas de Google en tiempo real:
+
+```tsx
+import { GoogleStatsBadge, GoogleStatsMetrics, GoogleStatsHeader } from '@/components/GoogleStatsDisplay';
+
+// Badge compacto para hero
+<GoogleStatsBadge />
+
+// Métricas grandes para secciones de social proof
+<GoogleStatsMetrics />
+
+// Header completo con estrellas y verificación
+<GoogleStatsHeader />
+```
+
+### Sincronización
+
+#### Manual (Development)
+
+**Desde el navegador:**
+```
+http://localhost:3001/api/reviews/sync?force=true
+```
+
+**Con script:**
+```bash
+cd apps/marketing
+node scripts/sync-google-reviews.js --force
+```
+
+#### Automática (Production)
+
+Configurada en `vercel.json` (en la raíz del proyecto) para ejecutarse diariamente a las 2 AM UTC:
+
+```json
+{
+  "crons": [{
+    "path": "/api/cron/sync-reviews",
+    "schedule": "0 2 * * *"
+  }]
+}
+```
+
+**Nota importante:** 
+- El archivo `vercel.json` DEBE estar en la raíz del repositorio
+- Vercel hace peticiones GET (no POST) a `/api/cron/sync-reviews`
+- El endpoint de cron verifica que el user-agent sea `vercel-cron/1.0`
+- Requiere **Vercel Pro Plan** o superior
+
+### Base de Datos
+
+**Tablas creadas:**
+- `marketing.google_reviews` - Reseñas almacenadas
+- `marketing.google_sync_logs` - Historial de sincronizaciones
+
+**Funciones RPC:**
+- `needs_sync(place_id)` - Verifica si necesita sync
+- `get_reviews_stats(place_id)` - Estadísticas agregadas
+
+**Vistas:**
+- `google_reviews_five_stars` - Solo 5 estrellas
+- `google_reviews_featured` - Destacadas
+
+### Variables de Entorno Requeridas
+
+```bash
+# Google Places API (New)
+GOOGLE_PLACES_API_KEY=AIzaSy...
+GOOGLE_PLACE_ID=ChIJ...
+
+# Supabase (ya existentes)
+NEXT_PUBLIC_SUPABASE_URL=https://...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+```
+
+### Limitaciones Conocidas
+
+1. **Google Places API solo retorna 5 reseñas más recientes**
+   - Solución: Acumular con sincronizaciones periódicas
+   - Alternativa: Agregar reseñas manualmente a la BD
+
+2. **Cache de 12 horas en stats**
+   - Rating puede estar desactualizado hasta 12 horas
+   - Trade-off aceptable para reducir llamadas a la API
+
+### Troubleshooting
+
+**Error: "permission denied for schema marketing"**
+```bash
+# Aplicar migración de permisos:
+npx supabase db push
+# (incluye 20251102000001_fix_marketing_schema_permissions.sql)
+```
+
+**Error: "REQUEST_DENIED - legacy API"**
+- Asegúrate de habilitar "Places API (New)" en Google Cloud Console
+- NO uses "Places API" (legacy)
+
+**No se muestran reseñas:**
+1. Verificar que haya reseñas en BD: `SELECT * FROM marketing.google_reviews`
+2. Ejecutar sync manual: `POST /api/reviews/sync?force=true`
+3. Verificar endpoint: `/api/reviews?limit=10`
+
+**Stats muestran fallback:**
+- Normal si Google API falla
+- Se usan valores por defecto (4.8/5, 550 reseñas)
+- Verificar en Network tab del browser el error exacto
+
+### Agregar Reseñas Manualmente
+
+Si necesitas agregar reseñas antiguas o destacar algunas:
+
+```sql
+INSERT INTO marketing.google_reviews (
+  author_name, rating, text, time, 
+  relative_time_description, language, 
+  place_id, is_active, is_featured
+) VALUES (
+  'Juan Pérez',
+  5,
+  'Excelente servicio, muy rápido y confiable.',
+  '2024-10-15T14:20:00Z',
+  'hace 2 semanas',
+  'es',
+  'ChIJGX8FH23PYpYRDr0UaKsxwZE',
+  true,
+  true  -- true para destacar
+);
+```
+
 ---
 
 **Para más detalles**: Ver `docs/DEPLOYMENT.md` para deploy o `docs/ARCHITECTURE.md` para decisiones técnicas.
