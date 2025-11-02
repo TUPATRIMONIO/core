@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     
     // Service pages por país
-    if (route.includes('/firmas-electronicas') || route.includes('/verificacion-identidad') || route.includes('/notaria-digital')) {
+    if (route.includes('/firmas-electronicas') || route.includes('/verificacion-identidad') || route.includes('/notaria-online')) {
       return route.startsWith('/cl') 
         ? { changeFrequency: 'weekly', priority: 0.9 }
         : { changeFrequency: 'monthly', priority: 0.6 };
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     
     // Generic/redirect pages
-    if (['/firmas-electronicas', '/verificacion-identidad', '/notaria-digital'].includes(route)) {
+    if (['/firmas-electronicas', '/verificacion-identidad', '/notaria-online'].includes(route)) {
       return { changeFrequency: 'monthly', priority: 0.6 };
     }
     

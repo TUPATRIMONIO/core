@@ -48,22 +48,22 @@
   status = 302
   country = ["CO"]
 
-# Notaría Digital
+# Notaría Online
 [[redirects]]
-  from = "/notaria-digital"
+  from = "/notaria-online"
   to = "/cl/notaria-online"
   status = 302
   country = ["CL"]
 
 [[redirects]]
-  from = "/notaria-digital"
-  to = "/mx/notaria-digital"
+  from = "/notaria-online"
+  to = "/mx/notaria-online"
   status = 302
   country = ["MX"]
 
 [[redirects]]
-  from = "/notaria-digital"
-  to = "/co/notaria-digital"
+  from = "/notaria-online"
+  to = "/co/notaria-online"
   status = 302
   country = ["CO"]
 
@@ -112,7 +112,7 @@
   status = 302
 
 [[redirects]]
-  from = "/notaria-digital"
+  from = "/notaria-online"
   to = "/cl/notaria-online"
   status = 302
 
@@ -133,7 +133,7 @@
 
 [[edge_functions]]
   function = "country-redirect"
-  path = "/notaria-digital"
+  path = "/notaria-online"
 
 [[edge_functions]]
   function = "country-redirect"

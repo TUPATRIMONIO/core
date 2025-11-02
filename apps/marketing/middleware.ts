@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   // Lógica de redirect por país para páginas específicas (Vercel geo-routing)
   const needsCountryRedirect = [
     '/firmas-electronicas',
-    '/notaria-digital', 
+    '/notaria-online', 
     '/verificacion-identidad',
     '/precios'
   ].includes(pathname);
@@ -76,7 +76,7 @@ export const config = {
     '/:country(cl|mx|co|pe|ar)/:path*',
     // Rutas que necesitan redirect por país
     '/firmas-electronicas',
-    '/notaria-digital',
+    '/notaria-online',
     '/verificacion-identidad', 
     '/precios',
   ],

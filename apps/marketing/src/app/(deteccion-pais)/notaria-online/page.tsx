@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Stamp, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export default function NotariaDigitalRedirect() {
+export default function NotariaOnlineRedirect() {
   const { country, isLoading } = useLocation();
   const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null);
 
@@ -19,7 +19,7 @@ export default function NotariaDigitalRedirect() {
         setRedirectCountdown(prev => {
           if (prev === 1) {
             clearInterval(interval);
-            window.location.href = `/${country}/notaria-digital`;
+            window.location.href = `/${country}/notaria-online`;
             return null;
           }
           return prev ? prev - 1 : null;
@@ -52,11 +52,11 @@ export default function NotariaDigitalRedirect() {
           <Stamp className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-6" />
           
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Notaría Digital
+            Notaría Online
           </h1>
           
           <p className="text-gray-600 mb-8">
-            Servicios notariales digitales adaptados a la legislación y código civil de cada país.
+            Servicios notariales online adaptados a la legislación y código civil de cada país.
           </p>
 
           {/* Auto-redirect countdown */}
@@ -88,7 +88,7 @@ export default function NotariaDigitalRedirect() {
               </Button>
             </Link>
             
-            <Link href="/co/notaria-digital">
+            <Link href="/co/notaria-online">
               <Button variant="outline" className="w-full">
                 <span className="mr-2">🇨🇴</span>
                 Colombia - Próximamente
@@ -96,7 +96,7 @@ export default function NotariaDigitalRedirect() {
               </Button>
             </Link>
             
-            <Link href="/mx/notaria-digital">
+            <Link href="/mx/notaria-online">
               <Button variant="outline" className="w-full">
                 <span className="mr-2">🇲🇽</span>
                 México - Próximamente
