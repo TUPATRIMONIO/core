@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Star, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGoogleReviews } from '@/hooks/useGoogleReviews';
+import { GoogleStatsHeader } from '@/components/GoogleStatsDisplay';
 
 // Interfaces
 interface Review {
@@ -153,6 +154,9 @@ export default function GoogleReviewsCarousel() {
           <span>Mostrando testimonios destacados</span>
         </div>
       )}
+
+      {/* Estadísticas de Google en tiempo real */}
+      {!showFallbackBadge && <GoogleStatsHeader />}
 
       {/* Carousel container */}
       <div className="relative px-12">

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
 import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
+import { GoogleStatsBadge, GoogleStatsMetrics } from "@/components/GoogleStatsDisplay";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
@@ -154,10 +155,7 @@ export default function NotariaOnlineChilePage() {
                   <BadgeCheck className="w-4 h-4 text-[var(--tp-brand)]" />
                   <span className="text-sm font-medium text-gray-700">Ley 19.799</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-[var(--tp-lines-20)]">
-                  <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span className="text-sm font-medium text-gray-700">4.8/5 (+500 reseñas)</span>
-                </div>
+                <GoogleStatsBadge />
                 <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-[var(--tp-lines-20)]">
                   <Users className="w-4 h-4 text-[var(--tp-brand)]" />
                   <span className="text-sm font-medium text-gray-700">+160k usuarios</span>
@@ -855,23 +853,23 @@ export default function NotariaOnlineChilePage() {
                       </li>
                       <li className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-green-600" />
-                        Mandatos generales
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-green-600" />
                         Declaraciones juradas
                       </li>
                       <li className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-green-600" />
-                        Contratos de trabajo
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-green-600" />
-                        Autorizaciones notariales
+                        Copias Legalizadas
                       </li>
                       <li className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-green-600" />
                         Protocolizaciones
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-600" />
+                        Firmas Autorizadas por Notario (FAN®)
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-600" />
+                        y mucho más...
                       </li>
                     </ul>
                   </div>
@@ -896,23 +894,13 @@ export default function NotariaOnlineChilePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Lo Que Dicen Nuestros +100,000 Usuarios
+                Lo Que Dicen Nuestros Usuarios
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Historias reales de personas y empresas que transformaron sus procesos legales
               </p>
               
-              <div className="inline-flex items-center gap-3 mt-6 px-8 py-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl border-2 border-yellow-200">
-                <div className="flex">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-3xl font-bold text-gray-900">4.8/5</p>
-                  <p className="text-sm text-gray-600">+500 reseñas verificadas en Google</p>
-                </div>
-              </div>
+             
             </div>
 
             {/* Carousel de reseñas de Google */}
@@ -924,24 +912,20 @@ export default function NotariaOnlineChilePage() {
             <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-12 border-2 border-[var(--tp-brand-20)]">
               <div className="grid md:grid-cols-4 gap-8 text-center">
                 <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+160k</div>
-                  <p className="text-gray-700 font-medium">Documentos Firmados</p>
-                  <p className="text-sm text-gray-600 mt-1">Desde 2020</p>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+6 años</div>
+                  <p className="text-gray-700 font-medium">De Trayectoria</p>
+                  <p className="text-sm text-gray-600 mt-1">Brindando tranquilidad desde 2019</p>
+                </div>
+                <GoogleStatsMetrics />
+                <div>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+160K</div>
+                  <p className="text-gray-700 font-medium">Usuarios Atendidos</p>
+                  <p className="text-sm text-gray-600 mt-1">Confiando en nosotros</p>
                 </div>
                 <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">4.9/5</div>
-                  <p className="text-gray-700 font-medium">Calificación Promedio</p>
-                  <p className="text-sm text-gray-600 mt-1">2,847 reseñas Google</p>
-                </div>
-                <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">99.7%</div>
-                  <p className="text-gray-700 font-medium">Tasa de Aceptación</p>
-                  <p className="text-sm text-gray-600 mt-1">Primera presentación</p>
-                </div>
-                <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">24hrs</div>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">2 hrs</div>
                   <p className="text-gray-700 font-medium">Tiempo Promedio</p>
-                  <p className="text-sm text-gray-600 mt-1">Entrega de documentos</p>
+                  <p className="text-sm text-gray-600 mt-1">Entrega de documentos notariados</p>
                 </div>
               </div>
             </div>
