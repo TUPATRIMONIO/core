@@ -930,17 +930,6 @@ export default function NotariaOnlineChilePage() {
               </div>
             </div>
 
-            {/* Logos de clientes (placeholder) */}
-            <div className="mt-16 text-center">
-              <p className="text-gray-600 mb-8 font-medium">Empresas que confían en TuPatrimonio:</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {["Inmobiliaria Portal", "FinTech Santiago", "Constructora Alameda", "StartupCL"].map((company) => (
-                  <div key={company} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 flex items-center justify-center">
-                    <span className="text-gray-600 font-semibold">{company}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </section>
 
@@ -957,56 +946,6 @@ export default function NotariaOnlineChilePage() {
             </div>
 
             <div className="space-y-6">
-              {/* Categoría: PRECIO */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-l-4 border-green-500">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <DollarSign className="w-8 h-8 text-green-600" />
-                  Preguntas sobre Precio
-                </h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Por qué es más barato que una notaría física?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      No tenemos costos de mantener oficinas físicas, personal de atención presencial ni horarios limitados. 
-                      Nuestro modelo <strong>100% digital</strong> reduce costos operacionales en <strong>85%</strong>, ahorro 
-                      que trasladamos directamente al cliente. Además, trabajamos con volúmenes altos que permiten economías de 
-                      escala. Una notaría física cobra $25.000-$40.000 por autorización de firma cuando el decreto legal 
-                      establece máximo $5.500. Nosotros cobramos $6.990, apenas por encima del valor legal y 72% más barato 
-                      que el mercado.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Hay costos ocultos o suscripciones?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>NO hay costos ocultos ni suscripciones mensuales</strong>. Pagas únicamente por cada documento 
-                      que gestiones. El precio publicado incluye: gestión completa del proceso, firma electrónica avanzada certificada, 
-                      revisión legal, autorización notarial, certificado digital, timbre de tiempo, registro en blockchain, descarga 
-                      ilimitada y cobertura legal sin tope. Los únicos costos adicionales opcionales son: servicio express 2 horas 
-                      (+$5.000) y certificación apostillada para uso internacional (+$8.000).
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Ofrecen descuentos por volumen?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      SÍ. Descuentos automáticos progresivos: <strong>5-9 documentos: 10% descuento</strong> (ahorras hasta 
-                      $700 por documento), <strong>10-49 documentos: 20% descuento</strong> (ahorras hasta $1.400), 
-                      <strong>50-99 documentos: 30% descuento</strong> (ahorras hasta $2.100), <strong>100+ documentos: 
-                      descuento personalizado hasta 40%</strong> (ahorras hasta $2.800). Para empresas con +500 documentos/mes 
-                      ofrecemos planes corporativos con API, facturación mensual y cuenta manager dedicado.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {/* Categoría: PROCESO */}
               <div className="bg-white rounded-2xl p-8 shadow-lg border-l-4 border-blue-500">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
