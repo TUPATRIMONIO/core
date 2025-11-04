@@ -11,7 +11,7 @@ export default async (request: Request, context: Context) => {
   // Solo aplicar a páginas específicas que necesitan redirect por país
   const needsCountryRedirect = [
     '/firmas-electronicas',
-    '/notaria-digital',
+    '/notaria-online',
     '/verificacion-identidad',
     '/precios'
   ].includes(pathname);
@@ -62,7 +62,7 @@ export default async (request: Request, context: Context) => {
 export const config = {
   path: [
     "/firmas-electronicas",
-    "/notaria-digital", 
+    "/notaria-online", 
     "/verificacion-identidad",
     "/precios"
   ]

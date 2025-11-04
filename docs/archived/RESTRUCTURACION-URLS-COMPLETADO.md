@@ -97,7 +97,7 @@ Con redirección automática si hay sesión activa:
 '/firmas-electronicas' → '/legal-tech/firma-electronica'
 '/notaria-digital' → '/legal-tech/tramites-notariales'
 '/cl/firmas-electronicas' → '/legal-tech/firma-electronica'
-'/cl/notaria-digital' → '/legal-tech/tramites-notariales'
+'/cl/notaria-online' → '/legal-tech/tramites-notariales'
 '/cl/legal/terminos' → '/terminos-y-condiciones'
 '/cl/legal/privacidad' → '/politica-privacidad'
 ```
@@ -242,7 +242,7 @@ Todas las páginas nuevas siguen el design system de TuPatrimonio:
 Las siguientes páginas se mantienen por compatibilidad pero redirigen:
 
 - `/cl/firmas-electronicas` → `/legal-tech/firma-electronica`
-- `/cl/notaria-digital` → `/legal-tech/tramites-notariales`
+- `/cl/notaria-online` → `/legal-tech/tramites-notariales`
 - `/firmas-electronicas` → `/legal-tech/firma-electronica`
 - `/notaria-digital` → `/legal-tech/tramites-notariales`
 

@@ -144,7 +144,7 @@ npm run dev                 # Puerto 3001
 src/app/
 ├── [country]/             # Páginas por país  
 │   ├── firmas-electronicas/
-│   ├── notaria-digital/
+│   ├── notaria-online/
 │   └── verificacion-identidad/
 ├── firmas-electronicas/   # Landing genérica (redirect)
 ├── blog/                  # Blog con categorías
@@ -491,7 +491,7 @@ export default function NuevoServicioLanding() {
 // netlify/edge-functions/country-redirect.ts
 const needsCountryRedirect = [
   '/firmas-electronicas',
-  '/notaria-digital', 
+  '/notaria-online', 
   '/verificacion-identidad',
   '/nuevo-servicio'        // ← Agregar aquí
 ].includes(pathname);

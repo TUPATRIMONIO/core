@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { 
   CheckCircle, Shield, Clock, FileSignature, Zap, Award, 
@@ -171,10 +172,10 @@ export default function NotariaOnlineChilePage() {
 
               {/* Subtítulo H2 */}
               <h2 className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
-                Gestionamos tu certificación notarial con validez legal en todo Chile, en menos de <strong>24 horas</strong>. <br></br> 
-                Firma electrónica simple y avanzada. Copia Legalizada, Protocolización y Firma Autorizada por Notario (FAN®). <br></br>
+                Gestionamos tu certificación notarial con validez legal en todo Chile, en menos de <strong>24 horas</strong>.  
+                Firma electrónica simple y avanzada. Copia Legalizada, Protocolización y Firma Autorizada por Notario (FAN®). 
                 Más de <strong>60.000 documentos gestionados</strong>. 
-                Firmas avanzadas certificadas por la Subsecretaría de Economía según <strong>Ley 19.799</strong>.
+                Cumplimineto de la <strong>Ley 19.799</strong>.
               </h2>
 
               {/* 3 Bullets de valor */}
@@ -194,7 +195,7 @@ export default function NotariaOnlineChilePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Documento Listo en &lt; 24 Horas</p>
-                    <p className="text-sm text-gray-600">94% procesados en menos de 6 horas</p>
+                    <p className="text-sm text-gray-600">94% procesados en &lt; 6 horas hábiles</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3 text-left">
@@ -202,8 +203,8 @@ export default function NotariaOnlineChilePage() {
                     <Shield className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Cobertura Legal Sin Tope</p>
-                    <p className="text-sm text-gray-600">Únicos en Chile con protección incluida</p>
+                    <p className="font-semibold text-gray-900">Seguro Legal Incluido</p>
+                    <p className="text-sm text-gray-600">Únicos en Chile con protección legal </p>
                   </div>
                 </div>
               </div>
@@ -218,16 +219,6 @@ export default function NotariaOnlineChilePage() {
                     <FileSignature className="w-5 h-5 mr-2" />
                     Firma tu Documento Ahora
                     </Button>
-                </a>
-                <a href="#como-funciona">
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
-                    className="px-10 py-6 text-lg font-semibold border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)]"
-                  >
-                    Ver Precios y Documentos
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
                 </a>
               </div>
 
@@ -959,12 +950,9 @@ export default function NotariaOnlineChilePage() {
                       ¿Cómo firma una persona que no tiene firma electrónica?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      No necesitas tener firma electrónica previa. <strong>Nosotros te proporcionamos todo</strong>. El proceso: 
-                      1) Creas tu cuenta con email, 2) Verificamos tu identidad con cédula chilena o pasaporte extranjero 
-                      mediante selfie y foto del documento, 3) Te enviamos un código de verificación por SMS, 4) Firmas en 
-                      nuestra plataforma con tu dispositivo (computador, tablet o celular), 5) Nuestro sistema certifica la 
-                      firma automáticamente. No necesitas instalar programas ni tener lectores de tarjeta. Todo funciona desde 
-                      el navegador web.
+                      No necesitas tener firma electrónica previa. <strong>Nosotros te proporcionamos todo</strong>. 
+                      Los firmantes verifican su identidad ingresando a un enlace que reciben por email y/o Whatsapp.
+                      No necesitas instalar programas ni tener lectores de tarjeta. Todo funciona desde el navegador web.
                     </p>
                   </div>
 
@@ -974,11 +962,9 @@ export default function NotariaOnlineChilePage() {
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
                       <strong>Reembolso 100% garantizado</strong> si el rechazo es por error nuestro. Si es por información 
-                      incompleta del usuario, ofrecemos <strong>corrección gratuita y re-envío sin costo</strong>. Nuestro 
-                      equipo legal revisa cada documento antes de enviar a notaría (tasa de rechazo: 0.3%). En los pocos casos 
-                      de rechazo, contactamos al cliente en menos de 2 horas, corregimos el error y re-enviamos el mismo día. 
-                      Además, la cobertura legal incluida protege al cliente sin tope de monto en caso de incumplimiento en el 
-                      proceso de gestión.
+                      incompleta del usuario, ofrecemos <strong>corrección gratuita y re-envío sin costo</strong>. Los documentos son 
+                      revisados por IA o por nuestro equipo antes del proceso de firmas, por lo que el nivel de rechazos por parte de notaría
+                      es muy bajo.
                     </p>
                   </div>
 
@@ -987,12 +973,9 @@ export default function NotariaOnlineChilePage() {
                       ¿Puedo corregir el documento después de firmado?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      Una vez firmado y autorizado por la notaría, el documento <strong>NO puede modificarse</strong> 
-                      (característica de seguridad legal). Sin embargo, ANTES de la firma, puedes revisar y modificar 
-                      ilimitadamente. Después de firmado, tienes dos opciones: 1) <strong>Anular el documento</strong> 
-                      (sin reembolso pero sin consecuencias legales) y crear uno nuevo con descuento del 50%, o 2) 
-                      <strong>Crear adenda o anexo</strong> al documento original ($4.990) que modifica cláusulas específicas 
-                      con validez legal.
+                      Una vez firmado y autorizado por la notaría, el documento <strong>NO puede modificarse </strong> 
+                       (característica de seguridad legal). Sin embargo, ANTES de la firma, puedes revisar y modificar 
+                      ilimitadamente.
                     </p>
                   </div>
                 </div>
@@ -1011,12 +994,8 @@ export default function NotariaOnlineChilePage() {
                       ¿Puedo usar este documento en un juicio?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      <strong>SÍ, absolutamente</strong>. La Ley 19.799 establece que documentos con firma electrónica avanzada 
-                      son <strong>plenamente admisibles como prueba en juicio</strong>. Tenemos casos exitosos en: Tribunales 
-                      Civiles (cobro de arriendos, ejecución de contratos), Tribunales Laborales (finiquitos, contratos de 
-                      trabajo), Tribunales de Familia (autorizaciones de viaje), y procedimientos arbitrales. El documento 
-                      incluye certificado de autenticidad, timbre de tiempo oficial y cadena de custodia digital que prueban 
-                      su validez. Hemos participado como peritos en +50 casos judiciales sin una sola invalidación.
+                      <strong>SÍ, absolutamente</strong>. La Ley 19.799 establece que documentos con firma electrónica 
+                      son <strong>plenamente admisibles como prueba en juicio</strong>.
                     </p>
                   </div>
 
@@ -1026,40 +1005,23 @@ export default function NotariaOnlineChilePage() {
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
                       <strong>SÍ, todos los bancos chilenos</strong> aceptan contratos de arriendo con firma electrónica avanzada 
-                      certificada. Hemos confirmado aceptación en: Banco de Chile, BancoEstado, Santander, Scotiabank, Itaú, 
-                      BICE, Security, Falabella, Ripley y cooperativas de ahorro. Lo presentas como cualquier contrato físico 
-                      (PDF con certificados digitales). Algunos bancos solicitan también: copia de cédulas de ambas partes, 
-                      certificado de dominio del inmueble y últimas 3 boletas de luz/agua (documentos estándar independientes 
-                      del tipo de firma). Tasa de aceptación bancaria: 99.8%.
+                      certificada. Lo presentas como cualquier contrato físico (PDF con certificados digitales). 
+                      Algunos bancos solicitan también firma notarial, por lo tanto es siempre recomendable agregar algún servicio notarial,
+                      como copia legalizada, protocolización o firma autorizada por notario (FAN®).
                     </p>
                   </div>
 
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Qué pasa si la otra parte dice que la firma no es válida?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      Cada documento incluye <strong>certificado de autenticidad</strong> emitido por certificadora acreditada 
-                      que prueba: identidad del firmante (validada con cédula/pasaporte), fecha y hora exacta de firma (timbre 
-                      de tiempo oficial), integridad del documento (cualquier alteración invalida la firma), y cadena de custodia 
-                      digital completa. Si alguien cuestiona la firma, puede verificarla en: 1) Portal de verificación de la 
-                      certificadora, 2) Blockchain público donde está registrada, 3) Peritaje forense digital por tribunal. 
-                      <strong>La cobertura legal incluida protege sin tope de monto</strong> en caso de incumplimiento en el 
-                      proceso de gestión del servicio notarial.
-                    </p>
-                  </div>
 
                   <div>
                     <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Tiene el mismo valor que ir presencialmente?
+                      ¿Tiene el mismo valor legal que ir presencialmente?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
                       <strong>SÍ, exactamente el mismo valor legal</strong>. Artículo 3° y 4° de la Ley 19.799 establecen 
                       equivalencia total. La única diferencia técnica: firma manuscrita deja rastro físico en papel, firma 
-                      electrónica avanzada deja rastro digital cifrado en blockchain (este último es más seguro y menos 
-                      falsificable). Ambos producen los mismos efectos jurídicos. De hecho, la firma electrónica tiene 
-                      <strong>ventajas adicionales</strong>: trazabilidad completa, imposible perder el documento, verificación 
-                      instantánea de autenticidad, copias certificadas ilimitadas, y no se deteriora con el tiempo.
+                      electrónica avanzada deja rastro digital cifrado. Ambos producen los mismos efectos jurídicos. De hecho, la firma electrónica tiene 
+                      <strong> ventajas adicionales</strong>: trazabilidad, imposible perder el documento, verificación 
+                      instantánea de autenticidad, copias ilimitadas, y no se deteriora con el tiempo.
                     </p>
                   </div>
                 </div>
@@ -1078,11 +1040,9 @@ export default function NotariaOnlineChilePage() {
                       ¿Necesito instalar algún programa?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      <strong>NO necesitas instalar nada</strong>. Todo funciona desde tu navegador web (Chrome, Firefox, 
-                      Safari, Edge). Solo necesitas: conexión a internet estable, cámara para verificación de identidad 
-                      (puede ser de computador o celular), y micrófono para verificación de voz (opcional). Funciona en: 
-                      Windows, Mac, Linux, Android, iOS. No requiere extensiones, plugins ni lectores de tarjeta. La tecnología 
-                      WebRTC permite capturar foto de tu documento y selfie directamente desde el navegador sin apps adicionales.
+                      <strong>NO necesitas instalar nada</strong>. Todo funciona desde tu navegador web desde cualquier dispositivo. Solo necesitas: conexión a internet estable, cámara para verificación de identidad 
+                      (puede ser de computador o celular). Funciona en: Windows, Mac, Linux, Android, iOS. No requiere extensiones, plugins ni lectores de tarjeta. La tecnología 
+                      usada permite realizar el proceso completamente desde el navegador sin apps adicionales.
                     </p>
                   </div>
 
@@ -1091,28 +1051,12 @@ export default function NotariaOnlineChilePage() {
                       ¿Funciona desde el celular?
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      <strong>SÍ, 100% optimizado para móviles</strong>. De hecho, el 68% de nuestros usuarios firma desde 
+                      <strong>SÍ, 100% optimizado para móviles</strong>. De hecho, la gran parte de nuestros usuarios firma desde 
                       celular. La interfaz es responsive y táctil. Pasos desde móvil: 1) Entra desde navegador de tu celular 
-                      (no necesitas app), 2) Toma foto de tu cédula con la cámara, 3) Toma selfie para verificación biométrica, 
-                      4) Firma tocando la pantalla con tu dedo o stylus, 5) Recibe documento por email. Tiempo total: 3-4 minutos. 
-                      Compatible con: iPhone 6 o superior, Android 7 o superior, tablets iPad y Android.
+                      (no necesitas app), 2) Verifica tu identidad y firma el documento, 3) Recibe documento por email. 
                     </p>
                   </div>
 
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Qué pasa si no tengo cédula de identidad chilena?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Acepta pasaportes de +150 países</strong>. Proceso para extranjeros: 1) Selecciona "Pasaporte" 
-                      como documento, 2) Elige tu país de origen, 3) Toma foto de la página principal del pasaporte (con tu 
-                      foto y datos), 4) Toma selfie sosteniendo el pasaporte, 5) Verificación biométrica internacional 
-                      (compara foto selfie vs foto pasaporte), 6) Código de verificación por email (no por SMS), 7) Firma 
-                      normalmente. También aceptamos: RUT chileno, Cédula de identidad de otros países latinoamericanos, 
-                      Permiso de residencia temporal/definitiva. <strong>NO necesitas estar físicamente en Chile</strong> 
-                      para usar el servicio.
-                    </p>
-                  </div>
 
                   <div>
                     <h4 className="font-bold text-lg text-gray-900 mb-2">
@@ -1124,825 +1068,37 @@ export default function NotariaOnlineChilePage() {
                       Asia (China, Japón, Singapur), Oceanía (Australia, Nueva Zelanda). El documento tiene validez legal en 
                       Chile independiente de dónde lo firmes. Casos de uso frecuentes: Chilenos en el extranjero que necesitan 
                       firmar poderes para gestionar trámites en Chile, Extranjeros que arriendan propiedades en Chile sin viajar, 
-                      Empresas multinacionales que contratan empleados remotos en Chile. La hora de firma se registra en UTC y 
-                      se convierte a hora Chile automáticamente.
+                      Empresas multinacionales que contratan empleados remotos en Chile. 
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Categoría: SEGURIDAD */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-l-4 border-red-500">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                  <Lock className="w-8 h-8 text-red-600" />
-                  Preguntas sobre Seguridad
-                </h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Cómo protegen mis datos personales?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      Cumplimos <strong>Ley 19.628 de Protección de Datos de Chile</strong> y GDPR europeo. Medidas de seguridad: 
-                      1) <strong>Cifrado AES-256</strong> de todos los documentos en tránsito y reposo, 2) <strong>Servidores 
-                      en Chile</strong> con certificación ISO 27001, 3) <strong>Autenticación de dos factores</strong> obligatoria, 
-                      4) <strong>Backups diarios</strong> cifrados en 3 ubicaciones geográficas, 5) <strong>Acceso restringido</strong> 
-                      con logs de auditoría completos, 6) <strong>Eliminación permanente</strong> de datos biométricos después 
-                      de verificación (no almacenamos tu selfie ni foto de cédula permanentemente), 7) <strong>Monitoreo 24/7</strong> 
-                      contra intrusiones. Certificaciones: ISO 27001, PCI-DSS, SOC 2 Type II.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Qué es blockchain y por qué lo usan?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Blockchain es un registro digital inmutable</strong> (imposible de alterar retroactivamente). 
-                      Cada documento firmado recibe un "hash" único (huella digital) que se registra en blockchain público 
-                      (Ethereum o Polygon). Beneficios: 1) <strong>Prueba de existencia:</strong> demuestra que el documento 
-                      existía en fecha/hora específica, 2) <strong>Inmutabilidad:</strong> cualquier cambio posterior invalida 
-                      el hash, 3) <strong>Verificación independiente:</strong> cualquier persona puede verificar autenticidad, 
-                      4) <strong>Resistencia a censura:</strong> nadie (ni nosotros) puede borrar el registro. Es como un 
-                      "notario digital descentralizado" adicional al notario físico chileno.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Puedo confiar en que no adulterarán el documento?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Imposible técnicamente adulterar</strong> un documento después de firmado. La firma electrónica 
-                      avanzada funciona con <strong>criptografía asimétrica</strong>: se genera un "sello digital" matemático 
-                      basado en el contenido exacto del documento. Si cambias una sola letra, el sello se invalida 
-                      automáticamente. Verificación: 1) <strong>Hash criptográfico</strong> del documento, 2) <strong>Timbre 
-                      de tiempo oficial</strong> de certificadora acreditada, 3) <strong>Registro en blockchain</strong> público, 
-                      4) <strong>Certificado digital</strong> con cadena de confianza hasta Subsecretaría de Economía. Además, 
-                      nosotros como plataforma <strong>no tenemos acceso</strong> a modificar documentos firmados (arquitectura 
-                      zero-knowledge).
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-lg text-gray-900 mb-2">
-                      ¿Qué respaldo tengo si algo sale mal?
-                    </h4>
-                    <p className="text-gray-700 leading-relaxed">
-                      <strong>Triple respaldo</strong>: 1) <strong>Cobertura legal incluida sin tope</strong> que protege al 
-                      cliente en caso de incumplimiento en el proceso de gestión notarial, con posibilidad de ceder este beneficio 
-                      a quien decidas, 2) <strong>Garantía de reembolso 100%</strong> si el documento es rechazado por error 
-                      nuestro (0.3% de casos), 3) <strong>Respaldo técnico permanente:</strong> tus documentos se almacenan 
-                      cifrados por 10 años mínimo con descargas ilimitadas, backups en 3 ubicaciones geográficas, y registro en 
-                      blockchain permanente. Además, mantenemos <strong>$50.000.000 en póliza de seguro de responsabilidad civil 
-                      profesional</strong> que cubre cualquier error u omisión de nuestro equipo. Soporte al cliente: WhatsApp, 
-                      email y teléfono con respuesta &lt;2 horas hábiles.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              
             </div>
 
             <div className="text-center mt-12">
               <p className="text-gray-600 mb-6">¿No encontraste respuesta a tu pregunta?</p>
               <Button 
+                asChild
                 size="lg" 
                 variant="outline"
                 className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)]"
               >
-                Contactar Soporte 24/7
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <Link href="/contacto" target="_blank" rel="noopener noreferrer nofollow">
+                  Contactar Soporte 24/7
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
               </Button>
             </div>
           </div>
         </section>
 
-        {/* SECCIÓN 10: COMPARATIVA EDUCATIVA */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Notaría Online vs Notaría Física: Guía Completa 2025
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Comparación detallada para que tomes la mejor decisión informada
-              </p>
-            </div>
+       
 
-            {/* Tabla comparativa extendida */}
-            <div className="overflow-x-auto mb-12">
-              <table className="w-full border-collapse bg-white shadow-xl rounded-lg overflow-hidden">
-                <thead>
-                  <tr className="bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)]">
-                    <th className="px-6 py-4 text-left text-white font-bold text-lg">Criterio</th>
-                    <th className="px-6 py-4 text-center text-white font-bold text-lg bg-green-600">Notaría Online<br/>(TuPatrimonio)</th>
-                    <th className="px-6 py-4 text-center text-white font-bold text-lg">Notaría Física<br/>(Tradicional)</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">💰 Precio promedio</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="text-2xl font-bold text-green-600">$6.990 - $24.990</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-xl font-medium text-red-600">$25.000 - $120.000</span>
-                    </td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">⏱️ Tiempo total del proceso</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">5 min - 24 hrs</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">2 - 5 días</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">🕐 Horario de atención</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">24/7 todos los días</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">Lun-Vie 9:00-18:00</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">📍 Ubicación requerida</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">Desde cualquier lugar</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">Presencial obligatorio</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">⏳ Tiempo en fila de espera</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">0 minutos</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">30 - 120 minutos</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">📄 Formato de documentos</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">Digital permanente + PDF</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">Papel físico (puede perderse)</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">⚖️ Validez legal en Chile</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">✓ Ley 19.799</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="font-bold text-green-600">✓ Código Civil</span>
-                    </td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">🔐 Tecnología de seguridad</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">Blockchain + Cripto</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">Firma manuscrita + Sello</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">🚗 Costo de transporte</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">$0</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">$2.000 - $10.000</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">⏰ Tiempo personal perdido</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">0 horas</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">3 - 4 horas promedio</td>
-                  </tr>
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">🌍 Acceso desde el extranjero</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">✓ Sí, cualquier país</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-red-100">
-                      <span className="text-red-600">✗ No posible</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">💼 Descuentos empresariales</td>
-                    <td className="px-6 py-4 text-center bg-green-50">
-                      <span className="font-bold text-green-600">✓ Hasta 40% descuento</span>
-                    </td>
-                    <td className="px-6 py-4 text-center text-gray-700">Generalmente no</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+      
 
-            {/* Párrafo educativo */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 border-2 border-amber-200 mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-                <AlertCircle className="w-8 h-8 text-amber-600" />
-                ¿Por qué las notarías físicas cobran hasta 40 veces más del precio legal?
-              </h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed">
-                <p>
-                  Según el <strong>estudio de la Fiscalía Nacional Económica (FNE) de 2018</strong>, las notarías físicas 
-                  en Chile cobran sistemáticamente precios muy superiores a los establecidos por ley. El 
-                  <strong> Decreto Supremo N° 587 de 1998</strong> fija el precio máximo de una autorización notarial 
-                  en <strong>$5.500 pesos</strong> (valor actualizado), pero en la práctica las notarías cobran entre 
-                  $25.000 y $120.000.
-                </p>
-                <p>
-                  <strong>Razones identificadas por la FNE:</strong>
-                </p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>
-                    <strong>Monopolio geográfico:</strong> En comunas de alto poder adquisitivo (Lo Barnechea, Vitacura, 
-                    Las Condes) solo hay 2-3 notarías que cobran precios premium sin competencia real.
-                  </li>
-                  <li>
-                    <strong>Falta de fiscalización:</strong> El Ministerio de Justicia no fiscaliza activamente el 
-                    cumplimiento del decreto de precios máximos.
-                  </li>
-                  <li>
-                    <strong>Costos operacionales altos:</strong> Oficinas en ubicaciones prime, personal numeroso, 
-                    horarios limitados y procesos manuales ineficientes.
-                  </li>
-                  <li>
-                    <strong>Información asimétrica:</strong> Los usuarios no conocen el precio legal máximo y asumen 
-                    que el cobro es legítimo.
-                  </li>
-                </ul>
-                <p>
-                  Las <strong>notarías online</strong> como TuPatrimonio disrumpimos este modelo porque:
-                </p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>
-                    <strong>Sin costos de ubicación física:</strong> No pagamos arriendos en zonas premium ni 
-                    mantenimiento de oficinas.
-                  </li>
-                  <li>
-                    <strong>Automatización de procesos:</strong> La tecnología reduce costos operacionales en 85%.
-                  </li>
-                  <li>
-                    <strong>Economías de escala:</strong> Atendemos miles de usuarios simultáneamente sin incrementar 
-                    costos proporcionalmente.
-                  </li>
-                  <li>
-                    <strong>Competencia digital:</strong> Operamos en mercado nacional (no monopolio geográfico) con 
-                    transparencia de precios.
-                  </li>
-                </ul>
-                <p className="font-bold text-[var(--tp-brand)] text-lg mt-4">
-                  Resultado: Podemos ofrecer el mismo servicio legalmente válido a $6.990 vs $25.000-$120.000, 
-                  trasladando el ahorro directamente al usuario.
-                </p>
-              </div>
-            </div>
-
-            {/* Video explicativo (placeholder) */}
-            <div className="bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-[var(--tp-brand)] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
-                  </div>
-                  <p className="text-white text-xl font-semibold">Video Explicativo: Notaría Online en 2 Minutos</p>
-                  <p className="text-gray-400 mt-2">Cómo funciona el proceso paso a paso</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECCIÓN 11: BLOG/RECURSOS */}
-        <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <BookOpen className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-4" />
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Aprende Más Sobre Notarías Online y Firma Electrónica
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Guías completas, tutoriales y recursos educativos gratuitos
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              {/* Artículo 1 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                    <FileSignature className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold">GUÍA COMPLETA</span>
-                      <span className="text-xs text-gray-500">📖 8 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      Cómo Hacer un Contrato de Arriendo Online en Chile
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Guía paso a paso completa con plantilla incluida, requisitos legales, cláusulas obligatorias y 
-                      consejos para arrendadores y arrendatarios. Ahorra hasta $35.000.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Leer guía completa →
-                      </span>
-                      <span className="text-xs text-gray-400">Actualizado 2025</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Artículo 2 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                    <Scale className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-semibold">LEGAL</span>
-                      <span className="text-xs text-gray-500">📖 10 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      Ley 19.799: Todo sobre Firma Electrónica Avanzada
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Análisis completo de la legislación chilena de firma electrónica. Artículos clave, validez legal, 
-                      diferencias entre firma simple y avanzada, y casos judiciales.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Leer análisis legal →
-                      </span>
-                      <span className="text-xs text-gray-400">Verificado</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Artículo 3 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                    <AlertCircle className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">CONSEJOS</span>
-                      <span className="text-xs text-gray-500">📖 6 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      5 Errores Comunes al Firmar Documentos Online (y Cómo Evitarlos)
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Errores frecuentes que invalidan documentos digitales: datos incorrectos, falta de verificación, 
-                      problemas de formato. Aprende a prevenirlos.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Ver errores comunes →
-                      </span>
-                      <span className="text-xs text-gray-400">Más leído</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Artículo 4 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                    <Building className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">REQUISITOS</span>
-                      <span className="text-xs text-gray-500">📖 5 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      ¿Cuándo es Obligatorio ir Presencialmente a la Notaría?
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      No todos los trámites pueden ser online. Lista completa de documentos que SÍ requieren presencialidad: 
-                      escrituras públicas, testamentos, matrimonios y más.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Ver lista completa →
-                      </span>
-                      <span className="text-xs text-gray-400">Esencial</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Artículo 5 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                    <Globe className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-semibold">EXTRANJEROS</span>
-                      <span className="text-xs text-gray-500">📖 7 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      Extranjeros en Chile: Cómo Firmar Documentos sin RUT
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Guía completa para extranjeros: qué documentos de identidad aceptamos, cómo validar pasaportes, 
-                      trámites posibles sin RUT chileno. +150 países soportados.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Leer guía extranjeros →
-                      </span>
-                      <span className="text-xs text-gray-400">Internacional</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-
-              {/* Artículo 6 */}
-              <a href="#" className="group">
-                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-200 hover:border-[var(--tp-brand)]">
-                  <div className="aspect-video bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-white" />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-semibold">GLOSARIO</span>
-                      <span className="text-xs text-gray-500">📖 12 min lectura</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[var(--tp-brand)] transition-colors">
-                      Diferencias entre FES, FEA, FAN y Protocolización
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Glosario técnico explicado en lenguaje simple: Firma Electrónica Simple vs Avanzada vs Autenticada, 
-                      qué es la protocolización notarial y cuándo usar cada una.
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[var(--tp-brand)] font-semibold text-sm group-hover:underline">
-                        Ver glosario completo →
-                      </span>
-                      <span className="text-xs text-gray-400">Referencia</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            <div className="text-center">
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg"
-              >
-                Ver Todos los Recursos Educativos
-                <BookOpen className="w-5 h-5 ml-2" />
-              </Button>
-              <p className="text-sm text-gray-500 mt-4">+50 artículos, guías y tutoriales gratuitos</p>
-            </div>
-          </div>
-        </section>
-
-        {/* SECCIÓN 12: MEMBRESÍA PLUS */}
-        <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-blue-50 relative overflow-hidden">
-          {/* Patrón decorativo */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-purple-500 rounded-full"></div>
-            <div className="absolute bottom-10 right-10 w-40 h-40 bg-blue-500 rounded-full"></div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full mb-4">
-                <Zap className="w-5 h-5 text-purple-600" />
-                <span className="text-sm font-bold text-purple-900">NUEVO: Ahorra hasta 60% con Membresía</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                ¿Firmas Documentos Regularmente?<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
-                  Membresía TuPatrimonio Plus
-                </span>
-              </h2>
-              
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Para quienes necesitan firmar más de un documento al mes, nuestra membresía te da 
-                <strong> documentos ilimitados</strong> y beneficios exclusivos desde <strong>$24.990/mes</strong>
-              </p>
-            </div>
-
-            {/* Comparación Pay-per-use vs Membresía */}
-            <div className="grid md:grid-cols-3 gap-8 mb-12">
-              
-              {/* Plan Ocasional (mantener opción actual) */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-gray-200">
-                <div className="text-center mb-6">
-                  <FileSignature className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Pago por Documento</h3>
-                  <p className="text-sm text-gray-600">Ideal si firmas esporádicamente</p>
-                </div>
-                
-                <div className="mb-6">
-                  <div className="text-center">
-                    <span className="text-sm text-gray-600">Desde</span>
-                    <div className="text-4xl font-bold text-[var(--tp-brand)] my-2">$6.990</div>
-                    <span className="text-sm text-gray-600">por documento</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Sin compromiso mensual</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Pagas solo lo que usas</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Validez legal completa</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Entrega en 24 horas</span>
-                  </li>
-                </ul>
-
-                <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/">
-                  <Button 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                  >
-                    Firmar Sin Membresía
-                  </Button>
-                </a>
-                
-                <p className="text-xs text-center text-gray-500 mt-3">
-                  Perfecto para 1-2 documentos al año
-                </p>
-              </div>
-
-              {/* Plan Plus - DESTACADO */}
-              <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 rounded-2xl p-8 shadow-2xl border-4 border-yellow-400 relative transform md:scale-105">
-                {/* Badge "Más popular" */}
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                    ⚡ MÁS POPULAR
-                  </div>
-                </div>
-
-                <div className="text-center mb-6 mt-2">
-                  <Star className="w-12 h-12 text-yellow-300 fill-yellow-300 mx-auto mb-3" />
-                  <h3 className="text-2xl font-bold text-white mb-2">Membresía Plus</h3>
-                  <p className="text-sm text-white/90">Ahorra hasta 60% por documento</p>
-                </div>
-                
-                <div className="mb-6">
-                  <div className="text-center">
-                    <span className="text-sm text-white/80">Desde</span>
-                    <div className="text-4xl font-bold text-white my-2">$24.990</div>
-                    <span className="text-sm text-white/80">al mes</span>
-                  </div>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 mt-3">
-                    <p className="text-xs text-white text-center">
-                      <strong>5 documentos incluidos</strong> + documentos adicionales a $2.990 c/u
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span><strong>5 documentos al mes incluidos</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span>Documentos extra solo $2.990 c/u</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span><strong>Prioridad en procesamiento</strong> (6 hrs)</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span>Soporte prioritario por WhatsApp</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span>Plantillas personalizadas guardadas</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-white">
-                    <Check className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
-                    <span>Cancela cuando quieras, sin penalización</span>
-                  </li>
-                </ul>
-
-                <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold shadow-xl"
-                  >
-                    <Zap className="w-5 h-5 mr-2" />
-                    Activar Membresía Plus
-                  </Button>
-                </a>
-                
-                <p className="text-xs text-center text-white/80 mt-3">
-                  💰 Ahorro de $10.000+ al mes vs pago individual
-                </p>
-              </div>
-
-              {/* Plan Profesional */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)]">
-                <div className="text-center mb-6">
-                  <Briefcase className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-3" />
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Profesional</h3>
-                  <p className="text-sm text-gray-600">Para inmobiliarias y empresas</p>
-                </div>
-                
-                <div className="mb-6">
-                  <div className="text-center">
-                    <span className="text-sm text-gray-600">Desde</span>
-                    <div className="text-4xl font-bold text-[var(--tp-brand)] my-2">$79.990</div>
-                    <span className="text-sm text-gray-600">al mes</span>
-                  </div>
-                  <div className="bg-[var(--tp-brand-5)] rounded-lg p-3 mt-3">
-                    <p className="text-xs text-gray-700 text-center">
-                      <strong>30 documentos incluidos</strong> + adicionales $1.990 c/u
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span><strong>30 documentos mensuales</strong></span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>API para integración automática</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Multi-usuario (hasta 5 cuentas)</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Gestor de cuenta dedicado</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Facturación centralizada</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Reportes y analytics</span>
-                  </li>
-                </ul>
-
-                <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/">
-                  <Button 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)]"
-                  >
-                    Solicitar Demo
-                  </Button>
-                </a>
-                
-                <p className="text-xs text-center text-gray-500 mt-3">
-                  Ahorro de $130.000+ al mes
-                </p>
-              </div>
-            </div>
-
-            {/* Calculadora de ahorro */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-200 max-w-4xl mx-auto">
-              <div className="text-center mb-6">
-                <TrendingDown className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Calcula Cuánto Ahorrarías con Membresía Plus
-                </h3>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div>
-                  <div className="bg-white rounded-xl p-6 shadow-md">
-                    <p className="text-sm text-gray-600 mb-2">Si firmas 3 docs/mes</p>
-                    <p className="text-3xl font-bold text-green-600 mb-1">$6.000</p>
-                    <p className="text-xs text-gray-500">de ahorro mensual</p>
-                  </div>
-                </div>
-                <div>
-                  <div className="bg-white rounded-xl p-6 shadow-md ring-2 ring-green-500">
-                    <p className="text-sm text-gray-600 mb-2">Si firmas 5 docs/mes</p>
-                    <p className="text-3xl font-bold text-green-600 mb-1">$10.000</p>
-                    <p className="text-xs text-gray-500">de ahorro mensual</p>
-                  </div>
-                </div>
-                <div>
-                  <div className="bg-white rounded-xl p-6 shadow-md">
-                    <p className="text-sm text-gray-600 mb-2">Si firmas 10 docs/mes</p>
-                    <p className="text-3xl font-bold text-green-600 mb-1">$45.000</p>
-                    <p className="text-xs text-gray-500">de ahorro mensual</p>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-center text-sm text-gray-700 mt-6">
-                <strong>¿Firmas 2+ documentos al mes?</strong> La Membresía Plus se paga sola. 
-                Cancela cuando quieras, sin letras chicas ni penalizaciones.
-              </p>
-            </div>
-
-            {/* Testimonios de usuarios Plus */}
-            <div className="mt-12 grid md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-purple-500">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-lg font-bold text-purple-600">
-                    AP
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Andrea Pérez</p>
-                    <p className="text-sm text-gray-600">Corredora de Propiedades</p>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm mb-2">
-                  "Como corredora, firmo entre 8-12 contratos de arriendo al mes. Con la Membresía Plus 
-                  ahorro <strong>$55.000 mensuales</strong>. Además el soporte prioritario es excelente."
-                </p>
-                <div className="flex">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md border-l-4 border-blue-500">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-lg font-bold text-blue-600">
-                    RG
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Roberto González</p>
-                    <p className="text-sm text-gray-600">Abogado Independiente</p>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm mb-2">
-                  "Mis clientes necesitan contratos, poderes y declaraciones juradas constantemente. 
-                  La membresía me permite <strong>ofrecer mejor precio</strong> y ganar más margen. Win-win."
-                </p>
-                <div className="flex">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* FAQ rápido */}
-            <div className="mt-12 bg-white rounded-2xl p-8 shadow-lg max-w-3xl mx-auto">
-              <h4 className="text-xl font-bold text-gray-900 mb-6 text-center">
-                Preguntas Frecuentes sobre la Membresía
-              </h4>
-              
-              <div className="space-y-4">
-                <div>
-                  <p className="font-semibold text-gray-900 mb-1">¿Puedo cancelar cuando quiera?</p>
-                  <p className="text-sm text-gray-600">
-                    Sí, cancelas con 1 clic sin penalización. Si cancelas, mantienes acceso hasta fin de mes pagado.
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="font-semibold text-gray-900 mb-1">¿Qué pasa si no uso mis 5 documentos?</p>
-                  <p className="text-sm text-gray-600">
-                    Los documentos NO se acumulan para el siguiente mes. Por eso recomendamos la membresía solo 
-                    si firmas regularmente 3+ documentos mensuales.
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="font-semibold text-gray-900 mb-1">¿Los documentos tienen la misma validez legal?</p>
-                  <p className="text-sm text-gray-600">
-                    Exactamente la misma. Solo cambia el modelo de pago, no la calidad ni validez legal.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+       
 
         {/* LLAMADO A LA ACCIÓN FINAL */}
         <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] relative overflow-hidden">
@@ -1958,7 +1114,7 @@ export default function NotariaOnlineChilePage() {
                 Comienza a Firmar tus Documentos Legales Hoy Mismo
               </h2>
               <p className="text-xl text-white/90 max-w-3xl mx-auto">
-                Únete a más de 160.000 usuarios que ya confían en el servicio de gestión notarial online más económico y seguro de Chile
+                Únete a más de 160.000 usuarios que ya confían en el servicio de gestión notarial online más confiable, intuitivo y seguro de Chile
               </p>
             </div>
 
@@ -1980,15 +1136,11 @@ export default function NotariaOnlineChilePage() {
                   </li>
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Desde $6.990 por documento</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <span>Disponible 24/7 desde cualquier lugar</span>
                   </li>
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Cobertura legal incluida sin tope</span>
+                    <span>Cobertura legal incluida</span>
                   </li>
                 </ul>
 
@@ -1997,7 +1149,7 @@ export default function NotariaOnlineChilePage() {
                   className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white py-6 text-lg font-semibold"
                 >
                   <FileSignature className="w-5 h-5 mr-2" />
-                  Firmar mi Primer Documento
+                  Firmar Documento
                 </Button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
@@ -2022,15 +1174,11 @@ export default function NotariaOnlineChilePage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Descuentos progresivos hasta $8.000</span>
+                    <span>Descuentos especiales</span>
                   </li>
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <span>API para integración con tus sistemas</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span>Facturación centralizada mensual</span>
                   </li>
                   <li className="flex items-start gap-2 text-gray-700">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -2044,11 +1192,11 @@ export default function NotariaOnlineChilePage() {
                   className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] py-6 text-lg font-semibold"
                 >
                   <Building className="w-5 h-5 mr-2" />
-                  Solicitar Demo Empresarial
+                  Crear Cuenta Empresarial
                 </Button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
-                  ✓ Sin compromiso • ✓ Respuesta en 24 hrs
+                  ✓ Registro gratuito
                 </p>
               </div>
             </div>
@@ -2065,28 +1213,24 @@ export default function NotariaOnlineChilePage() {
               </div>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
-                <span>Cobertura legal sin tope</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 fill-white" />
-                <span>+2847 reseñas 5 estrellas</span>
+                <span>Seguro legal incluido</span>
               </div>
             </div>
           </div>
         </section>
 
         {/* WhatsApp Floating Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <Button 
-            size="lg"
-            className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-2xl hover:scale-110 transition-transform"
-            aria-label="Contactar por WhatsApp"
-          >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
-          </Button>
-        </div>
+        <a
+          href="https://wa.me/56949166719?text=Hola,%20quiero%20información"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-2xl hover:scale-110 transition-all flex items-center justify-center group"
+          aria-label="Contactar por WhatsApp"
+        >
+          <svg className="w-8 h-8 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+        </a>
 
       </div>
     </>
