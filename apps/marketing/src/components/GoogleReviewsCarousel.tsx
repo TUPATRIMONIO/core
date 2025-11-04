@@ -263,7 +263,7 @@ export default function GoogleReviewsCarousel() {
       {/* Badge de Google */}
       <div className="mt-6 text-center">
         <a
-          href="https://www.google.com/search?q=TuPatrimonio"
+          href="https://www.google.com/search?q=TuPatrimonio#lrd=0x9662cf6d1f057f19:0x91c131ab6814bd0e,1,,,,"
           target="_blank"
           rel="noopener noreferrer nofollow"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[var(--tp-brand)] transition-colors"

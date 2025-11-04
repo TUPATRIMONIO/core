@@ -1,12 +1,24 @@
 import type { NextConfig } from "next";
 import { createHash } from "crypto";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Transpilar packages del monorepo
+  transpilePackages: ['@tupatrimonio/assets'],
   eslint: {
     ignoreDuringBuilds: true, // Temporal para deploy rápido
   },
   typescript: {
     ignoreBuildErrors: true, // Ignorar warnings TS
+  },
+  // Configurar webpack para resolver archivos desde packages
+  webpack: (config) => {
+    // Permitir importar archivos desde el package assets
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@tupatrimonio/assets/public': path.resolve(__dirname, '../../packages/assets/public'),
+    };
+    return config;
   },
   images: {
     remotePatterns: [

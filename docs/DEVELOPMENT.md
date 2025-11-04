@@ -26,9 +26,58 @@ npm run dev             # Puerto 3000 (web app)
 
 ## 📦 Packages y Dependencies
 
+### Packages Compartidos Disponibles
+
+#### 1. @tupatrimonio/assets
+Componentes de marca y assets visuales compartidos.
+
+```tsx
+import { Logo, Imagotipo, Isotipo, BRAND_COLORS } from '@tupatrimonio/assets';
+
+// Usar logo completo
+<Imagotipo width={120} height={150} />
+
+// Solo símbolo
+<Isotipo width={100} height={100} />
+
+// Wrapper con variantes
+<Logo variant="imagotipo" width={150} />
+<Logo variant="isotipo" width={80} />
+
+// Colores de marca
+const color = BRAND_COLORS.primary; // '#800039'
+```
+
+📚 **Documentación completa**: [`docs/ASSETS-PACKAGE.md`](./ASSETS-PACKAGE.md)
+
+#### 2. @tupatrimonio/location
+Sistema de detección y gestión de ubicación geográfica.
+
+```tsx
+import { useLocation, LocationManager } from '@tupatrimonio/location';
+
+const { country, city } = useLocation();
+```
+
+#### 3. @tupatrimonio/ui
+Sistema de diseño y estilos compartidos (globals.css).
+
+```tsx
+import "@tupatrimonio/ui/globals.css";
+```
+
 ### Estructura del Monorepo
 ```
 packages/
+├── assets/            # Assets y logos compartidos (NUEVO)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Imagotipo.tsx     # Logo completo
+│   │   │   ├── Isotipo.tsx       # Solo símbolo
+│   │   │   └── Logo.tsx          # Wrapper
+│   │   └── index.ts              # Exports + constantes
+│   ├── package.json
+│   └── tsconfig.json
 ├── location/           # Sistema de ubicación compartido
 │   ├── src/
 │   │   ├── LocationManager.ts     # Detección híbrida
@@ -411,6 +460,14 @@ WHERE slug = 'mi-articulo';
 ## 🐛 Troubleshooting
 
 ### Problemas Comunes
+
+#### "Can't resolve @tupatrimonio/assets"
+```bash
+# Solución: Compilar package assets
+cd packages/assets
+npm run build
+cd ../..
+```
 
 #### "Can't resolve @tupatrimonio/location"
 ```bash

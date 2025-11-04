@@ -8,6 +8,7 @@ import {
   BadgeCheck, DollarSign, Timer, FileCheck, BookOpen, MapPin,
   Briefcase
 } from "lucide-react";
+import { ImagotipoImage } from "@tupatrimonio/assets";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
 import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
 import { GoogleStatsBadge, GoogleStatsMetrics } from "@/components/GoogleStatsDisplay";
@@ -292,9 +293,14 @@ export default function NotariaOnlineChilePage() {
       <div className="min-h-screen bg-[var(--tp-background-light)]">
         
         {/* SECCIÓN 1: HERO */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-white via-[var(--tp-background-light)] to-white py-16 md:py-24">
+        <section className="relative overflow-hidden bg-gradient-to-br from-white via-[var(--tp-background-light)] to-white pt-8 pb-16 md:pt-12 md:pb-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
+              {/* Imagotipo TuPatrimonio */}
+              <div className="flex justify-center mb-8">
+                <ImagotipoImage width={120} height={150} priority />
+              </div>
+              
               {/* Trust badges superiores */}
               <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
                 <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-[var(--tp-lines-20)]">
@@ -396,7 +402,51 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* SECCIÓN 2: COMPARACIÓN DE BENEFICIOS */}
+        {/* SECCIÓN 2: LO QUE DICEN NUESTROS USUARIOS */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Lo Que Dicen Nuestros Usuarios
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Historias reales de personas y empresas que transformaron sus procesos legales
+              </p>
+              
+             
+            </div>
+
+            {/* Carousel de reseñas de Google */}
+            <div className="mb-12">
+              <GoogleReviewsCarousel />
+            </div>
+
+            {/* Métricas destacadas */}
+            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-12 border-2 border-[var(--tp-brand-20)]">
+              <div className="grid md:grid-cols-4 gap-8 text-center">
+                <div>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+6 años</div>
+                  <p className="text-gray-700 font-medium">De Trayectoria</p>
+                  <p className="text-sm text-gray-600 mt-1">Brindando tranquilidad desde 2019</p>
+                </div>
+                <GoogleStatsMetrics />
+                <div>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+160K</div>
+                  <p className="text-gray-700 font-medium">Usuarios Atendidos</p>
+                  <p className="text-sm text-gray-600 mt-1">Confiando en nosotros</p>
+                </div>
+                <div>
+                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">2 hrs</div>
+                  <p className="text-gray-700 font-medium">Tiempo Promedio</p>
+                  <p className="text-sm text-gray-600 mt-1">Entrega de documentos notariados</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* SECCIÓN 3: COMPARACIÓN DE BENEFICIOS */}
         <section id="beneficios" className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -519,7 +569,7 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* SECCIÓN 3: PROCESO PASO A PASO */}
+        {/* SECCIÓN 4: PROCESO PASO A PASO */}
         <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -632,10 +682,10 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* SECCIÓN 4: TIPOS DE DOCUMENTOS */}
+        {/* SECCIÓN 5: TIPOS DE DOCUMENTOS */}
         <DocumentsAvailable />
 
-        {/* SECCIÓN 5: COMPARATIVA VS COMPETENCIA */}
+        {/* SECCIÓN 6: COMPARATIVA VS COMPETENCIA */}
         <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -769,7 +819,7 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* SECCIÓN 6: VALIDEZ LEGAL (continuará en el siguiente bloque) */}
+        {/* SECCIÓN 7: VALIDEZ LEGAL (continuará en el siguiente bloque) */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -1023,53 +1073,7 @@ export default function NotariaOnlineChilePage() {
           </div>
         </section>
 
-        {/* Continuará con más secciones... Debido al límite de caracteres, dividiré el contenido */}
-
-        {/* SECCIÓN 8: SOCIAL PROOF MASIVO */}
-        <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Lo Que Dicen Nuestros Usuarios
-              </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Historias reales de personas y empresas que transformaron sus procesos legales
-              </p>
-              
-             
-            </div>
-
-            {/* Carousel de reseñas de Google */}
-            <div className="mb-12">
-              <GoogleReviewsCarousel />
-            </div>
-
-            {/* Métricas destacadas */}
-            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-12 border-2 border-[var(--tp-brand-20)]">
-              <div className="grid md:grid-cols-4 gap-8 text-center">
-                <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+6 años</div>
-                  <p className="text-gray-700 font-medium">De Trayectoria</p>
-                  <p className="text-sm text-gray-600 mt-1">Brindando tranquilidad desde 2019</p>
-                </div>
-                <GoogleStatsMetrics />
-                <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">+160K</div>
-                  <p className="text-gray-700 font-medium">Usuarios Atendidos</p>
-                  <p className="text-sm text-gray-600 mt-1">Confiando en nosotros</p>
-                </div>
-                <div>
-                  <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">2 hrs</div>
-                  <p className="text-gray-700 font-medium">Tiempo Promedio</p>
-                  <p className="text-sm text-gray-600 mt-1">Entrega de documentos notariados</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* SECCIÓN 9: PREGUNTAS FRECUENTES EXTENDIDAS */}
+        {/* SECCIÓN 8: PREGUNTAS FRECUENTES EXTENDIDAS */}
         <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
