@@ -13,21 +13,22 @@ import GoogleReviewsCarousel from "@/components/GoogleReviewsCarousel";
 import { GoogleStatsBadge, GoogleStatsMetrics } from "@/components/GoogleStatsDisplay";
 
 export const metadata: Metadata = {
-  title: "Notaría Online Chile: Firma tus Documentos Legales desde $6.990 en 24 Horas",
-  description: "Gestión de servicios notariales online, la más económica de Chile. Autorización notarial desde $6.990 con validez legal. +60k documentos gestionados. Firma electrónica avanzada certificada. Disponible 24/7.",
-  keywords: "notaría online, firma electrónica Chile, notaría virtual, contrato arriendo online, autorización notarial, protocolización online, notaría digital Chile, firma documentos online",
+  title: "Notaría Online Chile 2025: Tu Tranquilidad en Trámites Legales | TuPatrimonio",
+  description: "Gestión de servicios notariales 100% online en Chile. Firma documentos legales en menos de 24 horas desde $6.990. +160k usuarios atendidos. Firma electrónica avanzada con validez legal según Ley 19.799. Incluye seguro legal sin tope. Disponible 24/7 desde cualquier lugar.",
+  keywords: "notaría online Chile, firma electrónica avanzada, notaría virtual Chile 2025, contrato arriendo online, autorización notarial online, protocolización online Chile, notaría digital, firma documentos legales online, FAN firma autorizada notario, copia legalizada online, gestor servicios notariales, Ley 19.799 Chile, firma electrónica certificada, trámites notariales online",
   openGraph: {
-    title: "Notaría Online en Chile | Firma Documentos desde $6.990",
-    description: "Minutos (TuPatrimonio) vs Días (notaría física). Validez legal total. +160k usuarios confían en nosotros.",
+    title: "Notaría Online Chile | Tu Tranquilidad en Trámites Legales",
+    description: "Firma en minutos, no en días. Validez legal total. +160k usuarios confían en nosotros. Seguro legal incluido sin tope. Tu tranquilidad, nuestra prioridad.",
     url: "https://tupatrimonio.app/cl/notaria-online",
     locale: "es_CL",
     type: "website",
+    siteName: "TuPatrimonio",
     images: [
       {
         url: "https://tupatrimonio.app/images/notaria-online-chile-og.jpg",
         width: 1200,
         height: 630,
-        alt: "Notaría Online Chile - TuPatrimonio"
+        alt: "Notaría Online Chile - TuPatrimonio: Firma tus documentos legales en minutos con validez legal"
       }
     ],
   },
@@ -37,53 +38,165 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    }
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Notaría Online Chile | Tu Tranquilidad en Trámites Legales",
+    description: "Firma en minutos, no en días. +160k usuarios. Seguro legal incluido.",
+    images: ['https://tupatrimonio.app/images/notaria-online-chile-og.jpg'],
   }
 };
 
-// Schema.org JSON-LD
-const jsonLd = {
+// Schema.org JSON-LD - Organization
+const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "LegalService",
-  "name": "TuPatrimonio - Gestión de Servicios Notariales Online Chile",
-  "description": "Gestión de servicios notariales online con validez legal en todo Chile. Firma electrónica avanzada certificada según Ley 19.799.",
-  "url": "https://tupatrimonio.app/cl/notaria-online",
+  "name": "TuPatrimonio",
+  "legalName": "TuPatrimonio - Gestión de Servicios Notariales Online",
+  "description": "Líder en gestión de servicios notariales online en Chile. Ofrecemos firma electrónica avanzada certificada con validez legal según Ley 19.799. Tu tranquilidad, nuestra prioridad.",
+  "url": "https://tupatrimonio.app",
+  "logo": "https://tupatrimonio.app/images/logo-tupatrimonio.png",
   "image": "https://tupatrimonio.app/images/notaria-online-chile.jpg",
-  "priceRange": "$6.990 - $32.990 CLP",
+  "foundingDate": "2019-06",
+  "slogan": "Tu Tranquilidad, Nuestra Prioridad",
+  "telephone": "+56949166719",
+  "email": "contacto@tupatrimonio.app",
+  "areaServed": {
+    "@type": "Country",
+    "name": "Chile",
+    "sameAs": "https://www.wikidata.org/wiki/Q298"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "CL",
+    "addressLocality": "Chile"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "500",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "sameAs": [
+    "https://www.instagram.com/tupatrimonio.cl/",
+    "https://www.linkedin.com/company/tupatrimonio/"
+  ]
+};
+
+// Schema.org JSON-LD - Service
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Gestión de Servicios Notariales Online",
+  "provider": {
+    "@type": "Organization",
+    "name": "TuPatrimonio",
+    "url": "https://tupatrimonio.app"
+  },
   "areaServed": {
     "@type": "Country",
     "name": "Chile"
   },
-  "address": {
-    "@type": "PostalAddress",
-    "addressCountry": "CL"
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Servicios Notariales Online",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Autorización Notarial de Firma (FAN®) - 1 Firmante",
+          "description": "Firma Autorizada por Notario con validez legal en todo Chile según Ley 19.799. Proceso 100% online."
+        },
+        "price": "6990",
+        "priceCurrency": "CLP",
+        "availability": "https://schema.org/InStock",
+        "url": "https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Protocolización Notarial Online",
+          "description": "Protocolización de documentos con registro notarial. Validez legal completa en Chile."
+        },
+        "price": "14990",
+        "priceCurrency": "CLP",
+        "availability": "https://schema.org/InStock",
+        "url": "https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Copia Legalizada Online",
+          "description": "Copia legalizada de documentos con certificación notarial digital."
+        },
+        "price": "9990",
+        "priceCurrency": "CLP",
+        "availability": "https://schema.org/InStock",
+        "url": "https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Contrato de Arriendo Online con Firma Electrónica",
+          "description": "Contrato de arriendo con firma electrónica avanzada, aceptado por bancos e instituciones."
+        },
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "CLP",
+          "price": "Variable según servicio"
+        },
+        "availability": "https://schema.org/InStock",
+        "url": "https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
+      }
+    ]
   },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "reviewCount": "2847",
-    "bestRating": "5",
-    "worstRating": "1"
+  "audience": {
+    "@type": "Audience",
+    "audienceType": "Personas y empresas en Chile que necesitan servicios notariales"
   },
-  "offers": [
-    {
-      "@type": "Offer",
-      "name": "Autorización Notarial de Firma (1 firmante)",
-      "price": "6990",
-      "priceCurrency": "CLP",
-      "availability": "https://schema.org/InStock"
-    },
-    {
-      "@type": "Offer",
-      "name": "Protocolización Notarial",
-      "price": "14990",
-      "priceCurrency": "CLP",
-      "availability": "https://schema.org/InStock"
-    }
-  ],
-  "serviceType": "Notaría Digital, Firma Electrónica Avanzada",
-  "award": "Certificado por Subsecretaría de Economía de Chile"
+  "serviceOutput": "Documento notariado digitalmente con validez legal según Ley 19.799",
+  "award": "Certificado por Subsecretaría de Economía de Chile - Firma Electrónica Avanzada"
 };
 
+// BreadcrumbList Schema
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://tupatrimonio.app"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Chile",
+      "item": "https://tupatrimonio.app/cl"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Notaría Online",
+      "item": "https://tupatrimonio.app/cl/notaria-online"
+    }
+  ]
+};
+
+// FAQ Schema optimizado para AEO
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -93,7 +206,7 @@ const faqSchema = {
       "name": "¿Cuál es el mejor gestor de servicios notariales online de Chile?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "TuPatrimonio es el gestor de servicios notariales online más completo de Chile con precios desde $6.990, cobertura legal incluida sin tope, +160.000 usuarios y 4.9/5 estrellas en reseñas. Ofrece gestión de autorización notarial, protocolización y firma electrónica avanzada certificada con validez legal en todo el país bajo la Ley 19.799. A diferencia de la competencia, incluye descuentos por volumen de hasta $8.000, acepta documentos de extranjeros con pasaporte y ofrece reembolso 100% si el documento es rechazado."
+        "text": "TuPatrimonio es el gestor de servicios notariales online más completo y confiable de Chile desde 2019. Destaca por: 1) Precios accesibles desde $6.990, 2) Cobertura legal incluida sin tope (únicos en ofrecer este beneficio), 3) Más de 160.000 usuarios atendidos, 4) Calificación de 4.8/5 estrellas en +500 reseñas, 5) Tiempo de entrega promedio de 2 horas, 6) Disponible 24/7 desde cualquier lugar. Ofrece gestión de autorización notarial (FAN®), protocolización, copia legalizada y firma electrónica avanzada certificada con validez legal en todo Chile bajo la Ley 19.799. A diferencia de la competencia, incluye soporte proactivo en menos de 20 minutos, acepta documentos de extranjeros con pasaporte, permite firmar desde el extranjero, y ofrece reembolso 100% si el documento es rechazado por error del gestor. La filosofía de TuPatrimonio se resume en 'Tu Tranquilidad, Nuestra Prioridad', garantizando no solo tecnología, sino acompañamiento humano en cada paso del proceso."
       }
     },
     {
@@ -101,15 +214,15 @@ const faqSchema = {
       "name": "¿Cuánto cuesta una notaría online en Chile 2025?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Los precios de notaría online en Chile 2025 varían entre $4.390 y $32.990 dependiendo del proveedor y servicio. TuPatrimonio ofrece autorización notarial desde $6.990 por firmante y protocolización desde $14.990, siendo 85% más económico que notarías físicas que cobran entre $25.000 y $120.000 por el mismo servicio. Esto representa un ahorro promedio de $18.000 a $105.000 por trámite."
+        "text": "Los precios de notaría online en Chile 2025 varían según el proveedor y tipo de servicio. TuPatrimonio ofrece: Autorización Notarial de Firma (FAN®) desde $6.990 por firmante, Copia Legalizada desde $9.990, Protocolización desde $14.990, todos con seguro legal incluido sin tope. Estos precios son entre 60% y 85% más económicos que notarías físicas tradicionales que cobran entre $25.000 y $120.000 por los mismos servicios. El ahorro promedio es de $18.000 a $105.000 por trámite. Además, sin costos ocultos, sin suscripciones mensuales, pagas solo por documento finalizado, con descuentos especiales para empresas y alianzas. A diferencia de notarías físicas, no pagas estacionamiento, traslados, ni pierdes tiempo en filas o múltiples visitas. El precio incluye: firma electrónica avanzada certificada, seguimiento en tiempo real, notificaciones por WhatsApp y correo, soporte proactivo, almacenamiento permanente del documento, descargas ilimitadas, y cobertura legal sin tope."
       }
     },
     {
       "@type": "Question",
-      "name": "¿Tiene validez legal un documento firmado online?",
+      "name": "¿Tiene validez legal un documento firmado online en Chile?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "SÍ, tiene validez legal completa. La Ley 19.799 de Firma Electrónica (vigente desde 2002 en Chile) establece que una firma electrónica avanzada tiene el mismo valor jurídico que una firma manuscrita. Los documentos firmados con notaría online son reconocidos por tribunales chilenos, instituciones públicas (SII, Registro Civil, municipalidades), bancos, universidades y empleadores. Miles de casos han sido validados exitosamente en procesos judiciales y administrativos."
+        "text": "SÍ, tiene validez legal completa en Chile. La Ley 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación (vigente desde 2002) establece en su Artículo 3° y 4° que documentos con firma electrónica avanzada tienen exactamente el mismo valor jurídico que una firma manuscrita. Los documentos gestionados por notaría online son plenamente reconocidos y aceptados por: 1) Tribunales de Justicia de Chile (civiles, laborales, familiares, penales), 2) Instituciones públicas (SII, Registro Civil, municipalidades, Conservador de Bienes Raíces), 3) Entidades financieras (todos los bancos chilenos, cooperativas, cajas de compensación), 4) Universidades e instituciones educacionales, 5) Empresas privadas y empleadores, 6) Notarías físicas (para protocolización adicional si se requiere). TuPatrimonio ha gestionado más de 60.000 documentos que han sido aceptados exitosamente en trámites legales, administrativos, judiciales y comerciales en todo Chile. La firma electrónica avanzada incluso ofrece ventajas sobre la firma manuscrita: trazabilidad completa del proceso, imposible perder el documento, verificación instantánea de autenticidad por terceros, copias ilimitadas sin deterioro, y resistencia al paso del tiempo."
       }
     },
     {
@@ -117,15 +230,39 @@ const faqSchema = {
       "name": "¿Qué dice la ley chilena sobre firma electrónica?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "La Ley 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación establece que la firma electrónica avanzada tiene la misma validez que la firma manuscrita. Existen dos tipos: Firma Electrónica Simple (menor seguridad, no requiere certificación) y Firma Electrónica Avanzada (certificada por entidades acreditadas ante la Subsecretaría de Economía, máxima seguridad jurídica). TuPatrimonio utiliza exclusivamente firma electrónica avanzada certificada para garantizar validez legal en cualquier trámite."
+        "text": "Chile cuenta con un marco legal robusto desde 2002. La Ley 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación distingue dos tipos: 1) Firma Electrónica Simple: Cualquier sonido, símbolo o proceso electrónico que identifica al autor. Menor seguridad jurídica, no requiere certificación. Útil para comunicaciones informales pero no recomendada para contratos. 2) Firma Electrónica Avanzada (FEA): Certificada por prestadores acreditados ante la Subsecretaría de Economía. Requisitos según Artículo 2° letra g): identificación inequívoca del firmante, datos de creación exclusivos del firmante, detecta cualquier alteración posterior, susceptible de verificación por terceros, cuenta con certificado emitido por certificadora oficial. Esta tiene equivalencia total con firma manuscrita para efectos legales. TuPatrimonio utiliza exclusivamente Firma Electrónica Avanzada certificada para garantizar máxima seguridad jurídica. Solo pueden operar empresas autorizadas por la Subsecretaría de Economía bajo estrictos estándares (Decreto Supremo N° 81 de 2004). Para contratos de arriendo, promesas de compraventa, mandatos, poderes y cualquier acto jurídico con consecuencias patrimoniales, se recomienda usar Firma Electrónica Avanzada para eliminar cualquier cuestionamiento posterior."
       }
     },
     {
       "@type": "Question",
-      "name": "¿Cuánto tarda el proceso completo?",
+      "name": "¿Cuánto tarda el proceso completo de notaría online?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "El proceso completo toma entre 5 minutos y 24 horas. Desglose: 1) Elegir documento y completar datos: 3-5 minutos, 2) Firmar electrónicamente: 2 minutos, 3) Revisión y autorización notarial: 1-4 horas hábiles en promedio, 4) Entrega del documento firmado: inmediata por email. El 94% de documentos son procesados en menos de 6 horas. Para casos urgentes, ofrecemos servicio express en 2 horas hábiles con costo adicional."
+        "text": "El proceso completo de notaría online con TuPatrimonio toma entre 5 minutos y 24 horas máximo, con un tiempo promedio de 2 horas. Desglose detallado: 1) Elegir documento y completar datos: 3-5 minutos (puedes usar plantillas automatizadas o subir tu propio documento), 2) Proceso de firma electrónica: 2 minutos (incluye verificación de identidad biométrica o con Clave Única), 3) Revisión y autorización notarial: 1-4 horas hábiles en promedio (notarios de nuestra red revisan y certifican), 4) Entrega del documento firmado: inmediata por email (con notificación por WhatsApp). Estadísticas reales: El 94% de documentos son procesados en menos de 6 horas, el 75% en menos de 2 horas, el 50% en menos de 1 hora. Para casos urgentes, existe servicio express en 2 horas hábiles con costo adicional. A diferencia de notarías físicas que tardan 3-7 días hábiles con múltiples visitas presenciales, el proceso online se completa en una fracción del tiempo sin salir de casa. El proceso funciona 24/7: puedes enviar tu solicitud de madrugada y el procesamiento inicia en horario hábil siguiente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Los bancos aceptan contratos de arriendo con firma electrónica online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SÍ, todos los bancos chilenos aceptan contratos de arriendo con firma electrónica avanzada certificada según la Ley 19.799. Los contratos gestionados por TuPatrimonio son válidos para: Banco de Chile, Banco Santander, BancoEstado, Banco Falabella, Scotiabank, Itaú, BICE, Security, Consorcio, y todas las entidades financieras reguladas en Chile. Se presentan como cualquier contrato físico: archivo PDF con certificados digitales de firma incluidos que el banco puede verificar instantáneamente. Recomendación importante: Algunos bancos solicitan adicionalmente un servicio notarial complementario como copia legalizada, protocolización o Firma Autorizada por Notario (FAN®) para mayor respaldo. TuPatrimonio ofrece estos servicios adicionales de forma sencilla y económica. Casos de uso exitosos: Miles de clientes han usado contratos de arriendo online de TuPatrimonio para solicitar créditos hipotecarios, avaluar propiedades, demostrar domicilio y respaldo de ingresos. La ventaja es que el contrato digital no se deteriora, puedes descargarlo ilimitadamente, y tiene trazabilidad completa del proceso de firma, lo que genera mayor confianza en las instituciones financieras."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo firmar documentos online desde el extranjero?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SÍ, puedes firmar documentos online con validez legal en Chile desde cualquier país del mundo. Miles de chilenos expatriados y extranjeros usan el servicio de TuPatrimonio desde: América (USA, Canadá, Argentina, Brasil, México, Colombia), Europa (España, Alemania, Reino Unido, Francia, Italia, Suecia), Asia (China, Japón, Singapur, Corea del Sur), Oceanía (Australia, Nueva Zelanda), y más. El documento tiene plena validez legal en Chile independientemente de dónde lo firmes. Solo necesitas: conexión a internet estable, dispositivo con cámara (computador o celular) para verificación de identidad, tu cédula de identidad chilena o pasaporte vigente, el documento a firmar en PDF. Casos de uso frecuentes: 1) Chilenos en el extranjero que necesitan firmar poderes para gestionar trámites en Chile (venta de propiedades, trámites bancarios, representación legal), 2) Extranjeros que arriendan o compran propiedades en Chile sin necesidad de viajar, 3) Empresas multinacionales que contratan empleados remotos en Chile, 4) Estudiantes chilenos en el extranjero que necesitan documentación legal. El proceso funciona exactamente igual que desde Chile: firmas en minutos y recibes el documento certificado por email. TuPatrimonio no cobra extra por firmar desde el extranjero, el precio es el mismo independiente de tu ubicación geográfica."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué documentos NO se pueden hacer online en Chile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Por transparencia, NO todos los actos notariales se pueden realizar completamente online en Chile. Requieren presencialidad obligatoria según el Código Civil chileno: 1) Escrituras públicas de compraventa definitiva de inmuebles: Deben firmarse presencialmente ante notario para inscripción en Conservador de Bienes Raíces (Nota: La promesa de compraventa SÍ puede ser online), 2) Testamentos cerrados o abiertos: Exigen presencia física del testador ante notario y testigos, 3) Matrimonios: Requieren ceremonia presencial ante Oficial del Registro Civil, 4) Finiquitos laborales: Aunque el empleador puede firmar electrónicamente, el trabajador debe firmar presencialmente según el Código del Trabajo. Lo que SÍ puedes hacer 100% online con TuPatrimonio: Contratos de arriendo, Promesas de compraventa, Poderes simples y especiales, Declaraciones juradas, Mandatos, Cesiones de derechos, Contratos de prestación de servicios, Contratos de compraventa de bienes muebles, Reconocimiento de deuda, Autorizaciones de viaje para menores (con firma de ambos padres), Certificaciones de firma, Copias legalizadas, Protocolizaciones, y más del 90% de los documentos privados en Chile. La limitación existe porque el Código Civil (1855) y leyes especiales establecen formalidades para ciertos actos que aún no han sido actualizadas. Existen proyectos de ley en tramitación para modernizar estas normas."
       }
     }
   ]
@@ -134,10 +271,18 @@ const faqSchema = {
 export default function NotariaOnlineChilePage() {
   return (
     <>
-      {/* JSON-LD Schema */}
+      {/* JSON-LD Schemas para SEO y AEO */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <script
         type="application/ld+json"
@@ -1144,13 +1289,20 @@ export default function NotariaOnlineChilePage() {
                   </li>
                 </ul>
 
-                <Button 
-                  size="lg" 
-                  className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white py-6 text-lg font-semibold"
+                <a 
+                  href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" 
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="block w-full"
                 >
-                  <FileSignature className="w-5 h-5 mr-2" />
-                  Firmar Documento
-                </Button>
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white py-6 text-lg font-semibold"
+                  >
+                    <FileSignature className="w-5 h-5 mr-2" />
+                    Firmar Documento
+                  </Button>
+                </a>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
                   ✓ Paga solo por documento finalizado
@@ -1192,7 +1344,7 @@ export default function NotariaOnlineChilePage() {
                   className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] py-6 text-lg font-semibold"
                 >
                   <Building className="w-5 h-5 mr-2" />
-                  Crear Cuenta Empresarial
+                  ¡Próximamente!
                 </Button>
 
                 <p className="text-center text-sm text-gray-500 mt-4">
