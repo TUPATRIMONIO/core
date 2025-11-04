@@ -1,8 +1,5 @@
 // Exportar componentes de logos
-export { Imagotipo } from './components/Imagotipo';
 export { ImagotipoImage } from './components/ImagotipoImage';
-export { Isotipo } from './components/Isotipo';
-export { Logo } from './components/Logo';
 // Exportar rutas de imágenes para uso directo
 export const ASSET_PATHS = {
     logo: {

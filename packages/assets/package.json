@@ -1,6 +1,6 @@
 {
   "name": "@tupatrimonio/assets",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Assets compartidos para TuPatrimonio (imágenes, logos, iconos)",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

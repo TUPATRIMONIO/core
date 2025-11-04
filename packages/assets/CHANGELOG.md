@@ -1,5 +1,19 @@
 # Changelog - @tupatrimonio/assets
 
+## [1.2.2] - 2024-11-04
+
+### 🗑️ Removed (Limpieza)
+- **Componentes no utilizados**: Eliminados `Imagotipo.tsx`, `Isotipo.tsx`, y `Logo.tsx`
+- **Exports simplificados**: Solo se mantiene `ImagotipoImage` que es el único componente en uso
+- **Archivos compilados**: Limpiados archivos obsoletos de `dist/components/`
+
+### 📝 Notas
+- El package ahora solo exporta `ImagotipoImage` que es el componente activamente usado en producción
+- Reducción del tamaño del package y mantenimiento más simple
+- Los componentes SVG pueden restaurarse desde git history si son necesarios en el futuro
+
+---
+
 ## [1.2.1] - 2024-11-04
 
 ### 🐛 Fixes
