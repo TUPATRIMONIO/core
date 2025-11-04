@@ -326,7 +326,7 @@ export default function NotariaOnlineChilePage() {
                 Gestionamos tu certificación notarial con validez legal en todo Chile, en menos de <strong>24 horas</strong>.  
                 Firma electrónica simple y avanzada. Copia Legalizada, Protocolización y Firma Autorizada por Notario (FAN®). 
                 Más de <strong>60.000 documentos gestionados</strong>. 
-                Cumplimineto de la <strong>Ley 19.799</strong>.
+                Cumplimiento de la <strong>Ley 19.799</strong>.
               </h2>
 
               {/* 3 Bullets de valor */}
