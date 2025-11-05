@@ -16,14 +16,15 @@ import {
   FAQSection,
   FinalCTASection,
 } from "@/components/landing-sections";
+import { USERS_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile 2025: Tu Tranquilidad en Trámites Legales | TuPatrimonio",
-  description: "Gestión de servicios notariales 100% online en Chile. Firma documentos legales en menos de 24 horas desde $6.990. +160k usuarios atendidos. Firma electrónica avanzada con validez legal según Ley 19.799. Incluye seguro legal sin tope. Disponible 24/7 desde cualquier lugar.",
+  description: `Gestión de servicios notariales 100% online en Chile. Firma documentos legales en menos de 24 horas desde $6.990. ${USERS_COUNT.textShort} atendidos. Firma electrónica avanzada con validez legal según Ley 19.799. Incluye seguro legal sin tope. Disponible 24/7 desde cualquier lugar.`,
   keywords: "notaría online Chile, firma electrónica avanzada, notaría virtual Chile 2025, contrato arriendo online, autorización notarial online, protocolización online Chile, notaría digital, firma documentos legales online, FAN firma autorizada notario, copia legalizada online, gestor servicios notariales, Ley 19.799 Chile, firma electrónica certificada, trámites notariales online",
   openGraph: {
     title: "Notaría Online Chile | Tu Tranquilidad en Trámites Legales",
-    description: "Firma en minutos, no en días. Validez legal total. +160k usuarios confían en nosotros. Seguro legal incluido sin tope. Tu tranquilidad, nuestra prioridad.",
+    description: `Firma en minutos, no en días. Validez legal total. ${USERS_COUNT.short} usuarios confían en nosotros. Seguro legal incluido sin tope. Tu tranquilidad, nuestra prioridad.`,
     url: "https://tupatrimonio.app/cl/notaria-online",
     locale: "es_CL",
     type: "website",
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Notaría Online Chile | Tu Tranquilidad en Trámites Legales",
-    description: "Firma en minutos, no en días. +160k usuarios. Seguro legal incluido.",
+    description: `Firma en minutos, no en días. ${USERS_COUNT.short} usuarios. Seguro legal incluido.`,
     images: ['https://tupatrimonio.app/images/notaria-online-chile-og.jpg'],
   }
 };
@@ -211,7 +212,7 @@ const faqSchema = {
       "name": "¿Cuál es el mejor gestor de servicios notariales online de Chile?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "TuPatrimonio es el gestor de servicios notariales online más completo y confiable de Chile desde 2019. Destaca por: 1) Precios accesibles desde $6.990, 2) Cobertura legal incluida sin tope (únicos en ofrecer este beneficio), 3) Más de 160.000 usuarios atendidos, 4) Calificación de 4.8/5 estrellas en +500 reseñas, 5) Tiempo de entrega promedio de 2 horas, 6) Disponible 24/7 desde cualquier lugar. Ofrece gestión de autorización notarial (FAN®), protocolización, copia legalizada y firma electrónica avanzada certificada con validez legal en todo Chile bajo la Ley 19.799. A diferencia de la competencia, incluye soporte proactivo en menos de 20 minutos, acepta documentos de extranjeros con pasaporte, permite firmar desde el extranjero, y ofrece reembolso 100% si el documento es rechazado por error del gestor. La filosofía de TuPatrimonio se resume en 'Tu Tranquilidad, Nuestra Prioridad', garantizando no solo tecnología, sino acompañamiento humano en cada paso del proceso."
+        "text": `TuPatrimonio es el gestor de servicios notariales online más completo y confiable de Chile desde 2019. Destaca por: 1) Precios accesibles desde $6.990, 2) Cobertura legal incluida sin tope (únicos en ofrecer este beneficio), 3) ${USERS_COUNT.text} atendidos, 4) Calificación de 4.8/5 estrellas en +500 reseñas, 5) Tiempo de entrega promedio de 2 horas, 6) Disponible 24/7 desde cualquier lugar. Ofrece gestión de autorización notarial (FAN®), protocolización, copia legalizada y firma electrónica avanzada certificada con validez legal en todo Chile bajo la Ley 19.799. A diferencia de la competencia, incluye soporte proactivo en menos de 20 minutos, acepta documentos de extranjeros con pasaporte, permite firmar desde el extranjero, y ofrece reembolso 100% si el documento es rechazado por error del gestor. La filosofía de TuPatrimonio se resume en 'Tu Tranquilidad, Nuestra Prioridad', garantizando no solo tecnología, sino acompañamiento humano en cada paso del proceso.`
       }
     },
     {
@@ -309,7 +310,7 @@ export default function NotariaOnlineChilePage() {
           trustBadges={[
             { icon: BadgeCheck, text: "Ley 19.799" },
             { component: <GoogleStatsBadge /> },
-            { icon: Users, text: "+160k usuarios" }
+            { icon: Users, text: USERS_COUNT.textShort }
           ]}
           valueBullets={[
             {
@@ -355,7 +356,7 @@ export default function NotariaOnlineChilePage() {
           metrics={[
             { value: "+6 años", label: "De Trayectoria", description: "Brindando tranquilidad desde 2019" },
             { value: "", label: "", description: "" }, // Placeholder for GoogleStatsMetrics
-            { value: "+160K", label: "Usuarios Atendidos", description: "Confiando en nosotros" },
+            { value: USERS_COUNT.shortUpper, label: "Usuarios Atendidos", description: "Confiando en nosotros" },
             { value: "2 hrs", label: "Tiempo Promedio", description: "Entrega de documentos notariados" }
           ]}
         />
@@ -804,7 +805,7 @@ export default function NotariaOnlineChilePage() {
         {/* LLAMADO A LA ACCIÓN FINAL */}
         <FinalCTASection
           title="Comienza a Firmar tus Documentos Legales Hoy Mismo"
-          description="Únete a más de 160.000 usuarios que ya confían en el servicio de gestión notarial online más confiable, intuitivo y seguro de Chile"
+          description={`Únete a ${USERS_COUNT.text} que ya confían en el servicio de gestión notarial online más confiable, intuitivo y seguro de Chile`}
           cards={[
             {
               type: "personas",

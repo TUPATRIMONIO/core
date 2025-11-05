@@ -13,6 +13,7 @@ import {
   DollarSign, FileCheck, Building, Timer, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { USERS_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Contrato de Arriendo Online: Firma Fácil y con Tranquilidad | TuPatrimonio",
@@ -247,7 +248,7 @@ const heroProps = {
   trustBadges: [
     { icon: BadgeCheck, text: "Ley 19.799" },
     { component: <GoogleStatsBadge /> },
-    { icon: Users, text: "+160k usuarios" }
+    { icon: Users, text: USERS_COUNT.textShort }
   ],
   valueBullets: [
     {
@@ -406,7 +407,7 @@ const testimonialsProps = {
   metrics: [
     { value: "+6 años", label: "De Trayectoria", description: "Brindando tranquilidad desde 2019" },
     { value: "", label: "", description: "" }, // GoogleStatsMetrics se inserta automáticamente
-    { value: "+160K", label: "Usuarios Atendidos", description: "Confiando en nosotros" },
+    { value: USERS_COUNT.shortUpper, label: "Usuarios Atendidos", description: "Confiando en nosotros" },
     { value: "2 hrs", label: "Tiempo Promedio", description: "Entrega de documentos notariados" }
   ]
 };
@@ -487,7 +488,7 @@ const faqProps = {
 // Final CTA Section Props
 const finalCtaProps = {
   title: "Comienza a Firmar tu Contrato de Arriendo Hoy Mismo",
-  description: "Únete a más de 160.000 usuarios que ya confían en el servicio más confiable, intuitivo y seguro de Chile. Duerme tranquilo sabiendo que tu contrato está bien hecho.",
+  description: `Únete a ${USERS_COUNT.text} que ya confían en el servicio más confiable, intuitivo y seguro de Chile. Duerme tranquilo sabiendo que tu contrato está bien hecho.`,
   cards: [
     {
       type: "personas" as const,
