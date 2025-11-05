@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     description: 'Firmas electrónicas, verificación de identidad y notaría digital. Digitaliza tus procesos legales de forma segura y eficiente.',
     url: 'https://tupatrimonio.app',
     locale: 'es_CL',
+    siteName: 'TuPatrimonio',
   },
 };
 
