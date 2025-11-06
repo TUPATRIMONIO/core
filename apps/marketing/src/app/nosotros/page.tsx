@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function NosotrosPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,11 +34,11 @@ export default function NosotrosPage() {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               Transformando los Servicios Legales en{' '}
               <span className="text-[var(--tp-brand)]">Latinoamérica</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
               Somos una plataforma legal tech que simplifica trámites complejos, 
               democratiza el acceso a servicios legales y potencia la transformación digital 
               de empresas en toda la región.
@@ -160,10 +160,10 @@ export default function NosotrosPage() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               ¿Por qué elegir TuPatrimonio?
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Innovación, seguridad y simplicidad en una sola plataforma
             </p>
           </div>
@@ -209,7 +209,7 @@ export default function NosotrosPage() {
                   <CardTitle className="text-xl">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-base text-gray-600">
+                  <CardDescription className="text-base text-muted-foreground">
                     {item.description}
                   </CardDescription>
                 </CardContent>
@@ -222,10 +222,10 @@ export default function NosotrosPage() {
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-background-light)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             ¿Listo para Transformar tu Gestión Legal?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-muted-foreground mb-8">
             Únete a cientos de empresas que ya confían en TuPatrimonio
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

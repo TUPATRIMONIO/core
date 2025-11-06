@@ -43,7 +43,7 @@ export default async function KBCategoryPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/base-conocimiento">
             <Button variant="ghost" size="sm">
@@ -63,7 +63,7 @@ export default async function KBCategoryPage({ params }: PageProps) {
             >
               <span className="text-3xl">{category.icon || '📚'}</span>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-foreground mb-4">
               {category.name}
             </h1>
             <p className="text-xl text-gray-600">

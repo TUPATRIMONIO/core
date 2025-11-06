@@ -17,7 +17,7 @@ export default function CookiesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/">
             <Button variant="ghost" size="sm">
@@ -41,10 +41,10 @@ export default function CookiesPage() {
             <div className="lg:col-span-3 bg-white rounded-xl shadow-sm p-8">
             <div className="text-center mb-12">
               <Cookie className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-foreground mb-4">
                 Política de Cookies
               </h1>
-              <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>Última actualización: 21 de octubre de 2025</span>
@@ -70,12 +70,12 @@ export default function CookiesPage() {
               <div className="grid md:grid-cols-2 gap-6 my-8">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <Settings className="w-8 h-8 text-blue-600 mb-3" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Cookies Esenciales</h3>
-                  <p className="text-gray-600 text-sm">
+                  <h3 className="text-lg font-bold text-foreground mb-2">Cookies Esenciales</h3>
+                  <p className="text-muted-foreground text-sm">
                     Necesarias para el funcionamiento básico del sitio. 
                     No se pueden desactivar.
                   </p>
-                  <ul className="text-sm text-gray-600 mt-3 space-y-1">
+                  <ul className="text-sm text-muted-foreground mt-3 space-y-1">
                     <li>• Sesión de usuario</li>
                     <li>• Preferencias de idioma</li>
                     <li>• Configuración de seguridad</li>
@@ -84,11 +84,11 @@ export default function CookiesPage() {
 
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                   <BarChart className="w-8 h-8 text-green-600 mb-3" />
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Cookies de Analytics</h3>
-                  <p className="text-gray-600 text-sm">
+                  <h3 className="text-lg font-bold text-foreground mb-2">Cookies de Analytics</h3>
+                  <p className="text-muted-foreground text-sm">
                     Nos ayudan a entender cómo usa el sitio y mejorarlo.
                   </p>
-                  <ul className="text-sm text-gray-600 mt-3 space-y-1">
+                  <ul className="text-sm text-muted-foreground mt-3 space-y-1">
                     <li>• Google Analytics</li>
                     <li>• Métricas de rendimiento</li>
                     <li>• Patrones de uso</li>
@@ -206,7 +206,7 @@ export default function CookiesPage() {
 
             {/* CTA */}
             <div className="mt-12 text-center pt-8 border-t">
-              <p className="text-gray-600 mb-4">
+              <p className="text-muted-foreground mb-4">
                 ¿Listo para una experiencia digital segura?
               </p>
               <Button className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">

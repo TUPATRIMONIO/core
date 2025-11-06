@@ -39,7 +39,7 @@ export default function PreciosRedirect() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-4 animate-spin" />
-          <p className="text-gray-600">Detectando tu ubicación...</p>
+          <p className="text-muted-foreground">Detectando tu ubicación...</p>
         </div>
       </div>
     );
@@ -48,14 +48,14 @@ export default function PreciosRedirect() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
-        <div className="bg-white rounded-2xl shadow-lg border p-8 text-center">
+        <div className="bg-card rounded-2xl shadow-lg border p-8 text-center">
           <DollarSign className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-6" />
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Precios <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h1>
           
-          <p className="text-gray-600 mb-8">
+          <p className="text-muted-foreground mb-8">
             Precios específicos para cada país en moneda local con planes adaptados al mercado.
           </p>
 
@@ -109,15 +109,15 @@ export default function PreciosRedirect() {
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div className="text-center">
                 <div className="font-bold text-blue-600">CLP</div>
-                <div className="text-gray-600">Chile</div>
+                <div className="text-muted-foreground">Chile</div>
               </div>
               <div className="text-center">
                 <div className="font-bold text-yellow-600">COP</div>
-                <div className="text-gray-600">Colombia</div>
+                <div className="text-muted-foreground">Colombia</div>
               </div>
               <div className="text-center">
                 <div className="font-bold text-green-600">MXN</div>
-                <div className="text-gray-600">México</div>
+                <div className="text-muted-foreground">México</div>
               </div>
             </div>
           </div>

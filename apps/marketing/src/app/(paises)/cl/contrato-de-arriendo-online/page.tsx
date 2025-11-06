@@ -566,25 +566,25 @@ export default function ContratoArriendoOnlinePage() {
               </p>
               
               <ul className="max-w-3xl mx-auto text-left space-y-4 mb-12">
-                <li className="flex items-start gap-3 text-lg text-gray-700">
+                <li className="flex items-start gap-3 text-lg text-foreground/80">
                   <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Y si el arrendatario no me paga?"</strong> - El miedo número uno de todo arrendador
                   </div>
                 </li>
-                <li className="flex items-start gap-3 text-lg text-gray-700">
+                <li className="flex items-start gap-3 text-lg text-foreground/80">
                   <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Y si me están estafando?"</strong> - La inseguridad que todos sentimos
                   </div>
                 </li>
-                <li className="flex items-start gap-3 text-lg text-gray-700">
+                <li className="flex items-start gap-3 text-lg text-foreground/80">
                   <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Cómo coordino para que todos vayamos a la notaría?"</strong> - La pesadilla logística
                   </div>
                 </li>
-                <li className="flex items-start gap-3 text-lg text-gray-700">
+                <li className="flex items-start gap-3 text-lg text-foreground/80">
                   <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Estará bien hecho este contrato?"</strong> - La duda que no te deja dormir
@@ -592,7 +592,7 @@ export default function ContratoArriendoOnlinePage() {
                 </li>
               </ul>
 
-              <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-12">
+              <p className="text-xl text-foreground/80 max-w-3xl mx-auto mb-12">
                 Por eso creamos algo diferente. Un <strong>contrato de arriendo online</strong> que no solo es rápido, sino que te da la tranquilidad de saber que estás protegido. Sin salir de tu casa. Sin perder tiempo. <strong>Sin estrés.</strong>
               </p>
             </div>
@@ -601,7 +601,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-8 shadow-lg border-2 border-green-200">
                 <div className="text-5xl mb-4">😌</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Duerme Tranquilo</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-foreground/80 leading-relaxed">
                   Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
                 </p>
               </div>
@@ -609,7 +609,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-lg border-2 border-blue-200">
                 <div className="text-5xl mb-4">⏰</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Ahorra Tiempo (Y Estrés)</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-foreground/80 leading-relaxed">
                   Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
                 </p>
               </div>
@@ -617,7 +617,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-lg border-2 border-purple-200">
                 <div className="text-5xl mb-4">🛡️</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Estás Protegido</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-foreground/80 leading-relaxed">
                   No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
                 </p>
               </div>
@@ -625,7 +625,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-8 shadow-lg border-2 border-orange-200">
                 <div className="text-5xl mb-4">🤝</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Para Todos</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-foreground/80 leading-relaxed">
                   Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
                 </p>
               </div>
@@ -641,19 +641,19 @@ export default function ContratoArriendoOnlinePage() {
                 ¿Qué Es Un Contrato de Arriendo Online y Por Qué Lo Necesitas?
               </h2>
               
-              <p className="text-xl text-gray-700 leading-relaxed mb-6">
+              <p className="text-xl text-foreground/80 leading-relaxed mb-6">
                 Ok, vamos a lo simple: un <strong>contrato de arriendo</strong> es ese papel (bueno, ahora documento digital) donde tú y la otra persona acuerdan las "reglas del juego" cuando alguien va a vivir en una casa que no es suya.
               </p>
               
-              <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              <p className="text-xl text-foreground/80 leading-relaxed mb-8">
                 Piénsalo como las reglas de un juego de mesa: todos necesitan saber cuánto se paga, cuándo se paga, qué pasa si se rompe algo, cuánto tiempo dura el acuerdo, etc. Sin reglas claras, empiezan los problemas.
               </p>
 
               <h3 className="text-2xl font-bold text-gray-900 mb-4">¿Y el "online" qué significa?</h3>
-              <p className="text-lg text-gray-700 leading-relaxed mb-4">
+              <p className="text-lg text-foreground/80 leading-relaxed mb-4">
                 Simple: que no tienes que moverte de tu casa. Todo el proceso lo haces por internet:
               </p>
-              <ul className="list-disc pl-6 space-y-2 text-lg text-gray-700 mb-8">
+              <ul className="list-disc pl-6 space-y-2 text-lg text-foreground/80 mb-8">
                 <li>Llenas los datos desde tu computador o celular</li>
                 <li>Las firmas se hacen digitalmente (sí, son 100% válidas)</li>
                 <li>Un notario lo revisa y le pone su sello</li>
@@ -671,14 +671,14 @@ export default function ContratoArriendoOnlinePage() {
               </div>
 
               <h3 className="text-2xl font-bold text-gray-900 mb-4">¿Por qué es mejor que ir a la notaría?</h3>
-              <p className="text-lg text-gray-700 leading-relaxed mb-6">
+              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                 No vamos a decirte que ir a la notaría es "malo". Pero seamos honestos:
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
                   <h4 className="text-xl font-bold text-red-900 mb-4">❌ Ir a Notaría (la forma tradicional)</h4>
-                  <ul className="space-y-2 text-gray-700">
+                  <ul className="space-y-2 text-foreground/80">
                     <li>• Tienes que coordinar horarios de TODAS las personas</li>
                     <li>• Perder medio día (o día completo) para el trámite</li>
                     <li>• Hacer fila y esperar tu turno</li>
@@ -690,7 +690,7 @@ export default function ContratoArriendoOnlinePage() {
 
                 <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
                   <h4 className="text-xl font-bold text-green-900 mb-4">✅ Contrato Online (la forma inteligente)</h4>
-                  <ul className="space-y-2 text-gray-700">
+                  <ul className="space-y-2 text-foreground/80">
                     <li>• Cada uno firma cuando puede, desde donde esté</li>
                     <li>• Todo en 15-20 minutos (en serio)</li>
                     <li>• Sin filas, sin esperas</li>
@@ -708,7 +708,7 @@ export default function ContratoArriendoOnlinePage() {
         <ComparisonTableSection {...comparisonProps} />
 
         {/* SECCIÓN 5: PROCESO (CUSTOM - 6 PASOS) */}
-        <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
+        <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -717,7 +717,7 @@ export default function ContratoArriendoOnlinePage() {
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 No te vamos a complicar la vida. Este es el proceso, paso a paso, en lenguaje humano:
               </p>
-              <div className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white rounded-full shadow-md border border-gray-200">
+              <div className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white rounded-full shadow-md border border-border">
                 <Timer className="w-5 h-5 text-[var(--tp-brand)]" />
                 <span className="font-bold text-gray-900">Tiempo total: 15 minutos a 24 horas</span>
               </div>
@@ -725,7 +725,7 @@ export default function ContratoArriendoOnlinePage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Paso 1 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     1
@@ -733,7 +733,7 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Llenas los Datos (5 minutos)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Te preguntamos lo básico: dirección de la propiedad, cuánto es la renta, quién arrienda, quién es el dueño, etc. Como cuando llenas un formulario cualquiera. <strong>Sin letra chica, sin trampa.</strong>
                   </p>
                   <p className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
@@ -743,7 +743,7 @@ export default function ContratoArriendoOnlinePage() {
               </div>
 
               {/* Paso 2 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     2
@@ -751,7 +751,7 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Revisas Que Todo Esté Bien (3 minutos)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Antes de seguir, te mostramos el contrato completo. Lo puedes leer con calma. <strong>Si algo no te gusta o ves un error, lo cambias ahí mismo.</strong> Nadie te apura.
                   </p>
                   <p className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
@@ -761,7 +761,7 @@ export default function ContratoArriendoOnlinePage() {
               </div>
 
               {/* Paso 3 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     3
@@ -769,14 +769,14 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Pagas (1 minuto)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Con tarjeta de crédito o débito. Nada del otro mundo. Y tranquilo: <strong>si algo sale mal después, te devolvemos tu dinero</strong>. Así de simple.
                   </p>
                 </div>
               </div>
 
               {/* Paso 4 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     4
@@ -784,7 +784,7 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Todos Firman Digitalmente (5-10 min)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Le llega un correo a cada persona que tiene que firmar. Entran desde su celular (o computador), dibujan su firma con el dedo, y listo. <strong>Cada uno firma cuando puede, no tienen que estar juntos.</strong>
                   </p>
                   <p className="text-sm text-green-700 bg-green-50 p-3 rounded-lg">
@@ -794,7 +794,7 @@ export default function ContratoArriendoOnlinePage() {
               </div>
 
               {/* Paso 5 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     5
@@ -802,14 +802,14 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">El Notario Lo Certifica (24 horas)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Un notario real (sí, de verdad) revisa tu contrato y le pone su sello digital. Esto pasa automáticamente. Tú no tienes que hacer nada más.
                   </p>
                 </div>
               </div>
 
               {/* Paso 6 */}
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 relative">
+              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     6
@@ -817,7 +817,7 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
                 <div className="mt-8">
                   <h3 className="text-xl font-bold text-gray-900 mb-3">Lo Recibes en Tu Email (¡Listo!)</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     Te llega el PDF con tu <strong>contrato de arriendo online</strong> firmado y notariado. Lo puedes imprimir, guardar, mandar por WhatsApp. Lo que necesites.
                   </p>
                   <p className="text-sm text-purple-700 bg-purple-50 p-3 rounded-lg">
@@ -837,7 +837,7 @@ export default function ContratoArriendoOnlinePage() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </a>
-              <p className="text-sm text-gray-500 mt-3">✓ Si algo falla, te devolvemos tu dinero | ✓ Soporte por WhatsApp</p>
+              <p className="text-sm text-muted-foreground/80 mt-3">✓ Si algo falla, te devolvemos tu dinero | ✓ Soporte por WhatsApp</p>
             </div>
           </div>
         </section>
@@ -855,74 +855,74 @@ export default function ContratoArriendoOnlinePage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Contrato Personalizado</h3>
-                    <p className="text-gray-600">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
+                    <p className="text-muted-foreground">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Certificación Notarial</h3>
-                    <p className="text-gray-600">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
+                    <p className="text-muted-foreground">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Firmas Electrónicas Ilimitadas</h3>
-                    <p className="text-gray-600">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
+                    <p className="text-muted-foreground">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Modificaciones Antes de Firmar</h3>
-                    <p className="text-gray-600">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
+                    <p className="text-muted-foreground">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Soporte por WhatsApp</h3>
-                    <p className="text-gray-600">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
+                    <p className="text-muted-foreground">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-gray-200">
+              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Entrega en 24 Horas</h3>
-                    <p className="text-gray-600">Desde que la última persona firma hasta que lo recibes certificado.</p>
+                    <p className="text-muted-foreground">Desde que la última persona firma hasta que lo recibes certificado.</p>
                   </div>
                 </div>
               </div>
@@ -930,10 +930,10 @@ export default function ContratoArriendoOnlinePage() {
 
             <div className="bg-gradient-to-r from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-8 border-2 border-[var(--tp-brand-20)] max-w-3xl mx-auto">
               <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Precio Variable Según Tus Necesidades</h3>
-              <p className="text-gray-700 leading-relaxed text-center mb-4">
+              <p className="text-foreground/80 leading-relaxed text-center mb-4">
                 El precio varía según el tipo de firma electrónica que elijas y si agregas servicios notariales adicionales (como copia legalizada, protocolización o FAN®).
               </p>
-              <p className="text-gray-700 leading-relaxed text-center">
+              <p className="text-foreground/80 leading-relaxed text-center">
                 <strong>Sin sorpresas, sin letra chica.</strong> Es menos de lo que gastarías en transporte y tiempo perdido yendo a la notaría. Y con esto, <strong>duermes tranquilo</strong>.
               </p>
             </div>

@@ -64,14 +64,14 @@ export default function FAQPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white py-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <HelpCircle className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-6" />
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Preguntas <span className="text-[var(--tp-brand)]">Frecuentes</span>
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-muted-foreground">
             Encuentra respuestas rápidas a tus dudas
           </p>
         </div>
@@ -79,7 +79,7 @@ export default function FAQPage() {
         <div className="space-y-12">
           {faqs.map((category, catIndex) => (
             <div key={catIndex}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{category.category}</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-6">{category.category}</h2>
               <div className="space-y-4">
                 {category.questions.map((faq, qIndex) => (
                   <Card key={qIndex} className="border hover:border-[var(--tp-brand)] transition-all">
@@ -87,7 +87,7 @@ export default function FAQPage() {
                       <CardTitle className="text-lg">{faq.q}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-600">{faq.a}</p>
+                      <p className="text-muted-foreground">{faq.a}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -99,10 +99,10 @@ export default function FAQPage() {
         <div className="mt-16 text-center">
           <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)]">
             <CardContent className="py-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-4">
                 ¿No encuentras lo que buscas?
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 Nuestro equipo está disponible para ayudarte
               </p>
             </CardContent>

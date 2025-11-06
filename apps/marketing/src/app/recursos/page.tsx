@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 
 export default function RecursosPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white py-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Recursos <span className="text-[var(--tp-brand)]">Gratuitos</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Herramientas, guías y plantillas para ayudarte a gestionar mejor tu negocio
           </p>
         </div>
@@ -85,10 +85,10 @@ export default function RecursosPage() {
           <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)]">
             <CardContent className="py-12">
               <Download className="w-12 h-12 text-[var(--tp-brand)] mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <h2 className="text-2xl font-bold text-foreground mb-4">
                 Todos nuestros recursos son gratuitos
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground mb-6">
                 No necesitas registrarte para acceder a la mayoría de recursos. 
                 Solo crea una cuenta si deseas guardar tus favoritos.
               </p>

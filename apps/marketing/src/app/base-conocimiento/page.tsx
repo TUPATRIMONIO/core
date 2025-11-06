@@ -56,7 +56,7 @@ export default async function BaseConocimientoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand-5)] to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -66,11 +66,11 @@ export default async function BaseConocimientoPage() {
               <span className="text-sm font-medium">Centro de Ayuda</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               Base de Conocimiento
             </h1>
             
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-muted-foreground mb-8">
               Encuentra respuestas a tus preguntas sobre firma electrónica, 
               verificación de identidad y servicios legales digitales.
             </p>
@@ -101,10 +101,10 @@ export default async function BaseConocimientoPage() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Explora por Categoría
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-muted-foreground">
               Navega por nuestras categorías para encontrar lo que necesitas
             </p>
           </div>
@@ -153,10 +153,10 @@ export default async function BaseConocimientoPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
               <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                   Artículos Populares
                 </h2>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-muted-foreground">
                   Los artículos más útiles de nuestra comunidad
                 </p>
               </div>
@@ -224,7 +224,7 @@ export default async function BaseConocimientoPage() {
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contacto">
-                <Button variant="outline" size="lg" className="bg-white text-[var(--tp-brand)] hover:bg-gray-100">
+                <Button variant="outline" size="lg" className="bg-card text-[var(--tp-brand)] hover:bg-gray-100">
                   Contactar Soporte
                 </Button>
               </Link>

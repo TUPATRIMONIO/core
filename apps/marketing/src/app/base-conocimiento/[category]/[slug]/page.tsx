@@ -36,7 +36,7 @@ export default async function KBArticlePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link href="/base-conocimiento">
             <Button variant="ghost" size="sm">
@@ -49,7 +49,7 @@ export default async function KBArticlePage({ params }: PageProps) {
 
       <section className="py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-xl shadow-sm p-8">
+          <div className="bg-card rounded-xl shadow-sm p-8">
             <div className="mb-8">
               <Link
                 href={`/base-conocimiento/categoria/${(article.kb_categories as any)?.slug || 'general'}`}
@@ -66,11 +66,11 @@ export default async function KBArticlePage({ params }: PageProps) {
                 </span>
               </Link>
               
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-foreground mb-4">
                 {article.title}
               </h1>
               
-              <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   {article.reading_time} min lectura
@@ -94,7 +94,7 @@ export default async function KBArticlePage({ params }: PageProps) {
             />
 
             <div className="mt-12 pt-8 border-t">
-              <p className="text-center text-gray-600 mb-4">
+              <p className="text-center text-muted-foreground mb-4">
                 ¿Te resultó útil este artículo?
               </p>
               <div className="flex gap-4 justify-center">

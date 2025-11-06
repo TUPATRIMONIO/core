@@ -67,7 +67,7 @@ export default function FinTechPage() {
 
       <div className="mt-16 text-center bg-[var(--tp-background-light)] rounded-2xl p-12">
         <Wallet className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+        <h3 className="text-2xl font-bold text-foreground mb-4">
           FinTech próximamente
         </h3>
         <p className="text-lg text-gray-600 mb-6">

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function ContactoPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,11 +30,11 @@ export default function ContactoPage() {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               Hablemos de tu{' '}
               <span className="text-[var(--tp-brand)]">Proyecto</span>
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-xl text-muted-foreground leading-relaxed">
               Nuestro equipo está listo para ayudarte con cualquier consulta sobre 
               nuestros servicios legales digitales.
             </p>
@@ -69,7 +69,7 @@ export default function ContactoPage() {
                       <Mail className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Email</p>
+                      <p className="font-medium text-foreground">Email</p>
                       <a 
                         href="mailto:contacto@tupatrimonio.app" 
                         className="text-sm text-[var(--tp-brand)] hover:underline"
@@ -84,8 +84,8 @@ export default function ContactoPage() {
                       <MessageCircle className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">WhatsApp</p>
-                      <p className="text-sm text-gray-600">+56 9 XXXX XXXX</p>
+                      <p className="font-medium text-foreground">WhatsApp</p>
+                      <p className="text-sm text-muted-foreground">+56 9 XXXX XXXX</p>
                     </div>
                   </div>
 
@@ -94,9 +94,9 @@ export default function ContactoPage() {
                       <Clock className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Horario</p>
-                      <p className="text-sm text-gray-600">Lun - Vie: 9:00 - 18:00</p>
-                      <p className="text-sm text-gray-600">Sáb: 10:00 - 14:00</p>
+                      <p className="font-medium text-foreground">Horario</p>
+                      <p className="text-sm text-muted-foreground">Lun - Vie: 9:00 - 18:00</p>
+                      <p className="text-sm text-muted-foreground">Sáb: 10:00 - 14:00</p>
                     </div>
                   </div>
                 </CardContent>
@@ -111,9 +111,9 @@ export default function ContactoPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-[var(--tp-brand)]" />
-                      <p className="font-medium text-gray-900">🇨🇱 Chile</p>
+                      <p className="font-medium text-foreground">🇨🇱 Chile</p>
                     </div>
-                    <p className="text-sm text-gray-600 ml-6">
+                    <p className="text-sm text-muted-foreground ml-6">
                       Santiago, Región Metropolitana
                     </p>
                   </div>
@@ -121,9 +121,9 @@ export default function ContactoPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4 text-[var(--tp-brand)]" />
-                      <p className="font-medium text-gray-900">🇺🇸 USA</p>
+                      <p className="font-medium text-foreground">🇺🇸 USA</p>
                     </div>
-                    <p className="text-sm text-gray-600 ml-6">
+                    <p className="text-sm text-muted-foreground ml-6">
                       Delaware (Operaciones)
                     </p>
                   </div>
@@ -157,10 +157,10 @@ export default function ContactoPage() {
       <section className="py-20 bg-[var(--tp-background-light)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Preguntas Frecuentes
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-muted-foreground">
               Respuestas rápidas a las consultas más comunes
             </p>
           </div>
@@ -185,7 +185,7 @@ export default function ContactoPage() {
                   <CardTitle className="text-lg">{faq.q}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">{faq.a}</p>
+                  <p className="text-muted-foreground">{faq.a}</p>
                 </CardContent>
               </Card>
             ))}

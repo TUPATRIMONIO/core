@@ -35,7 +35,7 @@ export default function FirmaElectronicaPage() {
     >
       {/* Tipos de Firma */}
       <section className="mb-20">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
           Tipos de Firma Disponibles
         </h2>
         <div className="grid md:grid-cols-2 gap-8">
@@ -109,7 +109,7 @@ export default function FirmaElectronicaPage() {
 
       {/* Características */}
       <section className="mb-20 bg-[var(--tp-background-light)] rounded-3xl p-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
+        <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
           Características Principales
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -134,8 +134,8 @@ export default function FirmaElectronicaPage() {
               <div className="w-16 h-16 bg-[var(--tp-brand)] rounded-2xl flex items-center justify-center mx-auto mb-4 text-white">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <h3 className="text-xl font-bold text-foreground mb-3">{feature.title}</h3>
+              <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -143,7 +143,7 @@ export default function FirmaElectronicaPage() {
 
       {/* Cumplimiento Legal */}
       <section className="mb-20">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
           Cumplimiento Normativo por País
         </h2>
         <div className="grid md:grid-cols-5 gap-6">
@@ -169,7 +169,7 @@ export default function FirmaElectronicaPage() {
 
       {/* Casos de uso */}
       <section>
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
           ¿Para qué puedes usar la Firma Electrónica?
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

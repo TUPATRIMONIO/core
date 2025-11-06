@@ -35,7 +35,7 @@ export default function ChilePage() {
               <span className="font-medium text-gray-700">Estás viendo TuPatrimonio para</span>
               <span className="font-bold text-[var(--tp-brand)]">Chile 🇨🇱</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>¿Otro país?</span>
               <Link href="/co" className="text-[var(--tp-buttons)] hover:underline">Colombia</Link>
               <span>•</span>
@@ -49,11 +49,11 @@ export default function ChilePage() {
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               Servicios Legales Digitales
               <span className="text-[var(--tp-brand)]"> para Chile</span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto">
               Firma electrónica con validez legal según <strong>Ley 19.799</strong>, verificación de identidad KYC y 
               notaría digital. Todo cumpliendo la normativa chilena.
             </p>
@@ -72,7 +72,7 @@ export default function ChilePage() {
             </div>
             
             {/* Chile-specific trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-gray-600">
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600" />
                 <span>Cumple Ley 19.799</span>
@@ -94,22 +94,22 @@ export default function ChilePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Servicios Específicos para Chile
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Diseñados para cumplir la legislación y necesidades del mercado chileno
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Firma Electrónica Chile */}
-            <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Firma Electrónica</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-3">Firma Electrónica</h3>
+              <p className="text-muted-foreground mb-4">
                 Cumple <strong>Ley 19.799</strong>. Válida en tribunales chilenos. 
                 Integración con SII y registro civil.
               </p>
@@ -124,12 +124,12 @@ export default function ChilePage() {
             </div>
 
             {/* Verificación KYC Chile */}
-            <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">KYC & Verificación</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-3">KYC & Verificación</h3>
+              <p className="text-muted-foreground mb-4">
                 Verificación biométrica con <strong>cédulas chilenas</strong>. 
                 Cumple regulaciones CMF y SBIF.
               </p>
@@ -144,12 +144,12 @@ export default function ChilePage() {
             </div>
 
             {/* Notaría Digital Chile */}
-            <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Briefcase className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Notaría Digital</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-3">Notaría Digital</h3>
+              <p className="text-muted-foreground mb-4">
                 Notarización online válida según <strong>código civil chileno</strong>. 
                 Reconocida por tribunales.
               </p>
@@ -170,43 +170,43 @@ export default function ChilePage() {
       <section className="py-20 bg-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Diseñado Específicamente para Chile
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Entendemos el mercado chileno y sus regulaciones únicas
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 📋
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Legislación Local</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-foreground mb-3">Legislación Local</h3>
+              <p className="text-muted-foreground">
                 Cumple Ley 19.799, regulaciones CMF, SBIF y código civil chileno. 
                 Actualizado con últimas normativas.
               </p>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
               <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 🏛️
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Integración SII</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-foreground mb-3">Integración SII</h3>
+              <p className="text-muted-foreground">
                 Conectividad directa con Servicio de Impuestos Internos 
                 para validación de RUT y datos empresariales.
               </p>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
               <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 ⚖️
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Validez Tribunales</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-bold text-foreground mb-3">Validez Tribunales</h3>
+              <p className="text-muted-foreground">
                 Documentos aceptados en tribunales chilenos. 
                 Casos de éxito en Corte Suprema y tribunales civiles.
               </p>
@@ -218,7 +218,7 @@ export default function ChilePage() {
       {/* Chile Social Proof */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-foreground mb-12">
             Empresas Chilenas que Confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
           
@@ -227,7 +227,7 @@ export default function ChilePage() {
             {["BancoChile", "StartupCL", "InmobiliariaRM", "FinTechSantiago"].map((company) => (
               <div key={company} className="text-center">
                 <div className="h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-600 font-medium">{company}</span>
+                  <span className="text-muted-foreground font-medium">{company}</span>
                 </div>
               </div>
             ))}
@@ -237,15 +237,15 @@ export default function ChilePage() {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+500</div>
-                <p className="text-gray-600">Empresas chilenas</p>
+                <p className="text-muted-foreground">Empresas chilenas</p>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+15,000</div>
-                <p className="text-gray-600">Documentos firmados</p>
+                <p className="text-muted-foreground">Documentos firmados</p>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">99.8%</div>
-                <p className="text-gray-600">Uptime garantizado</p>
+                <p className="text-muted-foreground">Uptime garantizado</p>
               </div>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function ChilePage() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="bg-white text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
+              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
             >
               Comenzar Gratis en Chile
             </Button>

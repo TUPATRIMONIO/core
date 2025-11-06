@@ -39,7 +39,7 @@ export default function FirmasElectronicasLanding() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-4 animate-spin" />
-          <p className="text-gray-600">Detectando tu ubicación...</p>
+          <p className="text-muted-foreground">Detectando tu ubicación...</p>
         </div>
       </div>
     );
@@ -48,14 +48,14 @@ export default function FirmasElectronicasLanding() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full mx-4">
-        <div className="bg-white rounded-2xl shadow-lg border p-8 text-center">
+        <div className="bg-card rounded-2xl shadow-lg border p-8 text-center">
           <FileSignature className="w-16 h-16 text-[var(--tp-buttons)] mx-auto mb-6" />
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Firma Electrónica
           </h1>
           
-          <p className="text-gray-600 mb-8">
+          <p className="text-muted-foreground mb-8">
             Firma documentos legales de forma digital con validez jurídica completa en cada país.
           </p>
 

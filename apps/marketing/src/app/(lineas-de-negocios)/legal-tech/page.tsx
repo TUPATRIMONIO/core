@@ -82,7 +82,7 @@ export default function LegalTechPage() {
 
       {/* Beneficios del vertical */}
       <section className="mb-20">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
           ¿Por qué elegir nuestras soluciones Legal Tech?
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -106,7 +106,7 @@ export default function LegalTechPage() {
           ].map((benefit, index) => (
             <div 
               key={index}
-              className="bg-white p-6 rounded-xl border-2 border-[var(--tp-brand-20)] hover:border-[var(--tp-brand)] transition-all"
+              className="bg-card p-6 rounded-xl border-2 border-[var(--tp-brand-20)] hover:border-[var(--tp-brand)] transition-all"
             >
               <h3 className="text-xl font-bold text-[var(--tp-brand)] mb-3">
                 {benefit.title}

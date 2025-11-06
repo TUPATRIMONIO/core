@@ -190,7 +190,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <StructuredData data={articleSchema} />
       <StructuredData data={breadcrumbSchema} />
       {/* Back Navigation */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link href="/blog">
             <Button variant="ghost" size="sm">
@@ -216,12 +216,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </Link>
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
               {post.title}
             </h1>
             
             {post.excerpt && (
-              <p className="text-xl text-gray-600 mb-6">
+              <p className="text-xl text-muted-foreground mb-6">
                 {post.excerpt}
               </p>
             )}
@@ -266,16 +266,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           )}
 
           {/* Content */}
-          <div className="bg-white rounded-xl p-8 shadow-sm border">
+          <div className="bg-card rounded-xl p-8 shadow-sm border">
             <MarkdownContent content={post.content} />
           </div>
 
           {/* Bottom CTA */}
           <div className="mt-12 bg-[var(--tp-buttons)]/5 rounded-xl p-8 text-center border">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               ¿Listo para digitalizar tus procesos?
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Únete a más de 500 empresas que ya transformaron su gestión documental
             </p>
             <Button className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] px-8">

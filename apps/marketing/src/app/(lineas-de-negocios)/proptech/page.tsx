@@ -67,7 +67,7 @@ export default function PropTechPage() {
 
       <div className="mt-16 text-center bg-[var(--tp-background-light)] rounded-2xl p-12">
         <TrendingUp className="w-16 h-16 text-green-600 mx-auto mb-6" />
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">
+        <h3 className="text-2xl font-bold text-foreground mb-4">
           ¿Interesado en nuestras soluciones PropTech?
         </h3>
         <p className="text-lg text-gray-600 mb-6">

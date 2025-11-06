@@ -102,13 +102,13 @@ export default async function BlogPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Blog <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Guías, tutoriales y casos de éxito sobre digitalización de procesos legales
             </p>
           </div>
@@ -116,7 +116,7 @@ export default async function BlogPage() {
       </section>
 
       {/* Categories */}
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/blog">
@@ -143,7 +143,7 @@ export default async function BlogPage() {
               {/* Featured Post */}
               {posts[0] && (
                 <div className="mb-12">
-                  <div className="bg-white rounded-2xl shadow-sm overflow-hidden border">
+                  <div className="bg-card rounded-2xl shadow-sm overflow-hidden border">
                     <div className="md:flex">
                       <div className="md:w-1/3">
                         {posts[0].featured_image_url ? (
@@ -171,10 +171,10 @@ export default async function BlogPage() {
                             </span>
                           </div>
                         )}
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                        <h2 className="text-3xl font-bold text-foreground mb-4">
                           {posts[0].title}
                         </h2>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-muted-foreground mb-6">
                           {posts[0].excerpt}
                         </p>
                         <div className="flex items-center gap-6 text-sm text-gray-500 mb-6">
@@ -205,7 +205,7 @@ export default async function BlogPage() {
               {/* Other Posts */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.slice(1).map((post) => (
-                  <article key={post.id} className="bg-white rounded-xl shadow-sm overflow-hidden border hover:shadow-md transition-shadow">
+                  <article key={post.id} className="bg-card rounded-xl shadow-sm overflow-hidden border hover:shadow-md transition-shadow">
                     {post.featured_image_url ? (
                       <Image 
                         src={post.featured_image_url} 
@@ -230,10 +230,10 @@ export default async function BlogPage() {
                           </span>
                         </div>
                       )}
-                      <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                      <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
                         {post.title}
                       </h3>
-                      <p className="text-gray-600 mb-4 line-clamp-3">
+                      <p className="text-muted-foreground mb-4 line-clamp-3">
                         {post.excerpt}
                       </p>
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
@@ -255,10 +255,10 @@ export default async function BlogPage() {
             </>
           ) : (
             <div className="text-center py-20">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-4">
                 Próximamente: Contenido Increíble
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-muted-foreground mb-8">
                 Estamos preparando artículos exclusivos sobre digitalización legal
               </p>
               <Link href="/">

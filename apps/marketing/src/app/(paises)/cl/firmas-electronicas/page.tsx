@@ -35,7 +35,7 @@ export default function FirmasElectronicasChilePage() {
   return (
     <div className="min-h-screen">
       {/* Header con selector de país */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      <header className="bg-card border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-[var(--tp-brand)]">TuPatrimonio Chile</h1>
@@ -48,15 +48,15 @@ export default function FirmasElectronicasChilePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
+      <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-background py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
                 <span className="text-[var(--tp-brand)]">Firma Electrónica</span><br />
                 Válida Legalmente en Chile
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl text-muted-foreground mb-8">
                 Reduce el tiempo de firma de documentos en un <strong>90%</strong>. 
                 Cumple con la Ley 19.799 y tiene plena validez legal en Chile.
               </p>
@@ -73,7 +73,7 @@ export default function FirmasElectronicasChilePage() {
                 </Button>
               </div>
               
-              <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600" />
                   <span>Sin tarjeta de crédito</span>
@@ -92,7 +92,7 @@ export default function FirmasElectronicasChilePage() {
             <div className="relative">
               <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-8 text-center">
                 <Download className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
-                <p className="text-gray-600">Video demostración</p>
+                <p className="text-muted-foreground">Video demostración</p>
                 <p className="text-sm text-gray-500">Cómo firmar en 3 pasos simples</p>
               </div>
             </div>
@@ -104,23 +104,23 @@ export default function FirmasElectronicasChilePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Tipos de Firma Electrónica
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Ofrecemos diferentes niveles de seguridad según tus necesidades y requisitos legales
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Firma Simple */}
-            <div className="border border-gray-200 rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="border border-border rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Firma Simple</h3>
-                <p className="text-gray-600 mt-2">Para documentos internos</p>
+                <h3 className="text-xl font-bold text-foreground">Firma Simple</h3>
+                <p className="text-muted-foreground mt-2">Para documentos internos</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -137,8 +137,8 @@ export default function FirmasElectronicasChilePage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$500 CLP</p>
-                <p className="text-sm text-gray-600">por documento</p>
+                <p className="text-2xl font-bold text-foreground">$500 CLP</p>
+                <p className="text-sm text-muted-foreground">por documento</p>
               </div>
             </div>
 
@@ -153,8 +153,8 @@ export default function FirmasElectronicasChilePage() {
                 <div className="w-12 h-12 bg-[var(--tp-buttons)]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-[var(--tp-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Firma Avanzada</h3>
-                <p className="text-gray-600 mt-2">Para documentos comerciales</p>
+                <h3 className="text-xl font-bold text-foreground">Firma Avanzada</h3>
+                <p className="text-muted-foreground mt-2">Para documentos comerciales</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -171,19 +171,19 @@ export default function FirmasElectronicasChilePage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$2.500 CLP</p>
-                <p className="text-sm text-gray-600">por documento</p>
+                <p className="text-2xl font-bold text-foreground">$2.500 CLP</p>
+                <p className="text-sm text-muted-foreground">por documento</p>
               </div>
             </div>
 
             {/* Firma Cualificada */}
-            <div className="border border-gray-200 rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="border border-border rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Star className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Firma Cualificada</h3>
-                <p className="text-gray-600 mt-2">Máximo nivel de seguridad</p>
+                <h3 className="text-xl font-bold text-foreground">Firma Cualificada</h3>
+                <p className="text-muted-foreground mt-2">Máximo nivel de seguridad</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -200,8 +200,8 @@ export default function FirmasElectronicasChilePage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$8.500 CLP</p>
-                <p className="text-sm text-gray-600">por documento</p>
+                <p className="text-2xl font-bold text-foreground">$8.500 CLP</p>
+                <p className="text-sm text-muted-foreground">por documento</p>
               </div>
             </div>
           </div>
@@ -212,39 +212,39 @@ export default function FirmasElectronicasChilePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Marco Legal en Chile
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Cumplimos con toda la legislación chilena vigente
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="bg-card p-8 rounded-xl shadow-sm">
+              <h3 className="text-xl font-bold text-foreground mb-4">
                 Ley 19.799 - Firma Electrónica
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-muted-foreground mb-4">
                 Establece el marco legal para el uso de firmas electrónicas en Chile, 
                 garantizando su validez jurídica equivalente a la firma manuscrita.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Validez legal equivalente a firma manuscrita</li>
                 <li>• Requisitos técnicos de seguridad</li>
                 <li>• Certificación por entidades autorizadas</li>
               </ul>
             </div>
             
-            <div className="bg-white p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="bg-card p-8 rounded-xl shadow-sm">
+              <h3 className="text-xl font-bold text-foreground mb-4">
                 Decreto 181/2002 - Reglamento
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-muted-foreground mb-4">
                 Reglamenta los aspectos técnicos y operativos de las firmas electrónicas, 
                 definiendo los estándares de seguridad requeridos.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600">
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Estándares técnicos de implementación</li>
                 <li>• Procedimientos de certificación</li>
                 <li>• Requisitos para entidades certificadoras</li>
@@ -267,7 +267,7 @@ export default function FirmasElectronicasChilePage() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="bg-white text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
+              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
             >
               Probar Gratis 30 Días
             </Button>

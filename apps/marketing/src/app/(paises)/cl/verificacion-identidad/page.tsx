@@ -34,15 +34,15 @@ export default function VerificacionIdentidadPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 to-white py-20">
+      <section className="bg-gradient-to-br from-blue-50 to-background py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
                 <span className="text-[var(--tp-brand)]">Verificación de Identidad</span><br />
                 Digital en 3 Minutos
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl text-muted-foreground mb-8">
                 Verifica usuarios con <strong>biometría avanzada</strong> y documentos oficiales. 
                 Cumple regulaciones chilenas y reduce fraude en un <strong>95%</strong>.
               </p>
@@ -59,7 +59,7 @@ export default function VerificacionIdentidadPage() {
                 </Button>
               </div>
               
-              <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600" />
                   <span>3 min promedio</span>
@@ -80,7 +80,7 @@ export default function VerificacionIdentidadPage() {
               <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl p-8 text-center">
                 <Fingerprint className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
                 <p className="text-gray-700 font-medium">Verificación Biométrica</p>
-                <p className="text-sm text-gray-600">Selfie + Documento en vivo</p>
+                <p className="text-sm text-muted-foreground">Selfie + Documento en vivo</p>
               </div>
             </div>
           </div>
@@ -91,23 +91,23 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Tipos de Verificación Disponibles
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Desde verificación básica hasta KYC completo para instituciones financieras
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Verificación Básica */}
-            <div className="border border-gray-200 rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="border border-border rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Eye className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Verificación Básica</h3>
-                <p className="text-gray-600 mt-2">Para registro de usuarios</p>
+                <h3 className="text-xl font-bold text-foreground">Verificación Básica</h3>
+                <p className="text-muted-foreground mt-2">Para registro de usuarios</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -124,8 +124,8 @@ export default function VerificacionIdentidadPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$2.50</p>
-                <p className="text-sm text-gray-600">por verificación</p>
+                <p className="text-2xl font-bold text-foreground">$2.50</p>
+                <p className="text-sm text-muted-foreground">por verificación</p>
               </div>
             </div>
 
@@ -140,8 +140,8 @@ export default function VerificacionIdentidadPage() {
                 <div className="w-12 h-12 bg-[var(--tp-buttons)]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-[var(--tp-buttons)]" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">KYC Completo</h3>
-                <p className="text-gray-600 mt-2">Para fintechs y bancos</p>
+                <h3 className="text-xl font-bold text-foreground">KYC Completo</h3>
+                <p className="text-muted-foreground mt-2">Para fintechs y bancos</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -158,19 +158,19 @@ export default function VerificacionIdentidadPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">$8.50</p>
-                <p className="text-sm text-gray-600">por verificación</p>
+                <p className="text-2xl font-bold text-foreground">$8.50</p>
+                <p className="text-sm text-muted-foreground">por verificación</p>
               </div>
             </div>
 
             {/* Verificación Enterprise */}
-            <div className="border border-gray-200 rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
+            <div className="border border-border rounded-xl p-6 hover:border-[var(--tp-buttons)] transition-colors">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Fingerprint className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Enterprise</h3>
-                <p className="text-gray-600 mt-2">Volumen y personalización</p>
+                <h3 className="text-xl font-bold text-foreground">Enterprise</h3>
+                <p className="text-muted-foreground mt-2">Volumen y personalización</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -187,8 +187,8 @@ export default function VerificacionIdentidadPage() {
                 </li>
               </ul>
               <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900">Custom</p>
-                <p className="text-sm text-gray-600">según volumen</p>
+                <p className="text-2xl font-bold text-foreground">Custom</p>
+                <p className="text-sm text-muted-foreground">según volumen</p>
               </div>
             </div>
           </div>
@@ -199,10 +199,10 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               ¿Cómo Funciona la Verificación?
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Proceso simple y seguro en 3 pasos
             </p>
           </div>
@@ -212,8 +212,8 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">1</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Captura de Documento</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-foreground mb-3">Captura de Documento</h3>
+              <p className="text-muted-foreground">
                 El usuario toma foto de su cédula o pasaporte. 
                 Nuestro sistema extrae y valida todos los datos automáticamente.
               </p>
@@ -223,8 +223,8 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">2</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Selfie Biométrica</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-foreground mb-3">Selfie Biométrica</h3>
+              <p className="text-muted-foreground">
                 Verificación facial con liveness detection para confirmar que es una persona real, 
                 no una foto o video.
               </p>
@@ -234,8 +234,8 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">3</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Resultado Instantáneo</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-foreground mb-3">Resultado Instantáneo</h3>
+              <p className="text-muted-foreground">
                 Análisis con IA en tiempo real. Resultado aprobado/rechazado 
                 con score de confianza y reporte detallado.
               </p>
@@ -248,10 +248,10 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Casos de Uso por Industria
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Soluciones específicas para cada sector
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function VerificacionIdentidadPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Fintechs */}
             <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">💳 Fintechs y Bancos</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-4">💳 Fintechs y Bancos</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -282,7 +282,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* E-commerce */}
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">🛒 E-commerce y Marketplaces</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-4">🛒 E-commerce y Marketplaces</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -305,7 +305,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* Inmobiliarias */}
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">🏠 Inmobiliarias</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-4">🏠 Inmobiliarias</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -328,7 +328,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* SaaS y Apps */}
             <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">💻 SaaS y Apps</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-4">💻 SaaS y Apps</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -356,13 +356,13 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Casos de Éxito Reales
             </h2>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-card p-6 rounded-xl shadow-sm">
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
@@ -377,13 +377,13 @@ export default function VerificacionIdentidadPage() {
                   C
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">Carlos Mendoza</div>
-                  <div className="text-sm text-gray-600">Socio, Consultora Legal</div>
+                  <div className="font-medium text-foreground">Carlos Mendoza</div>
+                  <div className="text-sm text-muted-foreground">Socio, Consultora Legal</div>
                 </div>
               </div>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="bg-card p-6 rounded-xl shadow-sm">
               <div className="flex items-center gap-1 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
@@ -398,8 +398,8 @@ export default function VerificacionIdentidadPage() {
                   L
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">Laura Sánchez</div>
-                  <div className="text-sm text-gray-600">CTO, FinTech Pro</div>
+                  <div className="font-medium text-foreground">Laura Sánchez</div>
+                  <div className="text-sm text-muted-foreground">CTO, FinTech Pro</div>
                 </div>
               </div>
             </div>
@@ -411,17 +411,17 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Preguntas Frecuentes
             </h2>
           </div>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Qué documentos puedo verificar?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Verificamos cédulas de identidad chilenas, pasaportes, licencias de conducir y 
                 otros documentos oficiales. Nuestro sistema está entrenado específicamente 
                 para documentos de América Latina.
@@ -429,10 +429,10 @@ export default function VerificacionIdentidadPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Qué tan segura es la verificación biométrica?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Utilizamos algoritmos de machine learning de última generación con liveness detection 
                 para prevenir suplantación. La precisión es del 99.2% y cumple con estándares 
                 internacionales ISO 30107-3.
@@ -440,10 +440,10 @@ export default function VerificacionIdentidadPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Cumplen con las regulaciones chilenas?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Sí, cumplimos completamente con la Ley 19.628 de Protección de Datos, 
                 regulaciones de la CMF para instituciones financieras, y estándares 
                 internacionales de privacidad y seguridad.
@@ -466,7 +466,7 @@ export default function VerificacionIdentidadPage() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="bg-white text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
+              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
             >
               Comenzar Verificaciones Gratis
             </Button>

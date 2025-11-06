@@ -35,13 +35,13 @@ export default function CasosExitoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white py-20">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Casos de <span className="text-[var(--tp-brand)]">Éxito</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Conoce cómo empresas como la tuya transformaron sus procesos legales
           </p>
         </div>
@@ -67,14 +67,14 @@ export default function CasosExitoPage() {
                       <Quote className="w-5 h-5 text-[var(--tp-brand)]" />
                       El Desafío
                     </h3>
-                    <p className="text-gray-600">{item.challenge}</p>
+                    <p className="text-muted-foreground">{item.challenge}</p>
                   </div>
                   <div>
                     <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-[var(--tp-success)]" />
                       La Solución
                     </h3>
-                    <p className="text-gray-600">{item.solution}</p>
+                    <p className="text-muted-foreground">{item.solution}</p>
                   </div>
                 </div>
 
@@ -86,7 +86,7 @@ export default function CasosExitoPage() {
                   <div className="grid md:grid-cols-3 gap-4">
                     {item.results.map((result, i) => (
                       <div key={i} className="bg-[var(--tp-brand-5)] rounded-lg p-4 text-center">
-                        <p className="font-medium text-gray-900">{result}</p>
+                        <p className="font-medium text-foreground">{result}</p>
                       </div>
                     ))}
                   </div>
@@ -96,8 +96,8 @@ export default function CasosExitoPage() {
                   <Quote className="w-8 h-8 text-[var(--tp-brand)] mb-4" />
                   <p className="text-lg text-gray-700 italic mb-4">"{item.testimonial}"</p>
                   <div>
-                    <p className="font-bold text-gray-900">{item.author}</p>
-                    <p className="text-sm text-gray-600">{item.role}, {item.company}</p>
+                    <p className="font-bold text-foreground">{item.author}</p>
+                    <p className="text-sm text-muted-foreground">{item.role}, {item.company}</p>
                   </div>
                 </div>
               </CardContent>

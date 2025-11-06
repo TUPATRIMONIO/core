@@ -34,12 +34,12 @@ export default function PreciosPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Planes que se Adaptan a Ti
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
             Desde freelancers hasta grandes empresas. 
             Empieza gratis y escala según tus necesidades.
           </p>
@@ -51,12 +51,12 @@ export default function PreciosPage() {
                 <button className="px-6 py-2 rounded-md bg-[var(--tp-buttons)] text-white font-medium text-sm">
                   Individual
                 </button>
-                <button className="px-6 py-2 rounded-md text-gray-600 hover:text-gray-900 font-medium text-sm">
+                <button className="px-6 py-2 rounded-md text-muted-foreground hover:text-foreground font-medium text-sm">
                   Empresarial
                 </button>
               </div>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               💰 <span className="font-medium text-green-600">Ahorra 20%</span> pagando anualmente
             </div>
           </div>
@@ -69,13 +69,13 @@ export default function PreciosPage() {
           <div className="grid md:grid-cols-3 gap-8">
             
             {/* Personal Free */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+            <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Personal Free</h3>
-                <p className="text-gray-600">Para uso personal ocasional</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Personal Free</h3>
+                <p className="text-muted-foreground">Para uso personal ocasional</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">$0</span>
-                  <span className="text-gray-600">/mes</span>
+                  <span className="text-4xl font-bold text-foreground">$0</span>
+                  <span className="text-muted-foreground">/mes</span>
                 </div>
               </div>
               
@@ -108,7 +108,7 @@ export default function PreciosPage() {
             </div>
 
             {/* Personal Pro */}
-            <div className="bg-white rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
+            <div className="bg-card rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-[var(--tp-buttons)] text-white px-4 py-1 rounded-full text-sm font-medium">
                   Más Popular
@@ -116,11 +116,11 @@ export default function PreciosPage() {
               </div>
               
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Personal Pro</h3>
-                <p className="text-gray-600">Para freelancers y profesionales</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Personal Pro</h3>
+                <p className="text-muted-foreground">Para freelancers y profesionales</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">$9</span>
-                  <span className="text-gray-600">/mes</span>
+                  <span className="text-4xl font-bold text-foreground">$9</span>
+                  <span className="text-muted-foreground">/mes</span>
                 </div>
               </div>
               
@@ -153,16 +153,16 @@ export default function PreciosPage() {
             </div>
 
             {/* Personal Business */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+            <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Crown className="w-5 h-5 text-yellow-500" />
-                  <h3 className="text-2xl font-bold text-gray-900">Personal Business</h3>
+                  <h3 className="text-2xl font-bold text-foreground">Personal Business</h3>
                 </div>
-                <p className="text-gray-600">Para profesionales intensivos</p>
+                <p className="text-muted-foreground">Para profesionales intensivos</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">$29</span>
-                  <span className="text-gray-600">/mes</span>
+                  <span className="text-4xl font-bold text-foreground">$29</span>
+                  <span className="text-muted-foreground">/mes</span>
                 </div>
               </div>
               
@@ -200,10 +200,10 @@ export default function PreciosPage() {
       {/* Separador para Planes Empresariales */}
       <section className="py-12 bg-[var(--tp-buttons)]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-foreground mb-4">
             Planes Empresariales
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-muted-foreground">
             Para equipos y organizaciones que necesitan colaboración y gestión avanzada
           </p>
         </div>
@@ -215,14 +215,14 @@ export default function PreciosPage() {
           <div className="grid md:grid-cols-3 gap-8">
             
             {/* Team Starter */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+            <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
                 <Users className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Team Starter</h3>
-                <p className="text-gray-600">Para equipos pequeños</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Team Starter</h3>
+                <p className="text-muted-foreground">Para equipos pequeños</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">$49</span>
-                  <span className="text-gray-600">/mes</span>
+                  <span className="text-4xl font-bold text-foreground">$49</span>
+                  <span className="text-muted-foreground">/mes</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">hasta 5 usuarios</p>
               </div>
@@ -260,7 +260,7 @@ export default function PreciosPage() {
             </div>
 
             {/* Business */}
-            <div className="bg-white rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
+            <div className="bg-card rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-[var(--tp-buttons)] text-white px-4 py-1 rounded-full text-sm font-medium">
                   Empresas
@@ -269,11 +269,11 @@ export default function PreciosPage() {
               
               <div className="text-center mb-8">
                 <Building className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Business</h3>
-                <p className="text-gray-600">Para empresas medianas</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Business</h3>
+                <p className="text-muted-foreground">Para empresas medianas</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">$199</span>
-                  <span className="text-gray-600">/mes</span>
+                  <span className="text-4xl font-bold text-foreground">$199</span>
+                  <span className="text-muted-foreground">/mes</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">hasta 25 usuarios</p>
               </div>
@@ -315,13 +315,13 @@ export default function PreciosPage() {
             </div>
 
             {/* Enterprise */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8">
+            <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
                 <Crown className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                <p className="text-gray-600">Para grandes corporaciones</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">Enterprise</h3>
+                <p className="text-muted-foreground">Para grandes corporaciones</p>
                 <div className="mt-6">
-                  <span className="text-4xl font-bold text-gray-900">Custom</span>
+                  <span className="text-4xl font-bold text-foreground">Custom</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">según necesidades</p>
               </div>
@@ -370,10 +370,10 @@ export default function PreciosPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8">
             <Calculator className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               Calcula tu Ahorro Anual
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Estima cuánto ahorrarás digitalizando tus procesos documentales
             </p>
             
@@ -381,13 +381,13 @@ export default function PreciosPage() {
               <div>
                 <label className="text-sm font-medium text-gray-700">Firmas por mes</label>
                 <div className="mt-1 p-3 border rounded-lg bg-white">
-                  <span className="text-gray-600">~50 documentos</span>
+                  <span className="text-muted-foreground">~50 documentos</span>
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Método actual</label>
                 <div className="mt-1 p-3 border rounded-lg bg-white">
-                  <span className="text-gray-600">Presencial</span>
+                  <span className="text-muted-foreground">Presencial</span>
                 </div>
               </div>
               <div>
@@ -409,47 +409,47 @@ export default function PreciosPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
               Preguntas sobre Facturación
             </h2>
           </div>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Puedo cambiar de plan en cualquier momento?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Sí, puedes upgrader o downgrader tu plan cuando quieras. Los cambios se aplican 
                 inmediatamente y solo pagas la diferencia prorrateada.
               </p>
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Qué pasa si excedo mi límite mensual?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Ofrecemos créditos adicionales: $0.50 por firma extra, $2.50 por verificación extra, 
                 $6.00 por notarización extra. O puedes upgradear tu plan automáticamente.
               </p>
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Ofrecen descuentos por volumen?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Sí, para empresas con más de 1,000 transacciones mensuales ofrecemos descuentos 
                 significativos. Contacta nuestro equipo comercial para una cotización personalizada.
               </p>
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 ¿Qué métodos de pago aceptan?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Tarjetas de crédito/débito, transferencia bancaria, Khipu, Mercado Pago y 
                 otros métodos locales. Facturación automática mensual o anual.
               </p>
@@ -471,7 +471,7 @@ export default function PreciosPage() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="bg-white text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
+              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
             >
               Probar Gratis 14 Días
             </Button>

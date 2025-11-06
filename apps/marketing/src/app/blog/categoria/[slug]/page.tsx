@@ -150,20 +150,20 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumbs */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/blog" className="hover:text-[var(--tp-buttons)] transition-colors">
               Blog
             </Link>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-900 font-medium">{category.name}</span>
+            <span className="text-foreground font-medium">{category.name}</span>
           </div>
         </div>
       </div>
 
       {/* Header */}
-      <section className="bg-white border-b">
+      <section className="bg-card border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center max-w-3xl mx-auto">
             <div className="mb-4">
@@ -174,11 +174,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 {category.name}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               {category.name}
             </h1>
             {category.description && (
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-muted-foreground">
                 {category.description}
               </p>
             )}
@@ -197,7 +197,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               {posts.map((post) => (
                 <article 
                   key={post.id} 
-                  className="bg-white rounded-xl shadow-sm overflow-hidden border hover:shadow-md transition-shadow"
+                  className="bg-card rounded-xl shadow-sm overflow-hidden border hover:shadow-md transition-shadow"
                 >
                   {post.featured_image_url ? (
                     <Image 
@@ -223,10 +223,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                         </span>
                       </div>
                     )}
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                    <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
                       {post.excerpt}
                     </p>
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
@@ -255,10 +255,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   {category.name}
                 </span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-foreground mb-4">
                 Aún no hay artículos en esta categoría
               </h3>
-              <p className="text-gray-600 mb-8">
+              <p className="text-muted-foreground mb-8">
                 Estamos preparando contenido exclusivo sobre {category.name}
               </p>
               <Link href="/blog">
