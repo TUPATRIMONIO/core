@@ -79,14 +79,14 @@ export default function HeroSection({
           </div>
 
           {/* H1 Principal */}
-          <h1 className="text-4xl md:text-6xl lg:text-5xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="mb-6 max-w-5xl mx-auto">
             {title}
           </h1>
 
-          {/* Subtítulo H2 */}
-          <h2 className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
+          {/* Subtítulo/Descripción */}
+          <p className="text-muted-foreground mb-8 max-w-4xl mx-auto">
             {subtitle}
-          </h2>
+          </p>
 
           {/* 3 Bullets de valor */}
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">

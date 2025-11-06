@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from 'next/font/google';
+import { Outfit, Nunito } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { ConditionalUpdateNotification } from '../components/ConditionalUpdateNotification';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
@@ -12,6 +12,13 @@ import "../../../../packages/ui/globals.css";
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  variable: "--font-nunito",
   display: "swap",
 });
 
@@ -86,7 +93,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL" className={`${outfit.variable} antialiased`} suppressHydrationWarning>
+    <html lang="es-CL" className={`${outfit.variable} ${nunito.variable} antialiased`} suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
       </head>

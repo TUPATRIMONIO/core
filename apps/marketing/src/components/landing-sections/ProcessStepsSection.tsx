@@ -32,7 +32,7 @@ export default function ProcessStepsSection({
     <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="mb-4">
             {title}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -56,7 +56,7 @@ export default function ProcessStepsSection({
                 <div className={`w-16 h-16 bg-${step.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <step.icon className={`w-8 h-8 text-${step.color}-600`} />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">{step.title}</h3>
+                <h3 className="mb-3">{step.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   {step.description}
                 </p>

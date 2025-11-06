@@ -36,7 +36,7 @@ export default function CompetitorComparisonSection({
     <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="mb-4">
             {title}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -81,7 +81,7 @@ export default function CompetitorComparisonSection({
               <div className={`w-16 h-16 bg-gradient-to-br ${usp.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                 <usp.icon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3 text-center">{usp.title}</h3>
+              <h3 className="mb-3 text-center">{usp.title}</h3>
               {usp.description.map((paragraph, idx) => (
                 <p key={idx} className="text-muted-foreground leading-relaxed mb-4">
                   {paragraph}

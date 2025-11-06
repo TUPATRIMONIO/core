@@ -557,7 +557,7 @@ export default function ContratoArriendoOnlinePage() {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="mb-6">
                 ¿Por Qué Un Contrato de Arriendo Online Te Cambia la Vida?
               </h2>
               
@@ -600,7 +600,7 @@ export default function ContratoArriendoOnlinePage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-8 shadow-lg border-2 border-green-200">
                 <div className="text-5xl mb-4">😌</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Duerme Tranquilo</h3>
+                <h3 className="mb-3">Duerme Tranquilo</h3>
                 <p className="text-foreground/80 leading-relaxed">
                   Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
                 </p>
@@ -608,7 +608,7 @@ export default function ContratoArriendoOnlinePage() {
 
               <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-lg border-2 border-blue-200">
                 <div className="text-5xl mb-4">⏰</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Ahorra Tiempo (Y Estrés)</h3>
+                <h3 className="mb-3">Ahorra Tiempo (Y Estrés)</h3>
                 <p className="text-foreground/80 leading-relaxed">
                   Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
                 </p>
@@ -616,7 +616,7 @@ export default function ContratoArriendoOnlinePage() {
 
               <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-lg border-2 border-purple-200">
                 <div className="text-5xl mb-4">🛡️</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Estás Protegido</h3>
+                <h3 className="mb-3">Estás Protegido</h3>
                 <p className="text-foreground/80 leading-relaxed">
                   No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
                 </p>
@@ -624,7 +624,7 @@ export default function ContratoArriendoOnlinePage() {
 
               <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-8 shadow-lg border-2 border-orange-200">
                 <div className="text-5xl mb-4">🤝</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Para Todos</h3>
+                <h3 className="mb-3">Para Todos</h3>
                 <p className="text-foreground/80 leading-relaxed">
                   Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
                 </p>
@@ -637,7 +637,7 @@ export default function ContratoArriendoOnlinePage() {
         <section className="py-20 bg-gradient-to-br from-white to-[var(--tp-background-light)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 text-center">
+              <h2 className="mb-6 text-center">
                 ¿Qué Es Un Contrato de Arriendo Online y Por Qué Lo Necesitas?
               </h2>
               
@@ -649,7 +649,7 @@ export default function ContratoArriendoOnlinePage() {
                 Piénsalo como las reglas de un juego de mesa: todos necesitan saber cuánto se paga, cuándo se paga, qué pasa si se rompe algo, cuánto tiempo dura el acuerdo, etc. Sin reglas claras, empiezan los problemas.
               </p>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">¿Y el "online" qué significa?</h3>
+              <h3 className="mb-4">¿Y el "online" qué significa?</h3>
               <p className="text-lg text-foreground/80 leading-relaxed mb-4">
                 Simple: que no tienes que moverte de tu casa. Todo el proceso lo haces por internet:
               </p>
@@ -661,7 +661,7 @@ export default function ContratoArriendoOnlinePage() {
               </ul>
 
               <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8 border-2 border-blue-300 mb-8">
-                <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-start gap-2">
+                <h4 className="mb-3 flex items-start gap-2">
                   <span className="text-2xl">💡</span>
                   ¿Pero es legal firmar por internet?
                 </h4>
@@ -670,14 +670,14 @@ export default function ContratoArriendoOnlinePage() {
                 </p>
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">¿Por qué es mejor que ir a la notaría?</h3>
+              <h3 className="mb-4">¿Por qué es mejor que ir a la notaría?</h3>
               <p className="text-lg text-foreground/80 leading-relaxed mb-6">
                 No vamos a decirte que ir a la notaría es "malo". Pero seamos honestos:
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
-                  <h4 className="text-xl font-bold text-red-900 mb-4">❌ Ir a Notaría (la forma tradicional)</h4>
+                  <h4 className="text-red-900 mb-4">❌ Ir a Notaría (la forma tradicional)</h4>
                   <ul className="space-y-2 text-foreground/80">
                     <li>• Tienes que coordinar horarios de TODAS las personas</li>
                     <li>• Perder medio día (o día completo) para el trámite</li>
@@ -689,7 +689,7 @@ export default function ContratoArriendoOnlinePage() {
                 </div>
 
                 <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
-                  <h4 className="text-xl font-bold text-green-900 mb-4">✅ Contrato Online (la forma inteligente)</h4>
+                  <h4 className="text-green-900 mb-4">✅ Contrato Online (la forma inteligente)</h4>
                   <ul className="space-y-2 text-foreground/80">
                     <li>• Cada uno firma cuando puede, desde donde esté</li>
                     <li>• Todo en 15-20 minutos (en serio)</li>
@@ -711,7 +711,7 @@ export default function ContratoArriendoOnlinePage() {
         <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="mb-4">
                 Cómo Funciona (Más Simple Imposible)
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -732,7 +732,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Llenas los Datos (5 minutos)</h3>
+                  <h3 className="mb-3">Llenas los Datos (5 minutos)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Te preguntamos lo básico: dirección de la propiedad, cuánto es la renta, quién arrienda, quién es el dueño, etc. Como cuando llenas un formulario cualquiera. <strong>Sin letra chica, sin trampa.</strong>
                   </p>
@@ -750,7 +750,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Revisas Que Todo Esté Bien (3 minutos)</h3>
+                  <h3 className="mb-3">Revisas Que Todo Esté Bien (3 minutos)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Antes de seguir, te mostramos el contrato completo. Lo puedes leer con calma. <strong>Si algo no te gusta o ves un error, lo cambias ahí mismo.</strong> Nadie te apura.
                   </p>
@@ -768,7 +768,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Pagas (1 minuto)</h3>
+                  <h3 className="mb-3">Pagas (1 minuto)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Con tarjeta de crédito o débito. Nada del otro mundo. Y tranquilo: <strong>si algo sale mal después, te devolvemos tu dinero</strong>. Así de simple.
                   </p>
@@ -783,7 +783,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Todos Firman Digitalmente (5-10 min)</h3>
+                  <h3 className="mb-3">Todos Firman Digitalmente (5-10 min)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Le llega un correo a cada persona que tiene que firmar. Entran desde su celular (o computador), dibujan su firma con el dedo, y listo. <strong>Cada uno firma cuando puede, no tienen que estar juntos.</strong>
                   </p>
@@ -801,7 +801,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">El Notario Lo Certifica (24 horas)</h3>
+                  <h3 className="mb-3">El Notario Lo Certifica (24 horas)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Un notario real (sí, de verdad) revisa tu contrato y le pone su sello digital. Esto pasa automáticamente. Tú no tienes que hacer nada más.
                   </p>
@@ -816,7 +816,7 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Lo Recibes en Tu Email (¡Listo!)</h3>
+                  <h3 className="mb-3">Lo Recibes en Tu Email (¡Listo!)</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Te llega el PDF con tu <strong>contrato de arriendo online</strong> firmado y notariado. Lo puedes imprimir, guardar, mandar por WhatsApp. Lo que necesites.
                   </p>
@@ -846,7 +846,7 @@ export default function ContratoArriendoOnlinePage() {
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h2 className="mb-4">
                 ¿Qué Incluye Tu Contrato de Arriendo Online?
               </h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -861,7 +861,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Contrato Personalizado</h3>
+                    <h3 className="mb-2">Contrato Personalizado</h3>
                     <p className="text-muted-foreground">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
                   </div>
                 </div>
@@ -873,7 +873,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Certificación Notarial</h3>
+                    <h3 className="mb-2">Certificación Notarial</h3>
                     <p className="text-muted-foreground">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
                   </div>
                 </div>
@@ -885,7 +885,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Firmas Electrónicas Ilimitadas</h3>
+                    <h3 className="mb-2">Firmas Electrónicas Ilimitadas</h3>
                     <p className="text-muted-foreground">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
                   </div>
                 </div>
@@ -897,7 +897,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Modificaciones Antes de Firmar</h3>
+                    <h3 className="mb-2">Modificaciones Antes de Firmar</h3>
                     <p className="text-muted-foreground">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
                   </div>
                 </div>
@@ -909,7 +909,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Soporte por WhatsApp</h3>
+                    <h3 className="mb-2">Soporte por WhatsApp</h3>
                     <p className="text-muted-foreground">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
                   </div>
                 </div>
@@ -921,7 +921,7 @@ export default function ContratoArriendoOnlinePage() {
                     <Check className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Entrega en 24 Horas</h3>
+                    <h3 className="mb-2">Entrega en 24 Horas</h3>
                     <p className="text-muted-foreground">Desde que la última persona firma hasta que lo recibes certificado.</p>
                   </div>
                 </div>
@@ -929,7 +929,7 @@ export default function ContratoArriendoOnlinePage() {
             </div>
 
             <div className="bg-gradient-to-r from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-8 border-2 border-[var(--tp-brand-20)] max-w-3xl mx-auto">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Precio Variable Según Tus Necesidades</h3>
+              <h3 className="mb-4 text-center">Precio Variable Según Tus Necesidades</h3>
               <p className="text-foreground/80 leading-relaxed text-center mb-4">
                 El precio varía según el tipo de firma electrónica que elijas y si agregas servicios notariales adicionales (como copia legalizada, protocolización o FAN®).
               </p>

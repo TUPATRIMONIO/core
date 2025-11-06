@@ -35,7 +35,7 @@ export default function FAQSection({
     <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="mb-4">
             {title}
           </h2>
           <p className="text-xl text-muted-foreground">
@@ -46,7 +46,7 @@ export default function FAQSection({
         <div className="space-y-6">
           {categories.map((category, catIndex) => (
             <div key={catIndex} className={`bg-card rounded-2xl p-8 shadow-lg border-l-4 border-${category.color}-500`}>
-              <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+              <h3 className="mb-6 flex items-center gap-3">
                 <category.icon className={`w-8 h-8 text-${category.color}-600`} />
                 {category.name}
               </h3>
@@ -54,7 +54,7 @@ export default function FAQSection({
               <div className="space-y-6">
                 {category.questions.map((question, qIndex) => (
                   <div key={qIndex}>
-                    <h4 className="font-bold text-lg text-foreground mb-2">
+                    <h4 className="mb-2">
                       {question.question}
                     </h4>
                     <p className="text-foreground/80 leading-relaxed">

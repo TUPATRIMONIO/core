@@ -49,7 +49,7 @@ export default function ChilePage() {
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+            <h1 className="mb-6">
               Servicios Legales Digitales
               <span className="text-[var(--tp-brand)]"> para Chile</span>
             </h1>
@@ -94,7 +94,7 @@ export default function ChilePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Servicios Específicos para Chile
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -108,7 +108,7 @@ export default function ChilePage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">Firma Electrónica</h3>
+              <h3 className="mb-3">Firma Electrónica</h3>
               <p className="text-muted-foreground mb-4">
                 Cumple <strong>Ley 19.799</strong>. Válida en tribunales chilenos. 
                 Integración con SII y registro civil.
@@ -128,7 +128,7 @@ export default function ChilePage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">KYC & Verificación</h3>
+              <h3 className="mb-3">KYC & Verificación</h3>
               <p className="text-muted-foreground mb-4">
                 Verificación biométrica con <strong>cédulas chilenas</strong>. 
                 Cumple regulaciones CMF y SBIF.
@@ -148,7 +148,7 @@ export default function ChilePage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Briefcase className="w-8 h-8 text-[var(--tp-brand)]" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-3">Notaría Digital</h3>
+              <h3 className="mb-3">Notaría Digital</h3>
               <p className="text-muted-foreground mb-4">
                 Notarización online válida según <strong>código civil chileno</strong>. 
                 Reconocida por tribunales.
@@ -170,7 +170,7 @@ export default function ChilePage() {
       <section className="py-20 bg-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Diseñado Específicamente para Chile
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -183,7 +183,7 @@ export default function ChilePage() {
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 📋
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-3">Legislación Local</h3>
+              <h3 className="mb-3">Legislación Local</h3>
               <p className="text-muted-foreground">
                 Cumple Ley 19.799, regulaciones CMF, SBIF y código civil chileno. 
                 Actualizado con últimas normativas.
@@ -194,7 +194,7 @@ export default function ChilePage() {
               <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 🏛️
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-3">Integración SII</h3>
+              <h3 className="mb-3">Integración SII</h3>
               <p className="text-muted-foreground">
                 Conectividad directa con Servicio de Impuestos Internos 
                 para validación de RUT y datos empresariales.
@@ -205,7 +205,7 @@ export default function ChilePage() {
               <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
                 ⚖️
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-3">Validez Tribunales</h3>
+              <h3 className="mb-3">Validez Tribunales</h3>
               <p className="text-muted-foreground">
                 Documentos aceptados en tribunales chilenos. 
                 Casos de éxito en Corte Suprema y tribunales civiles.
@@ -218,7 +218,7 @@ export default function ChilePage() {
       {/* Chile Social Proof */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-12">
+            <h2 className="mb-12">
             Empresas Chilenas que Confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
           
@@ -255,7 +255,7 @@ export default function ChilePage() {
       {/* CTA Chile */}
       <section className="py-20 bg-[var(--tp-buttons)]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-white mb-4">
             Únete a la Transformación Digital en Chile
           </h2>
           <p className="text-xl text-white/90 mb-8">

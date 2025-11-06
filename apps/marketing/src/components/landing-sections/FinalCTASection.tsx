@@ -43,7 +43,7 @@ export default function FinalCTASection({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-white mb-6">
             {title}
           </h2>
           <p className="text-xl text-white/90 max-w-3xl mx-auto">
@@ -67,7 +67,7 @@ export default function FinalCTASection({
                 <div className={`w-16 h-16 ${card.type === 'personas' ? 'bg-[var(--tp-brand-10)]' : 'bg-blue-100'} rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <card.icon className={`w-8 h-8 ${card.type === 'personas' ? 'text-[var(--tp-brand)]' : 'text-blue-600'}`} />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">{card.title}</h3>
+                <h3 className="mb-2">{card.title}</h3>
                 <p className="text-muted-foreground">{card.description}</p>
               </div>
 

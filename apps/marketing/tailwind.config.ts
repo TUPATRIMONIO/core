@@ -155,6 +155,7 @@ const config: Config = {
       },
       fontFamily: {
         outfit: ["var(--font-outfit)"],
+        nunito: ["var(--font-nunito)"],
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },

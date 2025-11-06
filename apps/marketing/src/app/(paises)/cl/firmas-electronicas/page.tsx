@@ -52,7 +52,7 @@ export default function FirmasElectronicasChilePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+              <h1 className="mb-6">
                 <span className="text-[var(--tp-brand)]">Firma Electrónica</span><br />
                 Válida Legalmente en Chile
               </h1>
@@ -104,7 +104,7 @@ export default function FirmasElectronicasChilePage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Tipos de Firma Electrónica
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -119,7 +119,7 @@ export default function FirmasElectronicasChilePage() {
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Firma Simple</h3>
+                <h3 className="">Firma Simple</h3>
                 <p className="text-muted-foreground mt-2">Para documentos internos</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -153,7 +153,7 @@ export default function FirmasElectronicasChilePage() {
                 <div className="w-12 h-12 bg-[var(--tp-buttons)]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-[var(--tp-brand)]" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Firma Avanzada</h3>
+                <h3 className="">Firma Avanzada</h3>
                 <p className="text-muted-foreground mt-2">Para documentos comerciales</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -182,7 +182,7 @@ export default function FirmasElectronicasChilePage() {
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Star className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Firma Cualificada</h3>
+                <h3 className="">Firma Cualificada</h3>
                 <p className="text-muted-foreground mt-2">Máximo nivel de seguridad</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -212,7 +212,7 @@ export default function FirmasElectronicasChilePage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Marco Legal en Chile
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -222,7 +222,7 @@ export default function FirmasElectronicasChilePage() {
           
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-card p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold text-foreground mb-4">
+              <h3 className="mb-4">
                 Ley 19.799 - Firma Electrónica
               </h3>
               <p className="text-muted-foreground mb-4">
@@ -237,7 +237,7 @@ export default function FirmasElectronicasChilePage() {
             </div>
             
             <div className="bg-card p-8 rounded-xl shadow-sm">
-              <h3 className="text-xl font-bold text-foreground mb-4">
+              <h3 className="mb-4">
                 Decreto 181/2002 - Reglamento
               </h3>
               <p className="text-muted-foreground mb-4">
@@ -257,7 +257,7 @@ export default function FirmasElectronicasChilePage() {
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-white mb-4">
             Comienza a Firmar Digitalmente Hoy
           </h2>
           <p className="text-xl text-white/90 mb-8">

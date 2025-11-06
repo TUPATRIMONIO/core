@@ -38,7 +38,7 @@ export default function VerificacionIdentidadPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+              <h1 className="mb-6">
                 <span className="text-[var(--tp-brand)]">Verificación de Identidad</span><br />
                 Digital en 3 Minutos
               </h1>
@@ -91,7 +91,7 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Tipos de Verificación Disponibles
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -106,7 +106,7 @@ export default function VerificacionIdentidadPage() {
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Eye className="w-6 h-6 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Verificación Básica</h3>
+                <h3 className="">Verificación Básica</h3>
                 <p className="text-muted-foreground mt-2">Para registro de usuarios</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -140,7 +140,7 @@ export default function VerificacionIdentidadPage() {
                 <div className="w-12 h-12 bg-[var(--tp-buttons)]/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-6 h-6 text-[var(--tp-buttons)]" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">KYC Completo</h3>
+                <h3 className="">KYC Completo</h3>
                 <p className="text-muted-foreground mt-2">Para fintechs y bancos</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -169,7 +169,7 @@ export default function VerificacionIdentidadPage() {
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Fingerprint className="w-6 h-6 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground">Enterprise</h3>
+                <h3 className="">Enterprise</h3>
                 <p className="text-muted-foreground mt-2">Volumen y personalización</p>
               </div>
               <ul className="space-y-3 mb-6">
@@ -199,7 +199,7 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               ¿Cómo Funciona la Verificación?
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -212,7 +212,7 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">1</span>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">Captura de Documento</h3>
+              <h3 className="mb-3">Captura de Documento</h3>
               <p className="text-muted-foreground">
                 El usuario toma foto de su cédula o pasaporte. 
                 Nuestro sistema extrae y valida todos los datos automáticamente.
@@ -223,7 +223,7 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">2</span>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">Selfie Biométrica</h3>
+              <h3 className="mb-3">Selfie Biométrica</h3>
               <p className="text-muted-foreground">
                 Verificación facial con liveness detection para confirmar que es una persona real, 
                 no una foto o video.
@@ -234,7 +234,7 @@ export default function VerificacionIdentidadPage() {
               <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-[var(--tp-brand)]">3</span>
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">Resultado Instantáneo</h3>
+              <h3 className="mb-3">Resultado Instantáneo</h3>
               <p className="text-muted-foreground">
                 Análisis con IA en tiempo real. Resultado aprobado/rechazado 
                 con score de confianza y reporte detallado.
@@ -248,7 +248,7 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Casos de Uso por Industria
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -259,7 +259,7 @@ export default function VerificacionIdentidadPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Fintechs */}
             <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-foreground mb-4">💳 Fintechs y Bancos</h3>
+              <h3 className="mb-4">💳 Fintechs y Bancos</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -282,7 +282,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* E-commerce */}
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-foreground mb-4">🛒 E-commerce y Marketplaces</h3>
+              <h3 className="mb-4">🛒 E-commerce y Marketplaces</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -305,7 +305,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* Inmobiliarias */}
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-foreground mb-4">🏠 Inmobiliarias</h3>
+              <h3 className="mb-4">🏠 Inmobiliarias</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -328,7 +328,7 @@ export default function VerificacionIdentidadPage() {
 
             {/* SaaS y Apps */}
             <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl">
-              <h3 className="text-2xl font-bold text-foreground mb-4">💻 SaaS y Apps</h3>
+              <h3 className="mb-4">💻 SaaS y Apps</h3>
               <ul className="space-y-3">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
@@ -356,7 +356,7 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Casos de Éxito Reales
             </h2>
           </div>
@@ -411,14 +411,14 @@ export default function VerificacionIdentidadPage() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Preguntas Frecuentes
             </h2>
           </div>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Qué documentos puedo verificar?
               </h3>
               <p className="text-muted-foreground">
@@ -429,7 +429,7 @@ export default function VerificacionIdentidadPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Qué tan segura es la verificación biométrica?
               </h3>
               <p className="text-muted-foreground">
@@ -440,7 +440,7 @@ export default function VerificacionIdentidadPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Cumplen con las regulaciones chilenas?
               </h3>
               <p className="text-muted-foreground">
@@ -456,7 +456,7 @@ export default function VerificacionIdentidadPage() {
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-white mb-4">
             Reduce Fraude, Acelera Onboarding
           </h2>
           <p className="text-xl text-white/90 mb-8">

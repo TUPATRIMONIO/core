@@ -35,7 +35,7 @@ export default function ComparisonTableSection({
     <section id="beneficios" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="mb-4">
             {title}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -75,7 +75,7 @@ export default function ComparisonTableSection({
 
         {/* Llamado a la acción después de la tabla */}
         <div className="text-center mt-12 p-8 bg-gradient-to-r from-[var(--tp-brand-light)] to-[var(--tp-brand)] rounded-2xl">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          <h3 className="text-white mb-4">
             {ctaText}
           </h3>
           <p className="text-lg text-white/90 mb-6 max-w-2xl mx-auto">

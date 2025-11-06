@@ -302,7 +302,7 @@ export default function HomePage() {
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="mb-6">
               Una Plataforma, Todo TuPatrimonio Protegido
             </h2>
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
@@ -376,7 +376,7 @@ export default function HomePage() {
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="mb-6">
               Todo lo que Necesitas para Proteger TuPatrimonio, en Un Solo Lugar
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -504,7 +504,7 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="mb-6">
               Más Allá de los Trámites: Recupera Tu Tiempo y Tu Tranquilidad
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -604,7 +604,7 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="mb-6">
               Números que Hablan por Nosotros
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
@@ -653,7 +653,7 @@ export default function HomePage() {
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            <h2 className="mb-6">
               Diseñado para Personas Reales con Problemas Reales
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -781,7 +781,7 @@ export default function HomePage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--tp-brand)] rounded-full mb-6">
                   <Clock className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                <h2 className="mb-4">
                   Suscríbete a TuPatrimonio News 📬
                 </h2>
                 <p className="text-lg text-muted-foreground mb-2">
@@ -848,7 +848,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* Columna 1: Marca */}
             <div>
-              <h3 className="text-2xl font-bold mb-4">TuPatrimonio®</h3>
+              <h3 className="mb-4">TuPatrimonio®</h3>
               <p className="text-white/80 mb-4">
                 Tu copiloto para proteger y hacer crecer lo que más te importa. Transformando la gestión legal con tecnología de vanguardia.
               </p>

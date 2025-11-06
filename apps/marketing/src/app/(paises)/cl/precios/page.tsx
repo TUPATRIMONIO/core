@@ -36,7 +36,7 @@ export default function PreciosPage() {
       {/* Hero Section */}
       <section className="bg-card py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h1 className="mb-6">
             Planes que se Adaptan a Ti
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
@@ -71,7 +71,7 @@ export default function PreciosPage() {
             {/* Personal Free */}
             <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-foreground mb-2">Personal Free</h3>
+                <h3 className="mb-2">Personal Free</h3>
                 <p className="text-muted-foreground">Para uso personal ocasional</p>
                 <div className="mt-6">
                   <span className="text-4xl font-bold text-foreground">$0</span>
@@ -116,7 +116,7 @@ export default function PreciosPage() {
               </div>
               
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-foreground mb-2">Personal Pro</h3>
+                <h3 className="mb-2">Personal Pro</h3>
                 <p className="text-muted-foreground">Para freelancers y profesionales</p>
                 <div className="mt-6">
                   <span className="text-4xl font-bold text-foreground">$9</span>
@@ -157,7 +157,7 @@ export default function PreciosPage() {
               <div className="text-center mb-8">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <Crown className="w-5 h-5 text-yellow-500" />
-                  <h3 className="text-2xl font-bold text-foreground">Personal Business</h3>
+                  <h3 className="">Personal Business</h3>
                 </div>
                 <p className="text-muted-foreground">Para profesionales intensivos</p>
                 <div className="mt-6">
@@ -200,7 +200,7 @@ export default function PreciosPage() {
       {/* Separador para Planes Empresariales */}
       <section className="py-12 bg-[var(--tp-buttons)]/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
+          <h2 className="mb-4">
             Planes Empresariales
           </h2>
           <p className="text-xl text-muted-foreground">
@@ -218,7 +218,7 @@ export default function PreciosPage() {
             <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
                 <Users className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-foreground mb-2">Team Starter</h3>
+                <h3 className="mb-2">Team Starter</h3>
                 <p className="text-muted-foreground">Para equipos pequeños</p>
                 <div className="mt-6">
                   <span className="text-4xl font-bold text-foreground">$49</span>
@@ -269,7 +269,7 @@ export default function PreciosPage() {
               
               <div className="text-center mb-8">
                 <Building className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-foreground mb-2">Business</h3>
+                <h3 className="mb-2">Business</h3>
                 <p className="text-muted-foreground">Para empresas medianas</p>
                 <div className="mt-6">
                   <span className="text-4xl font-bold text-foreground">$199</span>
@@ -318,7 +318,7 @@ export default function PreciosPage() {
             <div className="bg-card rounded-2xl border border-border p-8">
               <div className="text-center mb-8">
                 <Crown className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-                <h3 className="text-2xl font-bold text-foreground mb-2">Enterprise</h3>
+                <h3 className="mb-2">Enterprise</h3>
                 <p className="text-muted-foreground">Para grandes corporaciones</p>
                 <div className="mt-6">
                   <span className="text-4xl font-bold text-foreground">Custom</span>
@@ -370,7 +370,7 @@ export default function PreciosPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8">
             <Calculator className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Calcula tu Ahorro Anual
             </h2>
             <p className="text-muted-foreground mb-6">
@@ -409,14 +409,14 @@ export default function PreciosPage() {
       <section className="py-20 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Preguntas sobre Facturación
             </h2>
           </div>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Puedo cambiar de plan en cualquier momento?
               </h3>
               <p className="text-muted-foreground">
@@ -426,7 +426,7 @@ export default function PreciosPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Qué pasa si excedo mi límite mensual?
               </h3>
               <p className="text-muted-foreground">
@@ -436,7 +436,7 @@ export default function PreciosPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Ofrecen descuentos por volumen?
               </h3>
               <p className="text-muted-foreground">
@@ -446,7 +446,7 @@ export default function PreciosPage() {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
+              <h3 className="mb-2">
                 ¿Qué métodos de pago aceptan?
               </h3>
               <p className="text-muted-foreground">
@@ -461,7 +461,7 @@ export default function PreciosPage() {
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-white mb-4">
             Comienza tu Transformación Digital
           </h2>
           <p className="text-xl text-white/90 mb-8">
