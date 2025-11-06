@@ -11,6 +11,8 @@ import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -84,7 +86,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL" className="antialiased" suppressHydrationWarning>
+    <html lang="es-CL" className={`${outfit.variable} antialiased`} suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
       </head>
