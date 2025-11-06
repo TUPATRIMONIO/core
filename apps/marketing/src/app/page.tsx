@@ -299,13 +299,13 @@ export default function HomePage() {
 
 
       {/* Sección 2: La Solución - Features */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Una Plataforma, Todo TuPatrimonio Protegido
             </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               TuPatrimonio no es otra app más de trámites. Es tu copiloto para todo lo que necesitas 
               en el mundo legal, inmobiliario y de documentos. Imagina tener un asistente personal que 
               conoce las leyes, entiende tus necesidades y te guía paso a paso.
@@ -314,7 +314,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1: IA */}
-            <Card className="border-2 border-transparent hover:border-[var(--tp-brand)] transition-all duration-300 hover:shadow-xl group">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Bot className="w-8 h-8 text-purple-600" />
@@ -328,7 +328,7 @@ export default function HomePage() {
             </Card>
 
             {/* Feature 2: Remoto */}
-            <Card className="border-2 border-transparent hover:border-[var(--tp-brand)] transition-all duration-300 hover:shadow-xl group">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Smartphone className="w-8 h-8 text-blue-600" />
@@ -342,7 +342,7 @@ export default function HomePage() {
             </Card>
 
             {/* Feature 3: Rápido */}
-            <Card className="border-2 border-transparent hover:border-[var(--tp-brand)] transition-all duration-300 hover:shadow-xl group">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Zap className="w-8 h-8 text-green-600" />
@@ -356,7 +356,7 @@ export default function HomePage() {
             </Card>
 
             {/* Feature 4: Transparente */}
-            <Card className="border-2 border-transparent hover:border-[var(--tp-brand)] transition-all duration-300 hover:shadow-xl group">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <CheckCircle className="w-8 h-8 text-orange-600" />
@@ -373,13 +373,13 @@ export default function HomePage() {
       </section>
 
       {/* Sección 4: Qué Puedes Hacer - Servicios */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Todo lo que Necesitas para Proteger TuPatrimonio, en Un Solo Lugar
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Hoy empezamos con servicios legales en Chile, pero nuestra visión es acompañarte 
               en todo Latinoamérica con soluciones para cada área de tu vida patrimonial.
             </p>
@@ -402,36 +402,36 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
+                    <span className="text-foreground/80"><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
+                    <span className="text-foreground/80"><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
+                    <span className="text-foreground/80"><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
+                    <span className="text-foreground/80"><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
+                    <span className="text-foreground/80"><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
+                    <span className="text-foreground/80"><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
                   </li>
-                  <li className="flex items-start gap-2">
+                  <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-gray-700"><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
+                    <span className="text-foreground/80"><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
                   </li>
                 </ul>
-                <p className="text-sm text-gray-600 bg-[var(--tp-bg-light-20)] p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground bg-[var(--tp-bg-light-20)] p-4 rounded-lg">
                   <strong>🎯 Ideal para:</strong> Corredores de propiedades, abogados, empresas y cualquier persona 
                   que necesite documentos legales sin complicarse la vida.
                 </p>
@@ -446,7 +446,7 @@ export default function HomePage() {
             {/* Próximamente: PropTech, FinTech, Business Hub */}
             <div className="space-y-8">
               {/* PropTech */}
-              <Card className="relative border-2 border-gray-300 shadow-md opacity-75 hover:opacity-90 transition-opacity">
+              <Card className="relative border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all opacity-75 hover:opacity-100">
                 <div className="absolute top-4 right-4 bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">
                   Próximamente
                 </div>
@@ -463,7 +463,7 @@ export default function HomePage() {
               </Card>
 
               {/* FinTech */}
-              <Card className="relative border-2 border-gray-300 shadow-md opacity-75 hover:opacity-90 transition-opacity">
+              <Card className="relative border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all opacity-75 hover:opacity-100">
                 <div className="absolute top-4 right-4 bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">
                   Próximamente
                 </div>
@@ -480,7 +480,7 @@ export default function HomePage() {
               </Card>
 
               {/* Business Hub */}
-              <Card className="relative border-2 border-gray-300 shadow-md opacity-75 hover:opacity-90 transition-opacity">
+              <Card className="relative border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all opacity-75 hover:opacity-100">
                 <div className="absolute top-4 right-4 bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">
                   Próximamente
                 </div>
@@ -501,20 +501,20 @@ export default function HomePage() {
       </section>
 
       {/* Sección 5: Beneficios Emocionales */}
-      <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-white">
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Más Allá de los Trámites: Recupera Tu Tiempo y Tu Tranquilidad
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Los beneficios reales que experimentarás al usar TuPatrimonio
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Beneficio 1 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4">
                   <Moon className="w-7 h-7 text-blue-600" />
@@ -528,7 +528,7 @@ export default function HomePage() {
             </Card>
 
             {/* Beneficio 2 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4">
                   <Clock className="w-7 h-7 text-orange-600" />
@@ -542,7 +542,7 @@ export default function HomePage() {
             </Card>
 
             {/* Beneficio 3 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4">
                   <Crown className="w-7 h-7 text-purple-600" />
@@ -556,7 +556,7 @@ export default function HomePage() {
             </Card>
 
             {/* Beneficio 4 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4">
                   <TrendingUp className="w-7 h-7 text-green-600" />
@@ -570,7 +570,7 @@ export default function HomePage() {
             </Card>
 
             {/* Beneficio 5 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-4">
                   <Globe className="w-7 h-7 text-cyan-600" />
@@ -584,7 +584,7 @@ export default function HomePage() {
             </Card>
 
             {/* Beneficio 6 */}
-            <Card className="hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-[var(--tp-brand-20)]">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-4">
                   <MessageCircle className="w-7 h-7 text-pink-600" />
@@ -650,20 +650,20 @@ export default function HomePage() {
       </section>
 
       {/* Sección 7: Para Quién Es */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Diseñado para Personas Reales con Problemas Reales
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Sea cual sea tu situación, TuPatrimonio tiene la solución que necesitas
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Perfil 1 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4">
                   <Briefcase className="w-7 h-7 text-blue-600" />
@@ -677,7 +677,7 @@ export default function HomePage() {
             </Card>
 
             {/* Perfil 2 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4">
                   <Building2 className="w-7 h-7 text-purple-600" />
@@ -691,7 +691,7 @@ export default function HomePage() {
             </Card>
 
             {/* Perfil 3 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4">
                   <Home className="w-7 h-7 text-green-600" />
@@ -705,7 +705,7 @@ export default function HomePage() {
             </Card>
 
             {/* Perfil 4 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4">
                   <Users className="w-7 h-7 text-orange-600" />
@@ -719,7 +719,7 @@ export default function HomePage() {
             </Card>
 
             {/* Perfil 5 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-4">
                   <Globe className="w-7 h-7 text-cyan-600" />
@@ -733,7 +733,7 @@ export default function HomePage() {
             </Card>
 
             {/* Perfil 6 */}
-            <Card className="border-2 border-gray-200 hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
                 <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-4">
                   <Rocket className="w-7 h-7 text-pink-600" />
@@ -758,13 +758,13 @@ export default function HomePage() {
       />
 
       {/* Certificación Notarial */}
-      <section className="py-12 bg-gradient-to-br from-[var(--tp-bg-light-20)] to-white">
+      <section className="py-12 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-3 bg-white px-6 py-4 rounded-2xl shadow-lg border-2 border-[var(--tp-brand-20)]">
+          <div className="inline-flex items-center gap-3 bg-card px-6 py-4 rounded-2xl shadow-lg border-2 border-[var(--tp-brand-20)]">
             <Landmark className="w-8 h-8 text-[var(--tp-brand)]" />
             <div className="text-left">
-              <p className="font-bold text-gray-900">Trabajamos con Excelentes Notarías</p>
-              <p className="text-sm text-gray-600">
+              <p className="font-bold text-foreground">Trabajamos con Excelentes Notarías</p>
+              <p className="text-sm text-muted-foreground">
                 Cada documento tiene el respaldo legal completo y cumple con todas las normativas vigentes
               </p>
             </div>
@@ -773,7 +773,7 @@ export default function HomePage() {
       </section>
 
       {/* Sección 9: Newsletter */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="border-2 border-[var(--tp-brand-20)] shadow-2xl overflow-hidden">
             <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent p-8 md:p-12">
@@ -781,10 +781,10 @@ export default function HomePage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--tp-brand)] rounded-full mb-6">
                   <Clock className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                   Suscríbete a TuPatrimonio News 📬
                 </h2>
-                <p className="text-lg text-gray-600 mb-2">
+                <p className="text-lg text-muted-foreground mb-2">
                   Recibe contenido exclusivo sobre transformación digital legal y tips para proteger tu patrimonio
                 </p>
                 <p className="text-2xl font-bold text-[var(--tp-brand)]">
@@ -813,7 +813,7 @@ export default function HomePage() {
                   </Button>
                 </div>
 
-                <p className="text-sm text-gray-500 text-center mt-4">
+                <p className="text-sm text-muted-foreground/80 text-center mt-4">
                   Al suscribirte aceptas recibir emails con novedades, tips y ofertas especiales.
                   Puedes cancelar en cualquier momento.
                 </p>

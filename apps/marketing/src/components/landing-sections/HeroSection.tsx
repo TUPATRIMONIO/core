@@ -51,7 +51,7 @@ export default function HeroSection({
   showImageotype = true,
 }: HeroSectionProps) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-white via-[var(--tp-background-light)] to-white pt-8 pb-16 md:pt-12 md:pb-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-background via-[var(--tp-background-light)] to-background pt-8 pb-16 md:pt-12 md:pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Imagotipo TuPatrimonio */}
@@ -69,22 +69,22 @@ export default function HeroSection({
               ) : (
                 <div
                   key={index}
-                  className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-[var(--tp-lines-20)]"
+                  className="flex items-center gap-2 px-4 py-2 bg-background dark:bg-card rounded-full shadow-sm border border-[var(--tp-lines-20)]"
                 >
                   {badge.icon && <badge.icon className="w-4 h-4 text-[var(--tp-brand)]" />}
-                  <span className="text-sm font-medium text-gray-700">{badge.text}</span>
+                  <span className="text-sm font-medium text-foreground/80">{badge.text}</span>
                 </div>
               )
             ))}
           </div>
 
           {/* H1 Principal */}
-          <h1 className="text-4xl md:text-6xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-5xl font-bold text-foreground mb-6 leading-tight">
             {title}
           </h1>
 
           {/* Subtítulo H2 */}
-          <h2 className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
+          <h2 className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
             {subtitle}
           </h2>
 
@@ -96,8 +96,8 @@ export default function HeroSection({
                   <bullet.icon className={`w-4 h-4 text-${bullet.color}-600`} />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{bullet.title}</p>
-                  <p className="text-sm text-gray-600">{bullet.description}</p>
+                  <p className="font-semibold text-foreground">{bullet.title}</p>
+                  <p className="text-sm text-muted-foreground">{bullet.description}</p>
                 </div>
               </div>
             ))}
@@ -124,17 +124,17 @@ export default function HeroSection({
           </div>
 
           {ctaSubtext && (
-            <p className="text-sm text-gray-500">{ctaSubtext}</p>
+            <p className="text-sm text-muted-foreground/80">{ctaSubtext}</p>
           )}
 
           {/* Trust badges inferiores */}
-          <div className="flex flex-wrap items-center justify-center gap-8 mt-12 pt-8 border-t border-gray-200">
+          <div className="flex flex-wrap items-center justify-center gap-8 mt-12 pt-8 border-t border-border">
             {bottomBadges.map((badge, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-white rounded-lg shadow-sm flex items-center justify-center mx-auto mb-2 border border-gray-200">
+                <div className="w-16 h-16 bg-card rounded-lg shadow-sm flex items-center justify-center mx-auto mb-2 border border-border">
                   <badge.icon className="w-8 h-8 text-[var(--tp-brand)]" />
                 </div>
-                <p className="text-xs text-gray-600 font-medium" dangerouslySetInnerHTML={{ __html: badge.text }} />
+                <p className="text-xs text-muted-foreground font-medium" dangerouslySetInnerHTML={{ __html: badge.text }} />
               </div>
             ))}
           </div>

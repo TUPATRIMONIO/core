@@ -55,10 +55,10 @@ export default function FinalCTASection({
           {cards.map((card, index) => (
             <div 
               key={index} 
-              className={`bg-white rounded-2xl p-8 shadow-2xl ${card.badge ? 'border-4 border-yellow-400 relative' : ''}`}
+              className={`bg-card rounded-2xl p-8 shadow-2xl ${card.badge ? 'border-4 border-yellow-400 relative' : ''}`}
             >
               {card.badge && (
-                <div className="absolute -top-4 right-4 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-sm font-bold">
+                <div className="absolute -top-4 right-4 bg-yellow-400 text-foreground px-4 py-1 rounded-full text-sm font-bold">
                   {card.badge}
                 </div>
               )}
@@ -67,13 +67,13 @@ export default function FinalCTASection({
                 <div className={`w-16 h-16 ${card.type === 'personas' ? 'bg-[var(--tp-brand-10)]' : 'bg-blue-100'} rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <card.icon className={`w-8 h-8 ${card.type === 'personas' ? 'text-[var(--tp-brand)]' : 'text-blue-600'}`} />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{card.title}</h3>
-                <p className="text-gray-600">{card.description}</p>
+                <h3 className="text-2xl font-bold text-foreground mb-2">{card.title}</h3>
+                <p className="text-muted-foreground">{card.description}</p>
               </div>
 
               <ul className="space-y-3 mb-6">
                 {card.benefits.map((benefit, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-gray-700">
+                  <li key={idx} className="flex items-start gap-2 text-foreground/80">
                     <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                     <span>{benefit}</span>
                   </li>
@@ -106,7 +106,7 @@ export default function FinalCTASection({
                 </a>
               )}
 
-              <p className="text-center text-sm text-gray-500 mt-4">
+              <p className="text-center text-sm text-muted-foreground/80 mt-4">
                 {card.type === 'personas' ? '✓ Paga solo por documento finalizado' : '✓ Registro gratuito'}
               </p>
             </div>

@@ -14,7 +14,7 @@ import { Button } from "./ui/button";
 
 interface Document {
   name: string;
-  link: string;
+  link?: string;
   popular?: boolean;
 }
 
@@ -452,14 +452,14 @@ export default function DocumentsAvailable({
     : DOCUMENTS_DATA.filter(cat => cat.id === activeTab); // Solo mostrar categoría activa sin búsqueda
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Documentos Notariales Online Disponibles
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Más del 90% de documentos legales con validez en todo Chile
           </p>
         </div>
@@ -468,17 +468,17 @@ export default function DocumentsAvailable({
         {showSearch && (
           <div className="max-w-2xl mx-auto mb-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Buscar documento... Ej: finiquito, arriendo, CBR"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-[var(--tp-brand)] focus:outline-none transition-colors"
+                className="w-full pl-12 pr-4 py-4 text-lg bg-background border-2 border-border rounded-xl focus:border-[var(--tp-brand)] focus:outline-none transition-colors text-foreground"
               />
             </div>
             {searchQuery && (
-              <p className="text-sm text-gray-500 mt-2 text-center">
+              <p className="text-sm text-muted-foreground/80 mt-2 text-center">
                 Mostrando resultados en todas las categorías
               </p>
             )}
@@ -488,10 +488,10 @@ export default function DocumentsAvailable({
         {/* Sección Más Solicitados */}
         {showPopular && !searchQuery && (
           <div className="mb-12">
-            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-white rounded-2xl p-8 border-2 border-[var(--tp-brand-20)]">
+            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-background rounded-2xl p-8 border-2 border-[var(--tp-brand-20)]">
               <div className="flex items-center gap-3 mb-6">
                 <Star className="w-7 h-7 text-[var(--tp-brand)] fill-[var(--tp-brand)]" />
-                <h3 className="text-2xl font-bold text-gray-900">Más Solicitados</h3>
+                <h3 className="text-2xl font-bold text-foreground">Más Solicitados</h3>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {POPULAR_DOCUMENTS.map((doc, index) => (
@@ -499,11 +499,11 @@ export default function DocumentsAvailable({
                     key={index}
                     href={baseLink}
                     rel="noopener noreferrer nofollow"
-                    className="flex items-center justify-between p-4 bg-white rounded-lg hover:shadow-md transition-all border border-gray-200 group"
+                    className="flex items-center justify-between p-4 bg-card rounded-lg hover:shadow-md transition-all border border-border group"
                   >
                     <div className="flex items-center gap-3 flex-1">
                       <FileCheck className="w-5 h-5 text-[var(--tp-brand)] flex-shrink-0" />
-                      <p className="font-medium text-gray-900 text-sm">{doc.name}</p>
+                      <p className="font-medium text-foreground text-sm">{doc.name}</p>
                     </div>
                     <ExternalLink className="w-4 h-4 text-[var(--tp-brand)] opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
@@ -517,7 +517,7 @@ export default function DocumentsAvailable({
         {!searchQuery && (
           <div className="mb-8">
             {/* Desktop: Tabs horizontales */}
-            <div className="hidden md:flex gap-2 border-b border-gray-200 overflow-x-auto">
+            <div className="hidden md:flex gap-2 border-b border-border overflow-x-auto">
               {DOCUMENTS_DATA.map((category) => {
                 const Icon = category.icon;
                 return (
@@ -527,7 +527,7 @@ export default function DocumentsAvailable({
                     className={`flex items-center gap-2 px-6 py-4 font-semibold transition-all whitespace-nowrap ${
                       activeTab === category.id
                         ? "text-[var(--tp-brand)] border-b-2 border-[var(--tp-brand)] -mb-[2px]"
-                        : "text-gray-600 hover:text-gray-900"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -542,7 +542,7 @@ export default function DocumentsAvailable({
               <select
                 value={activeTab}
                 onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full px-4 py-3 text-lg font-semibold border-2 border-gray-200 rounded-lg focus:border-[var(--tp-brand)] focus:outline-none"
+                className="w-full px-4 py-3 text-lg font-semibold bg-background border-2 border-border rounded-lg focus:border-[var(--tp-brand)] focus:outline-none text-foreground"
               >
                 {DOCUMENTS_DATA.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -565,7 +565,7 @@ export default function DocumentsAvailable({
                   {searchQuery && (
                     <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-[var(--tp-brand-20)]">
                       <Icon className="w-6 h-6 text-[var(--tp-brand)]" />
-                      <h3 className="text-2xl font-bold text-gray-900">{category.name}</h3>
+                      <h3 className="text-2xl font-bold text-foreground">{category.name}</h3>
                     </div>
                   )}
                   
@@ -577,41 +577,41 @@ export default function DocumentsAvailable({
                         return (
                           <div
                             key={subcategory.id}
-                            className="border-2 border-gray-200 rounded-xl overflow-hidden"
+                            className="border-2 border-border rounded-xl overflow-hidden"
                           >
                             {/* Header de subcategoría */}
                             <button
                               onClick={() => toggleSubcategory(subcategory.id)}
-                              className="w-full flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 transition-colors"
+                              className="w-full flex items-center justify-between p-5 bg-muted hover:bg-accent transition-colors"
                             >
                               <div className="flex items-center gap-3">
                                 <FileText className="w-5 h-5 text-[var(--tp-brand)]" />
-                                <h4 className="text-lg font-bold text-gray-900">
+                                <h4 className="text-lg font-bold text-foreground">
                                   {subcategory.name}
                                 </h4>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-muted-foreground">
                                   ({subcategory.documents.length} documentos)
                                 </span>
                               </div>
                               {isExpanded ? (
-                                <ChevronDown className="w-5 h-5 text-gray-600" />
+                                <ChevronDown className="w-5 h-5 text-muted-foreground" />
                               ) : (
-                                <ChevronRight className="w-5 h-5 text-gray-600" />
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
                               )}
                             </button>
 
                             {/* Lista de documentos */}
                             {isExpanded && (
-                              <div className="p-5 bg-white">
+                              <div className="p-5 bg-card">
                                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                   {subcategory.documents.map((doc, index) => (
                                     <a
                                       key={index}
                                       href={baseLink}
                                       rel="noopener noreferrer nofollow"
-                                      className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-[var(--tp-brand)] hover:shadow-md transition-all group"
+                                      className="flex items-center justify-between p-3 border border-border rounded-lg hover:border-[var(--tp-brand)] hover:shadow-md transition-all group"
                                     >
-                                      <p className="text-sm text-gray-800 flex-1">
+                                      <p className="text-sm text-foreground/90 flex-1">
                                         {doc.name}
                                       </p>
                                       <ExternalLink className="w-4 h-4 text-[var(--tp-brand)] opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" />
@@ -634,9 +634,9 @@ export default function DocumentsAvailable({
                           key={index}
                           href={baseLink}
                           rel="noopener noreferrer nofollow"
-                          className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-[var(--tp-brand)] hover:shadow-md transition-all group"
+                          className="flex items-center justify-between p-4 border-2 border-border rounded-lg hover:border-[var(--tp-brand)] hover:shadow-md transition-all group"
                         >
-                          <p className="text-sm text-gray-800 flex-1">{doc.name}</p>
+                          <p className="text-sm text-foreground/90 flex-1">{doc.name}</p>
                           <ExternalLink className="w-4 h-4 text-[var(--tp-brand)] opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" />
                         </a>
                       ))}
@@ -650,8 +650,8 @@ export default function DocumentsAvailable({
           /* Mensaje cuando no hay resultados de búsqueda */
           searchQuery && (
             <div className="text-center py-12">
-              <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">
+              <Search className="w-16 h-16 text-muted mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">
                 No se encontraron documentos para "{searchQuery}"
               </p>
             </div>
@@ -661,10 +661,10 @@ export default function DocumentsAvailable({
         {/* CTA Final */}
         <div className="mt-16 text-center">
           <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent rounded-2xl p-8 border border-[var(--tp-brand-20)]">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               ¿No encuentras el documento que necesitas?
             </h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
               Contáctanos y te ayudaremos a encontrar la solución perfecta para tu trámite legal
             </p>
             <Button

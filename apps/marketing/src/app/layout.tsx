@@ -5,6 +5,8 @@ import { ConditionalUpdateNotification } from '../components/ConditionalUpdateNo
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '../components/StructuredData';
+import { ThemeProvider } from '../components/theme-provider';
+import { FloatingActions } from '../components/FloatingActions';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -82,21 +84,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL" className="antialiased">
+    <html lang="es-CL" className="antialiased" suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
       </head>
       <body className={outfit.className}>
-        <ServiceWorkerRegistration />
-        
-        {/* Structured Data for SEO */}
-        <StructuredData data={generateOrganizationSchema()} />
-        <StructuredData data={generateWebSiteSchema()} />
-        
-        <LocationProvider>
-          <ConditionalUpdateNotification />
-          <main>{children}</main>
-        </LocationProvider>
+        <ThemeProvider>
+          <ServiceWorkerRegistration />
+          
+          {/* Structured Data for SEO */}
+          <StructuredData data={generateOrganizationSchema()} />
+          <StructuredData data={generateWebSiteSchema()} />
+          
+          <LocationProvider>
+            <ConditionalUpdateNotification />
+            <main>{children}</main>
+          </LocationProvider>
+
+          {/* Floating Actions: Theme switcher y futuras acciones rápidas */}
+          <FloatingActions />
+        </ThemeProvider>
       </body>
     </html>
   );

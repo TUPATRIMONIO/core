@@ -219,7 +219,10 @@
 }
 
 .dark {
-  --background: #4a4a4a;
+  /* ============================================================================
+   * SHADCN/UI - Variables para Dark Mode
+   * ============================================================================ */
+  --background: #1a1a1a;
   --foreground: oklch(0.985 0.001 106.423);
   --card: oklch(0.216 0.006 56.043);
   --card-foreground: oklch(0.985 0.001 106.423);
@@ -250,6 +253,100 @@
   --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.553 0.013 58.071);
+
+  /* ============================================================================
+   * TUPATRIMONIO - Variables para Dark Mode
+   * ============================================================================ */
+  
+  /* COLORES BASE DEL BRAND - Adaptados para Dark */
+  --tp-background-light: #1a1a1a;    /* Fondo oscuro principal */
+  --tp-background-dark: #0a0a0a;     /* Fondo más oscuro para contraste */
+  --tp-lines: #9a9a9a;               /* Líneas más claras para visibilidad */
+  
+  /* COLORES DE BOTONES - Más claros en dark para contraste */
+  --tp-buttons: #b0b0b0;
+  --tp-buttons-hover: #c5c5c5;
+  
+  /* COLOR DE MARCA (Vino) - Más brillante para mejor contraste */
+  --tp-brand: #a50049;
+  --tp-brand-light: #c5005a;
+  --tp-brand-dark: #800039;
+  
+  /* VARIACIONES CON OPACIDAD - Background Light (ahora oscuro) */
+  --tp-bg-light-5: #1a1a1a0d;
+  --tp-bg-light-10: #1a1a1a1a;
+  --tp-bg-light-20: #1a1a1a33;
+  --tp-bg-light-30: #1a1a1a4d;
+  --tp-bg-light-40: #1a1a1a66;
+  --tp-bg-light-50: #1a1a1a80;
+  --tp-bg-light-60: #1a1a1a99;
+  --tp-bg-light-80: #1a1a1acc;
+  
+  /* VARIACIONES CON OPACIDAD - Background Dark */
+  --tp-bg-dark-5: #0a0a0a0d;
+  --tp-bg-dark-10: #0a0a0a1a;
+  --tp-bg-dark-20: #0a0a0a33;
+  --tp-bg-dark-30: #0a0a0a4d;
+  --tp-bg-dark-40: #0a0a0a66;
+  --tp-bg-dark-50: #0a0a0a80;
+  
+  /* VARIACIONES CON OPACIDAD - Lines/Gray */
+  --tp-lines-10: #9a9a9a1a;
+  --tp-lines-20: #9a9a9a33;
+  --tp-lines-30: #9a9a9a4d;
+  --tp-lines-50: #9a9a9a80;
+  
+  /* VARIACIONES CON OPACIDAD - Buttons */
+  --tp-buttons-5: #b0b0b00d;
+  --tp-buttons-10: #b0b0b01a;
+  --tp-buttons-20: #b0b0b033;
+  --tp-buttons-30: #b0b0b04d;
+  
+  /* VARIACIONES CON OPACIDAD - Brand */
+  --tp-brand-5: #a500490d;
+  --tp-brand-10: #a500491a;
+  --tp-brand-20: #a5004933;
+  --tp-brand-30: #a500494d;
+  --tp-brand-40: #a5004966;
+  
+  /* COLORES ADICIONALES DEL SISTEMA - Invertidos para dark */
+  --tp-white: #0a0a0a;           /* "Blanco" ahora es oscuro */
+  --tp-white-80: #0a0a0acc;
+  --tp-white-60: #0a0a0a99;
+  --tp-white-50: #0a0a0a80;
+  --tp-white-40: #0a0a0a66;
+  
+  /* Escala de grises invertida para dark mode */
+  --tp-gray-50: #1f2937;         /* Invertido: el más oscuro */
+  --tp-gray-100: #374151;
+  --tp-gray-200: #4b5563;
+  --tp-gray-600: #d1d5db;
+  --tp-gray-700: #e5e7eb;
+  --tp-gray-900: #f3f4f6;        /* Invertido: el más claro */
+  
+  /* ESTADOS DE FEEDBACK - Ajustados para mejor visibilidad */
+  --tp-success: #34d399;         /* Más brillante */
+  --tp-success-light: #064e3b;   /* Más oscuro */
+  --tp-success-border: #065f46;
+  --tp-error: #f87171;           /* Más brillante */
+  --tp-error-light: #7f1d1d;     /* Más oscuro */
+  --tp-error-border: #991b1b;
+  --tp-warning: #fbbf24;         /* Más brillante */
+  --tp-info: #60a5fa;            /* Más brillante */
+  
+  /* GRADIENTES PREDEFINIDOS - Versiones dark */
+  --tp-gradient-primary: linear-gradient(135deg, var(--tp-buttons) 0%, var(--tp-buttons-hover) 100%);
+  --tp-gradient-brand: linear-gradient(135deg, var(--tp-brand) 0%, var(--tp-brand-light) 100%);
+  --tp-gradient-background: linear-gradient(135deg, #1a1a1a 0%, #252525 50%, #2a2a2a 100%);
+  --tp-gradient-background-dark: linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
+  --tp-gradient-subtle: linear-gradient(135deg, var(--tp-brand-5) 0%, transparent 50%, var(--tp-bg-dark-5) 100%);
+  
+  /* SOMBRAS Y EFECTOS - Más intensas para dark mode */
+  --tp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --tp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  --tp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+  --tp-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+  --tp-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
 }
 
 @layer base {

@@ -123,19 +123,19 @@ export default function GoogleReviewsCarousel() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200 animate-pulse"
+            className="bg-card rounded-2xl p-8 shadow-lg border border-border animate-pulse"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+              <div className="w-16 h-16 bg-muted rounded-full"></div>
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-24"></div>
+                <div className="h-4 bg-muted rounded w-32 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-24"></div>
               </div>
             </div>
             <div className="space-y-2">
-              <div className="h-3 bg-gray-200 rounded"></div>
-              <div className="h-3 bg-gray-200 rounded"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-muted rounded"></div>
+              <div className="h-3 bg-muted rounded"></div>
+              <div className="h-3 bg-muted rounded w-3/4"></div>
             </div>
           </div>
         ))}
@@ -149,7 +149,7 @@ export default function GoogleReviewsCarousel() {
     <div className="relative">
       {/* Badge de estado */}
       {showFallbackBadge && (
-        <div className="mb-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+        <div className="mb-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <AlertCircle className="w-4 h-4" />
           <span>Mostrando testimonios destacados</span>
         </div>
@@ -164,7 +164,7 @@ export default function GoogleReviewsCarousel() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg hover:bg-[var(--tp-background-light)] disabled:opacity-30"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background shadow-lg hover:bg-accent disabled:opacity-30"
           onClick={goToPrevious}
           disabled={currentIndex === 0}
           aria-label="Reseña anterior"
@@ -181,7 +181,7 @@ export default function GoogleReviewsCarousel() {
             return (
               <div
                 key={`${review.author_name}-${review.time}-${idx}`}
-                className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-8 shadow-lg border border-gray-200 transition-all hover:shadow-xl"
+                className="bg-card rounded-2xl p-8 shadow-lg border border-border transition-all hover:shadow-xl"
               >
                 {/* Header con foto y nombre */}
                 <div className="flex items-center gap-4 mb-4">
@@ -201,10 +201,10 @@ export default function GoogleReviewsCarousel() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 truncate">
+                  <p className="font-bold text-foreground truncate">
                     {review.author_name}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {review.relative_time_description}
                   </p>
                   <div className="flex mt-1">
@@ -219,7 +219,7 @@ export default function GoogleReviewsCarousel() {
               </div>
 
               {/* Texto de la reseña */}
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-foreground/80 leading-relaxed">
                 {review.text.length > 200
                   ? `${review.text.slice(0, 200)}...`
                   : review.text}
@@ -233,7 +233,7 @@ export default function GoogleReviewsCarousel() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg hover:bg-[var(--tp-background-light)] disabled:opacity-30"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background shadow-lg hover:bg-accent disabled:opacity-30"
           onClick={goToNext}
           disabled={currentIndex >= maxIndex}
           aria-label="Siguiente reseña"
@@ -252,7 +252,7 @@ export default function GoogleReviewsCarousel() {
               className={`h-2 rounded-full transition-all ${
                 idx === currentIndex
                   ? 'w-8 bg-[var(--tp-brand)]'
-                  : 'w-2 bg-gray-300 hover:bg-gray-400'
+                  : 'w-2 bg-border hover:bg-muted-foreground'
               }`}
               aria-label={`Ir a grupo ${idx + 1}`}
             />
@@ -266,7 +266,7 @@ export default function GoogleReviewsCarousel() {
           href="https://www.google.com/search?q=TuPatrimonio#lrd=0x9662cf6d1f057f19:0x91c131ab6814bd0e,1,,,,"
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[var(--tp-brand)] transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-[var(--tp-brand)] transition-colors"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

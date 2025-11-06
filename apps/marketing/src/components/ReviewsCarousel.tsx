@@ -30,7 +30,7 @@ function ReviewCard({ author_name, author_photo_url, rating, text, relative_time
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 h-full flex flex-col">
+    <div className="bg-card rounded-xl p-6 shadow-md border border-border h-full flex flex-col">
       {/* Header con foto y nombre */}
       <div className="flex items-center gap-4 mb-4">
         <div className="flex-shrink-0">
@@ -47,8 +47,8 @@ function ReviewCard({ author_name, author_photo_url, rating, text, relative_time
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="font-bold text-gray-900 truncate">{author_name}</h4>
-          <p className="text-sm text-gray-500">{relative_time_description}</p>
+          <h4 className="font-bold text-foreground truncate">{author_name}</h4>
+          <p className="text-sm text-muted-foreground">{relative_time_description}</p>
         </div>
       </div>
 
@@ -67,13 +67,13 @@ function ReviewCard({ author_name, author_photo_url, rating, text, relative_time
       </div>
 
       {/* Texto de la reseña */}
-      <p className="text-gray-700 text-sm leading-relaxed flex-1">
+      <p className="text-foreground/80 text-sm leading-relaxed flex-1">
         {truncateText(text)}
       </p>
 
       {/* Badge de Google */}
-      <div className="mt-4 pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+      <div className="mt-4 pt-4 border-t border-border">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -146,7 +146,7 @@ export default function ReviewsCarousel() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--tp-buttons)]"></div>
-        <p className="mt-4 text-gray-600">Cargando opiniones...</p>
+        <p className="mt-4 text-muted-foreground">Cargando opiniones...</p>
       </div>
     );
   }
@@ -154,8 +154,8 @@ export default function ReviewsCarousel() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">No pudimos cargar las opiniones en este momento.</p>
-        <p className="text-sm text-gray-500 mt-2">Por favor, intenta nuevamente más tarde.</p>
+        <p className="text-muted-foreground">No pudimos cargar las opiniones en este momento.</p>
+        <p className="text-sm text-muted-foreground/80 mt-2">Por favor, intenta nuevamente más tarde.</p>
       </div>
     );
   }
@@ -163,9 +163,9 @@ export default function ReviewsCarousel() {
   if (!reviews || reviews.length === 0) {
     return (
       <div className="text-center py-12">
-        <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">Aún no hay opiniones disponibles.</p>
-        <p className="text-sm text-gray-500 mt-2">Pronto encontrarás aquí las opiniones de nuestros clientes.</p>
+        <User className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <p className="text-muted-foreground">Aún no hay opiniones disponibles.</p>
+        <p className="text-sm text-muted-foreground/80 mt-2">Pronto encontrarás aquí las opiniones de nuestros clientes.</p>
       </div>
     );
   }
@@ -177,15 +177,15 @@ export default function ReviewsCarousel() {
         <div className="flex items-center justify-center gap-6 mb-8">
           <div className="text-center">
             <div className="flex items-center gap-2 justify-center">
-              <span className="text-4xl font-bold text-gray-900">{stats.average_rating}</span>
+              <span className="text-4xl font-bold text-foreground">{stats.average_rating}</span>
               <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
             </div>
-            <p className="text-sm text-gray-600 mt-1">Calificación promedio</p>
+            <p className="text-sm text-muted-foreground mt-1">Calificación promedio</p>
           </div>
-          <div className="h-12 w-px bg-gray-300"></div>
+          <div className="h-12 w-px bg-border"></div>
           <div className="text-center">
-            <div className="text-4xl font-bold text-gray-900">{stats.total_reviews}</div>
-            <p className="text-sm text-gray-600 mt-1">Reseñas totales</p>
+            <div className="text-4xl font-bold text-foreground">{stats.total_reviews}</div>
+            <p className="text-sm text-muted-foreground mt-1">Reseñas totales</p>
           </div>
         </div>
       )}
@@ -196,10 +196,10 @@ export default function ReviewsCarousel() {
         {currentIndex > 0 && (
           <button
             onClick={goToPrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-background rounded-full p-2 shadow-lg border border-border hover:bg-accent transition-colors"
             aria-label="Anterior"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-700" />
+            <ChevronLeft className="w-6 h-6 text-foreground" />
           </button>
         )}
 
@@ -207,10 +207,10 @@ export default function ReviewsCarousel() {
         {currentIndex < maxIndex && (
           <button
             onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-background rounded-full p-2 shadow-lg border border-border hover:bg-accent transition-colors"
             aria-label="Siguiente"
           >
-            <ChevronRight className="w-6 h-6 text-gray-700" />
+            <ChevronRight className="w-6 h-6 text-foreground" />
           </button>
         )}
 
@@ -243,7 +243,7 @@ export default function ReviewsCarousel() {
               className={`h-2 rounded-full transition-all ${
                 index === currentIndex
                   ? 'w-8 bg-[var(--tp-buttons)]'
-                  : 'w-2 bg-gray-300 hover:bg-gray-400'
+                  : 'w-2 bg-border hover:bg-muted-foreground'
               }`}
               aria-label={`Ir a grupo ${index + 1}`}
             />

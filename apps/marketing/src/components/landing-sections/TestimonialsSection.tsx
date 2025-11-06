@@ -22,13 +22,13 @@ export default function TestimonialsSection({
   metrics,
 }: TestimonialsSectionProps) {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             {title}
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             {description}
           </p>
         </div>
@@ -49,8 +49,8 @@ export default function TestimonialsSection({
               ) : (
                 <div key={index}>
                   <div className="text-5xl font-bold text-[var(--tp-brand)] mb-2">{metric.value}</div>
-                  <p className="text-gray-700 font-medium">{metric.label}</p>
-                  <p className="text-sm text-gray-600 mt-1">{metric.description}</p>
+                  <p className="text-foreground/90 font-medium">{metric.label}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{metric.description}</p>
                 </div>
               )
             ))}
