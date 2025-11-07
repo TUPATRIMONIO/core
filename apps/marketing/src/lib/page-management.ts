@@ -57,7 +57,7 @@ export class PageManagement {
   async getPageConfig(routePath: string): Promise<PageConfig | null> {
     try {
       const { data, error } = await this.supabase
-        .from('marketing.page_management')
+        .from('page_management')
         .select('*')
         .eq('route_path', routePath)
         .single();
@@ -122,7 +122,7 @@ export class PageManagement {
 
     try {
       const { data, error } = await this.supabase
-        .from('marketing.user_roles')
+        .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .single();
@@ -164,7 +164,7 @@ export class PageManagement {
   async upsertPageConfig(config: Omit<PageConfig, 'id' | 'created_at' | 'updated_at'>): Promise<PageConfig | null> {
     try {
       const { data, error } = await this.supabase
-        .from('marketing.page_management')
+        .from('page_management')
         .upsert(config, { 
           onConflict: 'route_path',
           ignoreDuplicates: false 
@@ -190,7 +190,7 @@ export class PageManagement {
   async deletePageConfig(routePath: string): Promise<boolean> {
     try {
       const { error } = await this.supabase
-        .from('marketing.page_management')
+        .from('page_management')
         .delete()
         .eq('route_path', routePath);
 
@@ -216,7 +216,7 @@ export class PageManagement {
   }): Promise<PageConfig[]> {
     try {
       let query = this.supabase
-        .from('marketing.page_management')
+        .from('page_management')
         .select('*')
         .order('route_path');
 
@@ -250,7 +250,7 @@ export class PageManagement {
   async assignUserRole(userId: string, role: UserRole, permissions?: Record<string, any>): Promise<boolean> {
     try {
       const { error } = await this.supabase
-        .from('marketing.user_roles')
+        .from('user_roles')
         .upsert({ 
           user_id: userId, 
           role, 
@@ -286,7 +286,7 @@ export class PageManagement {
   }> {
     try {
       const { data, error } = await this.supabase
-        .from('marketing.page_management')
+        .from('page_management')
         .select('status, country_code, section, seo_index');
 
       if (error) {

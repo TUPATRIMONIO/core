@@ -45,7 +45,7 @@ export function ContactForm({
       const supabase = createClient();
       
       const { data, error } = await supabase
-        .from('marketing.contact_messages')
+        .from('contact_messages')
         .insert({
           name: name.trim(),
           email: email.trim(),
@@ -195,16 +195,20 @@ export function ContactForm({
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Cuéntanos en qué podemos ayudarte..."
             rows={5}
+            minLength={10}
             className="w-full px-4 py-3 bg-background border border-input rounded-lg 
                      focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
                      text-foreground placeholder:text-muted-foreground
                      transition-all duration-200 resize-none"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Mínimo 10 caracteres ({message.trim().length}/10)
+          </p>
         </div>
 
         <Button
           type="submit"
-          disabled={!name || !email || !message || isLoading}
+          disabled={!name || !email || !message || message.trim().length < 10 || isLoading}
           className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] 
                    text-white dark:text-white
                    disabled:opacity-50 disabled:cursor-not-allowed

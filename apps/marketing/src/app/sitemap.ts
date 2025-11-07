@@ -176,7 +176,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: posts } = await supabase
-      .from('marketing.blog_posts')
+      .from('blog_posts')
       .select(`
         slug,
         updated_at,
@@ -207,7 +207,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: categories } = await supabase
-      .from('marketing.blog_categories')
+      .from('blog_categories')
       .select('slug')
       .eq('is_active', true);
 
@@ -229,7 +229,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: articles } = await supabase
-      .from('marketing.kb_articles')
+      .from('kb_articles')
       .select(`
         slug,
         updated_at,
@@ -259,7 +259,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createClient();
     const { data: kbCats } = await supabase
-      .from('marketing.kb_categories')
+      .from('kb_categories')
       .select('slug')
       .eq('is_active', true);
 
