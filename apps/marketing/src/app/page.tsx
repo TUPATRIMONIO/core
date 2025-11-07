@@ -305,7 +305,7 @@ export default function HomePage() {
             <h2 className="mb-6">
               Una Plataforma, Todo TuPatrimonio Protegido
             </h2>
-            <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
               TuPatrimonio no es otra app más de trámites. Es tu copiloto para todo lo que necesitas 
               en el mundo legal, inmobiliario y de documentos. Imagina tener un asistente personal que 
               conoce las leyes, entiende tus necesidades y te guía paso a paso.
@@ -404,31 +404,31 @@ export default function HomePage() {
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
+                    <span className=""><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
+                    <span className=""><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
+                    <span className=""><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
+                    <span className=""><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
+                    <span className=""><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
+                    <span className=""><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className="text-foreground/80"><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
+                    <span className=""><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
                   </li>
                 </ul>
                 <p className="text-sm text-muted-foreground bg-[var(--tp-bg-light-20)] p-4 rounded-lg">
@@ -604,7 +604,7 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="mb-6">
+            <h2 className="text-white mb-6">
               Números que Hablan por Nosotros
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
@@ -848,7 +848,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* Columna 1: Marca */}
             <div>
-              <h3 className="mb-4">TuPatrimonio®</h3>
+              <h3 className="text-white mb-4">TuPatrimonio®</h3>
               <p className="text-white/80 mb-4">
                 Tu copiloto para proteger y hacer crecer lo que más te importa. Transformando la gestión legal con tecnología de vanguardia.
               </p>
@@ -860,7 +860,7 @@ export default function HomePage() {
 
             {/* Columna 2: Enlaces */}
             <div>
-              <h4 className="font-semibold mb-4">Recursos</h4>
+              <h4 className="text-white mb-4">Recursos</h4>
               <ul className="space-y-2 text-white/80">
                 <li>
                   <Link href="/blog" className="hover:text-white transition-colors">
@@ -887,7 +887,7 @@ export default function HomePage() {
 
             {/* Columna 3: Legal */}
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
+              <h4 className="text-white mb-4">Legal</h4>
               <ul className="space-y-2 text-white/80">
                 <li>
                   <Link href="/cl/legal/terminos" className="hover:text-white transition-colors">

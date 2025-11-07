@@ -601,7 +601,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-8 shadow-lg border-2 border-green-200">
                 <div className="text-5xl mb-4">😌</div>
                 <h3 className="mb-3">Duerme Tranquilo</h3>
-                <p className="text-foreground/80 leading-relaxed">
+                <p className="">
                   Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
                 </p>
               </div>
@@ -609,7 +609,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-lg border-2 border-blue-200">
                 <div className="text-5xl mb-4">⏰</div>
                 <h3 className="mb-3">Ahorra Tiempo (Y Estrés)</h3>
-                <p className="text-foreground/80 leading-relaxed">
+                <p className="">
                   Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
                 </p>
               </div>
@@ -617,7 +617,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-lg border-2 border-purple-200">
                 <div className="text-5xl mb-4">🛡️</div>
                 <h3 className="mb-3">Estás Protegido</h3>
-                <p className="text-foreground/80 leading-relaxed">
+                <p className="">
                   No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
                 </p>
               </div>
@@ -625,7 +625,7 @@ export default function ContratoArriendoOnlinePage() {
               <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-8 shadow-lg border-2 border-orange-200">
                 <div className="text-5xl mb-4">🤝</div>
                 <h3 className="mb-3">Para Todos</h3>
-                <p className="text-foreground/80 leading-relaxed">
+                <p className="">
                   Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
                 </p>
               </div>
@@ -641,16 +641,16 @@ export default function ContratoArriendoOnlinePage() {
                 ¿Qué Es Un Contrato de Arriendo Online y Por Qué Lo Necesitas?
               </h2>
               
-              <p className="text-xl text-foreground/80 leading-relaxed mb-6">
+              <p className="text-xl text-foreground/80 mb-6">
                 Ok, vamos a lo simple: un <strong>contrato de arriendo</strong> es ese papel (bueno, ahora documento digital) donde tú y la otra persona acuerdan las "reglas del juego" cuando alguien va a vivir en una casa que no es suya.
               </p>
               
-              <p className="text-xl text-foreground/80 leading-relaxed mb-8">
+              <p className="text-xl text-foreground/80 mb-8">
                 Piénsalo como las reglas de un juego de mesa: todos necesitan saber cuánto se paga, cuándo se paga, qué pasa si se rompe algo, cuánto tiempo dura el acuerdo, etc. Sin reglas claras, empiezan los problemas.
               </p>
 
               <h3 className="mb-4">¿Y el "online" qué significa?</h3>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-4">
+              <p className="text-lg text-foreground/80 mb-4">
                 Simple: que no tienes que moverte de tu casa. Todo el proceso lo haces por internet:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-lg text-foreground/80 mb-8">
@@ -671,7 +671,7 @@ export default function ContratoArriendoOnlinePage() {
               </div>
 
               <h3 className="mb-4">¿Por qué es mejor que ir a la notaría?</h3>
-              <p className="text-lg text-foreground/80 leading-relaxed mb-6">
+              <p className="text-lg text-foreground/80 mb-6">
                 No vamos a decirte que ir a la notaría es "malo". Pero seamos honestos:
               </p>
 

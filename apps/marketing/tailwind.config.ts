@@ -156,6 +156,8 @@ const config: Config = {
       fontFamily: {
         outfit: ["var(--font-outfit)"],
         nunito: ["var(--font-nunito)"],
+        quicksand: ["var(--font-quicksand)"],
+        'josefin-sans': ["var(--font-josefin-sans)"],
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },

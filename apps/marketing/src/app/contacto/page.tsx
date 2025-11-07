@@ -34,7 +34,7 @@ export default function ContactoPage() {
               Hablemos de tu{' '}
               <span className="text-[var(--tp-brand)]">Proyecto</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
+            <p className="text-xl text-muted-foreground">
               Nuestro equipo está listo para ayudarte con cualquier consulta sobre 
               nuestros servicios legales digitales.
             </p>

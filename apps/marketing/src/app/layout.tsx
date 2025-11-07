@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Nunito } from 'next/font/google';
+import { Outfit, Nunito, Quicksand, Josefin_Sans } from 'next/font/google';
 import { LocationProvider } from '../components/LocationProvider';
 import { ConditionalUpdateNotification } from '../components/ConditionalUpdateNotification';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
@@ -19,6 +19,20 @@ const nunito = Nunito({
   subsets: ["latin"],
   weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-nunito",
+  display: "swap",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-quicksand",
+  display: "swap",
+});
+
+const josefinSans = Josefin_Sans({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-josefin-sans",
   display: "swap",
 });
 
@@ -93,7 +107,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-CL" className={`${outfit.variable} ${nunito.variable} antialiased`} suppressHydrationWarning>
+    <html lang="es-CL" className={`${outfit.variable} ${nunito.variable} ${quicksand.variable} ${josefinSans.variable} antialiased`} suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
       </head>

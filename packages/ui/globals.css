@@ -80,7 +80,7 @@
   /* ============================================================================
    * TIPOGRAFÍA - Font Families
    * ============================================================================ */
-  --font-h1: var(--font-outfit);
+  --font-h1: var(--font-josefin-sans);
   --font-h2: var(--font-outfit);
   --font-h3: var(--font-outfit);
   --font-h4: var(--font-outfit);
@@ -99,7 +99,7 @@
   --font-weight-extrabold: 800;
   
   /* TIPOGRAFÍA - Tamaños Base (Mobile First) */
-  --text-h1: 2.25rem;      /* 36px */
+  --text-h1: 2rem;      /* 36px */
   --text-h2: 2rem;     /* 30px */
   --text-h3: 1.5rem;       /* 24px */
   --text-h4: 1.25rem;      /* 20px */
@@ -108,7 +108,7 @@
   --text-base: 1rem;       /* 16px */
   
   /* TIPOGRAFÍA - Tamaños Tablet (md: 768px) */
-  --text-h1-md: 3rem;      /* 48px */
+  --text-h1-md: 2.5rem;      /* 48px */
   --text-h2-md: 2.5rem;    /* 40px */
   --text-h3-md: 2rem;      /* 32px */
   --text-h4-md: 1.5rem;    /* 24px */
@@ -117,7 +117,7 @@
   --text-base: 1rem;       /* 16px */
   
   /* TIPOGRAFÍA - Tamaños Desktop (lg: 1024px) */
-  --text-h1-lg: 3.75rem;   /* 60px */
+  --text-h1-lg: 3rem;   /* 60px */
   --text-h2-lg: 3rem;      /* 48px */
   --text-h3-lg: 2.5rem;    /* 40px */
   --text-h4-lg: 1.875rem;  /* 30px */
@@ -251,7 +251,7 @@
   --secondary: #f5f5f5;
   --secondary-foreground: #3f3f3f;
   --muted: #f5f5f5;
-  --muted-foreground: #737373;
+  --muted-foreground: #2d2d2d;
   --accent: #f5f5f5;
   --accent-foreground: #3f3f3f;
   --destructive: #dc2626;
@@ -288,7 +288,7 @@
   --secondary: #525252;
   --secondary-foreground: #fafafa;
   --muted: #525252;
-  --muted-foreground: #a3a3a3;
+  --muted-foreground: #ececec;
   --accent: #525252;
   --accent-foreground: #fafafa;
   --destructive: #ef4444;

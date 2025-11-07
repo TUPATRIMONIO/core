@@ -40,7 +40,7 @@ export default function LegalValiditySection({
                 <faq.icon className="w-7 h-7 text-green-600 flex-shrink-0 mt-1" />
                 {faq.question}
               </h3>
-              <div className="pl-10 space-y-3 text-foreground/80 leading-relaxed">
+              <div className="pl-10 space-y-3">
                 {faq.answer}
               </div>
             </div>

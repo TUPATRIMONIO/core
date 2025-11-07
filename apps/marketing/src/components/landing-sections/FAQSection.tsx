@@ -57,7 +57,7 @@ export default function FAQSection({
                     <h4 className="mb-2">
                       {question.question}
                     </h4>
-                    <p className="text-foreground/80 leading-relaxed">
+                    <p>
                       {question.answer}
                     </p>
                   </div>

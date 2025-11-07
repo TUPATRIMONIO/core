@@ -72,7 +72,7 @@ export default function HeroSection({
                   className="flex items-center gap-2 px-4 py-2 bg-background dark:bg-card rounded-full shadow-sm border border-[var(--tp-lines-20)]"
                 >
                   {badge.icon && <badge.icon className="w-4 h-4 text-[var(--tp-brand)]" />}
-                  <span className="text-sm font-medium text-foreground/80">{badge.text}</span>
+                  <span className="text-sm font-medium text-muted-foreground">{badge.text}</span>
                 </div>
               )
             ))}
