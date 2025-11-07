@@ -41,7 +41,7 @@ export default function FinalCTASection({
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-5xl tp-container relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-white mb-6">
             {title}

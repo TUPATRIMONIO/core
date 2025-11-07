@@ -35,7 +35,7 @@ export default function PreciosPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-card py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl tp-container text-center">
           <h1 className="mb-6">
             Planes que se Adaptan a Ti
           </h1>
@@ -65,7 +65,7 @@ export default function PreciosPage() {
 
       {/* Planes Individuales (B2C) */}
       <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-3 gap-8">
             
             {/* Personal Free */}
@@ -199,7 +199,7 @@ export default function PreciosPage() {
 
       {/* Separador para Planes Empresariales */}
       <section className="py-12 bg-[var(--tp-buttons)]/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl tp-container text-center">
           <h2 className="mb-4">
             Planes Empresariales
           </h2>
@@ -211,7 +211,7 @@ export default function PreciosPage() {
 
       {/* Planes Empresariales (B2B) */}
       <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-3 gap-8">
             
             {/* Team Starter */}
@@ -367,7 +367,7 @@ export default function PreciosPage() {
 
       {/* Calculadora de ROI */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl tp-container text-center">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8">
             <Calculator className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
             <h2 className="mb-4">
@@ -407,7 +407,7 @@ export default function PreciosPage() {
 
       {/* FAQ sobre Facturación */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Preguntas sobre Facturación
@@ -460,7 +460,7 @@ export default function PreciosPage() {
 
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container text-center">
           <h2 className="text-white mb-4">
             Comienza tu Transformación Digital
           </h2>

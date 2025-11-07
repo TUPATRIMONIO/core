@@ -191,7 +191,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <StructuredData data={breadcrumbSchema} />
       {/* Back Navigation */}
       <div className="bg-card border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-4xl tp-container py-4">
           <Link href="/blog">
             <Button variant="ghost" size="sm">
               <ChevronLeft className="w-4 h-4 mr-2" />
@@ -202,7 +202,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </div>
 
       <article className="py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           {/* Header */}
           <header className="mb-8">
             <div className="mb-4">

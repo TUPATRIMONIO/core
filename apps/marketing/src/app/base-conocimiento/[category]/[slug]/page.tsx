@@ -37,7 +37,7 @@ export default async function KBArticlePage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="bg-card border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-4xl tp-container py-6">
           <Link href="/base-conocimiento">
             <Button variant="ghost" size="sm">
               <ChevronLeft className="w-4 h-4 mr-2" />
@@ -48,7 +48,7 @@ export default async function KBArticlePage({ params }: PageProps) {
       </section>
 
       <section className="py-12">
-        <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <article className="max-w-4xl tp-container">
           <div className="bg-card rounded-xl shadow-sm p-8">
             <div className="mb-8">
               <Link

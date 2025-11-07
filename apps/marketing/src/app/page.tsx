@@ -300,7 +300,7 @@ export default function HomePage() {
 
       {/* Sección 2: La Solución - Features */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-6">
               Una Plataforma, Todo TuPatrimonio Protegido
@@ -374,7 +374,7 @@ export default function HomePage() {
 
       {/* Sección 4: Qué Puedes Hacer - Servicios */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-6">
               Todo lo que Necesitas para Proteger TuPatrimonio, en Un Solo Lugar
@@ -502,7 +502,7 @@ export default function HomePage() {
 
       {/* Sección 5: Beneficios Emocionales */}
       <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-6">
               Más Allá de los Trámites: Recupera Tu Tiempo y Tu Tranquilidad
@@ -602,7 +602,7 @@ export default function HomePage() {
 
       {/* Sección 6: Stats (Actualizada) */}
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="text-white mb-6">
               Números que Hablan por Nosotros
@@ -651,7 +651,7 @@ export default function HomePage() {
 
       {/* Sección 7: Para Quién Es */}
       <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-6">
               Diseñado para Personas Reales con Problemas Reales
@@ -759,7 +759,7 @@ export default function HomePage() {
 
       {/* Certificación Notarial */}
       <section className="py-12 bg-background">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl tp-container text-center">
           <div className="inline-flex items-center gap-3 bg-card px-6 py-4 rounded-2xl shadow-lg border-2 border-[var(--tp-brand-20)]">
             <Landmark className="w-8 h-8 text-[var(--tp-brand)]" />
             <div className="text-left">
@@ -774,7 +774,7 @@ export default function HomePage() {
 
       {/* Sección 9: Newsletter */}
       <section className="py-20 bg-background">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           <Card className="border-2 border-[var(--tp-brand-20)] shadow-2xl overflow-hidden">
             <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent p-8 md:p-12">
               <div className="text-center mb-8">
@@ -844,7 +844,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-[var(--tp-background-dark)] text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* Columna 1: Marca */}
             <div>

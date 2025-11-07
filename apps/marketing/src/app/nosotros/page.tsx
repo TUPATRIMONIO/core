@@ -25,7 +25,7 @@ export default function NosotrosPage() {
     <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20 md:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-[var(--tp-brand-5)] rounded-full px-4 py-2 mb-6">
               <Building2 className="w-4 h-4 text-[var(--tp-brand)]" />
@@ -51,7 +51,7 @@ export default function NosotrosPage() {
 
       {/* Misión, Visión, Valores */}
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Misión */}
             <Card className="border-2 border-[var(--tp-brand-20)] hover:border-[var(--tp-brand)] transition-all">
@@ -110,7 +110,7 @@ export default function NosotrosPage() {
 
       {/* Estadísticas */}
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
               TuPatrimonio en Números
@@ -158,7 +158,7 @@ export default function NosotrosPage() {
 
       {/* ¿Por qué TuPatrimonio? */}
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               ¿Por qué elegir TuPatrimonio?
@@ -221,7 +221,7 @@ export default function NosotrosPage() {
 
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-background-light)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl tp-container text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             ¿Listo para Transformar tu Gestión Legal?
           </h2>

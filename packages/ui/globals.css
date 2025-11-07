@@ -413,6 +413,26 @@
   }
   
   /* ============================================================================
+   * CONTAINER UTILITIES - Espaciado lateral consistente
+   * ============================================================================
+   * Clases para mantener un espaciado lateral consistente en todas las páginas.
+   * 
+   * USO:
+   * - .tp-container: Espaciado estándar para la mayoría de secciones
+   * - .tp-container-wide: Espaciado más amplio para secciones especiales
+   * 
+   * ESPACIADO:
+   * Mobile: 24px | Tablet: 32px | Desktop MD: 48px | Desktop LG: 64px | XL: 80px | 2XL: 96px
+   * ============================================================================ */
+  .tp-container {
+    @apply mx-auto px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24;
+  }
+  
+  .tp-container-wide {
+    @apply mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-24 2xl:px-32;
+  }
+  
+  /* ============================================================================
    * TIPOGRAFÍA CENTRALIZADA - TuPatrimonio
    * ============================================================================
    * Todos los estilos de headings se definen aquí para mantener consistencia.

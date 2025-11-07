@@ -103,7 +103,7 @@ export default async function BlogPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl tp-container py-12">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Blog <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
@@ -117,7 +117,7 @@ export default async function BlogPage() {
 
       {/* Categories */}
       <section className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl tp-container py-6">
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/blog">
               <Button variant="outline" size="sm" className="bg-[var(--tp-buttons)] text-white border-[var(--tp-buttons)]">
@@ -137,7 +137,7 @@ export default async function BlogPage() {
 
       {/* Blog Posts */}
       <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           {posts.length > 0 ? (
             <>
               {/* Featured Post */}

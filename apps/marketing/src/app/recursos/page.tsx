@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RecursosPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl tp-container">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
             Recursos <span className="text-[var(--tp-brand)]">Gratuitos</span>

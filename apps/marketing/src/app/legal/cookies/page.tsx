@@ -18,7 +18,7 @@ export default function CookiesPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-card border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-4xl tp-container py-6">
           <Link href="/">
             <Button variant="ghost" size="sm">
               <ChevronLeft className="w-4 h-4 mr-2" />
@@ -30,7 +30,7 @@ export default function CookiesPage() {
 
       {/* Content */}
       <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
             <aside className="lg:col-span-1">

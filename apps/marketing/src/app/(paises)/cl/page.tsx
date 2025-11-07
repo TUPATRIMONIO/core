@@ -28,7 +28,7 @@ export default function ChilePage() {
     <div className="min-h-screen">
       {/* Country Header */}
       <div className="bg-[var(--tp-buttons)]/5 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl tp-container py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="w-4 h-4 text-[var(--tp-buttons)]" />
@@ -47,7 +47,7 @@ export default function ChilePage() {
 
       {/* Hero Section Chile-specific */}
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center">
             <h1 className="mb-6">
               Servicios Legales Digitales
@@ -92,7 +92,7 @@ export default function ChilePage() {
 
       {/* Services Section Chile */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Servicios Específicos para Chile
@@ -168,7 +168,7 @@ export default function ChilePage() {
 
       {/* Chile Market Focus */}
       <section className="py-20 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Diseñado Específicamente para Chile
@@ -217,7 +217,7 @@ export default function ChilePage() {
 
       {/* Chile Social Proof */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl tp-container text-center">
             <h2 className="mb-12">
             Empresas Chilenas que Confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
           </h2>
@@ -254,7 +254,7 @@ export default function ChilePage() {
 
       {/* CTA Chile */}
       <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container text-center">
           <h2 className="text-white mb-4">
             Únete a la Transformación Digital en Chile
           </h2>

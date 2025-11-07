@@ -21,7 +21,7 @@ export default function ContactoPage() {
     <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 bg-[var(--tp-brand-5)] rounded-full px-4 py-2 mb-6">
               <MessageCircle className="w-4 h-4 text-[var(--tp-brand)]" />
@@ -155,7 +155,7 @@ export default function ContactoPage() {
 
       {/* FAQ Rápido */}
       <section className="py-20 bg-[var(--tp-background-light)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Preguntas Frecuentes

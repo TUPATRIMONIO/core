@@ -40,7 +40,7 @@ export function CountryRouteWrapper({
     <div className={className}>
       {showCountryHeader && (
         <div className="bg-[var(--tp-brand-5)] border-b border-[var(--tp-brand-20)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="max-w-7xl tp-container py-3">
             <div className="flex items-center justify-between flex-wrap gap-4">
               {/* País actual */}
               <div className="flex items-center gap-2">

@@ -35,7 +35,7 @@ export default function VerificacionIdentidadPage() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-background py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="mb-6">
@@ -89,7 +89,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* Tipos de Verificación */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Tipos de Verificación Disponibles
@@ -197,7 +197,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* Proceso de Verificación */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               ¿Cómo Funciona la Verificación?
@@ -246,7 +246,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* Beneficios por Industria */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Casos de Uso por Industria
@@ -354,7 +354,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* Testimonios */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Casos de Éxito Reales
@@ -409,7 +409,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* FAQ */}
       <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Preguntas Frecuentes
@@ -455,7 +455,7 @@ export default function VerificacionIdentidadPage() {
 
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container text-center">
           <h2 className="text-white mb-4">
             Reduce Fraude, Acelera Onboarding
           </h2>

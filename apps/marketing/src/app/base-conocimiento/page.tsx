@@ -59,7 +59,7 @@ export default async function BaseConocimientoPage() {
     <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Hero Section */}
       <section className="py-20 bg-gradient-to-br from-[var(--tp-brand-5)] to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-[var(--tp-brand)] text-white rounded-full px-4 py-2 mb-6">
               <BookOpen className="w-4 h-4" />
@@ -99,7 +99,7 @@ export default async function BaseConocimientoPage() {
 
       {/* Categories Grid */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Explora por Categoría
@@ -150,7 +150,7 @@ export default async function BaseConocimientoPage() {
       {/* Featured Articles */}
       {featuredArticles.length > 0 && (
         <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl tp-container">
             <div className="flex items-center justify-between mb-12">
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
@@ -212,7 +212,7 @@ export default async function BaseConocimientoPage() {
 
       {/* CTA Section */}
       <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container">
           <Card className="bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white border-0">
             <CardHeader className="text-center">
               <CardTitle className="text-3xl mb-4">

@@ -49,7 +49,7 @@ export default function FirmasElectronicasChilePage() {
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-background py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="mb-6">
@@ -102,7 +102,7 @@ export default function FirmasElectronicasChilePage() {
 
       {/* Tipos de Firma */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Tipos de Firma Electrónica
@@ -210,7 +210,7 @@ export default function FirmasElectronicasChilePage() {
 
       {/* Marco Legal Chileno */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
               Marco Legal en Chile
@@ -256,7 +256,7 @@ export default function FirmasElectronicasChilePage() {
 
       {/* CTA Final */}
       <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl tp-container text-center">
           <h2 className="text-white mb-4">
             Comienza a Firmar Digitalmente Hoy
           </h2>

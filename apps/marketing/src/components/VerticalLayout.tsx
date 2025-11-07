@@ -60,7 +60,7 @@ export function VerticalLayout({
       {/* Breadcrumb */}
       {breadcrumb.length > 0 && (
         <div className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="max-w-7xl tp-container py-3">
             <nav className="flex items-center gap-2 text-sm">
               <Link 
                 href="/" 
@@ -91,7 +91,7 @@ export function VerticalLayout({
 
       {/* Hero del vertical */}
       <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           <div className="text-center max-w-4xl mx-auto">
             {/* Icono */}
             <div 
@@ -119,7 +119,7 @@ export function VerticalLayout({
       <Separator className="max-w-7xl mx-auto" />
 
       {/* Contenido principal */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl tp-container py-16">
         {children}
       </div>
 
@@ -128,7 +128,7 @@ export function VerticalLayout({
         <>
           <Separator className="max-w-7xl mx-auto mb-16" />
           <section className="pb-20">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl tp-container">
               <Card 
                 className="border-2 shadow-2xl overflow-hidden"
                 style={{ borderColor: color }}

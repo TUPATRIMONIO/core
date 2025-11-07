@@ -22,7 +22,7 @@ export default function LegalValiditySection({
 }: LegalValiditySectionProps) {
   return (
     <section className="py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl tp-container">
         <div className="text-center mb-12">
           <Icon className="w-16 h-16 text-[var(--tp-brand)] mx-auto mb-4" />
           <h2 className="mb-4">

@@ -52,7 +52,7 @@ export default function HeroSection({
 }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-[var(--tp-background-light)] to-background pt-8 pb-16 md:pt-12 md:pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl tp-container">
         <div className="text-center">
           {/* Imagotipo TuPatrimonio */}
           {showImageotype && (

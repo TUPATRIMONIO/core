@@ -151,7 +151,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumbs */}
       <div className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl tp-container py-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link href="/blog" className="hover:text-[var(--tp-buttons)] transition-colors">
               Blog
@@ -164,7 +164,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       {/* Header */}
       <section className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl tp-container py-12">
           <div className="text-center max-w-3xl mx-auto">
             <div className="mb-4">
               <span 
@@ -191,7 +191,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
       {/* Posts */}
       <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl tp-container">
           {posts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (

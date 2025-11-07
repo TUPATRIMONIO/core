@@ -24,7 +24,7 @@ export function ComingSoonCountry({
     <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
       {/* Hero Section */}
       <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl tp-container text-center">
           {/* Back to Chile link */}
           <div className="mb-8">
             <Link href="/cl">
@@ -64,7 +64,7 @@ export function ComingSoonCountry({
 
       {/* What to expect section */}
       <section className="py-12 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl tp-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               ¿Qué puedes esperar?
@@ -116,7 +116,7 @@ export function ComingSoonCountry({
 
       {/* Notify me form section */}
       <section className="py-20">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl tp-container">
           <Card className="border-2 border-[var(--tp-brand)] shadow-2xl">
             <CardHeader className="text-center bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent">
               <div className="w-16 h-16 bg-[var(--tp-brand)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -139,7 +139,7 @@ export function ComingSoonCountry({
 
       {/* Meanwhile in Chile section */}
       <section className="py-16 bg-[var(--tp-brand-5)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-4xl tp-container text-center">
           <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             ¿Necesitas servicios legales digitales ahora?
           </h3>

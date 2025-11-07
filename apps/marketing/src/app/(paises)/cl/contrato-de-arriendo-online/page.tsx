@@ -555,7 +555,7 @@ export default function ContratoArriendoOnlinePage() {
 
         {/* SECCIÓN 2: BENEFICIOS EMOCIONALES (CUSTOM) */}
         <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl tp-container">
             <div className="text-center mb-12">
               <h2 className="mb-6">
                 ¿Por Qué Un Contrato de Arriendo Online Te Cambia la Vida?
@@ -635,7 +635,7 @@ export default function ContratoArriendoOnlinePage() {
 
         {/* SECCIÓN 3: EDUCACIÓN (CUSTOM) */}
         <section className="py-20 bg-gradient-to-br from-white to-[var(--tp-background-light)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl tp-container">
             <div className="max-w-4xl mx-auto">
               <h2 className="mb-6 text-center">
                 ¿Qué Es Un Contrato de Arriendo Online y Por Qué Lo Necesitas?
@@ -709,7 +709,7 @@ export default function ContratoArriendoOnlinePage() {
 
         {/* SECCIÓN 5: PROCESO (CUSTOM - 6 PASOS) */}
         <section id="como-funciona" className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl tp-container">
             <div className="text-center mb-16">
               <h2 className="mb-4">
                 Cómo Funciona (Más Simple Imposible)
@@ -844,7 +844,7 @@ export default function ContratoArriendoOnlinePage() {
 
         {/* SECCIÓN 6: QUÉ INCLUYE (CUSTOM) */}
         <section className="py-20 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl tp-container">
             <div className="text-center mb-12">
               <h2 className="mb-4">
                 ¿Qué Incluye Tu Contrato de Arriendo Online?
