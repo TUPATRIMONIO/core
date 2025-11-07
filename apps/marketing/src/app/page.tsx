@@ -52,6 +52,7 @@ import {
   type TrustBarItem,
   type Metric
 } from "@/components/landing-sections";
+import { NewsletterForm } from "@/components/forms/NewsletterForm";
 
 // Metadata optimizado con configuración desde page-config
 const pageConfig = getPageConfig('/');
@@ -793,30 +794,7 @@ export default function HomePage() {
               </div>
 
               <div className="max-w-md mx-auto">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="email" className="text-base font-medium mb-2 block">
-                      Correo electrónico
-                    </Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="tu@email.com"
-                      className="h-12 text-base border-2 focus:border-[var(--tp-brand)]"
-                    />
-                  </div>
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white h-12 text-base shadow-lg"
-                  >
-                    Suscribirme Ahora
-                  </Button>
-                </div>
-
-                <p className="text-sm text-muted-foreground/80 text-center mt-4">
-                  Al suscribirte aceptas recibir emails con novedades, tips y ofertas especiales.
-                  Puedes cancelar en cualquier momento.
-                </p>
+                <NewsletterForm />
               </div>
             </div>
           </Card>

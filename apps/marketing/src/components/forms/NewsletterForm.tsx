@@ -4,28 +4,20 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Gift } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { trackEvent } from '@/lib/analytics';
 
-interface NotifyMeFormProps {
-  country: string;
+interface NewsletterFormProps {
   className?: string;
 }
 
-export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
+export function NewsletterForm({ className = '' }: NewsletterFormProps) {
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const countryNames: Record<string, string> = {
-    mx: 'México',
-    co: 'Colombia',
-    pe: 'Perú',
-    ar: 'Argentina',
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,29 +28,26 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
       const supabase = createClient();
       
       const { data, error } = await supabase
-        .from('waitlist_subscribers')
+        .from('newsletter_subscribers')
         .insert({
           email: email.trim(),
           first_name: firstName.trim() || null,
-          referral_source: `notify_me_${country}`,
           status: 'active',
-          user_agent: typeof window !== 'undefined' ? window.navigator.userAgent : null,
         });
 
       if (error) {
         if (error.code === '23505') {
-          setError(`Ya estás registrado en nuestra lista de espera para ${countryNames[country] || country.toUpperCase()}`);
+          setError('Este email ya está suscrito a nuestro newsletter');
         } else {
-          setError('Hubo un error al procesar tu solicitud. Por favor, intenta nuevamente.');
+          setError('Hubo un error al procesar tu suscripción. Por favor, intenta nuevamente.');
         }
-        console.error('NotifyMe error:', error);
+        console.error('Newsletter error:', error);
         return;
       }
 
       // Track successful submission
       trackEvent('form_submit', {
-        form_name: 'notify_me',
-        country: country,
+        form_name: 'newsletter',
         has_name: !!firstName.trim()
       });
       
@@ -67,7 +56,7 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
       setFirstName('');
     } catch (err) {
       setError('Error de conexión. Verifica tu internet e inténtalo nuevamente.');
-      console.error('Error submitting notify form:', err);
+      console.error('Error submitting newsletter form:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -79,19 +68,25 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="w-8 h-8 text-green-600" />
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
-          ¡Gracias por registrarte!
+        <h3 className="text-2xl font-bold text-foreground mb-2">
+          ¡Bienvenido a TuPatrimonio News! 🎉
         </h3>
-        <p className="text-gray-600 mb-6">
-          Te notificaremos cuando estemos disponibles en {countryNames[country] || country.toUpperCase()}
+        <p className="text-muted-foreground mb-4">
+          Te has suscrito correctamente. Revisa tu email para confirmar tu suscripción.
         </p>
-        <Button 
-          variant="outline" 
-          onClick={() => setIsSuccess(false)}
-          className="border-[var(--tp-brand)] text-[var(--tp-brand)]"
-        >
-          Registrar otro correo
-        </Button>
+        <div className="inline-flex items-center gap-2 bg-[var(--tp-brand-5)] text-[var(--tp-brand)] px-4 py-3 rounded-lg">
+          <Gift className="w-5 h-5" />
+          <span className="font-semibold">¡15% de descuento en tu primer servicio!</span>
+        </div>
+        <div className="mt-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsSuccess(false)}
+            className="border-[var(--tp-brand)] text-[var(--tp-brand)]"
+          >
+            Suscribir otro correo
+          </Button>
+        </div>
       </div>
     );
   }
@@ -99,19 +94,19 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
-          <span className="text-red-700 text-sm">{error}</span>
+        <div className="bg-[var(--tp-error-light)] border border-[var(--tp-error-border)] rounded-lg p-4 flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-[var(--tp-error)] shrink-0" />
+          <span className="text-foreground text-sm">{error}</span>
         </div>
       )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="notify-email" className="text-base font-medium mb-2 block">
-            Email *
+          <Label htmlFor="newsletter-email" className="text-base font-medium mb-2 block">
+            Correo electrónico *
           </Label>
           <Input
-            id="notify-email"
+            id="newsletter-email"
             type="email"
             required
             value={email}
@@ -123,11 +118,11 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="notify-name" className="text-base font-medium mb-2 block">
-            Nombre
+          <Label htmlFor="newsletter-name" className="text-base font-medium mb-2 block">
+            Nombre (opcional)
           </Label>
           <Input
-            id="notify-name"
+            id="newsletter-name"
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
@@ -147,18 +142,18 @@ export function NotifyMeForm({ country, className = '' }: NotifyMeFormProps) {
         {isSubmitting ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Registrando...
+            Suscribiendo...
           </>
         ) : (
           <>
-            Notificarme cuando esté disponible
+            Suscribirme Ahora
           </>
         )}
       </Button>
 
-      <p className="text-xs text-gray-500 text-center mt-3">
-        Al registrarte, aceptas recibir notificaciones sobre el lanzamiento en {countryNames[country] || country.toUpperCase()}.
-        No compartiremos tu información con terceros.
+      <p className="text-sm text-muted-foreground/80 text-center mt-3">
+        Al suscribirte aceptas recibir emails con novedades, tips y ofertas especiales.
+        Puedes cancelar en cualquier momento.
       </p>
     </form>
   );
