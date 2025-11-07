@@ -90,15 +90,15 @@ export function ContactForm({
 
   if (isSuccess) {
     return (
-      <div className={`bg-green-50 border border-green-200 rounded-xl p-8 text-center ${className}`}>
-        <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-green-900 mb-2">
+      <div className={`bg-[var(--tp-success-light)] dark:bg-[var(--tp-success-light)] border border-[var(--tp-success-border)] rounded-xl p-8 text-center ${className}`}>
+        <CheckCircle className="w-12 h-12 text-[var(--tp-success)] mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-foreground mb-2">
           ¡Mensaje Enviado!
         </h3>
-        <p className="text-green-700 mb-4">
+        <p className="text-muted-foreground mb-4">
           Gracias por contactarnos. Nuestro equipo se pondrá en contacto contigo en menos de 24 horas.
         </p>
-        <div className="text-sm text-green-600">
+        <div className="text-sm text-[var(--tp-success)]">
           📧 Recibirás confirmación por email
         </div>
       </div>
@@ -106,23 +106,18 @@ export function ContactForm({
   }
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border p-8 ${className}`}>
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
-        <p className="text-gray-600">{description}</p>
-      </div>
-
+    <div className={className}>
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2 mb-6">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-red-700 text-sm">{error}</span>
+        <div className="bg-[var(--tp-error-light)] dark:bg-[var(--tp-error-light)] border border-[var(--tp-error-border)] rounded-lg p-4 flex items-center gap-2 mb-6">
+          <AlertCircle className="w-5 h-5 text-[var(--tp-error)]" />
+          <span className="text-foreground text-sm">{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Nombre completo *
             </label>
             <input
@@ -131,12 +126,15 @@ export function ContactForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tu nombre"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--tp-buttons)] focus:border-transparent"
+              className="w-full px-4 py-3 bg-background border border-input rounded-lg 
+                       focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
+                       text-foreground placeholder:text-muted-foreground
+                       transition-all duration-200"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Email *
             </label>
             <input
@@ -145,14 +143,17 @@ export function ContactForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--tp-buttons)] focus:border-transparent"
+              className="w-full px-4 py-3 bg-background border border-input rounded-lg 
+                       focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
+                       text-foreground placeholder:text-muted-foreground
+                       transition-all duration-200"
             />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Empresa
             </label>
             <input
@@ -160,12 +161,15 @@ export function ContactForm({
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               placeholder="Nombre de tu empresa"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--tp-buttons)] focus:border-transparent"
+              className="w-full px-4 py-3 bg-background border border-input rounded-lg 
+                       focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
+                       text-foreground placeholder:text-muted-foreground
+                       transition-all duration-200"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Asunto
             </label>
             <input
@@ -173,13 +177,16 @@ export function ContactForm({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder={formLabels[formType]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--tp-buttons)] focus:border-transparent"
+              className="w-full px-4 py-3 bg-background border border-input rounded-lg 
+                       focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
+                       text-foreground placeholder:text-muted-foreground
+                       transition-all duration-200"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Mensaje *
           </label>
           <textarea
@@ -187,30 +194,37 @@ export function ContactForm({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Cuéntanos en qué podemos ayudarte..."
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--tp-buttons)] focus:border-transparent"
+            rows={5}
+            className="w-full px-4 py-3 bg-background border border-input rounded-lg 
+                     focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent 
+                     text-foreground placeholder:text-muted-foreground
+                     transition-all duration-200 resize-none"
           />
         </div>
 
         <Button
           type="submit"
           disabled={!name || !email || !message || isLoading}
-          className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] disabled:opacity-50"
+          className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] 
+                   text-white dark:text-white
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   h-12 text-base font-medium
+                   shadow-lg hover:shadow-xl transition-all"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               Enviando mensaje...
             </>
           ) : (
             <>
-              <Send className="w-4 h-4 mr-2" />
+              <Send className="w-5 h-5 mr-2" />
               Enviar Mensaje
             </>
           )}
         </Button>
 
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-muted-foreground text-center pt-2">
           Al enviar este formulario aceptas nuestros términos y política de privacidad.
         </p>
       </form>

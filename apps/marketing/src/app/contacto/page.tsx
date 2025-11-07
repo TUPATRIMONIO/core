@@ -18,11 +18,11 @@ export const metadata: Metadata = {
 
 export default function ContactoPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
       {/* Hero Section */}
-      <section className="py-20">
+      <section className="py-12 md:py-20">
         <div className="max-w-7xl tp-container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
             <div className="inline-flex items-center gap-2 bg-[var(--tp-brand-5)] rounded-full px-4 py-2 mb-6">
               <MessageCircle className="w-4 h-4 text-[var(--tp-brand)]" />
               <span className="text-sm font-medium text-[var(--tp-brand)]">
@@ -30,20 +30,20 @@ export default function ContactoPage() {
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
+            <h1 className="mb-6">
               Hablemos de tu{' '}
               <span className="text-[var(--tp-brand)]">Proyecto</span>
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Nuestro equipo está listo para ayudarte con cualquier consulta sobre 
               nuestros servicios legales digitales.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
             {/* Formulario de Contacto */}
             <div className="lg:col-span-2">
-              <Card className="border-2 shadow-lg">
+              <Card className="border-2 shadow-lg bg-card">
                 <CardHeader>
                   <CardTitle className="text-2xl">Envíanos un Mensaje</CardTitle>
                   <CardDescription className="text-base">
@@ -57,9 +57,9 @@ export default function ContactoPage() {
             </div>
 
             {/* Información de Contacto */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {/* Canales de Contacto */}
-              <Card>
+              <Card className="bg-card">
                 <CardHeader>
                   <CardTitle className="text-xl">Canales de Contacto</CardTitle>
                 </CardHeader>
@@ -69,10 +69,10 @@ export default function ContactoPage() {
                       <Mail className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Email</p>
+                      <p className="font-medium text-card-foreground">Email</p>
                       <a 
                         href="mailto:contacto@tupatrimonio.app" 
-                        className="text-sm text-[var(--tp-brand)] hover:underline"
+                        className="text-sm text-[var(--tp-brand-light)] hover:underline transition-colors font-medium"
                       >
                         contacto@tupatrimonio.app
                       </a>
@@ -83,9 +83,26 @@ export default function ContactoPage() {
                     <div className="w-10 h-10 bg-[var(--tp-brand-10)] rounded-lg flex items-center justify-center shrink-0">
                       <MessageCircle className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">WhatsApp</p>
-                      <p className="text-sm text-muted-foreground">+56 9 XXXX XXXX</p>
+                    <div className="flex-1">
+                      <p className="font-medium text-card-foreground mb-2">WhatsApp</p>
+                      <div className="space-y-1">
+                        <a 
+                          href="https://wa.me/56949166719" 
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="text-sm text-[var(--tp-brand-light)] hover:underline transition-colors flex items-center gap-1 font-medium"
+                        >
+                          🇨🇱 +56 9 4916 6719 (Chile)
+                        </a>
+                        <a 
+                          href="https://wa.me/17164428514" 
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="text-sm text-[var(--tp-brand-light)] hover:underline transition-colors flex items-center gap-1 font-medium"
+                        >
+                          🇺🇸 +1 (716) 442-8514 (EEUU)
+                        </a>
+                      </div>
                     </div>
                   </div>
 
@@ -94,7 +111,7 @@ export default function ContactoPage() {
                       <Clock className="w-5 h-5 text-[var(--tp-brand)]" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">Horario</p>
+                      <p className="font-medium text-card-foreground">Horario</p>
                       <p className="text-sm text-muted-foreground">Lun - Vie: 9:00 - 18:00</p>
                       <p className="text-sm text-muted-foreground">Sáb: 10:00 - 14:00</p>
                     </div>
@@ -103,7 +120,7 @@ export default function ContactoPage() {
               </Card>
 
               {/* Oficinas */}
-              <Card>
+              <Card className="bg-card">
                 <CardHeader>
                   <CardTitle className="text-xl">Nuestras Oficinas</CardTitle>
                 </CardHeader>
@@ -111,20 +128,20 @@ export default function ContactoPage() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-[var(--tp-brand)]" />
-                      <p className="font-medium text-foreground">🇨🇱 Chile</p>
+                      <p className="font-medium text-card-foreground">🇨🇱 Chile</p>
                     </div>
                     <p className="text-sm text-muted-foreground ml-6">
-                      Santiago, Región Metropolitana
+                      Santiago
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4 text-[var(--tp-brand)]" />
-                      <p className="font-medium text-foreground">🇺🇸 USA</p>
+                      <p className="font-medium text-card-foreground">🇺🇸 USA</p>
                     </div>
                     <p className="text-sm text-muted-foreground ml-6">
-                      Delaware (Operaciones)
+                      Delaware
                     </p>
                   </div>
                 </CardContent>
@@ -133,18 +150,18 @@ export default function ContactoPage() {
               {/* Soporte Regional */}
               <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)]">
                 <CardHeader>
-                  <CardTitle className="text-xl">Soporte Regional</CardTitle>
+                  <CardTitle className="text-xl text-[var(--tp-brand)]">Soporte Regional</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-700 mb-3">
-                    Atendemos consultas en:
+                  <p className="text-sm text-foreground mb-3 font-medium">
+                    Atendemos consultas para:
                   </p>
-                  <div className="space-y-1 text-sm">
+                  <div className="space-y-1 text-sm text-card-foreground">
                     <p>🇨🇱 Chile</p>
-                    <p>🇲🇽 México</p>
-                    <p>🇨🇴 Colombia</p>
-                    <p>🇵🇪 Perú</p>
-                    <p>🇦🇷 Argentina</p>
+                    <p>🇲🇽 México (Próximamente)</p>
+                    <p>🇨🇴 Colombia (Próximamente)</p>
+                    <p>🇵🇪 Perú (Próximamente)</p>
+                    <p>🇦🇷 Argentina (Próximamente)</p>
                   </div>
                 </CardContent>
               </Card>
@@ -154,13 +171,13 @@ export default function ContactoPage() {
       </section>
 
       {/* FAQ Rápido */}
-      <section className="py-20 bg-[var(--tp-background-light)]">
+      <section className="py-12 md:py-20 bg-muted/30">
         <div className="max-w-4xl tp-container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="mb-4">
               Preguntas Frecuentes
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-base md:text-lg text-muted-foreground">
               Respuestas rápidas a las consultas más comunes
             </p>
           </div>
@@ -180,7 +197,10 @@ export default function ContactoPage() {
                 a: 'El soporte básico es gratuito para todos los usuarios. Los planes premium incluyen soporte prioritario.'
               },
             ].map((faq, index) => (
-              <Card key={index} className="border hover:border-[var(--tp-brand)] transition-colors">
+              <Card 
+                key={index} 
+                className="border hover:border-[var(--tp-brand)] transition-colors bg-card"
+              >
                 <CardHeader>
                   <CardTitle className="text-lg">{faq.q}</CardTitle>
                 </CardHeader>

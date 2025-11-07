@@ -279,7 +279,7 @@
    * ============================================================================ */
   --background: #1a1a1a;
   --foreground: #fafafa;
-  --card: #3f3f3f;
+  --card: #2a2a2a;
   --card-foreground: #fafafa;
   --popover: #3f3f3f;
   --popover-foreground: #fafafa;
@@ -429,7 +429,7 @@
   }
   
   .tp-container-wide {
-    @apply mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-24 2xl:px-32;
+    @apply mx-auto px-6 sm:px-8 md:px-10 lg:px-12 xl:px-16;
   }
   
   /* ============================================================================
