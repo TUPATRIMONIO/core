@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@tupatrimonio/ui";
 import { ArrowRight, LucideIcon } from "lucide-react";
 
 export interface FAQQuestion {
@@ -45,9 +46,9 @@ export default function FAQSection({
 
         <div className="space-y-6">
           {categories.map((category, catIndex) => (
-            <div key={catIndex} className={`bg-card rounded-2xl p-8 shadow-lg border-l-4 border-${category.color}-500`}>
+            <div key={catIndex} className="bg-card rounded-2xl p-8 shadow-lg border-l-4 border-[var(--tp-brand)]">
               <h3 className="mb-6 flex items-center gap-3">
-                <category.icon className={`w-8 h-8 text-${category.color}-600`} />
+                <Icon icon={category.icon} size="xl" variant="brand" />
                 {category.name}
               </h3>
               
@@ -77,7 +78,7 @@ export default function FAQSection({
           >
             <Link href={contactCta.href} target="_blank" rel="noopener noreferrer nofollow">
               {contactCta.text}
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <Icon icon={ArrowRight} size="md" variant="inherit" className="ml-2" />
             </Link>
           </Button>
         </div>

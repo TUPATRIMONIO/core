@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Icon, IconContainer } from "@tupatrimonio/ui";
 import { 
   FileSignature, 
   Shield, 
@@ -317,11 +318,16 @@ export default function HomePage() {
             {/* Feature 1: IA */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Bot className="w-8 h-8 text-purple-600" />
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Bot} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                  />
                 </div>
-                <CardTitle className="text-xl mb-2">Potenciado por IA</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <CardTitle>Potenciado por IA</CardTitle>
+                <CardDescription>
                   Nuestra inteligencia artificial entiende lo que necesitas y te sugiere el camino 
                   más rápido. Como tener un abogado amigo que habla tu idioma.
                 </CardDescription>
@@ -331,11 +337,16 @@ export default function HomePage() {
             {/* Feature 2: Remoto */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Smartphone className="w-8 h-8 text-blue-600" />
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Smartphone} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                  />
                 </div>
-                <CardTitle className="text-xl mb-2">Desde Cualquier Lugar</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <CardTitle>Desde Cualquier Lugar</CardTitle>
+                <CardDescription>
                   Tu casa, tu oficina, la cafetería. Solo necesitas internet. Nada de esperar turnos 
                   ni perder mañanas enteras en oficinas.
                 </CardDescription>
@@ -345,11 +356,16 @@ export default function HomePage() {
             {/* Feature 3: Rápido */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Zap className="w-8 h-8 text-green-600" />
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Zap} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                  />
                 </div>
-                <CardTitle className="text-xl mb-2">En Minutos, No en Días</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <CardTitle>En Minutos, No en Días</CardTitle>
+                <CardDescription>
                   Lo que antes te tomaba semanas, ahora lo resuelves antes de que se enfríe tu café. 
                   La mayoría de documentos listos en menos de 24 horas.
                 </CardDescription>
@@ -359,11 +375,16 @@ export default function HomePage() {
             {/* Feature 4: Transparente */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
               <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <CheckCircle className="w-8 h-8 text-orange-600" />
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={CheckCircle} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                  />
                 </div>
-                <CardTitle className="text-xl mb-2">Sin Letra Chica</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <CardTitle>Sin Letra Chica</CardTitle>
+                <CardDescription>
                   Cero tecnicismos, cero sorpresas. Todo explicado como si se lo contaras a un amigo. 
                   Transparencia total en cada paso.
                 </CardDescription>
@@ -393,10 +414,14 @@ export default function HomePage() {
                 Activo en Chile 🇨🇱
               </div>
               <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] rounded-2xl flex items-center justify-center mb-4">
-                  <Scale className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl mb-2">Legal</CardTitle>
+                <IconContainer 
+                  icon={Scale} 
+                  variant="solid-brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Legal</CardTitle>
                 <CardDescription className="text-base">
                   Servicios notariales y legales 100% digitales con validez legal completa
                 </CardDescription>
@@ -404,32 +429,32 @@ export default function HomePage() {
               <CardContent>
                 <ul className="space-y-3 mb-6">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Firma Electrónica Simple y Avanzada</strong> - Para tus contratos y documentos</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Autorización Notarial de Firmas</strong> - Validez legal en minutos</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Copias Legalizadas</strong> - Certifica documentos sin ir a la notaría</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Protocolización de Documentos</strong> - Respaldo oficial para tus acuerdos</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Contratos de Arriendo y Compraventa</strong> - Listos para firmar</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Documentos Laborales</strong> - Contratos, finiquitos, todo cubierto</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-[var(--tp-success)] shrink-0 mt-0.5" />
-                    <span className=""><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
+                    <Icon icon={CheckCircle} size="md" variant="brand" className="shrink-0 mt-0.5" />
+                    <span><strong>Poderes y Mandatos</strong> - Delega con seguridad</span>
                   </li>
                 </ul>
                 <p className="text-sm text-muted-foreground bg-[var(--tp-bg-light-20)] p-4 rounded-lg">
@@ -452,10 +477,14 @@ export default function HomePage() {
                   Próximamente
                 </div>
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mb-3">
-                    <Home className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-xl">PropTech</CardTitle>
+                  <IconContainer 
+                    icon={Home} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="md" 
+                    className="mb-3"
+                  />
+                  <CardTitle>PropTech</CardTitle>
                   <CardDescription>
                     Gestión completa de propiedades, contratos de arriendo, compraventas y todo lo 
                     relacionado con tu patrimonio inmobiliario.
@@ -469,10 +498,14 @@ export default function HomePage() {
                   Próximamente
                 </div>
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mb-3">
-                    <TrendingUp className="w-6 h-6 text-green-600" />
-                  </div>
-                  <CardTitle className="text-xl">FinTech</CardTitle>
+                  <IconContainer 
+                    icon={TrendingUp} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="md" 
+                    className="mb-3"
+                  />
+                  <CardTitle>FinTech</CardTitle>
                   <CardDescription>
                     Organiza y protege tu patrimonio financiero, inversiones y planificación para 
                     el futuro de lo que más te importa.
@@ -486,10 +519,14 @@ export default function HomePage() {
                   Próximamente
                 </div>
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mb-3">
-                    <Briefcase className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <CardTitle className="text-xl">Business Hub</CardTitle>
+                  <IconContainer 
+                    icon={Briefcase} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="md" 
+                    className="mb-3"
+                  />
+                  <CardTitle>Business Hub</CardTitle>
                   <CardDescription>
                     Herramientas y servicios especializados para hacer crecer tu negocio con toda 
                     la estructura legal y administrativa que necesitas.
@@ -517,11 +554,15 @@ export default function HomePage() {
             {/* Beneficio 1 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Moon className="w-7 h-7 text-blue-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Duerme Tranquilo</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Moon} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Duerme Tranquilo</CardTitle>
+                <CardDescription>
                   Saber que tus documentos tienen validez legal y están bien hechos es un alivio 
                   enorme. Ya no más "¿y si algo está mal?" Por fin, paz mental.
                 </CardDescription>
@@ -531,11 +572,15 @@ export default function HomePage() {
             {/* Beneficio 2 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Clock className="w-7 h-7 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Recupera Tu Tiempo</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Clock} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Recupera Tu Tiempo</CardTitle>
+                <CardDescription>
                   Esas horas (o días) que perdías yendo a notarías, haciendo filas, buscando 
                   información... ahora son tuyos. Para tu familia, tu negocio, o simplemente para descansar.
                 </CardDescription>
@@ -545,11 +590,15 @@ export default function HomePage() {
             {/* Beneficio 3 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Crown className="w-7 h-7 text-purple-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Toma el Control</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Crown} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Toma el Control</CardTitle>
+                <CardDescription>
                   Tu patrimonio, tus decisiones, tu ritmo. Sin depender de horarios de oficina 
                   ni de intermediarios. Tú mandas, nosotros te facilitamos el camino.
                 </CardDescription>
@@ -559,11 +608,15 @@ export default function HomePage() {
             {/* Beneficio 4 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4">
-                  <TrendingUp className="w-7 h-7 text-green-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Haz Crecer lo que Construiste</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={TrendingUp} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Haz Crecer lo que Construiste</CardTitle>
+                <CardDescription>
                   Cuando tus bases legales están sólidas, puedes enfocarte en lo que importa: 
                   hacer crecer tu negocio, invertir mejor, proteger a tu familia.
                 </CardDescription>
@@ -573,11 +626,15 @@ export default function HomePage() {
             {/* Beneficio 5 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Globe className="w-7 h-7 text-cyan-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Sin Fronteras</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Globe} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Sin Fronteras</CardTitle>
+                <CardDescription>
                   Estés donde estés en Latinoamérica (o el mundo), tu patrimonio está protegido 
                   y accesible. Aceptamos pasaportes y cédulas de múltiples países.
                 </CardDescription>
@@ -587,11 +644,15 @@ export default function HomePage() {
             {/* Beneficio 6 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-4">
-                  <MessageCircle className="w-7 h-7 text-pink-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Apoyo Humano Real</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={MessageCircle} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Apoyo Humano Real</CardTitle>
+                <CardDescription>
                   Aunque la tecnología hace la magia, siempre hay personas reales detrás listas 
                   para ayudarte. Por WhatsApp, mail o videollamada. Como debe ser.
                 </CardDescription>
@@ -616,7 +677,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center">
               <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Users className="w-10 h-10 text-white" />
+                <Icon icon={Users} size="xl" variant="white" />
               </div>
               <div className="text-5xl md:text-6xl font-bold mb-3">+160K</div>
               <div className="text-xl text-white/90">Usuarios Confían en Nosotros</div>
@@ -627,7 +688,7 @@ export default function HomePage() {
 
             <div className="text-center">
               <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <FileCheck className="w-10 h-10 text-white" />
+                <Icon icon={FileCheck} size="xl" variant="white" />
               </div>
               <div className="text-5xl md:text-6xl font-bold mb-3">+10K</div>
               <div className="text-xl text-white/90">Documentos Firmados</div>
@@ -638,7 +699,7 @@ export default function HomePage() {
 
             <div className="text-center">
               <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <TrendingDown className="w-10 h-10 text-white" />
+                <Icon icon={TrendingDown} size="xl" variant="white" />
               </div>
               <div className="text-5xl md:text-6xl font-bold mb-3">90%</div>
               <div className="text-xl text-white/90">Reducción de Tiempos</div>
@@ -666,11 +727,15 @@ export default function HomePage() {
             {/* Perfil 1 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Briefcase className="w-7 h-7 text-blue-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Profesionales Ocupados</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Briefcase} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Profesionales Ocupados</CardTitle>
+                <CardDescription>
                   No tienes tiempo para hacer filas. Necesitas resolver trámites entre reuniones 
                   y quieres que todo fluya sin complicaciones.
                 </CardDescription>
@@ -680,11 +745,15 @@ export default function HomePage() {
             {/* Perfil 2 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Building2 className="w-7 h-7 text-purple-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Empresas y Emprendedores</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Building2} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Empresas y Emprendedores</CardTitle>
+                <CardDescription>
                   Manejas varios contratos, necesitas agilidad y no puedes darte el lujo de que 
                   un documento mal hecho te traiga problemas legales después.
                 </CardDescription>
@@ -694,11 +763,15 @@ export default function HomePage() {
             {/* Perfil 3 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Home className="w-7 h-7 text-green-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Corredores de Propiedades</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Home} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Corredores de Propiedades</CardTitle>
+                <CardDescription>
                   Cierras arriendos y ventas constantemente. Necesitas que los contratos estén 
                   listos YA, sin depender de horarios de notarías.
                 </CardDescription>
@@ -708,11 +781,15 @@ export default function HomePage() {
             {/* Perfil 4 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Users className="w-7 h-7 text-orange-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Familias que Planifican</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Users} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Familias que Planifican</CardTitle>
+                <CardDescription>
                   Quieres proteger a los tuyos, organizar tu patrimonio y tener todo en orden 
                   sin gastar fortunas en abogados para cosas simples.
                 </CardDescription>
@@ -722,11 +799,15 @@ export default function HomePage() {
             {/* Perfil 5 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Globe className="w-7 h-7 text-cyan-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Expatriados y Latinoamericanos</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Globe} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Expatriados y Latinoamericanos</CardTitle>
+                <CardDescription>
                   Vives fuera o gestionas propiedades en otro país. Necesitas resolver desde 
                   la distancia con la misma validez legal.
                 </CardDescription>
@@ -736,11 +817,15 @@ export default function HomePage() {
             {/* Perfil 6 */}
             <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mb-4">
-                  <Rocket className="w-7 h-7 text-pink-600" />
-                </div>
-                <CardTitle className="text-xl mb-2">Personas que Valoran su Tiempo</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
+                <IconContainer 
+                  icon={Rocket} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>Personas que Valoran su Tiempo</CardTitle>
+                <CardDescription>
                   Simplemente no quieres perder tu vida en trámites burocráticos. Prefieres 
                   que la tecnología trabaje para ti.
                 </CardDescription>
@@ -762,7 +847,7 @@ export default function HomePage() {
       <section className="py-12 bg-background">
         <div className="max-w-4xl tp-container text-center">
           <div className="inline-flex items-center gap-3 bg-card px-6 py-4 rounded-2xl shadow-lg border-2 border-[var(--tp-brand-20)]">
-            <Landmark className="w-8 h-8 text-[var(--tp-brand)]" />
+            <Icon icon={Landmark} size="xl" variant="brand" />
             <div className="text-left">
               <p className="font-bold text-foreground">Trabajamos con Excelentes Notarías</p>
               <p className="text-sm text-muted-foreground">
@@ -780,7 +865,7 @@ export default function HomePage() {
             <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent p-8 md:p-12">
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--tp-brand)] rounded-full mb-6">
-                  <Clock className="w-8 h-8 text-white" />
+                  <Icon icon={Clock} size="xl" variant="white" />
                 </div>
                 <h2 className="mb-4">
                   Suscríbete a TuPatrimonio News 📬

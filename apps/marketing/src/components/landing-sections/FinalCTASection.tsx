@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@tupatrimonio/ui";
 import { Check, LucideIcon } from "lucide-react";
 
 export interface CTACard {
@@ -64,8 +65,8 @@ export default function FinalCTASection({
               )}
               
               <div className="text-center mb-6">
-                <div className={`w-16 h-16 ${card.type === 'personas' ? 'bg-[var(--tp-brand-10)]' : 'bg-blue-100'} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <card.icon className={`w-8 h-8 ${card.type === 'personas' ? 'text-[var(--tp-brand)]' : 'text-blue-600'}`} />
+                <div className="w-16 h-16 bg-[var(--tp-brand-10)] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon icon={card.icon} size="xl" variant="brand" />
                 </div>
                 <h3 className="mb-2">{card.title}</h3>
                 <p className="text-muted-foreground">{card.description}</p>
@@ -74,7 +75,7 @@ export default function FinalCTASection({
               <ul className="space-y-3 mb-6">
                 {card.benefits.map((benefit, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Icon icon={Check} size="md" variant="brand" className="flex-shrink-0 mt-0.5" />
                     <span>{benefit}</span>
                   </li>
                 ))}
@@ -86,7 +87,7 @@ export default function FinalCTASection({
                   variant="outline"
                   className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] py-6 text-lg font-semibold"
                 >
-                  {card.ctaIcon && <card.ctaIcon className="w-5 h-5 mr-2" />}
+                  {card.ctaIcon && <Icon icon={card.ctaIcon} size="md" variant="inherit" className="mr-2" />}
                   {card.ctaText}
                 </Button>
               ) : (
@@ -100,7 +101,7 @@ export default function FinalCTASection({
                     size="lg" 
                     className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white py-6 text-lg font-semibold"
                   >
-                    {card.ctaIcon && <card.ctaIcon className="w-5 h-5 mr-2" />}
+                    {card.ctaIcon && <Icon icon={card.ctaIcon} size="md" variant="inherit" className="mr-2" />}
                     {card.ctaText}
                   </Button>
                 </a>
@@ -117,7 +118,7 @@ export default function FinalCTASection({
         <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm">
           {trustBar.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
-              <item.icon className="w-5 h-5" />
+              <Icon icon={item.icon} size="md" variant="white" />
               <span>{item.text}</span>
             </div>
           ))}

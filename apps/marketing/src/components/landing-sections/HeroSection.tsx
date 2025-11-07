@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ImagotipoImage } from "@tupatrimonio/assets";
+import { Icon } from "@tupatrimonio/ui";
 import { LucideIcon } from "lucide-react";
 
 export interface TrustBadge {
@@ -71,7 +72,7 @@ export default function HeroSection({
                   key={index}
                   className="flex items-center gap-2 px-4 py-2 bg-background dark:bg-card rounded-full shadow-sm border border-[var(--tp-lines-20)]"
                 >
-                  {badge.icon && <badge.icon className="w-4 h-4 text-[var(--tp-brand)]" />}
+                  {badge.icon && <Icon icon={badge.icon} size="sm" variant="brand" />}
                   <span className="text-sm font-medium text-muted-foreground">{badge.text}</span>
                 </div>
               )
@@ -92,8 +93,8 @@ export default function HeroSection({
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
             {valueBullets.map((bullet, index) => (
               <div key={index} className="flex items-start gap-3 text-left">
-                <div className={`w-6 h-6 rounded-full bg-${bullet.color}-100 flex items-center justify-center flex-shrink-0 mt-1`}>
-                  <bullet.icon className={`w-4 h-4 text-${bullet.color}-600`} />
+                <div className="w-6 h-6 rounded-full bg-[var(--tp-brand-10)] flex items-center justify-center flex-shrink-0 mt-1">
+                  <Icon icon={bullet.icon} size="sm" variant="brand" />
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{bullet.title}</p>
@@ -116,7 +117,7 @@ export default function HeroSection({
                       : "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                   }
                 >
-                  {button.icon && <button.icon className="w-5 h-5 mr-2" />}
+                  {button.icon && <Icon icon={button.icon} size="md" variant="inherit" className="mr-2" />}
                   {button.text}
                 </Button>
               </a>
@@ -132,7 +133,7 @@ export default function HeroSection({
             {bottomBadges.map((badge, index) => (
               <div key={index} className="text-center">
                 <div className="w-16 h-16 bg-card rounded-lg shadow-sm flex items-center justify-center mx-auto mb-2 border border-border">
-                  <badge.icon className="w-8 h-8 text-[var(--tp-brand)]" />
+                  <Icon icon={badge.icon} size="xl" variant="brand" />
                 </div>
                 <p className="text-xs text-muted-foreground font-medium" dangerouslySetInnerHTML={{ __html: badge.text }} />
               </div>
