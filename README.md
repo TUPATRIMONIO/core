@@ -318,6 +318,17 @@ apps/web/src/components/ui/
 
 **Documentación**: https://ui.shadcn.com/docs/components
 
+### Componentes Personalizados TuPatrimonio
+
+**Componentes reutilizables creados para el proyecto**:
+
+- `StatsSection`: Sección de estadísticas con contenido predefinido
+  - **Uso súper simple**: `<StatsSection />` o `<StatsSection variant="notaria" />`
+  - **Zero configuración**: Contenido, iconos y datos incluidos
+  - **Variantes disponibles**: `default`, `nosotros`, `notaria`, `firmas`
+  - **Páginas usando**: Home, Nosotros, Notaría Online
+  - Documentación: `docs/STATS-SECTION-COMPONENT.md`
+
 ### Iconos Minimalistas
 
 Usamos **Lucide React** con estilo consistente y minimalista:

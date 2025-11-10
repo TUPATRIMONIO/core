@@ -501,6 +501,14 @@
     font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--leading-relaxed);
+    margin-bottom: 1rem;
+  }
+
+  /* Listas - mismo estilo que párrafos */
+  li {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
   }
   
   /* Responsive Typography - Tablet (768px+) */

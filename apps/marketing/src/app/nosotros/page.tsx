@@ -10,15 +10,17 @@ import {
   Award,
   Target,
   Heart,
-  Zap,
-  Shield
+  Shield,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
+import { USERS_COUNT } from '@/lib/constants';
+import { StatsSection } from '@/components/StatsSection';
 
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros - TuPatrimonio | Líderes en Servicios Legales Digitales',
-  description: 'Conoce TuPatrimonio: transformando los servicios legales en Latinoamérica con tecnología de vanguardia. Nuestra misión, visión y equipo.',
-  keywords: ['tupatrimonio', 'sobre nosotros', 'legal tech', 'equipo', 'misión', 'visión'],
+  title: 'Sobre Nosotros - TuPatrimonio | Tu Tranquilidad, Nuestra Prioridad',
+  description: 'Conoce cómo TuPatrimonio te ayuda a resolver tus trámites legales de forma simple y confiable. Estamos aquí para darte tranquilidad cuando más lo necesitas.',
+  keywords: ['tupatrimonio', 'sobre nosotros', 'quiénes somos', 'servicios legales', 'firma electrónica', 'notaría digital'],
 };
 
 export default function NosotrosPage() {
@@ -36,13 +38,13 @@ export default function NosotrosPage() {
             </div>
 
             <h1 className="mb-6">
-              Transformando los Servicios Legales en{' '}
-              <span className="text-[var(--tp-brand)]">Latinoamérica</span>
+              Estamos aquí para darte{' '}
+              <span className="text-[var(--tp-brand)]">tranquilidad</span>
             </h1>
-            <p className="text-muted-foreground mb-8">
-              Somos una plataforma legal tech que simplifica trámites complejos, 
-              democratiza el acceso a servicios legales y potencia la transformación digital 
-              de empresas en toda la región.
+            <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
+              Sabemos lo estresante que puede ser lidiar con trámites legales. Por eso creamos 
+              una forma más simple y confiable de hacer las cosas. Sin papeleos eternos, 
+              sin citas interminables, sin complicaciones. Solo soluciones que funcionan cuando más las necesitas.
             </p>
           </div>
         </div>
@@ -64,13 +66,13 @@ export default function NosotrosPage() {
                   size="lg" 
                   className="mb-4"
                 />
-                <CardTitle>Nuestra Misión</CardTitle>
+                <CardTitle>¿Qué hacemos?</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-muted-foreground">
-                  Democratizar el acceso a servicios legales mediante tecnología intuitiva, 
-                  eliminando barreras geográficas y económicas para empresas y profesionales 
-                  en Latinoamérica.
+                  Hacemos que tus trámites legales sean fáciles y rápidos. No importa dónde estés 
+                  o cuánto tiempo tengas: te ayudamos a resolver lo que necesitas sin complicaciones. 
+                  Eso es todo.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -85,13 +87,13 @@ export default function NosotrosPage() {
                   size="lg" 
                   className="mb-4"
                 />
-                <CardTitle>Nuestra Visión</CardTitle>
+                <CardTitle>¿A dónde vamos?</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-muted-foreground">
-                  Ser la plataforma legal tech líder en Latinoamérica, reconocida por 
-                  simplificar procesos legales y empoderar a millones de usuarios con 
-                  herramientas digitales confiables.
+                  Queremos ser tu primera opción cuando pienses en trámites legales en Latinoamérica. 
+                  El lugar al que vuelves porque sabes que funciona, es confiable, y te ahorra dolores 
+                  de cabeza.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -106,14 +108,14 @@ export default function NosotrosPage() {
                   size="lg" 
                   className="mb-4"
                 />
-                <CardTitle>Nuestros Valores</CardTitle>
+                <CardTitle>¿Cómo lo hacemos?</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>✓ Innovación constante</li>
-                  <li>✓ Transparencia total</li>
-                  <li>✓ Seguridad garantizada</li>
-                  <li>✓ Accesibilidad para todos</li>
+                  <li>✓ Hablamos claro, sin rodeos</li>
+                  <li>✓ Siempre buscamos mejorar</li>
+                  <li>✓ Tu información está protegida</li>
+                  <li>✓ Fácil de usar para todos</li>
                 </ul>
               </CardContent>
             </Card>
@@ -122,62 +124,17 @@ export default function NosotrosPage() {
       </section>
 
       {/* Estadísticas */}
-      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
-        <div className="max-w-7xl tp-container">
-          <div className="text-center mb-16">
-            <h2 className="mb-4 text-white">
-              TuPatrimonio en Números
-            </h2>
-            <p className="text-white/90">
-              Creciendo junto a nuestros clientes
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon icon={Users} size="xl" variant="white" />
-              </div>
-              <div className="text-4xl font-bold mb-2">+500</div>
-              <div className="text-white/90">Empresas Activas</div>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon icon={Globe} size="xl" variant="white" />
-              </div>
-              <div className="text-4xl font-bold mb-2">5</div>
-              <div className="text-white/90">Países</div>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon icon={Award} size="xl" variant="white" />
-              </div>
-              <div className="text-4xl font-bold mb-2">+10K</div>
-              <div className="text-white/90">Documentos Firmados</div>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Icon icon={Zap} size="xl" variant="white" />
-              </div>
-              <div className="text-4xl font-bold mb-2">90%</div>
-              <div className="text-white/90">Ahorro de Tiempo</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StatsSection variant="nosotros" />
 
       {/* ¿Por qué TuPatrimonio? */}
       <section className="py-20">
         <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
-              ¿Por qué elegir TuPatrimonio?
+              ¿Por qué elegirnos?
             </h2>
-            <p className="text-muted-foreground">
-              Innovación, seguridad y simplicidad en una sola plataforma
+            <p className="text-lg text-muted-foreground">
+              Porque entendemos perfectamente por lo que estás pasando
             </p>
           </div>
 
@@ -185,33 +142,33 @@ export default function NosotrosPage() {
             {[
               {
                 icon: Shield,
-                title: 'Seguridad Certificada',
-                description: 'Cumplimos con las más estrictas normativas de cada país. Tus datos están protegidos con encriptación de nivel bancario.'
+                title: 'Tus Datos Están Seguros',
+                description: 'Tu información está protegida, punto. Sin complicaciones técnicas, solo la tranquilidad de saber que está a salvo.'
               },
               {
                 icon: Zap,
-                title: 'Rápido y Fácil',
-                description: 'Lo que antes tomaba días, ahora lo haces en minutos. Interfaz intuitiva diseñada para cualquier usuario.'
+                title: 'Rápido y Sin Vueltas',
+                description: '¿Te acuerdas cuando resolver esto tomaba días? Ahora lo haces en minutos. Así de simple.'
               },
               {
                 icon: Globe,
-                title: 'Presencia Regional',
-                description: 'Operamos en Chile, México, Colombia, Perú y Argentina, adaptándonos a la legislación local de cada país.'
+                title: 'Dónde sea que Estés',
+                description: 'Chile, México, Colombia, Perú, Argentina... No importa tu ubicación, te ayudamos como corresponde en cada lugar.'
               },
               {
                 icon: Users,
-                title: 'Soporte Experto',
-                description: 'Equipo de abogados y expertos disponibles para ayudarte cuando lo necesites.'
+                title: 'Nunca Estás Solo',
+                description: 'Si te trabas o tienes dudas, estamos aquí. Hablamos claro y resolvemos tus preguntas sin hacerte sentir perdido.'
               },
               {
                 icon: Award,
-                title: 'Validez Legal Total',
-                description: 'Documentos con plena validez legal, aceptados en tribunales y entidades gubernamentales.'
+                title: 'Vale de Verdad',
+                description: 'Todo lo que hacemos tiene validez legal completa. Es como ir a la notaría, pero sin salir de tu casa.'
               },
               {
                 icon: Target,
-                title: 'Enfoque en el Cliente',
-                description: 'Tu éxito es nuestro éxito. Mejoramos constantemente basándonos en tu feedback.'
+                title: 'Si Funciona para Ti, Funciona',
+                description: 'No nos obsesionamos con la tecnología. Nos importa que resuelva tu problema real. Eso es lo único que cuenta.'
               },
             ].map((item, index) => (
               <Card key={index} className="border hover:border-[var(--tp-brand)] transition-all hover:shadow-lg">
@@ -240,16 +197,17 @@ export default function NosotrosPage() {
       <section className="py-20 bg-[var(--tp-background-light)]">
         <div className="max-w-4xl tp-container text-center">
           <h2 className="mb-4">
-            ¿Listo para Transformar tu Gestión Legal?
+            ¿Listo para Resolver tus Trámites sin Complicaciones?
           </h2>
-          <p className="text-muted-foreground mb-8">
-            Únete a cientos de empresas que ya confían en TuPatrimonio
+          <p className="text-lg text-muted-foreground mb-8">
+            Únete a más de {USERS_COUNT.short} personas que ya confían en nosotros
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="https://app.tupatrimonio.app">
+            <Link href="https://tupatrimon.io">
               <Button 
                 size="lg"
-                className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-8 py-6"
+                variant="default"
+                className="px-8 py-6"
               >
                 Comenzar Ahora
               </Button>
@@ -258,9 +216,9 @@ export default function NosotrosPage() {
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-2 border-[var(--tp-buttons)] px-8 py-6"
+                className="px-8 py-6"
               >
-                Hablar con un Experto
+                Hablar con Nosotros
               </Button>
             </Link>
           </div>

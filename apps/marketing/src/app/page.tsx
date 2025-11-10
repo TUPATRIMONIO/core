@@ -38,6 +38,7 @@ import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } fro
 import { getPageConfig } from "@/lib/page-config";
 import { GoogleStatsBadge } from "@/components/GoogleStatsDisplay";
 import { USERS_COUNT } from "@/lib/constants";
+import { StatsSection } from "@/components/StatsSection";
 
 // Componentes modulares
 import {
@@ -108,7 +109,7 @@ export default function HomePage() {
   const heroCtaButtons: CTAButton[] = [
     {
       text: "Empieza ahora, es gratis",
-      href: "/cl",
+      href: "https://tupatrimon.io",
       variant: "default",
       icon: Zap
     }
@@ -663,53 +664,7 @@ export default function HomePage() {
       </section>
 
       {/* Sección 6: Stats (Actualizada) */}
-      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
-        <div className="max-w-7xl tp-container">
-          <div className="text-center mb-16">
-            <h2 className="text-white mb-6">
-              Números que Hablan por Nosotros
-            </h2>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Miles de personas y empresas ya confían en TuPatrimonio para lo que más les importa
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Icon icon={Users} size="xl" variant="white" />
-              </div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">+160K</div>
-              <div className="text-xl text-white/90">Usuarios Confían en Nosotros</div>
-              <p className="text-white/70 mt-2">
-                Desde personas hasta grandes empresas
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Icon icon={FileCheck} size="xl" variant="white" />
-              </div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">+10K</div>
-              <div className="text-xl text-white/90">Documentos Firmados</div>
-              <p className="text-white/70 mt-2">
-                Con validez legal garantizada
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Icon icon={TrendingDown} size="xl" variant="white" />
-              </div>
-              <div className="text-5xl md:text-6xl font-bold mb-3">90%</div>
-              <div className="text-xl text-white/90">Reducción de Tiempos</div>
-              <p className="text-white/70 mt-2">
-                Comparado con trámites tradicionales
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StatsSection />
 
       {/* Sección 7: Para Quién Es */}
       <section className="py-20 bg-background">

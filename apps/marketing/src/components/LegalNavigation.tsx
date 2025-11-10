@@ -27,8 +27,8 @@ export function LegalNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-white border rounded-lg p-4 mb-8">
-      <h3 className="text-sm font-semibold text-gray-900 mb-4 px-2">
+    <nav className="bg-white dark:bg-card border border-border rounded-lg p-4 mb-8">
+      <h3 className="text-sm font-semibold text-foreground mb-4 px-2">
         Documentos Legales
       </h3>
       <ul className="space-y-1">
@@ -44,7 +44,7 @@ export function LegalNavigation() {
                   'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-[var(--tp-brand-10)] text-[var(--tp-brand)] font-semibold'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    : 'text-muted-foreground hover:bg-[var(--tp-bg-light-20)] hover:text-foreground'
                 )}
               >
                 <Icon className="w-4 h-4" />

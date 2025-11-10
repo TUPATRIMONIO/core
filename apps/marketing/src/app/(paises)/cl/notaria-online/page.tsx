@@ -22,6 +22,7 @@ import {
   FinalCTASection,
 } from "@/components/landing-sections";
 import { USERS_COUNT } from "@/lib/constants";
+import { StatsSection } from "@/components/StatsSection";
 
 export const metadata: Metadata = {
   title: "Notaría Online Chile 2025: Tu Tranquilidad en Trámites Legales | TuPatrimonio",
@@ -670,53 +671,7 @@ export default function NotariaOnlineChilePage() {
         </section>
 
         {/* SECCIÓN 8: ESTADÍSTICAS - Con componentes shadcn/ui */}
-        <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
-          <div className="max-w-7xl tp-container">
-            <div className="text-center mb-16">
-              <h2 className="text-white mb-6">
-                Números que Hablan por Nosotros
-              </h2>
-              <p className="text-xl text-white/90 max-w-3xl mx-auto">
-                Miles de personas y empresas ya confían en TuPatrimonio para sus trámites notariales
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-12">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon icon={Users} size="xl" variant="white" />
-                </div>
-                <div className="text-5xl md:text-6xl font-bold mb-3">{USERS_COUNT.shortUpper}</div>
-                <div className="text-xl text-white/90">Usuarios Atendidos</div>
-                <p className="text-white/70 mt-2">
-                  Desde personas hasta grandes empresas
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon icon={FileCheck} size="xl" variant="white" />
-                </div>
-                <div className="text-5xl md:text-6xl font-bold mb-3">+60K</div>
-                <div className="text-xl text-white/90">Documentos Gestionados</div>
-                <p className="text-white/70 mt-2">
-                  Con validez legal garantizada
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Icon icon={Clock} size="xl" variant="white" />
-                </div>
-                <div className="text-5xl md:text-6xl font-bold mb-3">2 hrs</div>
-                <div className="text-xl text-white/90">Tiempo Promedio</div>
-                <p className="text-white/70 mt-2">
-                  Entrega de documentos notariados
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <StatsSection variant="notaria" />
 
         {/* SECCIÓN 9: COMPARATIVA VS COMPETENCIA */}
         <CompetitorComparisonSection
