@@ -863,13 +863,13 @@ export default function ContratoArriendoOnlinePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground leading-relaxed">
-                    Le llega un correo a cada persona que tiene que firmar. Entran desde su celular (o computador), dibujan su firma con el dedo, y listo. <strong>Cada uno firma cuando puede, no tienen que estar juntos.</strong>
+                    Le llega un correo a cada persona que tiene que firmar. Entran desde su celular (o computador), validan su identidad, y listo. <strong>Cada uno firma cuando puede, no tienen que estar juntos.</strong>
                   </p>
                   <Card className="bg-[var(--tp-success-light)] border-[var(--tp-success-border)]">
                     <CardContent className="p-3 flex gap-2">
                       <Lock className="w-4 h-4 text-[var(--tp-success)] flex-shrink-0 mt-0.5" />
                       <p className="text-sm text-muted-foreground">
-                        <strong>Sobre la seguridad:</strong> Sí, es seguro. Usamos el mismo sistema que los bancos usan para sus apps. Tu identidad queda verificada y nadie puede firmar por ti.
+                        <strong>Sobre la seguridad:</strong> Sí, es seguro. Puedes seleccionar entre firma electrónica simple o avanzada. Tu identidad queda verificada y nadie puede firmar por ti.
                       </p>
                     </CardContent>
                   </Card>
@@ -884,12 +884,20 @@ export default function ContratoArriendoOnlinePage() {
                   </div>
                 </div>
                 <CardHeader>
-                  <CardTitle>El Notario Lo Certifica (24 horas)</CardTitle>
+                  <CardTitle>El Notario Lo Firma (24 horas) - Opcional</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <p className="text-muted-foreground leading-relaxed">
-                    Un notario real (sí, de verdad) revisa tu contrato y le pone su sello digital. Esto pasa automáticamente. Tú no tienes que hacer nada más.
+                    Un notario real revisa tu contrato y le pone su sello digital. Esto pasa automáticamente. Tú no tienes que hacer nada más, simplemente seleccionar al comienzo del proceso qué servicio notarial deseas.
                   </p>
+                  <Card className="bg-muted border-muted-foreground/20">
+                    <CardContent className="p-3 flex gap-2">
+                      <Lightbulb className="w-4 h-4 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Tip:</strong> Sugerimos que para los contratos de arrendamiento selecciones Firma Autorizada por Notario (FAN®) para quedar protegido por la nueva ley.
+                      </p>
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </Card>
 
@@ -931,96 +939,6 @@ export default function ContratoArriendoOnlinePage() {
               </a>
               <p className="text-sm text-muted-foreground/80 mt-3">✓ Si algo falla, te devolvemos tu dinero | ✓ Soporte por WhatsApp</p>
             </div>
-          </div>
-        </section>
-
-        {/* SECCIÓN 6: QUÉ INCLUYE (CUSTOM) */}
-        <section className="py-20 bg-background">
-          <div className="max-w-7xl tp-container">
-            <div className="text-center mb-12">
-              <h2 className="mb-4">
-                ¿Qué Incluye Tu Contrato de Arriendo Online?
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Porque queremos que estés tranquilo sabiendo <strong>exactamente</strong> qué estás pagando:
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Contrato Personalizado</CardTitle>
-                    <p className="text-muted-foreground text-sm">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Certificación Notarial</CardTitle>
-                    <p className="text-muted-foreground text-sm">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Firmas Electrónicas Ilimitadas</CardTitle>
-                    <p className="text-muted-foreground text-sm">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Modificaciones Antes de Firmar</CardTitle>
-                    <p className="text-muted-foreground text-sm">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Soporte por WhatsApp</CardTitle>
-                    <p className="text-muted-foreground text-sm">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
-                  <div>
-                    <CardTitle className="mb-2 text-base">Entrega en 24 Horas</CardTitle>
-                    <p className="text-muted-foreground text-sm">Desde que la última persona firma hasta que lo recibes certificado.</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)] max-w-3xl mx-auto">
-              <CardHeader>
-                <CardTitle className="text-center">Precio Variable Según Tus Necesidades</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-center">
-                <p className="text-muted-foreground leading-relaxed">
-                  El precio varía según el tipo de firma electrónica que elijas y si agregas servicios notariales adicionales (como copia legalizada, protocolización o FAN®).
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  <strong>Sin sorpresas, sin letra chica.</strong> Es menos de lo que gastarías en transporte y tiempo perdido yendo a la notaría. Y con esto, <strong>duermes tranquilo</strong>.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </section>
 
