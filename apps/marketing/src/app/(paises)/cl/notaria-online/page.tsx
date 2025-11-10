@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import { 
   CheckCircle, Shield, Clock, FileSignature, Users, Lock, Smartphone, Download,
   Star, Check, AlertCircle, Building, Scale, BadgeCheck, DollarSign, FileCheck, 
-  BookOpen, Timer, MapPin, Calendar, FileText, Handshake
+  BookOpen, Timer, MapPin, Calendar, FileText, Handshake, Zap, TrendingUp, Bot,
+  Globe, MessageCircle, Crown, Moon
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Icon, IconContainer } from "@tupatrimonio/ui";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
 import { GoogleStatsBadge } from "@/components/GoogleStatsDisplay";
 import {
@@ -316,20 +321,17 @@ export default function NotariaOnlineChilePage() {
             {
               icon: Check,
               title: "Firmar en minutos, no días.",
-              description: "Sin necesidad de traslados ni citas.",
-              color: "green"
+              description: "Sin necesidad de traslados ni citas."
             },
             {
               icon: Clock,
               title: "Documento Listo en < 24 Horas",
-              description: "94% procesados en < 6 horas hábiles",
-              color: "blue"
+              description: "94% procesados en < 6 horas hábiles"
             },
             {
               icon: Shield,
               title: "Seguro Legal Incluido",
-              description: "Únicos en Chile con protección legal",
-              color: "purple"
+              description: "Únicos en Chile con protección legal"
             }
           ]}
           ctaButtons={[
@@ -348,7 +350,101 @@ export default function NotariaOnlineChilePage() {
           showImageotype={true}
         />
 
-        {/* SECCIÓN 2: LO QUE DICEN NUESTROS USUARIOS */}
+        {/* SECCIÓN 2: BENEFICIOS DESTACADOS - Con componentes shadcn/ui */}
+        <section className="py-20 bg-background">
+          <div className="max-w-7xl tp-container">
+            <div className="text-center mb-16">
+              <h2 className="mb-6">
+                Una Plataforma, Todo Tu Patrimonio Protegido
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
+                TuPatrimonio no es solo firma electrónica. Es tu copiloto para todo lo que necesitas 
+                en el mundo legal. Imagina tener un asistente personal que conoce las leyes, entiende 
+                tus necesidades y te guía paso a paso.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Beneficio 1: IA */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                <CardHeader>
+                  <div className="mb-4 group-hover:scale-110 transition-transform">
+                    <IconContainer 
+                      icon={Bot} 
+                      variant="brand" 
+                      shape="rounded" 
+                      size="lg"
+                    />
+                  </div>
+                  <CardTitle>Potenciado por IA</CardTitle>
+                  <CardDescription>
+                    Nuestra inteligencia artificial revisa tus documentos y detecta errores antes 
+                    de enviarlos a la notaría. Como tener un abogado revisando todo.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 2: Remoto */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                <CardHeader>
+                  <div className="mb-4 group-hover:scale-110 transition-transform">
+                    <IconContainer 
+                      icon={Globe} 
+                      variant="brand" 
+                      shape="rounded" 
+                      size="lg"
+                    />
+                  </div>
+                  <CardTitle>Desde Cualquier Lugar</CardTitle>
+                  <CardDescription>
+                    Tu casa, tu oficina, el extranjero. Solo necesitas internet. Nada de esperar turnos 
+                    ni perder tiempo en oficinas.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 3: Rápido */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                <CardHeader>
+                  <div className="mb-4 group-hover:scale-110 transition-transform">
+                    <IconContainer 
+                      icon={Zap} 
+                      variant="brand" 
+                      shape="rounded" 
+                      size="lg"
+                    />
+                  </div>
+                  <CardTitle>En Minutos, No en Días</CardTitle>
+                  <CardDescription>
+                    Lo que antes te tomaba semanas, ahora lo resuelves antes de que se enfríe tu café. 
+                    Promedio de entrega: 2 horas.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 4: Transparente */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                <CardHeader>
+                  <div className="mb-4 group-hover:scale-110 transition-transform">
+                    <IconContainer 
+                      icon={CheckCircle} 
+                      variant="brand" 
+                      shape="rounded" 
+                      size="lg"
+                    />
+                  </div>
+                  <CardTitle>Sin Letra Chica</CardTitle>
+                  <CardDescription>
+                    Cero tecnicismos, cero sorpresas. Todo explicado como si se lo contaras a un amigo. 
+                    Transparencia total en cada paso.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* SECCIÓN 3: LO QUE DICEN NUESTROS USUARIOS */}
         <TestimonialsSection
           title="Lo Que Dicen Nuestros Usuarios"
           description="Historias reales de personas y empresas que transformaron sus procesos legales"
@@ -361,7 +457,7 @@ export default function NotariaOnlineChilePage() {
           ]}
         />
 
-        {/* SECCIÓN 3: COMPARACIÓN DE BENEFICIOS */}
+        {/* SECCIÓN 4: COMPARACIÓN DE BENEFICIOS */}
         <ComparisonTableSection
           title="¿Por qué elegir Notaría Online en Chile?"
           description="Descubre las ventajas reales de hacer tus trámites notariales 100% online vs. visitar una notaría física tradicional."
@@ -414,7 +510,7 @@ export default function NotariaOnlineChilePage() {
           ctaHref="https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
         />
 
-        {/* SECCIÓN 4: PROCESO PASO A PASO */}
+        {/* SECCIÓN 5: PROCESO PASO A PASO */}
         <ProcessStepsSection
           title="Cómo Funciona Nuestro Servicio de Gestión Notarial Online: 4 Simples Pasos"
           description="Proceso 100% digital, seguro y validado legalmente. De 5 minutos a 24 horas máximo."
@@ -446,10 +542,183 @@ export default function NotariaOnlineChilePage() {
           ctaHref="https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
         />
 
-        {/* SECCIÓN 5: TIPOS DE DOCUMENTOS */}
+        {/* SECCIÓN 6: TIPOS DE DOCUMENTOS */}
         <DocumentsAvailable />
 
-        {/* SECCIÓN 6: COMPARATIVA VS COMPETENCIA */}
+        {/* SECCIÓN 7: BENEFICIOS EMOCIONALES - Con componentes shadcn/ui */}
+        <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+          <div className="max-w-7xl tp-container">
+            <div className="text-center mb-16">
+              <h2 className="mb-6">
+                Más Allá de los Trámites: Recupera Tu Tiempo y Tu Tranquilidad
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Los beneficios reales que experimentarás al usar nuestra notaría online
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {/* Beneficio 1 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={Moon} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Duerme Tranquilo</CardTitle>
+                  <CardDescription>
+                    Saber que tus documentos tienen validez legal y están bien hechos es un alivio 
+                    enorme. Ya no más "¿y si algo está mal?" Por fin, paz mental.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 2 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={Clock} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Recupera Tu Tiempo</CardTitle>
+                  <CardDescription>
+                    Esas horas (o días) que perdías yendo a notarías, haciendo filas, buscando 
+                    información... ahora son tuyos. Para tu familia, tu negocio, o simplemente para descansar.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 3 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={Crown} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Toma el Control</CardTitle>
+                  <CardDescription>
+                    Tu patrimonio, tus decisiones, tu ritmo. Sin depender de horarios de oficina 
+                    ni de intermediarios. Tú mandas, nosotros te facilitamos el camino.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 4 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={TrendingUp} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Haz Crecer lo que Construiste</CardTitle>
+                  <CardDescription>
+                    Cuando tus bases legales están sólidas, puedes enfocarte en lo que importa: 
+                    hacer crecer tu negocio, invertir mejor, proteger a tu familia.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 5 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={Globe} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Sin Fronteras</CardTitle>
+                  <CardDescription>
+                    Estés donde estés en el mundo, tu patrimonio está protegido 
+                    y accesible. Firma desde cualquier país con validez legal en Chile.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Beneficio 6 */}
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+                <CardHeader>
+                  <IconContainer 
+                    icon={MessageCircle} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
+                  <CardTitle>Apoyo Humano Real</CardTitle>
+                  <CardDescription>
+                    Aunque la tecnología hace la magia, siempre hay personas reales detrás listas 
+                    para ayudarte. Por WhatsApp, mail o videollamada. Como debe ser.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* SECCIÓN 8: ESTADÍSTICAS - Con componentes shadcn/ui */}
+        <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] to-[var(--tp-brand-light)] text-white">
+          <div className="max-w-7xl tp-container">
+            <div className="text-center mb-16">
+              <h2 className="text-white mb-6">
+                Números que Hablan por Nosotros
+              </h2>
+              <p className="text-xl text-white/90 max-w-3xl mx-auto">
+                Miles de personas y empresas ya confían en TuPatrimonio para sus trámites notariales
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-12">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Icon icon={Users} size="xl" variant="white" />
+                </div>
+                <div className="text-5xl md:text-6xl font-bold mb-3">{USERS_COUNT.shortUpper}</div>
+                <div className="text-xl text-white/90">Usuarios Atendidos</div>
+                <p className="text-white/70 mt-2">
+                  Desde personas hasta grandes empresas
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Icon icon={FileCheck} size="xl" variant="white" />
+                </div>
+                <div className="text-5xl md:text-6xl font-bold mb-3">+60K</div>
+                <div className="text-xl text-white/90">Documentos Gestionados</div>
+                <p className="text-white/70 mt-2">
+                  Con validez legal garantizada
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Icon icon={Clock} size="xl" variant="white" />
+                </div>
+                <div className="text-5xl md:text-6xl font-bold mb-3">2 hrs</div>
+                <div className="text-xl text-white/90">Tiempo Promedio</div>
+                <p className="text-white/70 mt-2">
+                  Entrega de documentos notariados
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECCIÓN 9: COMPARATIVA VS COMPETENCIA */}
         <CompetitorComparisonSection
           title="Lo Que Nos Hace Únicos en Notaría Online"
           description="Comparación de características con otras plataformas del mercado"
@@ -490,7 +759,7 @@ export default function NotariaOnlineChilePage() {
           ]}
         />
 
-        {/* SECCIÓN 7: VALIDEZ LEGAL */}
+        {/* SECCIÓN 10: VALIDEZ LEGAL */}
         <LegalValiditySection
           title="¿Es Legal una Notaría Online en Chile? Todo lo que Debes Saber"
           description="Respuestas claras sobre la validez jurídica de los documentos firmados digitalmente"
@@ -726,7 +995,7 @@ export default function NotariaOnlineChilePage() {
           ]}
         />
 
-        {/* SECCIÓN 8: PREGUNTAS FRECUENTES EXTENDIDAS */}
+        {/* SECCIÓN 11: PREGUNTAS FRECUENTES EXTENDIDAS */}
         <FAQSection
           title="Preguntas Frecuentes sobre Notaría Online en Chile"
           description="Todas las respuestas que necesitas antes de comenzar"
@@ -795,7 +1064,7 @@ export default function NotariaOnlineChilePage() {
           }}
         />
 
-        {/* LLAMADO A LA ACCIÓN FINAL */}
+        {/* SECCIÓN 12: LLAMADO A LA ACCIÓN FINAL */}
         <FinalCTASection
           title="Comienza a Firmar tus Documentos Legales Hoy Mismo"
           description={`Únete a ${USERS_COUNT.text} que ya confían en el servicio de gestión notarial online más confiable, intuitivo y seguro de Chile`}

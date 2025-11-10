@@ -11,9 +11,15 @@ import {
   CheckCircle, Shield, Clock, FileSignature, Users, BadgeCheck,
   Star, Scale, AlertCircle, Lock, Smartphone, Check, Home,
   DollarSign, FileCheck, Building, Timer, ArrowRight, MapPin,
-  Calendar, FileText, Handshake
+  Calendar, FileText, Handshake, Lightbulb
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import { USERS_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -559,31 +565,31 @@ export default function ContratoArriendoOnlinePage() {
                 ¿Por Qué Un Contrato de Arriendo Online Te Cambia la Vida?
               </h2>
               
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
                 Mira, sabemos que arrendar puede dar nervios. Ya sea que estés arrendando tu casa por primera vez o que seas arrendatario buscando un lugar donde vivir, las preocupaciones son reales:
               </p>
               
               <ul className="max-w-3xl mx-auto text-left space-y-4 mb-12">
                 <li className="flex items-start gap-3 text-lg text-foreground/80">
-                  <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+                  <AlertCircle className="w-6 h-6 text-[var(--tp-error)] flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Y si el arrendatario no me paga?"</strong> - El miedo número uno de todo arrendador
                   </div>
                 </li>
                 <li className="flex items-start gap-3 text-lg text-foreground/80">
-                  <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+                  <AlertCircle className="w-6 h-6 text-[var(--tp-error)] flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Y si me están estafando?"</strong> - La inseguridad que todos sentimos
                   </div>
                 </li>
                 <li className="flex items-start gap-3 text-lg text-foreground/80">
-                  <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+                  <AlertCircle className="w-6 h-6 text-[var(--tp-error)] flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Cómo coordino para que todos vayamos a la notaría?"</strong> - La pesadilla logística
                   </div>
                 </li>
                 <li className="flex items-start gap-3 text-lg text-foreground/80">
-                  <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" />
+                  <AlertCircle className="w-6 h-6 text-[var(--tp-error)] flex-shrink-0 mt-1" />
                   <div>
                     <strong>"¿Estará bien hecho este contrato?"</strong> - La duda que no te deja dormir
                   </div>
@@ -596,37 +602,61 @@ export default function ContratoArriendoOnlinePage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="bg-gradient-to-br from-white to-green-50 rounded-2xl p-8 shadow-lg border-2 border-green-200">
-                <div className="text-5xl mb-4">😌</div>
-                <h3 className="mb-3">Duerme Tranquilo</h3>
-                <p className="">
-                  Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
-                </p>
-              </div>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center mb-4">
+                    <Shield className="w-6 h-6 text-[var(--tp-success)]" />
+                  </div>
+                  <CardTitle>Duerme Tranquilo</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
+                  </p>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl p-8 shadow-lg border-2 border-blue-200">
-                <div className="text-5xl mb-4">⏰</div>
-                <h3 className="mb-3">Ahorra Tiempo (Y Estrés)</h3>
-                <p className="">
-                  Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
-                </p>
-              </div>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Clock className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <CardTitle>Ahorra Tiempo (Y Estrés)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
+                  </p>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-lg border-2 border-purple-200">
-                <div className="text-5xl mb-4">🛡️</div>
-                <h3 className="mb-3">Estás Protegido</h3>
-                <p className="">
-                  No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
-                </p>
-              </div>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-[var(--tp-brand-5)] flex items-center justify-center mb-4">
+                    <CheckCircle className="w-6 h-6 text-[var(--tp-brand)]" />
+                  </div>
+                  <CardTitle>Estás Protegido</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
+                  </p>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-orange-50 rounded-2xl p-8 shadow-lg border-2 border-orange-200">
-                <div className="text-5xl mb-4">🤝</div>
-                <h3 className="mb-3">Para Todos</h3>
-                <p className="">
-                  Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
-                </p>
-              </div>
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Handshake className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <CardTitle>Para Todos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
@@ -658,15 +688,23 @@ export default function ContratoArriendoOnlinePage() {
                 <li>Y listo, lo recibes en tu email</li>
               </ul>
 
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8 border-2 border-blue-300 mb-8">
-                <h4 className="mb-3 flex items-start gap-2">
-                  <span className="text-2xl">💡</span>
-                  ¿Pero es legal firmar por internet?
-                </h4>
-                <p className="text-gray-800 leading-relaxed">
-                  ¡Totalmente! Desde el 2002 en Chile existe una ley (la 19.799, pero no te preocupes del nombre) que dice que <strong>firmar digitalmente tiene el mismo valor que firmar con lápiz en papel</strong>. Es decir, tu <strong>contrato de arriendo online</strong> vale IGUAL que uno firmado en notaría presencialmente.
-                </p>
-              </div>
+              <Card className="bg-muted border-muted-foreground/20 mb-8">
+                <CardHeader>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[var(--tp-brand-10)] flex items-center justify-center flex-shrink-0">
+                      <Lightbulb className="w-5 h-5 text-[var(--tp-brand)]" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">¿Pero es legal firmar por internet?</CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">
+                    ¡Totalmente! Desde el 2002 en Chile existe una ley (la 19.799, pero no te preocupes del nombre) que dice que <strong>firmar digitalmente tiene el mismo valor que firmar con lápiz en papel</strong>. Es decir, tu <strong>contrato de arriendo online</strong> vale IGUAL que uno firmado en notaría presencialmente.
+                  </p>
+                </CardContent>
+              </Card>
 
               <h3 className="mb-4">¿Por qué es mejor que ir a la notaría?</h3>
               <p className="text-lg text-foreground/80 mb-6">
@@ -674,29 +712,43 @@ export default function ContratoArriendoOnlinePage() {
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-red-50 rounded-2xl p-6 border-2 border-red-200">
-                  <h4 className="text-red-900 mb-4">❌ Ir a Notaría (la forma tradicional)</h4>
-                  <ul className="space-y-2 text-foreground/80">
-                    <li>• Tienes que coordinar horarios de TODAS las personas</li>
-                    <li>• Perder medio día (o día completo) para el trámite</li>
-                    <li>• Hacer fila y esperar tu turno</li>
-                    <li>• Pagar el trámite ALLÁ (y a veces sale más caro)</li>
-                    <li>• Rezar para que todo salga bien a la primera</li>
-                    <li>• Si hay un error, volver a empezar</li>
-                  </ul>
-                </div>
+                <Card className="bg-[var(--tp-error-light)] border-[var(--tp-error-border)]">
+                  <CardHeader>
+                    <CardTitle className="text-[var(--tp-error)] flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5" />
+                      Ir a Notaría (la forma tradicional)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Tienes que coordinar horarios de TODAS las personas</li>
+                      <li>• Perder medio día (o día completo) para el trámite</li>
+                      <li>• Hacer fila y esperar tu turno</li>
+                      <li>• Pagar el trámite ALLÁ (y a veces sale más caro)</li>
+                      <li>• Rezar para que todo salga bien a la primera</li>
+                      <li>• Si hay un error, volver a empezar</li>
+                    </ul>
+                  </CardContent>
+                </Card>
 
-                <div className="bg-green-50 rounded-2xl p-6 border-2 border-green-200">
-                  <h4 className="text-green-900 mb-4">✅ Contrato Online (la forma inteligente)</h4>
-                  <ul className="space-y-2 text-foreground/80">
-                    <li>• Cada uno firma cuando puede, desde donde esté</li>
-                    <li>• Todo en 15-20 minutos (en serio)</li>
-                    <li>• Sin filas, sin esperas</li>
-                    <li>• Precio fijo y transparente</li>
-                    <li>• Puedes revisar todo antes de confirmar</li>
-                    <li>• Si hay error, lo corriges en segundos</li>
-                  </ul>
-                </div>
+                <Card className="bg-[var(--tp-success-light)] border-[var(--tp-success-border)]">
+                  <CardHeader>
+                    <CardTitle className="text-[var(--tp-success)] flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Contrato Online (la forma inteligente)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>• Cada uno firma cuando puede, desde donde esté</li>
+                      <li>• Todo en 15-20 minutos (en serio)</li>
+                      <li>• Sin filas, sin esperas</li>
+                      <li>• Precio fijo y transparente</li>
+                      <li>• Puedes revisar todo antes de confirmar</li>
+                      <li>• Si hay error, lo corriges en segundos</li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
@@ -712,117 +764,149 @@ export default function ContratoArriendoOnlinePage() {
               <h2 className="mb-4">
                 Cómo Funciona (Más Simple Imposible)
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 No te vamos a complicar la vida. Este es el proceso, paso a paso, en lenguaje humano:
               </p>
               <div className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white rounded-full shadow-md border border-border">
                 <Timer className="w-5 h-5 text-[var(--tp-brand)]" />
-                <span className="font-bold text-gray-900">Tiempo total: 15 minutos a 24 horas</span>
+                <span className="font-bold text-foreground">Tiempo total: 15 minutos a 24 horas</span>
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Paso 1 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     1
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">Llenas los Datos (5 minutos)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>Llenas los Datos (5 minutos)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
                     Te preguntamos lo básico: dirección de la propiedad, cuánto es la renta, quién arrienda, quién es el dueño, etc. Como cuando llenas un formulario cualquiera. <strong>Sin letra chica, sin trampa.</strong>
                   </p>
-                  <p className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
-                    💡 <strong>Tip:</strong> Ten a mano la cédula de identidad de todos los que van a firmar. La vas a necesitar.
-                  </p>
-                </div>
-              </div>
+                  <Card className="bg-muted border-muted-foreground/20">
+                    <CardContent className="p-3 flex gap-2">
+                      <Lightbulb className="w-4 h-4 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Tip:</strong> Ten a mano la cédula de identidad de todos los que van a firmar. La vas a necesitar.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
 
               {/* Paso 2 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     2
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">Revisas Que Todo Esté Bien (3 minutos)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>Revisas Que Todo Esté Bien (3 minutos)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
                     Antes de seguir, te mostramos el contrato completo. Lo puedes leer con calma. <strong>Si algo no te gusta o ves un error, lo cambias ahí mismo.</strong> Nadie te apura.
                   </p>
-                  <p className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
-                    💡 <strong>Tip:</strong> Lee especialmente la parte de "cuánto se paga" y "cuándo se paga". Son las dos cosas que más problemas causan si no están claras.
-                  </p>
-                </div>
-              </div>
+                  <Card className="bg-muted border-muted-foreground/20">
+                    <CardContent className="p-3 flex gap-2">
+                      <Lightbulb className="w-4 h-4 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Tip:</strong> Lee especialmente la parte de "cuánto se paga" y "cuándo se paga". Son las dos cosas que más problemas causan si no están claras.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
 
               {/* Paso 3 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     3
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">Pagas (1 minuto)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>Pagas (1 minuto)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">
                     Con tarjeta de crédito o débito. Nada del otro mundo. Y tranquilo: <strong>si algo sale mal después, te devolvemos tu dinero</strong>. Así de simple.
                   </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Paso 4 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     4
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">Todos Firman Digitalmente (5-10 min)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>Todos Firman Digitalmente (5-10 min)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
                     Le llega un correo a cada persona que tiene que firmar. Entran desde su celular (o computador), dibujan su firma con el dedo, y listo. <strong>Cada uno firma cuando puede, no tienen que estar juntos.</strong>
                   </p>
-                  <p className="text-sm text-green-700 bg-green-50 p-3 rounded-lg">
-                    🔒 <strong>Sobre la seguridad:</strong> Sí, es seguro. Usamos el mismo sistema que los bancos usan para sus apps. Tu identidad queda verificada y nadie puede firmar por ti.
-                  </p>
-                </div>
-              </div>
+                  <Card className="bg-[var(--tp-success-light)] border-[var(--tp-success-border)]">
+                    <CardContent className="p-3 flex gap-2">
+                      <Lock className="w-4 h-4 text-[var(--tp-success)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Sobre la seguridad:</strong> Sí, es seguro. Usamos el mismo sistema que los bancos usan para sus apps. Tu identidad queda verificada y nadie puede firmar por ti.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
 
               {/* Paso 5 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     5
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">El Notario Lo Certifica (24 horas)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>El Notario Lo Certifica (24 horas)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">
                     Un notario real (sí, de verdad) revisa tu contrato y le pone su sello digital. Esto pasa automáticamente. Tú no tienes que hacer nada más.
                   </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Paso 6 */}
-              <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
+              <Card className="hover:shadow-xl transition-shadow relative pt-8">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
                     6
                   </div>
                 </div>
-                <div className="mt-8">
-                  <h3 className="mb-3">Lo Recibes en Tu Email (¡Listo!)</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-4">
+                <CardHeader>
+                  <CardTitle>Lo Recibes en Tu Email (¡Listo!)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
                     Te llega el PDF con tu <strong>contrato de arriendo online</strong> firmado y notariado. Lo puedes imprimir, guardar, mandar por WhatsApp. Lo que necesites.
                   </p>
-                  <p className="text-sm text-purple-700 bg-purple-50 p-3 rounded-lg">
-                    🎉 <strong>Ya está. Puedes respirar tranquilo.</strong> Tienes tu contrato 100% legal y estás protegido.
-                  </p>
-                </div>
-              </div>
+                  <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)]">
+                    <CardContent className="p-3 flex gap-2">
+                      <CheckCircle className="w-4 h-4 text-[var(--tp-brand)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-muted-foreground">
+                        <strong>Ya está. Puedes respirar tranquilo.</strong> Tienes tu contrato 100% legal y estás protegido.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="mt-12 text-center">
@@ -847,94 +931,98 @@ export default function ContratoArriendoOnlinePage() {
               <h2 className="mb-4">
                 ¿Qué Incluye Tu Contrato de Arriendo Online?
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 Porque queremos que estés tranquilo sabiendo <strong>exactamente</strong> qué estás pagando:
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Contrato Personalizado</h3>
-                    <p className="text-muted-foreground">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
+                    <CardTitle className="mb-2 text-base">Contrato Personalizado</CardTitle>
+                    <p className="text-muted-foreground text-sm">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Certificación Notarial</h3>
-                    <p className="text-muted-foreground">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
+                    <CardTitle className="mb-2 text-base">Certificación Notarial</CardTitle>
+                    <p className="text-muted-foreground text-sm">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Firmas Electrónicas Ilimitadas</h3>
-                    <p className="text-muted-foreground">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
+                    <CardTitle className="mb-2 text-base">Firmas Electrónicas Ilimitadas</CardTitle>
+                    <p className="text-muted-foreground text-sm">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Modificaciones Antes de Firmar</h3>
-                    <p className="text-muted-foreground">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
+                    <CardTitle className="mb-2 text-base">Modificaciones Antes de Firmar</CardTitle>
+                    <p className="text-muted-foreground text-sm">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Soporte por WhatsApp</h3>
-                    <p className="text-muted-foreground">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
+                    <CardTitle className="mb-2 text-base">Soporte por WhatsApp</CardTitle>
+                    <p className="text-muted-foreground text-sm">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="bg-gradient-to-br from-white to-[var(--tp-background-light)] rounded-2xl p-6 shadow-lg border border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-green-600" />
+              <Card className="hover:shadow-xl transition-shadow">
+                <CardContent className="flex items-start gap-4 pt-6">
+                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
+                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
                   </div>
                   <div>
-                    <h3 className="mb-2">Entrega en 24 Horas</h3>
-                    <p className="text-muted-foreground">Desde que la última persona firma hasta que lo recibes certificado.</p>
+                    <CardTitle className="mb-2 text-base">Entrega en 24 Horas</CardTitle>
+                    <p className="text-muted-foreground text-sm">Desde que la última persona firma hasta que lo recibes certificado.</p>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="bg-gradient-to-r from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] rounded-2xl p-8 border-2 border-[var(--tp-brand-20)] max-w-3xl mx-auto">
-              <h3 className="mb-4 text-center">Precio Variable Según Tus Necesidades</h3>
-              <p className="text-foreground/80 leading-relaxed text-center mb-4">
-                El precio varía según el tipo de firma electrónica que elijas y si agregas servicios notariales adicionales (como copia legalizada, protocolización o FAN®).
-              </p>
-              <p className="text-foreground/80 leading-relaxed text-center">
-                <strong>Sin sorpresas, sin letra chica.</strong> Es menos de lo que gastarías en transporte y tiempo perdido yendo a la notaría. Y con esto, <strong>duermes tranquilo</strong>.
-              </p>
-            </div>
+            <Card className="bg-[var(--tp-brand-5)] border-[var(--tp-brand-20)] max-w-3xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-center">Precio Variable Según Tus Necesidades</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-center">
+                <p className="text-muted-foreground leading-relaxed">
+                  El precio varía según el tipo de firma electrónica que elijas y si agregas servicios notariales adicionales (como copia legalizada, protocolización o FAN®).
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  <strong>Sin sorpresas, sin letra chica.</strong> Es menos de lo que gastarías en transporte y tiempo perdido yendo a la notaría. Y con esto, <strong>duermes tranquilo</strong>.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
@@ -946,19 +1034,6 @@ export default function ContratoArriendoOnlinePage() {
 
         {/* SECCIÓN 9: CTA FINAL */}
         <FinalCTASection {...finalCtaProps} />
-
-        {/* WhatsApp Floating Button */}
-        <a
-          href="https://wa.me/56949166719?text=Hola,%20necesito%20información%20sobre%20contratos%20de%20arriendo"
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-2xl hover:scale-110 transition-all flex items-center justify-center group"
-          aria-label="Contactar por WhatsApp"
-        >
-          <svg className="w-8 h-8 group-hover:scale-105 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-        </a>
 
       </div>
     </>
