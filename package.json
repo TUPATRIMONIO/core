@@ -13,10 +13,11 @@
     "build:web": "npm run build:packages && npm run build --workspace=apps/web",
     "build:web-standalone": "npm run build --workspace=apps/web",
     "build:marketing": "npm run build:packages && npm run build --workspace=apps/marketing",
-    "build:packages": "npm run build --workspace=packages/utils && npm run build --workspace=packages/location && npm run build --workspace=packages/update-notifier",
+    "build:packages": "npm run build --workspace=packages/utils && npm run build --workspace=packages/location && npm run build --workspace=packages/update-notifier && npm run build --workspace=packages/ui",
     "build:location": "npm run build --workspace=packages/location",
     "build:utils": "npm run build --workspace=packages/utils",
     "build:update-notifier": "npm run build --workspace=packages/update-notifier",
+    "build:ui": "npm run build --workspace=packages/ui",
     "start": "npm run start --workspace=apps/web",
     "start:marketing": "npm run start --workspace=apps/marketing",
     "lint": "npm run lint --workspaces"
