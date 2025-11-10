@@ -14,7 +14,6 @@ export interface ValueBullet {
   icon: LucideIcon;
   title: string;
   description: string;
-  color: string;
 }
 
 export interface CTAButton {

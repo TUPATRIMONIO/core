@@ -10,7 +10,8 @@ import { GoogleStatsBadge } from "@/components/GoogleStatsDisplay";
 import { 
   CheckCircle, Shield, Clock, FileSignature, Users, BadgeCheck,
   Star, Scale, AlertCircle, Lock, Smartphone, Check, Home,
-  DollarSign, FileCheck, Building, Timer, ArrowRight
+  DollarSign, FileCheck, Building, Timer, ArrowRight, MapPin,
+  Calendar, FileText, Handshake
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { USERS_COUNT } from "@/lib/constants";
@@ -254,20 +255,17 @@ const heroProps = {
     {
       icon: Check,
       title: "Duerme Tranquilo",
-      description: "Notario real certifica tu contrato",
-      color: "green"
+      description: "Notario real certifica tu contrato"
     },
     {
       icon: Clock,
       title: "Listo en < 24 Horas",
-      description: "Sin coordinar agendas ni filas",
-      color: "blue"
+      description: "Sin coordinar agendas ni filas"
     },
     {
       icon: Shield,
       title: "Estás Protegido",
-      description: "100% legal y con respaldo",
-      color: "purple"
+      description: "100% legal y con respaldo"
     }
   ],
   ctaButtons: [
@@ -304,7 +302,7 @@ const comparisonProps = {
   rows: [
     {
       aspect: "Tiempo de gestión",
-      emoji: "⏱️",
+      icon: Clock,
       online: {
         value: "Menos de 24 horas",
         description: "Trámite completo desde tu casa",
@@ -317,7 +315,7 @@ const comparisonProps = {
     },
     {
       aspect: "Ubicación y desplazamiento",
-      emoji: "📍",
+      icon: MapPin,
       online: {
         value: "0 traslados",
         description: "100% desde donde estés",
@@ -330,7 +328,7 @@ const comparisonProps = {
     },
     {
       aspect: "Horario de atención",
-      emoji: "🕐",
+      icon: Calendar,
       online: {
         value: "24/7",
         description: "Envía tu solicitud cuando quieras",
@@ -343,7 +341,7 @@ const comparisonProps = {
     },
     {
       aspect: "Seguimiento del trámite",
-      emoji: "📱",
+      icon: Smartphone,
       online: {
         value: "Tiempo real",
         description: "Notificaciones por WhatsApp y correo",
@@ -356,7 +354,7 @@ const comparisonProps = {
     },
     {
       aspect: "Entrega de documentos",
-      emoji: "📄",
+      icon: FileText,
       online: {
         value: "Instantánea digital",
         description: "Descarga inmediata + envío email",
@@ -369,7 +367,7 @@ const comparisonProps = {
     },
     {
       aspect: "Validez legal",
-      emoji: "✅",
+      icon: CheckCircle,
       online: {
         value: "100% legal",
         description: "Autorizada por Ley 19.799",
@@ -382,7 +380,7 @@ const comparisonProps = {
     },
     {
       aspect: "Experiencia del cliente",
-      emoji: "🤝",
+      icon: Handshake,
       online: {
         value: "Tranquilidad total",
         description: "Soporte proactivo y acompañamiento",
