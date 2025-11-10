@@ -15,6 +15,116 @@ Ecosistema multi-tenant B2C + B2B que digitaliza procesos legales con IA avanzad
 - **✍️ Servicios Core**: Firmas electrónicas, verificación de identidad, notaría digital
 - **🎨 Design System**: Sistema dual de colores y estilos centralizados
 
+## 💬 ADN Y VOZ DE MARCA (ESENCIAL)
+
+> **CRÍTICO**: Todo el contenido, funcionalidad y comunicación debe reflejar estos valores fundamentales.
+
+### **WHY - Propósito**
+Brindar **tranquilidad, abundancia y confianza** en las áreas legal, inmobiliaria y financiera a todos quienes interactúan con la empresa.
+
+### **HOW - Diferenciadores Clave**
+- **Amigable**: Lenguaje cordial y accesible, sin tecnicismos
+- **Confiable**: Transmite seguridad y validez legal en cada interacción
+- **Colaborador**: Enfoque en soluciones para el usuario, no solo proveer servicios
+- **Intuitivo**: Explica procesos legales complejos de forma simple y clara
+- **Moderno**: Innovador pero NO tecno-céntrico (la tecnología es medio, no fin)
+- **Eficiente**: Rápido, ágil, sin burocracia innecesaria
+
+### **VOZ DE MARCA - Reglas de Redacción**
+
+#### ✅ **SÍ Hacer:**
+- **Cercano y conversacional**: Habla como hablarías con un amigo que confía en ti
+- **Sin tecnicismos**: Debe entenderlo un niño de 10 años
+- **Profesional pero alegre**: Serio cuando importa, optimista siempre
+- **Empático**: Reconoce los dolores reales del usuario (miedo, frustración, incertidumbre)
+- **Transparente y honesto**: Di lo que puedes y no puedes hacer claramente
+- **Tutear SIEMPRE**: Usa "tú", "tu", "te" en toda la comunicación
+- **Humano**: Reconoce que somos humanos con errores, pero buscamos soluciones
+
+#### ❌ **NO Hacer:**
+- Usar jerga legal o técnica sin explicar
+- Sonar corporativo, frío o distante
+- Prometer lo que no podemos cumplir
+- Complicar lo simple con palabras rebuscadas
+
+### **POSICIONAMIENTO**
+> **"La marca que te genera mayor tranquilidad para resolver tus problemas"**
+
+**Palabra clave: TRANQUILIDAD** - Debe ser el hilo conductor en toda la comunicación.
+
+**Enfoque emocional**:
+- **De**: Miedo → Confianza
+- **De**: Frustración → Claridad  
+- **De**: Incertidumbre → Tranquilidad
+- **De**: Complicación → Simplicidad
+
+### **Ejemplos Prácticos**
+
+#### ❌ MAL (Corporativo, frío, técnico):
+```
+"Nuestra plataforma proporciona servicios de firma electrónica avanzada 
+conforme a la Ley 19.799, con certificación notarial y validez jurídica 
+plena en el territorio nacional."
+```
+
+#### ✅ BIEN (Cercano, simple, empático):
+```
+"¿Te estresa pensar en ir a la notaría? Lo entendemos. Por eso creamos 
+algo diferente: firma tus documentos desde tu casa, con el mismo respaldo 
+legal que si hubieras ido presencialmente. Sin filas, sin coordinar 
+agendas. Solo tú, tu celular, y tu tranquilidad."
+```
+
+#### ❌ MAL (Tecno-céntrico):
+```
+"Implementamos algoritmos de IA de última generación para automatizar 
+el análisis documental mediante procesamiento de lenguaje natural."
+```
+
+#### ✅ BIEN (Enfocado en el beneficio):
+```
+"Nuestra tecnología revisa tu documento automáticamente para que no tengas 
+que preocuparte por errores. Tú solo necesitas subirlo, y nosotros nos 
+encargamos del resto."
+```
+
+### **Aplicación en Código**
+
+Cuando escribas contenido en la interfaz, mensajes de error, notificaciones o cualquier texto:
+
+```tsx
+// ❌ MAL
+<p>Error: Autenticación fallida. Código 401.</p>
+
+// ✅ BIEN
+<p>Uy, algo salió mal al iniciar sesión. ¿Quieres intentarlo de nuevo? 
+Si el problema persiste, escríbenos y te ayudamos.</p>
+
+// ❌ MAL
+<button>Procesar transacción</button>
+
+// ✅ BIEN  
+<button>Firmar Mi Documento</button>
+
+// ❌ MAL
+<h2>Servicios de validación documental digital</h2>
+
+// ✅ BIEN
+<h2>Firma tus documentos sin salir de casa</h2>
+```
+
+### **Checklist para Nuevas Features**
+
+Antes de crear cualquier contenido, funcionalidad o diseño, pregúntate:
+
+1. ☑️ **¿Esto genera tranquilidad al usuario?**
+2. ☑️ **¿El lenguaje es cercano y comprensible para todos?**
+3. ☑️ **¿Refleja empatía con el dolor del usuario?**
+4. ☑️ **¿Estamos siendo colaboradores o solo proveedores?**
+5. ☑️ **¿La solución realmente funciona para el problema real?**
+
+**Recuerda**: No buscamos la perfección técnica por sí misma. Buscamos que **funcione** y **resuelva el problema real** del usuario.
+
 ## 🛠️ Stack Tecnológico
 
 ### Core Framework
