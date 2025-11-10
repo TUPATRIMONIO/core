@@ -19,7 +19,9 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  CardDescription,
 } from "@/components/ui/card";
+import { Icon, IconContainer } from "@tupatrimonio/ui";
 import { USERS_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -558,7 +560,7 @@ export default function ContratoArriendoOnlinePage() {
         <HeroSection {...heroProps} />
 
         {/* SECCIÓN 2: BENEFICIOS EMOCIONALES (CUSTOM) */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-background">
           <div className="max-w-7xl tp-container">
             <div className="text-center mb-12">
               <h2 className="mb-6">
@@ -602,67 +604,75 @@ export default function ContratoArriendoOnlinePage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center mb-4">
-                    <Shield className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <IconContainer 
+                    icon={Shield} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
                   <CardTitle>Duerme Tranquilo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
+                  <CardDescription>
                     Tu contrato está revisado y certificado por un notario real. Tiene TODO el peso legal que necesitas si algo sale mal.
-                  </p>
-                </CardContent>
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Clock className="w-6 h-6 text-muted-foreground" />
-                  </div>
+                  <IconContainer 
+                    icon={Clock} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
                   <CardTitle>Ahorra Tiempo (Y Estrés)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
+                  <CardDescription>
                     Olvídate de coordinar agendas, hacer filas o tomar medio día libre. Firma desde tu celular mientras tomas café en tu casa.
-                  </p>
-                </CardContent>
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-[var(--tp-brand-5)] flex items-center justify-center mb-4">
-                    <CheckCircle className="w-6 h-6 text-[var(--tp-brand)]" />
-                  </div>
+                  <IconContainer 
+                    icon={CheckCircle} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
                   <CardTitle>Estás Protegido</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
+                  <CardDescription>
                     No más contratos hechos "a mano" que no sirven. Esto es un documento legal con todas las de la ley. Si hay problemas, estás respaldado.
-                  </p>
-                </CardContent>
+                  </CardDescription>
+                </CardHeader>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardHeader>
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <Handshake className="w-6 h-6 text-muted-foreground" />
-                  </div>
+                  <IconContainer 
+                    icon={Handshake} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg" 
+                    className="mb-4"
+                  />
                   <CardTitle>Para Todos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
+                  <CardDescription>
                     Ya seas arrendador o arrendatario, esto te protege. Porque cuando todos están tranquilos, todo fluye mejor.
-                  </p>
-                </CardContent>
+                  </CardDescription>
+                </CardHeader>
               </Card>
             </div>
           </div>
         </section>
 
         {/* SECCIÓN 3: EDUCACIÓN (CUSTOM) */}
-        <section className="py-20 bg-gradient-to-br from-white to-[var(--tp-background-light)]">
+        <section className="py-20 bg-gradient-to-br from-background to-[var(--tp-background-light)] dark:to-background">
           <div className="max-w-7xl tp-container">
             <div className="max-w-4xl mx-auto">
               <h2 className="mb-6 text-center">
@@ -767,7 +777,7 @@ export default function ContratoArriendoOnlinePage() {
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 No te vamos a complicar la vida. Este es el proceso, paso a paso, en lenguaje humano:
               </p>
-              <div className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white rounded-full shadow-md border border-border">
+              <div className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-card rounded-full shadow-md border border-border">
                 <Timer className="w-5 h-5 text-[var(--tp-brand)]" />
                 <span className="font-bold text-foreground">Tiempo total: 15 minutos a 24 horas</span>
               </div>
@@ -925,7 +935,7 @@ export default function ContratoArriendoOnlinePage() {
         </section>
 
         {/* SECCIÓN 6: QUÉ INCLUYE (CUSTOM) */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-background">
           <div className="max-w-7xl tp-container">
             <div className="text-center mb-12">
               <h2 className="mb-4">
@@ -937,11 +947,9 @@ export default function ContratoArriendoOnlinePage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Contrato Personalizado</CardTitle>
                     <p className="text-muted-foreground text-sm">Adaptado a tu situación específica. No es una plantilla genérica de internet.</p>
@@ -949,11 +957,9 @@ export default function ContratoArriendoOnlinePage() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Certificación Notarial</CardTitle>
                     <p className="text-muted-foreground text-sm">Un notario real lo revisa y certifica. Tiene todo el peso legal que necesitas.</p>
@@ -961,11 +967,9 @@ export default function ContratoArriendoOnlinePage() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Firmas Electrónicas Ilimitadas</CardTitle>
                     <p className="text-muted-foreground text-sm">Para todos los que necesiten firmar: arrendador, arrendatario, aval. Sin costos extra.</p>
@@ -973,11 +977,9 @@ export default function ContratoArriendoOnlinePage() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Modificaciones Antes de Firmar</CardTitle>
                     <p className="text-muted-foreground text-sm">¿Te equivocaste en algo? Lo cambias las veces que necesites antes de confirmar.</p>
@@ -985,11 +987,9 @@ export default function ContratoArriendoOnlinePage() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Soporte por WhatsApp</CardTitle>
                     <p className="text-muted-foreground text-sm">Si te trabas o tienes dudas, nos escribes y te ayudamos. Somos humanos reales.</p>
@@ -997,11 +997,9 @@ export default function ContratoArriendoOnlinePage() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-xl transition-shadow">
+              <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
                 <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="w-10 h-10 rounded-full bg-[var(--tp-success-light)] flex items-center justify-center flex-shrink-0">
-                    <Check className="w-6 h-6 text-[var(--tp-success)]" />
-                  </div>
+                  <Icon icon={Check} size="lg" variant="brand" className="flex-shrink-0 mt-0.5" />
                   <div>
                     <CardTitle className="mb-2 text-base">Entrega en 24 Horas</CardTitle>
                     <p className="text-muted-foreground text-sm">Desde que la última persona firma hasta que lo recibes certificado.</p>
