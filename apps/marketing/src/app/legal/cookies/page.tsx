@@ -1,22 +1,46 @@
-import type { Metadata } from "next";
+'use client';
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Cookie, Settings, BarChart, Shield, Calendar } from "lucide-react";
+import { ChevronLeft, Cookie, Settings, BarChart, Shield, Calendar, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { LegalNavigation } from "@/components/LegalNavigation";
 import { IconContainer } from "@tupatrimonio/ui";
-
-export const metadata: Metadata = {
-  title: "Política de Cookies - TuPatrimonio",
-  description: "Política de cookies y tecnologías de seguimiento de TuPatrimonio. Cómo utilizamos cookies para mejorar tu experiencia.",
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { CookiePreferencesDialog } from "@/components/CookiePreferencesDialog";
 
 export default function CookiesPage() {
+  const { acceptAll, acceptEssential, consent } = useCookieConsent();
+  const [showDialog, setShowDialog] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const handleAcceptAll = () => {
+    acceptAll();
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
+  };
+
+  const handleEssentialOnly = () => {
+    acceptEssential();
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
+  };
+
+  const handleConfigure = () => {
+    setShowDialog(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setShowDialog(open);
+    if (!open && consent) {
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white dark:from-background dark:via-[var(--tp-background-dark)] dark:to-background">
+    <>
+      <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white dark:from-background dark:via-[var(--tp-background-dark)] dark:to-background">
       {/* Header */}
       <section className="bg-card border-b">
         <div className="max-w-4xl tp-container py-8">
@@ -247,21 +271,61 @@ export default function CookiesPage() {
                 <li><strong>Asunto:</strong> &quot;Consulta sobre Cookies&quot;</li>
               </ul>
 
+              {/* Mensaje de Éxito */}
+              {showSuccessMessage && (
+                <div className="bg-green-50 dark:bg-green-950 border-2 border-green-200 dark:border-green-800 rounded-xl p-6 mt-8 shadow-lg animate-in slide-in-from-top">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    <div>
+                      <h3 className="text-lg font-bold text-green-900 dark:text-green-100">
+                        ¡Preferencias Guardadas!
+                      </h3>
+                      <p className="text-green-800 dark:text-green-200 text-sm">
+                        Tus preferencias de cookies han sido actualizadas correctamente.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Panel de Configuración */}
               <div className="bg-yellow-50 dark:bg-yellow-950 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl p-8 mt-8 shadow-lg">
                 <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-100 mb-2">
                   💡 Configurar Preferencias de Cookies
                 </h3>
                 <p className="text-yellow-800 dark:text-yellow-200 mb-6">
                   Puede gestionar sus preferencias de cookies en cualquier momento.
+                  {consent && (
+                    <span className="block mt-2 text-sm">
+                      <strong>Estado actual:</strong>{' '}
+                      {consent.analytics ? 'Analytics activado' : 'Solo esenciales'}
+                    </span>
+                  )}
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <Button size="sm" className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                  <Button 
+                    size="sm" 
+                    onClick={handleAcceptAll}
+                    className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
                     Aceptar Todas
                   </Button>
-                  <Button size="sm" variant="outline" className="hover:bg-[var(--tp-bg-light-20)]">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleEssentialOnly}
+                    className="hover:bg-[var(--tp-bg-light-20)]"
+                  >
                     Solo Esenciales
                   </Button>
-                  <Button size="sm" variant="outline" className="hover:bg-[var(--tp-bg-light-20)]">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleConfigure}
+                    className="hover:bg-[var(--tp-bg-light-20)]"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
                     Configurar
                   </Button>
                 </div>
@@ -280,8 +344,15 @@ export default function CookiesPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
       </section>
-    </div>
+      </div>
+
+      {/* Dialog de Preferencias */}
+      <CookiePreferencesDialog 
+        open={showDialog} 
+        onOpenChange={handleDialogClose}
+      />
+    </>
   );
 }

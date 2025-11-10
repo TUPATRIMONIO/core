@@ -7,6 +7,7 @@ import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } from '../components/StructuredData';
 import { ThemeProvider } from '../components/theme-provider';
 import { FloatingActions } from '../components/FloatingActions';
+import { CookieBanner } from '../components/CookieBanner';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -124,8 +125,11 @@ export default function RootLayout({
             <main>{children}</main>
           </LocationProvider>
 
-          {/* Floating Actions: Theme switcher y futuras acciones rápidas */}
+          {/* Floating Actions: Theme switcher, cookies y WhatsApp */}
           <FloatingActions />
+
+          {/* Cookie Consent Banner - Aparece solo en primera visita */}
+          <CookieBanner />
         </ThemeProvider>
       </body>
     </html>
