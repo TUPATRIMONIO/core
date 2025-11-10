@@ -1,12 +1,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { IconContainer } from "@tupatrimonio/ui";
 import { ArrowRight, Timer, LucideIcon } from "lucide-react";
 
 export interface ProcessStep {
   icon: LucideIcon;
   title: string;
   description: string;
-  color: string;
 }
 
 export interface ProcessStepsSectionProps {
@@ -46,22 +47,24 @@ export default function ProcessStepsSection({
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => (
-            <div key={index} className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-border relative">
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                <div className="w-12 h-12 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
+            <Card key={index} className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all relative">
+              <div className="absolute -top-4 -right-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-brand)] text-white flex items-center justify-center text-lg font-bold shadow-lg">
                   {index + 1}
                 </div>
               </div>
-              <div className="mt-8 text-center">
-                <div className={`w-16 h-16 bg-${step.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                  <step.icon className={`w-8 h-8 text-${step.color}-600`} />
-                </div>
-                <h3 className="mb-3">{step.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            </div>
+              <CardHeader>
+                <IconContainer 
+                  icon={step.icon} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>{step.title}</CardTitle>
+                <CardDescription>{step.description}</CardDescription>
+              </CardHeader>
+            </Card>
           ))}
         </div>
 

@@ -1,8 +1,10 @@
 import React from "react";
+import { Icon } from "@tupatrimonio/ui";
+import { LucideIcon } from "lucide-react";
 
 export interface ComparisonRow {
   aspect: string;
-  emoji: string;
+  icon: LucideIcon;
   online: {
     value: string;
     description: string;
@@ -56,7 +58,12 @@ export default function ComparisonTableSection({
             <tbody>
               {rows.map((row, index) => (
                 <tr key={index} className={`${index < rows.length - 1 ? 'border-b border-border' : ''} hover:bg-accent/50 transition-colors`}>
-                  <td className="px-6 py-4 font-medium text-foreground">{row.emoji} {row.aspect}</td>
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    <div className="flex items-center gap-3">
+                      <Icon icon={row.icon} size="md" variant="brand" />
+                      <span>{row.aspect}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-center">
                     <span className={`text-xl font-bold ${row.online.highlight ? 'text-green-600' : 'text-foreground'}`}>
                       {row.online.value}

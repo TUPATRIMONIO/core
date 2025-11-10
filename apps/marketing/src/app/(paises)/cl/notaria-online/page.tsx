@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { 
   CheckCircle, Shield, Clock, FileSignature, Users, Lock, Smartphone, Download,
   Star, Check, AlertCircle, Building, Scale, BadgeCheck, DollarSign, FileCheck, 
-  BookOpen, Timer
+  BookOpen, Timer, MapPin, Calendar, FileText, Handshake
 } from "lucide-react";
 import DocumentsAvailable from "@/components/DocumentsAvailable";
 import { GoogleStatsBadge } from "@/components/GoogleStatsDisplay";
@@ -368,43 +368,43 @@ export default function NotariaOnlineChilePage() {
           rows={[
             {
               aspect: "Tiempo de gestión",
-              emoji: "⏱️",
+              icon: Clock,
               online: { value: "Menos de 24 horas", description: "Trámite completo desde tu casa", highlight: true },
               physical: { value: "3-7 días hábiles", description: "Múltiples visitas presenciales" }
             },
             {
               aspect: "Ubicación y desplazamiento",
-              emoji: "📍",
+              icon: MapPin,
               online: { value: "0 traslados", description: "100% desde donde estés", highlight: true },
               physical: { value: "2-3 visitas mínimo", description: "Tráfico, estacionamiento, tiempo perdido" }
             },
             {
               aspect: "Horario de atención",
-              emoji: "🕐",
+              icon: Calendar,
               online: { value: "24/7", description: "Envía tu solicitud cuando quieras", highlight: true },
               physical: { value: "Lun-Vie 9:00-17:00", description: "Debes pedir permiso en tu trabajo" }
             },
             {
               aspect: "Seguimiento del trámite",
-              emoji: "📱",
+              icon: Smartphone,
               online: { value: "Tiempo real", description: "Notificaciones por WhatsApp y correo", highlight: true },
               physical: { value: "Debes llamar/ir", description: "Sin visibilidad del proceso" }
             },
             {
               aspect: "Entrega de documentos",
-              emoji: "📄",
+              icon: FileText,
               online: { value: "Instantánea digital", description: "Descarga inmediata + envío email", highlight: true },
               physical: { value: "Retiro presencial", description: "Otra visita para buscar documentos" }
             },
             {
               aspect: "Validez legal",
-              emoji: "✅",
+              icon: CheckCircle,
               online: { value: "100% legal", description: "Autorizada por Ley 19.799 (Firma Electrónica Avanzada)", highlight: true },
               physical: { value: "100% legal", description: "Firma manuscrita tradicional" }
             },
             {
               aspect: "Experiencia del cliente",
-              emoji: "🤝",
+              icon: Handshake,
               online: { value: "Tranquilidad total", description: "Soporte proactivo y acompañamiento", highlight: true },
               physical: { value: "Variable", description: "Largas esperas, poca comunicación" }
             }
@@ -423,26 +423,22 @@ export default function NotariaOnlineChilePage() {
             {
               icon: FileSignature,
               title: "Elige tu documento",
-              description: "Puedes usar nuestras plantillas automatizadas o subir tu propio documento. Contratos de arriendo, promesas de compraventa, poderes, declaraciones juradas y mucho más.",
-              color: "[var(--tp-brand-10)]"
+              description: "Puedes usar nuestras plantillas automatizadas o subir tu propio documento. Contratos de arriendo, promesas de compraventa, poderes, declaraciones juradas y mucho más."
             },
             {
               icon: Smartphone,
               title: "Completa y firma electrónicamente",
-              description: "Firma con validación biométrica facial, Clave Única o firma electrónica avanzada certificada. Todo el proceso toma menos de 5 minutos y funciona desde cualquier dispositivo.",
-              color: "blue"
+              description: "Firma con validación biométrica facial, Clave Única o firma electrónica avanzada certificada. Todo el proceso toma menos de 5 minutos y funciona desde cualquier dispositivo."
             },
             {
               icon: Building,
               title: "Envío a notaría asociada",
-              description: "Tu documento se envía automáticamente a nuestra red de notarías. Nuestros notarios revisan y validan el documento en 1-4 horas hábiles. Trabajamos con las mejores notarías de Chile.",
-              color: "green"
+              description: "Tu documento se envía automáticamente a nuestra red de notarías. Nuestros notarios revisan y validan el documento en 1-4 horas hábiles. Trabajamos con las mejores notarías de Chile."
             },
             {
               icon: Download,
               title: "Recibe tu documento",
-              description: "Recibe tu documento notariado por email en < 24 horas. Descarga ilimitada, respaldo permanente y validez legal en todo Chile. Listo para usar en cualquier trámite público o privado inmediatamente.",
-              color: "purple"
+              description: "Recibe tu documento notariado por email en < 24 horas. Descarga ilimitada, respaldo permanente y validez legal en todo Chile. Listo para usar en cualquier trámite público o privado inmediatamente."
             }
           ]}
           ctaText="Comenzar Ahora - Gratis"
@@ -473,8 +469,7 @@ export default function NotariaOnlineChilePage() {
               description: [
                 "Somos los únicos gestores de servicios notariales online en Chile que incluyen una cobertura legal sin tope de monto en cada documento procesado.",
                 "Esta protección legal cubre al gestor del pedido (tú) o a quien decidas ceder su beneficio, en caso de incumplimiento relacionado con el proceso de gestión notarial. Incluye asesoría legal especializada y respaldo en controversias."
-              ],
-              gradient: "from-purple-500 to-purple-600"
+              ]
             },
             {
               icon: DollarSign,
@@ -482,8 +477,7 @@ export default function NotariaOnlineChilePage() {
               description: [
                 "Sin costos ocultos, sin letra pequeña, sin sorpresas. Nuestro modelo 100% digital nos permite ofrecer servicios notariales accesibles para todos, eliminando las barreras de las notarías tradicionales.",
                 "Sabes exactamente lo que pagas desde el primer momento. Nuestros precios son claros, fijos y predecibles. No cobramos por \"imprevistos\" ni agregamos cargos administrativos sorpresa. Tu tranquilidad financiera es parte de nuestro compromiso contigo."
-              ],
-              gradient: "from-green-500 to-green-600"
+              ]
             },
             {
               icon: FileCheck,
@@ -491,8 +485,7 @@ export default function NotariaOnlineChilePage() {
               description: [
                 "Más del 90% de los documentos privados en Chile se pueden gestionar completamente de forma online, sin necesidad de presencia física en notaría. Contratos, poderes, autorizaciones y más.",
                 "Solo necesitas tu cédula o pasaporte, tu documento en PDF y conexión a internet. En menos de 24 horas tendrás tu documento firmado con plena validez legal. Sin traslados, sin filas, sin pérdida de tiempo. Tu tranquilidad, desde donde estés."
-              ],
-              gradient: "from-blue-500 to-blue-600"
+              ]
             }
           ]}
         />

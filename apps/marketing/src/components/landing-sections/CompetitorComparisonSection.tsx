@@ -1,4 +1,6 @@
 import React from "react";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { IconContainer } from "@tupatrimonio/ui";
 import { Award, Check, LucideIcon } from "lucide-react";
 
 export interface CompetitorFeature {
@@ -14,7 +16,6 @@ export interface USP {
   icon: LucideIcon;
   title: string;
   description: string[];
-  gradient: string;
 }
 
 export interface CompetitorComparisonSectionProps {
@@ -77,17 +78,23 @@ export default function CompetitorComparisonSection({
         {/* 3 USPs destacados */}
         <div className="grid md:grid-cols-3 gap-8">
           {usps.map((usp, index) => (
-            <div key={index} className="bg-card rounded-2xl p-8 shadow-lg border-2 border-[var(--tp-brand-20)]">
-              <div className={`w-16 h-16 bg-gradient-to-br ${usp.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
-                <usp.icon className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="mb-3 text-center">{usp.title}</h3>
-              {usp.description.map((paragraph, idx) => (
-                <p key={idx} className="text-muted-foreground leading-relaxed mb-4">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            <Card key={index} className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all">
+              <CardHeader>
+                <IconContainer 
+                  icon={usp.icon} 
+                  variant="brand" 
+                  shape="rounded" 
+                  size="lg" 
+                  className="mb-4"
+                />
+                <CardTitle>{usp.title}</CardTitle>
+                {usp.description.map((paragraph, idx) => (
+                  <CardDescription key={idx} className={idx > 0 ? "mt-4" : ""}>
+                    {paragraph}
+                  </CardDescription>
+                ))}
+              </CardHeader>
+            </Card>
           ))}
         </div>
       </div>

@@ -101,17 +101,17 @@
   /* TIPOGRAFÍA - Tamaños Base (Mobile First) */
   --text-h1: 2rem;      /* 36px */
   --text-h2: 2rem;     /* 30px */
-  --text-h3: 1.5rem;       /* 24px */
+  --text-h3: 1.25rem;       /* 24px */
   --text-h4: 1.25rem;      /* 20px */
   --text-h5: 1.125rem;     /* 18px */
-  --text-h6: 1rem;         /* 16px */
+  --text-h6: 1.25rem;         /* 16px */
   --text-base: 1rem;       /* 16px */
   
   /* TIPOGRAFÍA - Tamaños Tablet (md: 768px) */
   --text-h1-md: 2.5rem;      /* 48px */
   --text-h2-md: 2.5rem;    /* 40px */
-  --text-h3-md: 2rem;      /* 32px */
-  --text-h4-md: 1.5rem;    /* 24px */
+  --text-h3-md: 1.25rem;      /* 32px */
+  --text-h4-md: 1.25rem;    /* 24px */
   --text-h5-md: 1.25rem;   /* 20px */
   --text-h6-md: 1.125rem;  /* 18px */
   --text-base: 1rem;       /* 16px */
@@ -119,9 +119,9 @@
   /* TIPOGRAFÍA - Tamaños Desktop (lg: 1024px) */
   --text-h1-lg: 3rem;   /* 60px */
   --text-h2-lg: 3rem;      /* 48px */
-  --text-h3-lg: 2.5rem;    /* 40px */
-  --text-h4-lg: 1.875rem;  /* 30px */
-  --text-h5-lg: 1.5rem;    /* 24px */
+  --text-h3-lg: 1rem;    /* 40px */
+  --text-h4-lg: 1rem;  /* 30px */
+  --text-h5-lg: 1rem;    /* 24px */
   --text-h6-lg: 1rem;   /* 20px */
   --text-base: 1rem;       /* 16px */
   
