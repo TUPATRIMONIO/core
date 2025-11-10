@@ -18,7 +18,7 @@ export interface LegalValiditySectionProps {
 export default function LegalValiditySection({
   title,
   description,
-  icon: Icon,
+  icon: IconComponent,
   faqs,
 }: LegalValiditySectionProps) {
   return (
@@ -26,7 +26,7 @@ export default function LegalValiditySection({
       <div className="max-w-7xl tp-container">
         <div className="text-center mb-12">
           <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <Icon icon={icon} size="xl" variant="brand" />
+            <Icon icon={IconComponent} size="xl" variant="brand" />
           </div>
           <h2 className="mb-4">
             {title}
