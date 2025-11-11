@@ -417,6 +417,306 @@ import {
 - Gap interno: `gap-6` (24px entre elementos)
 - Background: `bg-card` (se adapta a tema)
 
+## 🎯 Patrones de Diseño de Componentes
+
+### Sistema de Íconos Minimalista
+
+Usamos el paquete `@tupatrimonio/ui` que exporta componentes `Icon` e `IconContainer` para mantener consistencia:
+
+#### Icon - Íconos sin contenedor
+
+```tsx
+import { Icon } from '@tupatrimonio/ui';
+import { CheckCircle, Shield, Zap } from 'lucide-react';
+
+// Tamaños estándar
+<Icon icon={CheckCircle} size="sm" />   // 16px
+<Icon icon={Shield} size="md" />        // 20px  
+<Icon icon={Zap} size="lg" />           // 24px
+<Icon icon={Users} size="xl" />         // 32px
+
+// Variantes de color
+<Icon icon={CheckCircle} size="md" variant="brand" />     // Color de marca
+<Icon icon={Shield} size="md" variant="muted" />          // Color apagado
+<Icon icon={Zap} size="md" variant="white" />             // Blanco
+<Icon icon={Lock} size="md" className="text-green-600" /> // Custom
+```
+
+**Características**:
+- `strokeWidth: 1.5` por defecto (líneas delgadas y minimalistas)
+- Se adapta automáticamente al modo dark/light
+- Consistente en toda la aplicación
+
+#### IconContainer - Íconos con fondo
+
+```tsx
+import { IconContainer } from '@tupatrimonio/ui';
+
+// Variantes de fondo
+<IconContainer 
+  icon={Bell} 
+  variant="brand"        // Fondo suave de marca
+  shape="rounded"        // rounded-xl
+  size="lg"              // 56px contenedor
+/>
+
+<IconContainer 
+  icon={CheckCircle} 
+  variant="solid-brand"  // Fondo sólido de marca
+  shape="circle"         // rounded-full
+  size="md"              // 48px contenedor
+/>
+
+// Con animación hover
+<div className="group">
+  <div className="group-hover:scale-110 transition-transform">
+    <IconContainer icon={Sparkles} variant="brand" shape="rounded" size="lg" />
+  </div>
+</div>
+```
+
+**Variantes disponibles**:
+- `brand`: Fondo suave con borde (`bg-[var(--tp-brand-10)]`)
+- `solid-brand`: Fondo sólido de marca (`bg-[var(--tp-brand)]`)
+- `muted`: Fondo neutral
+- `neutral`: Fondo background
+
+**Formas**:
+- `circle`: `rounded-full` - Para badges o elementos destacados
+- `rounded`: `rounded-xl` - Estándar para features
+- `square`: `rounded-none` - Para casos especiales
+
+### Cards con Efectos Hover Consistentes
+
+Patrón estándar para cards de features/beneficios:
+
+```tsx
+<Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+  <CardHeader>
+    <div className="mb-4 group-hover:scale-110 transition-transform">
+      <IconContainer 
+        icon={Zap} 
+        variant="brand" 
+        shape="rounded" 
+        size="lg"
+      />
+    </div>
+    <CardTitle>Título del Feature</CardTitle>
+    <CardDescription>
+      Descripción breve y clara del beneficio
+    </CardDescription>
+  </CardHeader>
+</Card>
+```
+
+**Elementos clave**:
+- `border-2 border-border`: Borde neutral por defecto
+- `hover:border-[var(--tp-brand)]`: Borde de marca en hover
+- `hover:shadow-xl`: Sombra que crece
+- `transition-all`: Transiciones suaves
+- `group`: Para animar el ícono hijo
+- `group-hover:scale-110`: Ícono crece 10% en hover
+
+### Modo Dark - Patrones Correctos
+
+#### Fondos de Sección
+
+```tsx
+// ✅ CORRECTO - Se adapta automáticamente
+<section className="py-20 bg-background">
+<section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+
+// ❌ INCORRECTO - Fijo en light mode
+<section className="py-20 bg-white">
+<section className="py-20 bg-gray-50">
+```
+
+#### Trust Indicators con Background
+
+```tsx
+// ✅ CORRECTO - Funciona en ambos modos
+<div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+  <Icon icon={CheckCircle} size="sm" className="text-green-600 dark:text-green-400" />
+  <span className="text-green-700 dark:text-green-300">Validez Legal</span>
+</div>
+
+// ❌ INCORRECTO - No se ve bien en dark
+<div className="flex items-center gap-2">
+  <Icon icon={CheckCircle} size="sm" className="text-green-600" />
+  <span className="text-green-700">Validez Legal</span>
+</div>
+```
+
+**Patrón de colores para dark mode**:
+- Backgrounds: `bg-green-50 dark:bg-green-950` (950 para dark)
+- Iconos: `text-green-600 dark:text-green-400` (más claro en dark)
+- Texto: `text-green-700 dark:text-green-300` (más claro en dark)
+
+#### Cards y Formularios
+
+```tsx
+// ✅ CORRECTO - Fondo adaptable
+<Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card">
+
+// ✅ CORRECTO - Sin gradiente de fondo en CardHeader
+<CardHeader className="text-center pt-8">
+  {/* Contenido sin bg-gradient */}
+</CardHeader>
+
+// ❌ INCORRECTO - Gradiente crea franja visual
+<CardHeader className="bg-gradient-to-br from-[var(--tp-buttons)]/5">
+```
+
+### Secciones CTA con Gradiente Premium
+
+Patrón estándar para secciones de llamado a la acción:
+
+```tsx
+<section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] relative overflow-hidden">
+  {/* Patrón decorativo de fondo */}
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
+    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
+  </div>
+
+  <div className="max-w-4xl tp-container text-center relative z-10">
+    <h2 className="text-white mb-6">Título del CTA</h2>
+    <p className="text-xl text-white/90 mb-10">Descripción persuasiva</p>
+    
+    {/* Botones */}
+    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+      {/* Botón primario blanco */}
+      <Button 
+        size="lg" 
+        className="bg-white text-[var(--tp-brand)] hover:bg-gray-100 dark:hover:bg-gray-200 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+      >
+        <Icon icon={MapPin} size="md" variant="inherit" className="mr-2" />
+        Acción Principal
+      </Button>
+      
+      {/* Botón secundario outline */}
+      <Button 
+        size="lg" 
+        variant="ghost"
+        className="text-white border-2 border-white hover:bg-white/10 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+      >
+        Acción Secundaria
+      </Button>
+    </div>
+    
+    {/* Trust bar */}
+    <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm">
+      <div className="flex items-center gap-2">
+        <Icon icon={Zap} size="md" variant="white" />
+        <span>Beneficio 1</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Icon icon={Lock} size="md" variant="white" />
+        <span>Beneficio 2</span>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+**Elementos clave**:
+- **Gradiente de 3 colores**: `from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)]`
+- **Patrón decorativo**: Círculos blancos con `opacity-10` para profundidad
+- **Z-index**: `relative z-10` en contenido para estar sobre el patrón
+- **Botón primario**: Fondo blanco con texto de marca
+- **Botón secundario**: `variant="ghost"` con borde blanco y hover sutil
+- **Trust bar**: Íconos con `variant="white"` y sin separadores
+
+### Botones sobre Fondo de Marca
+
+Patrones correctos para botones sobre fondos de color:
+
+```tsx
+// ✅ Botón primario - Fondo blanco sólido
+<Button 
+  size="lg" 
+  className="bg-white text-[var(--tp-brand)] hover:bg-gray-100 dark:hover:bg-gray-200 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+>
+  Acción Principal
+</Button>
+
+// ✅ Botón secundario - Ghost con borde
+<Button 
+  size="lg" 
+  variant="ghost"
+  className="text-white border-2 border-white hover:bg-white/10 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+>
+  Acción Secundaria
+</Button>
+
+// ❌ EVITAR - Outline no funciona bien
+<Button variant="outline" className="border-white text-white hover:bg-white hover:text-[var(--tp-brand)]">
+  No usar este patrón
+</Button>
+```
+
+**Reglas**:
+- Sobre fondo de marca: `variant="ghost"` con borde personalizado
+- Hover sutil: `hover:bg-white/10` (10% de overlay)
+- Mantener texto blanco en hover para legibilidad
+- Agregar `dark:hover:bg-gray-200` en botones blancos
+
+### Badges y Trust Indicators
+
+```tsx
+// Badge "Próximamente" con ícono minimalista
+<Badge className="bg-[var(--tp-buttons)] dark:bg-[var(--tp-brand)] text-white px-4 py-2 text-base flex items-center gap-2 w-fit mx-auto shadow-lg">
+  <Icon icon={Rocket} size="sm" className="text-white" />
+  <span>Próximamente</span>
+</Badge>
+
+// Trust indicators con fondo de color
+<div className="flex flex-wrap items-center justify-center gap-6">
+  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+    <Icon icon={CheckCircle} size="sm" className="text-green-600 dark:text-green-400" />
+    <span className="text-green-700 dark:text-green-300">Validez Legal</span>
+  </div>
+</div>
+```
+
+### Espaciado y Jerarquía Visual
+
+```tsx
+// Títulos con espaciado correcto
+<h2 className="mb-6">       // 24px margen inferior
+<h3 className="mb-4">       // 16px margen inferior
+
+// Párrafos descriptivos
+<p className="text-xl text-muted-foreground mb-10">  // 40px margen
+
+// Grupos de botones
+<div className="flex gap-4 mb-10">  // 16px entre botones, 40px después
+
+// Trust bars
+<div className="flex gap-6">  // 24px entre elementos
+
+// Secciones
+<section className="py-20">  // 80px padding vertical
+<section className="py-16">  // 64px para secciones menos importantes
+```
+
+### Checklist de Implementación
+
+Antes de crear un nuevo componente, verifica:
+
+- [ ] **Íconos**: ¿Usas `Icon` o `IconContainer` de `@tupatrimonio/ui`?
+- [ ] **Modo Dark**: ¿Los fondos usan `bg-background` o `bg-card`?
+- [ ] **Trust Indicators**: ¿Tienen fondos adaptativos (`dark:bg-green-950`)?
+- [ ] **Cards**: ¿Usan `hover:border-[var(--tp-brand)]` consistente?
+- [ ] **Botones en CTA**: ¿Siguen el patrón blanco primario + ghost secundario?
+- [ ] **Gradientes**: ¿Usan las 3 variantes de marca?
+- [ ] **Espaciado**: ¿Usan `py-20` para secciones y `mb-6`/`mb-10` para jerarquía?
+- [ ] **Transiciones**: ¿Todos los hovers tienen `transition-all`?
+
+### Ejemplo Completo - Componente Coming Soon
+
+Ver `apps/marketing/src/components/ComingSoonCountry.tsx` como referencia de implementación completa de todos estos patrones.
+
 ## 📐 Guía Rápida de Estilos
 
 ### Uso de Variables CSS

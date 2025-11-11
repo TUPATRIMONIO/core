@@ -814,29 +814,32 @@ export default function HomePage() {
       </section>
 
       {/* Sección 9: Newsletter */}
-      <section className="py-20 bg-background">
-        <div className="max-w-4xl tp-container">
-          <Card className="border-2 border-[var(--tp-brand-20)] shadow-2xl overflow-hidden">
-            <div className="bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent p-8 md:p-12">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--tp-brand)] rounded-full mb-6">
-                  <Icon icon={Clock} size="xl" variant="white" />
-                </div>
-                <h2 className="mb-4">
-                  Suscríbete a TuPatrimonio News 📬
-                </h2>
-                <p className="text-lg text-muted-foreground mb-2">
-                  Recibe contenido exclusivo sobre transformación digital legal y tips para proteger tu patrimonio
-                </p>
-                <p className="text-2xl font-bold text-[var(--tp-brand)]">
-                  ¡Y gana un 15% de descuento en tu primer servicio! 🎉
-                </p>
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent">
+        <div className="max-w-2xl tp-container">
+          <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card overflow-hidden">
+            <CardHeader className="text-center pt-8">
+              <div className="mb-6">
+                <IconContainer 
+                  icon={Clock} 
+                  variant="solid-brand" 
+                  shape="circle" 
+                  size="lg"
+                  className="mx-auto"
+                />
               </div>
-
-              <div className="max-w-md mx-auto">
-                <NewsletterForm />
-              </div>
-            </div>
+              <CardTitle className="text-3xl mb-3">
+                Suscríbete a TuPatrimonio News 📬
+              </CardTitle>
+              <CardDescription className="text-base mb-4">
+                Recibe contenido exclusivo sobre transformación digital legal y tips para proteger tu patrimonio
+              </CardDescription>
+              <p className="text-xl font-bold text-[var(--tp-brand)]">
+                ¡Y gana un 15% de descuento en tu primer servicio! 🎉
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6 pb-8">
+              <NewsletterForm />
+            </CardContent>
           </Card>
         </div>
       </section>
