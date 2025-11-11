@@ -59,22 +59,23 @@ export function VerticalCard({
   return (
     <Card 
       className={`
-        h-full transition-all duration-300 hover:shadow-xl
+        h-full transition-all duration-300 hover:shadow-xl group
         ${isFeatured 
           ? 'border-2 shadow-lg scale-105' 
-          : 'border-2 border-transparent hover:border-[color:var(--hover-color)]'
+          : 'border-2 border-border hover:shadow-lg'
         }
       `}
       style={{
         // @ts-ignore
         '--hover-color': color,
+        ...(isFeatured ? { borderColor: color } : {}),
       } as React.CSSProperties}
     >
       <CardHeader>
         {/* Icono y Badge */}
         <div className="relative mb-4">
           <div 
-            className="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
+            className="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md"
             style={{
               background: `linear-gradient(135deg, ${color}, ${color}dd)`,
             }}
@@ -110,7 +111,7 @@ export function VerticalCard({
                   className="w-5 h-5 shrink-0 mt-0.5" 
                   style={{ color }}
                 />
-                <span className="text-sm text-gray-600">{feature}</span>
+                <span className="text-sm text-muted-foreground">{feature}</span>
               </li>
             ))}
           </ul>
@@ -123,7 +124,7 @@ export function VerticalCard({
             className={`
               w-full transition-all
               ${isFeatured 
-                ? 'text-white shadow-md' 
+                ? 'text-white shadow-md hover:opacity-90' 
                 : 'hover:text-white'
               }
             `}

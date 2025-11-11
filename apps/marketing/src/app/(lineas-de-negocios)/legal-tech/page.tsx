@@ -18,9 +18,9 @@ export default function LegalTechPage() {
   return (
     <VerticalLayout
       title="Legal Tech"
-      description="Revoluciona tus procesos legales con tecnología de vanguardia. Firma, notariza y modifica documentos empresariales de forma digital y segura."
+      description="Los trámites legales no tienen que ser un martirio. Firma, notariza y modifica documentos desde donde estés, con la misma validez legal que siempre."
       icon={<Scale className="w-full h-full" />}
-      color="var(--tp-brand)"
+      color="#800039"
       breadcrumb={[
         { label: 'Legal Tech', href: '/legal-tech' },
       ]}
@@ -32,15 +32,15 @@ export default function LegalTechPage() {
       <div className="grid md:grid-cols-3 gap-8 mb-20">
         <VerticalCard
           title="Firma Electrónica"
-          description="Firma documentos con validez legal total. Cumple normativas de Chile, México, Colombia y más países de Latinoamérica."
+          description="¿Te estresa coordinar firmas? Ahora puedes firmar desde tu celular, con el mismo respaldo legal que si estuvieras en la notaría."
           icon={<FileSignature className="w-full h-full" />}
-          color="var(--tp-brand)"
+          color="#800039"
           features={[
-            'Firma Simple y Avanzada',
-            'Validez legal garantizada',
-            'Integración con APIs',
-            'Sin límite de documentos',
-            'Trazabilidad completa',
+            'Simple y rápida, o avanzada si lo necesitas',
+            'Vale igual que tu firma en papel',
+            'Conéctala a tus sistemas si quieres',
+            'Firma todo lo que necesites',
+            'Sabes quién firmó y cuándo',
           ]}
           href="/legal-tech/firma-electronica"
           buttonText="Ver Firma Electrónica"
@@ -49,31 +49,31 @@ export default function LegalTechPage() {
 
         <VerticalCard
           title="Trámites Notariales"
-          description="Notariza documentos online sin ir a la notaría. Copias legalizadas, protocolizaciones y más trámites 100% digitales."
+          description="¿Odias las filas en la notaría? Nosotros también. Por eso creamos una forma de hacer tus trámites sin salir de casa."
           icon={<FileCheck className="w-full h-full" />}
-          color="var(--tp-buttons)"
+          color="#404040"
           features={[
-            'Notarización online',
-            'Copias legalizadas',
-            'Protocolización digital',
-            'Válido en tribunales',
-            'Sin filas ni esperas',
+            'Notariza sin moverte de tu casa',
+            'Copias con el mismo valor legal',
+            'Protocoliza documentos online',
+            'Los tribunales las aceptan sin problema',
+            'Tu tiempo vale oro',
           ]}
           href="/legal-tech/tramites-notariales"
           buttonText="Ver Trámites Notariales"
         />
 
         <VerticalCard
-          title="Modificaciones Empresa"
-          description="Modifica tu empresa de forma simple: cambio de nombre, dirección, socios, capital social y más."
+          title="Modificaciones de Empresa"
+          description="¿Tu empresa necesita cambios? Te ayudamos a hacerlo rápido y sin complicaciones legales de por medio."
           icon={<Building2 className="w-full h-full" />}
-          color="var(--tp-buttons-hover)"
+          color="#555555"
           features={[
-            'Cambio de razón social',
-            'Modificación de directorio',
-            'Aumento de capital',
-            'Cambio de domicilio',
-            'Asesoría incluida',
+            'Cambia el nombre de tu empresa',
+            'Actualiza tu directorio fácilmente',
+            'Aumenta tu capital cuando lo necesites',
+            'Cambia de dirección sin drama',
+            'Te guiamos en cada paso',
           ]}
           href="/legal-tech/modificaciones-empresa"
           buttonText="Ver Modificaciones"
@@ -83,35 +83,35 @@ export default function LegalTechPage() {
       {/* Beneficios del vertical */}
       <section className="mb-20">
         <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-          ¿Por qué elegir nuestras soluciones Legal Tech?
+          ¿Por qué miles de personas ya confían en nosotros?
         </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               title: 'Rapidez',
-              description: 'Procesos que tomaban días ahora en minutos',
+              description: 'Lo que antes te tomaba días, ahora lo resuelves en minutos',
             },
             {
               title: 'Seguridad',
-              description: 'Encriptación de nivel bancario',
+              description: 'Tus documentos están tan seguros como en un banco',
             },
             {
               title: 'Validez Legal',
-              description: 'Cumple todas las normativas locales',
+              description: 'Todo lo que hacemos cumple con la ley al 100%',
             },
             {
               title: 'Ahorro',
-              description: 'Hasta 70% menos que métodos tradicionales',
+              description: 'Pagas hasta 70% menos que en los métodos tradicionales',
             },
           ].map((benefit, index) => (
             <div 
               key={index}
-              className="bg-card p-6 rounded-xl border-2 border-[var(--tp-brand-20)] hover:border-[var(--tp-brand)] transition-all"
+              className="bg-card p-6 rounded-xl border-2 border-[#80003933] hover:border-[#800039] transition-all"
             >
-              <h3 className="text-xl font-bold text-[var(--tp-brand)] mb-3">
+              <h3 className="text-xl font-bold text-[#800039] mb-3">
                 {benefit.title}
               </h3>
-              <p className="text-gray-600">{benefit.description}</p>
+              <p className="text-muted-foreground">{benefit.description}</p>
             </div>
           ))}
         </div>

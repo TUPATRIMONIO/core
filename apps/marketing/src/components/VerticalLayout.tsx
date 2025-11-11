@@ -56,28 +56,28 @@ export function VerticalLayout({
   ctaHref = '/empezar',
 }: VerticalLayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[var(--tp-background-light)] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
       {/* Breadcrumb */}
       {breadcrumb.length > 0 && (
-        <div className="bg-white border-b">
+        <div className="bg-background border-b border-border">
           <div className="max-w-7xl tp-container py-3">
             <nav className="flex items-center gap-2 text-sm">
               <Link 
                 href="/" 
-                className="text-gray-500 hover:text-[var(--tp-brand)] transition-colors flex items-center gap-1"
+                className="text-muted-foreground hover:text-[var(--tp-brand)] transition-colors flex items-center gap-1"
               >
                 <Home className="w-4 h-4" />
                 Inicio
               </Link>
               {breadcrumb.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <span className="text-gray-400">/</span>
+                  <span className="text-muted-foreground/50">/</span>
                   {index === breadcrumb.length - 1 ? (
-                    <span className="text-gray-900 font-medium">{item.label}</span>
+                    <span className="text-foreground font-medium">{item.label}</span>
                   ) : (
                     <Link 
                       href={item.href}
-                      className="text-gray-500 hover:text-[var(--tp-brand)] transition-colors"
+                      className="text-muted-foreground hover:text-[var(--tp-brand)] transition-colors"
                     >
                       {item.label}
                     </Link>
@@ -95,7 +95,7 @@ export function VerticalLayout({
           <div className="text-center max-w-4xl mx-auto">
             {/* Icono */}
             <div 
-              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6"
+              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 shadow-lg"
               style={{
                 background: `linear-gradient(135deg, ${color}, ${color}dd)`,
               }}
@@ -106,10 +106,10 @@ export function VerticalLayout({
             </div>
 
             {/* Título y descripción */}
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               {title}
             </h1>
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
               {description}
             </p>
           </div>
@@ -130,14 +130,11 @@ export function VerticalLayout({
           <section className="pb-20">
             <div className="max-w-4xl tp-container">
               <Card 
-                className="border-2 shadow-2xl overflow-hidden"
+                className="border-2 shadow-2xl overflow-hidden bg-card"
                 style={{ borderColor: color }}
               >
                 <CardHeader 
-                  className="text-center pb-8"
-                  style={{
-                    background: `linear-gradient(135deg, ${color}10, transparent)`,
-                  }}
+                  className="text-center pb-8 pt-10"
                 >
                   <CardTitle className="text-3xl md:text-4xl mb-4">
                     ¿Listo para Comenzar?
@@ -150,7 +147,7 @@ export function VerticalLayout({
                   <Link href={ctaHref}>
                     <Button
                       size="lg"
-                      className="text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+                      className="text-white hover:opacity-90 px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
                       style={{
                         backgroundColor: color,
                       }}
@@ -159,7 +156,7 @@ export function VerticalLayout({
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                   </Link>
-                  <p className="text-sm text-gray-500 mt-4">
+                  <p className="text-sm text-muted-foreground mt-4">
                     Sin tarjeta de crédito • Gratis para siempre • Cancela cuando quieras
                   </p>
                 </CardContent>
