@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { VerticalLayout } from '@/components/VerticalLayout';
 import { VerticalCard } from '@/components/VerticalCard';
-import { Briefcase, Calculator, Building, BookOpen } from 'lucide-react';
+import { WaitlistForm } from '@/components/WaitlistForm';
+import { Briefcase, BookOpen, GraduationCap, Wrench } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Business Hub - TuPatrimonio | Centro de Negocios Digital',
-  description: 'Hub de negocios: contabilidad digital, oficinas virtuales y guías para emprendedores. Todo lo que tu empresa necesita.',
-  keywords: ['business hub', 'contabilidad', 'oficina virtual', 'emprendimiento', 'negocios'],
+  description: 'Hub de negocios: guías para emprendedores, formaciones y herramientas digitales. Todo lo que tu empresa necesita para crecer.',
+  keywords: ['business hub', 'guías emprendedor', 'formaciones', 'herramientas negocios', 'emprendimiento'],
 };
 
 export default function BusinessHubPage() {
@@ -17,38 +18,9 @@ export default function BusinessHubPage() {
       icon={<Briefcase className="w-full h-full" />}
       color="#f59e0b"
       breadcrumb={[{ label: 'Business Hub', href: '/business-hub' }]}
+      showCTA={false}
     >
       <div className="grid md:grid-cols-3 gap-8">
-        <VerticalCard
-          title="Contabilidad Digital"
-          description="Olvídate de las planillas complicadas. Te ayudamos a llevar tu contabilidad de forma simple, como debe ser."
-          icon={<Calculator className="w-full h-full" />}
-          color="#f59e0b"
-          features={[
-            'Facturación en minutos',
-            'Declaraciones sin dolor de cabeza',
-            'Ve tus números al instante',
-            'Conecta tu banco automáticamente',
-          ]}
-          href="/business-hub/contabilidad"
-          badge="Próximamente"
-        />
-
-        <VerticalCard
-          title="Oficinas Virtuales"
-          description="¿Trabajas desde casa pero necesitas una dirección profesional? Te damos presencia sin pagar arriendo."
-          icon={<Building className="w-full h-full" />}
-          color="#f59e0b"
-          features={[
-            'Dirección comercial en zona premium',
-            'Recibimos tu correo por ti',
-            'Salas de reunión cuando las necesites',
-            'Alguien contesta tus llamadas',
-          ]}
-          href="/business-hub/oficinas-virtuales"
-          badge="Próximamente"
-        />
-
         <VerticalCard
           title="Guías para Emprendedores"
           description="Sabemos que emprender puede ser abrumador. Aquí encontrarás todo lo que necesitas para avanzar con confianza."
@@ -57,10 +29,40 @@ export default function BusinessHubPage() {
           features={[
             'Paso a paso, sin complicaciones',
             'Plantillas listas para usar',
-            'Aprende con expertos en vivo',
+            'Consejos prácticos que funcionan',
             'Conéctate con otros emprendedores',
           ]}
           href="/business-hub/guias-emprendedor"
+        />
+
+        <VerticalCard
+          title="Formaciones"
+          description="Aprende lo que realmente necesitas para hacer crecer tu negocio. Cursos creados por personas que han estado en tu lugar."
+          icon={<GraduationCap className="w-full h-full" />}
+          color="#f59e0b"
+          features={[
+            'Cursos cortos y al grano',
+            'Desde lo básico hasta lo avanzado',
+            'Aprende a tu ritmo',
+            'Certificados que valen',
+          ]}
+          href="/business-hub/formaciones"
+          badge="Próximamente"
+        />
+
+        <VerticalCard
+          title="Herramientas"
+          description="Las herramientas digitales que todo emprendedor necesita, sin complicaciones técnicas ni curvas de aprendizaje eternas."
+          icon={<Wrench className="w-full h-full" />}
+          color="#f59e0b"
+          features={[
+            'Calculadoras para tu negocio',
+            'Generadores de documentos',
+            'Plantillas pre-diseñadas',
+            'Todo gratis y fácil de usar',
+          ]}
+          href="/business-hub/herramientas"
+          badge="Próximamente"
         />
       </div>
 
@@ -69,9 +71,14 @@ export default function BusinessHubPage() {
         <h3 className="text-2xl font-bold text-foreground mb-4">
           Lo estamos preparando con mucho cariño
         </h3>
-        <p className="text-lg text-muted-foreground mb-6">
+        <p className="text-lg text-muted-foreground mb-8">
           Queremos que tu negocio tenga todas las herramientas que merece. Estamos trabajando duro para traerte estas soluciones pronto. ¿Te gustaría ser de los primeros en probarlas?
         </p>
+        
+        <WaitlistForm 
+          source="business-hub" 
+          useCase="business"
+        />
       </div>
     </VerticalLayout>
   );
