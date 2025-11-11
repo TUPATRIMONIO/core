@@ -222,15 +222,10 @@ export default async function BaseConocimientoPage() {
                 Nuestro equipo de soporte está listo para ayudarte
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col sm:flex-row gap-4 justify-center">
+            <CardContent className="flex justify-center">
               <Link href="/contacto">
                 <Button variant="outline" size="lg" className="bg-card text-[var(--tp-brand)] hover:bg-gray-100">
                   Contactar Soporte
-                </Button>
-              </Link>
-              <Link href="/faq">
-                <Button variant="ghost" size="lg" className="text-white border-white hover:bg-white/10">
-                  Ver Preguntas Frecuentes
                 </Button>
               </Link>
             </CardContent>
