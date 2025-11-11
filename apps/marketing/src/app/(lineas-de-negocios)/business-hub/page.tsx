@@ -24,7 +24,7 @@ export default function BusinessHubPage() {
         <VerticalCard
           title="Guías para Emprendedores"
           description="Sabemos que emprender puede ser abrumador. Aquí encontrarás todo lo que necesitas para avanzar con confianza."
-          icon={<BookOpen className="w-full h-full" />}
+          icon={BookOpen}
           color="#f59e0b"
           features={[
             'Paso a paso, sin complicaciones',
@@ -33,12 +33,14 @@ export default function BusinessHubPage() {
             'Conéctate con otros emprendedores',
           ]}
           href="/business-hub/guias-emprendedor"
+          buttonText="Próximamente"
+          badge="Próximamente"
         />
 
         <VerticalCard
           title="Formaciones"
           description="Aprende lo que realmente necesitas para hacer crecer tu negocio. Cursos creados por personas que han estado en tu lugar."
-          icon={<GraduationCap className="w-full h-full" />}
+          icon={GraduationCap}
           color="#f59e0b"
           features={[
             'Cursos cortos y al grano',
@@ -47,13 +49,14 @@ export default function BusinessHubPage() {
             'Certificados que valen',
           ]}
           href="/business-hub/formaciones"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
 
         <VerticalCard
           title="Herramientas"
           description="Las herramientas digitales que todo emprendedor necesita, sin complicaciones técnicas ni curvas de aprendizaje eternas."
-          icon={<Wrench className="w-full h-full" />}
+          icon={Wrench}
           color="#f59e0b"
           features={[
             'Calculadoras para tu negocio',
@@ -62,6 +65,7 @@ export default function BusinessHubPage() {
             'Todo gratis y fácil de usar',
           ]}
           href="/business-hub/herramientas"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
       </div>

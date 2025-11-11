@@ -24,7 +24,7 @@ export default function PropTechPage() {
         <VerticalCard
           title="Compraventa Digital"
           description="¿Comprar o vender una propiedad te estresa? Te guiamos paso a paso, desde la promesa hasta la escritura, todo digital y seguro."
-          icon={<Home className="w-full h-full" />}
+          icon={Home}
           color="#10b981"
           features={[
             'Promesa firmada desde tu casa',
@@ -33,13 +33,14 @@ export default function PropTechPage() {
             'Sabes exactamente en qué va todo',
           ]}
           href="/proptech/compraventa"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
 
         <VerticalCard
           title="Gestión de Arriendos"
           description="¿Tienes propiedades en arriendo y se te complica organizarte? Aquí administras todo desde un solo lugar."
-          icon={<KeyRound className="w-full h-full" />}
+          icon={KeyRound}
           color="#10b981"
           features={[
             'Contratos listos en minutos',
@@ -48,13 +49,14 @@ export default function PropTechPage() {
             'Comunícate sin complicaciones',
           ]}
           href="/proptech/gestion-arriendos"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
 
         <VerticalCard
           title="Marketplace Inmobiliario"
           description="Conecta con personas reales que buscan exactamente lo que tú ofreces. Sin intermediarios innecesarios."
-          icon={<Store className="w-full h-full" />}
+          icon={Store}
           color="#10b981"
           features={[
             'Publica tu propiedad en segundos',
@@ -63,6 +65,7 @@ export default function PropTechPage() {
             'Promociona como los profesionales',
           ]}
           href="/proptech/marketplace-inmobiliario"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
       </div>

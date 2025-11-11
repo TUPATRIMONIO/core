@@ -33,7 +33,7 @@ export default function LegalTechPage() {
         <VerticalCard
           title="Firma Electrónica"
           description="¿Te estresa coordinar firmas? Ahora puedes firmar desde tu celular, con el mismo respaldo legal que si estuvieras en la notaría."
-          icon={<FileSignature className="w-full h-full" />}
+          icon={FileSignature}
           color="#800039"
           features={[
             'Simple y rápida, o avanzada si lo necesitas',
@@ -42,15 +42,14 @@ export default function LegalTechPage() {
             'Firma todo lo que necesites',
             'Sabes quién firmó y cuándo',
           ]}
-          href="/legal-tech/firma-electronica"
+          href="/firmas-electronicas"
           buttonText="Ver Firma Electrónica"
-          variant="featured"
         />
 
         <VerticalCard
-          title="Trámites Notariales"
+          title="Notaría Online"
           description="¿Odias las filas en la notaría? Nosotros también. Por eso creamos una forma de hacer tus trámites sin salir de casa."
-          icon={<FileCheck className="w-full h-full" />}
+          icon={FileCheck}
           color="#404040"
           features={[
             'Notariza sin moverte de tu casa',
@@ -59,14 +58,14 @@ export default function LegalTechPage() {
             'Los tribunales las aceptan sin problema',
             'Tu tiempo vale oro',
           ]}
-          href="/legal-tech/tramites-notariales"
-          buttonText="Ver Trámites Notariales"
+          href="/notaria-online"
+          buttonText="Ver Notaría Online"
         />
 
         <VerticalCard
           title="Modificaciones de Empresa"
           description="¿Tu empresa necesita cambios? Te ayudamos a hacerlo rápido y sin complicaciones legales de por medio."
-          icon={<Building2 className="w-full h-full" />}
+          icon={Building2}
           color="#555555"
           features={[
             'Cambia el nombre de tu empresa',
@@ -75,7 +74,7 @@ export default function LegalTechPage() {
             'Cambia de dirección sin drama',
             'Te guiamos en cada paso',
           ]}
-          href="/legal-tech/modificaciones-empresa"
+          href="/empezar"
           buttonText="Ver Modificaciones"
         />
       </div>

@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { Icon, IconContainer } from '@tupatrimonio/ui';
+import { ArrowRight, CheckCircle, LucideIcon } from 'lucide-react';
 
 interface VerticalCardProps {
   /**
@@ -14,9 +14,9 @@ interface VerticalCardProps {
    */
   description: string;
   /**
-   * Icono del servicio
+   * Icono del servicio (componente de Lucide React)
    */
-  icon: ReactNode;
+  icon: LucideIcon;
   /**
    * Color principal (variable CSS)
    */
@@ -59,34 +59,24 @@ export function VerticalCard({
   return (
     <Card 
       className={`
-        h-full transition-all duration-300 hover:shadow-xl group
-        ${isFeatured 
-          ? 'border-2 shadow-lg scale-105' 
-          : 'border-2 border-border hover:shadow-lg'
-        }
+        h-full border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group
+        ${isFeatured ? 'shadow-lg scale-105 border-[var(--tp-brand)]' : ''}
       `}
-      style={{
-        // @ts-ignore
-        '--hover-color': color,
-        ...(isFeatured ? { borderColor: color } : {}),
-      } as React.CSSProperties}
     >
       <CardHeader>
         {/* Icono y Badge */}
         <div className="relative mb-4">
-          <div 
-            className="w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md"
-            style={{
-              background: `linear-gradient(135deg, ${color}, ${color}dd)`,
-            }}
-          >
-            <div className="text-white w-7 h-7">
-              {icon}
-            </div>
+          <div className="group-hover:scale-110 transition-transform">
+            <IconContainer 
+              icon={icon}
+              variant={isFeatured ? 'solid-brand' : 'brand'}
+              shape="rounded"
+              size="lg"
+            />
           </div>
           {badge && (
             <div 
-              className="absolute -top-2 -right-2 text-xs font-bold px-2 py-1 rounded-full text-white shadow-md"
+              className="absolute -top-2 right-0 text-xs font-bold px-3 py-1 rounded-full text-white shadow-md"
               style={{ backgroundColor: color }}
             >
               {badge}
@@ -104,12 +94,14 @@ export function VerticalCard({
       <CardContent className="space-y-6">
         {/* Features */}
         {features.length > 0 && (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {features.map((feature, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <CheckCircle 
-                  className="w-5 h-5 shrink-0 mt-0.5" 
-                  style={{ color }}
+              <li key={index} className="flex items-start gap-3">
+                <Icon 
+                  icon={CheckCircle}
+                  size="md"
+                  variant="brand"
+                  className="shrink-0 mt-0.5"
                 />
                 <span className="text-sm text-muted-foreground">{feature}</span>
               </li>
@@ -118,29 +110,31 @@ export function VerticalCard({
         )}
 
         {/* Botón */}
-        <Link href={href} className="block">
+        {buttonText === 'Próximamente' ? (
           <Button 
-            variant={isFeatured ? 'default' : 'outline'}
-            className={`
-              w-full transition-all
-              ${isFeatured 
-                ? 'text-white shadow-md hover:opacity-90' 
-                : 'hover:text-white'
-              }
-            `}
-            style={
-              isFeatured 
-                ? { backgroundColor: color }
-                : {
-                    // @ts-ignore
-                    '--hover-bg': color,
-                  } as React.CSSProperties
-            }
+            variant="outline"
+            disabled
+            className="w-full cursor-not-allowed opacity-60"
           >
             {buttonText}
-            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
-        </Link>
+        ) : (
+          <Link href={href} className="block">
+            <Button 
+              variant={isFeatured ? 'default' : 'outline'}
+              className={`
+                w-full transition-all
+                ${isFeatured 
+                  ? 'bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white shadow-md' 
+                  : 'hover:bg-[var(--tp-brand)] hover:text-white'
+                }
+              `}
+            >
+              {buttonText}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        )}
       </CardContent>
     </Card>
   );

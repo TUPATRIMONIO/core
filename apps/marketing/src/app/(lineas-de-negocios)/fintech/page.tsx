@@ -24,7 +24,7 @@ export default function FinTechPage() {
         <VerticalCard
           title="Educación Financiera"
           description="¿Sientes que las finanzas son un mundo aparte? Te enseñamos todo lo que necesitas saber, en un lenguaje que realmente entiendas."
-          icon={<GraduationCap className="w-full h-full" />}
+          icon={GraduationCap}
           color="#3b82f6"
           features={[
             'Aprende haciendo, no solo leyendo',
@@ -33,13 +33,14 @@ export default function FinTechPage() {
             'Un experto que te escucha',
           ]}
           href="/fintech/educacion-financiera"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
 
         <VerticalCard
           title="Plataforma de Inversiones"
           description="Invertir no es solo para ricos. Empieza con poco, elige proyectos que te gusten y haz crecer tu dinero con confianza."
-          icon={<TrendingUp className="w-full h-full" />}
+          icon={TrendingUp}
           color="#3b82f6"
           features={[
             'Proyectos revisados uno por uno',
@@ -48,13 +49,14 @@ export default function FinTechPage() {
             'Ve exactamente dónde está tu dinero',
           ]}
           href="/fintech/inversiones"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
 
         <VerticalCard
           title="Crowdfunding"
           description="¿Tienes una idea pero te falta el empujón? O quizás quieres apoyar proyectos increíbles. Aquí conectamos sueños con recursos."
-          icon={<Users2 className="w-full h-full" />}
+          icon={Users2}
           color="#3b82f6"
           features={[
             'Comparte tu proyecto con el mundo',
@@ -63,6 +65,7 @@ export default function FinTechPage() {
             'Cumplimos con todas las reglas',
           ]}
           href="/fintech/crowdfunding"
+          buttonText="Próximamente"
           badge="Próximamente"
         />
       </div>
