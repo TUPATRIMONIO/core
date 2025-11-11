@@ -37,40 +37,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateNotification = UpdateNotification;
 /**
  * Componente de notificación de actualización
- * Muestra una notificación en la esquina superior derecha cuando hay una nueva versión
- * Usa componentes de shadcn/ui para un diseño profesional
+ * Diseño moderno y empático siguiendo las guidelines de TuPatrimonio
+ * Funciona perfectamente en light y dark mode
  */
 const react_1 = __importStar(require("react"));
 const useUpdateDetection_1 = require("../hooks/useUpdateDetection");
 const ui_1 = require("@tupatrimonio/ui");
 const ui_2 = require("@tupatrimonio/ui");
-const COUNTDOWN_SECONDS = 10;
+const ui_3 = require("@tupatrimonio/ui");
+const lucide_react_1 = require("lucide-react");
 function UpdateNotification() {
-    const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = (0, useUpdateDetection_1.useUpdateDetection)();
-    const [countdown, setCountdown] = (0, react_1.useState)(COUNTDOWN_SECONDS);
+    const { hasUpdate, dismissUpdate, applyUpdate } = (0, useUpdateDetection_1.useUpdateDetection)();
     const [isVisible, setIsVisible] = (0, react_1.useState)(false);
-    // Manejar countdown
+    // Mostrar notificación cuando hay actualización
     (0, react_1.useEffect)(() => {
         if (hasUpdate) {
             setIsVisible(true);
-            setCountdown(COUNTDOWN_SECONDS);
         }
     }, [hasUpdate]);
-    (0, react_1.useEffect)(() => {
-        if (!isVisible || !hasUpdate)
-            return;
-        const timer = setInterval(() => {
-            setCountdown((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    applyUpdate();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-        return () => clearInterval(timer);
-    }, [isVisible, hasUpdate, applyUpdate]);
     const handleUpdateNow = () => {
         applyUpdate();
     };
@@ -84,7 +68,6 @@ function UpdateNotification() {
     };
     if (!isVisible || !hasUpdate)
         return null;
-    const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100;
     return (react_1.default.createElement(react_1.default.Fragment, null,
         react_1.default.createElement("style", { dangerouslySetInnerHTML: {
                 __html: `
@@ -99,12 +82,14 @@ function UpdateNotification() {
             }
           }
 
-          @keyframes tp-pulse {
+          @keyframes tp-pulse-glow {
             0%, 100% {
-              opacity: 1;
+              transform: scale(1);
+              opacity: 0.8;
             }
             50% {
-              opacity: 0.7;
+              transform: scale(1.05);
+              opacity: 1;
             }
           }
 
@@ -112,39 +97,31 @@ function UpdateNotification() {
             animation: tp-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           }
 
-          .tp-pulse {
-            animation: tp-pulse 2s ease-in-out infinite;
+          .tp-pulse-glow {
+            animation: tp-pulse-glow 2s ease-in-out infinite;
           }
         `
             } }),
-        react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in" },
-            react_1.default.createElement(ui_1.Alert, { className: "bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl" },
-                react_1.default.createElement("div", { className: "absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden" },
-                    react_1.default.createElement("div", { className: "h-full bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] transition-all duration-1000 ease-linear", style: { width: `${progress}%` } })),
-                react_1.default.createElement("div", { className: "relative flex-shrink-0" },
-                    react_1.default.createElement("div", { className: "absolute inset-0 bg-[var(--tp-brand-10)] rounded-full blur-md tp-pulse" }),
-                    react_1.default.createElement("svg", { className: "text-[var(--tp-brand)] relative z-10", fill: "none", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: "2", viewBox: "0 0 24 24", stroke: "currentColor" },
-                        react_1.default.createElement("path", { d: "M13 10V3L4 14h7v7l9-11h-7z" }))),
-                react_1.default.createElement("button", { onClick: handleDismiss, className: "absolute top-3 right-3 text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]", "aria-label": "Cerrar notificaci\u00F3n" },
-                    react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
-                        react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M6 18L18 6M6 6l12 12" }))),
-                react_1.default.createElement(ui_1.AlertTitle, { className: "text-[var(--tp-background-dark)] font-outfit text-base mb-2 pr-6" }, "Nueva versi\u00F3n disponible"),
-                react_1.default.createElement(ui_1.AlertDescription, { className: "text-[var(--tp-lines)] space-y-3" },
-                    react_1.default.createElement("p", null,
-                        "Hay una actualizaci\u00F3n disponible. La p\u00E1gina se actualizar\u00E1 autom\u00E1ticamente en",
-                        ' ',
-                        react_1.default.createElement("span", { className: "font-semibold text-[var(--tp-brand)]" }, countdown),
-                        ' ',
-                        "segundo",
-                        countdown !== 1 ? 's' : '',
-                        "."),
-                    react_1.default.createElement("div", { className: "flex gap-2 pt-1" },
-                        react_1.default.createElement(ui_2.Button, { onClick: handleUpdateNow, variant: "default", size: "sm", className: "flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white" },
-                            react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
-                                react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" })),
-                            "Actualizar ahora"),
-                        react_1.default.createElement(ui_2.Button, { onClick: handlePostpone, variant: "outline", size: "sm", className: "flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]" },
-                            react_1.default.createElement("svg", { className: "w-4 h-4", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
-                                react_1.default.createElement("path", { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" })),
-                            "Posponer")))))));
+        react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in px-4" },
+            react_1.default.createElement(ui_1.Card, { className: "border-2 border-[var(--tp-brand)] shadow-2xl bg-card relative overflow-hidden" },
+                react_1.default.createElement("button", { onClick: handleDismiss, className: "absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted/50 z-10", "aria-label": "Cerrar notificaci\u00F3n" },
+                    react_1.default.createElement(ui_3.Icon, { icon: lucide_react_1.X, size: "sm", variant: "inherit" })),
+                react_1.default.createElement(ui_1.CardHeader, { className: "pb-4 pt-6 pr-12" },
+                    react_1.default.createElement("div", { className: "flex items-start gap-4" },
+                        react_1.default.createElement("div", { className: "tp-pulse-glow" },
+                            react_1.default.createElement(ui_3.IconContainer, { icon: lucide_react_1.Sparkles, variant: "solid-brand", shape: "rounded", size: "md" })),
+                        react_1.default.createElement("div", { className: "flex-1" },
+                            react_1.default.createElement(ui_1.CardTitle, { className: "text-lg mb-1" }, "\u00A1Hay algo nuevo para ti!"),
+                            react_1.default.createElement(ui_1.CardDescription, { className: "text-sm" }, "Acabamos de mejorar la plataforma")))),
+                react_1.default.createElement(ui_1.CardContent, { className: "pb-6 space-y-4" },
+                    react_1.default.createElement("p", { className: "text-sm text-muted-foreground leading-relaxed" }, "Tenemos una versi\u00F3n mejorada lista para ti. Cuando actualices, la p\u00E1gina se recargar\u00E1 por completo."),
+                    react_1.default.createElement("div", { className: "flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded-lg" },
+                        react_1.default.createElement(ui_3.Icon, { icon: lucide_react_1.AlertCircle, size: "sm", className: "text-blue-600 dark:text-blue-400" }),
+                        react_1.default.createElement("span", { className: "text-xs text-blue-700 dark:text-blue-300 font-medium" }, "Guarda tu trabajo antes de actualizar")),
+                    react_1.default.createElement("div", { className: "flex flex-col sm:flex-row gap-2 pt-2" },
+                        react_1.default.createElement(ui_2.Button, { onClick: handleUpdateNow, size: "default", className: "flex-1 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white shadow-lg hover:shadow-xl transition-all" },
+                            react_1.default.createElement(ui_3.Icon, { icon: lucide_react_1.RefreshCw, size: "sm", variant: "white" }),
+                            "Actualizar Ahora"),
+                        react_1.default.createElement(ui_2.Button, { onClick: handlePostpone, variant: "outline", size: "default", className: "flex-1 border-2 hover:bg-muted/50 transition-all" }, "M\u00E1s Tarde")),
+                    react_1.default.createElement("p", { className: "text-xs text-muted-foreground/70 text-center pt-1" }, "Solo tomar\u00E1 un momento y vale la pena"))))));
 }

@@ -148,7 +148,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const posts = await getPostsByCategory(category.id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Breadcrumbs */}
       <div className="bg-card border-b">
         <div className="max-w-7xl tp-container py-4">

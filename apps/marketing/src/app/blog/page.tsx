@@ -103,9 +103,9 @@ export default async function BlogPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-[var(--tp-background-light)] to-background">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand-5)] to-background">
+      <section className="py-20 bg-gradient-to-br from-background via-[var(--tp-background-light)] to-background">
         <div className="max-w-7xl tp-container">
           <div className="text-center max-w-3xl mx-auto">
             <Badge className="bg-[var(--tp-brand)] text-white px-4 py-2 text-base mb-6 shadow-lg">

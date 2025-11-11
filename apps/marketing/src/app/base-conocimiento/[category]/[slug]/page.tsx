@@ -35,7 +35,7 @@ export default async function KBArticlePage({ params }: PageProps) {
   if (!article) notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <section className="bg-card border-b">
         <div className="max-w-4xl tp-container py-6">
           <Link href="/base-conocimiento">

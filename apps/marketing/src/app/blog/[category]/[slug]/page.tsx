@@ -185,7 +185,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   ])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Structured Data para SEO */}
       <StructuredData data={articleSchema} />
       <StructuredData data={breadcrumbSchema} />

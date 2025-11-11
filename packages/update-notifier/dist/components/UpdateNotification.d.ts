@@ -1,7 +1,7 @@
 /**
  * Componente de notificación de actualización
- * Muestra una notificación en la esquina superior derecha cuando hay una nueva versión
- * Usa componentes de shadcn/ui para un diseño profesional
+ * Diseño moderno y empático siguiendo las guidelines de TuPatrimonio
+ * Funciona perfectamente en light y dark mode
  */
 import React from 'react';
 export declare function UpdateNotification(): React.JSX.Element | null;

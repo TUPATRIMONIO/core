@@ -2,46 +2,27 @@
 
 /**
  * Componente de notificación de actualización
- * Muestra una notificación en la esquina superior derecha cuando hay una nueva versión
- * Usa componentes de shadcn/ui para un diseño profesional
+ * Diseño moderno y empático siguiendo las guidelines de TuPatrimonio
+ * Funciona perfectamente en light y dark mode
  */
 
 import React, { useState, useEffect } from 'react';
 import { useUpdateDetection } from '../hooks/useUpdateDetection';
-import { Alert, AlertTitle, AlertDescription } from '@tupatrimonio/ui';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@tupatrimonio/ui';
 import { Button } from '@tupatrimonio/ui';
-
-const COUNTDOWN_SECONDS = 10;
+import { Icon, IconContainer } from '@tupatrimonio/ui';
+import { Sparkles, RefreshCw, X, AlertCircle } from 'lucide-react';
 
 export function UpdateNotification() {
-  const { hasUpdate, newVersion, dismissUpdate, applyUpdate } = useUpdateDetection();
-  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const { hasUpdate, dismissUpdate, applyUpdate } = useUpdateDetection();
   const [isVisible, setIsVisible] = useState(false);
 
-  // Manejar countdown
+  // Mostrar notificación cuando hay actualización
   useEffect(() => {
     if (hasUpdate) {
       setIsVisible(true);
-      setCountdown(COUNTDOWN_SECONDS);
     }
   }, [hasUpdate]);
-
-  useEffect(() => {
-    if (!isVisible || !hasUpdate) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          applyUpdate();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isVisible, hasUpdate, applyUpdate]);
 
   const handleUpdateNow = () => {
     applyUpdate();
@@ -59,8 +40,6 @@ export function UpdateNotification() {
 
   if (!isVisible || !hasUpdate) return null;
 
-  const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100;
-
   return (
     <>
       <style dangerouslySetInnerHTML={{
@@ -76,12 +55,14 @@ export function UpdateNotification() {
             }
           }
 
-          @keyframes tp-pulse {
+          @keyframes tp-pulse-glow {
             0%, 100% {
-              opacity: 1;
+              transform: scale(1);
+              opacity: 0.8;
             }
             50% {
-              opacity: 0.7;
+              transform: scale(1.05);
+              opacity: 1;
             }
           }
 
@@ -89,89 +70,86 @@ export function UpdateNotification() {
             animation: tp-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           }
 
-          .tp-pulse {
-            animation: tp-pulse 2s ease-in-out infinite;
+          .tp-pulse-glow {
+            animation: tp-pulse-glow 2s ease-in-out infinite;
           }
         `
       }} />
       
-      <div className="fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in">
-        <Alert className="bg-[var(--tp-background-light)] border-[var(--tp-brand-20)] shadow-xl">
-          {/* Barra de progreso superior */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--tp-lines-10)] rounded-t-lg overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] transition-all duration-1000 ease-linear"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          {/* Ícono del rayo - estructura correcta de shadcn/ui */}
-          <div className="relative flex-shrink-0">
-            <div className="absolute inset-0 bg-[var(--tp-brand-10)] rounded-full blur-md tp-pulse"></div>
-            <svg
-              className="text-[var(--tp-brand)] relative z-10"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-
-          {/* Botón de cerrar */}
+      <div className="fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in px-4">
+        <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card relative overflow-hidden">
+          {/* Botón de cerrar mejorado */}
           <button
             onClick={handleDismiss}
-            className="absolute top-3 right-3 text-[var(--tp-lines)] hover:text-[var(--tp-background-dark)] transition-colors p-1 rounded-md hover:bg-[var(--tp-bg-light-50)]"
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted/50 z-10"
             aria-label="Cerrar notificación"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <Icon icon={X} size="sm" variant="inherit" />
           </button>
 
-          <AlertTitle className="text-[var(--tp-background-dark)] font-outfit text-base mb-2 pr-6">
-            Nueva versión disponible
-          </AlertTitle>
+          <CardHeader className="pb-4 pt-6 pr-12">
+            <div className="flex items-start gap-4">
+              {/* Ícono animado con efecto glow */}
+              <div className="tp-pulse-glow">
+                <IconContainer 
+                  icon={Sparkles} 
+                  variant="solid-brand" 
+                  shape="rounded" 
+                  size="md"
+                />
+              </div>
+              
+              <div className="flex-1">
+                <CardTitle className="text-lg mb-1">
+                  ¡Hay algo nuevo para ti!
+                </CardTitle>
+                <CardDescription className="text-sm">
+                  Acabamos de mejorar la plataforma
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
 
-          <AlertDescription className="text-[var(--tp-lines)] space-y-3">
-            <p>
-              Hay una actualización disponible. La página se actualizará automáticamente en{' '}
-              <span className="font-semibold text-[var(--tp-brand)]">
-                {countdown}
-              </span>{' '}
-              segundo{countdown !== 1 ? 's' : ''}.
+          <CardContent className="pb-6 space-y-4">
+            {/* Mensaje empático y claro */}
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Tenemos una versión mejorada lista para ti. Cuando actualices, la página se recargará por completo.
             </p>
 
-            {/* Botones de acción */}
-            <div className="flex gap-2 pt-1">
+            {/* Trust indicator - honesto y empático */}
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <Icon icon={AlertCircle} size="sm" className="text-blue-600 dark:text-blue-400" />
+              <span className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                Guarda tu trabajo antes de actualizar
+              </span>
+            </div>
+
+            {/* Botones de acción mejorados */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <Button
                 onClick={handleUpdateNow}
-                variant="default"
-                size="sm"
-                className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
+                size="default"
+                className="flex-1 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white shadow-lg hover:shadow-xl transition-all"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Actualizar ahora
+                <Icon icon={RefreshCw} size="sm" variant="white" />
+                Actualizar Ahora
               </Button>
               <Button
                 onClick={handlePostpone}
                 variant="outline"
-                size="sm"
-                className="flex-1 border-[var(--tp-lines-30)] hover:bg-[var(--tp-bg-light-50)] hover:border-[var(--tp-lines-50)] text-[var(--tp-background-dark)]"
+                size="default"
+                className="flex-1 border-2 hover:bg-muted/50 transition-all"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Posponer
+                Más Tarde
               </Button>
             </div>
-          </AlertDescription>
-        </Alert>
+
+            {/* Texto de ayuda sutil */}
+            <p className="text-xs text-muted-foreground/70 text-center pt-1">
+              Solo tomará un momento y vale la pena
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </>
   );

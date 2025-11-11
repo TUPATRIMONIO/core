@@ -42,7 +42,7 @@ export default async function KBCategoryPage({ params }: PageProps) {
     .order('view_count', { ascending: false });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <section className="bg-card border-b">
         <div className="max-w-7xl tp-container py-6">
           <Link href="/base-conocimiento">
