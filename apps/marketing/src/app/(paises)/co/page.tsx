@@ -3,8 +3,8 @@ import { ComingSoonCountry } from "@/components/ComingSoonCountry";
 
 export const metadata: Metadata = {
   title: "TuPatrimonio Colombia - Servicios Legales Digitales | Próximamente",
-  description: "Servicios legales digitales próximamente en Colombia: firma electrónica válida según Ley 527, verificación de identidad KYC, notaría digital. Lanzamiento Q2 2025.",
-  keywords: ["firma electrónica colombia", "kyc colombia", "notaría digital colombia", "ley 527 colombia", "servicios legales digitales colombia"],
+  description: "Servicios legales digitales próximamente en Colombia: firma electrónica válida según Ley 527, modificaciones de empresa, notaría digital. Lanzamiento Q2 2025.",
+  keywords: ["firma electrónica colombia", "modificaciones de empresa colombia", "notaría digital colombia", "ley 527 colombia", "servicios legales digitales colombia"],
   openGraph: {
     title: "TuPatrimonio Colombia - Servicios Legales Digitales | Próximamente",
     description: "Firma electrónica y servicios legales digitales próximamente disponibles en Colombia. Cumplimiento Ley 527.",

@@ -3,8 +3,8 @@ import { ComingSoonCountry } from "@/components/ComingSoonCountry";
 
 export const metadata: Metadata = {
   title: "TuPatrimonio Perú - Servicios Legales Digitales | Próximamente",
-  description: "Servicios legales digitales próximamente en Perú: firma electrónica válida, verificación de identidad KYC, notaría digital. Lanzamiento Q3 2025.",
-  keywords: ["firma electrónica perú", "kyc perú", "notaría digital perú", "firma digital perú", "servicios legales digitales perú"],
+  description: "Servicios legales digitales próximamente en Perú: firma electrónica válida, modificaciones de empresa, notaría digital. Lanzamiento Q3 2025.",
+  keywords: ["firma electrónica perú", "modificaciones de empresa perú", "notaría digital perú", "firma digital perú", "servicios legales digitales perú"],
   openGraph: {
     title: "TuPatrimonio Perú - Servicios Legales Digitales | Próximamente",
     description: "Firma electrónica y servicios legales digitales próximamente disponibles en Perú.",

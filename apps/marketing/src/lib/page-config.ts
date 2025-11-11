@@ -57,11 +57,11 @@ export const PAGE_CONFIG: Record<string, PageConfigEntry> = {
     section: 'firmas',
     notes: 'Firmas electrónicas Chile'
   },
-  '/cl/verificacion-identidad': { 
+  '/cl/modificaciones-empresa': { 
     seoIndex: true, 
     status: 'public',
-    section: 'kyc',
-    notes: 'KYC para Chile'
+    section: 'modificaciones',
+    notes: 'Modificaciones de empresa para Chile'
   },
   '/cl/notaria-online': { 
     seoIndex: true, 

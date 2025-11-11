@@ -43,8 +43,8 @@ export const metadata: Metadata = {
     default: "TuPatrimonio - Firmas Electrónicas, Verificación Digital y Notaría Online",
     template: "%s | TuPatrimonio"
   },
-  description: "Digitaliza tus procesos legales con TuPatrimonio: firmas electrónicas válidas, verificación de identidad biométrica y servicios notariales 100% online. Prueba gratis.",
-  keywords: ["firma electrónica", "verificación identidad", "notaría digital", "Chile", "documentos digitales"],
+  description: "Digitaliza tus procesos legales con TuPatrimonio: firmas electrónicas válidas, modificaciones de empresa y servicios notariales 100% online. Prueba gratis.",
+  keywords: ["firma electrónica", "modificaciones de empresa", "notaría digital", "Chile", "documentos digitales"],
   authors: [{ name: "TuPatrimonio Team" }],
   creator: "TuPatrimonio",
   publisher: "TuPatrimonio",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     url: 'https://tupatrimonio.app',
     siteName: 'TuPatrimonio',
     title: 'TuPatrimonio - Servicios Legales Digitales con IA',
-    description: 'Firmas electrónicas, verificación de identidad y notaría digital. Digitaliza tus procesos legales de forma segura y eficiente.',
+    description: 'Firmas electrónicas, modificaciones de empresa y notaría digital. Digitaliza tus procesos legales de forma segura y eficiente.',
     images: [
       {
         url: '/og-image.jpg',
@@ -75,7 +75,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TuPatrimonio - Servicios Legales Digitales',
-    description: 'Firmas electrónicas, verificación de identidad y notaría digital. Digitaliza tus procesos legales.',
+    description: 'Firmas electrónicas, modificaciones de empresa y notaría digital. Digitaliza tus procesos legales.',
     images: ['/og-image.jpg'],
     creator: '@tupatrimonio',
   },

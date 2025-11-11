@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Icon, IconContainer } from "@tupatrimonio/ui";
-import { CheckCircle, Shield, Clock, Users, MapPin, Building, Briefcase, Zap, Lock, FileSignature } from "lucide-react";
+import { CheckCircle, Shield, Clock, Users, MapPin, Building, Building2, Briefcase, Zap, Lock, FileSignature } from "lucide-react";
 import { GoogleStatsMetrics } from "@/components/GoogleStatsDisplay";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "TuPatrimonio Chile - Servicios Legales Digitales | Firma Electrónica, KYC, Notaría",
-  description: "Servicios legales digitales en Chile: firma electrónica válida, verificación de identidad KYC, notaría digital. Cumple legislación chilena. Prueba gratis.",
-  keywords: ["firma electrónica chile", "kyc chile", "notaría digital chile", "documentos digitales chile", "ley 19.799"],
+  title: "TuPatrimonio Chile - Servicios Legales Digitales | Firma Electrónica, Modificaciones de Empresa, Notaría",
+  description: "Servicios legales digitales en Chile: firma electrónica válida, modificaciones de empresa, notaría digital. Cumple legislación chilena. Prueba gratis.",
+  keywords: ["firma electrónica chile", "modificaciones de empresa chile", "notaría digital chile", "documentos digitales chile", "ley 19.799"],
   openGraph: {
     title: "TuPatrimonio Chile - Servicios Legales Digitales",
-    description: "Firma electrónica, verificación de identidad y notaría digital válidos en Chile. Cumple Ley 19.799.",
+    description: "Firma electrónica, modificaciones de empresa y notaría digital válidos en Chile. Cumple Ley 19.799.",
     url: "https://tupatrimonio.app/cl",
     locale: "es_CL",
   },
@@ -61,7 +61,7 @@ export default function ChilePage() {
               <span className="text-[var(--tp-brand)]"> para Chile</span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto">
-              Firma electrónica con validez legal según <strong>Ley 19.799</strong>, verificación de identidad KYC y 
+              Firma electrónica con validez legal según <strong>Ley 19.799</strong>, modificaciones de empresa y 
               notaría digital. Todo cumpliendo la normativa chilena.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -159,39 +159,8 @@ export default function ChilePage() {
               </CardContent>
             </Card>
 
-            {/* Verificación KYC Chile */}
-            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
-              <CardHeader>
-                <div className="mb-4 group-hover:scale-110 transition-transform">
-                  <IconContainer 
-                    icon={Shield} 
-                    variant="brand" 
-                    shape="rounded" 
-                    size="lg"
-                    className="mx-auto"
-                  />
-                </div>
-                <CardTitle>KYC & Verificación</CardTitle>
-                <CardDescription className="mb-4">
-                  Verifica la identidad de tus clientes en minutos. Tecnología biométrica 
-                  con <strong>cédulas y pasaportes chilenas</strong>. 
-                </CardDescription>
-               
-              </CardHeader>
-              <CardContent>
-                <Link href="/cl/verificacion-identidad">
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] transition-all"
-                  >
-                    Ver KYC Chile
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Notaría Digital Chile */}
-            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+{/* Notaría Digital Chile */}
+<Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
               <CardHeader>
                 <div className="mb-4 group-hover:scale-110 transition-transform">
                   <IconContainer 
@@ -219,6 +188,39 @@ export default function ChilePage() {
                 </Link>
               </CardContent>
             </Card>
+
+            {/* Modificaciones de Empresa Chile */}
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Building2} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>Modificaciones de Empresa</CardTitle>
+                <CardDescription className="mb-4">
+                  Modifica tu empresa de forma 100% digital: cambios de razón social, aumentos de capital, 
+                  modificaciones de directorio y más. <strong>Sin ir a la notaría</strong>.
+                </CardDescription>
+               
+              </CardHeader>
+              <CardContent>
+                <Link href="/cl/modificaciones-empresa">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] transition-all"
+                  >
+                    Ver Modificaciones de Empresa
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            
           </div>
         </div>
       </section>

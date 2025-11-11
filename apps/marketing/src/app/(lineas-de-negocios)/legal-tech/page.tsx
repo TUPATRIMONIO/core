@@ -74,7 +74,7 @@ export default function LegalTechPage() {
             'Cambia de dirección sin drama',
             'Te guiamos en cada paso',
           ]}
-          href="/empezar"
+          href="/modificaciones-empresa"
           buttonText="Ver Modificaciones"
         />
       </div>

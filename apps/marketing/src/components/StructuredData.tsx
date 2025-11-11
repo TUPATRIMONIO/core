@@ -19,7 +19,7 @@ export function generateOrganizationSchema() {
     "name": "TuPatrimonio",
     "url": "https://tupatrimonio.app",
     "logo": "https://tupatrimonio.app/logo.png",
-    "description": "Plataforma de firma electrónica, verificación de identidad y notaría digital para empresas en LATAM",
+    "description": "Plataforma de firma electrónica, modificaciones de empresa y notaría digital para empresas en LATAM",
     "foundingDate": "2025",
     "address": {
       "@type": "PostalAddress",
@@ -40,7 +40,7 @@ export function generateWebSiteSchema() {
     "@type": "WebSite",
     "name": "TuPatrimonio",
     "url": "https://tupatrimonio.app",
-    "description": "Firma electrónica, verificación de identidad y notaría digital",
+    "description": "Firma electrónica, modificaciones de empresa y notaría digital",
     "publisher": {
       "@type": "Organization",
       "name": "TuPatrimonio"

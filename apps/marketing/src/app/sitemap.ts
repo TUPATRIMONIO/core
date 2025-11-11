@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     
     // Service pages por país
-    if (route.includes('/firmas-electronicas') || route.includes('/verificacion-identidad') || route.includes('/notaria-online')) {
+    if (route.includes('/firmas-electronicas') || route.includes('/modificaciones-empresa') || route.includes('/notaria-online')) {
       return route.startsWith('/cl') 
         ? { changeFrequency: 'weekly', priority: 0.9 }
         : { changeFrequency: 'monthly', priority: 0.6 };
@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     
     // Generic/redirect pages
-    if (['/firmas-electronicas', '/verificacion-identidad', '/notaria-online'].includes(route)) {
+    if (['/firmas-electronicas', '/modificaciones-empresa', '/notaria-online'].includes(route)) {
       return { changeFrequency: 'monthly', priority: 0.6 };
     }
     
@@ -106,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/cl/verificacion-identidad`,
+      url: `${baseUrl}/cl/modificaciones-empresa`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.9,
