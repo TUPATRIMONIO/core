@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { VerticalLayout } from '@/components/VerticalLayout';
 import { VerticalCard } from '@/components/VerticalCard';
+import { WaitlistForm } from '@/components/WaitlistForm';
 import { Home, KeyRound, Store, TrendingUp } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function PropTechPage() {
       icon={<Home className="w-full h-full" />}
       color="#10b981"
       breadcrumb={[{ label: 'PropTech', href: '/proptech' }]}
+      showCTA={false}
     >
       <div className="grid md:grid-cols-3 gap-8">
         <VerticalCard
@@ -70,9 +72,14 @@ export default function PropTechPage() {
         <h3 className="text-2xl font-bold text-foreground mb-4">
           Estamos construyendo algo que te va a encantar
         </h3>
-        <p className="text-lg text-muted-foreground mb-6">
+        <p className="text-lg text-muted-foreground mb-8">
           Conocemos perfectamente esa sensación de perderte entre papeles, notarías y trámites interminables. Por eso estamos creando herramientas que realmente te simplifican la vida. ¿Quieres ser de los primeros en usarlas?
         </p>
+        
+        <WaitlistForm 
+          source="proptech" 
+          useCase="business"
+        />
       </div>
     </VerticalLayout>
   );

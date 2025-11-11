@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { VerticalLayout } from '@/components/VerticalLayout';
 import { VerticalCard } from '@/components/VerticalCard';
+import { WaitlistForm } from '@/components/WaitlistForm';
 import { Wallet, TrendingUp, Users2, GraduationCap } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function FinTechPage() {
       icon={<Wallet className="w-full h-full" />}
       color="#3b82f6"
       breadcrumb={[{ label: 'FinTech', href: '/fintech' }]}
+      showCTA={false}
     >
       <div className="grid md:grid-cols-3 gap-8">
         <VerticalCard
@@ -70,9 +72,14 @@ export default function FinTechPage() {
         <h3 className="text-2xl font-bold text-foreground mb-4">
           Estamos trabajando en algo especial
         </h3>
-        <p className="text-lg text-muted-foreground mb-6">
+        <p className="text-lg text-muted-foreground mb-8">
           Sabemos que las finanzas pueden dar miedo. Por eso estamos creando herramientas que realmente te ayuden a tomar el control de tu dinero, sin estrés y sin complicaciones. ¿Te avisamos cuando esté listo?
         </p>
+        
+        <WaitlistForm 
+          source="fintech" 
+          useCase="business"
+        />
       </div>
     </VerticalLayout>
   );
