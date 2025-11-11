@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Shield, Clock, Users, MapPin, Building, Briefcase } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Icon, IconContainer } from "@tupatrimonio/ui";
+import { CheckCircle, Shield, Clock, Users, MapPin, Building, Briefcase, Zap, Lock, FileSignature } from "lucide-react";
+import { GoogleStatsMetrics } from "@/components/GoogleStatsDisplay";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -27,26 +30,30 @@ export default function ChilePage() {
   return (
     <div className="min-h-screen">
       {/* Country Header */}
-      <div className="bg-[var(--tp-buttons)]/5 border-b">
+      <div className="bg-[var(--tp-buttons)]/5 dark:bg-[var(--tp-buttons)]/10 border-b border-border">
         <div className="max-w-7xl tp-container py-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4 text-[var(--tp-buttons)]" />
-              <span className="font-medium text-gray-700">Estás viendo TuPatrimonio para</span>
+              <Icon icon={MapPin} size="sm" className="text-[var(--tp-buttons)]" />
+              <span className="font-medium text-muted-foreground">Estás viendo TuPatrimonio para</span>
               <span className="font-bold text-[var(--tp-brand)]">Chile 🇨🇱</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>¿Otro país?</span>
-              <Link href="/co" className="text-[var(--tp-buttons)] hover:underline">Colombia</Link>
+              <Link href="/ar" className="text-[var(--tp-brand)] hover:underline">Argentina</Link>
               <span>•</span>
-              <Link href="/mx" className="text-[var(--tp-buttons)] hover:underline">México</Link>
+              <Link href="/co" className="text-[var(--tp-brand)] hover:underline">Colombia</Link>
+              <span>•</span>
+              <Link href="/mx" className="text-[var(--tp-brand)] hover:underline">México</Link>
+              <span>•</span>
+              <Link href="/pe" className="text-[var(--tp-brand)] hover:underline">Perú</Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Hero Section Chile-specific */}
-      <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-white py-20">
+      <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-background py-20">
         <div className="max-w-7xl tp-container">
           <div className="text-center">
             <h1 className="mb-6">
@@ -58,32 +65,51 @@ export default function ChilePage() {
               notaría digital. Todo cumpliendo la normativa chilena.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white px-8 py-4 text-lg"
-              >
-                Empieza Gratis - Chile
-              </Button>
+              <a href="https://tupatrimon.io" target="_blank" rel="noopener noreferrer nofollow">
+                <Button 
+                  size="lg" 
+                  className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  Empieza Gratis - Chile
+                </Button>
+              </a>
               <Link href="/cl/precios">
-                <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
                   Ver Precios CLP
                 </Button>
               </Link>
             </div>
             
-            {/* Chile-specific trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>Cumple Ley 19.799</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-green-600" />
-                <span>Regulaciones CMF</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-green-600" />
-                <span>+200 empresas chilenas</span>
+            {/* Chile-specific stats */}
+            <div className="mt-12 bg-gradient-to-br from-[var(--tp-brand-5)] to-[var(--tp-bg-light-20)] dark:from-[var(--tp-brand-5)] dark:to-transparent rounded-2xl p-8 md:p-12 border-2 border-[var(--tp-brand-20)]">
+              <div className="grid md:grid-cols-4 gap-8 text-center">
+                {/* Métrica 1: Usuarios */}
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold text-[var(--tp-brand)] mb-2">+160K</div>
+                  <p className="font-medium text-foreground">Usuarios Confían</p>
+                  <p className="text-sm text-muted-foreground mt-1">Personas y empresas</p>
+                </div>
+                
+                {/* Métrica 2: Google Stats (componente dinámico) */}
+                <GoogleStatsMetrics />
+                
+                {/* Métrica 3: Validez Legal */}
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold text-[var(--tp-brand)] mb-2">100%</div>
+                  <p className="font-medium text-foreground">Validez Legal</p>
+                  <p className="text-sm text-muted-foreground mt-1">Cumple Ley 19.799</p>
+                </div>
+                
+                {/* Métrica 4: Tiempo */}
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold text-[var(--tp-brand)] mb-2">24hrs</div>
+                  <p className="font-medium text-foreground">Tiempo Promedio</p>
+                  <p className="text-sm text-muted-foreground mt-1">Documentos listos</p>
+                </div>
               </div>
             </div>
           </div>
@@ -91,7 +117,7 @@ export default function ChilePage() {
       </section>
 
       {/* Services Section Chile */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-background">
         <div className="max-w-7xl tp-container">
           <div className="text-center mb-16">
             <h2 className="mb-4">
@@ -104,195 +130,151 @@ export default function ChilePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {/* Firma Electrónica Chile */}
-            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-[var(--tp-brand)]" />
-              </div>
-              <h3 className="mb-3">Firma Electrónica</h3>
-              <p className="text-muted-foreground mb-4">
-                Cumple <strong>Ley 19.799</strong>. Válida en tribunales chilenos. 
-                Integración con SII y registro civil.
-              </p>
-              <div className="text-sm text-gray-500 mb-4">
-                Desde $500 CLP por documento
-              </div>
-              <Link href="/cl/firmas-electronicas">
-                <Button variant="outline" className="w-full">
-                  Ver Detalles Chile
-                </Button>
-              </Link>
-            </div>
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={FileSignature} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>Firma Electrónica</CardTitle>
+                <CardDescription className="mb-4">
+                  Firma tus contratos y documentos desde casa. Con el mismo respaldo legal que si 
+                  hubieras ido a la notaría. Cumple <strong>Ley 19.799</strong>.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/cl/firmas-electronicas">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] transition-all"
+                  >
+                    Ver Detalles Chile
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
 
             {/* Verificación KYC Chile */}
-            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-[var(--tp-brand)]" />
-              </div>
-              <h3 className="mb-3">KYC & Verificación</h3>
-              <p className="text-muted-foreground mb-4">
-                Verificación biométrica con <strong>cédulas chilenas</strong>. 
-                Cumple regulaciones CMF y SBIF.
-              </p>
-              <div className="text-sm text-gray-500 mb-4">
-                Desde $2.500 CLP por verificación
-              </div>
-              <Link href="/cl/verificacion-identidad">
-                <Button variant="outline" className="w-full">
-                  Ver KYC Chile
-                </Button>
-              </Link>
-            </div>
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Shield} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>KYC & Verificación</CardTitle>
+                <CardDescription className="mb-4">
+                  Verifica la identidad de tus clientes en minutos. Tecnología biométrica 
+                  con <strong>cédulas y pasaportes chilenas</strong>. 
+                </CardDescription>
+               
+              </CardHeader>
+              <CardContent>
+                <Link href="/cl/verificacion-identidad">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] transition-all"
+                  >
+                    Ver KYC Chile
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
 
             {/* Notaría Digital Chile */}
-            <div className="text-center p-6 rounded-lg border border-border hover:border-[var(--tp-buttons)] transition-colors">
-              <div className="w-16 h-16 bg-[var(--tp-buttons)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-[var(--tp-brand)]" />
-              </div>
-              <h3 className="mb-3">Notaría Digital</h3>
-              <p className="text-muted-foreground mb-4">
-                Notarización online válida según <strong>código civil chileno</strong>. 
-                Reconocida por tribunales.
-              </p>
-              <div className="text-sm text-gray-500 mb-4">
-                Desde $6.000 CLP por notarización
-              </div>
-              <Link href="/cl/notaria-online">
-                <Button variant="outline" className="w-full">
-                  Ver Notaría Chile
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Chile Market Focus */}
-      <section className="py-20 bg-blue-50">
-        <div className="max-w-7xl tp-container">
-          <div className="text-center mb-16">
-            <h2 className="mb-4">
-              Diseñado Específicamente para Chile
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Entendemos el mercado chileno y sus regulaciones únicas
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
-                📋
-              </div>
-              <h3 className="mb-3">Legislación Local</h3>
-              <p className="text-muted-foreground">
-                Cumple Ley 19.799, regulaciones CMF, SBIF y código civil chileno. 
-                Actualizado con últimas normativas.
-              </p>
-            </div>
-            
-            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
-                🏛️
-              </div>
-              <h3 className="mb-3">Integración SII</h3>
-              <p className="text-muted-foreground">
-                Conectividad directa con Servicio de Impuestos Internos 
-                para validación de RUT y datos empresariales.
-              </p>
-            </div>
-            
-            <div className="bg-card p-8 rounded-xl shadow-sm text-center">
-              <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mx-auto mb-4 text-white font-bold">
-                ⚖️
-              </div>
-              <h3 className="mb-3">Validez Tribunales</h3>
-              <p className="text-muted-foreground">
-                Documentos aceptados en tribunales chilenos. 
-                Casos de éxito en Corte Suprema y tribunales civiles.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Chile Social Proof */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl tp-container text-center">
-            <h2 className="mb-12">
-            Empresas Chilenas que Confían en <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
-          </h2>
-          
-          {/* Placeholder para logos de empresas chilenas */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            {["BancoChile", "StartupCL", "InmobiliariaRM", "FinTechSantiago"].map((company) => (
-              <div key={company} className="text-center">
-                <div className="h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-muted-foreground font-medium">{company}</span>
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Briefcase} 
+                    variant="brand" 
+                    shape="rounded" 
+                    size="lg"
+                    className="mx-auto"
+                  />
                 </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="bg-gray-50 rounded-2xl p-8">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+500</div>
-                <p className="text-muted-foreground">Empresas chilenas</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">+15,000</div>
-                <p className="text-muted-foreground">Documentos firmados</p>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--tp-brand)] mb-2">99.8%</div>
-                <p className="text-muted-foreground">Uptime garantizado</p>
-              </div>
-            </div>
+                <CardTitle>Notaría Digital</CardTitle>
+                <CardDescription className="mb-4">
+                  Legaliza documentos sin salir de casa. Autorización notarial de firmas 
+                  y copias legalizadas válidas según <strong>código civil chileno</strong>.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/cl/notaria-online">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] transition-all"
+                  >
+                    Ver Notaría Chile
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
+
+
 
       {/* CTA Chile */}
-      <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl tp-container text-center">
-          <h2 className="text-white mb-4">
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] relative overflow-hidden">
+        {/* Patrón decorativo de fondo */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
+        </div>
+
+        <div className="max-w-4xl tp-container text-center relative z-10">
+          <h2 className="text-white mb-6">
             Únete a la Transformación Digital en Chile
           </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Más de 500 empresas chilenas ya digitalizaron sus procesos legales
+          <p className="text-xl text-white/90 mb-10 max-w-3xl mx-auto">
+            Más de 500 empresas chilenas ya digitalizaron sus procesos legales. Es tu turno de simplificar tus trámites.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
-            >
-              Comenzar Gratis en Chile
-            </Button>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <a href="https://tupatrimon.io" target="_blank" rel="noopener noreferrer nofollow">
+              <Button 
+                size="lg" 
+                className="bg-white text-[var(--tp-brand)] hover:bg-gray-100 dark:hover:bg-gray-200 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Comenzar Gratis en Chile
+              </Button>
+            </a>
             <Link href="/cl/precios">
               <Button 
                 size="lg" 
-                variant="ghost" 
-                className="text-white border-white hover:bg-white/10 px-8 py-4"
+                variant="ghost"
+                className="text-white border-2 border-white hover:bg-white/10 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
               >
                 Ver Precios en CLP
               </Button>
             </Link>
-            <Link href="/cl/contacto">
-              <Button 
-                size="lg" 
-                variant="ghost" 
-                className="text-white border-white hover:bg-white/10 px-8 py-4"
-              >
-                Hablar con Especialista
-              </Button>
-            </Link>
           </div>
           
-          <div className="mt-8 text-center">
-            <p className="text-white/80 text-sm">
-              💰 Precios en pesos chilenos • 🏛️ Cumple legislación local • 🇨🇱 Soporte en horario chileno
-            </p>
+          {/* Trust bar con iconos minimalistas */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm">
+            <div className="flex items-center gap-2">
+              <Icon icon={CheckCircle} size="md" variant="white" />
+              <span>Validez Legal Garantizada</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon icon={Zap} size="md" variant="white" />
+              <span>Documentos en 24hrs</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon icon={Lock} size="md" variant="white" />
+              <span>100% Seguro</span>
+            </div>
           </div>
         </div>
       </section>
