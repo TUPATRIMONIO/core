@@ -87,24 +87,50 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
   - Código TypeScript actualizado (`page-management.ts`, `users/page.tsx`)
   - Migración SQL corregida: `20251112185905_limpiar-user-roles.sql` ✅
   
-- ✅ **Schema CRM Multi-Tenant Completo**:
+- ✅ **Schema CRM Multi-Tenant Completo - Estilo HubSpot**:
   - **Schema separado**: `crm` (siguiendo arquitectura de schemas por aplicación)
-  - 6 tablas creadas: `crm.contacts`, `crm.activities`, `crm.deals`, `crm.emails`, `crm.settings`, `crm.notes`
-  - ENUMs: `crm.contact_status`, `crm.activity_type`, `crm.deal_stage`, `crm.email_status`
-  - RLS completo por organization_id
-  - Roles específicos en core: `crm_manager` (nivel 6), `sales_rep` (nivel 4)
-  - Aplicación `crm_sales` registrada en core.applications
-  - Función de importación: `import_marketing_leads_to_crm()`
-  - Función de estadísticas: `crm.get_stats(org_id)`
-  - Migración SQL completa: `20251112190000_schema-crm-multitenant.sql` ✅
+  - **10 tablas principales**:
+    * Base (6): `contacts`, `companies`, `deals`, `tickets`, `activities`, `emails`
+    * Comercial (3): `products`, `quotes`, `quote_line_items`
+    * Config (2): `pipelines`, `settings`, `notes`
+  - **ENUMs completos** (8):
+    * Existentes: `contact_status`, `activity_type`, `deal_stage`, `email_status`
+    * Nuevos: `company_type`, `ticket_status`, `ticket_priority`, `quote_status`
+  - **Relaciones HubSpot-style**:
+    * Contacto ↔ Empresa (N:1)
+    * Empresa → Contactos, Deals, Tickets (1:N)
+    * Deal → Contacto/Empresa (flexible)
+    * Ticket → Contacto/Empresa (soporte)
+    * Quote → Contacto/Empresa/Deal (propuestas)
+    * Activities → Universal (timeline para todo)
+  - **Features automáticas**:
+    * Auto-numeración: TICK-00001, QUO-00001
+    * Cálculo automático de totales en cotizaciones
+    * Pipelines personalizables por org
+    * Subsidiarias (parent_company_id)
+  - **Funciones SQL**:
+    * `import_marketing_leads_to_crm()`
+    * `crm.get_stats(org_id)` - Dashboard principal
+    * `crm.get_company_stats(company_id)` - Stats por empresa
+    * `crm.get_company_contacts(company_id)` - Contactos de empresa
+  - **RLS completo** por organization_id en todas las tablas
+  - **Roles específicos** en core: `crm_manager` (nivel 6), `sales_rep` (nivel 4)
+  - **Aplicación** `crm_sales` registrada en core.applications
+  - **Migraciones SQL**:
+    * `20251112190000_schema-crm-multitenant.sql` ✅ (Base)
+    * `20251112202031_crm-base.sql` ✅ (Expansión HubSpot)
   
 - 📋 **Documentación Creada**:
-  - `docs/schemas/crm.md` - Guía completa con arquitectura multi-tenant
+  - `docs/schemas/crm.md` - Implementación técnica multi-tenant
+  - `docs/schemas/crm-hubspot-style.md` - Arquitectura completa estilo HubSpot ⭐ NUEVO
   - `docs/schemas/ARCHITECTURE-SCHEMAS.md` - Filosofía de schemas separados
   - `docs/ORGANIZATION-SUMMARY.md` - Resumen de organización de docs
+  - `docs/NAVIGATION-MAP.md` - Mapa de navegación de documentación
   - Ejemplos de API routes con permisos
+  - Diagramas de relaciones entre entidades
   - Sistema de límites por plan de suscripción
   - Integración Gmail por organización
+  - Flujos de trabajo completos
   - Testing multi-tenant
 
 - ✅ **Organización de Documentación** (12 Nov 2025):

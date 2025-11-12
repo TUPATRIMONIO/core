@@ -55,21 +55,36 @@ Para entender la filosofía completa de schemas, consulta:
 
 ---
 
-### 3. Schema `crm` (CRM Multi-Tenant B2B) ⭐ NUEVO
+### 3. Schema `crm` (CRM Multi-Tenant B2B) ⭐ COMPLETO - Estilo HubSpot
 
-**Estado**: ✅ Schema completo, UI pendiente
+**Estado**: ✅ Schema completo (10 tablas), UI pendiente
 
-**Propósito**: Sistema CRM como servicio B2B vendible. Multi-tenant con aislamiento total por organización.
+**Propósito**: Sistema CRM completo como servicio B2B vendible. Diseñado estilo HubSpot con todas las entidades principales interconectadas.
 
-**Migración**: `supabase/migrations/20251112190000_schema-crm-multitenant.sql`
+**Migraciones**: 
+- `20251112190000_schema-crm-multitenant.sql` (Base)
+- `20251112202031_crm-base.sql` (Expansión HubSpot)
 
-**Tablas principales**:
-- `contacts` - Contactos por organización
-- `activities` - Timeline de interacciones
+**Tablas principales** (10):
+- `contacts` - Contactos/Personas individuales
+- `companies` - Empresas/Organizaciones ⭐ NUEVO
 - `deals` - Oportunidades de venta
+- `tickets` - Sistema de soporte ⭐ NUEVO
+- `products` - Catálogo de productos/servicios ⭐ NUEVO
+- `quotes` + `quote_line_items` - Cotizaciones ⭐ NUEVO
+- `activities` - Timeline universal (expandido)
 - `emails` - Integración Gmail
+- `pipelines` - Stages personalizables ⭐ NUEVO
 - `settings` - Configuración por org
 - `notes` - Notas internas
+
+**Relaciones clave**:
+- Contacto → Empresa (N:1)
+- Empresa → Contactos, Deals, Tickets (1:N)
+- Deal → Contacto/Empresa (N:1)
+- Ticket → Contacto/Empresa (N:1)
+- Quote → Contacto/Empresa/Deal (N:1)
+- Activity → Todo (N:1 universal)
 
 **Características**:
 - Multi-tenant estricto (RLS por organization_id)
@@ -77,8 +92,13 @@ Para entender la filosofía completa de schemas, consulta:
 - Vendible como servicio B2B
 - Integración Gmail por organización
 - Límites por plan de suscripción
+- Auto-numeración (tickets, quotes)
+- Cálculos automáticos (totales de quotes)
+- Pipelines personalizables
 
-**Ver más**: 📄 **[crm.md](./crm.md)** - Documentación completa
+**Ver más**: 
+- 📄 **[crm.md](./crm.md)** - Implementación técnica
+- 📄 **[crm-hubspot-style.md](./crm-hubspot-style.md)** - Arquitectura completa estilo HubSpot
 
 ---
 
