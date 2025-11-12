@@ -1,487 +1,273 @@
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, X, Crown, Users, Building, Calculator, Star } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Icon, IconContainer } from "@tupatrimonio/ui";
+import PriceCalculator from "@/components/pricing/PriceCalculator";
+import SignatureComparisonTable from "@/components/pricing/SignatureComparisonTable";
+import NotarialServicesTable from "@/components/pricing/NotarialServicesTable";
+import PointsPackages from "@/components/pricing/PointsPackages";
+import VolumeDiscounts from "@/components/pricing/VolumeDiscounts";
+import RefundPolicy from "@/components/pricing/RefundPolicy";
+import { USERS_COUNT } from "@/lib/constants";
+import { Zap, Lock, Users, Percent, Coins as CoinsIcon, RefreshCcw, ArrowRight, Calculator as CalculatorIcon, FileCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Precios TuPatrimonio - Planes Individuales y Empresariales | Chile",
-  description: "Planes desde $0 para individuales y desde $49 para empresas. Firma electrónica, verificación de identidad y notaría digital. Sin costos ocultos.",
-  keywords: ["precios firma electrónica", "planes verificación identidad", "costo notaría digital", "pricing b2b", "planes empresariales"],
+  title: "Precios - Firma Electrónica y Servicios Notariales | TuPatrimonio Chile",
+  description: "Firma Electrónica Simple desde $6.990, servicios notariales desde $8.990. Sistema de puntos con descuentos hasta 9%. Reembolso garantizado.",
+  keywords: [
+    "precios firma electrónica chile",
+    "costo firma electrónica",
+    "precio notaría digital",
+    "firma electrónica simple precio",
+    "firma electrónica avanzada precio",
+    "notaría online chile precios",
+    "descuentos firma electrónica"
+  ],
   openGraph: {
-    title: "Precios TuPatrimonio - Planes para Individuos y Empresas",
-    description: "Planes desde $0 para individuales y desde $49 para empresas. Servicios legales digitales sin costos ocultos.",
-    url: "https://tupatrimonio.app/precios",
+    title: "Precios - Firma Electrónica y Servicios Notariales | TuPatrimonio",
+    description: "FES desde $6.990, servicios notariales desde $8.990. Sistema de puntos con descuentos. Reembolso garantizado.",
+    url: "https://tupatrimonio.app/cl/precios",
     images: [
       {
-        url: "/precios-og.jpg",
+        url: "/og-precios.jpg",
         width: 1200,
         height: 630,
-        alt: "Precios TuPatrimonio - Planes"
+        alt: "Precios TuPatrimonio Chile"
       }
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Precios TuPatrimonio - Planes Individuales y Empresariales",
-    description: "Desde $0 para individuales, desde $49 para empresas. Sin costos ocultos.",
-    images: ["/precios-og.jpg"],
+    title: "Precios - Firma Electrónica y Servicios Notariales Chile",
+    description: "FES desde $6.990, servicios notariales desde $8.990. Descuentos automáticos por volumen.",
+    images: ["/og-precios.jpg"],
   },
   alternates: {
-    canonical: "https://tupatrimonio.app/precios",
+    canonical: "https://tupatrimonio.app/cl/precios",
   },
 };
 
 export default function PreciosPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-card py-20">
-        <div className="max-w-7xl tp-container text-center">
-          <h1 className="mb-6">
-            Planes que se Adaptan a Ti
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Desde freelancers hasta grandes empresas. 
-            Empieza gratis y escala según tus necesidades.
-          </p>
-          
-          {/* Toggle Individual/Empresarial */}
-          <div className="flex items-center justify-center gap-8 mb-12">
-            <div className="bg-gray-100 p-1 rounded-lg">
-              <div className="flex">
-                <button className="px-6 py-2 rounded-md bg-[var(--tp-buttons)] text-white font-medium text-sm">
-                  Individual
-                </button>
-                <button className="px-6 py-2 rounded-md text-muted-foreground hover:text-foreground font-medium text-sm">
-                  Empresarial
-                </button>
-              </div>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              💰 <span className="font-medium text-green-600">Ahorra 20%</span> pagando anualmente
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Planes Individuales (B2C) */}
-      <section className="py-12">
+      <section className="bg-gradient-to-br from-[var(--tp-background-light)] to-background py-20">
         <div className="max-w-7xl tp-container">
-          <div className="grid md:grid-cols-3 gap-8">
-            
-            {/* Personal Free */}
-            <div className="bg-card rounded-2xl border border-border p-8">
-              <div className="text-center mb-8">
-                <h3 className="mb-2">Personal Free</h3>
-                <p className="text-muted-foreground">Para uso personal ocasional</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">$0</span>
-                  <span className="text-muted-foreground">/mes</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>3 firmas electrónicas simples/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>1 verificación de identidad</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Soporte por email</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <X className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-400">Notaría digital</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <X className="w-5 h-5 text-gray-400" />
-                  <span className="text-gray-400">API access</span>
-                </li>
-              </ul>
-              
-              <Button variant="outline" className="w-full">
-                Comenzar Gratis
-              </Button>
-            </div>
-
-            {/* Personal Pro */}
-            <div className="bg-card rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-[var(--tp-buttons)] text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Más Popular
-                </span>
-              </div>
-              
-              <div className="text-center mb-8">
-                <h3 className="mb-2">Personal Pro</h3>
-                <p className="text-muted-foreground">Para freelancers y profesionales</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">$9</span>
-                  <span className="text-muted-foreground">/mes</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>20 firmas electrónicas/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>5 verificaciones de identidad</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>3 notarizaciones digitales</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Templates predefinidos</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Soporte prioritario</span>
-                </li>
-              </ul>
-              
-              <Button className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-                Empezar 14 días gratis
-              </Button>
-            </div>
-
-            {/* Personal Business */}
-            <div className="bg-card rounded-2xl border border-border p-8">
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Crown className="w-5 h-5 text-yellow-500" />
-                  <h3 className="">Personal Business</h3>
-                </div>
-                <p className="text-muted-foreground">Para profesionales intensivos</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">$29</span>
-                  <span className="text-muted-foreground">/mes</span>
-                </div>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Firmas ilimitadas</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>20 verificaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>10 notarizaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>API básico incluido</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Integración con CRM</span>
-                </li>
-              </ul>
-              
-              <Button variant="outline" className="w-full">
-                Empezar Prueba
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Separador para Planes Empresariales */}
-      <section className="py-12 bg-[var(--tp-buttons)]/5">
-        <div className="max-w-7xl tp-container text-center">
-          <h2 className="mb-4">
-            Planes Empresariales
-          </h2>
-          <p className="text-xl text-muted-foreground">
-            Para equipos y organizaciones que necesitan colaboración y gestión avanzada
-          </p>
-        </div>
-      </section>
-
-      {/* Planes Empresariales (B2B) */}
-      <section className="py-12">
-        <div className="max-w-7xl tp-container">
-          <div className="grid md:grid-cols-3 gap-8">
-            
-            {/* Team Starter */}
-            <div className="bg-card rounded-2xl border border-border p-8">
-              <div className="text-center mb-8">
-                <Users className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="mb-2">Team Starter</h3>
-                <p className="text-muted-foreground">Para equipos pequeños</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">$49</span>
-                  <span className="text-muted-foreground">/mes</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">hasta 5 usuarios</p>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>200 firmas/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>50 verificaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>20 notarizaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Gestión de equipos</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Dashboard centralizado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>API incluido</span>
-                </li>
-              </ul>
-              
-              <Button variant="outline" className="w-full">
-                Empezar Team Trial
-              </Button>
-            </div>
-
-            {/* Business */}
-            <div className="bg-card rounded-2xl border-2 border-[var(--tp-buttons)] p-8 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-[var(--tp-buttons)] text-white px-4 py-1 rounded-full text-sm font-medium">
-                  Empresas
-                </span>
-              </div>
-              
-              <div className="text-center mb-8">
-                <Building className="w-8 h-8 text-[var(--tp-brand)] mx-auto mb-3" />
-                <h3 className="mb-2">Business</h3>
-                <p className="text-muted-foreground">Para empresas medianas</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">$199</span>
-                  <span className="text-muted-foreground">/mes</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">hasta 25 usuarios</p>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Firmas ilimitadas</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>500 verificaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>100 notarizaciones/mes</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Workflows automatizados</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Integraciones avanzadas</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Soporte dedicado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Analytics y reportes</span>
-                </li>
-              </ul>
-              
-              <Button className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-                Empezar 30 días gratis
-              </Button>
-            </div>
-
-            {/* Enterprise */}
-            <div className="bg-card rounded-2xl border border-border p-8">
-              <div className="text-center mb-8">
-                <Crown className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-                <h3 className="mb-2">Enterprise</h3>
-                <p className="text-muted-foreground">Para grandes corporaciones</p>
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-foreground">Custom</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">según necesidades</p>
-              </div>
-              
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Todo ilimitado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Usuarios ilimitados</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>SLA garantizado 99.9%</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Implementación personalizada</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Account manager dedicado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>Compliance personalizado</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span>White label disponible</span>
-                </li>
-              </ul>
-              
-              <Button variant="outline" className="w-full">
-                Contactar Ventas
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Calculadora de ROI */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl tp-container text-center">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-8">
-            <Calculator className="w-12 h-12 text-[var(--tp-buttons)] mx-auto mb-4" />
-            <h2 className="mb-4">
-              Calcula tu Ahorro Anual
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Estima cuánto ahorrarás digitalizando tus procesos documentales
+          <div className="text-center">
+            <h1 className="mb-6">
+              Precios <span className="text-[var(--tp-brand)]">Transparentes</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto">
+              Paga solo por lo que usas. Sin suscripciones mensuales, sin ataduras. 
+              Simplemente elige el servicio que necesitas y listo.
             </p>
-            
-            <div className="grid md:grid-cols-3 gap-6 text-left">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Firmas por mes</label>
-                <div className="mt-1 p-3 border rounded-lg bg-white">
-                  <span className="text-muted-foreground">~50 documentos</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Método actual</label>
-                <div className="mt-1 p-3 border rounded-lg bg-white">
-                  <span className="text-muted-foreground">Presencial</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Ahorro estimado</label>
-                <div className="mt-1 p-3 border-2 border-green-500 rounded-lg bg-green-50">
-                  <span className="text-green-700 font-bold">$245,000 CLP/año</span>
-                </div>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+              <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" rel="noopener noreferrer nofollow">
+                <Button 
+                  size="lg" 
+                  className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  Comenzar mi trámite
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </a>
+              <a href="#calculadora">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg font-semibold"
+                >
+                  <CalculatorIcon className="w-5 h-5 mr-2" />
+                  Calcular mi Precio
+                </Button>
+              </a>
             </div>
             
-            <Button className="mt-6 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-              Calcular mi Ahorro Exacto
-            </Button>
+            {/* Métricas del sistema */}
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+                <Icon icon={Users} size="sm" className="text-green-600 dark:text-green-400" />
+                <span className="text-green-700 dark:text-green-300 text-sm font-medium">{USERS_COUNT.shortUpper} Usuarios</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+                <Icon icon={FileCheck} size="sm" className="text-green-600 dark:text-green-400" />
+                <span className="text-green-700 dark:text-green-300 text-sm font-medium">+60K Documentos</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+                <Icon icon={Zap} size="sm" className="text-green-600 dark:text-green-400" />
+                <span className="text-green-700 dark:text-green-300 text-sm font-medium">En Minutos</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ sobre Facturación */}
-      <section className="py-20 bg-gray-50">
+      {/* Comparativa de Firma Electrónica */}
+      <section className="py-20 bg-background">
+        <div className="max-w-7xl tp-container">
+          <SignatureComparisonTable />
+        </div>
+      </section>
+
+      {/* Comparativa de Servicios Notariales */}
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+        <div className="max-w-7xl tp-container">
+          <NotarialServicesTable />
+        </div>
+      </section>
+
+      {/* Calculadora de Precios */}
+      <section id="calculadora" className="py-20 bg-background">
         <div className="max-w-4xl tp-container">
-          <div className="text-center mb-16">
-            <h2 className="mb-4">
-              Preguntas sobre Facturación
-            </h2>
+          <PriceCalculator />
+        </div>
+      </section>
+
+      {/* Sistema de Puntos */}
+      <section id="descuentos" className="py-20 bg-background">
+        <div className="max-w-7xl tp-container">
+          <PointsPackages />
+        </div>
+      </section>
+
+      {/* Descuentos por Volumen */}
+      <section className="py-20 bg-background">
+        <div className="max-w-7xl tp-container">
+          <VolumeDiscounts />
+        </div>
+      </section>
+
+      {/* Política de Reembolsos */}
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+        <div className="max-w-4xl tp-container">
+          <RefundPolicy />
+        </div>
+      </section>
+
+      {/* Preguntas Frecuentes */}
+      <section className="py-20 bg-background">
+        <div className="max-w-4xl tp-container">
+          <div className="text-center mb-12">
+            <h2 className="mb-4">Preguntas Frecuentes</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Todo lo que necesitas saber sobre precios, descuentos y reembolsos
+            </p>
           </div>
-          
-          <div className="space-y-8">
-            <div>
-              <h3 className="mb-2">
-                ¿Puedo cambiar de plan en cualquier momento?
-              </h3>
-              <p className="text-muted-foreground">
-                Sí, puedes upgrader o downgrader tu plan cuando quieras. Los cambios se aplican 
-                inmediatamente y solo pagas la diferencia prorrateada.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="mb-2">
-                ¿Qué pasa si excedo mi límite mensual?
-              </h3>
-              <p className="text-muted-foreground">
-                Ofrecemos créditos adicionales: $0.50 por firma extra, $2.50 por verificación extra, 
-                $6.00 por notarización extra. O puedes upgradear tu plan automáticamente.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="mb-2">
-                ¿Ofrecen descuentos por volumen?
-              </h3>
-              <p className="text-muted-foreground">
-                Sí, para empresas con más de 1,000 transacciones mensuales ofrecemos descuentos 
-                significativos. Contacta nuestro equipo comercial para una cotización personalizada.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="mb-2">
-                ¿Qué métodos de pago aceptan?
-              </h3>
-              <p className="text-muted-foreground">
-                Tarjetas de crédito/débito, transferencia bancaria, Khipu, Mercado Pago y 
-                otros métodos locales. Facturación automática mensual o anual.
-              </p>
-            </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Pregunta 1 */}
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={Percent} 
+                    variant="brand" 
+                    shape="circle" 
+                    size="md"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>¿Existen descuentos?</CardTitle>
+                <CardDescription>
+                  Sí. Accede a descuentos automáticos según la cantidad de documentos realizados en los últimos 6 meses.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            {/* Pregunta 2 */}
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={CoinsIcon} 
+                    variant="brand" 
+                    shape="circle" 
+                    size="md"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>¿Cómo funcionan los puntos?</CardTitle>
+                <CardDescription>
+                  Compra puntos a valor 1:1 y obtén 2% de descuento adicional automáticamente al usarlos como medio de pago en cualquier servicio.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            {/* Pregunta 3 */}
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group text-center">
+              <CardHeader>
+                <div className="mb-4 group-hover:scale-110 transition-transform">
+                  <IconContainer 
+                    icon={RefreshCcw} 
+                    variant="brand" 
+                    shape="circle" 
+                    size="md"
+                    className="mx-auto"
+                  />
+                </div>
+                <CardTitle>¿Hay reembolsos?</CardTitle>
+                <CardDescription>
+                  Sí. Puedes solicitar reembolso si el pedido no está finalizado y dentro de los 30 días desde la compra.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-20 bg-[var(--tp-buttons)]">
-        <div className="max-w-4xl tp-container text-center">
-          <h2 className="text-white mb-4">
-            Comienza tu Transformación Digital
+      {/* CTA Final con patrón decorativo */}
+      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] relative overflow-hidden">
+        {/* Patrón decorativo de fondo */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
+        </div>
+
+        <div className="max-w-4xl tp-container text-center relative z-10">
+          <h2 className="text-white mb-6">
+            Comienza a legalizar tus documentos hoy
           </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Sin compromiso, sin configuración compleja, sin costos ocultos
+          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+            Sin configuración compleja, sin costos ocultos, sin trámites presenciales. 
+            Todo desde la comodidad de tu casa u oficina.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="bg-card text-[var(--tp-buttons)] border-white hover:bg-gray-100 px-8 py-4"
-            >
-              Probar Gratis 14 Días
-            </Button>
-            <Button 
-              size="lg" 
-              variant="ghost" 
-              className="text-white border-white hover:bg-white/10 px-8 py-4"
-            >
-              Hablar con Ventas
-            </Button>
+          
+          {/* Botones */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <a href="https://tupatrimon.io/legalizacion-de-documentos-electronicos/" rel="noopener noreferrer nofollow">
+              <Button 
+                size="lg" 
+                className="bg-white text-[var(--tp-brand)] hover:bg-gray-100 dark:hover:bg-gray-200 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Comenzar mi trámite
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </a>
+            <a href="https://tupatrimon.io/contacto/" rel="noopener noreferrer nofollow">
+              <Button 
+                size="lg" 
+                variant="ghost"
+                className="text-white border-2 border-white hover:bg-white/10 px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Hablar con soporte
+              </Button>
+            </a>
+          </div>
+
+          {/* Trust bar con métricas */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm">
+            <div className="flex items-center gap-2">
+              <Icon icon={Users} size="md" variant="white" />
+              <span>{USERS_COUNT.shortUpper} Usuarios Confían</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon icon={FileCheck} size="md" variant="white" />
+              <span>+60K Documentos Firmados</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon icon={Zap} size="md" variant="white" />
+              <span>Resultados en Minutos</span>
+            </div>
           </div>
         </div>
       </section>
