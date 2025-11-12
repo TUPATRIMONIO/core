@@ -1,28 +1,89 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** 29 Octubre 2025  
-> **📊 Estado:** Fase 0 en progreso (~85% completado)  
-> **🎯 Próximo milestone:** Completar sistema de autenticación y contenido real
+> **📅 Última actualización:** 12 Noviembre 2025  
+> **📊 Estado:** Fase 0 prácticamente COMPLETA (~95% completado)  
+> **🎯 Próximo milestone:** Finalizar contenido real y comenzar Fase 1
 
-## 🚨 Cambios Recientes (29 Oct 2025)
+## 📊 Resumen Ejecutivo (Nov 2025)
 
-### Actualización de Prioridades Fase 0:
+**Estado General:** La Fase 0 está prácticamente completa al **95%**. Toda la infraestructura técnica, páginas, sistemas de contenido y integraciones están implementadas y funcionando. La **única tarea crítica pendiente** es la migración y creación de contenido real para poblar el sitio.
 
-Se han identificado **dos tareas críticas pendientes** antes de pasar a Fase 1:
+**Completado en Fase 0:**
+- ✅ Infraestructura completa (monorepo, Next.js 15, Tailwind v4, Supabase)
+- ✅ 60+ páginas implementadas (landing pages, blog, KB, ayuda, etc.)
+- ✅ Sistema de blog dinámico con admin panel
+- ✅ Base de conocimiento completa con categorías
+- ✅ Integración Google Business Reviews
+- ✅ Sistema de gestión de páginas dinámicas
+- ✅ SEO avanzado (sitemap multicapa, structured data)
+- ✅ Deploy completo en Vercel (2 apps funcionando)
+- ✅ Dark mode, PWA, Analytics, colores dual
 
-1. **Sistema de Autenticación Completo** (1 semana)
-   - Configurar verificación de correo electrónico
-   - Implementar OAuth providers (Google, LinkedIn)
-   - Agregar Magic Links (passwordless)
-   - Mejorar flujo de onboarding
+**Pendiente para 100%:**
+- ⏳ Migrar contenido del sitio actual (1-2 semanas)
+- ⏳ Poblar blog con 10-15 posts
+- ⏳ Poblar KB con 15-20 artículos
 
-2. **Contenido Real para Producción** (1-2 semanas)
-   - Migrar contenido del sitio actual en producción
-   - Actualizar landing pages con información definitiva
-   - Migrar posts del blog existente
-   - Optimizar contenido para SEO
+**Próximo paso:** Una vez completado el contenido, iniciar Fase 1 (Backend Foundation con servicios de negocio).
 
-**Estimación revisada:** 2-3 semanas adicionales antes de iniciar Fase 1
+---
+
+## 🚨 Cambios Recientes (Nov 2025)
+
+### Avances Significativos de Noviembre:
+
+✅ **COMPLETADOS en Noviembre 2025:**
+
+1. **Sistema de Gestión de Páginas Dinámicas**
+   - Sistema completo de gestión de rutas y contenido
+   - API routes para configuración de páginas
+   - Integración con sitemap dinámico
+   - Páginas gestionadas desde base de datos
+
+2. **Base de Conocimiento (Knowledge Base)**
+   - Sistema completo de artículos KB
+   - Categorías y navegación por categorías
+   - Integración con Supabase (kb_articles, kb_categories)
+   - SEO optimizado para cada artículo
+   - URLs amigables: `/base-conocimiento/[categoria]/[slug]`
+
+3. **Sistema de Reviews de Google Business**
+   - Integración completa con Google Business API
+   - Sincronización automática de reseñas
+   - Cron job para actualización periódica
+   - Display de reseñas en landing pages
+   - Cache de datos para mejor performance
+
+4. **Rutas y Páginas Adicionales**
+   - `/ayuda` - Centro de ayuda completo
+   - `/nosotros` - Página sobre TuPatrimonio
+   - `/contacto` - Formulario de contacto global
+   - Todas las páginas legales (`/legal/*`)
+   - Páginas de líneas de negocio (legal-tech, business-hub, proptech, fintech)
+
+5. **Mejoras de SEO y Sitemap**
+   - Sitemap dinámico que incluye:
+     * Páginas estáticas priorizadas
+     * Posts del blog con última modificación
+     * Artículos de base de conocimiento
+     * Categorías de ambos sistemas
+   - Prioridades inteligentes por tipo de contenido
+   - Change frequencies optimizadas
+
+**📋 PENDIENTES para completar Fase 0:**
+
+1. **Contenido Real** (1-2 semanas)
+   - Migrar contenido del sitio actual
+   - Crear posts iniciales para blog
+   - Poblar base de conocimiento con artículos
+   - Optimizar todas las landing pages
+
+2. **Sistema de Autenticación** (opcional para MVP)
+   - OAuth providers (Google, LinkedIn)
+   - Magic Links
+   - Verificación de correo mejorada
+
+**Estimación revisada:** 1-2 semanas para completar Fase 0 al 100%
 
 ---
 
@@ -1335,122 +1396,199 @@ Al completar Fase 0:
 📋 Migración 21: seed-data.sql (datos iniciales)
 ```
 
-#### ✅ **PROGRESO FASE 0 - ACTUALIZADO (21 Oct 2025):**
+#### ✅ **PROGRESO FASE 0 - ACTUALIZADO (12 Nov 2025):**
 
-**✅ COMPLETADO HOY (21 Oct 2025):**
+**✅ COMPLETADO - Marketing Site Foundation:**
 
-**1. Marketing Site Foundation (Semana 1) - COMPLETADO**
-   - ✅ Crear estructura de monorepo con apps/marketing
-   - ✅ Setup Next.js + TailwindCSS + Shadcn/UI compartido
-   - ✅ Configurar variables CSS y fuente Quicksand
-   - ✅ Setup SEO básico (metadata API, sitemap, robots.txt)
+**1. Estructura y Setup (100% Completado)**
+   - ✅ Monorepo completo con apps/marketing + apps/web
+   - ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
+   - ✅ Sistema de tipografía triple (Josefin Sans, Outfit, Nunito)
+   - ✅ Sistema de colores dual (funcional gris + marca vino)
+   - ✅ SEO avanzado (metadata API, sitemap dinámico, robots.txt)
+   - ✅ Dark mode completo con next-themes
 
-**2. Landing Pages Base - COMPLETADO**
-   - ✅ Homepage con value proposition y CTA
-   - ✅ Landing `/firmas-electronicas` SEO-optimizada (ejemplo completo)
-   - 📋 Landing `/verificacion-identidad` (PENDIENTE)
-   - 📋 Landing `/notaria-digital` (PENDIENTE)
-   - 📋 Página `/precios` con planes B2C/B2B (PENDIENTE)
-   - 📋 Páginas legales (/legal/terminos, /privacidad, /cookies) (PENDIENTE)
+**2. Landing Pages (100% Completado)**
+   - ✅ Homepage global con value proposition
+   - ✅ Landing `/cl/firmas-electronicas` completa y optimizada
+   - ✅ Landing `/cl/notaria-online` completa y optimizada
+   - ✅ Landing `/cl/modificaciones-empresa` completa
+   - ✅ Landing `/cl/contrato-de-arriendo-online` completa
+   - ✅ Landing `/cl/verificacion-identidad` (redirect configurado)
+   - ✅ Página `/cl/precios` con planes diferenciados
+   - ✅ Páginas legales completas (`/legal/terminos`, `/legal/privacidad`, `/legal/cookies`)
 
-**3. Blog con Supabase - COMPLETADO**
-   - ✅ Schema `marketing` completo creado (8 tablas)
-   - ✅ Implementar páginas dinámicas del blog (/blog, /blog/[slug])
-   - ✅ Sistema de categorías funcionando
-   - ✅ Panel admin completo para gestionar posts (COMPLETADO 25 Oct 2025)
+**3. Sistema de Contenido Completo (100% Completado)**
+   - ✅ **Blog dinámico** con Supabase
+     * Schema `marketing.blog_posts` y `blog_categories`
+     * Páginas dinámicas `/blog/[category]/[slug]`
+     * Sistema de categorías funcionando
+     * Panel admin completo para gestionar posts
+   - ✅ **Base de Conocimiento** (Knowledge Base) - NUEVO Nov 2025
+     * Schema `marketing.kb_articles` y `kb_categories`
+     * Páginas dinámicas `/base-conocimiento/[category]/[slug]`
+     * Sistema de categorías independiente
+     * Navegación por categorías `/base-conocimiento/categoria/[slug]`
+     * Integrado en sitemap dinámico
+   - ✅ **Sistema de Gestión de Páginas**
+     * API routes para configuración de páginas
+     * `marketing.page_config` para gestión dinámica
+     * Integración con sitemap automático
+     * Estados por país (activo, coming-soon)
 
-**4. Deploy Infrastructure - COMPLETADO**
-   - ✅ **Ambas apps deployadas exitosamente en Vercel**
-   - ✅ Build commands y publish directories configurados
-   - ✅ Variables de entorno funcionando
-   - ✅ Monorepo en producción
+**4. Deploy Infrastructure (100% Completado)**
+   - ✅ **Ambas apps en Vercel**
+     * Marketing app: `tupatrimonio.app`
+     * Web app: `app.tupatrimonio.app`
+     * Build commands optimizados
+     * Variables de entorno configuradas
+     * Edge Middleware para geolocalización
 
-#### 🚀 **PRÓXIMOS PASOS PARA MAÑANA (Completar Fase 0):**
+**5. Páginas Adicionales (100% Completado) - NUEVO Nov 2025**
+   - ✅ `/ayuda` - Centro de ayuda completo con FAQs
+   - ✅ `/nosotros` - Página sobre TuPatrimonio
+   - ✅ `/contacto` - Formulario de contacto global
+   - ✅ `/base-conocimiento` - Hub de artículos KB
+   - ✅ Líneas de negocio:
+     * `/legal-tech` - Servicios legales digitales
+     * `/business-hub` - Soluciones empresariales
+     * `/proptech` - Tecnología inmobiliaria
+     * `/fintech` - Servicios financieros
 
-**✅ COMPLETADO (22 Oct 2025):**
-   - ✅ Todas las landing pages creadas y organizadas por países
-   - ✅ Estructura internacional /cl/, /co/, /mx/ implementada
-   - ✅ Formularios lead capture conectados a Supabase
-   - ✅ Páginas legales (términos, privacidad, cookies) para Chile
-   - ✅ Redirects automáticos con detección de país
-   - ✅ Página de contacto específica (/cl/contacto)
+**6. Integraciones y APIs (NUEVO Nov 2025)**
+   - ✅ **Google Business Reviews**
+     * API completa de sincronización
+     * Cron job para actualización automática
+     * Display de reseñas en landing pages
+     * Cache de datos para performance
+     * Endpoints: `/api/google-reviews`, `/api/google-stats`
+   - ✅ **API de Gestión de Páginas**
+     * `/api/pages-config` - Configuración dinámica
+     * Sistema de estados por país
+     * Integración con sitemap
 
-**📋 RESTANTE PARA COMPLETAR FASE 0:**
+**7. SEO Avanzado (100% Completado)**
+   - ✅ Sitemap dinámico multicapa:
+     * Páginas estáticas con prioridades
+     * Posts del blog con última modificación
+     * Artículos KB con categorías
+     * Categorías de ambos sistemas
+     * Sistema de gestión de páginas integrado
+   - ✅ Prioridades inteligentes por tipo de contenido
+   - ✅ Change frequencies optimizadas
+   - ✅ Structured data (Organization, WebSite, Article, BreadcrumbList)
 
-**PRIORIDAD 1: Sistema de Autenticación Completo** ← NUEVO
-   - [ ] **Consolidar sistema de login/registro**
-     * Configurar verificación de correo electrónico
-     * Implementar Magic Links (login sin contraseña)
-     * Agregar OAuth providers (Google, LinkedIn)
-     * Configurar SMS OTP via Twilio (opcional)
-     * Mejorar flujo de onboarding post-registro
-     * Testing completo del flujo de autenticación
-     * Documentar proceso para usuarios
+#### 📊 **RESUMEN DE PROGRESO FASE 0: ~95% COMPLETADO**
 
-**PRIORIDAD 2: Contenido Real para Producción** ← NUEVO
-   - [ ] **Landing pages con contenido definitivo**
-     * Homepage: Copiar contenido de sitio actual en producción
-     * Landing firmas electrónicas: Contenido real y actualizado
-     * Landing verificación identidad: Contenido real
-     * Landing notaría digital: Contenido real
-     * Página de precios: Planes y precios definitivos
-     * Páginas legales: Términos, privacidad actualizados
-   - [ ] **Blog con contenido migrado**
-     * Migrar posts existentes del sitio actual
-     * Revisar y actualizar contenido obsoleto
+**✅ COMPLETADO (Oct-Nov 2025):**
+
+**Infraestructura y Setup:**
+   - ✅ Monorepo completo con 2 apps + packages compartidos
+   - ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
+   - ✅ Sistema de colores dual y tipografía triple
+   - ✅ Dark mode completo
+   - ✅ Deploy en Vercel (ambas apps)
+   - ✅ PWA funcional en web app
+
+**Marketing Site:**
+   - ✅ 8+ landing pages principales para Chile
+   - ✅ Estructura internacional (/cl/, /co/, /mx/, /pe/, /ar/)
+   - ✅ Detección automática de país
+   - ✅ Blog dinámico con categorías
+   - ✅ Base de conocimiento completa (NUEVO Nov 2025)
+   - ✅ Centro de ayuda
+   - ✅ Páginas legales completas
+   - ✅ Formularios de lead capture
+
+**Integraciones:**
+   - ✅ Google Business Reviews (NUEVO Nov 2025)
+   - ✅ Google Analytics 4 (propiedades separadas)
+   - ✅ Google Search Console
+   - ✅ Sistema de gestión de páginas dinámicas
+
+**SEO:**
+   - ✅ Sitemap dinámico multicapa
+   - ✅ Structured data completo
+   - ✅ Metadata optimizada por página
+   - ✅ Robots.txt configurado
+   - ✅ Prioridades y change frequencies optimizadas
+
+**Backend (Supabase):**
+   - ✅ Schema marketing completo (13+ tablas)
+   - ✅ Sistema de blog
+   - ✅ Sistema de base de conocimiento
+   - ✅ Sistema de reviews
+   - ✅ Lead capture y contacto
+   - ✅ Storage buckets para imágenes
+
+**📋 PENDIENTE PARA COMPLETAR FASE 0 AL 100%:**
+
+**PRIORIDAD 1: Contenido Real (1-2 semanas)** ← CRÍTICO
+   - [ ] **Migrar contenido del sitio actual**
+     * Copiar textos de producción actual
+     * Actualizar landing pages con información real
+     * Revisar y optimizar mensajes
+   - [ ] **Poblar Blog**
+     * Migrar 10-15 posts existentes
+     * Crear 3-5 posts nuevos sobre servicios
      * Optimizar imágenes y SEO
-     * 3-4 posts nuevos sobre servicios
+   - [ ] **Poblar Base de Conocimiento**
+     * Crear 15-20 artículos iniciales
+     * Organizar por categorías
+     * Optimizar para búsqueda
+   - [ ] **Optimización Final**
+     * Revisar todos los textos
+     * Verificar enlaces internos
+     * Testing de formularios
+     * Verificar responsive design
 
-**PRIORIDAD 3: SEO y Analytics Final**  
-   - [x] Configurar dominios personalizados en Vercel: ✅ COMPLETADO
-     * tupatrimonio.app → marketing site ✅
-     * app.tupatrimonio.app → web app ✅
-   - [x] Structured data básico (Organization, WebSite, Article) ✅ COMPLETADO
-     * Organization schema en homepage ✅
-     * WebSite schema en homepage ✅
-     * Article schema en posts del blog ✅
-     * BreadcrumbList en posts del blog ✅
-   - [x] Google Analytics 4 + Search Console ✅ COMPLETADO (27-28 Oct)
-     * Marketing App: GA4 configurado ✅
-     * Web App: GA4 con propiedad separada (G-HKK7H001DB) ✅
-     * Eventos específicos por aplicación ✅
-     * Search Console configurado ✅
+**PRIORIDAD 2 (Opcional): Sistema de Autenticación Mejorado**
+   - [ ] OAuth providers (Google, LinkedIn)
+   - [ ] Magic Links
+   - [ ] Verificación de correo mejorada
+   - [ ] Flujo de onboarding refinado
 
-**PRIORIDAD 4: Branding Visual**
-   - [x] Favicons personalizados para ambas apps ✅ COMPLETADO (27 Oct)
-     * Marketing app: favicon diferenciado ✅
-     * Web app: favicon diferenciado ✅
-     * Múltiples formatos (ico, png, apple-icon) ✅
-     * Metadata configurada en layouts ✅
+**NOTA**: El sistema de autenticación básico ya funciona. Esta prioridad es opcional para MVP.
 
-**MOVIDO A FASE 1:**
-   - [ ] Newsletter signup component
+- ✅ **Arquitectura Completa** (Oct-Nov 2025)
+  - ✅ Sistema de rutas dinámicas por país (cl, mx, co, pe, ar)
+  - ✅ Componentes reutilizables con Shadcn/UI
+  - ✅ Verticales de negocio (Legal-Tech, PropTech, Business-Hub, FinTech)
+  - ✅ Sistema de detección de país híbrido
+  - ✅ Middleware con validación y redirects
+  - ✅ 60+ páginas implementadas y funcionando
+  - ✅ Build exitoso y deployado en Vercel
 
-- ✅ **Restructuración Completa de URLs COMPLETADA** (27 Oct 2025)
-  - ✅ Sistema de rutas dinámicas con `[pais]` (cl, mx, co, pe, ar)
-  - ✅ 5 componentes reutilizables con Shadcn/UI creados
-  - ✅ Verticales de negocio implementados (Legal-Tech, PropTech, Business-Hub, FinTech)
-  - ✅ Sistema completo de recursos (/recursos/guias, /calculadoras, /plantillas)
-  - ✅ Páginas CTA con detección de sesión (/registrarse, /login, /empezar)
-  - ✅ Middleware actualizado con validación de países
-  - ✅ Redirects configurados para URLs antiguas
-  - ✅ 55 páginas totales implementadas
-  - ✅ Build exitoso sin errores
-  - ✅ **Arquitectura URL escalable y SEO-friendly completa** 🗺️
+**📈 PROGRESO FASE 0: ~95% COMPLETADO** (Actualizado Nov 12, 2025)
 
-**📈 PROGRESO FASE 0: ~85% COMPLETADO**
-**🕒 ESTIMADO RESTANTE: 2-3 semanas para completar Fase 0**
-  - Sistema de login completo: 1 semana
-  - Contenido real (landing pages + blog): 1-2 semanas
+**🕒 ESTIMADO RESTANTE: 1-2 semanas para completar Fase 0 al 100%**
+  - **Contenido real**: 1-2 semanas (CRÍTICO)
+    * Migración de contenido existente
+    * Población de blog y KB
+    * Optimización final
+  - **Sistema de autenticación avanzado**: Opcional para MVP
 
-**🎯 ÚLTIMAS MEJORAS (28 Oct 2025):**
-- ✅ **Admin del blog centralizado** en apps/web/dashboard/blog
-- ✅ **RLS policies corregidas** para mostrar borradores e inactivos
-- ✅ **Cálculo de tiempo de lectura** mejorado con limpieza de Markdown
-- ✅ **Arquitectura de storage** documentada y funcionando
-- ✅ **Sistema completo y funcional** listo para crear contenido
+**🎯 ÚLTIMAS MEJORAS (Nov 2025):**
+- ✅ **Sistema de Base de Conocimiento** completo (kb_articles, kb_categories)
+- ✅ **Integración Google Business Reviews** con API y cron jobs
+- ✅ **Sistema de gestión de páginas dinámicas** con page_config
+- ✅ **Sitemap multicapa** con todas las fuentes de contenido
+- ✅ **Páginas adicionales**: /ayuda, /nosotros, /contacto, /base-conocimiento
+- ✅ **Líneas de negocio**: legal-tech, business-hub, proptech, fintech
+- ✅ **APIs robustas** para reviews, stats y configuración
+- ✅ **Sistema completo de contenido** listo para población masiva
 
-#### 📝 **NOTAS IMPORTANTES PARA CONTINUAR MAÑANA:**
+**🎯 MEJORAS PREVIAS (Oct 2025):**
+- ✅ Admin del blog centralizado en apps/web/dashboard/blog
+- ✅ RLS policies corregidas para mostrar borradores e inactivos
+- ✅ Cálculo de tiempo de lectura mejorado con limpieza de Markdown
+- ✅ Arquitectura de storage documentada y funcionando
+- ✅ Sistema de colores dual implementado
+- ✅ Tipografía triple configurada
+- ✅ Dark mode completo
+- ✅ PWA funcional
+
+#### 📝 **NOTAS IMPORTANTES:**
 
 **🌐 URLs de Desarrollo:**
 - **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing` desde raíz)
@@ -1542,16 +1680,28 @@ npm run build:packages   # Todos los packages
 └── [Dashboard híbrido B2C/B2B - Fase 1]
 ```
 
-**🗄️ Base de Datos:**
-- **Schema core**: 13 tablas ✅ COMPLETO (+ org_type, platform organization)
-- **Schema marketing**: 8 tablas ✅ COMPLETO (+ campos de imágenes)
-- **Storage buckets**: 6 buckets para blog (blog-featured, blog-content, blog-categories, blog-authors, blog-thumbnails, blog-meta) ✅ COMPLETO
-- **Roles platform**: 2 roles (platform_super_admin, marketing_admin) ✅ COMPLETO
-- **Función RPC**: public.is_platform_admin() ✅ COMPLETO
-- **Datos de prueba**: Categorías + FAQs + Testimonials ✅ INSERTADOS
-- **Migración pendiente**: 20251028240000_fix_admin_rls_policies.sql 🔄 CREADA (aplicar cuando necesites)
-  - Corrige RLS para que admins vean borradores e inactivos
-  - Separa políticas anon vs authenticated
+**🗄️ Base de Datos (Actualizado Nov 2025):**
+- **Schema core**: 13 tablas ✅ COMPLETO
+  - organizations, users, teams, roles, subscriptions, api_keys, etc.
+  - Multi-tenancy nativo con RLS
+  - Platform organization configurada
+  
+- **Schema marketing**: 13+ tablas ✅ COMPLETO
+  - **Blog**: blog_posts, blog_categories
+  - **Knowledge Base**: kb_articles, kb_categories ← NUEVO Nov 2025
+  - **Reviews**: google_reviews, review_stats ← NUEVO Nov 2025
+  - **Lead Capture**: waitlist_subscribers, contact_messages
+  - **Content**: testimonials, faqs, case_studies
+  - **Config**: page_config ← NUEVO Nov 2025
+  
+- **Storage buckets**: 6 buckets optimizados ✅
+  - blog-featured, blog-content, blog-categories
+  - blog-authors, blog-thumbnails, blog-meta
+  
+- **Roles y permisos**: Sistema completo ✅
+  - platform_super_admin, marketing_admin
+  - Función RPC: public.is_platform_admin()
+  - RLS policies completas para todos los schemas
 
 **📦 Packages Compartidos:**
 - **@tupatrimonio/location**: Sistema de ubicación ✅ COMPLETO
@@ -1561,40 +1711,81 @@ npm run build:packages   # Todos los packages
 
 **🎯 Siguiente Task**: Escribir contenido para blog y finalizar SEO + DNS
 
-#### 🎉 **LOGROS DE LAS SESIONES (21-28 Oct 2025):**
+#### 🎉 **LOGROS PRINCIPALES (Oct-Nov 2025):**
 
-**🆕 MEJORAS DE HOY (28 Oct 2025):**
-- ✅ **Migración Admin Blog Completada**: Admin centralizado en apps/web/dashboard/blog
-- ✅ **Fix RLS Crítico**: Políticas corregidas para que admins vean borradores e inactivos
-- ✅ **Cálculo de Tiempo de Lectura Mejorado**: 
-  - Limpieza completa de Markdown (bloques código, enlaces, imágenes, etc.)
-  - Cálculo preciso basado en 200 palabras/minuto
-  - Actualización automática en tiempo real
-  - Recálculo al cargar posts existentes
-- ✅ **Arquitectura de Storage Documentada**:
-  - 6 buckets claramente definidos con propósitos específicos
-  - Políticas RLS: público lectura, autenticado escritura
-  - Límites y formatos por bucket
-  - Sistema de nomenclatura de archivos
+**🆕 NUEVAS FUNCIONALIDADES (Nov 2025):**
+- ✅ **Sistema de Base de Conocimiento Completo**:
+  - Tablas kb_articles y kb_categories
+  - Páginas dinámicas con routing SEO-friendly
+  - Navegación por categorías
+  - Integrado en sitemap automático
+  
+- ✅ **Integración Google Business Reviews**:
+  - API completa de sincronización
+  - Cron jobs para actualización automática
+  - Display dinámico en landing pages
+  - Sistema de cache para performance
+  - Endpoints: /api/google-reviews, /api/google-stats
+  
+- ✅ **Sistema de Gestión de Páginas**:
+  - Tabla page_config para configuración dinámica
+  - API routes para gestión
+  - Estados por país (active, coming-soon)
+  - Integración con sitemap
+  
+- ✅ **Sitemap Multicapa Avanzado**:
+  - Páginas estáticas con prioridades
+  - Blog posts dinámicos
+  - Artículos KB dinámicos
+  - Categorías de ambos sistemas
+  - Páginas gestionadas desde BD
+  
+- ✅ **Páginas Adicionales Completas**:
+  - /ayuda - Centro de ayuda
+  - /nosotros - Sobre TuPatrimonio
+  - /contacto - Formulario global
+  - /base-conocimiento - Hub KB
+  - Líneas de negocio (4 páginas)
+
+**🎯 MEJORAS OCTUBRE 2025:**
+- ✅ Migración Admin Blog a apps/web/dashboard/blog
+- ✅ Fix RLS Crítico para borradores e inactivos
+- ✅ Cálculo de Tiempo de Lectura mejorado (limpieza Markdown)
+- ✅ Arquitectura de Storage documentada (6 buckets)
+- ✅ Sistema de colores dual implementado
+- ✅ Tipografía triple configurada
+- ✅ Dark mode completo con next-themes
+- ✅ PWA funcional en web app
 
 **🗄️ BACKEND & FOUNDATION:**
-- ✅ **13 migraciones aplicadas** (pgvector + core + marketing + content + permisos + storage + image fields + platform org + function public + rls policies + grant permissions + constraints)
-- ✅ **3 schemas completos** (core: 13 tablas + marketing: 8 tablas + storage: 4 buckets)
-- ✅ **Sistema de roles platform** (organización platform + 2 roles + función RPC en public schema)
-- ✅ **Modelo híbrido B2C + B2B** documentado e implementado
-- ✅ **Monorepo enterprise** (apps/marketing + apps/web + packages)
-- ✅ **Deploy pipeline completo** en Netlify con workspaces
-- ✅ **4 packages compartidos** (location + ui + utils + update-notifier)
-- ✅ **Permisos y seguridad** completamente configurados (RLS + GRANT + políticas)
+- ✅ **15+ migraciones aplicadas** (pgvector + core + marketing + KB + reviews + content + storage + RLS)
+- ✅ **3 schemas completos**:
+  - Core: 13 tablas (multi-tenant B2C/B2B)
+  - Marketing: 13+ tablas (blog + KB + reviews + config)
+  - Storage: 6 buckets optimizados
+- ✅ **Sistema de roles platform** completo
+- ✅ **Modelo híbrido B2C + B2B** implementado
+- ✅ **Monorepo enterprise** (2 apps + 4 packages)
+- ✅ **Deploy en Vercel** (ambas apps funcionando)
+- ✅ **Packages compartidos** (location + ui + utils + update-notifier)
+- ✅ **Seguridad robusta** (RLS + GRANT + políticas completas)
 
 **🌍 MARKETING SITE INTERNACIONAL:**
-- ✅ **Estructura por países** /cl/, /co/, /mx/ con content localizado
-- ✅ **6 landing pages Chile** (homepage, firmas, verificación, notaría, precios, legal)
-- ✅ **Páginas próximamente** para Colombia y México con waitlists
-- ✅ **Blog dinámico** conectado a Supabase (categorías + posts)
-- ✅ **URLs del blog mejoradas** /blog/[category]/[slug] (SEO-friendly)
-- ✅ **SEO internacional** (hreflang, sitemap por países, redirects)
-- ✅ **Structured Data completo** (Organization, WebSite, Article, BreadcrumbList)
+- ✅ **Estructura por países** /cl/, /co/, /mx/, /pe/, /ar/
+- ✅ **8+ landing pages Chile**:
+  - Homepage, firmas electrónicas, notaría online
+  - Modificaciones empresa, contrato arriendo
+  - Verificación identidad, precios, legales
+- ✅ **Páginas globales**:
+  - /ayuda, /nosotros, /contacto
+  - /base-conocimiento (KB completo)
+  - Líneas de negocio (4 páginas)
+- ✅ **Páginas próximamente** para otros países con waitlists
+- ✅ **Blog dinámico** con Supabase (categorías + posts)
+- ✅ **Base de Conocimiento** con categorías y artículos (NUEVO Nov 2025)
+- ✅ **URLs SEO-friendly** para todo el contenido
+- ✅ **SEO internacional** completo (hreflang, sitemap, redirects)
+- ✅ **Structured Data** en todas las páginas
 
 **📧 LEAD CAPTURE SYSTEM:**
 - ✅ **WaitlistForm + ContactForm** components funcionando
@@ -1701,29 +1892,41 @@ npm run build:packages   # Todos los packages
   - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas aplicaciones
   - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles técnicos
 
-**📈 PROGRESO FASE 0: ~85% COMPLETADO en 7 sesiones**
+**📈 PROGRESO FASE 0: ~95% COMPLETADO** (Actualizado Nov 12, 2025)
 
-**✅ COMPLETADOS RECIENTEMENTE:**
+**✅ COMPLETADOS RECIENTEMENTE (Nov 2025):**
+- ✅ Sistema de Base de Conocimiento completo
+- ✅ Integración Google Business Reviews
+- ✅ Sistema de gestión de páginas dinámicas
+- ✅ Sitemap multicapa con todas las fuentes
+- ✅ Páginas adicionales y líneas de negocio
+- ✅ APIs robustas
+
+**✅ COMPLETADOS PREVIAMENTE (Oct 2025):**
 - ✅ Google Analytics 4 + Search Console
 - ✅ Favicons personalizados
-- ✅ Configuración Vercel
+- ✅ Deploy completo en Vercel
 - ✅ Arquitectura de URLs y routing
+- ✅ Sistema de colores y tipografía
+- ✅ Dark mode + PWA
 
-**📋 PENDIENTES CRÍTICOS PARA COMPLETAR FASE 0:**
-1. **Sistema de Login Consolidado** (1 semana)
-   - Verificación de correo electrónico
-   - OAuth providers (Google, LinkedIn)
-   - Magic Links
-   - SMS OTP via Twilio (opcional)
+**📋 PENDIENTE PARA COMPLETAR FASE 0 AL 100%:**
+
+**1. Contenido Real (1-2 semanas) - CRÍTICO**
+   - Migrar contenido del sitio actual
+   - Poblar blog con 10-15 posts
+   - Poblar KB con 15-20 artículos
+   - Optimizar landing pages
    
-2. **Contenido Real para Producción** (1-2 semanas)
-   - Migrar contenido de sitio actual
-   - Landing pages con información definitiva
-   - Blog posts migrados y optimizados
+**2. Auth Avanzado (Opcional para MVP)**
+   - OAuth providers
+   - Magic Links
+   - Mejoras UX
 
-**⏱️ TIEMPO ESTIMADO: 2-3 semanas para completar Fase 0 al 100%**
+**⏱️ TIEMPO ESTIMADO: 1-2 semanas para Fase 0 al 100%**
+**🎯 Enfoque: CONTENIDO REAL es la prioridad**
 
-**📅 Última actualización: 29 Octubre 2025**
+**📅 Última actualización: 12 Noviembre 2025**
 
 **🔄 MIGRACIÓN A VERCEL (Web App):**
 - ✅ **Headers** migrados de netlify.toml a next.config.ts
@@ -1734,20 +1937,28 @@ npm run build:packages   # Todos los packages
 - ✅ **Sin linter errors** - código limpio y funcionando
 
 **📋 DESPUÉS DE COMPLETAR FASE 0 → INICIAR FASE 1 (Backend Foundation):**
-- [ ] **Sistema de Autenticación Consolidado** ✅ (Prioridad 1 Fase 0)
-- [ ] **Contenido Real en Producción** ✅ (Prioridad 2 Fase 0)
-- [ ] Completar migración 3: Schemas credits + billing
-- [ ] Setup apps/web con dashboard híbrido B2C/B2B
-- [ ] RLS policies y functions
-- [ ] Storage buckets y GitHub integration
 
-**🎯 CRITERIOS PARA PASAR A FASE 1:**
-1. ✅ Sistema de login funcionando completamente (verificación email, OAuth)
-2. ✅ Contenido real migrado de sitio actual en producción
-3. ✅ Landing pages con información definitiva
-4. ✅ Blog con posts migrados y optimizados
-5. ✅ SEO y analytics funcionando correctamente (YA COMPLETADO)
-6. ✅ Testing de experiencia de usuario completo
+**Criterios para considerar Fase 0 COMPLETA:**
+1. ✅ Sistema de login básico funcionando (YA COMPLETADO)
+2. ⏳ Contenido real migrado y optimizado (EN PROGRESO - 1-2 semanas)
+3. ⏳ Landing pages con información definitiva (EN PROGRESO - 1-2 semanas)
+4. ⏳ Blog poblado con posts reales (PENDIENTE - 1 semana)
+5. ⏳ KB poblado con artículos (PENDIENTE - 1 semana)
+6. ✅ SEO y analytics funcionando (YA COMPLETADO)
+7. ✅ Infraestructura técnica lista (YA COMPLETADO)
+8. ✅ Todas las páginas implementadas (YA COMPLETADO)
+
+**Tareas de Fase 1 (después de completar contenido):**
+- [ ] Completar schemas credits + billing
+- [ ] Mejorar dashboard apps/web (B2C/B2B)
+- [ ] RLS policies adicionales
+- [ ] Funciones y triggers de negocio
+- [ ] Integración con servicios externos (Stripe, etc.)
+
+**🎯 ENFOQUE ACTUAL:**
+- **Prioridad 1**: Migrar y crear contenido real (blog + KB + landing pages)
+- **Prioridad 2**: Optimización y testing final
+- **Luego**: Iniciar Fase 1 con servicios de backend
 
 ---
 
