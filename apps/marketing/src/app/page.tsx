@@ -55,6 +55,7 @@ import {
   type Metric
 } from "@/components/landing-sections";
 import { NewsletterForm } from "@/components/forms/NewsletterForm";
+import { MainFooter } from "@/components/MainFooter";
 
 // Metadata optimizado con configuración desde page-config
 const pageConfig = getPageConfig('/');
@@ -232,7 +233,7 @@ export default function HomePage() {
         "Desde tu casa, en cualquier momento"
       ],
       ctaText: "Empieza Ahora - Es Gratis",
-      ctaHref: "/cl",
+      ctaHref: "https://tupatrimon.io",
       ctaIcon: Zap,
       variant: "default"
     },
@@ -248,7 +249,7 @@ export default function HomePage() {
         "Asesoría personalizada"
       ],
       ctaText: "Habla con Nuestro Equipo",
-      ctaHref: "https://wa.me/56123456789",
+      ctaHref: "/contacto",
       ctaIcon: MessageCircle,
       variant: "default",
       badge: "Más Popular"
@@ -864,81 +865,7 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="bg-[var(--tp-background-dark)] text-white py-12">
-        <div className="max-w-7xl tp-container">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {/* Columna 1: Marca */}
-            <div>
-              <h3 className="text-white mb-4">TuPatrimonio®</h3>
-              <p className="text-white/80 mb-4">
-                Tu copiloto para proteger y hacer crecer lo que más te importa. Transformando la gestión legal con tecnología de vanguardia.
-              </p>
-              <div className="space-y-2 text-sm text-white/70">
-                <p>🇨🇱 TuPatrimonio SpA (Chile)</p>
-                <p>🇺🇸 TuPatrimonio LLC (USA)</p>
-              </div>
-            </div>
-
-            {/* Columna 2: Enlaces */}
-            <div>
-              <h4 className="text-white mb-4">Recursos</h4>
-              <ul className="space-y-2 text-white/80">
-                <li>
-                  <Link href="/blog" className="hover:text-white transition-colors">
-                    Blog y Guías
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/ayuda" className="hover:text-white transition-colors">
-                    Centro de Ayuda
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cl/contacto" className="hover:text-white transition-colors">
-                    Contacto
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/alianzas" className="hover:text-white transition-colors">
-                    Programa de Alianzas
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Columna 3: Legal */}
-            <div>
-              <h4 className="text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-white/80">
-                <li>
-                  <Link href="/cl/legal/terminos" className="hover:text-white transition-colors">
-                    Términos y Condiciones
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cl/legal/privacidad" className="hover:text-white transition-colors">
-                    Política de Privacidad
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cl/legal/cookies" className="hover:text-white transition-colors">
-                    Política de Cookies
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <Separator className="bg-white/20 my-8" />
-
-          <div className="text-center text-white/60 text-sm">
-            <p>Copyright © 2025 TuPatrimonio. Todos los derechos reservados.</p>
-            <p className="mt-2">
-              Plataforma de servicios legales digitales. Operativo en Chile 🇨🇱 · Próximamente en más países de Latinoamérica
-            </p>
-          </div>
-        </div>
-      </footer>
+      <MainFooter />
     </div>
   );
 }
