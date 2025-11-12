@@ -41,6 +41,102 @@ export const PAGE_CONFIG: Record<string, PageConfigEntry> = {
     section: 'help',
     notes: 'Centro de ayuda y FAQ'
   },
+  '/nosotros': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'about',
+    notes: 'Sobre nosotros'
+  },
+  '/contacto': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'contacto',
+    notes: 'Página de contacto global'
+  },
+  '/base-conocimiento': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'knowledge-base',
+    notes: 'Base de conocimiento - índice'
+  },
+  
+  // ==========================================
+  // PÁGINAS GLOBALES - LEGALES
+  // ==========================================
+  '/legal/terminos': { 
+    seoIndex: false, 
+    status: 'public',
+    section: 'legal',
+    notes: 'Términos y condiciones globales'
+  },
+  '/legal/privacidad': { 
+    seoIndex: false, 
+    status: 'public',
+    section: 'legal',
+    notes: 'Política de privacidad global'
+  },
+  '/legal/cookies': { 
+    seoIndex: false, 
+    status: 'public',
+    section: 'legal',
+    notes: 'Política de cookies global'
+  },
+
+  // ==========================================
+  // LÍNEAS DE NEGOCIO
+  // ==========================================
+  '/legal-tech': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'business-lines',
+    notes: 'Legal Tech - Servicios legales digitales'
+  },
+  '/business-hub': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'business-lines',
+    notes: 'Business Hub - Centro de negocios (próximamente)'
+  },
+  '/proptech': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'business-lines',
+    notes: 'PropTech - Tecnología inmobiliaria (próximamente)'
+  },
+  '/fintech': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'business-lines',
+    notes: 'FinTech - Tecnología financiera (próximamente)'
+  },
+
+  // ==========================================
+  // PÁGINAS DE REDIRECCIÓN (Detección de país)
+  // ==========================================
+  '/firmas-electronicas': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'redirect',
+    notes: 'Redirect con detección de país'
+  },
+  '/modificaciones-empresa': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'redirect',
+    notes: 'Redirect con detección de país'
+  },
+  '/notaria-online': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'redirect',
+    notes: 'Redirect con detección de país'
+  },
+  '/precios': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'redirect',
+    notes: 'Redirect con detección de país'
+  },
 
   // ==========================================
   // CHILE - LIVE
@@ -69,35 +165,17 @@ export const PAGE_CONFIG: Record<string, PageConfigEntry> = {
     section: 'notaria',
     notes: 'Notaría digital Chile'
   },
+  '/cl/contrato-de-arriendo-online': { 
+    seoIndex: true, 
+    status: 'public',
+    section: 'arriendo',
+    notes: 'Contrato de arriendo online Chile'
+  },
   '/cl/precios': { 
     seoIndex: true, 
     status: 'public',
     section: 'precios',
     notes: 'Planes y precios Chile'
-  },
-  '/cl/contacto': { 
-    seoIndex: true, 
-    status: 'public',
-    section: 'contacto',
-    notes: 'Página de contacto Chile'
-  },
-  '/cl/legal/terminos': { 
-    seoIndex: false, 
-    status: 'public',
-    section: 'legal',
-    notes: 'Términos y condiciones Chile'
-  },
-  '/cl/legal/privacidad': { 
-    seoIndex: false, 
-    status: 'public',
-    section: 'legal',
-    notes: 'Política de privacidad Chile'
-  },
-  '/cl/legal/cookies': { 
-    seoIndex: false, 
-    status: 'public',
-    section: 'legal',
-    notes: 'Política de cookies Chile'
   },
 
   // ==========================================

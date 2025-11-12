@@ -16,8 +16,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return { changeFrequency: 'weekly', priority: 0.8 };
     }
     
+    // Páginas globales principales
+    if (route === '/ayuda') return { changeFrequency: 'weekly', priority: 0.85 };
+    if (route === '/nosotros') return { changeFrequency: 'monthly', priority: 0.75 };
+    if (route === '/contacto') return { changeFrequency: 'weekly', priority: 0.8 };
+    if (route === '/base-conocimiento') return { changeFrequency: 'weekly', priority: 0.75 };
+    
+    // Líneas de negocio
+    if (route === '/legal-tech') return { changeFrequency: 'weekly', priority: 0.85 };
+    if (route === '/business-hub') return { changeFrequency: 'weekly', priority: 0.7 };
+    if (route === '/proptech') return { changeFrequency: 'weekly', priority: 0.7 };
+    if (route === '/fintech') return { changeFrequency: 'weekly', priority: 0.7 };
+    
     // Service pages por país
-    if (route.includes('/firmas-electronicas') || route.includes('/modificaciones-empresa') || route.includes('/notaria-online')) {
+    if (route.includes('/firmas-electronicas') || 
+        route.includes('/modificaciones-empresa') || 
+        route.includes('/notaria-online') ||
+        route.includes('/contrato-de-arriendo-online')) {
       return route.startsWith('/cl') 
         ? { changeFrequency: 'weekly', priority: 0.9 }
         : { changeFrequency: 'monthly', priority: 0.6 };
@@ -41,13 +56,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return { changeFrequency: 'monthly', priority: 0.7 };
     }
     
+    // Knowledge Base
+    if (route.startsWith('/base-conocimiento')) {
+      if (route === '/base-conocimiento') return { changeFrequency: 'weekly', priority: 0.75 };
+      if (route.includes('/categoria/')) return { changeFrequency: 'weekly', priority: 0.6 };
+      return { changeFrequency: 'monthly', priority: 0.7 };
+    }
+    
     // Legal pages
     if (route.includes('/legal/')) {
       return { changeFrequency: 'monthly', priority: 0.3 };
     }
     
     // Generic/redirect pages
-    if (['/firmas-electronicas', '/modificaciones-empresa', '/notaria-online'].includes(route)) {
+    if (['/firmas-electronicas', '/modificaciones-empresa', '/notaria-online', '/precios'].includes(route)) {
       return { changeFrequency: 'monthly', priority: 0.6 };
     }
     
@@ -72,7 +94,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Si no hay páginas gestionadas, usar páginas estáticas como fallback
   const fallbackStaticPages = managedPages.length === 0 ? [
-    // Homepage global
+    // ==========================================
+    // HOMEPAGE GLOBAL
+    // ==========================================
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -80,7 +104,99 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     
-    // Chile-specific pages (high priority) - solo las que sabemos que están públicas
+    // ==========================================
+    // PÁGINAS GLOBALES - Alta prioridad
+    // ==========================================
+    {
+      url: `${baseUrl}/ayuda`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/nosotros`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/contacto`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/base-conocimiento`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    },
+    
+    // ==========================================
+    // LÍNEAS DE NEGOCIO
+    // ==========================================
+    {
+      url: `${baseUrl}/legal-tech`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/business-hub`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/proptech`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/fintech`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    },
+    
+    // ==========================================
+    // PÁGINAS DE REDIRECCIÓN (Detección de país)
+    // ==========================================
+    {
+      url: `${baseUrl}/firmas-electronicas`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/modificaciones-empresa`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/notaria-online`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/precios`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    
+    // ==========================================
+    // CHILE - Servicios Principales
+    // ==========================================
     {
       url: `${baseUrl}/cl`,
       lastModified: new Date(),
@@ -94,10 +210,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/cl/precios`,
+      url: `${baseUrl}/cl/modificaciones-empresa`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
-      priority: 0.85,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/cl/notaria-online`,
@@ -106,45 +222,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/cl/modificaciones-empresa`,
+      url: `${baseUrl}/cl/contrato-de-arriendo-online`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
-      priority: 0.9,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/cl/precios`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
     },
     
-    // Otros países (Próximamente)
-    {
-      url: `${baseUrl}/mx`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/co`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/pe`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/ar`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    
-    // Páginas globales
-    {
-      url: `${baseUrl}/contacto`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
+    // ==========================================
+    // PÁGINAS LEGALES (Baja prioridad)
+    // ==========================================
     {
       url: `${baseUrl}/legal/terminos`,
       lastModified: new Date(),
@@ -163,12 +255,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: 0.3,
     },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
-    },
+    
+    // ==========================================
+    // NOTA: Países como MX, CO, PE, AR están en estado "coming-soon"
+    // y NO deben incluirse en el sitemap hasta que estén públicos
+    // según la configuración en PAGE_CONFIG
+    // ==========================================
   ] : [];
 
   // Dynamic blog posts from Supabase
