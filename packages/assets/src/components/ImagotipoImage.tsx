@@ -1,8 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
-// Import directo de la imagen desde el package - una sola fuente de verdad
+// Import directo de las imágenes desde el package - una sola fuente de verdad
 // Path relativo desde dist/components/ hacia public/
 import imagotipoSrc from '../../public/images/logo/Imagotipo.webp';
+import logoHorizontalSrc from '../../public/images/logo/logo-horizontal.svg';
+import isotipoSrc from '../../public/images/logo/isotipo.svg';
+
+type LogoVariant = 'imagotipo' | 'horizontal' | 'isotipo';
 
 interface ImagotipoImageProps {
   width?: number;
@@ -10,6 +14,7 @@ interface ImagotipoImageProps {
   className?: string;
   alt?: string;
   priority?: boolean;
+  variant?: LogoVariant;
 }
 
 /**
@@ -19,25 +24,47 @@ interface ImagotipoImageProps {
  * Una única fuente de verdad en packages/assets/public/
  * Optimización automática, lazy loading y responsive.
  * 
- * @param width - Ancho de la imagen (default: 120)
- * @param height - Alto de la imagen (default: 150)
+ * @param width - Ancho de la imagen
+ * @param height - Alto de la imagen
  * @param className - Clases CSS adicionales
  * @param alt - Texto alternativo (default: "TuPatrimonio")
  * @param priority - Si true, carga la imagen con prioridad (hero images)
+ * @param variant - Variante del logo: 'imagotipo' | 'horizontal' | 'isotipo' (default: 'imagotipo')
  */
 export const ImagotipoImage: React.FC<ImagotipoImageProps> = ({ 
-  width = 120, 
-  height = 150,
+  width, 
+  height,
   className = '',
   alt = 'TuPatrimonio',
-  priority = false
+  priority = false,
+  variant = 'imagotipo'
 }) => {
+  // Seleccionar el source según la variante
+  const logoSrc = variant === 'horizontal' 
+    ? logoHorizontalSrc 
+    : variant === 'isotipo' 
+    ? isotipoSrc 
+    : imagotipoSrc;
+  
+  // Defaults específicos por variante
+  const defaultWidth = variant === 'horizontal' 
+    ? 180 
+    : variant === 'isotipo' 
+    ? 50 
+    : 120;
+  
+  const defaultHeight = variant === 'horizontal' 
+    ? 50 
+    : variant === 'isotipo' 
+    ? 50 
+    : 150;
+
   return (
     <Image
-      src={imagotipoSrc}
+      src={logoSrc}
       alt={alt}
-      width={width}
-      height={height}
+      width={width || defaultWidth}
+      height={height || defaultHeight}
       className={className}
       priority={priority}
       quality={95}

@@ -8,6 +8,8 @@ import { StructuredData, generateOrganizationSchema, generateWebSiteSchema } fro
 import { ThemeProvider } from '../components/theme-provider';
 import { FloatingActions } from '../components/FloatingActions';
 import { CookieBanner } from '../components/CookieBanner';
+import { NavigationProvider } from '../components/NavigationProvider';
+import { MainNavigation } from '../components/MainNavigation';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -120,10 +122,15 @@ export default function RootLayout({
           <StructuredData data={generateOrganizationSchema()} />
           <StructuredData data={generateWebSiteSchema()} />
           
-          <LocationProvider>
-            <ConditionalUpdateNotification />
-            <main>{children}</main>
-          </LocationProvider>
+          <NavigationProvider>
+            <LocationProvider>
+              {/* Main Navigation Menu */}
+              <MainNavigation />
+              
+              <ConditionalUpdateNotification />
+              <main>{children}</main>
+            </LocationProvider>
+          </NavigationProvider>
 
           {/* Floating Actions: Theme switcher, cookies y WhatsApp */}
           <FloatingActions />
