@@ -295,7 +295,7 @@ export default function HomePage() {
         ctaButtons={heroCtaButtons}
         ctaSubtext="Sin planes ni suscripciones. Pagas solo lo que usas."
         bottomBadges={heroBottomBadges}
-        showImageotype={true}
+        showImageotype={false}
       />
 
       
@@ -814,7 +814,7 @@ export default function HomePage() {
       </section>
 
       {/* Sección 9: Newsletter */}
-      <section className="py-20 bg-gradient-to-br from-[var(--tp-brand-5)] to-transparent">
+      <section className="py-20 bg-background">
         <div className="max-w-2xl tp-container">
           <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card overflow-hidden">
             <CardHeader className="text-center pt-8">
