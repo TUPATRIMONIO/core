@@ -53,12 +53,32 @@ export default function UsersManagementPage() {
 {`-- Ver usuarios existentes
 SELECT id, email FROM auth.users;
 
+-- Obtener IDs necesarios
+SELECT id, name FROM core.organizations WHERE org_type = 'platform';
+SELECT id, slug FROM core.roles WHERE slug IN ('platform_super_admin', 'marketing_admin', 'sales_manager');
+
 -- Asignar rol de admin a un usuario
-INSERT INTO marketing.user_roles (user_id, role) 
-VALUES ('user-id-aqui', 'admin')
-ON CONFLICT (user_id) 
-DO UPDATE SET role = 'admin';`}
+INSERT INTO core.organization_users (organization_id, user_id, role_id, status)
+VALUES (
+  (SELECT id FROM core.organizations WHERE org_type = 'platform' LIMIT 1),
+  'user-id-aqui',
+  (SELECT id FROM core.roles WHERE slug = 'platform_super_admin' LIMIT 1),
+  'active'
+)
+ON CONFLICT (organization_id, user_id) 
+DO UPDATE SET 
+  role_id = (SELECT id FROM core.roles WHERE slug = 'platform_super_admin' LIMIT 1),
+  status = 'active';`}
             </pre>
+          </div>
+
+          <div className="mt-4 bg-blue-50 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">Roles Disponibles</h3>
+            <ul className="text-sm text-gray-600 space-y-2">
+              <li><span className="font-medium">platform_super_admin:</span> Acceso total al sistema</li>
+              <li><span className="font-medium">marketing_admin:</span> Gestión de contenido marketing (blog, KB)</li>
+              <li><span className="font-medium">sales_manager:</span> Gestión de CRM y leads (futuro)</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

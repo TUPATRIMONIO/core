@@ -25,14 +25,36 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Base de conocimiento con 15-20 artículos** (Nov 2025)
 - ✅ **Optimización final y testing completados** (Nov 12, 2025)
 
-**📋 Opcional (no requerido para Fase 1):**
-- ⏳ **Sistema CRM y gestión de correos** (puede implementarse en Fase 1 o después)
-  - Panel para visualizar leads de formularios
-  - Integración con email workspace
-  - Responder correos desde dashboard
-  - Sistema de seguimiento de contactos
+**🚀 EN DESARROLLO - Sistema CRM Multi-Tenant B2B:**
+- ✅ **Decisión arquitectónica**: CRM como servicio vendible multi-tenant
+- ✅ **Migración de roles** completada y corregida
+  - Eliminada tabla redundante `marketing.user_roles`
+  - Unificado en `core.roles` + `core.organization_users`
+  - Función `can_access_admin()` actualizada
+  - Función `can_access_crm()` creada
+- ✅ **Schema CRM completo** creado (migración lista)
+  - 6 tablas multi-tenant: contacts, activities, deals, emails, settings, notes
+  - RLS completo por organization_id
+  - Roles específicos: crm_manager, sales_rep
+  - Aplicación registrada en ecosistema
+  - Función de importación de leads de marketing
+- 📄 **Documentación completa**:
+  - `docs/CRM-MULTITENANT-GUIDE.md` - Guía completa multi-tenant
+  - Migraciones: `20251112185905` (roles) + `20251112190000` (schema CRM)
+- ⏳ **Pendiente**: Implementar UI y APIs (2-3 semanas)
 
-**🚀 PRÓXIMO PASO:** **INICIAR FASE 1** - Backend Foundation con servicios de negocio.
+**🚀 PRÓXIMOS PASOS:** 
+1. **Aplicar migraciones en orden**:
+   - `20251112185905_limpiar-user-roles.sql` (unificación de roles)
+   - `20251112190000_schema-crm-multitenant.sql` (schema CRM completo)
+2. **Importar leads existentes**: `SELECT import_marketing_leads_to_crm();`
+3. **Implementar UI del CRM** (2-3 semanas):
+   - Dashboard y estadísticas
+   - Lista y detalle de contactos
+   - Integración Gmail
+   - Sistema de actividades
+   - Deals y pipeline
+4. **Luego continuar con FASE 1** - Backend Foundation completo
 
 ---
 
@@ -49,7 +71,51 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Testing completo realizado
 - ✅ **Fase 0: 100% COMPLETADA**
 
-**🚀 Próximo paso:** INICIAR FASE 1 - Backend Foundation
+**🔄 EN DESARROLLO - Sistema CRM Multi-Tenant B2B (12 Nov 2025):**
+
+- ✅ **Decisión Arquitectónica**:
+  - CRM diseñado como servicio vendible multi-tenant
+  - TuPatrimonio Platform como cliente #1 del CRM
+  - Cada organización gestiona sus propios contactos
+  - Aislamiento total vía RLS por organization_id
+
+- ✅ **Unificación de Sistema de Roles**:
+  - Eliminada tabla redundante `marketing.user_roles`
+  - Migrado todo a sistema `core.roles` + `core.organization_users`
+  - Función `can_access_admin()` actualizada
+  - Nueva función `can_access_crm()` creada
+  - Código TypeScript actualizado (`page-management.ts`, `users/page.tsx`)
+  - Migración SQL corregida: `20251112185905_limpiar-user-roles.sql` ✅
+  
+- ✅ **Schema CRM Multi-Tenant Completo**:
+  - **Schema separado**: `crm` (siguiendo arquitectura de schemas por aplicación)
+  - 6 tablas creadas: `crm.contacts`, `crm.activities`, `crm.deals`, `crm.emails`, `crm.settings`, `crm.notes`
+  - ENUMs: `crm.contact_status`, `crm.activity_type`, `crm.deal_stage`, `crm.email_status`
+  - RLS completo por organization_id
+  - Roles específicos en core: `crm_manager` (nivel 6), `sales_rep` (nivel 4)
+  - Aplicación `crm_sales` registrada en core.applications
+  - Función de importación: `import_marketing_leads_to_crm()`
+  - Función de estadísticas: `crm.get_stats(org_id)`
+  - Migración SQL completa: `20251112190000_schema-crm-multitenant.sql` ✅
+  
+- 📋 **Documentación Creada**:
+  - `docs/schemas/crm.md` - Guía completa con arquitectura multi-tenant
+  - `docs/schemas/ARCHITECTURE-SCHEMAS.md` - Filosofía de schemas separados
+  - `docs/ORGANIZATION-SUMMARY.md` - Resumen de organización de docs
+  - Ejemplos de API routes con permisos
+  - Sistema de límites por plan de suscripción
+  - Integración Gmail por organización
+  - Testing multi-tenant
+
+- ✅ **Organización de Documentación** (12 Nov 2025):
+  - README raíz simplificado (995 → 89 líneas)
+  - Estructura de carpetas clara (schemas/, design/, features/, etc.)
+  - READMEs en todas las subcarpetas
+  - Archivos históricos movidos a archived/
+  - Documentación de packages en su ubicación correcta
+  - 8 categorías organizadas + navegación clara
+
+**🚀 Próximo paso:** Implementar UI del CRM (2-3 semanas) → FASE 1
 
 ---
 

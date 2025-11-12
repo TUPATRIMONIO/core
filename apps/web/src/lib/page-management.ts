@@ -4,17 +4,18 @@
  * Proporciona funcionalidades centrales para controlar:
  * - Estados de publicación (público, borrador, privado)
  * - Control de indexación SEO
- * - Permisos de acceso por rol de usuario
+ * - Permisos de acceso por rol de usuario (usando core.roles)
  * - Gestión por país y sección
  * 
  * NOTA: Las páginas estáticas se leen desde la API de marketing (page-config.ts)
  * en lugar de la base de datos. Esta es la fuente de verdad única.
+ * 
+ * SISTEMA DE ROLES: Usa core.roles + core.organization_users (unificado)
  */
 
 import { createClient } from '@/lib/supabase/client';
 
 export type PageStatus = 'public' | 'draft' | 'private' | 'coming-soon';
-export type UserRole = 'public' | 'editor' | 'admin' | 'super_admin';
 
 export interface PageConfig {
   id?: string;
@@ -30,15 +31,6 @@ export interface PageConfig {
   updated_at?: string;
   created_by?: string;
   updated_by?: string;
-}
-
-export interface UserRoleConfig {
-  id?: string;
-  user_id: string;
-  role: UserRole;
-  permissions?: Record<string, any>;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface PageAccessResult {
@@ -86,7 +78,7 @@ export class PageManagement {
       const { data, error } = await this.supabase
         .rpc('get_page_status', {
           page_route: routePath,
-          user_role: await this.getUserRole(userId)
+          user_role: 'public' // El RPC ya maneja la verificación con core.roles
         });
 
       if (error) {
@@ -117,27 +109,23 @@ export class PageManagement {
   }
 
   /**
-   * Obtiene el rol de un usuario
+   * Verifica si un usuario es admin de plataforma
+   * Usa el sistema unificado core.roles
    */
-  async getUserRole(userId?: string): Promise<UserRole> {
-    if (!userId) return 'public';
-
+  async isUserAdmin(userId: string): Promise<boolean> {
     try {
       const { data, error } = await this.supabase
-        .schema('marketing')
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+        .rpc('can_access_admin', { user_id: userId });
 
-      if (error || !data) {
-        return 'public';
+      if (error) {
+        console.error('Error checking admin status:', error);
+        return false;
       }
 
-      return data.role as UserRole;
+      return data || false;
     } catch (error) {
-      console.error('Error getting user role:', error);
-      return 'public';
+      console.error('Error in isUserAdmin:', error);
+      return false;
     }
   }
 
@@ -255,19 +243,44 @@ export class PageManagement {
   }
 
   /**
-   * Asigna un rol a un usuario
+   * Asigna un rol a un usuario en la organización platform
+   * Usa el sistema unificado core.roles
    */
-  async assignUserRole(userId: string, role: UserRole, permissions?: Record<string, any>): Promise<boolean> {
+  async assignUserRole(userId: string, roleSlug: 'platform_super_admin' | 'marketing_admin' | 'sales_manager'): Promise<boolean> {
     try {
+      // Obtener platform org ID y role ID
+      const { data: orgData } = await this.supabase
+        .from('organizations')
+        .select('id')
+        .eq('org_type', 'platform')
+        .single();
+
+      if (!orgData) {
+        console.error('Platform organization not found');
+        return false;
+      }
+
+      const { data: roleData } = await this.supabase
+        .from('roles')
+        .select('id')
+        .eq('slug', roleSlug)
+        .single();
+
+      if (!roleData) {
+        console.error('Role not found:', roleSlug);
+        return false;
+      }
+
+      // Insertar en organization_users
       const { error } = await this.supabase
-        .schema('marketing')
-        .from('user_roles')
+        .from('organization_users')
         .upsert({ 
+          organization_id: orgData.id,
           user_id: userId, 
-          role, 
-          permissions: permissions || {} 
+          role_id: roleData.id,
+          status: 'active'
         }, { 
-          onConflict: 'user_id',
+          onConflict: 'organization_id,user_id',
           ignoreDuplicates: false 
         });
 
