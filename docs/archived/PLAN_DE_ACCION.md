@@ -23,8 +23,13 @@
 - ⏳ Migrar contenido del sitio actual (1-2 semanas)
 - ⏳ Poblar blog con 10-15 posts
 - ⏳ Poblar KB con 15-20 artículos
+- ⏳ **Sistema CRM y gestión de correos** (3-5 días) ← NUEVO
+  - Panel para visualizar leads de formularios
+  - Integración con email workspace
+  - Responder correos desde dashboard
+  - Sistema de seguimiento de contactos
 
-**Próximo paso:** Una vez completado el contenido, iniciar Fase 1 (Backend Foundation con servicios de negocio).
+**Próximos pasos:** Completar contenido → Implementar CRM básico → Iniciar Fase 1 (Backend Foundation con servicios de negocio).
 
 ---
 
@@ -72,18 +77,38 @@
 
 **📋 PENDIENTES para completar Fase 0:**
 
-1. **Contenido Real** (1-2 semanas)
+1. **Contenido Real** (1-2 semanas) ← PRIORIDAD CRÍTICA
    - Migrar contenido del sitio actual
    - Crear posts iniciales para blog
    - Poblar base de conocimiento con artículos
    - Optimizar todas las landing pages
 
-2. **Sistema de Autenticación** (opcional para MVP)
+2. **Sistema CRM y Gestión de Correos** (3-5 días) ← NUEVO
+   - **Panel CRM en Dashboard**:
+     * Visualizar contactos de formularios (waitlist + contacto)
+     * Ver detalles de cada lead con toda su información
+     * Sistema de estados (nuevo, contactado, calificado, convertido)
+     * Filtros y búsqueda de contactos
+     * Notas y seguimiento por contacto
+   - **Integración de Email Workspace**:
+     * Conectar correo del workspace (Google Workspace / Outlook)
+     * Poder responder emails directamente desde el CRM
+     * Recibir y visualizar correos entrantes
+     * Threading de conversaciones
+     * Templates de respuestas rápidas
+   - **Notificaciones**:
+     * Alertas cuando llega nuevo contacto
+     * Emails de notificación al equipo
+     * Dashboard de leads pendientes de respuesta
+
+3. **Sistema de Autenticación Avanzado** (opcional para MVP)
    - OAuth providers (Google, LinkedIn)
    - Magic Links
    - Verificación de correo mejorada
 
-**Estimación revisada:** 1-2 semanas para completar Fase 0 al 100%
+**Estimación revisada:** 2-3 semanas para completar Fase 0 al 100%
+  - Contenido: 1-2 semanas
+  - CRM + Email: 3-5 días
 
 ---
 
@@ -1542,7 +1567,31 @@ Al completar Fase 0:
      * Testing de formularios
      * Verificar responsive design
 
-**PRIORIDAD 2 (Opcional): Sistema de Autenticación Mejorado**
+**PRIORIDAD 2: Sistema CRM y Gestión de Correos (3-5 días)** ← NUEVO
+   - [ ] **Panel CRM en Dashboard**
+     * Vista de lista de contactos (waitlist + formulario contacto)
+     * Página de detalle por contacto con toda su información
+     * Sistema de estados: nuevo, contactado, calificado, convertido, descartado
+     * Filtros por estado, fecha, país, tipo de lead
+     * Búsqueda de contactos
+     * Sistema de notas y seguimiento
+     * Tags personalizables
+   - [ ] **Integración Email Workspace**
+     * Conectar con Google Workspace o Microsoft 365
+     * OAuth para acceso a emails
+     * Visualizar correos entrantes en el CRM
+     * Responder emails directamente desde dashboard
+     * Threading de conversaciones por contacto
+     * Templates de respuestas rápidas
+     * Firma automática de emails
+   - [ ] **Sistema de Notificaciones**
+     * Notificación en dashboard cuando llega nuevo lead
+     * Email de alerta al equipo comercial
+     * Dashboard de leads sin responder
+     * Recordatorios de seguimiento
+     * Webhook para Slack (opcional)
+
+**PRIORIDAD 3 (Opcional): Sistema de Autenticación Mejorado**
    - [ ] OAuth providers (Google, LinkedIn)
    - [ ] Magic Links
    - [ ] Verificación de correo mejorada
@@ -1561,11 +1610,15 @@ Al completar Fase 0:
 
 **📈 PROGRESO FASE 0: ~95% COMPLETADO** (Actualizado Nov 12, 2025)
 
-**🕒 ESTIMADO RESTANTE: 1-2 semanas para completar Fase 0 al 100%**
+**🕒 ESTIMADO RESTANTE: 2-3 semanas para completar Fase 0 al 100%**
   - **Contenido real**: 1-2 semanas (CRÍTICO)
     * Migración de contenido existente
     * Población de blog y KB
     * Optimización final
+  - **Sistema CRM y correos**: 3-5 días (IMPORTANTE) ← NUEVO
+    * Panel de gestión de leads
+    * Integración con email workspace
+    * Sistema de notificaciones
   - **Sistema de autenticación avanzado**: Opcional para MVP
 
 **🎯 ÚLTIMAS MEJORAS (Nov 2025):**
@@ -1944,21 +1997,25 @@ npm run build:packages   # Todos los packages
 3. ⏳ Landing pages con información definitiva (EN PROGRESO - 1-2 semanas)
 4. ⏳ Blog poblado con posts reales (PENDIENTE - 1 semana)
 5. ⏳ KB poblado con artículos (PENDIENTE - 1 semana)
-6. ✅ SEO y analytics funcionando (YA COMPLETADO)
-7. ✅ Infraestructura técnica lista (YA COMPLETADO)
-8. ✅ Todas las páginas implementadas (YA COMPLETADO)
+6. ⏳ **Sistema CRM para gestión de leads** (PENDIENTE - 3-5 días) ← NUEVO
+7. ⏳ **Integración email workspace** (PENDIENTE - 3-5 días) ← NUEVO
+8. ✅ SEO y analytics funcionando (YA COMPLETADO)
+9. ✅ Infraestructura técnica lista (YA COMPLETADO)
+10. ✅ Todas las páginas implementadas (YA COMPLETADO)
 
-**Tareas de Fase 1 (después de completar contenido):**
+**Tareas de Fase 1 (después de completar contenido y CRM básico):**
 - [ ] Completar schemas credits + billing
 - [ ] Mejorar dashboard apps/web (B2C/B2B)
 - [ ] RLS policies adicionales
 - [ ] Funciones y triggers de negocio
 - [ ] Integración con servicios externos (Stripe, etc.)
+- [ ] Expandir funcionalidades del CRM (reportes, automatizaciones)
 
 **🎯 ENFOQUE ACTUAL:**
 - **Prioridad 1**: Migrar y crear contenido real (blog + KB + landing pages)
-- **Prioridad 2**: Optimización y testing final
-- **Luego**: Iniciar Fase 1 con servicios de backend
+- **Prioridad 2**: Implementar CRM básico y gestión de correos ← NUEVO
+- **Prioridad 3**: Optimización y testing final
+- **Luego**: Iniciar Fase 1 con servicios de backend completos
 
 ---
 
@@ -2460,6 +2517,24 @@ core.roles:
 ---
 
 ## 📧 Fase 3: Comunicaciones y CRM (Semanas 17-22)
+
+> **📝 NOTA IMPORTANTE (Nov 2025):** Se implementará una **versión básica del CRM** al final de Fase 0 para gestionar los leads de los formularios y conectar el email del workspace. Esta sección describe el CRM completo que se desarrollará en Fase 3 con funcionalidades avanzadas.
+
+**CRM Básico Fase 0 (3-5 días):**
+- Vista de contactos de formularios
+- Sistema de estados básico
+- Integración con email workspace (Google/Microsoft)
+- Responder correos desde dashboard
+- Notificaciones de nuevos leads
+
+**CRM Completo Fase 3 (descrito abajo):**
+- Gestión avanzada de contactos
+- Pipelines de ventas
+- Campañas de email marketing
+- Automatizaciones
+- Reportes y analytics
+
+---
 
 ### 3.1 Schema Communications
 
