@@ -1,25 +1,38 @@
 import type {Metadata, Viewport} from "next";
-import {Geist, Geist_Mono, Outfit} from "next/font/google";
+import { Outfit, Nunito, Quicksand, Josefin_Sans } from 'next/font/google';
 import { cn } from "@/lib/utils";
 import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/GoogleAnalytics';
+import { ThemeProvider } from '../components/theme-provider';
 import "../../../../packages/ui/globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 const outfit = Outfit({
-  variable: "--font-outfit",
   subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  variable: "--font-nunito",
+  display: "swap",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-quicksand",
+  display: "swap",
+});
+
+const josefinSans = Josefin_Sans({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-josefin-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -54,20 +67,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={cn(
-      "min-h-screen bg-background antialiased",
-      `${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`
-    )}>
+      `${outfit.variable} ${nunito.variable} ${quicksand.variable} ${josefinSans.variable} antialiased`
+    )} suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
       </head>
       <body className={cn("bg-background text-foreground", outfit.className)}>
-        <ServiceWorkerRegistration />
-        <LocationProvider>
-          <UpdateNotification />
-          <main className="min-h-screen flex flex-col items-center">
-            {children}
-          </main>
-        </LocationProvider>
+        <ThemeProvider>
+          <ServiceWorkerRegistration />
+          <LocationProvider>
+            <UpdateNotification />
+            <main className="min-h-screen">
+              {children}
+            </main>
+          </LocationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

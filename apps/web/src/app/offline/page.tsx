@@ -86,7 +86,7 @@ export default function OfflinePage() {
         {/* Botón retry */}
         <button
           onClick={handleRetry}
-          className="mt-8 w-full px-6 py-3 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white font-medium rounded-lg transition-colors duration-200 shadow-[var(--tp-shadow-md)]"
+          className="mt-8 w-full px-6 py-3 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-medium rounded-lg transition-colors duration-200 shadow-[var(--tp-shadow-md)]"
         >
           {isOnline ? 'Reintentar' : 'Verificar Conexión'}
         </button>

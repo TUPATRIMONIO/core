@@ -1,62 +1,91 @@
-import Image from "next/image";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon, IconContainer } from '@tupatrimonio/ui';
+import { ImagotipoImage } from '@tupatrimonio/assets';
+import { Button } from '@/components/ui/button';
+import { LogIn, UserPlus, Shield, Zap, FileCheck, Lock } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        {/* Logo de TuPatrimonio */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[#800039] to-[#a50049] rounded-full mb-6 shadow-lg">
-            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+    <div className="min-h-screen bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+      {/* Hero Section */}
+      <section className="tp-container py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Imagotipo TuPatrimonio */}
+          <div className="flex justify-center mb-8">
+            <ImagotipoImage width={120} height={150} priority />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">TuPatrimonio</h1>
-          <p className="text-lg text-gray-600 mb-8">Gestión inteligente de tu patrimonio</p>
-        </div>
 
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/60 p-8 max-w-md w-full">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Comenzar ahora</h2>
-          <p className="text-gray-600 text-sm text-center mb-6">
-            Inicia sesión o crea una cuenta para comenzar a gestionar tu patrimonio
+          {/* Título principal con tipografía correcta */}
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Tu Plataforma de <span className="text-[var(--tp-brand)]">Servicios Legales Digitales</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            Tu plataforma de servicios legales digitales. Firma documentos, verifica identidad y gestiona trámites desde cualquier lugar.
           </p>
 
-          <div className="flex gap-4 flex-col sm:flex-row w-full">
-            <a
-              className="bg-[#800039] hover:bg-[#a50049] text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md flex items-center justify-center gap-2 flex-1"
-              href="/login"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15 12H9m6 0l-3-3m3 3l-3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Iniciar Sesión
-            </a>
-            <a
-              className="border border-[#800039] text-[#800039] hover:bg-[#800039] hover:text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 flex-1"
-              href="/login"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              Registrarse
-            </a>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Link href="/login">
+              <Button 
+                size="lg" 
+                className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                <Icon icon={LogIn} size="md" variant="inherit" className="mr-2" />
+                Iniciar Sesión
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                <Icon icon={UserPlus} size="md" variant="inherit" className="mr-2" />
+                Crear Cuenta
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 rounded-full">
+              <Icon icon={Shield} size="sm" className="text-green-600 dark:text-green-400" />
+              <span className="text-green-700 dark:text-green-300">100% Seguro</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded-full">
+              <Icon icon={Lock} size="sm" className="text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-700 dark:text-blue-300">Validez Legal</span>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-950 rounded-full">
+              <Icon icon={Zap} size="sm" className="text-purple-600 dark:text-purple-400" />
+              <span className="text-purple-700 dark:text-purple-300">Rápido y Fácil</span>
+            </div>
           </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <p className="text-gray-600 text-sm text-center">
-          © 2024 TuPatrimonio. Gestiona tu patrimonio de forma inteligente.
-        </p>
-        <div className="flex gap-4 text-gray-600">
-          <a href="#" className="hover:text-[#800039] transition-colors text-sm">
-            Términos
-          </a>
-          <a href="#" className="hover:text-[#800039] transition-colors text-sm">
-            Privacidad
-          </a>
-          <a href="#" className="hover:text-[#800039] transition-colors text-sm">
-            Soporte
-          </a>
+      </section>
+
+      
+
+      {/* Footer */}
+      <footer className="tp-container py-8 border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground text-center md:text-left">
+              © {new Date().getFullYear()} TuPatrimonio. Tu tranquilidad, nuestra prioridad.
+            </p>
+            <div className="flex gap-6">
+              <a href="/legal/terminos" rel="noopener noreferrer nofollow" className="text-sm text-muted-foreground hover:text-[var(--tp-brand)] transition-colors">
+                Términos
+              </a>
+              <a href="/legal/privacidad" rel="noopener noreferrer nofollow" className="text-sm text-muted-foreground hover:text-[var(--tp-brand)] transition-colors">
+                Privacidad
+              </a>
+              <a href="/ayuda" rel="noopener noreferrer nofollow" className="text-sm text-muted-foreground hover:text-[var(--tp-brand)] transition-colors">
+                Ayuda
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

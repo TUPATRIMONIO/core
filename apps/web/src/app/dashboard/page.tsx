@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { PricingExample } from '@/components/PricingExample';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon, IconContainer } from '@tupatrimonio/ui';
 import Link from 'next/link';
-import { FileText, Globe, Users, ArrowRight } from 'lucide-react';
+import { FileText, Globe, Users, ArrowRight, CheckCircle, Zap } from 'lucide-react';
 
 export default async function Dashboard() {
   const supabase = await createClient()
@@ -20,79 +21,129 @@ export default async function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--tp-background-light)] to-background">
       <DashboardHeader title="Dashboard" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto tp-container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Welcome card */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-bold mb-4">¡Bienvenido a TuPatrimonio!</h2>
-              <p className="text-gray-600 mb-4">
-                Tu plataforma de servicios legales digitales personalizada.
-              </p>
-              
-              <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h3 className="font-semibold text-blue-900">Usuario autenticado</h3>
-                  <p className="text-blue-700">Email: {data.user.email}</p>
+            <Card className="border-2 border-border hover:border-[var(--tp-brand)] transition-all">
+              <CardHeader>
+                <div className="flex items-center gap-4 mb-4">
+                  <IconContainer 
+                    icon={CheckCircle} 
+                    variant="solid-brand" 
+                    shape="circle" 
+                    size="lg"
+                  />
+                  <div>
+                    <CardTitle className="text-2xl">¡Bienvenido a TuPatrimonio!</CardTitle>
+                    <CardDescription className="text-base mt-1">
+                      Tu plataforma de servicios legales digitales personalizada
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Icon icon={Users} size="md" className="text-blue-600 dark:text-blue-400" />
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">Usuario autenticado</h3>
+                  </div>
+                  <p className="text-blue-700 dark:text-blue-300 text-sm ml-9">Email: {data.user.email}</p>
                 </div>
                 
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <h3 className="font-semibold text-green-900">Conexión a Supabase</h3>
-                  <p className="text-green-700">✅ Funcionando correctamente</p>
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Icon icon={Zap} size="md" className="text-green-600 dark:text-green-400" />
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">Conexión a Supabase</h3>
+                  </div>
+                  <p className="text-green-700 dark:text-green-300 text-sm ml-9">✅ Funcionando correctamente</p>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Secciones de administración */}
             {isAdmin && (
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-bold mb-4">Panel de Administración</h2>
-                <p className="text-gray-600 mb-6">
-                  Accede a las herramientas de gestión de contenido y configuración
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Link
-                    href="/dashboard/blog"
-                    className="p-4 border border-gray-200 rounded-lg hover:border-[var(--tp-buttons)] hover:bg-gray-50 transition-all group"
-                  >
-                    <FileText className="h-6 w-6 text-[var(--tp-buttons)] mb-2" />
-                    <h3 className="font-semibold text-gray-900 mb-1">Blog</h3>
-                    <p className="text-sm text-gray-600 mb-2">Gestiona posts y categorías del blog</p>
-                    <span className="text-sm text-[var(--tp-buttons)] group-hover:underline inline-flex items-center">
-                      Ir al blog <ArrowRight className="h-3 w-3 ml-1" />
-                    </span>
-                  </Link>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-2xl">Panel de Administración</CardTitle>
+                  <CardDescription className="text-base">
+                    Accede a las herramientas de gestión de contenido y configuración
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Link href="/dashboard/blog">
+                      <Card className="h-full border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                        <CardHeader>
+                          <div className="mb-4 group-hover:scale-110 transition-transform">
+                            <IconContainer 
+                              icon={FileText} 
+                              variant="brand" 
+                              shape="rounded" 
+                              size="lg"
+                            />
+                          </div>
+                          <CardTitle className="text-xl mb-2">Blog</CardTitle>
+                          <CardDescription className="text-base leading-relaxed">
+                            Gestiona posts y categorías del blog
+                          </CardDescription>
+                          <div className="text-sm text-[var(--tp-brand)] group-hover:underline inline-flex items-center mt-4">
+                            Ir al blog <Icon icon={ArrowRight} size="sm" variant="inherit" className="ml-1" />
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Link>
 
-                  <Link
-                    href="/dashboard/pages"
-                    className="p-4 border border-gray-200 rounded-lg hover:border-[var(--tp-buttons)] hover:bg-gray-50 transition-all group"
-                  >
-                    <Globe className="h-6 w-6 text-[var(--tp-buttons)] mb-2" />
-                    <h3 className="font-semibold text-gray-900 mb-1">Páginas</h3>
-                    <p className="text-sm text-gray-600 mb-2">Controla visibilidad y SEO de páginas</p>
-                    <span className="text-sm text-[var(--tp-buttons)] group-hover:underline inline-flex items-center">
-                      Gestionar páginas <ArrowRight className="h-3 w-3 ml-1" />
-                    </span>
-                  </Link>
+                    <Link href="/dashboard/pages">
+                      <Card className="h-full border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                        <CardHeader>
+                          <div className="mb-4 group-hover:scale-110 transition-transform">
+                            <IconContainer 
+                              icon={Globe} 
+                              variant="brand" 
+                              shape="rounded" 
+                              size="lg"
+                            />
+                          </div>
+                          <CardTitle className="text-xl mb-2">Páginas</CardTitle>
+                          <CardDescription className="text-base leading-relaxed">
+                            Controla visibilidad y SEO de páginas
+                          </CardDescription>
+                          <div className="text-sm text-[var(--tp-brand)] group-hover:underline inline-flex items-center mt-4">
+                            Gestionar páginas <Icon icon={ArrowRight} size="sm" variant="inherit" className="ml-1" />
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Link>
 
-                  <Link
-                    href="/dashboard/users"
-                    className="p-4 border border-gray-200 rounded-lg hover:border-[var(--tp-buttons)] hover:bg-gray-50 transition-all group"
-                  >
-                    <Users className="h-6 w-6 text-[var(--tp-buttons)] mb-2" />
-                    <h3 className="font-semibold text-gray-900 mb-1">Usuarios</h3>
-                    <p className="text-sm text-gray-600 mb-2">Administra roles y permisos</p>
-                    <span className="text-sm text-[var(--tp-buttons)] group-hover:underline inline-flex items-center">
-                      Ver usuarios <ArrowRight className="h-3 w-3 ml-1" />
-                    </span>
-                  </Link>
-                </div>
-              </div>
+                    <Link href="/dashboard/users">
+                      <Card className="h-full border-2 border-border hover:border-[var(--tp-brand)] hover:shadow-xl transition-all group">
+                        <CardHeader>
+                          <div className="mb-4 group-hover:scale-110 transition-transform">
+                            <IconContainer 
+                              icon={Users} 
+                              variant="brand" 
+                              shape="rounded" 
+                              size="lg"
+                            />
+                          </div>
+                          <CardTitle className="text-xl mb-2">Usuarios</CardTitle>
+                          <CardDescription className="text-base leading-relaxed">
+                            Administra roles y permisos
+                          </CardDescription>
+                          <div className="text-sm text-[var(--tp-brand)] group-hover:underline inline-flex items-center mt-4">
+                            Ver usuarios <Icon icon={ArrowRight} size="sm" variant="inherit" className="ml-1" />
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             )}
             
             {/* Example of localized pricing */}
@@ -101,39 +152,43 @@ export default async function Dashboard() {
           
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Acciones rápidas</h3>
-              <div className="space-y-2">
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+            <Card>
+              <CardHeader>
+                <CardTitle>Acciones rápidas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <button className="w-full text-left px-4 py-3 text-sm bg-muted hover:bg-[var(--tp-brand-10)] hover:text-[var(--tp-brand)] rounded-lg transition-all font-medium border border-transparent hover:border-[var(--tp-brand-20)]">
                   Nueva firma electrónica
                 </button>
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                <button className="w-full text-left px-4 py-3 text-sm bg-muted hover:bg-[var(--tp-brand-10)] hover:text-[var(--tp-brand)] rounded-lg transition-all font-medium border border-transparent hover:border-[var(--tp-brand-20)]">
                   Verificar identidad
                 </button>
-                <button className="w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                <button className="w-full text-left px-4 py-3 text-sm bg-muted hover:bg-[var(--tp-brand-10)] hover:text-[var(--tp-brand)] rounded-lg transition-all font-medium border border-transparent hover:border-[var(--tp-brand-20)]">
                   Notarizar documento
                 </button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
             
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Configuración</h3>
-              <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="text-sm">
-                  <span className="text-gray-600">País detectado:</span>
-                  <div className="mt-1 text-gray-900 font-medium">Automático</div>
+                  <span className="text-muted-foreground">País detectado:</span>
+                  <div className="mt-1 font-medium">Automático</div>
                 </div>
                 
                 <form action="/auth/signout" method="post">
                   <button 
                     type="submit" 
-                    className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    className="w-full px-4 py-3 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors text-sm font-medium shadow-md hover:shadow-lg"
                   >
                     Cerrar Sesión
                   </button>
                 </form>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

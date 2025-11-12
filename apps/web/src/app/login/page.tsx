@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/custom/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon } from '@tupatrimonio/ui'
 import { Eye, EyeOff, User, Mail, Lock, ArrowRight, UserPlus, Github } from 'lucide-react'
 
 type AuthMode = 'login' | 'register'
@@ -44,7 +45,7 @@ function GitHubButton() {
     <Button
       onClick={handleGitHubSignIn}
       disabled={loading}
-      className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      className="w-full bg-gray-900 dark:bg-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-md hover:shadow-lg"
     >
       {loading ? (
         <div className="flex items-center justify-center">
@@ -53,7 +54,7 @@ function GitHubButton() {
         </div>
       ) : (
         <div className="flex items-center justify-center">
-          <Github className="w-5 h-5 mr-3" />
+          <Icon icon={Github} size="md" variant="inherit" className="mr-3" />
           Continuar con GitHub
         </div>
       )}
@@ -69,7 +70,7 @@ function SubmitButton({ authMode }: { authMode: AuthMode }) {
     <Button
       type="submit"
       disabled={pending}
-      className="w-full bg-[#800039] hover:bg-[#a50049] text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-medium py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg hover:shadow-xl"
     >
       {pending ? (
         <div className="flex items-center justify-center">
@@ -79,7 +80,7 @@ function SubmitButton({ authMode }: { authMode: AuthMode }) {
       ) : (
         <div className="flex items-center justify-center">
           {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <Icon icon={ArrowRight} size="sm" variant="inherit" className="ml-2" />
         </div>
       )}
     </Button>
@@ -142,253 +143,256 @@ export default function LoginPage() {
   }, [])
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#f7f7f7] via-[#f0f0f0] to-[#e8e8e8] flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[var(--tp-background-light)] to-background flex items-center justify-center p-4">
       {/* Fondo con gradiente sutil */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#800039]/5 via-transparent to-[#4a4a4a]/5" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[var(--tp-brand)]/5 via-transparent to-[var(--tp-buttons)]/5" />
       
       {/* Card principal */}
       <div className="relative w-full max-w-md">
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/60 p-8">
-          {/* Header con logo/título */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#800039] to-[#a50049] rounded-full mb-4">
-              <User className="w-8 h-8 text-white" />
+        <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card">
+          <CardHeader className="text-center pt-8">
+            {/* Logo con estilo de marca */}
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] rounded-full mb-6 shadow-lg">
+              <Icon icon={User} size="xl" variant="white" />
             </div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-              TuPatrimonio
-            </h1>
-            <p className="text-sm text-gray-600">
+            <CardTitle className="text-3xl mb-2">
+              <span className="text-[var(--tp-brand)]">TuPatrimonio</span>
+            </CardTitle>
+            <CardDescription className="text-base">
               {authMode === 'login' 
-                ? 'Ingresa a tu cuenta' 
-                : 'Crea tu cuenta nueva'
+                ? 'Ingresa a tu cuenta para continuar' 
+                : 'Crea tu cuenta y comienza ahora'
               }
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
 
-          {/* Toggle de modo */}
-          <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('login')
-                setFormData({
-                  email: '',
-                  password: '',
-                  confirmPassword: '',
-                  rememberMe: false
-                })
-                setErrors({})
-              }}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                authMode === 'login'
-                  ? 'bg-white shadow-sm text-[#800039]'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <User className="w-4 h-4 inline mr-2" />
-              Iniciar Sesión
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('register')
-                setFormData({
-                  email: '',
-                  password: '',
-                  confirmPassword: '',
-                  rememberMe: false
-                })
-                setErrors({})
-              }}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                authMode === 'register'
-                  ? 'bg-white shadow-sm text-[#800039]'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <UserPlus className="w-4 h-4 inline mr-2" />
-              Registrarse
-            </button>
-          </div>
+          <CardContent>
+
+            {/* Toggle de modo */}
+            <div className="flex bg-muted rounded-lg p-1 mb-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('login')
+                  setFormData({
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    rememberMe: false
+                  })
+                  setErrors({})
+                }}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                  authMode === 'login'
+                    ? 'bg-background shadow-md text-[var(--tp-brand)] border border-[var(--tp-brand-20)]'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon icon={User} size="sm" variant="inherit" className="inline mr-2" />
+                Iniciar Sesión
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('register')
+                  setFormData({
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    rememberMe: false
+                  })
+                  setErrors({})
+                }}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                  authMode === 'register'
+                    ? 'bg-background shadow-md text-[var(--tp-brand)] border border-[var(--tp-brand-20)]'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon icon={UserPlus} size="sm" variant="inherit" className="inline mr-2" />
+                Registrarse
+              </button>
+            </div>
 
           {/* Botón de GitHub */}
           <div className="mb-6">
             <GitHubButton />
           </div>
 
-          {/* Separador */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#7a7a7a]/30" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#7a7a7a] font-medium">
-                o continúa con email
-              </span>
-            </div>
-          </div>
-
-          {/* Formulario */}
-          <form action={currentAction} className="space-y-4">
-            {/* Email */}
-            <div>
-              <Label htmlFor="email" className="text-gray-700 mb-2 block">
-                Correo Electrónico
-              </Label>
-              <div className="relative">
-                <Mail className="w-5 h-5 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 border-gray-300 focus:border-[#800039] focus:ring-[#800039]/20 ${
-                    errors.email ? 'border-red-500 focus:border-red-500' : ''
-                  }`}
-                  required
-                />
+            {/* Separador */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
               </div>
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Contraseña */}
-            <div>
-              <Label htmlFor="password" className="text-gray-700 mb-2 block">
-                Contraseña
-              </Label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`pl-10 pr-10 border-gray-300 focus:border-[#800039] focus:ring-[#800039]/20 ${
-                    errors.password ? 'border-red-500 focus:border-red-500' : ''
-                  }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-card text-muted-foreground font-medium">
+                  o continúa con email
+                </span>
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
             </div>
 
-            {/* Confirmar Contraseña (solo en registro) */}
-            {authMode === 'register' && (
+            {/* Formulario */}
+            <form action={currentAction} className="space-y-4">
+              {/* Email */}
               <div>
-                <Label htmlFor="confirmPassword" className="text-gray-700 mb-2 block">
-                  Confirmar Contraseña
+                <Label htmlFor="email" className="mb-2 block">
+                  Correo Electrónico
                 </Label>
                 <div className="relative">
-                  <Lock className="w-5 h-5 text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Icon icon={Mail} size="md" variant="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
                   <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="tu@email.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className={`pl-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20 ${
+                      errors.email ? 'border-red-500 focus:border-red-500' : ''
+                    }`}
+                    required
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Contraseña */}
+              <div>
+                <Label htmlFor="password" className="mb-2 block">
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <Icon icon={Lock} size="md" variant="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className={`pl-10 pr-10 border-gray-300 focus:border-[#800039] focus:ring-[#800039]/20 ${
-                      errors.confirmPassword ? 'border-red-500 focus:border-red-500' : ''
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    className={`pl-10 pr-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20 ${
+                      errors.password ? 'border-red-500 focus:border-red-500' : ''
                     }`}
                     required
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    <Icon icon={showPassword ? EyeOff : Eye} size="md" variant="inherit" />
                   </button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                 )}
               </div>
-            )}
 
-            {/* Recordar sesión */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="rememberMe"
-                checked={formData.rememberMe}
-                onCheckedChange={(checked) => handleInputChange('rememberMe', checked as boolean)}
-                className="border-tp-lines data-[state=checked]:bg-tp-primary data-[state=checked]:border-tp-primary"
-              />
-              <Label
-                htmlFor="rememberMe"
-                className="text-sm text-tp-gray-600 cursor-pointer"
-              >
-                Recordar mi sesión
-              </Label>
+              {/* Confirmar Contraseña (solo en registro) */}
+              {authMode === 'register' && (
+                <div>
+                  <Label htmlFor="confirmPassword" className="mb-2 block">
+                    Confirmar Contraseña
+                  </Label>
+                  <div className="relative">
+                    <Icon icon={Lock} size="md" variant="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                      className={`pl-10 pr-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20 ${
+                        errors.confirmPassword ? 'border-red-500 focus:border-red-500' : ''
+                      }`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <Icon icon={showConfirmPassword ? EyeOff : Eye} size="md" variant="inherit" />
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Recordar sesión */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={formData.rememberMe}
+                  onCheckedChange={(checked) => handleInputChange('rememberMe', checked as boolean)}
+                  className="border-[var(--tp-brand)] data-[state=checked]:bg-[var(--tp-brand)] data-[state=checked]:border-[var(--tp-brand)]"
+                />
+                <Label
+                  htmlFor="rememberMe"
+                  className="text-sm text-muted-foreground cursor-pointer"
+                >
+                  Recordar mi sesión
+                </Label>
+              </div>
+
+              {/* Mensajes de error y éxito */}
+              {currentState?.error && (
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
+                  <p className="text-red-600 dark:text-red-400 text-sm">{currentState.error}</p>
+                </div>
+              )}
+              
+              {currentState?.success && currentState?.message && (
+                <div className="p-3 rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
+                  <p className="text-green-600 dark:text-green-400 text-sm">{currentState.message}</p>
+                </div>
+              )}
+
+              {errors.general && !currentState?.error && (
+                <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
+                  <p className="text-red-600 dark:text-red-400 text-sm">{errors.general}</p>
+                </div>
+              )}
+
+              {/* Botón submit */}
+              <SubmitButton authMode={authMode} />
+            </form>
+
+            {/* Enlaces adicionales */}
+            <div className="mt-6 space-y-3">
+              {authMode === 'login' && (
+                <div className="text-center">
+                  <button className="text-sm text-[var(--tp-brand)] hover:text-[var(--tp-brand-light)] transition-colors">
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
+              )}
+
+              {/* Enlaces legales */}
+              <div className="text-center text-xs text-muted-foreground space-y-1">
+                <p>
+                  Al continuar, aceptas nuestros{' '}
+                  <a href="/legal/terminos" rel="noopener noreferrer nofollow" className="text-[var(--tp-brand)] hover:text-[var(--tp-brand-light)] underline transition-colors">
+                    Términos de Servicio
+                  </a>
+                  {' '}y{' '}
+                  <a href="/legal/privacidad" rel="noopener noreferrer nofollow" className="text-[var(--tp-brand)] hover:text-[var(--tp-brand-light)] underline transition-colors">
+                    Política de Privacidad
+                  </a>
+                </p>
+              </div>
             </div>
-
-            {/* Mensajes de error y éxito */}
-            {currentState?.error && (
-              <div className="p-3 rounded-md bg-tp-error-light border border-red-500-border">
-                <p className="text-red-500 text-sm">{currentState.error}</p>
-              </div>
-            )}
-            
-            {currentState?.success && currentState?.message && (
-              <div className="p-3 rounded-md bg-green-50 border border-green-200">
-                <p className="text-green-600 text-sm">{currentState.message}</p>
-              </div>
-            )}
-
-            {errors.general && !currentState?.error && (
-              <div className="p-3 rounded-md bg-tp-error-light border border-red-500-border">
-                <p className="text-red-500 text-sm">{errors.general}</p>
-              </div>
-            )}
-
-            {/* Botón submit */}
-            <SubmitButton authMode={authMode} />
-          </form>
-
-          {/* Enlaces adicionales */}
-          <div className="mt-6 space-y-3">
-            {authMode === 'login' && (
-              <div className="text-center">
-                <button className="text-sm text-[#800039] hover:text-[#800039]-hover transition-colors">
-                  ¿Olvidaste tu contraseña?
-                </button>
-              </div>
-            )}
-
-            {/* Enlaces legales */}
-            <div className="text-center text-xs text-gray-600 space-y-1">
-              <p>
-                Al continuar, aceptas nuestros{' '}
-                <button className="text-[#800039] hover:text-[#800039]-hover underline transition-colors">
-                  Términos de Servicio
-                </button>
-                {' '}y{' '}
-                <button className="text-[#800039] hover:text-[#800039]-hover underline transition-colors">
-                  Política de Privacidad
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Decoración de fondo */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-tp-primary-20 to-tp-primary-hover/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-tr from-tp-bg-dark-10 to-tp-lines-10 rounded-full blur-3xl" />
+        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--tp-brand-20)] to-[var(--tp-brand-light)]/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-tr from-[var(--tp-buttons-10)] to-[var(--tp-buttons-20)] rounded-full blur-3xl" />
       </div>
     </div>
   )
