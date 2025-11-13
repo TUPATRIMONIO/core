@@ -76,7 +76,10 @@ export function UpdateNotification() {
         `
       }} />
       
-      <div className="fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in px-4">
+      <div
+        className="fixed top-4 right-4 w-full max-w-md tp-animate-slide-in px-4"
+        style={{ zIndex: 9999 }}
+      >
         <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card relative overflow-hidden">
           {/* Botón de cerrar mejorado */}
           <button

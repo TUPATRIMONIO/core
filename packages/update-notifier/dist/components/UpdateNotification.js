@@ -102,7 +102,7 @@ function UpdateNotification() {
           }
         `
             } }),
-        react_1.default.createElement("div", { className: "fixed top-4 right-4 z-50 w-full max-w-md tp-animate-slide-in px-4" },
+        react_1.default.createElement("div", { className: "fixed top-4 right-4 w-full max-w-md tp-animate-slide-in px-4", style: { zIndex: 9999 } },
             react_1.default.createElement(ui_1.Card, { className: "border-2 border-[var(--tp-brand)] shadow-2xl bg-card relative overflow-hidden" },
                 react_1.default.createElement("button", { onClick: handleDismiss, className: "absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted/50 z-10", "aria-label": "Cerrar notificaci\u00F3n" },
                     react_1.default.createElement(ui_3.Icon, { icon: lucide_react_1.X, size: "sm", variant: "inherit" })),

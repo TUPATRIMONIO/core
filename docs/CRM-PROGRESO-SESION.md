@@ -307,3 +307,4 @@ http://localhost:3000/dashboard/crm
 **Próximo paso**: Tú decides - usar el CRM, completarlo, o continuar con Fase 1.
 
 
+

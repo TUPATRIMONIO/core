@@ -447,3 +447,4 @@ Solo faltan detalles menores (ediciones) y features nice-to-have (reportes, bús
 **Siguiente decisión**: ¿Usar el CRM ahora, completar el 15% restante, o continuar con Fase 1 del roadmap?
 
 
+
