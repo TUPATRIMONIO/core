@@ -135,9 +135,9 @@ export async function signUp(prevState: AuthResult | null, formData: FormData): 
         }
       }
 
-      // Si no se requiere confirmación, redirigir
+      // Si no se requiere confirmación, redirigir a onboarding
       revalidatePath('/', 'layout')
-      redirect('/dashboard')
+      redirect('/onboarding')
     }
 
     return { error: 'Error inesperado al crear la cuenta' }
