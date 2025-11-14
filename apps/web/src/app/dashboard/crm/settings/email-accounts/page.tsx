@@ -119,7 +119,8 @@ export default function EmailAccountsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to disconnect account');
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(errorData.error || 'No se pudo desconectar la cuenta');
       }
 
       toast({
@@ -132,7 +133,7 @@ export default function EmailAccountsPage() {
       console.error('Error disconnecting account:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo desconectar la cuenta',
+        description: error instanceof Error ? error.message : 'No se pudo desconectar la cuenta',
         variant: 'destructive',
       });
     }
