@@ -138,9 +138,9 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -151,8 +151,8 @@ export default async function DashboardLayout({
                   </svg>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">TuPatrimonio</h1>
-                  <p className="text-xs text-gray-500">Dashboard</p>
+                  <h1 className="text-xl font-bold text-foreground">TuPatrimonio</h1>
+                  <p className="text-xs text-muted-foreground">Dashboard</p>
                 </div>
               </Link>
             </div>
@@ -167,15 +167,15 @@ export default async function DashboardLayout({
               <a 
                 href="https://tupatrimonio.app" 
                 target="_blank"
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Ver Sitio →
               </a>
-              <span className="text-sm text-gray-500">{user.email}</span>
+              <span className="text-sm text-muted-foreground">{user.email}</span>
               <form action="/auth/signout" method="post">
                 <button 
                   type="submit"
-                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center"
+                  className="text-sm text-muted-foreground hover:text-foreground flex items-center transition-colors"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Salir
@@ -193,7 +193,7 @@ export default async function DashboardLayout({
             <nav className="space-y-1">
               <Link
                 href="/dashboard"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
               >
                 <LayoutDashboard className="h-4 w-4 mr-3" />
                 Inicio
@@ -202,14 +202,14 @@ export default async function DashboardLayout({
               {canCRM && (
                 <>
                   <div className="mt-4 mb-2">
-                    <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       CRM
                     </div>
                   </div>
                   
                   <Link
                     href="/dashboard/crm"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <LayoutDashboard className="h-4 w-4 mr-3" />
                     Dashboard CRM
@@ -217,7 +217,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/contacts"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Users className="h-4 w-4 mr-3" />
                     Contactos
@@ -230,7 +230,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/companies"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Building2 className="h-4 w-4 mr-3" />
                     Empresas
@@ -238,7 +238,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/deals"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Briefcase className="h-4 w-4 mr-3" />
                     Negocios
@@ -246,7 +246,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/tickets"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Ticket className="h-4 w-4 mr-3" />
                     Tickets
@@ -259,7 +259,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/products"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Package className="h-4 w-4 mr-3" />
                     Productos
@@ -267,7 +267,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/quotes"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <FileCheck className="h-4 w-4 mr-3" />
                     Cotizaciones
@@ -275,7 +275,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/crm/emails"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Mail className="h-4 w-4 mr-3" />
                     Emails
@@ -291,7 +291,7 @@ export default async function DashboardLayout({
               {isAdmin && (
                 <>
                   <div className="mt-4 mb-2">
-                    <div className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Administración
                     </div>
                   </div>
@@ -299,20 +299,20 @@ export default async function DashboardLayout({
                   <div className="space-y-1">
                     <Link
                       href="/dashboard/blog"
-                      className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                     >
                       <FileText className="h-4 w-4 mr-3" />
                       Blog
                     </Link>
                     <Link
                       href="/dashboard/blog/categories"
-                      className="flex items-center px-4 py-2 pl-11 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="flex items-center px-4 py-2 pl-11 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
                     >
                       Categorías
                     </Link>
                     <Link
                       href="/dashboard/blog/media"
-                      className="flex items-center px-4 py-2 pl-11 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="flex items-center px-4 py-2 pl-11 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
                     >
                       Galería
                     </Link>
@@ -320,7 +320,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/pages"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Globe className="h-4 w-4 mr-3" />
                     Páginas
@@ -328,7 +328,7 @@ export default async function DashboardLayout({
 
                   <Link
                     href="/dashboard/users"
-                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Users className="h-4 w-4 mr-3" />
                     Usuarios

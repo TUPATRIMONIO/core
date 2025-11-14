@@ -1,7 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { PricingExample } from '@/components/PricingExample';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon, IconContainer } from '@tupatrimonio/ui';
 import Link from 'next/link';
 import { FileText, Globe, Users, ArrowRight, CheckCircle, Zap } from 'lucide-react';
@@ -22,8 +20,6 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--tp-background-light)] to-background">
-      <DashboardHeader title="Dashboard" />
-      
       <div className="max-w-7xl mx-auto tp-container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main content */}
@@ -145,9 +141,6 @@ export default async function Dashboard() {
                 </CardContent>
               </Card>
             )}
-            
-            {/* Example of localized pricing */}
-            <PricingExample />
           </div>
           
           {/* Sidebar */}
@@ -175,8 +168,8 @@ export default async function Dashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-sm">
-                  <span className="text-muted-foreground">País detectado:</span>
-                  <div className="mt-1 font-medium">Automático</div>
+                  <span className="text-muted-foreground">Email:</span>
+                  <div className="mt-1 font-medium">{data.user.email}</div>
                 </div>
                 
                 <form action="/auth/signout" method="post">

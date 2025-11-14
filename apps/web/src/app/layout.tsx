@@ -1,11 +1,11 @@
 import type {Metadata, Viewport} from "next";
 import { Outfit, Nunito, Quicksand, Josefin_Sans } from 'next/font/google';
 import { cn } from "@/lib/utils";
-import { LocationProvider } from '../components/LocationProvider';
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import { ThemeProvider } from '../components/theme-provider';
+import { FloatingActions } from '../components/FloatingActions';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -75,12 +75,13 @@ export default function RootLayout({
       <body className={cn("bg-background text-foreground", outfit.className)}>
         <ThemeProvider>
           <ServiceWorkerRegistration />
-          <LocationProvider>
-            <UpdateNotification />
-            <main className="min-h-screen">
-              {children}
-            </main>
-          </LocationProvider>
+          <UpdateNotification />
+          <main className="min-h-screen">
+            {children}
+          </main>
+
+          {/* Botón flotante de cambio de tema y WhatsApp */}
+          <FloatingActions />
         </ThemeProvider>
       </body>
     </html>
