@@ -42,17 +42,23 @@ export default function InboxPage() {
   const [threads, setThreads] = useState<EmailThread[]>([]);
   const [accounts, setAccounts] = useState<EmailAccountOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     loadAccounts();
   }, []);
 
   useEffect(() => {
-    loadThreads();
+    // Resetear offset cuando cambian los filtros
+    setOffset(0);
+    loadThreads(true);
   }, [filter, selectedAccount]);
 
   async function loadAccounts() {
@@ -67,20 +73,38 @@ export default function InboxPage() {
     }
   }
 
-  async function loadThreads() {
+  async function loadThreads(reset = false) {
     try {
-      setIsLoading(true);
+      const loadingOffset = reset ? 0 : offset;
+      
+      if (reset) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
       const unreadParam = filter === 'unread' ? '&unread_only=true' : '';
       const accountParam = selectedAccount !== 'all' ? `&account_id=${selectedAccount}` : '';
       
-      const response = await fetch(`/api/crm/inbox?limit=50${unreadParam}${accountParam}`);
+      const response = await fetch(
+        `/api/crm/inbox?limit=${ITEMS_PER_PAGE}&offset=${loadingOffset}${unreadParam}${accountParam}`
+      );
       
       if (!response.ok) {
         throw new Error('Failed to load inbox');
       }
 
-      const { data } = await response.json();
-      setThreads(data || []);
+      const { data, count } = await response.json();
+      
+      if (reset) {
+        setThreads(data || []);
+        setOffset(ITEMS_PER_PAGE);
+      } else {
+        setThreads(prev => [...prev, ...(data || [])]);
+        setOffset(prev => prev + ITEMS_PER_PAGE);
+      }
+      
+      setTotalCount(count || 0);
     } catch (error) {
       console.error('Error loading inbox:', error);
       toast({
@@ -90,7 +114,12 @@ export default function InboxPage() {
       });
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
+  }
+
+  async function loadMoreThreads() {
+    await loadThreads(false);
   }
 
   async function syncAllAccounts() {
@@ -111,7 +140,8 @@ export default function InboxPage() {
         description: `${result.summary.new_emails} emails nuevos, ${result.summary.updated_threads} threads actualizados`,
       });
 
-      loadThreads();
+      setOffset(0);
+      loadThreads(true);
     } catch (error) {
       console.error('Error syncing:', error);
       toast({
@@ -144,7 +174,8 @@ export default function InboxPage() {
             Inbox
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {threads.length} conversaciones {unreadCount > 0 && `(${unreadCount} no leídas)`}
+            Mostrando {filteredThreads.length} de {totalCount} conversaciones
+            {unreadCount > 0 && ` (${unreadCount} no leídas)`}
           </p>
         </div>
 
@@ -310,6 +341,38 @@ export default function InboxPage() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Botón Cargar Más */}
+          {!search && threads.length < totalCount && (
+            <Card className="bg-gray-50 dark:bg-gray-900 border-dashed">
+              <CardContent className="py-8 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Mostrando {threads.length} de {totalCount} conversaciones
+                  <br />
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {totalCount - threads.length} conversaciones más disponibles
+                  </span>
+                </p>
+                <Button
+                  onClick={loadMoreThreads}
+                  disabled={isLoadingMore}
+                  variant="outline"
+                  className="min-w-[200px]"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Cargando...
+                    </>
+                  ) : (
+                    <>
+                      Cargar {Math.min(ITEMS_PER_PAGE, totalCount - threads.length)} más
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
