@@ -17,7 +17,8 @@ import {
   Briefcase,
   Ticket,
   Package,
-  FileCheck
+  FileCheck,
+  Settings
 } from 'lucide-react';
 import { OrganizationSwitcher, type OrganizationSummary } from './OrganizationSwitcher';
 
@@ -274,16 +275,30 @@ export default async function DashboardLayout({
                   </Link>
 
                   <Link
-                    href="/dashboard/crm/emails"
+                    href="/dashboard/crm/inbox"
                     className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
                   >
                     <Mail className="h-4 w-4 mr-3" />
-                    Emails
+                    Inbox
                     {crmStats && crmStats.unread_emails > 0 && (
                       <span className="ml-auto px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
                         {crmStats.unread_emails}
                       </span>
                     )}
+                  </Link>
+
+                  <div className="mt-4 mb-2">
+                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Configuración
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/dashboard/crm/settings/email-accounts"
+                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
+                  >
+                    <Settings className="h-4 w-4 mr-3" />
+                    Cuentas de Email
                   </Link>
                 </>
               )}

@@ -8,19 +8,24 @@ import type { GmailTokens } from './types';
 
 /**
  * Crea cliente OAuth2 de Google
+ * @param callbackPath - Path del callback (default: /api/crm/email-accounts/callback)
  */
-export function getOAuth2Client() {
+export function getOAuth2Client(callbackPath?: string) {
+  const defaultCallback = '/api/crm/email-accounts/callback';
+  const callback = callbackPath || defaultCallback;
+  
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/crm/settings/gmail/callback`
+    `${process.env.NEXT_PUBLIC_APP_URL}${callback}`
   );
 }
 
 /**
  * Genera URL de autorización OAuth
+ * @param state - Datos a pasar al callback (puede ser string o objeto serializado)
  */
-export function getGmailAuthUrl(organizationId: string): string {
+export function getGmailAuthUrl(state: string): string {
   const oauth2Client = getOAuth2Client();
 
   return oauth2Client.generateAuthUrl({
@@ -32,7 +37,7 @@ export function getGmailAuthUrl(organizationId: string): string {
       'https://www.googleapis.com/auth/gmail.modify',
       'https://www.googleapis.com/auth/gmail.compose'
     ],
-    state: organizationId // Pasar org_id en state para el callback
+    state: state // Pasar datos en state para el callback
   });
 }
 

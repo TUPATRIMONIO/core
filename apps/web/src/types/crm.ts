@@ -253,6 +253,70 @@ export interface Activity {
   performed_by_user?: User;
 }
 
+export interface EmailAccount {
+  id: string;
+  organization_id: string;
+  email_address: string;
+  display_name?: string;
+  account_type: 'shared' | 'personal';
+  owner_user_id?: string;
+  gmail_oauth_tokens: any;
+  gmail_email_address?: string;
+  gmail_history_id?: string;
+  is_active: boolean;
+  is_default: boolean;
+  sync_enabled: boolean;
+  sync_interval: number;
+  last_sync_at?: string;
+  last_sync_error?: string;
+  signature_html?: string;
+  signature_text?: string;
+  connected_at: string;
+  connected_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailAccountPermission {
+  id: string;
+  email_account_id: string;
+  user_id: string;
+  can_send: boolean;
+  can_receive: boolean;
+  is_default: boolean;
+  granted_by?: string;
+  granted_at: string;
+  revoked_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailThread {
+  id: string;
+  organization_id: string;
+  gmail_thread_id: string;
+  contact_id?: string;
+  company_id?: string;
+  deal_id?: string;
+  subject?: string;
+  snippet?: string;
+  participants: string[];
+  status: 'active' | 'closed' | 'archived' | 'spam';
+  is_read: boolean;
+  has_attachments: boolean;
+  email_count: number;
+  last_email_at?: string;
+  last_email_from?: string;
+  labels: string[];
+  created_at: string;
+  updated_at: string;
+  
+  // Relaciones populadas
+  contact?: Contact;
+  company?: Company;
+  emails?: Email[];
+}
+
 export interface Email {
   id: string;
   organization_id: string;
@@ -277,8 +341,23 @@ export interface Email {
   created_at: string;
   updated_at: string;
   
+  // Nuevos campos para multi-cuenta y threading
+  sent_from_account_id?: string;
+  received_in_account_id?: string;
+  thread_id_crm?: string;
+  parent_email_id?: string;
+  is_read?: boolean;
+  labels?: string[];
+  has_attachments?: boolean;
+  snippet?: string;
+  in_reply_to?: string;
+  references?: string[];
+  
   // Relaciones
   contact?: Contact;
+  sent_from_account?: EmailAccount;
+  received_in_account?: EmailAccount;
+  thread?: EmailThread;
 }
 
 export interface Pipeline {

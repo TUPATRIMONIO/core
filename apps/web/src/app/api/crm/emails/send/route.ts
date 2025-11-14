@@ -19,19 +19,55 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { to, cc, bcc, subject, body: emailBody, contact_id } = body;
+    const { to, cc, bcc, subject, body: emailBody, contact_id, from_account_id } = body;
 
-    // Obtener tokens de Gmail de la organización
-    const { data: settings, error: settingsError } = await supabase
-      .schema('crm')
-      .from('settings')
-      .select('gmail_oauth_tokens')
-      .eq('organization_id', userWithOrg.organizationId)
-      .single();
+    // Obtener cuenta de email a usar
+    let emailAccount;
+    
+    if (from_account_id) {
+      // Usar cuenta específica
+      const { data: account } = await supabase
+        .schema('crm')
+        .from('email_accounts')
+        .select('*')
+        .eq('id', from_account_id)
+        .eq('organization_id', userWithOrg.organizationId)
+        .eq('is_active', true)
+        .single();
+      
+      emailAccount = account;
+    } else {
+      // Usar cuenta por defecto del usuario
+      // Primero buscar cuenta marcada como default
+      const { data: defaultAccount } = await supabase
+        .schema('crm')
+        .from('email_accounts')
+        .select('*')
+        .eq('organization_id', userWithOrg.organizationId)
+        .eq('is_active', true)
+        .eq('is_default', true)
+        .single();
 
-    if (settingsError || !settings?.gmail_oauth_tokens) {
+      if (defaultAccount) {
+        emailAccount = defaultAccount;
+      } else {
+        // Si no hay default, usar la primera disponible
+        const { data: firstAccount } = await supabase
+          .schema('crm')
+          .from('email_accounts')
+          .select('*')
+          .eq('organization_id', userWithOrg.organizationId)
+          .eq('is_active', true)
+          .limit(1)
+          .single();
+        
+        emailAccount = firstAccount;
+      }
+    }
+
+    if (!emailAccount || !emailAccount.gmail_oauth_tokens) {
       return NextResponse.json({ 
-        error: 'Gmail not connected. Please connect Gmail in settings.' 
+        error: 'No email account available. Please connect an email account first.' 
       }, { status: 400 });
     }
 
@@ -44,8 +80,8 @@ export async function POST(request: Request) {
       body: emailBody
     };
 
-    // Enviar email
-    const result = await sendEmail(settings.gmail_oauth_tokens, message);
+    // Enviar email usando los tokens de la cuenta
+    const result = await sendEmail(emailAccount.gmail_oauth_tokens, message);
 
     // Guardar en crm.emails
     const { data: emailRecord, error: emailError } = await supabase
@@ -56,7 +92,7 @@ export async function POST(request: Request) {
         contact_id: contact_id || null,
         gmail_message_id: result.id,
         thread_id: result.threadId,
-        from_email: 'me', // Obtener del perfil de Gmail
+        from_email: emailAccount.email_address,
         to_emails: Array.isArray(to) ? to : [to],
         cc_emails: cc || [],
         bcc_emails: bcc || [],
@@ -65,7 +101,8 @@ export async function POST(request: Request) {
         direction: 'outbound',
         status: 'sent',
         sent_at: new Date().toISOString(),
-        sent_by: userWithOrg.user.id
+        sent_by: userWithOrg.user.id,
+        sent_from_account_id: emailAccount.id
       })
       .select()
       .single();
