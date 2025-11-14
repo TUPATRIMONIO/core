@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Contact, ContactStatus } from '@/types/crm';
-import { formatRelativeTime } from '@/lib/crm/helpers';
+import { formatRelativeTime } from '@/lib/crm/formatters';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Detalle de Contacto - CRM',
@@ -50,15 +51,13 @@ export default async function ContactDetailPage({
     redirect('/dashboard');
   }
 
-  // Obtener organization_id
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
 
-  if (!orgUser) {
+  if (needsSelection) {
+    redirect('/dashboard/select-organization');
+  }
+
+  if (!organizationId) {
     redirect('/dashboard');
   }
 
@@ -72,7 +71,7 @@ export default async function ContactDetailPage({
       assigned_user:users!contacts_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
     `)
     .eq('id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single();
 
   if (error || !contact) {
@@ -88,7 +87,7 @@ export default async function ContactDetailPage({
       performed_by_user:users!activities_performed_by_fkey(id, first_name, last_name, email)
     `)
     .eq('contact_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('performed_at', { ascending: false })
     .limit(20);
 
@@ -98,7 +97,7 @@ export default async function ContactDetailPage({
     .from('deals')
     .select('id, title, value, currency, stage')
     .eq('contact_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 
   // Obtener tickets del contacto
@@ -107,7 +106,7 @@ export default async function ContactDetailPage({
     .from('tickets')
     .select('id, ticket_number, subject, status, priority')
     .eq('contact_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 
   return (

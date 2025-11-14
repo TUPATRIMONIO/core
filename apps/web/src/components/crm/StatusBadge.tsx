@@ -4,7 +4,7 @@
  */
 
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   getContactStatusColor,
   getContactStatusLabel,
   getCompanyTypeColor,
@@ -16,14 +16,14 @@ import {
   getTicketPriorityColor,
   getTicketPriorityLabel,
   getQuoteStatusColor
-} from '@/lib/crm/helpers';
-import type { 
-  ContactStatus, 
-  CompanyType, 
-  DealStage, 
-  TicketStatus, 
+} from '@/lib/crm/formatters';
+import type {
+  ContactStatus,
+  CompanyType,
+  DealStage,
+  TicketStatus,
   TicketPriority,
-  QuoteStatus 
+  QuoteStatus
 } from '@/types/crm';
 
 interface StatusBadgeProps {

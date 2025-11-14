@@ -31,7 +31,7 @@ import { ArrowLeft, Save, Plus, Trash2, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/types/crm';
-import { formatCurrency } from '@/lib/crm/helpers';
+import { formatCurrency } from '@/lib/crm/formatters';
 
 interface LineItem {
   product_id?: string;

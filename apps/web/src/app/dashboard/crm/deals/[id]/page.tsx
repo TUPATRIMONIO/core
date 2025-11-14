@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Deal, DealStage } from '@/types/crm';
-import { formatCurrency, formatRelativeTime } from '@/lib/crm/helpers';
+import { formatCurrency, formatRelativeTime } from '@/lib/crm/formatters';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Detalle de Negocio - CRM',
@@ -40,14 +41,10 @@ export default async function DealDetailPage({
   const { data: canAccess } = await supabase.rpc('can_access_crm', { user_id: user.id });
   if (!canAccess) redirect('/dashboard');
 
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
 
-  if (!orgUser) redirect('/dashboard');
+  if (needsSelection) redirect('/dashboard/select-organization');
+  if (!organizationId) redirect('/dashboard');
 
   // Obtener deal
   const { data: deal, error } = await supabase
@@ -60,7 +57,7 @@ export default async function DealDetailPage({
       assigned_user:users!deals_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
     `)
     .eq('id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single();
 
   if (error || !deal) redirect('/dashboard/crm/deals');
@@ -74,7 +71,7 @@ export default async function DealDetailPage({
       performed_by_user:users!activities_performed_by_fkey(id, first_name, last_name)
     `)
     .eq('deal_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('performed_at', { ascending: false })
     .limit(10);
 
@@ -84,7 +81,7 @@ export default async function DealDetailPage({
     .from('quotes')
     .select('id, quote_number, title, status, total, currency')
     .eq('deal_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 
   return (

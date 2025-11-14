@@ -29,7 +29,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Quote, QuoteStatus } from '@/types/crm';
-import { formatCurrency, formatRelativeTime } from '@/lib/crm/helpers';
+import { formatCurrency, formatRelativeTime } from '@/lib/crm/formatters';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Detalle de Cotización - CRM',
@@ -48,14 +49,10 @@ export default async function QuoteDetailPage({
   const { data: canAccess } = await supabase.rpc('can_access_crm', { user_id: user.id });
   if (!canAccess) redirect('/dashboard');
 
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
 
-  if (!orgUser) redirect('/dashboard');
+  if (needsSelection) redirect('/dashboard/select-organization');
+  if (!organizationId) redirect('/dashboard');
 
   // Obtener cotización con line items
   const { data: quote, error } = await supabase
@@ -73,7 +70,7 @@ export default async function QuoteDetailPage({
       )
     `)
     .eq('id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single();
 
   if (error || !quote) redirect('/dashboard/crm/quotes');

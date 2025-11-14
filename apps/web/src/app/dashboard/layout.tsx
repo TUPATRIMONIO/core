@@ -19,6 +19,7 @@ import {
   Package,
   FileCheck
 } from 'lucide-react';
+import { OrganizationSwitcher, type OrganizationSummary } from './OrganizationSwitcher';
 
 export default async function DashboardLayout({
   children,
@@ -37,6 +38,80 @@ export default async function DashboardLayout({
     user_id: user.id
   });
 
+  const { data: memberships, error: membershipsError } = await supabase
+    .schema('core')
+    .from('organization_users')
+    .select('organization_id, role_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: true });
+
+  let organizations: OrganizationSummary[] = [];
+
+  if (!membershipsError && memberships && memberships.length > 0) {
+    const organizationIds = Array.from(
+      new Set(
+        memberships
+          .map((entry: any) => entry.organization_id as string | null)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    if (organizationIds.length > 0) {
+      const roleIds = Array.from(
+        new Set(
+          memberships
+            .map((entry: any) => entry.role_id as string | null)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      let rolesMap = new Map<string, string>();
+
+      if (roleIds.length > 0) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .schema('core')
+          .from('roles')
+          .select('id, name')
+          .in('id', roleIds);
+
+        if (!rolesError && rolesData) {
+          rolesMap = new Map(rolesData.map((role) => [role.id as string, role.name as string]));
+        }
+      }
+
+      const { data: orgDetails, error: orgDetailsError } = await supabase
+        .schema('core')
+        .from('organizations')
+        .select('id, name, slug, org_type')
+        .in('id', organizationIds);
+
+      if (!orgDetailsError && orgDetails) {
+        organizations = organizationIds
+          .map((orgId) => {
+            const found = orgDetails.find((org) => org.id === orgId);
+            if (!found) return null;
+            const membership = memberships.find((entry: any) => entry.organization_id === orgId);
+
+            return {
+              id: found.id as string,
+              name: (found.name || found.slug || 'Organización') as string,
+              slug: (found.slug || found.name || found.id.slice(0, 8)) as string,
+              orgType: (found.org_type || 'business') as string,
+              roleName: membership?.role_id ? rolesMap.get(membership.role_id as string) ?? null : null,
+            } satisfies OrganizationSummary;
+          })
+          .filter(Boolean) as OrganizationSummary[];
+      }
+    }
+  }
+
+  const { data: activeOrg } = await supabase
+    .rpc('get_user_active_organization', { user_id: user.id })
+    .maybeSingle();
+
+  const activeOrganizationId = activeOrg?.organization_id ?? null;
+
   // Verificar si puede acceder al CRM
   let canCRM = false;
   let crmStats = null;
@@ -48,21 +123,12 @@ export default async function DashboardLayout({
     canCRM = canAccessCRM || false;
 
     // Obtener estadísticas del CRM si tiene acceso (sin bloquear si falla)
-    if (canCRM) {
+    if (canCRM && activeOrganizationId) {
       try {
-        const { data: orgUser } = await supabase
-          .from('organization_users')
-          .select('organization_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
-
-        if (orgUser) {
-          const { data: stats } = await supabase
-            .schema('crm')
-            .rpc('get_stats', { org_id: orgUser.organization_id });
-          crmStats = stats;
-        }
+        const { data: stats } = await supabase
+          .schema('crm')
+          .rpc('get_stats', { org_id: activeOrganizationId });
+        crmStats = stats;
       } catch (statsError) {
         console.warn('Could not load CRM stats:', statsError);
       }
@@ -91,7 +157,13 @@ export default async function DashboardLayout({
               </Link>
             </div>
 
-            <nav className="flex items-center space-x-4">
+            <nav className="flex flex-wrap items-center justify-end gap-3">
+              {organizations.length > 0 && (
+                <OrganizationSwitcher
+                  organizations={organizations}
+                  activeOrganizationId={activeOrganizationId}
+                />
+              )}
               <a 
                 href="https://tupatrimonio.app" 
                 target="_blank"

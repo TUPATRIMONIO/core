@@ -36,7 +36,7 @@ import {
   Phone
 } from 'lucide-react';
 import type { Contact, ContactStatus } from '@/types/crm';
-import { formatRelativeTime } from '@/lib/crm/helpers';
+import { formatRelativeTime } from '@/lib/crm/formatters';
 
 export default function ContactsPage() {
   const router = useRouter();

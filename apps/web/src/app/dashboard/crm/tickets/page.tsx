@@ -29,7 +29,7 @@ import { StatusBadge } from '@/components/crm/StatusBadge';
 import { EmptyState } from '@/components/crm/EmptyState';
 import { Ticket, Plus, Search, AlertCircle } from 'lucide-react';
 import type { Ticket as TicketType, TicketStatus, TicketPriority } from '@/types/crm';
-import { formatRelativeTime } from '@/lib/crm/helpers';
+import { formatRelativeTime } from '@/lib/crm/formatters';
 
 export default function TicketsPage() {
   const router = useRouter();

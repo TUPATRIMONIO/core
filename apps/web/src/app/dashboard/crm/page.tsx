@@ -7,19 +7,20 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { StatsCard } from '@/components/crm/StatsCard';
-import { 
-  Users, 
-  Building2, 
-  Briefcase, 
-  Ticket, 
+import {
+  Users,
+  Building2,
+  Briefcase,
+  Ticket,
   DollarSign,
   Mail,
   TrendingUp
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { formatCurrency, formatRelativeTime } from '@/lib/crm/helpers';
+import { formatCurrency, formatRelativeTime } from '@/lib/crm/formatters';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Dashboard CRM - TuPatrimonio',
@@ -43,22 +44,20 @@ export default async function CRMDashboardPage() {
     redirect('/dashboard');
   }
 
-  // Obtener organization_id
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
 
-  if (!orgUser) {
+  if (needsSelection) {
+    redirect('/dashboard/select-organization');
+  }
+
+  if (!organizationId) {
     redirect('/dashboard');
   }
 
   // Obtener estadísticas
   const { data: stats } = await supabase
     .schema('crm')
-    .rpc('get_stats', { org_id: orgUser.organization_id });
+    .rpc('get_stats', { org_id: organizationId });
 
   const crmStats = stats || {
     total_contacts: 0,
@@ -80,7 +79,7 @@ export default async function CRMDashboardPage() {
       company:companies(id, name),
       performed_by_user:users!activities_performed_by_fkey(id, first_name, last_name)
     `)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('performed_at', { ascending: false })
     .limit(10);
 
@@ -93,7 +92,7 @@ export default async function CRMDashboardPage() {
       contact:contacts(id, full_name),
       company:companies(id, name)
     `)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .not('stage', 'in', '(closed_won,closed_lost)')
     .not('expected_close_date', 'is', null)
     .order('expected_close_date', { ascending: true })

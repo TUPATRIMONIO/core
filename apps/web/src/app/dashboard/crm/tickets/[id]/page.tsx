@@ -20,7 +20,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Ticket as TicketType, TicketStatus, TicketPriority } from '@/types/crm';
-import { formatRelativeTime } from '@/lib/crm/helpers';
+import { formatRelativeTime } from '@/lib/crm/formatters';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Detalle de Ticket - CRM',
@@ -39,14 +40,10 @@ export default async function TicketDetailPage({
   const { data: canAccess } = await supabase.rpc('can_access_crm', { user_id: user.id });
   if (!canAccess) redirect('/dashboard');
 
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
 
-  if (!orgUser) redirect('/dashboard');
+  if (needsSelection) redirect('/dashboard/select-organization');
+  if (!organizationId) redirect('/dashboard');
 
   // Obtener ticket
   const { data: ticket, error } = await supabase
@@ -59,7 +56,7 @@ export default async function TicketDetailPage({
       assigned_user:users!tickets_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
     `)
     .eq('id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single();
 
   if (error || !ticket) redirect('/dashboard/crm/tickets');
@@ -73,7 +70,7 @@ export default async function TicketDetailPage({
       performed_by_user:users!activities_performed_by_fkey(id, first_name, last_name)
     `)
     .eq('ticket_id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .order('performed_at', { ascending: false });
 
   return (

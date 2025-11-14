@@ -156,6 +156,22 @@ Verifica si es super admin de plataforma
 
 ---
 
+### 5. Selección de organización post login
+
+**Archivos clave**:
+- `apps/web/src/app/dashboard/select-organization/page.tsx`
+- `apps/web/src/app/dashboard/OrganizationSwitcher.tsx`
+- `apps/web/src/app/api/organizations/set-active/route.ts`
+- `apps/web/src/lib/supabase/middleware.ts`
+
+**Flujo**:
+- Después del login, si el usuario pertenece a varias organizaciones activas y no tiene `last_active_organization_id`, se redirige a `/dashboard/select-organization`.
+- La pantalla lista todas las organizaciones activas y guarda la selección llamando al endpoint `POST /api/organizations/set-active`.
+- El selector también está disponible en el header del dashboard para cambiar de organización en cualquier momento.
+- Middleware y páginas del CRM usan `get_user_active_organization` para asegurar el contexto correcto y evitar errores cuando existen múltiples organizaciones.
+
+---
+
 ## 🔐 Sistema de Permisos
 
 ### Tipos de Usuario

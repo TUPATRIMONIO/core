@@ -29,7 +29,7 @@ import { StatusBadge } from '@/components/crm/StatusBadge';
 import { EmptyState } from '@/components/crm/EmptyState';
 import { Briefcase, Plus, Search, TrendingUp } from 'lucide-react';
 import type { Deal, DealStage } from '@/types/crm';
-import { formatCurrency, formatRelativeTime } from '@/lib/crm/helpers';
+import { formatCurrency, formatRelativeTime } from '@/lib/crm/formatters';
 
 export default function DealsPage() {
   const router = useRouter();

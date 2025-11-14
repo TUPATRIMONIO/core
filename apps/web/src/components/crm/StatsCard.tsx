@@ -5,7 +5,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
-import { formatCurrency } from '@/lib/crm/helpers';
+import { formatCurrency } from '@/lib/crm/formatters';
 
 interface StatsCardProps {
   title: string;

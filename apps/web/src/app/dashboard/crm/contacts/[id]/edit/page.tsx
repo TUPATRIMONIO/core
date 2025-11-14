@@ -7,6 +7,7 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import EditContactForm from './EditContactForm';
+import { resolveActiveOrganizationId } from '@/lib/organizations/server';
 
 export const metadata: Metadata = {
   title: 'Editar Contacto - CRM',
@@ -25,14 +26,9 @@ export default async function EditContactPage({
   const { data: canAccess } = await supabase.rpc('can_access_crm', { user_id: user.id });
   if (!canAccess) redirect('/dashboard');
 
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
-
-  if (!orgUser) redirect('/dashboard');
+  const { organizationId, needsSelection } = await resolveActiveOrganizationId(supabase, user.id);
+  if (needsSelection) redirect('/dashboard/select-organization');
+  if (!organizationId) redirect('/dashboard');
 
   // Obtener contacto
   const { data: contact, error } = await supabase
@@ -40,7 +36,7 @@ export default async function EditContactPage({
     .from('contacts')
     .select('*')
     .eq('id', params.id)
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single();
 
   if (error || !contact) redirect('/dashboard/crm/contacts');

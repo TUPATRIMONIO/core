@@ -22,7 +22,7 @@ import {
 import { EmptyState } from '@/components/crm/EmptyState';
 import { Package, Plus, Search } from 'lucide-react';
 import type { Product } from '@/types/crm';
-import { formatCurrency } from '@/lib/crm/helpers';
+import { formatCurrency } from '@/lib/crm/formatters';
 
 export default function ProductsPage() {
   const router = useRouter();

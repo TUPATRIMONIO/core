@@ -65,6 +65,49 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
+    const isSelectingOrganization = pathname.startsWith('/dashboard/select-organization')
+
+    if (!isSelectingOrganization) {
+      // Verificar si el usuario tiene organización activa
+      const { data: userProfile } = await supabase
+        .schema('core')
+        .from('users')
+        .select('last_active_organization_id')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!userProfile?.last_active_organization_id) {
+        const { data: memberships, error: membershipsError } = await supabase
+          .schema('core')
+          .from('organization_users')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+
+        if (!membershipsError && memberships) {
+          if (memberships.length === 0) {
+            // Usuario sin organizaciones, redirigir a onboarding
+            const url = request.nextUrl.clone()
+            url.pathname = '/onboarding'
+            return NextResponse.redirect(url)
+          } else if (memberships.length === 1) {
+            const singleOrgId = memberships[0]?.organization_id
+            if (singleOrgId) {
+              await supabase
+                .schema('core')
+                .from('users')
+                .update({ last_active_organization_id: singleOrgId })
+                .eq('id', user.id)
+            }
+          } else if (memberships.length > 1) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard/select-organization'
+            return NextResponse.redirect(url)
+          }
+        }
+      }
+    }
+
     // Verificar si tiene acceso admin para rutas específicas de administración
     const adminRoutes = ['/dashboard/pages', '/dashboard/blog', '/dashboard/users'];
     const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));

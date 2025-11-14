@@ -29,7 +29,7 @@ import { StatusBadge } from '@/components/crm/StatusBadge';
 import { EmptyState } from '@/components/crm/EmptyState';
 import { FileText, Plus, Search } from 'lucide-react';
 import type { Quote, QuoteStatus } from '@/types/crm';
-import { formatCurrency, formatRelativeTime } from '@/lib/crm/helpers';
+import { formatCurrency, formatRelativeTime } from '@/lib/crm/formatters';
 
 export default function QuotesPage() {
   const router = useRouter();

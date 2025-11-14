@@ -53,8 +53,42 @@ export async function signIn(prevState: AuthResult | null, formData: FormData): 
     }
 
     if (data.user) {
+      let targetPath = '/dashboard'
+
+      // Obtener organizaciones activas del usuario
+      const { data: memberships, error: membershipsError } = await supabase
+        .schema('core')
+        .from('organization_users')
+        .select('organization_id')
+        .eq('user_id', data.user.id)
+        .eq('status', 'active')
+
+      if (!membershipsError && memberships) {
+        if (memberships.length === 1) {
+          const singleOrgId = memberships[0]?.organization_id
+          if (singleOrgId) {
+            await supabase
+              .schema('core')
+              .from('users')
+              .update({ last_active_organization_id: singleOrgId })
+              .eq('id', data.user.id)
+          }
+        } else if (memberships.length > 1) {
+          const { data: userProfile } = await supabase
+            .schema('core')
+            .from('users')
+            .select('last_active_organization_id')
+            .eq('id', data.user.id)
+            .maybeSingle()
+
+          if (!userProfile?.last_active_organization_id) {
+            targetPath = '/dashboard/select-organization'
+          }
+        }
+      }
+
       revalidatePath('/', 'layout')
-      redirect('/dashboard')
+      redirect(targetPath)
     }
 
     return { error: 'Error inesperado al iniciar sesión' }
