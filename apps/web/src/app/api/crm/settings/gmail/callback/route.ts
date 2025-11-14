@@ -35,6 +35,7 @@ export async function GET(request: Request) {
 
   // Verificar que el usuario pertenece a la organización
   const { data: orgUser } = await supabase
+    .schema('core')
     .from('organization_users')
     .select('organization_id')
     .eq('user_id', user.id)
@@ -55,13 +56,16 @@ export async function GET(request: Request) {
     // Obtener perfil de Gmail para verificar
     const profile = await getGmailProfile(tokens);
 
-    // Guardar tokens en crm.settings
+    // Guardar tokens y email en crm.settings
     const { error: settingsError } = await supabase
       .schema('crm')
       .from('settings')
       .upsert({
         organization_id: organizationId,
-        gmail_oauth_tokens: tokens, // En producción: encriptar tokens
+        gmail_oauth_tokens: {
+          ...tokens,
+          email: profile.emailAddress // Agregar email al objeto de tokens
+        }, // En producción: encriptar tokens
       }, {
         onConflict: 'organization_id'
       });
@@ -84,6 +88,7 @@ export async function GET(request: Request) {
     );
   }
 }
+
 
 
 

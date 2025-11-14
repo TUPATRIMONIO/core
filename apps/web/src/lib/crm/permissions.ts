@@ -11,14 +11,24 @@ export async function getCurrentUserOrgId(): Promise<string | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) return null;
+  if (!user) {
+    console.log('[getCurrentUserOrgId] No user found');
+    return null;
+  }
   
-  const { data } = await supabase
+  console.log('[getCurrentUserOrgId] Fetching org for user:', user.id);
+  
+  const { data, error } = await supabase
+    .schema('core')
     .from('organization_users')
     .select('organization_id')
     .eq('user_id', user.id)
     .eq('status', 'active')
-    .single();
+    .order('joined_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  
+  console.log('[getCurrentUserOrgId] Query result:', { data, error });
   
   return data?.organization_id || null;
 }
@@ -55,6 +65,7 @@ export async function getCurrentUserWithOrg() {
     organizationId: orgId
   };
 }
+
 
 
 

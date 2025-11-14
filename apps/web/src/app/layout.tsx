@@ -6,6 +6,7 @@ import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistrati
 import { GoogleAnalytics } from '../components/GoogleAnalytics';
 import { ThemeProvider } from '../components/theme-provider';
 import { FloatingActions } from '../components/FloatingActions';
+import { AuthListener } from '../components/AuthListener';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -74,6 +75,7 @@ export default function RootLayout({
       </head>
       <body className={cn("bg-background text-foreground", outfit.className)}>
         <ThemeProvider>
+          <AuthListener />
           <ServiceWorkerRegistration />
           <UpdateNotification />
           <main className="min-h-screen">

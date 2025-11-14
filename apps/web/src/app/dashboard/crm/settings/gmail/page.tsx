@@ -28,27 +28,47 @@ export default function GmailSettingsPage() {
     const email = searchParams.get('email');
     
     if (gmailStatus === 'connected' && email) {
+      // Actualizar estado inmediatamente
+      setIsConnected(true);
+      setConnectedEmail(email);
+      
       toast({
         title: 'Gmail conectado',
         description: `Tu cuenta ${email} ha sido vinculada exitosamente`,
       });
+      
+      // Limpiar URL params
+      window.history.replaceState({}, '', '/dashboard/crm/settings/gmail');
     } else if (gmailStatus === 'error') {
       toast({
         title: 'Error',
         description: 'No se pudo conectar Gmail. Intenta nuevamente.',
         variant: 'destructive',
       });
+      
+      // Limpiar URL params
+      window.history.replaceState({}, '', '/dashboard/crm/settings/gmail');
     }
-  }, [searchParams]);
+  }, [searchParams, toast]);
 
   async function checkGmailConnection() {
     try {
-      // Verificar si hay tokens de Gmail configurados
-      // En una implementación real, harías una llamada a un endpoint
-      // que verifique si la org tiene tokens válidos
-      setIsLoading(false);
+      setIsLoading(true);
+      const response = await fetch('/api/crm/settings/gmail/status');
+      
+      if (!response.ok) {
+        throw new Error('Failed to check Gmail status');
+      }
+
+      const { isConnected: connected, email } = await response.json();
+      
+      setIsConnected(connected);
+      setConnectedEmail(email);
     } catch (error) {
       console.error('Error checking Gmail connection:', error);
+      setIsConnected(false);
+      setConnectedEmail(null);
+    } finally {
       setIsLoading(false);
     }
   }
@@ -227,6 +247,7 @@ export default function GmailSettingsPage() {
     </div>
   );
 }
+
 
 
 

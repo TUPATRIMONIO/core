@@ -339,7 +339,7 @@ export default async function DashboardLayout({
           </aside>
 
           {/* Main content */}
-          <main className="flex-1 min-h-[calc(100vh-200px)]">
+          <main className="flex-1 min-h-[calc(100vh-200px)] pb-24 md:pb-28">
             {children}
           </main>
         </div>

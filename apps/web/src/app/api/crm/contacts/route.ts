@@ -25,15 +25,11 @@ export async function GET(request: Request) {
   const offset = parseInt(searchParams.get('offset') || '0');
 
   try {
-    // Construir query
+    // Construir query (sin joins complejos para evitar errores)
     let query = supabase
       .schema('crm')
       .from('contacts')
-      .select(`
-        *,
-        company:companies(id, name, domain, type),
-        assigned_user:users!contacts_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('organization_id', userWithOrg.organizationId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -91,16 +87,16 @@ export async function POST(request: Request) {
         organization_id: userWithOrg.organizationId,
         created_by: userWithOrg.user.id
       })
-      .select(`
-        *,
-        company:companies(id, name, domain, type),
-        assigned_user:users!contacts_assigned_to_fkey(id, first_name, last_name, email)
-      `)
+      .select()
       .single();
 
     if (error) {
-      console.error('Error creating contact:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[POST /api/crm/contacts] Error creating contact:', error);
+      return NextResponse.json({ 
+        error: error.message,
+        details: error.details,
+        hint: error.hint
+      }, { status: 500 });
     }
 
     return NextResponse.json(contact, { status: 201 });
@@ -109,6 +105,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
 
 
 

@@ -85,7 +85,14 @@ export default function OnboardingPage() {
         description: 'Tu cuenta personal ha sido configurada exitosamente',
       });
 
-      router.push('/dashboard/crm');
+      // Esperar un momento para que la base de datos se actualice
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Refrescar la página para actualizar el estado del usuario
+      router.refresh();
+      
+      // Redirigir al dashboard
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error in personal setup:', error);
       
@@ -122,23 +129,36 @@ export default function OnboardingPage() {
         body: JSON.stringify(businessFormData)
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Error al crear organización empresarial');
+        console.error('Server error:', result);
+        throw new Error(result.error || 'Error al crear organización empresarial');
       }
 
-      const { organization_id } = await response.json();
+      const { organization_id } = result;
 
       toast({
         title: '¡Bienvenido a TuPatrimonio!',
         description: `${businessFormData.name} ha sido configurada exitosamente`,
       });
 
-      router.push('/dashboard/crm');
+      // Esperar un momento para que la base de datos se actualice
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Refrescar la página para actualizar el estado del usuario
+      router.refresh();
+      
+      // Redirigir al dashboard
+      router.push('/dashboard');
     } catch (error) {
       console.error('Error in business setup:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo completar el registro. Intenta nuevamente.';
+      
       toast({
         title: 'Error',
-        description: 'No se pudo completar el registro. Intenta nuevamente.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -392,12 +412,11 @@ export default function OnboardingPage() {
                   onChange={(e) => setBusinessFormData(prev => ({ ...prev, size: e.target.value }))}
                 >
                   <option value="">Seleccionar</option>
-                  <option value="1-10">1-10 empleados</option>
-                  <option value="11-50">11-50 empleados</option>
-                  <option value="51-200">51-200 empleados</option>
-                  <option value="201-500">201-500 empleados</option>
-                  <option value="501-1000">501-1000 empleados</option>
-                  <option value="1000+">1000+ empleados</option>
+                  <option value="startup">1-10 empleados (Startup)</option>
+                  <option value="small">11-50 empleados (Pequeña)</option>
+                  <option value="medium">51-200 empleados (Mediana)</option>
+                  <option value="large">201-500 empleados (Grande)</option>
+                  <option value="enterprise">500+ empleados (Empresa)</option>
                 </select>
               </div>
 

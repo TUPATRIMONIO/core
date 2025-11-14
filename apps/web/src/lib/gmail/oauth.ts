@@ -70,6 +70,41 @@ export async function refreshAccessToken(refreshToken: string): Promise<GmailTok
   return credentials as GmailTokens;
 }
 
+/**
+ * Obtiene el perfil del usuario de Gmail
+ */
+export async function getGmailProfile(tokens: GmailTokens): Promise<{
+  emailAddress: string;
+  messagesTotal: number;
+  threadsTotal: number;
+}> {
+  try {
+    let currentTokens = tokens;
+    if (tokens.expiry_date && Date.now() >= tokens.expiry_date) {
+      if (tokens.refresh_token) {
+        currentTokens = await refreshAccessToken(tokens.refresh_token);
+      }
+    }
+
+    const oauth2Client = getAuthenticatedClient(currentTokens);
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+    const { data } = await gmail.users.getProfile({
+      userId: 'me'
+    });
+
+    return {
+      emailAddress: data.emailAddress!,
+      messagesTotal: data.messagesTotal || 0,
+      threadsTotal: data.threadsTotal || 0
+    };
+  } catch (error) {
+    console.error('Error fetching Gmail profile:', error);
+    throw new Error('Failed to fetch Gmail profile');
+  }
+}
+
+
 
 
 

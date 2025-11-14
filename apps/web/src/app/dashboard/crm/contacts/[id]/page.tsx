@@ -33,8 +33,9 @@ export const metadata: Metadata = {
 export default async function ContactDetailPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -65,12 +66,8 @@ export default async function ContactDetailPage({
   const { data: contact, error } = await supabase
     .schema('crm')
     .from('contacts')
-    .select(`
-      *,
-      company:companies(id, name, domain, type, website, phone, email),
-      assigned_user:users!contacts_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
-    `)
-    .eq('id', params.id)
+    .select('*')
+    .eq('id', id)
     .eq('organization_id', organizationId)
     .single();
 
@@ -82,11 +79,8 @@ export default async function ContactDetailPage({
   const { data: activities } = await supabase
     .schema('crm')
     .from('activities')
-    .select(`
-      *,
-      performed_by_user:users!activities_performed_by_fkey(id, first_name, last_name, email)
-    `)
-    .eq('contact_id', params.id)
+    .select('*')
+    .eq('contact_id', id)
     .eq('organization_id', organizationId)
     .order('performed_at', { ascending: false })
     .limit(20);
@@ -96,7 +90,7 @@ export default async function ContactDetailPage({
     .schema('crm')
     .from('deals')
     .select('id, title, value, currency, stage')
-    .eq('contact_id', params.id)
+    .eq('contact_id', id)
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 
@@ -105,7 +99,7 @@ export default async function ContactDetailPage({
     .schema('crm')
     .from('tickets')
     .select('id, ticket_number, subject, status, priority')
-    .eq('contact_id', params.id)
+    .eq('contact_id', id)
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
 

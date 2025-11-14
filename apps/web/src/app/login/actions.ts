@@ -15,6 +15,7 @@ interface AuthResult {
 export async function signIn(prevState: AuthResult | null, formData: FormData): Promise<AuthResult> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const rememberMe = formData.get('rememberMe') === 'on'
 
   // Validaciones básicas del lado del servidor
   if (!email) {
@@ -33,9 +34,13 @@ export async function signIn(prevState: AuthResult | null, formData: FormData): 
   try {
     const supabase = await createClient()
     
+    // Si "remember me", la sesión persiste; sino solo durante la sesión del navegador
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        persistSession: rememberMe,
+      },
     })
 
     if (error) {
@@ -53,36 +58,41 @@ export async function signIn(prevState: AuthResult | null, formData: FormData): 
     }
 
     if (data.user) {
-      let targetPath = '/dashboard'
+      // Verificar si hay un redirect pendiente (cuando el usuario intentó acceder a una ruta protegida)
+      const redirectTo = formData.get('redirectTo') as string | null
+      let targetPath = redirectTo || '/dashboard'
 
-      // Obtener organizaciones activas del usuario
-      const { data: memberships, error: membershipsError } = await supabase
-        .schema('core')
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', data.user.id)
-        .eq('status', 'active')
+      // Si no hay redirect específico, manejar la lógica de organizaciones
+      if (!redirectTo) {
+        // Obtener organizaciones activas del usuario
+        const { data: memberships, error: membershipsError } = await supabase
+          .schema('core')
+          .from('organization_users')
+          .select('organization_id')
+          .eq('user_id', data.user.id)
+          .eq('status', 'active')
 
-      if (!membershipsError && memberships) {
-        if (memberships.length === 1) {
-          const singleOrgId = memberships[0]?.organization_id
-          if (singleOrgId) {
-            await supabase
+        if (!membershipsError && memberships) {
+          if (memberships.length === 1) {
+            const singleOrgId = memberships[0]?.organization_id
+            if (singleOrgId) {
+              await supabase
+                .schema('core')
+                .from('users')
+                .update({ last_active_organization_id: singleOrgId })
+                .eq('id', data.user.id)
+            }
+          } else if (memberships.length > 1) {
+            const { data: userProfile } = await supabase
               .schema('core')
               .from('users')
-              .update({ last_active_organization_id: singleOrgId })
+              .select('last_active_organization_id')
               .eq('id', data.user.id)
-          }
-        } else if (memberships.length > 1) {
-          const { data: userProfile } = await supabase
-            .schema('core')
-            .from('users')
-            .select('last_active_organization_id')
-            .eq('id', data.user.id)
-            .maybeSingle()
+              .maybeSingle()
 
-          if (!userProfile?.last_active_organization_id) {
-            targetPath = '/dashboard/select-organization'
+            if (!userProfile?.last_active_organization_id) {
+              targetPath = '/dashboard/select-organization'
+            }
           }
         }
       }
@@ -269,6 +279,44 @@ export async function resetPassword(prevState: AuthResult | null, formData: Form
     }
     
     console.error('Error in resetPassword:', error)
+    return { error: 'Error interno del servidor' }
+  }
+}
+
+// Acción para reenviar email de confirmación
+export async function resendConfirmationEmail(prevState: AuthResult | null, formData: FormData): Promise<AuthResult> {
+  const email = formData.get('email') as string
+
+  if (!email) {
+    return { error: 'El email es requerido' }
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return { error: 'Email no válido' }
+  }
+
+  try {
+    const supabase = await createClient()
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}auth/callback`,
+      }
+    })
+
+    if (error) {
+      return { error: error.message || 'Error al reenviar email de confirmación' }
+    }
+
+    return { 
+      success: true, 
+      message: 'Email de confirmación reenviado. Por favor revisa tu bandeja de entrada.' 
+    }
+  } catch (error) {
+    console.error('Error in resendConfirmationEmail:', error)
     return { error: 'Error interno del servidor' }
   }
 }
