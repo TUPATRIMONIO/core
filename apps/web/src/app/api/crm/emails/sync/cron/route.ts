@@ -74,7 +74,7 @@ export async function GET(request: Request) {
         supabase,
         account.id,
         account.organization_id,
-        account.gmail_oauth_tokens,
+        account, // Pasar cuenta completa
         account.last_sync_at
       );
 

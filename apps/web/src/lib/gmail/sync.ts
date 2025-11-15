@@ -5,6 +5,8 @@
 
 import { google } from 'googleapis';
 import { getAuthenticatedClient, refreshAccessToken } from './oauth';
+import { fetchEmailsIMAP, type IMAPConfig } from '../email/imap-service';
+import { decryptObject } from '../crypto';
 import type { GmailTokens } from './types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -32,13 +34,13 @@ interface ParsedEmail {
 }
 
 /**
- * Sincroniza emails de una cuenta
+ * Sincroniza emails de una cuenta (OAuth o IMAP)
  */
 export async function syncEmailsForAccount(
   supabase: SupabaseClient,
   accountId: string,
   organizationId: string,
-  tokens: GmailTokens,
+  account: any, // Account completo con connection_type
   lastSyncAt?: string
 ): Promise<SyncResult> {
   const result: SyncResult = {
@@ -48,6 +50,14 @@ export async function syncEmailsForAccount(
   };
 
   try {
+    // Detectar tipo de conexión
+    if (account.connection_type === 'imap_smtp') {
+      // Sincronizar vía IMAP
+      return await syncEmailsViaIMAP(supabase, accountId, organizationId, account, lastSyncAt);
+    }
+    
+    // Si es OAuth, continuar con Gmail API (código actual)
+    const tokens = account.gmail_oauth_tokens || account;
     // Verificar y refrescar tokens si es necesario
     let currentTokens = tokens;
     if (tokens.expiry_date && Date.now() >= tokens.expiry_date) {
@@ -315,6 +325,169 @@ async function upsertEmailThread(
       });
   } catch (error) {
     console.error('Error upserting thread:', error);
+  }
+}
+
+/**
+ * Sincroniza emails vía IMAP
+ */
+async function syncEmailsViaIMAP(
+  supabase: SupabaseClient,
+  accountId: string,
+  organizationId: string,
+  account: any,
+  lastSyncAt?: string
+): Promise<SyncResult> {
+  const result: SyncResult = {
+    newEmails: 0,
+    updatedThreads: 0,
+    errors: []
+  };
+
+  try {
+    // Desencriptar configuración IMAP
+    const imapConfig: IMAPConfig = decryptObject(account.imap_config);
+    
+    const sinceDate = lastSyncAt ? new Date(lastSyncAt) : undefined;
+    
+    console.log(`[IMAP Sync] Fetching emails for ${account.email_address} since ${sinceDate || 'beginning'}`);
+    
+    // Obtener emails via IMAP
+    const emails = await fetchEmailsIMAP(imapConfig, sinceDate, 100);
+    
+    console.log(`[IMAP Sync] Fetched ${emails.length} emails`);
+    
+    // Procesar cada email
+    for (const parsed of emails) {
+      try {
+        // Verificar si ya existe
+        const { data: existing } = await supabase
+          .schema('crm')
+          .from('emails')
+          .select('id')
+          .eq('gmail_message_id', parsed.messageId)
+          .eq('organization_id', organizationId)
+          .single();
+
+        if (existing) continue;
+
+        // Determinar dirección
+        const accountEmail = account.email_address.toLowerCase();
+        const isOutbound = parsed.from.toLowerCase().includes(accountEmail);
+
+        // Intentar match con contacto
+        const contactEmail = isOutbound ? parsed.to[0] : parsed.from;
+        const { data: contact } = await supabase
+          .schema('crm')
+          .from('contacts')
+          .select('id')
+          .eq('organization_id', organizationId)
+          .ilike('email', contactEmail)
+          .single();
+
+        // Insertar email
+        const emailData: any = {
+          organization_id: organizationId,
+          contact_id: contact?.id || null,
+          gmail_message_id: parsed.messageId,
+          thread_id: parsed.messageId, // IMAP usa messageId como thread
+          from_email: parsed.from,
+          to_emails: parsed.to,
+          cc_emails: parsed.cc,
+          subject: parsed.subject,
+          body_html: parsed.bodyHtml,
+          body_text: parsed.bodyText,
+          snippet: parsed.snippet,
+          direction: isOutbound ? 'outbound' : 'inbound',
+          status: 'delivered',
+          sent_at: parsed.date.toISOString(),
+          has_attachments: parsed.hasAttachments,
+          in_reply_to: parsed.inReplyTo,
+          "references": parsed.references
+        };
+
+        if (isOutbound) {
+          emailData.sent_from_account_id = accountId;
+        } else {
+          emailData.received_in_account_id = accountId;
+        }
+
+        const { error: insertError } = await supabase
+          .schema('crm')
+          .from('emails')
+          .insert(emailData);
+
+        if (insertError) {
+          result.errors.push(`Failed to insert email: ${insertError.message}`);
+        } else {
+          result.newEmails++;
+          
+          // Crear actividad si hay contacto
+          if (contact?.id) {
+            await supabase
+              .schema('crm')
+              .from('activities')
+              .insert({
+                organization_id: organizationId,
+                contact_id: contact.id,
+                type: 'email',
+                subject: `Email ${isOutbound ? 'enviado' : 'recibido'}: ${parsed.subject}`,
+                description: parsed.snippet,
+                performed_at: parsed.date.toISOString()
+              });
+          }
+        }
+
+        // Crear/actualizar thread (usar messageId como thread_id)
+        const threadData = {
+          organization_id: organizationId,
+          gmail_thread_id: parsed.messageId,
+          subject: parsed.subject,
+          snippet: parsed.snippet,
+          participants: Array.from(new Set([parsed.from, ...parsed.to])),
+          last_email_at: parsed.date.toISOString(),
+          last_email_from: parsed.from,
+          contact_id: contact?.id,
+          labels: []
+        };
+
+        await supabase
+          .schema('crm')
+          .from('email_threads')
+          .upsert(threadData, {
+            onConflict: 'organization_id,gmail_thread_id'
+          });
+        
+        result.updatedThreads++;
+
+      } catch (error) {
+        console.error('[IMAP Sync] Error processing email:', error);
+        result.errors.push(error instanceof Error ? error.message : 'Unknown error');
+      }
+    }
+
+    // Actualizar last_sync_at
+    await supabase
+      .schema('crm')
+      .from('email_accounts')
+      .update({ 
+        last_sync_at: new Date().toISOString(),
+        last_sync_error: result.errors.length > 0 ? result.errors.join('; ') : null
+      })
+      .eq('id', accountId);
+
+    return result;
+  } catch (error) {
+    console.error(`[IMAP Sync Account ${accountId}] Error:`, error);
+    result.errors.push(error instanceof Error ? error.message : 'Unknown error');
+    
+    await supabase
+      .schema('crm')
+      .from('email_accounts')
+      .update({ last_sync_error: error instanceof Error ? error.message : 'Unknown error' })
+      .eq('id', accountId);
+    
+    return result;
   }
 }
 

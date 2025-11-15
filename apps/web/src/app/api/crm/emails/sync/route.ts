@@ -70,13 +70,13 @@ export async function POST(request: Request) {
     const results = [];
     
     for (const account of accountsToSync) {
-      console.log(`[Sync] Processing account: ${account.email_address}`);
+      console.log(`[Sync] Processing account: ${account.email_address} (${account.connection_type})`);
       
       const result = await syncEmailsForAccount(
         supabaseAdmin,
         account.id,
         userWithOrg.organizationId,
-        account.gmail_oauth_tokens,
+        account, // Pasar cuenta completa en lugar de solo tokens
         account.last_sync_at
       );
 

@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmailConnectionWizard } from '@/components/crm/EmailConnectionWizard';
 import { 
   Mail, 
   Users, 
@@ -31,6 +32,8 @@ export default function EmailAccountsPage() {
   const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardAccountType, setWizardAccountType] = useState<'shared' | 'personal'>('shared');
 
   useEffect(() => {
     loadAccounts();
@@ -83,29 +86,14 @@ export default function EmailAccountsPage() {
     }
   }
 
-  async function connectAccount(type: 'shared' | 'personal') {
-    try {
-      // Display name por defecto (se puede editar después)
-      const displayName = type === 'shared' ? 'Cuenta Compartida' : 'Mi Cuenta';
-      
-      const response = await fetch(
-        `/api/crm/email-accounts/connect?account_type=${type}&display_name=${encodeURIComponent(displayName)}`
-      );
-      
-      if (!response.ok) {
-        throw new Error('Failed to get authorization URL');
-      }
+  function openWizard(type: 'shared' | 'personal') {
+    setWizardAccountType(type);
+    setShowWizard(true);
+  }
 
-      const { auth_url } = await response.json();
-      window.location.href = auth_url;
-    } catch (error) {
-      console.error('Error connecting account:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo iniciar la conexión',
-        variant: 'destructive',
-      });
-    }
+  function closeWizard() {
+    setShowWizard(false);
+    loadAccounts(); // Recargar cuentas después de conectar
   }
 
   async function disconnectAccount(accountId: string) {
@@ -195,24 +183,35 @@ export default function EmailAccountsPage() {
         </AlertDescription>
       </Alert>
 
-      {/* Botones de acción */}
-      <div className="flex gap-3">
-        <Button
-          onClick={() => connectAccount('shared')}
-          className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-        >
-          <Users className="w-4 h-4 mr-2" />
-          Conectar Cuenta Compartida
-        </Button>
-        
-        <Button
-          onClick={() => connectAccount('personal')}
-          variant="outline"
-        >
-          <User className="w-4 h-4 mr-2" />
-          Conectar Mi Cuenta Personal
-        </Button>
-      </div>
+      {/* Wizard de Conexión */}
+      {showWizard ? (
+        <EmailConnectionWizard
+          accountType={wizardAccountType}
+          onSuccess={closeWizard}
+          onCancel={closeWizard}
+        />
+      ) : (
+        <>
+          {/* Botones de acción */}
+          <div className="flex gap-3">
+            <Button
+              onClick={() => openWizard('shared')}
+              className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Conectar Cuenta Compartida
+            </Button>
+            
+            <Button
+              onClick={() => openWizard('personal')}
+              variant="outline"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Conectar Mi Cuenta Personal
+            </Button>
+          </div>
+        </>
+      )}
 
       {isLoading ? (
         <p className="text-gray-500">Cargando cuentas...</p>
@@ -359,19 +358,19 @@ export default function EmailAccountsPage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   No hay cuentas conectadas
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Conecta una cuenta de Gmail para empezar a enviar y recibir emails desde el CRM
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <Button onClick={() => connectAccount('shared')}>
-                    <Users className="w-4 h-4 mr-2" />
-                    Conectar Cuenta Compartida
-                  </Button>
-                  <Button onClick={() => connectAccount('personal')} variant="outline">
-                    <User className="w-4 h-4 mr-2" />
-                    Conectar Mi Cuenta
-                  </Button>
-                </div>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Conecta una cuenta de email para empezar a enviar y recibir mensajes desde el CRM
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button onClick={() => openWizard('shared')}>
+                  <Users className="w-4 h-4 mr-2" />
+                  Conectar Cuenta Compartida
+                </Button>
+                <Button onClick={() => openWizard('personal')} variant="outline">
+                  <User className="w-4 h-4 mr-2" />
+                  Conectar Mi Cuenta
+                </Button>
+              </div>
               </CardContent>
             </Card>
           )}

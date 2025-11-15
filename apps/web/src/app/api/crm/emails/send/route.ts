@@ -7,7 +7,10 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { getCurrentUserWithOrg } from '@/lib/crm/permissions';
 import { sendEmail } from '@/lib/gmail/service';
+import { sendEmailSMTP } from '@/lib/email/smtp-service';
+import { decryptObject } from '@/lib/crypto';
 import type { EmailMessage } from '@/lib/gmail/types';
+import type { SMTPConfig } from '@/lib/email/smtp-service';
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -71,17 +74,38 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Preparar mensaje
-    const message: EmailMessage = {
-      to: Array.isArray(to) ? to : [to],
-      cc,
-      bcc,
-      subject,
-      body: emailBody
-    };
-
-    // Enviar email usando los tokens de la cuenta
-    const result = await sendEmail(emailAccount.gmail_oauth_tokens, message);
+    // Detectar tipo de conexión y enviar según corresponda
+    let result: any;
+    
+    if (emailAccount.connection_type === 'oauth') {
+      // Enviar vía Gmail API (OAuth)
+      const message: EmailMessage = {
+        to: Array.isArray(to) ? to : [to],
+        cc,
+        bcc,
+        subject,
+        body: emailBody
+      };
+      
+      result = await sendEmail(emailAccount.gmail_oauth_tokens, message);
+    } else {
+      // Enviar vía SMTP
+      const smtpConfig: SMTPConfig = decryptObject(emailAccount.smtp_config);
+      
+      result = await sendEmailSMTP(smtpConfig, {
+        to: Array.isArray(to) ? to : [to],
+        cc,
+        bcc,
+        subject,
+        body: emailBody
+      });
+      
+      // Adaptar resultado de SMTP a formato esperado
+      result = {
+        id: result.messageId,
+        threadId: result.messageId // IMAP no tiene threadId, usar messageId
+      };
+    }
 
     // Guardar en crm.emails
     const { data: emailRecord, error: emailError } = await supabase
