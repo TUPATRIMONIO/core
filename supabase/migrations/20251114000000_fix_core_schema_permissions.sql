@@ -21,3 +21,4 @@ GRANT SELECT, UPDATE ON core.users TO authenticated;
 COMMENT ON SCHEMA core IS 'Schema principal para organizaciones y usuarios multitenant';
 
 
+
