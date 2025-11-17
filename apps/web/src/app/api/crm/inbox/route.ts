@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     const unreadOnly = searchParams.get('unread_only') === 'true';
     const accountId = searchParams.get('account_id');
     const contactId = searchParams.get('contact_id');
+    const sortBy = searchParams.get('sort_by') || 'date_desc';
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -40,13 +41,39 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Determinar ordenamiento
+    let orderColumn = 'last_email_at';
+    let orderAscending = false;
+    
+    switch (sortBy) {
+      case 'date_asc':
+        orderColumn = 'last_email_at';
+        orderAscending = true;
+        break;
+      case 'date_desc':
+        orderColumn = 'last_email_at';
+        orderAscending = false;
+        break;
+      case 'sender_asc':
+        orderColumn = 'last_email_from';
+        orderAscending = true;
+        break;
+      case 'unread_first':
+        orderColumn = 'is_read';
+        orderAscending = true; // false primero (unread), luego true (read)
+        break;
+      default:
+        orderColumn = 'last_email_at';
+        orderAscending = false;
+    }
+
     // Construir query
     let query = supabaseAdmin
       .schema('crm')
       .from('email_threads')
       .select('*', { count: 'exact' })
       .eq('organization_id', userWithOrg.organizationId)
-      .order('last_email_at', { ascending: false })
+      .order(orderColumn, { ascending: orderAscending })
       .range(offset, offset + limit - 1);
 
     if (status) {
@@ -64,39 +91,23 @@ export async function GET(request: Request) {
     let threads = null;
     let count = 0;
 
-    // Si hay filtro de cuenta, filtrar threads que tienen emails de esa cuenta
+    // Si hay filtro de cuenta, usar función RPC personalizada
     if (accountId) {
-      // Obtener thread_ids que tienen emails de esta cuenta
-      const { data: emailsWithAccount } = await supabaseAdmin
+      console.log('[Inbox] Filtering by account:', accountId);
+      
+      const { data: filteredThreads, error: threadsError } = await supabaseAdmin
         .schema('crm')
-        .from('emails')
-        .select('thread_id')
-        .eq('organization_id', userWithOrg.organizationId)
-        .or(`sent_from_account_id.eq.${accountId},received_in_account_id.eq.${accountId}`);
+        .rpc('get_threads_by_account', {
+          org_id: userWithOrg.organizationId,
+          account_uuid: accountId,
+          result_limit: limit,
+          result_offset: offset
+        });
 
-      const threadIds = Array.from(new Set(
-        (emailsWithAccount || [])
-          .map(e => e.thread_id)
-          .filter(Boolean)
-      ));
-
-      if (threadIds.length > 0) {
-        // Buscar threads que tienen esos gmail_thread_ids
-        const result = await supabaseAdmin
-          .schema('crm')
-          .from('email_threads')
-          .select('*', { count: 'exact' })
-          .eq('organization_id', userWithOrg.organizationId)
-          .in('gmail_thread_id', threadIds)
-          .order('last_email_at', { ascending: false })
-          .range(offset, offset + limit - 1);
-
-        threads = result.data;
-        count = result.count || 0;
-      } else {
-        threads = [];
-        count = 0;
-      }
+      console.log('[Inbox] RPC Threads found:', filteredThreads?.length, 'error:', threadsError);
+      
+      threads = filteredThreads;
+      count = filteredThreads?.length || 0; // RPC no retorna count total, solo los resultados
     } else {
       // Sin filtro de cuenta, traer todos
       const result = await query;

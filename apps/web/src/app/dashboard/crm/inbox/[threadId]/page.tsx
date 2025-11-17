@@ -70,17 +70,17 @@ export default function ThreadViewPage({ params }: PageProps) {
     if (!threadId) return;
 
     try {
-      const response = await fetch(`/api/crm/inbox/${threadId}`, {
-        method: 'PATCH',
+      const response = await fetch(`/api/crm/inbox/${threadId}/move`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'archived' })
+        body: JSON.stringify({ folder_name: 'Archived' })
       });
 
       if (!response.ok) throw new Error('Failed to archive');
 
       toast({
         title: 'Conversación archivada',
-        description: 'La conversación ha sido archivada',
+        description: 'La conversación ha sido movida a Archived',
       });
 
       router.push('/dashboard/crm/inbox');

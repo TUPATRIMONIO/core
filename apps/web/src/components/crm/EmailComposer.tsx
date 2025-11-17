@@ -14,6 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, X, Mail, Users, User, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FileUpload } from './FileUpload';
+import { uploadAttachment } from '@/lib/storage/attachments';
 import {
   Select,
   SelectContent,
@@ -49,10 +51,11 @@ export function EmailComposer({
   onSent,
   onCancel
 }: EmailComposerProps) {
-  const { toast } = useToast();
+  const { toast} = useToast();
   const [isSending, setIsSending] = useState(false);
   const [accounts, setAccounts] = useState<EmailAccountOption[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     to: defaultTo,
     cc: '',
@@ -102,16 +105,48 @@ export function EmailComposer({
     setIsSending(true);
 
     try {
+      // Crear email primero para obtener ID (necesario para upload de adjuntos)
+      const tempEmailId = `temp-${Date.now()}`;
+      const uploadedAttachments = [];
+
+      // Subir adjuntos a Supabase Storage (si hay)
+      if (attachments.length > 0) {
+        toast({
+          title: 'Subiendo adjuntos...',
+          description: `Subiendo ${attachments.length} archivo(s)`,
+        });
+
+        // Necesitamos el organization_id, lo obtenemos del endpoint
+        const orgResponse = await fetch('/api/crm/email-accounts');
+        const { data: accountsData } = await orgResponse.json();
+        const account = accountsData?.find((a: any) => a.account_id === selectedAccount);
+        
+        if (!account) throw new Error('No se pudo obtener información de la cuenta');
+
+        // Subir cada archivo
+        for (const file of attachments) {
+          try {
+            const metadata = await uploadAttachment(file, account.organization_id, tempEmailId);
+            uploadedAttachments.push(metadata);
+          } catch (uploadError) {
+            console.error('Error uploading file:', uploadError);
+            throw new Error(`Error al subir ${file.name}`);
+          }
+        }
+      }
+
+      // Enviar email con adjuntos
       const response = await fetch('/api/crm/emails/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from_account_id: selectedAccount, // ← NUEVO: Cuenta seleccionada
+          from_account_id: selectedAccount,
           to: formData.to,
           cc: formData.cc ? formData.cc.split(',').map(e => e.trim()) : undefined,
           subject: formData.subject,
           body: formData.body.replace(/\n/g, '<br>'),
-          contact_id: contactId
+          contact_id: contactId,
+          attachments: uploadedAttachments // URLs de Supabase Storage
         })
       });
 
@@ -134,13 +169,14 @@ export function EmailComposer({
         subject: '',
         body: ''
       });
+      setAttachments([]);
 
       if (onSent) onSent();
     } catch (error) {
       console.error('Error sending email:', error);
       toast({
         title: 'Error al enviar email',
-        description: error instanceof Error ? error.message : 'Intenta nuevamente o verifica la configuración de Gmail',
+        description: error instanceof Error ? error.message : 'Intenta nuevamente o verifica la configuración',
         variant: 'destructive',
       });
     } finally {
@@ -281,6 +317,16 @@ export function EmailComposer({
               rows={12}
               placeholder="Escribe tu mensaje aquí..."
               required
+            />
+          </div>
+
+          {/* Adjuntos */}
+          <div className="space-y-2">
+            <Label>Adjuntos</Label>
+            <FileUpload
+              files={attachments}
+              onFilesChange={setAttachments}
+              disabled={isSending}
             />
           </div>
 

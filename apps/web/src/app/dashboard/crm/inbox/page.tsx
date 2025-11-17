@@ -46,6 +46,7 @@ export default function InboxPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
+  const [sortBy, setSortBy] = useState('date_desc');
   const [search, setSearch] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -57,9 +58,10 @@ export default function InboxPage() {
 
   useEffect(() => {
     // Resetear offset cuando cambian los filtros
+    console.log('[Inbox Frontend] Filter changed:', { filter, selectedAccount, sortBy });
     setOffset(0);
     loadThreads(true);
-  }, [filter, selectedAccount]);
+  }, [filter, selectedAccount, sortBy]);
 
   async function loadAccounts() {
     try {
@@ -85,9 +87,10 @@ export default function InboxPage() {
 
       const unreadParam = filter === 'unread' ? '&unread_only=true' : '';
       const accountParam = selectedAccount !== 'all' ? `&account_id=${selectedAccount}` : '';
+      const sortParam = sortBy ? `&sort_by=${sortBy}` : '';
       
       const response = await fetch(
-        `/api/crm/inbox?limit=${ITEMS_PER_PAGE}&offset=${loadingOffset}${unreadParam}${accountParam}`
+        `/api/crm/inbox?limit=${ITEMS_PER_PAGE}&offset=${loadingOffset}${unreadParam}${accountParam}${sortParam}`
       );
       
       if (!response.ok) {
@@ -234,6 +237,19 @@ export default function InboxPage() {
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
             <SelectItem value="unread">No leídas ({unreadCount})</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Ordenamiento */}
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-52">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date_desc">Más recientes primero</SelectItem>
+            <SelectItem value="date_asc">Más antiguos primero</SelectItem>
+            <SelectItem value="sender_asc">Por remitente (A-Z)</SelectItem>
+            <SelectItem value="unread_first">No leídos primero</SelectItem>
           </SelectContent>
         </Select>
       </div>

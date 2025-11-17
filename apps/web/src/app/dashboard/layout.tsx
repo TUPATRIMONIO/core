@@ -21,6 +21,7 @@ import {
   Settings
 } from 'lucide-react';
 import { OrganizationSwitcher, type OrganizationSummary } from './OrganizationSwitcher';
+import { DashboardSidebar } from './DashboardSidebar';
 
 export default async function DashboardLayout({
   children,
@@ -187,174 +188,13 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
-            <nav className="space-y-1">
-              <Link
-                href="/dashboard"
-                className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-              >
-                <LayoutDashboard className="h-4 w-4 mr-3" />
-                Inicio
-              </Link>
-
-              {canCRM && (
-                <>
-                  <div className="mt-4 mb-2">
-                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      CRM
-                    </div>
-                  </div>
-                  
-                  <Link
-                    href="/dashboard/crm"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <LayoutDashboard className="h-4 w-4 mr-3" />
-                    Dashboard CRM
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/contacts"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Users className="h-4 w-4 mr-3" />
-                    Contactos
-                    {crmStats && crmStats.new_contacts > 0 && (
-                      <span className="ml-auto px-2 py-0.5 text-xs bg-[var(--tp-brand)] text-white rounded-full">
-                        {crmStats.new_contacts}
-                      </span>
-                    )}
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/companies"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Building2 className="h-4 w-4 mr-3" />
-                    Empresas
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/deals"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Briefcase className="h-4 w-4 mr-3" />
-                    Negocios
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/tickets"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Ticket className="h-4 w-4 mr-3" />
-                    Tickets
-                    {crmStats && crmStats.open_tickets > 0 && (
-                      <span className="ml-auto px-2 py-0.5 text-xs bg-orange-500 text-white rounded-full">
-                        {crmStats.open_tickets}
-                      </span>
-                    )}
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/products"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Package className="h-4 w-4 mr-3" />
-                    Productos
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/quotes"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <FileCheck className="h-4 w-4 mr-3" />
-                    Cotizaciones
-                  </Link>
-
-                  <Link
-                    href="/dashboard/crm/inbox"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Mail className="h-4 w-4 mr-3" />
-                    Inbox
-                    {crmStats && crmStats.unread_emails > 0 && (
-                      <span className="ml-auto px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
-                        {crmStats.unread_emails}
-                      </span>
-                    )}
-                  </Link>
-
-                  <div className="mt-4 mb-2">
-                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Configuración
-                    </div>
-                  </div>
-
-                  <Link
-                    href="/dashboard/crm/settings/email-accounts"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Settings className="h-4 w-4 mr-3" />
-                    Cuentas de Email
-                  </Link>
-                </>
-              )}
-
-              {isAdmin && (
-                <>
-                  <div className="mt-4 mb-2">
-                    <div className="px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Administración
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Link
-                      href="/dashboard/blog"
-                      className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                    >
-                      <FileText className="h-4 w-4 mr-3" />
-                      Blog
-                    </Link>
-                    <Link
-                      href="/dashboard/blog/categories"
-                      className="flex items-center px-4 py-2 pl-11 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
-                    >
-                      Categorías
-                    </Link>
-                    <Link
-                      href="/dashboard/blog/media"
-                      className="flex items-center px-4 py-2 pl-11 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
-                    >
-                      Galería
-                    </Link>
-                  </div>
-
-                  <Link
-                    href="/dashboard/pages"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Globe className="h-4 w-4 mr-3" />
-                    Páginas
-                  </Link>
-
-                  <Link
-                    href="/dashboard/users"
-                    className="flex items-center px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Users className="h-4 w-4 mr-3" />
-                    Usuarios
-                  </Link>
-                </>
-              )}
-            </nav>
-          </aside>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-8">
+        <div className="flex gap-4">
+          {/* Sidebar Colapsable */}
+          <DashboardSidebar canCRM={canCRM} isAdmin={isAdmin || false} crmStats={crmStats} />
 
           {/* Main content */}
-          <main className="flex-1 min-h-[calc(100vh-200px)] pb-24 md:pb-28">
+          <main className="flex-1 min-h-[calc(100vh-200px)] pb-28 md:pb-32 pr-2 md:pr-4">
             {children}
           </main>
         </div>
@@ -362,4 +202,3 @@ export default async function DashboardLayout({
     </div>
   );
 }
-
