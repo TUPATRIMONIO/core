@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { 
   Inbox, 
@@ -43,9 +43,12 @@ const ICON_MAP: Record<string, any> = {
 export function FolderSidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  const currentFolder = searchParams.get('folder') || 'Inbox';
 
   useEffect(() => {
     loadFolders();
@@ -70,16 +73,25 @@ export function FolderSidebar() {
   }
 
   const isActive = (folderName: string) => {
-    if (pathname === '/dashboard/crm/inbox' && folderName === 'Inbox') return true;
-    return pathname.includes(`/folder/${folderName.toLowerCase()}`);
+    return currentFolder === folderName;
   };
 
   const navigateToFolder = (folderName: string) => {
+    // Mantener todos los query params excepto folder
+    const params = new URLSearchParams(searchParams.toString());
+    
     if (folderName === 'Inbox') {
-      router.push('/dashboard/crm/inbox');
+      params.delete('folder'); // Inbox es el default
     } else {
-      router.push(`/dashboard/crm/inbox/folder/${folderName.toLowerCase()}`);
+      params.set('folder', folderName);
     }
+    
+    // Actualizar URL sin navegar (mantiene todos los filtros)
+    const newUrl = params.toString() 
+      ? `/dashboard/crm/inbox?${params.toString()}`
+      : '/dashboard/crm/inbox';
+    
+    router.push(newUrl);
   };
 
   if (isLoading) {

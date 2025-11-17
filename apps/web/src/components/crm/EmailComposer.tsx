@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,7 +52,8 @@ export function EmailComposer({
   onSent,
   onCancel
 }: EmailComposerProps) {
-  const { toast} = useToast();
+  const router = useRouter();
+  const { toast } = useToast();
   const [isSending, setIsSending] = useState(false);
   const [accounts, setAccounts] = useState<EmailAccountOption[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>('');
@@ -105,32 +107,28 @@ export function EmailComposer({
     setIsSending(true);
 
     try {
-      // Crear email primero para obtener ID (necesario para upload de adjuntos)
-      const tempEmailId = `temp-${Date.now()}`;
-      const uploadedAttachments = [];
+      // Convertir adjuntos a base64 (directamente, sin Supabase Storage)
+      const processedAttachments = [];
 
-      // Subir adjuntos a Supabase Storage (si hay)
       if (attachments.length > 0) {
         toast({
-          title: 'Subiendo adjuntos...',
-          description: `Subiendo ${attachments.length} archivo(s)`,
+          title: 'Procesando adjuntos...',
+          description: `Procesando ${attachments.length} archivo(s)`,
         });
 
-        // Necesitamos el organization_id, lo obtenemos del endpoint
-        const orgResponse = await fetch('/api/crm/email-accounts');
-        const { data: accountsData } = await orgResponse.json();
-        const account = accountsData?.find((a: any) => a.account_id === selectedAccount);
-        
-        if (!account) throw new Error('No se pudo obtener información de la cuenta');
-
-        // Subir cada archivo
         for (const file of attachments) {
           try {
-            const metadata = await uploadAttachment(file, account.organization_id, tempEmailId);
-            uploadedAttachments.push(metadata);
-          } catch (uploadError) {
-            console.error('Error uploading file:', uploadError);
-            throw new Error(`Error al subir ${file.name}`);
+            // Convertir archivo a base64
+            const base64 = await fileToBase64(file);
+            
+            processedAttachments.push({
+              filename: file.name,
+              content: base64,
+              contentType: file.type
+            });
+          } catch (error) {
+            console.error('Error processing file:', error);
+            throw new Error(`Error al procesar ${file.name}`);
           }
         }
       }
@@ -146,7 +144,7 @@ export function EmailComposer({
           subject: formData.subject,
           body: formData.body.replace(/\n/g, '<br>'),
           contact_id: contactId,
-          attachments: uploadedAttachments // URLs de Supabase Storage
+          attachments: processedAttachments // Base64 directo
         })
       });
 
@@ -171,7 +169,12 @@ export function EmailComposer({
       });
       setAttachments([]);
 
-      if (onSent) onSent();
+      if (onSent) {
+        onSent();
+      } else {
+        // Recargar página para mostrar el email enviado en el historial
+        router.refresh();
+      }
     } catch (error) {
       console.error('Error sending email:', error);
       toast({
@@ -190,6 +193,20 @@ export function EmailComposer({
 
   const sharedAccounts = accounts.filter(a => a.account_type === 'shared');
   const personalAccounts = accounts.filter(a => a.account_type === 'personal');
+
+  // Helper: Convertir archivo a base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // Remover el prefijo "data:mime/type;base64,"
+        const base64 = (reader.result as string).split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
 
   return (
     <Card>

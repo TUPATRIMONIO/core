@@ -70,20 +70,16 @@ export function FileUpload({ files, onFilesChange, maxFiles, disabled }: FileUpl
           disabled={disabled}
           className="hidden"
         />
-        <label htmlFor="file-upload">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={disabled}
-            asChild
-          >
-            <span className="cursor-pointer">
-              <Paperclip className="w-4 h-4 mr-2" />
-              Adjuntar Archivos
-            </span>
-          </Button>
-        </label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+          onClick={() => document.getElementById('file-upload')?.click()}
+        >
+          <Paperclip className="w-4 h-4 mr-2" />
+          Adjuntar Archivos
+        </Button>
       </div>
 
       {/* Lista de archivos */}

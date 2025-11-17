@@ -190,8 +190,8 @@ export async function syncEmailsForAccount(
           }
         }
 
-        // Actualizar o crear thread
-        await upsertEmailThread(supabase, organizationId, parsed, contact?.id);
+        // Actualizar o crear thread (isOutbound ya fue calculado arriba en línea 127)
+        await upsertEmailThread(supabase, organizationId, parsed, contact?.id, isOutbound);
         result.updatedThreads++;
 
       } catch (msgError) {
@@ -302,7 +302,8 @@ async function upsertEmailThread(
   supabase: SupabaseClient,
   organizationId: string,
   parsed: ParsedEmail,
-  contactId?: string
+  contactId?: string,
+  isOutbound?: boolean
 ): Promise<void> {
   try {
     const threadData = {
@@ -317,12 +318,48 @@ async function upsertEmailThread(
       contact_id: contactId
     };
 
-    await supabase
+    const { data: upsertedThread } = await supabase
       .schema('crm')
       .from('email_threads')
       .upsert(threadData, {
         onConflict: 'organization_id,gmail_thread_id'
-      });
+      })
+      .select('id')
+      .single();
+
+    // Auto-asignar a carpeta
+    if (upsertedThread && isOutbound !== undefined) {
+      const folderName = isOutbound ? 'Sent' : 'Inbox';
+      
+      const { data: folder } = await supabase
+        .schema('crm')
+        .from('folders')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('name', folderName)
+        .single();
+
+      if (folder) {
+        // Verificar si ya existe antes de insertar
+        const { data: existing } = await supabase
+          .schema('crm')
+          .from('thread_labels')
+          .select('id')
+          .eq('thread_id', upsertedThread.id)
+          .eq('folder_id', folder.id)
+          .single();
+
+        if (!existing) {
+          await supabase
+            .schema('crm')
+            .from('thread_labels')
+            .insert({
+              thread_id: upsertedThread.id,
+              folder_id: folder.id
+            });
+        }
+      }
+    }
   } catch (error) {
     console.error('Error upserting thread:', error);
   }
@@ -451,12 +488,48 @@ async function syncEmailsViaIMAP(
           labels: []
         };
 
-        await supabase
+        const { data: upsertedThread } = await supabase
           .schema('crm')
           .from('email_threads')
           .upsert(threadData, {
             onConflict: 'organization_id,gmail_thread_id'
-          });
+          })
+          .select('id')
+          .single();
+        
+        // Auto-asignar a carpeta (Inbox para recibidos, Sent para enviados)
+        if (upsertedThread) {
+          const folderName = isOutbound ? 'Sent' : 'Inbox';
+          
+          const { data: folder } = await supabase
+            .schema('crm')
+            .from('folders')
+            .select('id')
+            .eq('organization_id', organizationId)
+            .eq('name', folderName)
+            .single();
+
+          if (folder) {
+            // Verificar si ya existe antes de insertar
+            const { data: existing } = await supabase
+              .schema('crm')
+              .from('thread_labels')
+              .select('id')
+              .eq('thread_id', upsertedThread.id)
+              .eq('folder_id', folder.id)
+              .single();
+
+            if (!existing) {
+              await supabase
+                .schema('crm')
+                .from('thread_labels')
+                .insert({
+                  thread_id: upsertedThread.id,
+                  folder_id: folder.id
+                });
+            }
+          }
+        }
         
         result.updatedThreads++;
 

@@ -28,27 +28,74 @@ export async function sendEmail(
     const oauth2Client = getAuthenticatedClient(currentTokens);
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
-    // Construir email
-    const emailLines = [];
+    // Construir email con adjuntos
+    let email: string;
     
-    // Headers
-    const toAddresses = Array.isArray(message.to) ? message.to.join(', ') : message.to;
-    emailLines.push(`To: ${toAddresses}`);
-    
-    if (message.cc && message.cc.length > 0) {
-      emailLines.push(`Cc: ${message.cc.join(', ')}`);
+    if (message.attachments && message.attachments.length > 0) {
+      // Email con adjuntos (multipart)
+      const boundary = `boundary_${Date.now()}`;
+      const emailLines = [];
+      
+      // Headers principales
+      const toAddresses = Array.isArray(message.to) ? message.to.join(', ') : message.to;
+      emailLines.push(`To: ${toAddresses}`);
+      
+      if (message.cc && message.cc.length > 0) {
+        emailLines.push(`Cc: ${message.cc.join(', ')}`);
+      }
+      
+      if (message.bcc && message.bcc.length > 0) {
+        emailLines.push(`Bcc: ${message.bcc.join(', ')}`);
+      }
+      
+      emailLines.push(`Subject: ${message.subject}`);
+      emailLines.push(`Content-Type: multipart/mixed; boundary="${boundary}"`);
+      emailLines.push('');
+      
+      // Contenido del email
+      emailLines.push(`--${boundary}`);
+      emailLines.push('Content-Type: text/html; charset=utf-8');
+      emailLines.push('');
+      emailLines.push(message.body);
+      emailLines.push('');
+      
+      // Adjuntos
+      for (const attachment of message.attachments) {
+        emailLines.push(`--${boundary}`);
+        emailLines.push(`Content-Type: ${attachment.contentType}; name="${attachment.filename}"`);
+        emailLines.push('Content-Transfer-Encoding: base64');
+        emailLines.push(`Content-Disposition: attachment; filename="${attachment.filename}"`);
+        emailLines.push('');
+        // Gmail requiere que el base64 esté en líneas de máximo 76 caracteres
+        const base64Lines = attachment.content.match(/.{1,76}/g) || [];
+        emailLines.push(base64Lines.join('\n'));
+        emailLines.push('');
+      }
+      
+      emailLines.push(`--${boundary}--`);
+      email = emailLines.join('\n');
+    } else {
+      // Email simple sin adjuntos
+      const emailLines = [];
+      
+      const toAddresses = Array.isArray(message.to) ? message.to.join(', ') : message.to;
+      emailLines.push(`To: ${toAddresses}`);
+      
+      if (message.cc && message.cc.length > 0) {
+        emailLines.push(`Cc: ${message.cc.join(', ')}`);
+      }
+      
+      if (message.bcc && message.bcc.length > 0) {
+        emailLines.push(`Bcc: ${message.bcc.join(', ')}`);
+      }
+      
+      emailLines.push(`Subject: ${message.subject}`);
+      emailLines.push('Content-Type: text/html; charset=utf-8');
+      emailLines.push('');
+      emailLines.push(message.body);
+      
+      email = emailLines.join('\n');
     }
-    
-    if (message.bcc && message.bcc.length > 0) {
-      emailLines.push(`Bcc: ${message.bcc.join(', ')}`);
-    }
-    
-    emailLines.push(`Subject: ${message.subject}`);
-    emailLines.push('Content-Type: text/html; charset=utf-8');
-    emailLines.push('');
-    emailLines.push(message.body);
-
-    const email = emailLines.join('\n');
 
     // Codificar en base64url
     const encodedEmail = Buffer.from(email)

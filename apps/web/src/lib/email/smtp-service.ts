@@ -21,6 +21,11 @@ export interface EmailMessage {
   subject: string;
   body: string; // HTML
   bodyText?: string; // Plain text alternative
+  attachments?: Array<{
+    filename: string;
+    content: string; // Base64
+    contentType: string;
+  }>;
 }
 
 export interface SendResult {
@@ -58,7 +63,7 @@ export async function sendEmailSMTP(
   try {
     const transporter = createTransporter(config);
     
-    const mailOptions = {
+    const mailOptions: any = {
       from: config.username,
       to: Array.isArray(message.to) ? message.to.join(', ') : message.to,
       cc: message.cc?.join(', '),
@@ -67,6 +72,15 @@ export async function sendEmailSMTP(
       html: message.body,
       text: message.bodyText || message.body.replace(/<[^>]*>/g, '') // Strip HTML si no hay texto
     };
+    
+    // Agregar adjuntos si existen
+    if (message.attachments && message.attachments.length > 0) {
+      mailOptions.attachments = message.attachments.map(att => ({
+        filename: att.filename,
+        content: Buffer.from(att.content, 'base64'),
+        contentType: att.contentType
+      }));
+    }
     
     const info = await transporter.sendMail(mailOptions);
     

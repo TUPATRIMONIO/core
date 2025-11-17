@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     const unreadOnly = searchParams.get('unread_only') === 'true';
     const accountId = searchParams.get('account_id');
     const contactId = searchParams.get('contact_id');
+    const folderName = searchParams.get('folder');
     const sortBy = searchParams.get('sort_by') || 'date_desc';
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -91,9 +92,64 @@ export async function GET(request: Request) {
     let threads = null;
     let count = 0;
 
-    // Si hay filtro de cuenta, usar función RPC personalizada
-    if (accountId) {
-      console.log('[Inbox] Filtering by account:', accountId);
+    // Combinar filtros de carpeta Y cuenta si ambos existen
+    if (folderName && accountId) {
+      console.log('[Inbox] Filtering by folder AND account:', folderName, accountId);
+      
+      // Primero obtener threads de la carpeta
+      const { data: folderThreads } = await supabaseAdmin
+        .schema('crm')
+        .rpc('get_threads_by_folder', {
+          org_id: userWithOrg.organizationId,
+          folder_name: folderName,
+          result_limit: 1000, // Traer todos para filtrar
+          result_offset: 0
+        });
+
+      // Luego obtener thread_ids que tienen emails de la cuenta
+      const { data: accountEmails } = await supabaseAdmin
+        .schema('crm')
+        .from('emails')
+        .select('thread_id')
+        .eq('organization_id', userWithOrg.organizationId)
+        .or(`sent_from_account_id.eq.${accountId},received_in_account_id.eq.${accountId}`);
+
+      const accountThreadIds = new Set(
+        (accountEmails || []).map(e => e.thread_id).filter(Boolean)
+      );
+
+      // Filtrar threads que estén en ambos conjuntos
+      const combinedThreads = (folderThreads || []).filter(t => 
+        accountThreadIds.has(t.gmail_thread_id)
+      );
+
+      // Aplicar paginación en memoria
+      threads = combinedThreads.slice(offset, offset + limit);
+      count = combinedThreads.length;
+
+      console.log('[Inbox] Combined filter result:', threads.length, 'of', count);
+    }
+    // Solo filtro de carpeta
+    else if (folderName) {
+      console.log('[Inbox] Filtering by folder only:', folderName);
+      
+      const { data: filteredThreads, error: folderError } = await supabaseAdmin
+        .schema('crm')
+        .rpc('get_threads_by_folder', {
+          org_id: userWithOrg.organizationId,
+          folder_name: folderName,
+          result_limit: limit,
+          result_offset: offset
+        });
+
+      console.log('[Inbox] Threads in folder:', filteredThreads?.length, 'error:', folderError);
+      
+      threads = filteredThreads;
+      count = filteredThreads?.length || 0;
+    }
+    // Solo filtro de cuenta
+    else if (accountId) {
+      console.log('[Inbox] Filtering by account only:', accountId);
       
       const { data: filteredThreads, error: threadsError } = await supabaseAdmin
         .schema('crm')
@@ -107,9 +163,10 @@ export async function GET(request: Request) {
       console.log('[Inbox] RPC Threads found:', filteredThreads?.length, 'error:', threadsError);
       
       threads = filteredThreads;
-      count = filteredThreads?.length || 0; // RPC no retorna count total, solo los resultados
-    } else {
-      // Sin filtro de cuenta, traer todos
+      count = filteredThreads?.length || 0;
+    } 
+    // Sin filtros
+    else {
       const result = await query;
       threads = result.data;
       count = result.count || 0;

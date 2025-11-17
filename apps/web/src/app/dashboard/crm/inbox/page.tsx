@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +39,7 @@ interface EmailAccountOption {
 
 export default function InboxPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [threads, setThreads] = useState<EmailThread[]>([]);
   const [accounts, setAccounts] = useState<EmailAccountOption[]>([]);
@@ -52,16 +54,19 @@ export default function InboxPage() {
   const [offset, setOffset] = useState(0);
   const ITEMS_PER_PAGE = 20;
 
+  // Leer carpeta desde URL (para sincronización con FolderSidebar)
+  const selectedFolder = searchParams.get('folder') || 'Inbox';
+
   useEffect(() => {
     loadAccounts();
   }, []);
 
   useEffect(() => {
     // Resetear offset cuando cambian los filtros
-    console.log('[Inbox Frontend] Filter changed:', { filter, selectedAccount, sortBy });
+    console.log('[Inbox Frontend] Filter changed:', { filter, selectedAccount, selectedFolder, sortBy });
     setOffset(0);
     loadThreads(true);
-  }, [filter, selectedAccount, sortBy]);
+  }, [filter, selectedAccount, selectedFolder, sortBy]);
 
   async function loadAccounts() {
     try {
@@ -87,10 +92,11 @@ export default function InboxPage() {
 
       const unreadParam = filter === 'unread' ? '&unread_only=true' : '';
       const accountParam = selectedAccount !== 'all' ? `&account_id=${selectedAccount}` : '';
+      const folderParam = selectedFolder !== 'Inbox' ? `&folder=${selectedFolder}` : '';
       const sortParam = sortBy ? `&sort_by=${sortBy}` : '';
       
       const response = await fetch(
-        `/api/crm/inbox?limit=${ITEMS_PER_PAGE}&offset=${loadingOffset}${unreadParam}${accountParam}${sortParam}`
+        `/api/crm/inbox?limit=${ITEMS_PER_PAGE}&offset=${loadingOffset}${unreadParam}${accountParam}${folderParam}${sortParam}`
       );
       
       if (!response.ok) {
@@ -174,7 +180,7 @@ export default function InboxPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Inbox
+            {selectedFolder}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             Mostrando {filteredThreads.length} de {totalCount} conversaciones

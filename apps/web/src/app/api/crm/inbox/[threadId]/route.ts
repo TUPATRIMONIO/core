@@ -126,3 +126,43 @@ export async function PATCH(
   }
 }
 
+/**
+ * DELETE - Eliminar thread permanentemente
+ */
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ threadId: string }> }
+) {
+  try {
+    const { threadId } = await params;
+    const supabase = await createClient();
+    const userWithOrg = await getCurrentUserWithOrg();
+    
+    if (!userWithOrg || !userWithOrg.organizationId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Eliminar thread (cascade eliminará thread_labels y emails)
+    const { error } = await supabaseAdmin
+      .schema('crm')
+      .from('email_threads')
+      .delete()
+      .eq('id', threadId)
+      .eq('organization_id', userWithOrg.organizationId);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('[DELETE /api/crm/inbox/[threadId]]:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+

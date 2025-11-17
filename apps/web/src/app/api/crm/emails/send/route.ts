@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getCurrentUserWithOrg } from '@/lib/crm/permissions';
 import { sendEmail } from '@/lib/gmail/service';
@@ -20,16 +21,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Usar Service Role para bypasear RLS
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
   try {
     const body = await request.json();
-    const { to, cc, bcc, subject, body: emailBody, contact_id, from_account_id } = body;
+    const { to, cc, bcc, subject, body: emailBody, contact_id, from_account_id, attachments } = body;
 
     // Obtener cuenta de email a usar
     let emailAccount;
     
     if (from_account_id) {
       // Usar cuenta específica
-      const { data: account } = await supabase
+      const { data: account } = await supabaseAdmin
         .schema('crm')
         .from('email_accounts')
         .select('*')
@@ -42,7 +49,7 @@ export async function POST(request: Request) {
     } else {
       // Usar cuenta por defecto del usuario
       // Primero buscar cuenta marcada como default
-      const { data: defaultAccount } = await supabase
+      const { data: defaultAccount } = await supabaseAdmin
         .schema('crm')
         .from('email_accounts')
         .select('*')
@@ -55,7 +62,7 @@ export async function POST(request: Request) {
         emailAccount = defaultAccount;
       } else {
         // Si no hay default, usar la primera disponible
-        const { data: firstAccount } = await supabase
+        const { data: firstAccount } = await supabaseAdmin
           .schema('crm')
           .from('email_accounts')
           .select('*')
@@ -68,11 +75,25 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!emailAccount || !emailAccount.gmail_oauth_tokens) {
+    if (!emailAccount) {
       return NextResponse.json({ 
         error: 'No email account available. Please connect an email account first.' 
       }, { status: 400 });
     }
+
+    // Validar que tenga credenciales según su tipo
+    const hasCredentials = emailAccount.connection_type === 'oauth' 
+      ? emailAccount.gmail_oauth_tokens 
+      : (emailAccount.imap_config && emailAccount.smtp_config);
+
+    if (!hasCredentials) {
+      return NextResponse.json({ 
+        error: 'Email account credentials not found. Please reconnect the account.' 
+      }, { status: 400 });
+    }
+
+    // Los adjuntos ya vienen en base64 desde el frontend
+    const processedAttachments = attachments || [];
 
     // Detectar tipo de conexión y enviar según corresponda
     let result: any;
@@ -84,7 +105,8 @@ export async function POST(request: Request) {
         cc,
         bcc,
         subject,
-        body: emailBody
+        body: emailBody,
+        attachments: processedAttachments
       };
       
       result = await sendEmail(emailAccount.gmail_oauth_tokens, message);
@@ -97,7 +119,8 @@ export async function POST(request: Request) {
         cc,
         bcc,
         subject,
-        body: emailBody
+        body: emailBody,
+        attachments: processedAttachments
       });
       
       // Adaptar resultado de SMTP a formato esperado
@@ -126,7 +149,9 @@ export async function POST(request: Request) {
         status: 'sent',
         sent_at: new Date().toISOString(),
         sent_by: userWithOrg.user.id,
-        sent_from_account_id: emailAccount.id
+        sent_from_account_id: emailAccount.id,
+        has_attachments: attachments && attachments.length > 0,
+        attachments: attachments || []
       })
       .select()
       .single();

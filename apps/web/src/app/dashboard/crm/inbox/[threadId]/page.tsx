@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,6 +15,8 @@ import {
   Reply, 
   Archive,
   Trash2,
+  RotateCcw,
+  AlertCircle,
   ExternalLink,
   User as UserIcon
 } from 'lucide-react';
@@ -28,12 +30,15 @@ interface PageProps {
 
 export default function ThreadViewPage({ params }: PageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [threadId, setThreadId] = useState<string>('');
   const [thread, setThread] = useState<EmailThread | null>(null);
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showReply, setShowReply] = useState(false);
+  
+  const currentFolder = searchParams.get('folder') || 'Inbox';
 
   useEffect(() => {
     params.then(p => {
@@ -68,27 +73,77 @@ export default function ThreadViewPage({ params }: PageProps) {
 
   async function archiveThread() {
     if (!threadId) return;
+    await moveToFolder('Archived', 'Conversación archivada', 'Movida a Archived');
+  }
+
+  async function moveToTrash() {
+    if (!threadId) return;
+    await moveToFolder('Trash', 'Conversación eliminada', 'Movida a Trash');
+  }
+
+  async function restoreFromTrash() {
+    if (!threadId) return;
+    await moveToFolder('Inbox', 'Conversación restaurada', 'Movida de vuelta a Inbox');
+  }
+
+  async function deletePermanently() {
+    if (!threadId) return;
+    
+    if (!confirm('¿Estás seguro de eliminar permanentemente esta conversación? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/crm/inbox/${threadId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) throw new Error('Failed to delete');
+
+      toast({
+        title: 'Conversación eliminada',
+        description: 'La conversación ha sido eliminada permanentemente',
+      });
+
+      router.push('/dashboard/crm/inbox');
+    } catch (error) {
+      console.error('Error deleting thread:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la conversación',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  async function moveToFolder(folderName: string, title: string, description: string) {
+    if (!threadId) return;
 
     try {
       const response = await fetch(`/api/crm/inbox/${threadId}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder_name: 'Archived' })
+        body: JSON.stringify({ folder_name: folderName })
       });
 
-      if (!response.ok) throw new Error('Failed to archive');
+      if (!response.ok) throw new Error('Failed to move');
 
       toast({
-        title: 'Conversación archivada',
-        description: 'La conversación ha sido movida a Archived',
+        title,
+        description,
       });
 
-      router.push('/dashboard/crm/inbox');
+      // Mantener query params al volver
+      const backUrl = searchParams.toString() 
+        ? `/dashboard/crm/inbox?${searchParams.toString()}`
+        : '/dashboard/crm/inbox';
+      
+      router.push(backUrl);
     } catch (error) {
-      console.error('Error archiving thread:', error);
+      console.error('Error moving thread:', error);
       toast({
         title: 'Error',
-        description: 'No se pudo archivar la conversación',
+        description: 'No se pudo mover la conversación',
         variant: 'destructive',
       });
     }
@@ -143,14 +198,48 @@ export default function ThreadViewPage({ params }: PageProps) {
         </div>
 
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={archiveThread}
-          >
-            <Archive className="w-4 h-4 mr-2" />
-            Archivar
-          </Button>
+          {/* Botones según carpeta actual */}
+          {currentFolder === 'Trash' ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={restoreFromTrash}
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Restaurar
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={deletePermanently}
+              >
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Eliminar Permanentemente
+              </Button>
+            </>
+          ) : (
+            <>
+              {currentFolder !== 'Archived' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={archiveThread}
+                >
+                  <Archive className="w-4 h-4 mr-2" />
+                  Archivar
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={moveToTrash}
+              >
+                <Trash2 className="w-4 h-4 mr-2 text-red-600" />
+                Eliminar
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
