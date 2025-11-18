@@ -26,6 +26,8 @@ export interface EmailMessage {
     content: string; // Base64
     contentType: string;
   }>;
+  inReplyTo?: string; // Message-ID del email al que se responde
+  references?: string[]; // Referencias para threading
 }
 
 export interface SendResult {
@@ -70,7 +72,9 @@ export async function sendEmailSMTP(
       bcc: message.bcc?.join(', '),
       subject: message.subject,
       html: message.body,
-      text: message.bodyText || message.body.replace(/<[^>]*>/g, '') // Strip HTML si no hay texto
+      text: message.bodyText || message.body.replace(/<[^>]*>/g, ''), // Strip HTML si no hay texto
+      inReplyTo: message.inReplyTo, // Para threading en SMTP
+      references: message.references?.join(' ') || message.inReplyTo // Referencias para threading
     };
     
     // Agregar adjuntos si existen

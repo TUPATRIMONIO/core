@@ -74,6 +74,7 @@ export async function PATCH(
       'is_active',
       'is_default',
       'sync_enabled',
+      'sync_to_inbox',
       'sync_interval',
       'signature_html',
       'signature_text'

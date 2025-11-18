@@ -105,11 +105,19 @@ export async function sendEmail(
       .replace(/=+$/, '');
 
     // Enviar
+    // Si hay threadId, pasarlo en el requestBody para que Gmail agrupe correctamente
+    const requestBody: any = {
+      raw: encodedEmail
+    };
+    
+    if (message.threadId) {
+      requestBody.threadId = message.threadId;
+      console.log(`[Gmail Service] Sending email with threadId: ${message.threadId}`);
+    }
+    
     const { data } = await gmail.users.messages.send({
       userId: 'me',
-      requestBody: {
-        raw: encodedEmail
-      }
+      requestBody
     });
 
     return {

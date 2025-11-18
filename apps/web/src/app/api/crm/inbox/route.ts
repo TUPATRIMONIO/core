@@ -42,6 +42,27 @@ export async function GET(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Obtener IDs de cuentas que deben mostrarse en inbox
+    const { data: inboxAccounts } = await supabaseAdmin
+      .schema('crm')
+      .from('email_accounts')
+      .select('id')
+      .eq('organization_id', userWithOrg.organizationId)
+      .eq('is_active', true)
+      .eq('sync_to_inbox', true);
+
+    const inboxAccountIds = (inboxAccounts || []).map(a => a.id);
+
+    // Si no hay cuentas para inbox, retornar vacío
+    if (inboxAccountIds.length === 0) {
+      return NextResponse.json({
+        data: [],
+        count: 0,
+        limit,
+        offset
+      });
+    }
+
     // Determinar ordenamiento
     let orderColumn = 'last_email_at';
     let orderAscending = false;
@@ -76,6 +97,16 @@ export async function GET(request: Request) {
       .eq('organization_id', userWithOrg.organizationId)
       .order(orderColumn, { ascending: orderAscending })
       .range(offset, offset + limit - 1);
+
+    // IMPORTANTE: Filtrar solo threads de cuentas con sync_to_inbox = true
+    // Usar OR para incluir threads recibidos O enviados desde cuentas válidas
+    const accountFilter = inboxAccountIds.map(id => 
+      `received_in_account_id.eq.${id},sent_from_account_id.eq.${id}`
+    ).join(',');
+    
+    if (accountFilter) {
+      query = query.or(accountFilter);
+    }
 
     if (status) {
       query = query.eq('status', status);

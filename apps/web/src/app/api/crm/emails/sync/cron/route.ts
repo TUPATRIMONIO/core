@@ -31,13 +31,14 @@ export async function GET(request: Request) {
       }
     );
 
-    // Obtener todas las cuentas activas con sync habilitado
+    // Obtener todas las cuentas activas con sync habilitado Y que deban aparecer en inbox
     const { data: accounts, error: accountsError } = await supabase
       .schema('crm')
       .from('email_accounts')
       .select('*')
       .eq('is_active', true)
-      .eq('sync_enabled', true);
+      .eq('sync_enabled', true)
+      .eq('sync_to_inbox', true);
 
     if (accountsError) {
       throw new Error(`Failed to fetch accounts: ${accountsError.message}`);

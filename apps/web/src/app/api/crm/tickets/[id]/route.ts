@@ -9,8 +9,9 @@ import { getCurrentUserWithOrg } from '@/lib/crm/permissions';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const supabase = await createClient();
   const userWithOrg = await getCurrentUserWithOrg();
   
@@ -25,10 +26,9 @@ export async function GET(
       .select(`
         *,
         contact:contacts(id, full_name, email, phone),
-        company:companies(id, name, domain),
-        assigned_user:users!tickets_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
+        company:companies(id, name, domain)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('organization_id', userWithOrg.organizationId)
       .single();
 
@@ -46,8 +46,9 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const supabase = await createClient();
   const userWithOrg = await getCurrentUserWithOrg();
   
@@ -57,18 +58,18 @@ export async function PATCH(
 
   try {
     const body = await request.json();
+    console.log('PATCH ticket:', id, body); // Debug
 
     const { data: ticket, error } = await supabase
       .schema('crm')
       .from('tickets')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('organization_id', userWithOrg.organizationId)
       .select(`
         *,
         contact:contacts(id, full_name, email),
-        company:companies(id, name, domain),
-        assigned_user:users!tickets_assigned_to_fkey(id, first_name, last_name, email)
+        company:companies(id, name, domain)
       `)
       .single();
 
@@ -77,6 +78,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log('Ticket updated successfully:', ticket.ticket_number); // Debug
     return NextResponse.json(ticket);
   } catch (error) {
     console.error('Error in PATCH /api/crm/tickets/[id]:', error);
@@ -86,8 +88,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const supabase = await createClient();
   const userWithOrg = await getCurrentUserWithOrg();
   
@@ -100,7 +103,7 @@ export async function DELETE(
       .schema('crm')
       .from('tickets')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('organization_id', userWithOrg.organizationId);
 
     if (error) {

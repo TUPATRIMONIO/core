@@ -16,6 +16,22 @@ export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'rejected' 
 export type ActivityType = 'email' | 'call' | 'meeting' | 'note' | 'task' | 'whatsapp' | 'system';
 export type EmailStatus = 'draft' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed';
 
+// Sistema Universal CRM
+export type PropertyType =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'boolean'
+  | 'single_select'
+  | 'multi_select'
+  | 'user'
+  | 'contact'
+  | 'company'
+  | 'file'
+  | 'url';
+
+export type EntityType = 'ticket' | 'contact' | 'company' | 'deal' | 'product' | 'quote';
+
 // =====================================================
 // INTERFACES
 // =====================================================
@@ -50,6 +66,8 @@ export interface Contact {
   last_activity_at?: string;
   linkedin_url?: string;
   twitter_handle?: string;
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -57,6 +75,8 @@ export interface Contact {
   // Relaciones pobladas
   company?: Company;
   assigned_user?: User;
+  pipeline?: Pipeline;
+  stage?: PipelineStage;
 }
 
 export interface Company {
@@ -84,6 +104,8 @@ export interface Company {
   twitter_handle?: string;
   custom_fields?: Record<string, any>;
   tags?: string[];
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -91,6 +113,8 @@ export interface Company {
   // Relaciones
   parent_company?: Company;
   assigned_user?: User;
+  pipeline?: Pipeline;
+  stage?: PipelineStage;
 }
 
 export interface Deal {
@@ -110,6 +134,8 @@ export interface Deal {
   source?: string;
   competitor?: string;
   custom_fields?: Record<string, any>;
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -118,6 +144,8 @@ export interface Deal {
   contact?: Contact;
   company?: Company;
   assigned_user?: User;
+  pipeline?: Pipeline;
+  stage_obj?: PipelineStage;
 }
 
 export interface Ticket {
@@ -140,6 +168,9 @@ export interface Ticket {
   closed_at?: string;
   tags?: string[];
   custom_fields?: Record<string, any>;
+  source_email_thread_id?: string;
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -148,6 +179,9 @@ export interface Ticket {
   contact?: Contact;
   company?: Company;
   assigned_user?: User;
+  email_thread?: EmailThread;
+  pipeline?: Pipeline;
+  stage?: PipelineStage;
 }
 
 export interface Product {
@@ -168,9 +202,15 @@ export interface Product {
   stock_quantity?: number;
   image_url?: string;
   custom_fields?: Record<string, any>;
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
+  
+  // Relaciones
+  pipeline?: Pipeline;
+  stage?: PipelineStage;
 }
 
 export interface Quote {
@@ -197,6 +237,8 @@ export interface Quote {
   accepted_at?: string;
   rejected_at?: string;
   assigned_to?: string;
+  pipeline_id?: string;
+  stage_id?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -206,6 +248,8 @@ export interface Quote {
   company?: Company;
   deal?: Deal;
   line_items?: QuoteLineItem[];
+  pipeline?: Pipeline;
+  stage?: PipelineStage;
 }
 
 export interface QuoteLineItem {
@@ -266,6 +310,7 @@ export interface EmailAccount {
   is_active: boolean;
   is_default: boolean;
   sync_enabled: boolean;
+  sync_to_inbox?: boolean; // Si false, no sincroniza ni aparece en inbox (útil para notificaciones)
   sync_interval: number;
   last_sync_at?: string;
   last_sync_error?: string;
@@ -360,25 +405,81 @@ export interface Email {
   thread?: EmailThread;
 }
 
-export interface Pipeline {
+// =====================================================
+// SISTEMA UNIVERSAL: Propiedades Personalizables
+// =====================================================
+
+export interface EntityProperty {
   id: string;
   organization_id: string;
-  name: string;
-  type: 'deals' | 'tickets';
-  stages: PipelineStage[];
-  is_active: boolean;
-  is_default: boolean;
+  entity_type: EntityType;
+  property_name: string;
+  property_key: string;
+  property_type: PropertyType;
+  options?: string[];
+  is_required: boolean;
+  default_value?: string;
+  description?: string;
+  display_order: number;
+  is_visible: boolean;
   created_at: string;
   updated_at: string;
   created_by?: string;
 }
 
+// =====================================================
+// SISTEMA UNIVERSAL: Pipelines y Stages
+// =====================================================
+
 export interface PipelineStage {
   id: string;
+  pipeline_id: string;
   name: string;
-  probability?: number; // Solo para deals
-  order: number;
+  slug: string;
   color: string;
+  display_order: number;
+  probability?: number;
+  is_final: boolean;
+  final_type?: 'won' | 'lost' | 'resolved' | 'closed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Pipeline {
+  id: string;
+  organization_id: string;
+  name: string;
+  type?: 'deals' | 'tickets'; // Deprecated, usar entity_type
+  entity_type: EntityType;
+  category?: string;
+  description?: string;
+  color: string;
+  is_active: boolean;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  
+  // Relaciones
+  stages?: PipelineStage[];
+}
+
+export interface PipelinePermission {
+  id: string;
+  pipeline_id: string;
+  user_id: string;
+  can_view: boolean;
+  can_create: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+  allowed_stages: string[];
+  granted_by?: string;
+  granted_at: string;
+  created_at: string;
+  updated_at: string;
+  
+  // Relaciones
+  user?: User;
 }
 
 export interface CRMSettings {
