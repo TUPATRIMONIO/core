@@ -32,7 +32,6 @@ export async function createClient() {
 /**
  * Cliente Supabase para operaciones en tiempo de compilación (build time)
  * NO usa cookies - solo para queries públicas de lectura
- * Usar en: generateStaticParams, generateMetadata (si no requiere auth)
  */
 export function createBuildTimeClient() {
   return createSupabaseClient(
@@ -40,4 +39,3 @@ export function createBuildTimeClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }
-
