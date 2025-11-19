@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { CreditCard, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui/card'
-import { Button } from '@tupatrimonio/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
+import { Button } from '@tupatrimonio/ui'
 import { useCredits } from '@/hooks/use-credits'
 
 export default function CreditsPage() {

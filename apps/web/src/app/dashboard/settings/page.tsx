@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui/card'
-import { Button } from '@tupatrimonio/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
+import { Button } from '@tupatrimonio/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/hooks/use-toast'

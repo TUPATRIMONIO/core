@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui/card'
-import { Button } from '@tupatrimonio/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
+import { Button } from '@tupatrimonio/ui'
 
 export default function LoginPage() {
   const router = useRouter()

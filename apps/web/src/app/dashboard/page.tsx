@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { PenTool, Stamp, Users, CreditCard, ArrowRight } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui/card'
-import { Button } from '@tupatrimonio/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
+import { Button } from '@tupatrimonio/ui'
 import { useAuthStore } from '@/stores/auth-store'
 import { usePermissionsStore } from '@/stores/permissions-store'
 import { useCredits } from '@/hooks/use-credits'

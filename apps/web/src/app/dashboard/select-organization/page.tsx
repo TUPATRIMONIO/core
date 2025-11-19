@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Building2, Check } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
 import { useAuthStore } from '@/stores/auth-store'
 
 export default function SelectOrganizationPage() {
