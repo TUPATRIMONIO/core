@@ -79,10 +79,9 @@ export async function updateSession(request: NextRequest) {
       if (!userProfile?.last_active_organization_id) {
         const { data: memberships, error: membershipsError } = await supabase
           .schema('core')
-          .from('organization_users')
+          .from('organization_members')
           .select('organization_id')
           .eq('user_id', user.id)
-          .eq('status', 'active')
 
         if (!membershipsError && memberships) {
           if (memberships.length === 0) {
