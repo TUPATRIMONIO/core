@@ -32,8 +32,7 @@ export async function GET(request: Request) {
       .select(`
         *,
         contact:contacts(id, full_name, email, company_name),
-        company:companies(id, name, domain),
-        assigned_user:users!tickets_assigned_to_fkey(id, first_name, last_name, email, avatar_url)
+        company:companies(id, name, domain)
       `, { count: 'exact' })
       .eq('organization_id', userWithOrg.organizationId)
       .order('created_at', { ascending: false })
@@ -87,8 +86,7 @@ export async function POST(request: Request) {
       .select(`
         *,
         contact:contacts(id, full_name, email),
-        company:companies(id, name, domain),
-        assigned_user:users!tickets_assigned_to_fkey(id, first_name, last_name, email)
+        company:companies(id, name, domain)
       `)
       .single();
 

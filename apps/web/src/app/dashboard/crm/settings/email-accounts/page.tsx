@@ -10,6 +10,8 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { EmailConnectionWizard } from '@/components/crm/EmailConnectionWizard';
 import { 
   Mail, 
@@ -159,6 +161,36 @@ export default function EmailAccountsPage() {
     }
   }
 
+  async function toggleSyncToInbox(accountId: string, currentValue: boolean) {
+    try {
+      const response = await fetch(`/api/crm/email-accounts/${accountId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sync_to_inbox: !currentValue })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update account');
+      }
+
+      toast({
+        title: !currentValue ? 'Cuenta sincronizada' : 'Cuenta desvinculada del inbox',
+        description: !currentValue 
+          ? 'Los emails de esta cuenta ahora aparecerán en el inbox' 
+          : 'Los emails de esta cuenta ya no aparecerán en el inbox (solo para notificaciones)',
+      });
+
+      loadAccounts();
+    } catch (error) {
+      console.error('Error updating sync_to_inbox:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo actualizar la configuración',
+        variant: 'destructive',
+      });
+    }
+  }
+
   const sharedAccounts = accounts.filter(a => a.account_type === 'shared');
   const personalAccounts = accounts.filter(a => a.account_type === 'personal');
 
@@ -243,14 +275,19 @@ export default function EmailAccountsPage() {
                         </div>
                         
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-semibold text-gray-900 dark:text-gray-100">
                               {account.display_name || account.email_address}
                             </p>
                             {account.is_default && (
-                              <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                              <Badge variant="default" className="text-xs">
                                 Por defecto
-                              </span>
+                              </Badge>
+                            )}
+                            {account.sync_to_inbox === false && (
+                              <Badge variant="secondary" className="text-xs">
+                                🔔 Solo notificaciones
+                              </Badge>
                             )}
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -261,6 +298,18 @@ export default function EmailAccountsPage() {
                               Última sincronización: {new Date(account.last_sync_at).toLocaleString('es-CL')}
                             </p>
                           )}
+                          
+                          {/* Toggle Sync to Inbox */}
+                          <div className="flex items-center gap-2 mt-2">
+                            <Switch
+                              checked={account.sync_to_inbox ?? true}
+                              onCheckedChange={() => toggleSyncToInbox(account.id, account.sync_to_inbox ?? true)}
+                              disabled={!account.is_active}
+                            />
+                            <label className="text-sm text-gray-600 dark:text-gray-400">
+                              Mostrar en Inbox del CRM
+                            </label>
+                          </div>
                         </div>
                       </div>
 
@@ -311,9 +360,16 @@ export default function EmailAccountsPage() {
                         </div>
                         
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900 dark:text-gray-100">
-                            {account.display_name || account.email_address}
-                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">
+                              {account.display_name || account.email_address}
+                            </p>
+                            {account.sync_to_inbox === false && (
+                              <Badge variant="secondary" className="text-xs">
+                                🔔 Solo notificaciones
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             {account.email_address}
                           </p>
@@ -322,6 +378,17 @@ export default function EmailAccountsPage() {
                               Última sincronización: {new Date(account.last_sync_at).toLocaleString('es-CL')}
                             </p>
                           )}
+                          
+                          {/* Toggle Sync to Inbox */}
+                          <div className="flex items-center gap-2 mt-2">
+                            <Switch
+                              checked={account.sync_to_inbox ?? true}
+                              onCheckedChange={() => toggleSyncToInbox(account.id, account.sync_to_inbox ?? true)}
+                            />
+                            <label className="text-sm text-gray-600 dark:text-gray-400">
+                              Mostrar en Inbox del CRM
+                            </label>
+                          </div>
                         </div>
                       </div>
 

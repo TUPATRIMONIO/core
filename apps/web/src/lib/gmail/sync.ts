@@ -164,15 +164,104 @@ export async function syncEmailsForAccount(
           emailData.received_in_account_id = accountId;
         }
 
-        const { error: insertError } = await supabase
+        const { data: insertedEmail, error: insertError } = await supabase
           .schema('crm')
           .from('emails')
-          .insert(emailData);
+          .insert(emailData)
+          .select('id')
+          .single();
 
         if (insertError) {
           result.errors.push(`Failed to insert email ${parsed.gmail_message_id}: ${insertError.message}`);
         } else {
           result.newEmails++;
+          
+          // Si es email entrante, intentar vincularlo a un ticket por múltiples métodos
+          if (!isOutbound && insertedEmail?.id) {
+            let outboundEmail: any = null;
+            
+            // Método 1: Buscar por thread_id
+            if (parsed.gmail_thread_id) {
+              const { data } = await supabase
+                .schema('crm')
+                .from('emails')
+                .select('ticket_id')
+                .eq('thread_id', parsed.gmail_thread_id)
+                .eq('direction', 'outbound')
+                .eq('organization_id', organizationId)
+                .not('ticket_id', 'is', null)
+                .order('sent_at', { ascending: false })
+                .limit(1)
+                .single();
+              
+              outboundEmail = data;
+              if (outboundEmail?.ticket_id) {
+                console.log(`[Sync] Found ticket by thread_id: ${parsed.gmail_thread_id}`);
+              }
+            }
+            
+            // Método 2: Si no se encontró, buscar por in_reply_to (Message-ID del email original)
+            if (!outboundEmail?.ticket_id && parsed.in_reply_to) {
+              // Extraer message-id del header in-reply-to (formato: <message-id@domain>)
+              const messageIdMatch = parsed.in_reply_to.match(/<([^>]+)>/);
+              if (messageIdMatch) {
+                const originalMessageId = messageIdMatch[1];
+                console.log(`[Sync] Trying to link by in_reply_to: ${originalMessageId}`);
+                
+                const { data } = await supabase
+                  .schema('crm')
+                  .from('emails')
+                  .select('ticket_id')
+                  .or(`gmail_message_id.eq.${originalMessageId},thread_id.eq.${originalMessageId}`)
+                  .eq('direction', 'outbound')
+                  .eq('organization_id', organizationId)
+                  .not('ticket_id', 'is', null)
+                  .order('sent_at', { ascending: false })
+                  .limit(1)
+                  .single();
+                
+                outboundEmail = data;
+                if (outboundEmail?.ticket_id) {
+                  console.log(`[Sync] Found ticket by in_reply_to: ${originalMessageId}`);
+                }
+              }
+            }
+            
+            // Método 3: Buscar por gmail_message_id si está disponible
+            if (!outboundEmail?.ticket_id && parsed.gmail_message_id) {
+              // Buscar emails enviados recientes del mismo thread
+              const { data } = await supabase
+                .schema('crm')
+                .from('emails')
+                .select('ticket_id, thread_id')
+                .eq('thread_id', parsed.gmail_thread_id)
+                .eq('direction', 'outbound')
+                .eq('organization_id', organizationId)
+                .not('ticket_id', 'is', null)
+                .order('sent_at', { ascending: false })
+                .limit(1)
+                .single();
+              
+              outboundEmail = data;
+              if (outboundEmail?.ticket_id) {
+                console.log(`[Sync] Found ticket by thread_id (fallback): ${parsed.gmail_thread_id}`);
+              }
+            }
+            
+            // Vincular si se encontró un ticket
+            if (outboundEmail?.ticket_id) {
+              await supabase
+                .schema('crm')
+                .from('emails')
+                .update({ ticket_id: outboundEmail.ticket_id })
+                .eq('id', insertedEmail.id)
+                .eq('organization_id', organizationId);
+              
+              console.log(`[Sync] ✅ Linked inbound email ${insertedEmail.id} to ticket ${outboundEmail.ticket_id}`);
+            } else {
+              console.log(`[Sync] ⚠️ Could not link inbound email ${insertedEmail.id} - thread_id: ${parsed.gmail_thread_id}, in_reply_to: ${parsed.in_reply_to}`);
+            }
+          }
           
           // Crear actividad si hay contacto
           if (contact?.id) {
@@ -191,7 +280,7 @@ export async function syncEmailsForAccount(
         }
 
         // Actualizar o crear thread (isOutbound ya fue calculado arriba en línea 127)
-        await upsertEmailThread(supabase, organizationId, parsed, contact?.id, isOutbound);
+        await upsertEmailThread(supabase, organizationId, parsed, contact?.id, isOutbound, accountId);
         result.updatedThreads++;
 
       } catch (msgError) {
@@ -303,10 +392,11 @@ async function upsertEmailThread(
   organizationId: string,
   parsed: ParsedEmail,
   contactId?: string,
-  isOutbound?: boolean
+  isOutbound?: boolean,
+  accountId?: string
 ): Promise<void> {
   try {
-    const threadData = {
+    const threadData: any = {
       organization_id: organizationId,
       gmail_thread_id: parsed.gmail_thread_id,
       subject: parsed.subject,
@@ -317,6 +407,15 @@ async function upsertEmailThread(
       labels: parsed.labels,
       contact_id: contactId
     };
+
+    // Establecer cuenta de origen del thread
+    if (accountId) {
+      if (isOutbound) {
+        threadData.sent_from_account_id = accountId;
+      } else {
+        threadData.received_in_account_id = accountId;
+      }
+    }
 
     const { data: upsertedThread } = await supabase
       .schema('crm')
@@ -449,15 +548,99 @@ async function syncEmailsViaIMAP(
           emailData.received_in_account_id = accountId;
         }
 
-        const { error: insertError } = await supabase
+        const { data: insertedEmail, error: insertError } = await supabase
           .schema('crm')
           .from('emails')
-          .insert(emailData);
+          .insert(emailData)
+          .select('id')
+          .single();
 
         if (insertError) {
           result.errors.push(`Failed to insert email: ${insertError.message}`);
         } else {
           result.newEmails++;
+          
+          // Si es email entrante, intentar vincularlo a un ticket por múltiples métodos
+          if (!isOutbound && insertedEmail?.id) {
+            let outboundEmail: any = null;
+            
+            // Método 1: Buscar por thread_id (para IMAP, thread_id es messageId)
+            if (parsed.messageId) {
+              const { data } = await supabase
+                .schema('crm')
+                .from('emails')
+                .select('ticket_id')
+                .eq('thread_id', parsed.messageId)
+                .eq('direction', 'outbound')
+                .eq('organization_id', organizationId)
+                .not('ticket_id', 'is', null)
+                .order('sent_at', { ascending: false })
+                .limit(1)
+                .single();
+              
+              outboundEmail = data;
+              if (outboundEmail?.ticket_id) {
+                console.log(`[IMAP Sync] Found ticket by thread_id: ${parsed.messageId}`);
+              }
+            }
+            
+            // Método 2: Si no se encontró, intentar por in_reply_to (Message-ID del email original)
+            if (!outboundEmail?.ticket_id && parsed.inReplyTo) {
+              // Extraer message-id del header in-reply-to
+              const messageIdMatch = parsed.inReplyTo.match(/<([^>]+)>/);
+              if (messageIdMatch) {
+                const originalMessageId = messageIdMatch[1];
+                console.log(`[IMAP Sync] Trying to link by in_reply_to: ${originalMessageId}`);
+                
+                const { data } = await supabase
+                  .schema('crm')
+                  .from('emails')
+                  .select('ticket_id')
+                  .or(`gmail_message_id.eq.${originalMessageId},thread_id.eq.${originalMessageId}`)
+                  .eq('direction', 'outbound')
+                  .eq('organization_id', organizationId)
+                  .not('ticket_id', 'is', null)
+                  .order('sent_at', { ascending: false })
+                  .limit(1)
+                  .single();
+                
+                outboundEmail = data;
+                if (outboundEmail?.ticket_id) {
+                  console.log(`[IMAP Sync] Found ticket by in_reply_to: ${originalMessageId}`);
+                }
+              } else {
+                // Si no tiene formato <>, intentar directamente
+                console.log(`[IMAP Sync] Trying to link by in_reply_to (direct): ${parsed.inReplyTo}`);
+                const { data } = await supabase
+                  .schema('crm')
+                  .from('emails')
+                  .select('ticket_id')
+                  .or(`gmail_message_id.eq.${parsed.inReplyTo},thread_id.eq.${parsed.inReplyTo}`)
+                  .eq('direction', 'outbound')
+                  .eq('organization_id', organizationId)
+                  .not('ticket_id', 'is', null)
+                  .order('sent_at', { ascending: false })
+                  .limit(1)
+                  .single();
+                
+                outboundEmail = data;
+              }
+            }
+            
+            // Vincular si se encontró un ticket
+            if (outboundEmail?.ticket_id) {
+              await supabase
+                .schema('crm')
+                .from('emails')
+                .update({ ticket_id: outboundEmail.ticket_id })
+                .eq('id', insertedEmail.id)
+                .eq('organization_id', organizationId);
+              
+              console.log(`[IMAP Sync] ✅ Linked inbound email ${insertedEmail.id} to ticket ${outboundEmail.ticket_id}`);
+            } else {
+              console.log(`[IMAP Sync] ⚠️ Could not link inbound email ${insertedEmail.id} - thread_id: ${parsed.messageId}, in_reply_to: ${parsed.inReplyTo}`);
+            }
+          }
           
           // Crear actividad si hay contacto
           if (contact?.id) {
@@ -476,7 +659,7 @@ async function syncEmailsViaIMAP(
         }
 
         // Crear/actualizar thread (usar messageId como thread_id)
-        const threadData = {
+        const threadData: any = {
           organization_id: organizationId,
           gmail_thread_id: parsed.messageId,
           subject: parsed.subject,
@@ -487,6 +670,13 @@ async function syncEmailsViaIMAP(
           contact_id: contact?.id,
           labels: []
         };
+
+        // Establecer cuenta de origen del thread
+        if (isOutbound) {
+          threadData.sent_from_account_id = accountId;
+        } else {
+          threadData.received_in_account_id = accountId;
+        }
 
         const { data: upsertedThread } = await supabase
           .schema('crm')

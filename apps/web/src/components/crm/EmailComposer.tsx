@@ -32,6 +32,8 @@ interface EmailComposerProps {
   defaultTo?: string;
   defaultSubject?: string;
   contactId?: string;
+  ticketId?: string;
+  replyToThreadId?: string; // Thread ID del email al que se está respondiendo
   onSent?: () => void;
   onCancel?: () => void;
 }
@@ -49,6 +51,8 @@ export function EmailComposer({
   defaultTo = '',
   defaultSubject = '',
   contactId,
+  ticketId,
+  replyToThreadId,
   onSent,
   onCancel
 }: EmailComposerProps) {
@@ -144,6 +148,8 @@ export function EmailComposer({
           subject: formData.subject,
           body: formData.body.replace(/\n/g, '<br>'),
           contact_id: contactId,
+          ticket_id: ticketId,
+          reply_to_thread_id: replyToThreadId, // Thread ID del email original si es respuesta
           attachments: processedAttachments // Base64 directo
         })
       });

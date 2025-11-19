@@ -16,8 +16,9 @@ export const metadata: Metadata = {
 export default async function EditTicketPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -35,7 +36,7 @@ export default async function EditTicketPage({
     .schema('crm')
     .from('tickets')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('organization_id', organizationId)
     .single();
 

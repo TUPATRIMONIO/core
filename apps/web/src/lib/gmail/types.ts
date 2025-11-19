@@ -17,6 +17,7 @@ export interface EmailMessage {
   subject: string;
   body: string;
   attachments?: EmailAttachment[];
+  threadId?: string; // Para respuestas, mantener el thread original
 }
 
 export interface EmailAttachment {

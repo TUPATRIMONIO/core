@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | Sistema CRM Multi-Tenant en desarrollo  
-> **📅 Actualización:** 12 Noviembre 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Sistema CRM Universal Implementado** 🎉  
+> **📅 Actualización:** 17 Noviembre 2025  
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -14,7 +14,8 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
 - **✍️ Servicios Core**: Firmas electrónicas, verificación de identidad, notaría digital
-- **📊 CRM Multi-Tenant**: Sistema CRM vendible como servicio B2B
+- **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares
+- **📧 Email-to-Ticket**: Creación automática de tickets desde emails entrantes
 - **🎨 Design System**: Colores dual, dark mode, componentes Shadcn/UI
 
 ---
@@ -95,7 +96,7 @@ Cada servicio tiene su propio schema para mejor organización:
 |--------|-----------|--------|
 | `core` | Foundation multi-tenant (orgs, users, roles) | ✅ Completo |
 | `marketing` | Blog, KB, leads, reviews | ✅ Completo |
-| `crm` | CRM multi-tenant B2B vendible | ✅ Schema listo |
+| `crm` | CRM universal configurable con pipelines y custom properties | ✅ **NUEVO** Sistema Universal |
 | `signatures` | Firma electrónica | 📋 Fase 7 |
 | `ai_customer_service` | Chatbot IA con RAG | 📋 Fase 9 |
 | `ai_document_review` | Análisis de docs IA | 📋 Fase 10 |
@@ -168,6 +169,7 @@ La documentación completa está organizada en `/docs`:
 - **🎨 Diseño**: [design/](docs/design/) - Sistema de diseño
 - **⚙️ Features**: [features/](docs/features/) - Implementaciones específicas
 - **🚀 Deploy**: [deployment/](docs/deployment/) - Guías de producción
+- **🆕 CRM Universal**: [CRM-UNIVERSAL-SYSTEM.md](docs/CRM-UNIVERSAL-SYSTEM.md) - Sistema configurable
 
 📖 **Índice completo**: [`docs/README.md`](docs/README.md)
 

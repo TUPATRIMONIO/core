@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ export default function NewTicketPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingPipeline, setLoadingPipeline] = useState(true);
   const [formData, setFormData] = useState({
     subject: '',
     description: '',
@@ -36,8 +37,39 @@ export default function NewTicketPage() {
     status: 'new' as const,
     contact_id: searchParams.get('contact_id') || '',
     company_id: searchParams.get('company_id') || '',
-    due_date: ''
+    due_date: '',
+    pipeline_id: '',
+    stage_id: ''
   });
+
+  // Cargar pipeline por defecto al montar
+  useEffect(() => {
+    fetchDefaultPipeline();
+  }, []);
+
+  const fetchDefaultPipeline = async () => {
+    try {
+      const response = await fetch('/api/crm/pipelines?entity_type=ticket&is_active=true&include_stages=true');
+      if (!response.ok) throw new Error('Error loading pipeline');
+      
+      const pipelines = await response.json();
+      const defaultPipeline = pipelines.find((p: any) => p.is_default) || pipelines[0];
+      
+      if (defaultPipeline && defaultPipeline.stages && defaultPipeline.stages.length > 0) {
+        // Asignar pipeline y primera etapa automáticamente
+        const firstStage = defaultPipeline.stages.sort((a: any, b: any) => a.display_order - b.display_order)[0];
+        setFormData(prev => ({
+          ...prev,
+          pipeline_id: defaultPipeline.id,
+          stage_id: firstStage.id
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching default pipeline:', error);
+    } finally {
+      setLoadingPipeline(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +80,9 @@ export default function NewTicketPage() {
         ...formData,
         contact_id: formData.contact_id || null,
         company_id: formData.company_id || null,
-        due_date: formData.due_date || null
+        due_date: formData.due_date || null,
+        pipeline_id: formData.pipeline_id || null,
+        stage_id: formData.stage_id || null
       };
 
       const response = await fetch('/api/crm/tickets', {
@@ -183,6 +217,18 @@ export default function NewTicketPage() {
               </p>
             </div>
 
+            {/* Info del pipeline */}
+            {loadingPipeline && (
+              <div className="text-sm text-muted-foreground">
+                Cargando configuración...
+              </div>
+            )}
+            {!loadingPipeline && formData.pipeline_id && (
+              <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
+                ℹ️ Este ticket se creará en el pipeline configurado por defecto
+              </div>
+            )}
+
             {/* Botones */}
             <div className="flex gap-4 justify-end pt-4">
               <Link href="/dashboard/crm/tickets">
@@ -192,7 +238,7 @@ export default function NewTicketPage() {
               </Link>
               <Button 
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || loadingPipeline}
                 className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)]"
               >
                 <Save className="w-4 h-4 mr-2" />

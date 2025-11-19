@@ -22,3 +22,4 @@ COMMENT ON SCHEMA core IS 'Schema principal para organizaciones y usuarios multi
 
 
 
+

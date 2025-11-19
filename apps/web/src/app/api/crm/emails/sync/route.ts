@@ -47,14 +47,15 @@ export async function POST(request: Request) {
 
       accountsToSync = account ? [account] : [];
     } else {
-      // Sincronizar todas las cuentas activas de la org
+      // Sincronizar todas las cuentas activas de la org (solo las que están en inbox)
       const { data: accounts } = await supabaseAdmin
         .schema('crm')
         .from('email_accounts')
         .select('*')
         .eq('organization_id', userWithOrg.organizationId)
         .eq('is_active', true)
-        .eq('sync_enabled', true);
+        .eq('sync_enabled', true)
+        .eq('sync_to_inbox', true);
 
       accountsToSync = accounts || [];
     }

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { to, cc, bcc, subject, body: emailBody, contact_id, from_account_id, attachments } = body;
+    const { to, cc, bcc, subject, body: emailBody, contact_id, ticket_id, reply_to_thread_id, from_account_id, attachments } = body;
 
     // Obtener cuenta de email a usar
     let emailAccount;
@@ -95,6 +95,26 @@ export async function POST(request: Request) {
     // Los adjuntos ya vienen en base64 desde el frontend
     const processedAttachments = attachments || [];
 
+    // Si es una respuesta, obtener thread_id del email original
+    let threadIdToUse: string | undefined = reply_to_thread_id;
+    
+    if (reply_to_thread_id && ticket_id) {
+      // Buscar el email original en el ticket para obtener su thread_id
+      const { data: originalEmail } = await supabaseAdmin
+        .schema('crm')
+        .from('emails')
+        .select('thread_id, gmail_message_id')
+        .eq('ticket_id', ticket_id)
+        .or(`thread_id.eq.${reply_to_thread_id},gmail_message_id.eq.${reply_to_thread_id},id.eq.${reply_to_thread_id}`)
+        .order('sent_at', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (originalEmail) {
+        threadIdToUse = originalEmail.thread_id || originalEmail.gmail_message_id;
+      }
+    }
+
     // Detectar tipo de conexión y enviar según corresponda
     let result: any;
     
@@ -106,7 +126,8 @@ export async function POST(request: Request) {
         bcc,
         subject,
         body: emailBody,
-        attachments: processedAttachments
+        attachments: processedAttachments,
+        threadId: threadIdToUse // Pasar thread_id si es respuesta
       };
       
       result = await sendEmail(emailAccount.gmail_oauth_tokens, message);
@@ -120,55 +141,65 @@ export async function POST(request: Request) {
         bcc,
         subject,
         body: emailBody,
-        attachments: processedAttachments
+        attachments: processedAttachments,
+        inReplyTo: threadIdToUse ? `message-id-${threadIdToUse}` : undefined // Para SMTP
       });
       
       // Adaptar resultado de SMTP a formato esperado
       result = {
         id: result.messageId,
-        threadId: result.messageId // IMAP no tiene threadId, usar messageId
+        threadId: threadIdToUse || result.messageId // Usar thread_id del original si existe
       };
     }
 
     // Guardar en crm.emails
+    const emailData = {
+      organization_id: userWithOrg.organizationId,
+      contact_id: contact_id || null,
+      ticket_id: ticket_id || null,
+      gmail_message_id: result.id,
+      thread_id: result.threadId,
+      from_email: emailAccount.email_address,
+      to_emails: Array.isArray(to) ? to : [to],
+      cc_emails: cc || [],
+      bcc_emails: bcc || [],
+      subject,
+      body_html: emailBody,
+      direction: 'outbound',
+      status: 'sent',
+      sent_at: new Date().toISOString(),
+      sent_by: userWithOrg.user.id,
+      sent_from_account_id: emailAccount.id,
+      has_attachments: attachments && attachments.length > 0,
+      attachments: attachments || []
+    };
+
+    console.log('[POST /api/crm/emails/send] Saving email with ticket_id:', ticket_id);
+
     const { data: emailRecord, error: emailError } = await supabase
       .schema('crm')
       .from('emails')
-      .insert({
-        organization_id: userWithOrg.organizationId,
-        contact_id: contact_id || null,
-        gmail_message_id: result.id,
-        thread_id: result.threadId,
-        from_email: emailAccount.email_address,
-        to_emails: Array.isArray(to) ? to : [to],
-        cc_emails: cc || [],
-        bcc_emails: bcc || [],
-        subject,
-        body_html: emailBody,
-        direction: 'outbound',
-        status: 'sent',
-        sent_at: new Date().toISOString(),
-        sent_by: userWithOrg.user.id,
-        sent_from_account_id: emailAccount.id,
-        has_attachments: attachments && attachments.length > 0,
-        attachments: attachments || []
-      })
+      .insert(emailData)
       .select()
       .single();
 
     if (emailError) {
       console.error('Error saving email record:', emailError);
+      console.error('Email data:', emailData);
       // Email fue enviado pero no se guardó en BD
+    } else {
+      console.log('[POST /api/crm/emails/send] Email saved successfully:', emailRecord?.id);
     }
 
-    // Crear actividad si hay contact_id
-    if (contact_id) {
+    // Crear actividad si hay contact_id o ticket_id
+    if (contact_id || ticket_id) {
       await supabase
         .schema('crm')
         .from('activities')
         .insert({
           organization_id: userWithOrg.organizationId,
-          contact_id,
+          contact_id: contact_id || null,
+          ticket_id: ticket_id || null,
           type: 'email',
           subject: `Email enviado: ${subject}`,
           description: emailBody.substring(0, 500), // Primeros 500 chars

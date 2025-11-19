@@ -78,6 +78,25 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // Verificar si ya existe un contacto con ese email
+    if (body.email) {
+      const { data: existingContact } = await supabase
+        .schema('crm')
+        .from('contacts')
+        .select('id, full_name, email')
+        .eq('organization_id', userWithOrg.organizationId)
+        .ilike('email', body.email)
+        .single();
+
+      if (existingContact) {
+        return NextResponse.json({ 
+          error: 'duplicate_email',
+          message: 'Ya existe un contacto con este correo electrónico',
+          existingContact
+        }, { status: 409 });
+      }
+    }
+
     // Crear contacto
     const { data: contact, error } = await supabase
       .schema('crm')
@@ -92,6 +111,15 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('[POST /api/crm/contacts] Error creating contact:', error);
+      
+      // Detectar error de duplicado (por si acaso pasa la validación previa)
+      if (error.code === '23505' && error.message.includes('unique_email_per_org')) {
+        return NextResponse.json({ 
+          error: 'duplicate_email',
+          message: 'Ya existe un contacto con este correo electrónico en tu organización'
+        }, { status: 409 });
+      }
+
       return NextResponse.json({ 
         error: error.message,
         details: error.details,
