@@ -1,7 +1,7 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon, IconContainer } from '@tupatrimonio/ui';
+import { Icon } from '@tupatrimonio/ui';
 import { ImagotipoImage } from '@tupatrimonio/assets';
 import { Button } from '@/components/ui/button';
-import { LogIn, UserPlus, Shield, Zap, FileCheck, Lock } from 'lucide-react';
+import { LogIn, UserPlus, Shield, Zap, Lock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {

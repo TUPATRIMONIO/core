@@ -5,8 +5,6 @@ import { UpdateNotification } from '@tupatrimonio/update-notifier';
 import { ServiceWorkerRegistration } from '../components/shared/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/shared/GoogleAnalytics';
 import { ThemeProvider } from '../components/providers/theme-provider';
-import { FloatingActions } from '../components/shared/FloatingActions';
-import { AuthListener } from '../components/auth/AuthListener';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -79,15 +77,11 @@ export default function RootLayout({
       </head>
       <body className={cn("bg-background text-foreground", outfit.className)}>
         <ThemeProvider>
-          <AuthListener />
           <ServiceWorkerRegistration />
           <UpdateNotification />
           <main className="min-h-screen">
             {children}
           </main>
-
-          {/* Botón flotante de cambio de tema y WhatsApp */}
-          <FloatingActions />
         </ThemeProvider>
       </body>
     </html>
