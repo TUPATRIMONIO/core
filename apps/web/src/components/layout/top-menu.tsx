@@ -1,9 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { LogOut, User, Settings, HelpCircle, CreditCard } from 'lucide-react'
+import { LogOut, User, Settings, HelpCircle, CreditCard, Globe } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useCredits } from '@/hooks/use-credits'
+import { useCurrency } from '@/hooks/use-currency'
 import { createClient } from '@/lib/supabase/client'
 import {
   DropdownMenu,
@@ -17,8 +18,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export function TopMenu() {
   const router = useRouter()
-  const { profile, reset } = useAuthStore()
+  const { profile, reset, setProfile } = useAuthStore()
   const { balance } = useCredits()
+  const { currencies, selectedCurrency, updateUserCurrency } = useCurrency()
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -47,6 +49,34 @@ export function TopMenu() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+          {/* Currency selector */}
+          {currencies.length > 1 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm bg-secondary rounded-md hover:bg-secondary/80 transition-colors">
+                  <Globe className="h-4 w-4" />
+                  <span>{selectedCurrency}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Seleccionar moneda</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {currencies.map((currency) => (
+                  <DropdownMenuItem
+                    key={currency.code}
+                    onClick={() => updateUserCurrency(currency.code)}
+                    className="cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>{currency.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{currency.symbol}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           {/* Credits display */}
           <button
             onClick={() => router.push('/dashboard/credits')}

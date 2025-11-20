@@ -1,4 +1,5 @@
 export { useUser } from './use-user'
 export { usePermissions } from './use-permissions'
 export { useCredits } from './use-credits'
+export { useCurrency } from './use-currency'
 export { useToast, toast } from './use-toast'

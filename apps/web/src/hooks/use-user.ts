@@ -50,6 +50,7 @@ export function useUser() {
       try {
         // Get profile
         const { data: profileData } = await supabase
+          .schema('core')
           .from('users')
           .select('*')
           .eq('id', userId)
@@ -59,21 +60,30 @@ export function useUser() {
           setProfile(profileData)
         }
 
-        // Get memberships with organizations
+        // Get memberships with organizations and roles
         const { data: membershipData } = await supabase
-          .from('organization_members')
+          .schema('core')
+          .from('organization_users')
           .select(`
             *,
-            organization:organizations(*)
+            organization:organizations(*),
+            role:roles(slug, name)
           `)
           .eq('user_id', userId)
+          .eq('status', 'active')
 
         if (membershipData) {
-          setMemberships(membershipData)
+          // Transform data to match expected structure
+          const transformedMemberships = membershipData.map(m => ({
+            ...m,
+            role: m.role?.slug || 'org_member', // Use role slug as role
+          }))
+          
+          setMemberships(transformedMemberships)
 
           // Auto-select organization if only one
-          if (membershipData.length === 1 && !currentOrganization) {
-            setCurrentOrganization(membershipData[0].organization)
+          if (transformedMemberships.length === 1 && !currentOrganization) {
+            setCurrentOrganization(transformedMemberships[0].organization)
           }
         }
       } catch (error) {

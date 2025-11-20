@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   // Rutas públicas que no requieren autenticación
-  const publicRoutes = ['/login', '/auth', '/404']
+  const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/auth', '/404', '/legal']
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 
   // Manejo de la raíz (/)
@@ -79,9 +79,10 @@ export async function updateSession(request: NextRequest) {
       if (!userProfile?.last_active_organization_id) {
         const { data: memberships, error: membershipsError } = await supabase
           .schema('core')
-          .from('organization_members')
+          .from('organization_users')
           .select('organization_id')
           .eq('user_id', user.id)
+          .eq('status', 'active')
 
         if (!membershipsError && memberships) {
           if (memberships.length === 0) {
@@ -128,8 +129,9 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Si está autenticado y trata de acceder a login, redirigir a dashboard
-  if (user && pathname.startsWith('/login')) {
+  // Si está autenticado y trata de acceder a páginas de auth, redirigir a dashboard
+  const authPages = ['/login', '/register', '/forgot-password']
+  if (user && authPages.some(page => pathname.startsWith(page))) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

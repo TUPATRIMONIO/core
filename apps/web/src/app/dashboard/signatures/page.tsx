@@ -38,6 +38,7 @@ export default function SignaturesPage() {
     try {
       const supabase = createClient()
       const { data } = await supabase
+        .schema('signatures')
         .from('documents')
         .select('*')
         .eq('organization_id', currentOrganization.id)

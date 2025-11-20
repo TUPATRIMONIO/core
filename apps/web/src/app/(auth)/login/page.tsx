@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
@@ -9,10 +9,20 @@ import { Button } from '@tupatrimonio/ui'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam === 'auth') {
+      setError('Error en la autenticación. Por favor, intenta nuevamente.')
+    } else if (errorParam === 'auth_callback_error') {
+      setError('Error al verificar el email. Por favor, intenta iniciar sesión.')
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +76,7 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-[var(--color-brand)] flex items-center justify-center">
+        <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-[var(--tp-brand)] flex items-center justify-center">
           <span className="text-white font-bold text-xl">TP</span>
         </div>
         <CardTitle className="text-2xl">Bienvenido</CardTitle>
@@ -152,6 +162,12 @@ export default function LoginPage() {
             </svg>
             Google
           </Button>
+
+          <div className="flex items-center justify-between text-sm">
+            <Link href="/forgot-password" className="text-primary hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
 
           <p className="text-center text-sm text-muted-foreground">
             ¿No tienes cuenta?{' '}

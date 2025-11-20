@@ -33,6 +33,7 @@ export function useCredits() {
 
       // Get current balance
       const { data: creditsData } = await supabase
+        .schema('core')
         .from('organization_credits')
         .select('*')
         .eq('organization_id', currentOrganization.id)
@@ -42,6 +43,7 @@ export function useCredits() {
 
       // Get recent transactions
       const { data: txData } = await supabase
+        .schema('core')
         .from('credit_transactions')
         .select('*')
         .eq('organization_id', currentOrganization.id)

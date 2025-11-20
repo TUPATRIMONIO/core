@@ -37,6 +37,7 @@ export default function NotaryPage() {
     try {
       const supabase = createClient()
       const { data } = await supabase
+        .schema('notary')
         .from('requests')
         .select('*')
         .eq('organization_id', currentOrganization.id)

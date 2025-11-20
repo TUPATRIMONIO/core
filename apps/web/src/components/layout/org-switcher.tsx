@@ -76,7 +76,9 @@ export function OrgSwitcher() {
               <div className="flex flex-col min-w-0">
                 <span className="truncate text-sm">{membership.organization.name}</span>
                 <span className="text-xs text-muted-foreground capitalize">
-                  {membership.role.replace('org_', '')}
+                  {typeof membership.role === 'string' 
+                    ? membership.role.replace('org_', '')
+                    : membership.role?.slug?.replace('org_', '') || 'member'}
                 </span>
               </div>
             </div>

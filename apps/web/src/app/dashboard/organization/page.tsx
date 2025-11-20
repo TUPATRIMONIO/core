@@ -29,6 +29,7 @@ export default function OrganizationPage() {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
+        .schema('core')
         .from('organizations')
         .update({ name })
         .eq('id', currentOrganization.id)

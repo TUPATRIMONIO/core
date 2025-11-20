@@ -26,8 +26,21 @@ export default function OnboardingPage() {
     try {
       const supabase = createClient()
 
+      // Get owner role ID
+      const { data: ownerRole } = await supabase
+        .schema('core')
+        .from('roles')
+        .select('id')
+        .eq('slug', 'org_owner')
+        .single()
+
+      if (!ownerRole) {
+        throw new Error('Error al obtener rol de propietario')
+      }
+
       // Create organization
       const { data: org, error: orgError } = await supabase
+        .schema('core')
         .from('organizations')
         .insert({
           name: organizationName,
@@ -43,11 +56,13 @@ export default function OnboardingPage() {
 
       // Create membership
       const { error: memberError } = await supabase
-        .from('organization_members')
+        .schema('core')
+        .from('organization_users')
         .insert({
           organization_id: org.id,
           user_id: user.id,
-          role: 'org_owner',
+          role_id: ownerRole.id,
+          status: 'active',
         })
 
       if (memberError) {
@@ -56,6 +71,7 @@ export default function OnboardingPage() {
 
       // Create credits balance
       await supabase
+        .schema('core')
         .from('organization_credits')
         .insert({
           organization_id: org.id,
@@ -64,6 +80,7 @@ export default function OnboardingPage() {
 
       // Update user's last active org
       await supabase
+        .schema('core')
         .from('users')
         .update({ last_active_organization_id: org.id })
         .eq('id', user.id)
@@ -73,7 +90,7 @@ export default function OnboardingPage() {
         id: crypto.randomUUID(),
         organization_id: org.id,
         user_id: user.id,
-        role: 'org_owner' as const,
+        role: { slug: 'org_owner', name: 'Organization Owner' },
         created_at: new Date().toISOString(),
         organization: org,
       }

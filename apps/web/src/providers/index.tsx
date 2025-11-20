@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from './auth-provider'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -10,9 +11,11 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthProvider>
-      {children}
-      <Toaster />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        {children}
+        <Toaster />
+      </AuthProvider>
+    </ThemeProvider>
   )
 }

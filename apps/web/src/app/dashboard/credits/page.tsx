@@ -1,13 +1,50 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CreditCard, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react'
+import { CreditCard, ArrowUpRight, ArrowDownRight, Plus, CheckCircle, XCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@tupatrimonio/ui'
 import { Button } from '@tupatrimonio/ui'
 import { useCredits } from '@/hooks/use-credits'
+import { useToast } from '@/hooks/use-toast'
 
 export default function CreditsPage() {
-  const { balance, transactions, isLoading } = useCredits()
+  const { balance, credits, transactions, isLoading, reload } = useCredits()
+  const searchParams = useSearchParams()
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const error = searchParams.get('error')
+
+    if (success === 'purchase_completed') {
+      toast({
+        title: 'Compra exitosa',
+        description: 'Los créditos se han agregado a tu cuenta',
+      })
+      reload()
+    } else if (success === 'already_processed') {
+      toast({
+        title: 'Pago ya procesado',
+        description: 'Este pago ya fue procesado anteriormente',
+      })
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        invalid_callback: 'Callback de pago inválido',
+        payment_not_found: 'Pago no encontrado',
+        credits_failed: 'Error al agregar créditos',
+        payment_failed: 'El pago falló',
+        callback_error: 'Error al procesar el callback',
+      }
+
+      toast({
+        title: 'Error',
+        description: errorMessages[error] || 'Ocurrió un error',
+        variant: 'destructive',
+      })
+    }
+  }, [searchParams, toast, reload])
 
   const getTransactionIcon = (type: string) => {
     if (['purchase', 'bonus', 'refund', 'transfer_in'].includes(type)) {
@@ -38,12 +75,21 @@ export default function CreditsPage() {
             Administra tus créditos y revisa el historial
           </p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/credits/buy">
-            <Plus className="mr-2 h-4 w-4" />
-            Comprar créditos
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          {credits?.allow_transfers && (
+            <Button asChild variant="outline">
+              <Link href="/dashboard/credits/transfer">
+                Transferir
+              </Link>
+            </Button>
+          )}
+          <Button asChild>
+            <Link href="/dashboard/credits/buy">
+              <Plus className="mr-2 h-4 w-4" />
+              Comprar créditos
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Balance card */}

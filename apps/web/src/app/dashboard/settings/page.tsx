@@ -24,6 +24,7 @@ export default function SettingsPage() {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
+        .schema('core')
         .from('users')
         .update({
           full_name: fullName,

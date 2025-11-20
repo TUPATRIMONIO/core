@@ -45,6 +45,7 @@ export default function NewSignaturePage() {
     try {
       const supabase = createClient()
       const { data } = await supabase
+        .schema('signatures')
         .from('providers')
         .select('*')
         .eq('is_active', true)
@@ -140,6 +141,7 @@ export default function NewSignaturePage() {
 
       // Create document
       const { data: document, error: docError } = await supabase
+        .schema('signatures')
         .from('documents')
         .insert({
           organization_id: currentOrganization.id,
@@ -169,6 +171,7 @@ export default function NewSignaturePage() {
       }))
 
       const { error: signersError } = await supabase
+        .schema('signatures')
         .from('document_signers')
         .insert(signersToInsert)
 

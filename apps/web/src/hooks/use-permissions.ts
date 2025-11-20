@@ -37,42 +37,52 @@ export function usePermissions() {
 
       // Get user's role in organization
       const { data: membership } = await supabase
-        .from('organization_members')
-        .select('role')
+        .schema('core')
+        .from('organization_users')
+        .select(`
+          role:roles(slug, name)
+        `)
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganization.id)
+        .eq('status', 'active')
         .single()
 
-      if (!membership) {
+      if (!membership || !membership.role) {
         setPermissions({})
         return
       }
 
       // Base permissions by role
-      const basePermissions = getRolePermissions(membership.role)
+      const roleSlug = membership.role.slug
+      const basePermissions = getRolePermissions(roleSlug)
 
       // Get custom permissions for this user in this org
-      const { data: customPermissions } = await supabase
+      const { data: customPermissionsData } = await supabase
+        .schema('core')
         .from('user_permissions')
-        .select('schema_name, permissions')
+        .select('permissions')
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganization.id)
+        .maybeSingle()
 
       // Merge base with custom permissions
       const mergedPermissions = { ...basePermissions }
 
-      if (customPermissions) {
-        for (const custom of customPermissions) {
-          if (mergedPermissions[custom.schema_name]) {
+      if (customPermissionsData?.permissions) {
+        // Parse JSONB permissions: {"schema_name": ["action1", "action2"]}
+        const customPerms = customPermissionsData.permissions as Record<string, string[]>
+        
+        for (const [schemaName, actions] of Object.entries(customPerms)) {
+          if (mergedPermissions[schemaName]) {
             // Merge arrays, removing duplicates
-            mergedPermissions[custom.schema_name] = [
+            mergedPermissions[schemaName] = [
               ...new Set([
-                ...mergedPermissions[custom.schema_name],
-                ...custom.permissions,
+                ...mergedPermissions[schemaName],
+                ...actions,
               ]),
             ]
           } else {
-            mergedPermissions[custom.schema_name] = custom.permissions
+            mergedPermissions[schemaName] = actions
           }
         }
       }

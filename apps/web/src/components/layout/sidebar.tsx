@@ -91,7 +91,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center h-16 px-4 border-b">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[var(--tp-brand)] flex items-center justify-center">
               <span className="text-white font-bold text-sm">TP</span>
             </div>
             <span className="font-semibold text-lg">TuPatrimonio</span>
