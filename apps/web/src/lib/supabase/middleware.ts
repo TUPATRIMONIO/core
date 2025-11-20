@@ -27,14 +27,36 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refrescar la sesión del usuario si existe
-  // IMPORTANTE: Obtener usuario debe ser una operación de solo lectura, 
-  // no debe escribir en la sesión. Usar getUser() en lugar de getSession() 
-  // para evitar issues con las cookies.
-  await supabase.auth.getUser()
+  const pathname = request.nextUrl.pathname
 
-  // Simplemente mantener la sesión actualizada
-  // Ya no hay redirecciones automáticas, solo la página principal
+  // No aplicar lógica de auth en rutas públicas de autenticación
+  const isAuthRoute = pathname.startsWith('/login') || 
+                      pathname.startsWith('/register') || 
+                      pathname.startsWith('/verify-email') ||
+                      pathname.startsWith('/forgot-password') ||
+                      pathname.startsWith('/reset-password')
+
+  // Rutas completamente públicas donde no verificamos sesión
+  if (isAuthRoute) {
+    // Refrescar la sesión si existe, pero no redirigir automáticamente
+    await supabase.auth.getUser()
+    return supabaseResponse
+  }
+
+  // Para rutas privadas, verificar autenticación
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Proteger rutas privadas
+  const isPrivateRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/notary')
+
+  // Si no está autenticado e intenta acceder a ruta privada, redirigir a login
+  if (!user && isPrivateRoute) {
+    const redirectUrl = new URL('/login', request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
   return supabaseResponse
 }
 

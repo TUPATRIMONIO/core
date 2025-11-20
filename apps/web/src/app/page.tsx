@@ -1,12 +1,40 @@
 import { Icon } from '@tupatrimonio/ui';
 import { ImagotipoImage } from '@tupatrimonio/assets';
 import { Button } from '@/components/ui/button';
-import { LogIn, UserPlus, Shield, Zap, Lock } from 'lucide-react';
+import { LogIn, UserPlus, Shield, Zap, Lock, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { signOut } from '@/lib/auth/actions';
 
-export default function Home() {
+export default async function Home() {
+  // Verificar si el usuario está autenticado
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--tp-background-light)] to-background">
+      {/* Header con botón de logout si está autenticado */}
+      {user && (
+        <header className="tp-container py-4 border-b border-border">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              Hola, <span className="font-semibold text-foreground">{user.email}</span>
+            </p>
+            <form action={signOut}>
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </Button>
+            </form>
+          </div>
+        </header>
+      )}
+
       {/* Hero Section */}
       <section className="tp-container py-20">
         <div className="max-w-4xl mx-auto text-center">
@@ -24,27 +52,43 @@ export default function Home() {
             Tu plataforma de servicios legales digitales. Firma documentos, verifica identidad y gestiona trámites desde cualquier lugar.
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Mostrar diferentes botones según si está autenticado */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link href="/login">
-              <Button 
-                size="lg" 
-                className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                <Icon icon={LogIn} size="md" variant="inherit" className="mr-2" />
-                Iniciar Sesión
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                <Icon icon={UserPlus} size="md" variant="inherit" className="mr-2" />
-                Crear Cuenta
-              </Button>
-            </Link>
+            {user ? (
+              // Usuario autenticado: botón para ir al dashboard
+              <Link href="/dashboard">
+                <Button 
+                  size="lg" 
+                  className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                >
+                  <Icon icon={Shield} size="md" variant="inherit" className="mr-2" />
+                  Ir al Dashboard
+                </Button>
+              </Link>
+            ) : (
+              // Usuario no autenticado: botones de login y registro
+              <>
+                <Link href="/login">
+                  <Button 
+                    size="lg" 
+                    className="bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Icon icon={LogIn} size="md" variant="inherit" className="mr-2" />
+                    Iniciar Sesión
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button 
+                    size="lg" 
+                    variant="outline"
+                    className="border-2 border-[var(--tp-brand)] text-[var(--tp-brand)] hover:bg-[var(--tp-brand-5)] px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Icon icon={UserPlus} size="md" variant="inherit" className="mr-2" />
+                    Crear Cuenta
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Trust indicators */}
@@ -64,8 +108,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      
 
       {/* Footer */}
       <footer className="tp-container py-8 border-t border-border">

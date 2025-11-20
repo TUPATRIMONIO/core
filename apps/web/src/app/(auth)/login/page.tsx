@@ -3,9 +3,9 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { SignupForm } from '@/components/auth/signup-form'
+import { LoginForm } from '@/components/auth/login-form'
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter()
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function RegisterPage() {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
         
-        // Solo redirigir si hay una sesión válida Y el usuario está verificado
+        // Solo redirigir si hay una sesión válida
         if (active && session && !error) {
           router.replace('/dashboard')
           router.refresh()
@@ -42,12 +42,16 @@ export default function RegisterPage() {
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--tp-buttons)] font-semibold text-white shadow-[var(--tp-shadow-md)]">
               TP
             </span>
-            <p className="text-sm font-medium text-muted-foreground">Tu Tranquilidad, Nuestra Prioridad</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              Bienvenido de nuevo
+            </h1>
+            <p className="text-sm font-medium text-muted-foreground">
+              Tu Tranquilidad, Nuestra Prioridad
+            </p>
           </div>
-          <SignupForm />
+          <LoginForm />
         </div>
       </div>
     </main>
   )
 }
-

@@ -1,163 +1,161 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon } from '@tupatrimonio/ui'
 import { Lock, Eye, EyeOff, CheckCircle } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { useToast } from '@/hooks/useToast'
+import { updatePassword } from '@/lib/auth/actions'
 
 export default function ResetPasswordPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  
+  const [success, setSuccess] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
-    // Validaciones
+
+    // Validaciones client-side
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres')
       return
     }
-    
+
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden')
       return
     }
-    
+
     setLoading(true)
-    
+
+    const formData = new FormData()
+    formData.append('password', password)
+
     try {
-      const supabase = createClient()
-      
-      // Actualizar contraseña
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: password
-      })
-      
-      if (updateError) {
-        throw updateError
+      const result = await updatePassword(formData)
+
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
       }
-      
-      // Mostrar éxito
-      toast({
-        title: '¡Contraseña actualizada!',
-        description: 'Tu contraseña ha sido cambiada exitosamente',
-      })
-      
-      // Redirigir al dashboard después de 2 segundos
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 2000)
-      
-    } catch (err: any) {
-      console.error('Error updating password:', err)
-      setError(err.message || 'Error al actualizar la contraseña')
+      // Si es exitoso, updatePassword redirige automáticamente a /dashboard
+    } catch (err) {
+      setError('Ocurrió un error. Por favor intenta de nuevo')
+    } finally {
       setLoading(false)
     }
   }
-  
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[var(--tp-background-light)] to-background flex items-center justify-center p-4">
-      {/* Fondo con gradiente sutil */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--tp-brand)]/5 via-transparent to-[var(--tp-buttons)]/5" />
-      
-      {/* Card principal */}
-      <div className="relative w-full max-w-md">
-        <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card">
-          <CardHeader className="text-center pt-8">
-            {/* Logo con estilo de marca */}
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] rounded-full mb-6 shadow-lg">
-              <Icon icon={Lock} size="xl" variant="white" />
-            </div>
-            <CardTitle className="text-3xl mb-2">
-              <span className="text-[var(--tp-brand)]">Nueva Contraseña</span>
-            </CardTitle>
-            <CardDescription className="text-base">
-              Establece una nueva contraseña para tu cuenta
-            </CardDescription>
-          </CardHeader>
 
-          <CardContent>
+  if (success) {
+    return (
+      <main className="bg-[var(--tp-bg-light-10)]">
+        <div className="flex min-h-svh flex-col items-center justify-center px-6 py-12 sm:px-8">
+          <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground">
+                ¡Contraseña actualizada!
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Tu contraseña ha sido cambiada exitosamente. Redirigiendo...
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="bg-[var(--tp-bg-light-10)]">
+      <div className="flex min-h-svh flex-col items-center justify-center px-6 py-12 sm:px-8">
+        <div className="flex w-full max-w-md flex-col items-center gap-6">
+          {/* Header */}
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--tp-buttons-20)] shadow-[var(--tp-shadow-lg)]">
+              <Lock className="h-8 w-8 text-[var(--tp-buttons)]" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Nueva Contraseña
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Establece una nueva contraseña para tu cuenta
+            </p>
+          </div>
+
+          {/* Card con formulario */}
+          <div className="w-full rounded-lg border border-[var(--tp-lines-30)] bg-card p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Nueva Contraseña */}
-              <div>
-                <Label htmlFor="password" className="mb-2 block">
-                  Nueva Contraseña
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="password">Nueva Contraseña</Label>
                 <div className="relative">
-                  <Icon icon={Lock} size="md" variant="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
-                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20"
+                    className="pl-10 pr-10 focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
                     required
                     minLength={6}
+                    disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <Icon icon={showPassword ? EyeOff : Eye} size="md" variant="inherit" />
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
 
               {/* Confirmar Contraseña */}
-              <div>
-                <Label htmlFor="confirmPassword" className="mb-2 block">
-                  Confirmar Contraseña
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
                 <div className="relative">
-                  <Icon icon={Lock} size="md" variant="muted" className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="confirmPassword"
-                    name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="pl-10 pr-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20"
+                    className="pl-10 pr-10 focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
                     required
                     minLength={6}
+                    disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    <Icon icon={showConfirmPassword ? EyeOff : Eye} size="md" variant="inherit" />
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
-              
-              {/* Mensaje de error */}
+
               {error && (
                 <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
                   <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
                 </div>
               )}
-              
-              {/* Botón submit */}
+
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white font-medium"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
@@ -165,31 +163,25 @@ export default function ResetPasswordPage() {
                     Actualizando...
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center">
-                    <Icon icon={CheckCircle} size="sm" variant="inherit" className="mr-2" />
-                    Actualizar Contraseña
-                  </div>
+                  'Actualizar Contraseña'
                 )}
               </Button>
-            </form>
 
-            {/* Info adicional */}
-            <div className="mt-4 p-3 rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-              <p className="text-blue-600 dark:text-blue-400 text-xs">
+              <p className="text-xs text-center text-muted-foreground">
                 La contraseña debe tener al menos 6 caracteres. Te recomendamos usar una combinación de letras, números y símbolos.
               </p>
-            </div>
-          </CardContent>
-        </Card>
+            </form>
+          </div>
 
-        {/* Decoración de fondo */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-[var(--tp-brand-20)] to-[var(--tp-brand-light)]/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-tr from-[var(--tp-buttons-10)] to-[var(--tp-buttons-20)] rounded-full blur-3xl" />
+          {/* Link volver al login */}
+          <a
+            href="/login"
+            className="text-sm text-[var(--tp-buttons)] hover:underline font-medium"
+          >
+            Volver al login
+          </a>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
-
-
-
-
