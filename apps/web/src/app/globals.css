@@ -1,0 +1,11 @@
+/* 
+ * Importar el sistema de estilos centralizado de TuPatrimonio
+ * Este archivo ahora usa packages/ui/globals.css como base
+ * que contiene todas las variables CSS y configuraciones del design system
+ */
+@import "tw-animate-css";
+
+/* 
+ * Estilos específicos de apps/web pueden agregarse aquí si son necesarios
+ * pero la mayoría de estilos vienen de packages/ui/globals.css
+ */
