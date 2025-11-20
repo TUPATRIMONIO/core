@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import type { Product } from '@/types/crm';
 
 interface EditProductFormProps {

@@ -3,7 +3,7 @@
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
 > **📊 Estado:** Fase 0 COMPLETA ✅ | **Sistema CRM Universal Implementado** 🎉  
-> **📅 Actualización:** 17 Noviembre 2025  
+> **📅 Actualización:** 20 Noviembre 2024  
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -94,9 +94,9 @@ Cada servicio tiene su propio schema para mejor organización:
 
 | Schema | Propósito | Estado |
 |--------|-----------|--------|
-| `core` | Foundation multi-tenant (orgs, users, roles) | ✅ Completo |
-| `marketing` | Blog, KB, leads, reviews | ✅ Completo |
-| `crm` | CRM universal configurable con pipelines y custom properties | ✅ **NUEVO** Sistema Universal |
+| `core` | Foundation multi-tenant (orgs, users, roles, suscripciones) - 13 tablas | ✅ Completo |
+| `marketing` | Blog, KB, leads, reviews, testimonios - 11 tablas | ✅ Completo |
+| `crm` | CRM completo estilo HubSpot: contacts, companies, deals, tickets, products, quotes, email multi-cuenta, pipelines configurables - 16+ tablas | ✅ Sistema Universal |
 | `signatures` | Firma electrónica | 📋 Fase 7 |
 | `ai_customer_service` | Chatbot IA con RAG | 📋 Fase 9 |
 | `ai_document_review` | Análisis de docs IA | 📋 Fase 10 |

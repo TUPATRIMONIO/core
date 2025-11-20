@@ -2,11 +2,11 @@ import type {Metadata, Viewport} from "next";
 import { Outfit, Nunito, Quicksand, Josefin_Sans } from 'next/font/google';
 import { cn } from "@/lib/utils";
 import { UpdateNotification } from '@tupatrimonio/update-notifier';
-import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
-import { GoogleAnalytics } from '../components/GoogleAnalytics';
-import { ThemeProvider } from '../components/theme-provider';
-import { FloatingActions } from '../components/FloatingActions';
-import { AuthListener } from '../components/AuthListener';
+import { ServiceWorkerRegistration } from '../components/shared/ServiceWorkerRegistration';
+import { GoogleAnalytics } from '../components/shared/GoogleAnalytics';
+import { ThemeProvider } from '../components/providers/theme-provider';
+import { FloatingActions } from '../components/shared/FloatingActions';
+import { AuthListener } from '../components/auth/AuthListener';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -46,9 +46,13 @@ export const metadata: Metadata = {
     title: "TuPatrimonio",
   },
   icons: {
-    icon: '/icon.png',
-    shortcut: '/favicon.ico',
-    apple: '/apple-icon.png',
+    icon: [
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png',
   },
 };
 

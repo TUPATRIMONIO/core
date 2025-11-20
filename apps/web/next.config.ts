@@ -165,11 +165,6 @@ const nextConfig: NextConfig = {
         destination: '/login',
         permanent: true,
       },
-      {
-        source: '/register',
-        destination: '/login',
-        permanent: true,
-      },
     ];
   },
   generateBuildId: async () => {

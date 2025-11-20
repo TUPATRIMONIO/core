@@ -12,7 +12,7 @@ import { CustomFieldRenderer } from './CustomFieldRenderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pencil, Save, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 interface CustomFieldsSectionProps {
   entityType: EntityType;

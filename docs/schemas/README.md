@@ -57,26 +57,47 @@ Para entender la filosofía completa de schemas, consulta:
 
 ### 3. Schema `crm` (CRM Multi-Tenant B2B) ⭐ COMPLETO - Estilo HubSpot
 
-**Estado**: ✅ Schema completo (10 tablas), UI pendiente
+**Estado**: ✅ Schema completo (16+ tablas), UI pendiente
 
-**Propósito**: Sistema CRM completo como servicio B2B vendible. Diseñado estilo HubSpot con todas las entidades principales interconectadas.
+**Propósito**: Sistema CRM completo como servicio B2B vendible. Diseñado estilo HubSpot con todas las entidades principales interconectadas, sistema universal configurable y email multi-cuenta.
 
-**Migraciones**: 
-- `20251112190000_schema-crm-multitenant.sql` (Base)
-- `20251112202031_crm-base.sql` (Expansión HubSpot)
+**Migraciones principales**: 
+- `20251112190000_schema-crm-multitenant.sql` (Base: 6 tablas)
+- `20251112202031_crm-base.sql` (Expansión HubSpot: +6 tablas)
+- `20251117211519_universal_crm_system.sql` (Sistema Universal: +3 tablas)
+- `20251114160000_crm_email_multi_account.sql` (Email multi-cuenta: +4 tablas)
+- `20251117215900_ticket_email_integration.sql` (Email-to-Ticket: +1 tabla)
 
-**Tablas principales** (10):
+**Tablas principales** (16+):
+
+**Core Entities (6)**:
 - `contacts` - Contactos/Personas individuales
-- `companies` - Empresas/Organizaciones ⭐ NUEVO
+- `companies` - Empresas/Organizaciones
 - `deals` - Oportunidades de venta
-- `tickets` - Sistema de soporte ⭐ NUEVO
-- `products` - Catálogo de productos/servicios ⭐ NUEVO
-- `quotes` + `quote_line_items` - Cotizaciones ⭐ NUEVO
-- `activities` - Timeline universal (expandido)
-- `emails` - Integración Gmail
-- `pipelines` - Stages personalizables ⭐ NUEVO
-- `settings` - Configuración por org
+- `tickets` - Sistema de soporte con SLA
+- `products` - Catálogo de productos/servicios
+- `quotes` + `quote_line_items` - Cotizaciones con líneas de detalle
+
+**Sistema Universal Configurable (3)**:
+- `entity_properties` - Propiedades personalizables por entidad
+- `pipeline_stages` - Stages de pipelines configurables
+- `pipeline_permissions` - Permisos granulares por pipeline
+
+**Email Multi-Cuenta (4)**:
+- `email_accounts` - Cuentas de email IMAP/SMTP por organización
+- `email_threads` - Hilos de conversación
+- `email_folders` - Carpetas del sistema de email
+- `email_labels` - Etiquetas personalizadas
+
+**Soporte y Comunicación (4)**:
+- `activities` - Timeline universal de interacciones
+- `emails` - Mensajes individuales de email
 - `notes` - Notas internas
+- `ticket_contacts` - Relación M:N tickets-contactos
+
+**Configuración (2)**:
+- `pipelines` - Definición de pipelines personalizados
+- `settings` - Configuración OAuth y general por org
 
 **Relaciones clave**:
 - Contacto → Empresa (N:1)
@@ -87,14 +108,18 @@ Para entender la filosofía completa de schemas, consulta:
 - Activity → Todo (N:1 universal)
 
 **Características**:
-- Multi-tenant estricto (RLS por organization_id)
-- Roles específicos: crm_manager, sales_rep
-- Vendible como servicio B2B
-- Integración Gmail por organización
-- Límites por plan de suscripción
-- Auto-numeración (tickets, quotes)
-- Cálculos automáticos (totales de quotes)
-- Pipelines personalizables
+- ✅ Multi-tenant estricto (RLS por organization_id)
+- ✅ Roles específicos: crm_manager, sales_rep
+- ✅ Vendible como servicio B2B
+- ✅ Email multi-cuenta IMAP/SMTP por organización
+- ✅ Email-to-Ticket automático desde inbox
+- ✅ Sistema universal: propiedades personalizables por entidad
+- ✅ Pipelines configurables con stages personalizados
+- ✅ Permisos granulares por pipeline y rol
+- ✅ Auto-numeración (tickets: TICK-00001, quotes: QUO-00001)
+- ✅ Cálculos automáticos (totales de quotes)
+- ✅ Límites por plan de suscripción
+- ✅ Timeline universal de actividades
 
 **Ver más**: 
 - 📄 **[crm.md](./crm.md)** - Implementación técnica
@@ -177,5 +202,6 @@ USING (
 
 ---
 
-**Última actualización**: 12 de Noviembre 2024
+**Última actualización**: 20 de Noviembre 2024  
+**Total tablas implementadas**: 40+ (13 core + 11 marketing + 16+ crm)
 

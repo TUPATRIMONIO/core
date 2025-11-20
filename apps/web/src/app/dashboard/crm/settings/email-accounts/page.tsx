@@ -25,7 +25,7 @@ import {
   Trash2,
   RefreshCw
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import type { EmailAccount } from '@/types/crm';
 
 export default function EmailAccountsPage() {

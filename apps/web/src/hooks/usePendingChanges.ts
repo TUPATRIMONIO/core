@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 interface UsePendingChangesOptions {
   onSave: (changes: Record<string, any>) => Promise<void>;

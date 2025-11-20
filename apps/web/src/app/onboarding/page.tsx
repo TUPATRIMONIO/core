@@ -27,7 +27,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 type OrgType = 'personal' | 'business' | 'invitation' | null;
 

@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, X, Mail, Users, User, AlertCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FileUpload } from './FileUpload';
 import { uploadAttachment } from '@/lib/storage/attachments';

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon } from '@tupatrimonio/ui'
 import { Lock, Eye, EyeOff, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/hooks/useToast'
 
 export default function ResetPasswordPage() {
   const router = useRouter()

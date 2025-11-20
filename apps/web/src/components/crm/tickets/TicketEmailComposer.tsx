@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mail } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { EmailComposer } from '@/components/crm/EmailComposer';
 
 interface TicketEmailComposerProps {

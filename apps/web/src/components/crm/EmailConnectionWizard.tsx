@@ -23,7 +23,7 @@ import {
   ArrowRight,
   ArrowLeft
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { detectProvider, getProviderConfig } from '@/lib/email/providers';
 
 interface WizardProps {

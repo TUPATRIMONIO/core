@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/table';
 import { ArrowLeft, Save, Plus, Trash2, Package } from 'lucide-react';
 import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import type { Product } from '@/types/crm';
 import { formatCurrency } from '@/lib/crm/formatters';
 

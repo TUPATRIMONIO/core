@@ -84,14 +84,37 @@ marketing.review_stats      # Estadísticas de reviews
 
 **Responsabilidad**: Gestión de contactos, deals, comunicaciones, pipeline de ventas
 
-**Tablas principales**:
+**Tablas principales** (16+):
 ```
+# Core Entities
 crm.contacts                # Contactos por organización
-crm.activities              # Timeline de interacciones
+crm.companies               # Empresas/Organizaciones
 crm.deals                   # Oportunidades de venta
-crm.emails                  # Integración Gmail (envío/recepción)
-crm.settings                # Configuración por organización
+crm.tickets                 # Sistema de soporte con SLA
+crm.products                # Catálogo de productos/servicios
+crm.quotes                  # Cotizaciones
+crm.quote_line_items        # Líneas de detalle de cotizaciones
+
+# Sistema Universal Configurable
+crm.entity_properties       # Propiedades personalizables por entidad
+crm.pipeline_stages         # Stages de pipelines configurables
+crm.pipeline_permissions    # Permisos granulares por pipeline
+
+# Email Multi-Cuenta
+crm.email_accounts          # Cuentas IMAP/SMTP por org
+crm.email_threads           # Hilos de conversación
+crm.email_folders           # Carpetas del sistema
+crm.email_labels            # Etiquetas personalizadas
+
+# Soporte y Comunicación
+crm.activities              # Timeline universal de interacciones
+crm.emails                  # Mensajes individuales de email
 crm.notes                   # Notas internas
+crm.ticket_contacts         # Relación M:N tickets-contactos
+
+# Configuración
+crm.pipelines               # Definición de pipelines personalizados
+crm.settings                # Configuración OAuth y general por org
 ```
 
 **ENUMs**:
@@ -107,7 +130,11 @@ crm.email_status            # draft, sent, delivered, opened, clicked, replied, 
 - **RLS robusto**: Cada org solo ve sus datos
 - **Roles específicos**: `crm_manager`, `sales_rep`
 - **Vendible**: Registrado en `core.applications` como servicio de pago
-- **Integración Gmail**: OAuth tokens por organización en `crm.settings`
+- **Email multi-cuenta**: IMAP/SMTP por organización con folders y labels
+- **Email-to-Ticket**: Conversión automática de emails a tickets
+- **Sistema Universal**: Propiedades personalizables y pipelines configurables
+- **Permisos granulares**: Control por pipeline, stage y rol
+- **Auto-numeración**: Tickets (TICK-00001) y Quotes (QUO-00001)
 
 **Usado por**: 
 - TuPatrimonio Platform (uso interno)
@@ -259,8 +286,8 @@ USING (
 | Schema | Estado | Tablas | Propósito | Multi-Tenant |
 |--------|--------|--------|-----------|--------------|
 | `core` | ✅ Completo | 13 | Foundation del sistema | Nativo |
-| `marketing` | ✅ Completo | 13+ | Marketing site y leads | No (público) |
-| `crm` | ✅ Schema listo | 6 | CRM B2B vendible | ✅ Sí |
+| `marketing` | ✅ Completo | 11 | Marketing site y leads | No (público) |
+| `crm` | ✅ Schema completo | 16+ | CRM B2B vendible estilo HubSpot | ✅ Sí |
 | `signatures` | 📋 Pendiente | - | Firma electrónica | ✅ Sí |
 | `verifications` | 📋 Pendiente | - | KYC/Identidad | ✅ Sí |
 | `ai_customer_service` | 📋 Pendiente | - | Chatbot IA | ✅ Sí |
@@ -333,6 +360,7 @@ A medida que el producto crece:
 
 ---
 
-**Última actualización**: 12 de Noviembre 2024  
-**Schemas implementados**: 3 de 8 planificados
+**Última actualización**: 20 de Noviembre 2024  
+**Schemas implementados**: 3 de 8 planificados  
+**Tablas totales**: 40+ (13 core + 11 marketing + 16+ crm)
 

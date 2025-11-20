@@ -1,7 +1,7 @@
 "use client"
 import { cn } from "@/lib/utils"
 import { Instagram, Dribbble, PartyPopper, LogOut } from "lucide-react"
-import {signOut} from "@/app/login/actions"
+import { signOut } from "@/lib/auth/actions"
 import { useState } from 'react';
 import { Input } from "./input"
 

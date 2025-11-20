@@ -20,7 +20,7 @@ import {
   ExternalLink,
   User as UserIcon
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { EmailComposer } from '@/components/crm/EmailComposer';
 import type { EmailThread, Email } from '@/types/crm';
 

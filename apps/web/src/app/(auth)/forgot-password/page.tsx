@@ -1,43 +1,58 @@
 'use client'
 
 import { useState } from 'react'
-import { useActionState } from 'react'
-import { useFormStatus } from 'react-dom'
-import { resendConfirmationEmail } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Icon } from '@tupatrimonio/ui'
-import { Mail, ArrowLeft, RefreshCcw } from 'lucide-react'
+import { Mail, ArrowLeft, Key } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  
-  return (
-    <Button
-      type="submit"
-      disabled={pending}
-      className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
-    >
-      {pending ? (
-        <div className="flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-          Enviando...
-        </div>
-      ) : (
-        <div className="flex items-center justify-center">
-          <Icon icon={RefreshCcw} size="sm" variant="inherit" className="mr-2" />
-          Reenviar Email de Confirmación
-        </div>
-      )}
-    </Button>
-  )
-}
-
-export default function ResendConfirmationPage() {
-  const [state, action] = useActionState(resendConfirmationEmail, null)
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setSuccess(false)
+    
+    if (!email) {
+      setError('El email es requerido')
+      return
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError('Email no válido')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const supabase = createClient()
+      
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      
+      if (resetError) {
+        throw resetError
+      }
+      
+      setSuccess(true)
+      setEmail('')
+    } catch (err: any) {
+      console.error('Error sending reset email:', err)
+      setError(err.message || 'Error al enviar el email de recuperación')
+    } finally {
+      setLoading(false)
+    }
+  }
   
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[var(--tp-background-light)] to-background flex items-center justify-center p-4">
@@ -50,18 +65,18 @@ export default function ResendConfirmationPage() {
           <CardHeader className="text-center pt-8">
             {/* Logo con estilo de marca */}
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--tp-brand)] via-[var(--tp-brand-light)] to-[var(--tp-brand-dark)] rounded-full mb-6 shadow-lg">
-              <Icon icon={Mail} size="xl" variant="white" />
+              <Icon icon={Key} size="xl" variant="white" />
             </div>
             <CardTitle className="text-3xl mb-2">
-              <span className="text-[var(--tp-brand)]">Confirmar Email</span>
+              <span className="text-[var(--tp-brand)]">Recuperar Contraseña</span>
             </CardTitle>
             <CardDescription className="text-base">
-              Te reenviaremos el email de confirmación a tu correo
+              Te enviaremos un email con las instrucciones para restablecer tu contraseña
             </CardDescription>
           </CardHeader>
 
           <CardContent>
-            <form action={action} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div>
                 <Label htmlFor="email" className="mb-2 block">
@@ -78,33 +93,42 @@ export default function ResendConfirmationPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 focus:border-[var(--tp-brand)] focus:ring-[var(--tp-brand)]/20"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
               
-              {/* Mensaje de error */}
-              {state?.error && (
+              {/* Mensajes de error */}
+              {error && (
                 <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
-                  <p className="text-red-600 dark:text-red-400 text-sm">{state.error}</p>
+                  <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
                 </div>
               )}
               
-              {/* Mensaje de éxito */}
-              {state?.success && (
+              {/* Mensajes de éxito */}
+              {success && (
                 <div className="p-3 rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
-                  <p className="text-green-600 dark:text-green-400 text-sm">{state.message}</p>
+                  <p className="text-green-600 dark:text-green-400 text-sm">
+                    Se ha enviado un email para restablecer tu contraseña. Revisa tu bandeja de entrada.
+                  </p>
                 </div>
               )}
-              
-              {/* Info adicional */}
-              <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-                <p className="text-blue-600 dark:text-blue-400 text-xs">
-                  Si no has recibido el email de confirmación, revisa tu carpeta de spam o correo no deseado.
-                </p>
-              </div>
               
               {/* Botón submit */}
-              <SubmitButton />
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-medium py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Enviando...
+                  </div>
+                ) : (
+                  'Enviar Email de Recuperación'
+                )}
+              </Button>
             </form>
 
             {/* Volver al login */}
@@ -127,7 +151,4 @@ export default function ResendConfirmationPage() {
     </div>
   )
 }
-
-
-
 

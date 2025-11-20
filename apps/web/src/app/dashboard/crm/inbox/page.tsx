@@ -19,7 +19,7 @@ import {
   Archive,
   Trash2
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import type { EmailThread } from '@/types/crm';
 import {
