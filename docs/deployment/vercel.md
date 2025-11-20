@@ -2,6 +2,7 @@
 
 ## Variables de Entorno
 
+
 Configurar en Vercel Dashboard → Settings → Environment Variables:
 
 ### Google Analytics
