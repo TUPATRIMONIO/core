@@ -1,14 +1,14 @@
 /**
- * Service Worker para detección de actualizaciones - TuPatrimonio
+ * Service Worker para detección de actualizaciones - TuPatrimonio Web App
  * 
  * Estrategia:
- * - Network-first para /version.json (siempre buscar la última versión)
+ * - Network-first para /api/version.json (siempre buscar la última versión)
  * - Cache-first para assets estáticos (performance)
  * - Notifica al cliente cuando detecta nueva versión
  */
 
-const CACHE_NAME = 'tupatrimonio-v1';
-const VERSION_ENDPOINT = '/version.json';
+const CACHE_NAME = 'tupatrimonio-web-v1';
+const VERSION_ENDPOINT = '/api/version.json';
 
 // Instalar Service Worker
 self.addEventListener('install', (event) => {
@@ -129,4 +129,3 @@ self.addEventListener('message', (event) => {
 });
 
 console.log('[SW] Service Worker loaded');
-

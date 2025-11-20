@@ -77,70 +77,70 @@ export function UpdateNotification() {
       }} />
       
       <div
-        className="fixed top-4 right-4 w-full max-w-md tp-animate-slide-in px-4"
+        className="fixed top-4 right-4 w-80 tp-animate-slide-in"
         style={{ zIndex: 9999 }}
       >
         <Card className="border-2 border-[var(--tp-brand)] shadow-2xl bg-card relative overflow-hidden">
           {/* Botón de cerrar mejorado */}
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-muted/50 z-10"
+            className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted/50 z-10"
             aria-label="Cerrar notificación"
           >
-            <Icon icon={X} size="sm" variant="inherit" />
+            <Icon icon={X} size="xs" variant="inherit" />
           </button>
 
-          <CardHeader className="pb-4 pt-6 pr-12">
-            <div className="flex items-start gap-4">
+          <CardHeader className="pb-3 pt-4 pr-10">
+            <div className="flex items-start gap-3">
               {/* Ícono animado con efecto glow */}
               <div className="tp-pulse-glow">
                 <IconContainer 
                   icon={Sparkles} 
                   variant="solid-brand" 
                   shape="rounded" 
-                  size="md"
+                  size="sm"
                 />
               </div>
               
               <div className="flex-1">
-                <CardTitle className="text-lg mb-1">
+                <CardTitle className="text-base mb-1">
                   ¡Hay algo nuevo para ti!
                 </CardTitle>
-                <CardDescription className="text-sm">
+                <CardDescription className="text-xs">
                   Acabamos de mejorar la plataforma
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className="pb-6 space-y-4">
+          <CardContent className="pb-4 space-y-3">
             {/* Mensaje empático y claro */}
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Tenemos una versión mejorada lista para ti. Cuando actualices, la página se recargará por completo.
             </p>
 
             {/* Trust indicator - honesto y empático */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded-lg">
-              <Icon icon={AlertCircle} size="sm" className="text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <Icon icon={AlertCircle} size="xs" className="text-blue-600 dark:text-blue-400" />
               <span className="text-xs text-blue-700 dark:text-blue-300 font-medium">
                 Guarda tu trabajo antes de actualizar
               </span>
             </div>
 
             {/* Botones de acción mejorados */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <div className="flex gap-2 pt-1">
               <Button
                 onClick={handleUpdateNow}
-                size="default"
+                size="sm"
                 className="flex-1 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white shadow-lg hover:shadow-xl transition-all"
               >
-                <Icon icon={RefreshCw} size="sm" variant="white" />
+                <Icon icon={RefreshCw} size="xs" variant="white" />
                 Actualizar Ahora
               </Button>
               <Button
                 onClick={handlePostpone}
                 variant="outline"
-                size="default"
+                size="sm"
                 className="flex-1 border-2 hover:bg-muted/50 transition-all"
               >
                 Más Tarde
@@ -148,7 +148,7 @@ export function UpdateNotification() {
             </div>
 
             {/* Texto de ayuda sutil */}
-            <p className="text-xs text-muted-foreground/70 text-center pt-1">
+            <p className="text-xs text-muted-foreground/70 text-center">
               Solo tomará un momento y vale la pena
             </p>
           </CardContent>

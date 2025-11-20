@@ -24,6 +24,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.1",
     "@tupatrimonio/assets": "*",
+    "@tupatrimonio/ui": "*",
     "@tupatrimonio/update-notifier": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

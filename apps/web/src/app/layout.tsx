@@ -1,10 +1,12 @@
 import type {Metadata, Viewport} from "next";
 import { Outfit, Nunito, Quicksand, Josefin_Sans } from 'next/font/google';
 import { cn } from "@/lib/utils";
-import { UpdateNotification } from '@tupatrimonio/update-notifier';
+import { ConditionalUpdateNotification } from '../components/shared/ConditionalUpdateNotification';
 import { ServiceWorkerRegistration } from '../components/shared/ServiceWorkerRegistration';
 import { GoogleAnalytics } from '../components/shared/GoogleAnalytics';
 import { ThemeProvider } from '../components/providers/theme-provider';
+import { FloatingActions } from '../components/shared/FloatingActions';
+import { CookieBanner } from '../components/shared/CookieBanner';
 import "../../../../packages/ui/globals.css";
 
 const outfit = Outfit({
@@ -78,10 +80,16 @@ export default function RootLayout({
       <body className={cn("bg-background text-foreground", outfit.className)}>
         <ThemeProvider>
           <ServiceWorkerRegistration />
-          <UpdateNotification />
+          <ConditionalUpdateNotification />
           <main className="min-h-screen">
             {children}
           </main>
+
+          {/* Botones flotantes: tema, cookies y WhatsApp */}
+          <FloatingActions />
+
+          {/* Banner de consentimiento de cookies - Aparece solo en primera visita */}
+          <CookieBanner />
         </ThemeProvider>
       </body>
     </html>
