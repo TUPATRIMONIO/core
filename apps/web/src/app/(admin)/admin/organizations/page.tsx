@@ -40,13 +40,13 @@ export default async function OrganizationsPage() {
   const organizations = await getOrganizations()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Organizaciones"
         description="Gestiona todas las organizaciones del sistema"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         {organizations.length === 0 ? (
           <Card>
             <CardContent className="p-0">

@@ -85,7 +85,7 @@ export default async function OrganizationDetailPage({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title={org.name}
         description={`Detalles de la organización ${org.slug}`}
@@ -99,7 +99,7 @@ export default async function OrganizationDetailPage({
         }
       />
 
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 px-4 pb-6 space-y-6">
         {/* Información General */}
         <Card>
           <CardHeader>

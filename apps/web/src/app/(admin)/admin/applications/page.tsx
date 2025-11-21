@@ -35,13 +35,13 @@ export default async function ApplicationsPage() {
   const applications = await getApplications()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Aplicaciones"
         description="Catálogo de aplicaciones del ecosistema"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {applications.map((app: any) => (
             <Card key={app.id}>

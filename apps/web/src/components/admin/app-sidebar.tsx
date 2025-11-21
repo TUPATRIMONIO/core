@@ -150,17 +150,23 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--tp-buttons)] text-white font-bold">
-            TP
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">TuPatrimonio</span>
-            <span className="text-xs text-muted-foreground">Administración</span>
-          </div>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/admin">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--tp-brand)] text-white font-bold text-sm">
+                  TP
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">TuPatrimonio</span>
+                  <span className="truncate text-xs">Administración</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
@@ -171,9 +177,13 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -190,9 +200,13 @@ export function AppSidebar() {
             <SidebarMenu>
               {appsMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -209,9 +223,13 @@ export function AppSidebar() {
             <SidebarMenu>
               {systemMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -227,31 +245,30 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-                  <Avatar className="h-6 w-6">
+                <SidebarMenuButton size="lg">
+                  <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user?.avatar_url} />
-                    <AvatarFallback className="text-xs">
+                    <AvatarFallback className="rounded-lg bg-[var(--tp-brand)] text-white">
                       {getInitials(user?.full_name, user?.email)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col items-start text-left text-sm">
-                    <span className="truncate font-medium">
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
                       {user?.full_name || user?.email || 'Usuario'}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Platform Admin
-                    </span>
+                    <span className="truncate text-xs">Platform Admin</span>
                   </div>
-                  <ChevronRight className="ml-auto h-4 w-4" />
+                  <ChevronRight className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                side="top"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
                 align="end"
-                className="w-[--radix-dropdown-menu-trigger-width]"
+                sideOffset={4}
               >
                 <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut />
                   Cerrar sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>

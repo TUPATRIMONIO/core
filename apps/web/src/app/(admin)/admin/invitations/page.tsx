@@ -38,13 +38,13 @@ export default async function InvitationsPage() {
   const invitations = await getInvitations()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Invitaciones"
         description="Gestiona todas las invitaciones del sistema"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         {invitations.length === 0 ? (
           <Card>
             <CardContent className="p-0">

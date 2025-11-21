@@ -50,13 +50,13 @@ export default async function UsersPage() {
   const users = await getUsers()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Usuarios"
         description="Gestiona todos los usuarios del sistema"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         {users.length === 0 ? (
           <Card>
             <CardContent className="p-0">

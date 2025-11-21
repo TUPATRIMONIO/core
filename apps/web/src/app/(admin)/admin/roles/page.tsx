@@ -24,13 +24,13 @@ export default async function RolesPage() {
   const roles = await getRoles()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Roles y Permisos"
         description="Gestiona los roles del sistema y sus permisos"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {roles.map((role: any) => (
             <Card key={role.id}>

@@ -57,13 +57,13 @@ export default async function SystemEventsPage() {
   const events = await getSystemEvents()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="System Events"
         description="Audit log de eventos del sistema"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         {events.length === 0 ? (
           <Card>
             <CardContent className="p-0">

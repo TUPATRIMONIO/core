@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Users, CreditCard, AlertCircle, TrendingUp, Activity } from 'lucide-react'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
 
 async function getMetrics() {
   const supabase = await createClient()
@@ -63,16 +61,11 @@ export default async function AdminDashboardPage() {
   const metrics = await getMetrics()
 
   return (
-    <div className="flex flex-col">
-      {/* Header */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
-        <h1 className="text-lg font-semibold">Dashboard</h1>
-      </header>
-
-      {/* Content */}
-      <div className="flex-1 space-y-6 p-6">
+    <div className="flex flex-1 flex-col">
+      <div className="flex items-center justify-between px-4 py-4">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+      </div>
+      <div className="flex-1 space-y-6 px-4 pb-6">
         {/* Métricas Principales */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>

@@ -55,13 +55,13 @@ export default async function SubscriptionsPage() {
   const subscriptions = await getSubscriptions()
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 flex-col">
       <PageHeader
         title="Suscripciones"
         description="Gestiona planes y suscripciones activas"
       />
 
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-4 pb-6">
         <Tabs defaultValue="plans" className="space-y-4">
           <TabsList>
             <TabsTrigger value="plans">Planes</TabsTrigger>
