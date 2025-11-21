@@ -22,10 +22,9 @@ async function getOrganization(id: string) {
         role_id,
         status,
         joined_at,
-        users(
+        users!organization_users_user_id_fkey(
           id,
-          full_name,
-          email:id
+          full_name
         ),
         roles(
           id,
@@ -80,9 +79,10 @@ async function getOrganization(id: string) {
 export default async function OrganizationDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const org = await getOrganization(params.id)
+  const { id } = await params
+  const org = await getOrganization(id)
 
   if (!org) {
     notFound()

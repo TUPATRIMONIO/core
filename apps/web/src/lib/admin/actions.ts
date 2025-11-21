@@ -3,6 +3,20 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
+// ============================================================================
+// IMPORTANTE: SEGURIDAD DE organization_users
+// ============================================================================
+// RLS está DESHABILITADO en core.organization_users debido a recursión infinita
+// inevitable con PostgreSQL cuando las políticas consultan la misma tabla.
+//
+// TODA la seguridad se maneja en estos server actions mediante:
+// 1. verifyPlatformAdmin() - Verifica si el usuario es platform admin
+// 2. Verificaciones adicionales según la operación (org owner, membresía, etc.)
+//
+// NUNCA exponer core.organization_users directamente al cliente.
+// TODAS las operaciones DEBEN pasar por estos server actions.
+// ============================================================================
+
 type ActionResult = {
   error?: string
   success?: boolean
@@ -13,6 +27,8 @@ type ActionResult = {
 // ============================================================================
 // HELPER: Verificar si es platform admin
 // ============================================================================
+// Usa la función is_platform_admin() que consulta la tabla de bypass _bypass.platform_admins
+// Esta tabla NO tiene RLS, evitando recursión infinita.
 
 async function verifyPlatformAdmin(): Promise<boolean> {
   const supabase = await createClient()
@@ -54,6 +70,8 @@ export async function createOrganization(formData: FormData): Promise<ActionResu
   const supabase = await createClient()
 
   try {
+    // Insertar organización sin hacer JOIN con organization_users
+    // para evitar recursión infinita en políticas RLS
     const { data, error } = await supabase
       .from('organizations')
       .insert({
@@ -65,7 +83,7 @@ export async function createOrganization(formData: FormData): Promise<ActionResu
         country: country || null,
         status,
       })
-      .select()
+      .select('id, name, slug, org_type, email, phone, country, status, created_at, updated_at')
       .single()
 
     if (error) {
