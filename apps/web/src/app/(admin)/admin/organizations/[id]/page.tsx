@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { EditOrganizationButton } from '@/components/admin/edit-organization-button'
+import { UserRoleActions } from '@/components/admin/user-role-actions'
 
 async function getOrganization(id: string) {
   const supabase = await createClient()
@@ -17,6 +19,7 @@ async function getOrganization(id: string) {
       *,
       organization_users(
         id,
+        role_id,
         status,
         joined_at,
         users(
@@ -25,6 +28,7 @@ async function getOrganization(id: string) {
           email:id
         ),
         roles(
+          id,
           name,
           slug
         )
@@ -90,12 +94,26 @@ export default async function OrganizationDetailPage({
         title={org.name}
         description={`Detalles de la organización ${org.slug}`}
         actions={
-          <Link href="/admin/organizations">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <EditOrganizationButton
+              organization={{
+                id: org.id,
+                name: org.name,
+                slug: org.slug,
+                org_type: org.org_type,
+                email: org.email,
+                phone: org.phone,
+                country: org.country,
+                status: org.status,
+              }}
+            />
+            <Link href="/admin/organizations">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -162,6 +180,13 @@ export default async function OrganizationDetailPage({
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">{ou.roles.name}</span>
                     <StatusBadge status={ou.status} />
+                    <UserRoleActions
+                      userId={ou.users.id}
+                      userName={ou.users.full_name || ou.users.email || 'Usuario'}
+                      organizationId={org.id}
+                      currentRoleId={ou.role_id}
+                      currentRoleName={ou.roles.name}
+                    />
                   </div>
                 </div>
               ))}

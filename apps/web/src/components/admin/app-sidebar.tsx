@@ -14,6 +14,8 @@ import {
   Settings,
   ChevronRight,
   LogOut,
+  UserCog,
+  Key,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -65,6 +67,11 @@ const mainMenuItems = [
     url: '/admin/invitations',
     icon: Mail,
   },
+  {
+    title: 'Teams',
+    url: '/admin/teams',
+    icon: UserCog,
+  },
 ]
 
 const appsMenuItems = [
@@ -81,6 +88,11 @@ const appsMenuItems = [
 ]
 
 const systemMenuItems = [
+  {
+    title: 'API Keys',
+    url: '/admin/api-keys',
+    icon: Key,
+  },
   {
     title: 'System Events',
     url: '/admin/events',

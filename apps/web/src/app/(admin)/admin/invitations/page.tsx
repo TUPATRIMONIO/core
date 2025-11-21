@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/table'
 import { Mail } from 'lucide-react'
 import { EmptyState } from '@/components/admin/empty-state'
+import { CreateInvitationButton } from '@/components/admin/create-invitation-button'
+import { CancelInvitationButton } from '@/components/admin/cancel-invitation-button'
 
 async function getInvitations() {
   const supabase = await createClient()
@@ -42,6 +44,7 @@ export default async function InvitationsPage() {
       <PageHeader
         title="Invitaciones"
         description="Gestiona todas las invitaciones del sistema"
+        actions={<CreateInvitationButton />}
       />
 
       <div className="flex-1 px-4 pb-6">
@@ -67,6 +70,7 @@ export default async function InvitationsPage() {
                     <TableHead>Invitado por</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Expira</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -83,6 +87,14 @@ export default async function InvitationsPage() {
                       </TableCell>
                       <TableCell>
                         {new Date(invitation.expires_at).toLocaleDateString('es-CL')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {invitation.status === 'pending' && (
+                          <CancelInvitationButton
+                            invitationId={invitation.id}
+                            invitationEmail={invitation.email}
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

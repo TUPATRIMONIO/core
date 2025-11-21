@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { Eye } from 'lucide-react'
 import { EmptyState } from '@/components/admin/empty-state'
 import { Building2 } from 'lucide-react'
+import { CreateOrganizationButton } from '@/components/admin/create-organization-button'
 
 async function getOrganizations() {
   const supabase = await createClient()
@@ -44,6 +45,7 @@ export default async function OrganizationsPage() {
       <PageHeader
         title="Organizaciones"
         description="Gestiona todas las organizaciones del sistema"
+        actions={<CreateOrganizationButton />}
       />
 
       <div className="flex-1 px-4 pb-6">
