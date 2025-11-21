@@ -245,6 +245,7 @@ const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'bu
           'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
           '[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
           '[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',
+          'group-data-[collapsible=icon]:hidden',
           className
         )}
         {...props}
@@ -273,14 +274,14 @@ SidebarInset.displayName = 'SidebarInset'
 
 const SidebarHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} data-sidebar="header" className={cn('flex flex-col gap-2 p-2', className)} {...props} />
+    return <div ref={ref} data-sidebar="header" className={cn('flex flex-col gap-2 p-2 group-data-[collapsible=icon]:px-0', className)} {...props} />
   }
 )
 SidebarHeader.displayName = 'SidebarHeader'
 
 const SidebarFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} data-sidebar="footer" className={cn('flex flex-col gap-2 p-2', className)} {...props} />
+    return <div ref={ref} data-sidebar="footer" className={cn('flex flex-col gap-2 p-2 group-data-[collapsible=icon]:px-0', className)} {...props} />
   }
 )
 SidebarFooter.displayName = 'SidebarFooter'
@@ -303,7 +304,7 @@ const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'di
 SidebarContent.displayName = 'SidebarContent'
 
 const SidebarGroup = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(({ className, ...props }, ref) => {
-  return <div ref={ref} data-sidebar="group" className={cn('relative flex w-full min-w-0 flex-col p-2', className)} {...props} />
+  return <div ref={ref} data-sidebar="group" className={cn('relative flex w-full min-w-0 flex-col p-2 group-data-[collapsible=icon]:px-0', className)} {...props} />
 })
 SidebarGroup.displayName = 'SidebarGroup'
 
@@ -356,7 +357,7 @@ const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.ComponentProp
 SidebarGroupContent.displayName = 'SidebarGroupContent'
 
 const SidebarMenu = React.forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(({ className, ...props }, ref) => (
-  <ul ref={ref} data-sidebar="menu" className={cn('flex w-full min-w-0 flex-col gap-1', className)} {...props} />
+  <ul ref={ref} data-sidebar="menu" className={cn('flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center', className)} {...props} />
 ))
 SidebarMenu.displayName = 'SidebarMenu'
 
