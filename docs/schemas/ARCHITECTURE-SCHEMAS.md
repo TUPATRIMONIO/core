@@ -142,9 +142,65 @@ crm.email_status            # draft, sent, delivered, opened, clicked, replied, 
 
 ---
 
+### 4. Schema `notarial_services` ⭐ NUEVO
+
+**Propósito**: Servicios notariales multi-tenant (copia legalizada, protocolización, firma autorizada)
+
+**Responsabilidad**: Gestión de servicios notariales, notarios, solicitudes, documentos y seguimiento de procesos
+
+**Tablas principales**:
+```
+# Core Entities
+notarial_services.notaries              # Notarios registrados en el sistema
+notarial_services.notary_offices        # Notarías asociadas
+notarial_services.service_requests      # Solicitudes de servicios notariales
+notarial_services.service_documents     # Documentos asociados a solicitudes
+
+# Tipos de Servicios
+notarial_services.legalized_copies      # Copias legalizadas
+notarial_services.protocolizations      # Protocolizaciones
+notarial_services.authorized_signatures # Firmas autorizadas por notario
+
+# Gestión de Proceso
+notarial_services.request_status_history  # Historial de estados
+notarial_services.notary_assignments       # Asignación de notarios a solicitudes
+notarial_services.service_timeline         # Timeline de eventos del servicio
+
+# Configuración
+notarial_services.service_types         # Tipos de servicios configurables
+notarial_services.service_pricing       # Precios por tipo de servicio y región
+notarial_services.notary_availability   # Disponibilidad de notarios
+notarial_services.service_settings      # Configuración por organización
+```
+
+**ENUMs**:
+```
+notarial_services.service_type          # legalized_copy, protocolization, authorized_signature
+notarial_services.request_status        # pending, assigned, in_progress, completed, cancelled, rejected
+notarial_services.document_type         # original, copy, certificate, authorization
+notarial_services.priority_level        # low, normal, high, urgent
+```
+
+**Características**:
+- **Multi-tenant estricto**: Aislamiento total por `organization_id`
+- **RLS robusto**: Cada org solo ve sus solicitudes y datos
+- **Roles específicos**: `notary`, `notary_admin`, `service_coordinator`
+- **Vendible**: Registrado en `core.applications` como servicio de pago
+- **Gestión de notarios**: Registro y disponibilidad de notarios por región
+- **Seguimiento completo**: Timeline y estados de cada solicitud
+- **Auto-numeración**: Solicitudes (NS-00001, LC-00001, PRO-00001)
+- **Integración con pagos**: Vinculación con sistema de pagos
+- **Notificaciones**: Alertas por WhatsApp y email en cambios de estado
+
+**Usado por**: 
+- TuPatrimonio Platform (servicio principal)
+- Clientes B2C y B2B que requieren servicios notariales
+
+---
+
 ## 📦 Schemas Futuros (Roadmap)
 
-### 4. Schema `signatures` (Fase 7)
+### 5. Schema `signatures` (Fase 7)
 
 **Propósito**: Servicio de firma electrónica
 
@@ -159,7 +215,7 @@ signatures.certificates
 
 ---
 
-### 5. Schema `verifications` (Fase 8)
+### 6. Schema `verifications` (Fase 8)
 
 **Propósito**: Verificación de identidad (KYC)
 
@@ -173,7 +229,7 @@ verifications.identity_records
 
 ---
 
-### 6. Schema `ai_customer_service` (Fase 9)
+### 7. Schema `ai_customer_service` (Fase 9)
 
 **Propósito**: Chatbot IA con RAG
 
@@ -191,7 +247,7 @@ ai_customer_service.feedback
 
 ---
 
-### 7. Schema `ai_document_review` (Fase 10)
+### 8. Schema `ai_document_review` (Fase 10)
 
 **Propósito**: Análisis de documentos con IA
 
@@ -206,7 +262,7 @@ ai_document_review.comparisons
 
 ---
 
-### 8. Schema `analytics` (Fase 11)
+### 9. Schema `analytics` (Fase 11)
 
 **Propósito**: Métricas y reportes
 
@@ -231,6 +287,7 @@ analytics.report_templates
      │
      ├─→ marketing         (puede leer core.users para autores)
      ├─→ crm               (usa core.organizations, core.users)
+     ├─→ notarial_services (usa core.organizations, core.users)
      ├─→ signatures        (usa core.organizations, core.users)
      ├─→ verifications     (usa core.organizations, core.users)
      ├─→ ai_*              (usa core.organizations, core.users)
@@ -288,6 +345,7 @@ USING (
 | `core` | ✅ Completo | 13 | Foundation del sistema | Nativo |
 | `marketing` | ✅ Completo | 11 | Marketing site y leads | No (público) |
 | `crm` | ✅ Schema completo | 16+ | CRM B2B vendible estilo HubSpot | ✅ Sí |
+| `notarial_services` | 📋 Pendiente | 12+ | Servicios notariales (copia legalizada, protocolización, firma autorizada) | ✅ Sí |
 | `signatures` | 📋 Pendiente | - | Firma electrónica | ✅ Sí |
 | `verifications` | 📋 Pendiente | - | KYC/Identidad | ✅ Sí |
 | `ai_customer_service` | 📋 Pendiente | - | Chatbot IA | ✅ Sí |
@@ -360,7 +418,7 @@ A medida que el producto crece:
 
 ---
 
-**Última actualización**: 20 de Noviembre 2024  
-**Schemas implementados**: 3 de 8 planificados  
-**Tablas totales**: 40+ (13 core + 11 marketing + 16+ crm)
+**Última actualización**: Diciembre 2024  
+**Schemas implementados**: 3 de 9 planificados  
+**Tablas totales**: 52+ (13 core + 11 marketing + 16+ crm + 12+ notarial_services planificadas)
 
