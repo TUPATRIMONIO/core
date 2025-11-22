@@ -60,9 +60,8 @@ export default async function UsagePage({ searchParams }: PageProps) {
       startDate.setMonth(startDate.getMonth() - 6);
   }
   
-  // Obtener transacciones de créditos gastados
+  // Obtener transacciones de créditos gastados (usar vista pública)
   const { data: transactions } = await supabase
-    .schema('credits')
     .from('credit_transactions')
     .select('*')
     .eq('organization_id', orgUser.organization_id)
@@ -71,9 +70,8 @@ export default async function UsagePage({ searchParams }: PageProps) {
     .lte('created_at', endDate.toISOString())
     .order('created_at', { ascending: false });
   
-  // Obtener cuenta de créditos para estadísticas
+  // Obtener cuenta de créditos para estadísticas (usar vista pública)
   const { data: account } = await supabase
-    .schema('credits')
     .from('credit_accounts')
     .select('*')
     .eq('organization_id', orgUser.organization_id)

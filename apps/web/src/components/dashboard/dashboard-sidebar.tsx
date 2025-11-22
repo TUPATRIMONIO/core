@@ -4,23 +4,20 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
-  Building2,
-  Users,
-  Shield,
-  Mail,
-  Package,
   CreditCard,
-  FileText,
+  Receipt,
+  Wallet,
   Settings,
   ChevronRight,
   LogOut,
-  UserCog,
-  Key,
-  DollarSign,
   Contact,
+  Building2,
+  TrendingUp,
+  Ticket,
+  Package,
   BookOpen,
-  Receipt,
-  Wallet,
+  FileText,
+  BarChart3,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -49,96 +46,81 @@ import { useState, useEffect } from 'react'
 const mainMenuItems = [
   {
     title: 'Dashboard',
-    url: '/admin',
+    url: '/dashboard',
     icon: LayoutDashboard,
-  },
-  {
-    title: 'Organizaciones',
-    url: '/admin/organizations',
-    icon: Building2,
-  },
-  {
-    title: 'Usuarios',
-    url: '/admin/users',
-    icon: Users,
-  },
-  {
-    title: 'Roles y Permisos',
-    url: '/admin/roles',
-    icon: Shield,
-  },
-  {
-    title: 'Invitaciones',
-    url: '/admin/invitations',
-    icon: Mail,
-  },
-  {
-    title: 'Teams',
-    url: '/admin/teams',
-    icon: UserCog,
   },
 ]
 
-const appsMenuItems = [
-  {
-    title: 'Aplicaciones',
-    url: '/admin/applications',
-    icon: Package,
-  },
-  {
-    title: 'Suscripciones',
-    url: '/admin/subscriptions',
-    icon: CreditCard,
-  },
+const crmMenuItems = [
   {
     title: 'CRM',
-    url: '/admin/crm',
+    url: '/dashboard/crm',
     icon: Contact,
   },
   {
-    title: 'Blog',
-    url: '/admin/blog',
-    icon: BookOpen,
+    title: 'Contactos',
+    url: '/dashboard/crm/contacts',
+    icon: Contact,
+  },
+  {
+    title: 'Empresas',
+    url: '/dashboard/crm/companies',
+    icon: Building2,
+  },
+  {
+    title: 'Deals',
+    url: '/dashboard/crm/deals',
+    icon: TrendingUp,
+  },
+  {
+    title: 'Tickets',
+    url: '/dashboard/crm/tickets',
+    icon: Ticket,
+  },
+  {
+    title: 'Productos',
+    url: '/dashboard/crm/products',
+    icon: Package,
   },
 ]
 
 const billingMenuItems = [
   {
-    title: 'Créditos',
-    url: '/admin/billing/credits',
+    title: 'Facturación',
+    url: '/billing',
+    icon: CreditCard,
+  },
+  {
+    title: 'Comprar Créditos',
+    url: '/billing/purchase-credits',
     icon: Wallet,
   },
   {
     title: 'Facturas',
-    url: '/admin/billing/invoices',
+    url: '/billing/invoices',
     icon: Receipt,
   },
   {
-    title: 'Pagos',
-    url: '/admin/billing/payments',
-    icon: DollarSign,
-  },
-]
-
-const systemMenuItems = [
-  {
-    title: 'API Keys',
-    url: '/admin/api-keys',
-    icon: Key,
-  },
-  {
-    title: 'System Events',
-    url: '/admin/events',
-    icon: FileText,
+    title: 'Uso de Créditos',
+    url: '/billing/usage',
+    icon: BarChart3,
   },
   {
     title: 'Configuración',
-    url: '/admin/settings',
+    url: '/billing/settings',
     icon: Settings,
   },
 ]
 
-export function AppSidebar() {
+const contentMenuItems = [
+  {
+    title: 'Blog',
+    url: '/dashboard/blog',
+    icon: BookOpen,
+  },
+]
+
+export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
@@ -173,8 +155,8 @@ export function AppSidebar() {
   }
 
   const isActive = (url: string) => {
-    if (url === '/admin') {
-      return pathname === '/admin'
+    if (url === '/dashboard') {
+      return pathname === '/dashboard'
     }
     return pathname.startsWith(url)
   }
@@ -200,13 +182,13 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/admin">
+              <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--tp-brand)] text-white font-bold text-sm">
                   TP
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">TuPatrimonio</span>
-                  <span className="truncate text-xs">Administración</span>
+                  <span className="truncate text-xs">Dashboard</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -238,12 +220,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Apps & Services */}
+        {/* CRM */}
         <SidebarGroup>
-          <SidebarGroupLabel>Apps & Servicios</SidebarGroupLabel>
+          <SidebarGroupLabel>CRM</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {appsMenuItems.map((item) => (
+              {crmMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
@@ -261,7 +243,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Billing & Credits */}
+        {/* Billing */}
         <SidebarGroup>
           <SidebarGroupLabel>Facturación</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -284,12 +266,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* System */}
+        {/* Content */}
         <SidebarGroup>
-          <SidebarGroupLabel>Sistema</SidebarGroupLabel>
+          <SidebarGroupLabel>Contenido</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {systemMenuItems.map((item) => (
+              {contentMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
@@ -324,7 +306,7 @@ export function AppSidebar() {
                     <span className="truncate font-semibold">
                       {user?.full_name || user?.email || 'Usuario'}
                     </span>
-                    <span className="truncate text-xs">Platform Admin</span>
+                    <span className="truncate text-xs">Mi Cuenta</span>
                   </div>
                   <ChevronRight className="ml-auto size-4" />
                 </SidebarMenuButton>

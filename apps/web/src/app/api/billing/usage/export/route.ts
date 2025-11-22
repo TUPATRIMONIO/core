@@ -55,9 +55,8 @@ export async function GET(request: NextRequest) {
         startDate.setMonth(startDate.getMonth() - 6);
     }
     
-    // Obtener transacciones
+    // Obtener transacciones (usar vista pública)
     const { data: transactions } = await supabase
-      .schema('credits')
       .from('credit_transactions')
       .select('*')
       .eq('organization_id', orgUser.organization_id)

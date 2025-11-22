@@ -58,9 +58,8 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
     throw new Error('Invalid auto-recharge amount');
   }
   
-  // Obtener método de pago
+  // Obtener método de pago (usar vista pública)
   const { data: paymentMethod } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('*')
     .eq('id', account.auto_recharge_payment_method_id)
@@ -72,9 +71,8 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
     throw new Error('Payment method not found');
   }
   
-  // Obtener paquete de créditos equivalente
+  // Obtener paquete de créditos equivalente (usar vista pública)
   const { data: packages } = await supabase
-    .schema('credits')
     .from('credit_packages')
     .select('*')
     .eq('is_active', true)
