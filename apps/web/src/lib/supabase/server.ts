@@ -41,3 +41,25 @@ export function createBuildTimeClient() {
   )
 }
 
+/**
+ * Cliente Supabase con service role key para operaciones administrativas
+ * BYPASS RLS - usar SOLO en webhooks y operaciones del servidor que requieren acceso completo
+ * NUNCA exponer este cliente al frontend
+ */
+export function createServiceRoleClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured');
+  }
+  
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+}
+

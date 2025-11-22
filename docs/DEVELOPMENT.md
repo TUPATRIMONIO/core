@@ -948,6 +948,64 @@ npx supabase db push
 # (incluye 20251102000001_fix_marketing_schema_permissions.sql)
 ```
 
+---
+
+## 💳 Integración con Stripe (Billing)
+
+### Configuración de Webhooks
+
+Los webhooks de Stripe son esenciales para recibir eventos de pago y suscripción en tiempo real.
+
+📚 **Guía completa**: [`docs/STRIPE-WEBHOOK-SETUP.md`](./STRIPE-WEBHOOK-SETUP.md)
+
+#### Quick Start para Desarrollo Local
+
+1. **Instalar Stripe CLI**:
+   ```bash
+   # Windows (Chocolatey)
+   choco install stripe
+   
+   # macOS
+   brew install stripe/stripe-cli/stripe
+   ```
+
+2. **Autenticar**:
+   ```bash
+   stripe login
+   ```
+
+3. **Iniciar listener** (en terminal separada):
+   ```bash
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   ```
+
+4. **Copiar el webhook secret** que muestra el comando y agregarlo a `.env.local`:
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+   ```
+
+5. **Probar evento**:
+   ```bash
+   stripe trigger payment_intent.succeeded
+   ```
+
+#### Variables de Entorno Requeridas
+
+```bash
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...  # Diferente para test y producción
+```
+
+#### Eventos Soportados
+
+- `payment_intent.succeeded` - Agrega créditos después de compra
+- `customer.subscription.created/updated/deleted` - Maneja suscripciones
+- `invoice.paid` - Agrega créditos mensuales incluidos
+- `invoice.payment_failed` - Maneja fallos de pago
+
 **Error: "REQUEST_DENIED - legacy API"**
 - Asegúrate de habilitar "Places API (New)" en Google Cloud Console
 - NO uses "Places API" (legacy)

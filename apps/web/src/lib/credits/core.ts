@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
+import { checkAndRecharge } from './auto-recharge';
 
 /**
  * Reserva créditos antes de una operación
+ * Verifica automáticamente si necesita auto-recarga antes de reservar
  */
 export async function reserveCredits(
   orgId: string,
@@ -12,6 +14,45 @@ export async function reserveCredits(
 ): Promise<string> {
   const supabase = await createClient();
   
+  // Obtener cuenta de créditos para verificar balance disponible
+  const { data: account } = await supabase
+    .from('credit_accounts')
+    .select('balance, reserved_balance, auto_recharge_enabled, auto_recharge_threshold')
+    .eq('organization_id', orgId)
+    .single();
+  
+  if (account) {
+    const availableBalance = account.balance - account.reserved_balance;
+    const requiredBalance = amount;
+    
+    // Si no hay suficientes créditos disponibles, verificar auto-recarga
+    if (availableBalance < requiredBalance && account.auto_recharge_enabled) {
+      console.log('🔄 Créditos insuficientes, verificando auto-recarga...', {
+        orgId,
+        availableBalance,
+        requiredBalance,
+        threshold: account.auto_recharge_threshold,
+      });
+      
+      try {
+        // Intentar auto-recarga
+        const rechargeExecuted = await checkAndRecharge(orgId);
+        
+        if (rechargeExecuted) {
+          console.log('✅ Auto-recarga ejecutada, esperando procesamiento...');
+          // Esperar un momento para que el webhook procese el pago
+          // Nota: En producción, esto debería manejarse de forma asíncrona
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (error: any) {
+        console.warn('⚠️ Auto-recarga falló o no fue necesaria:', error.message);
+        // Continuar con la reserva, puede que haya suficientes créditos ahora
+        // o que la auto-recarga no esté configurada correctamente
+      }
+    }
+  }
+  
+  // Intentar reservar créditos
   const { data, error } = await supabase.rpc('reserve_credits', {
     org_id_param: orgId,
     amount_param: amount,
@@ -75,6 +116,13 @@ export async function addCredits(
 ): Promise<string> {
   const supabase = await createClient();
   
+  console.log('🔄 addCredits llamado:', {
+    orgId,
+    amount,
+    source,
+    metadata,
+  });
+  
   const { data, error } = await supabase.rpc('add_credits', {
     org_id_param: orgId,
     amount_param: amount,
@@ -84,8 +132,22 @@ export async function addCredits(
   });
   
   if (error) {
+    console.error('❌ Error en add_credits RPC:', {
+      error: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+      orgId,
+      amount,
+    });
     throw new Error(`Error adding credits: ${error.message}`);
   }
+  
+  console.log('✅ add_credits RPC exitoso:', {
+    transactionId: data,
+    orgId,
+    amount,
+  });
   
   return data;
 }

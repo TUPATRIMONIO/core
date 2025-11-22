@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { addCredits } from './core';
 import { createPayment as createStripePayment } from '@/lib/stripe/subscriptions';
 import { createPayment as createDLocalPayment } from '@/lib/dlocal/client';
+import { notifyAutoRechargeExecuted, notifyAutoRechargeFailed } from '@/lib/notifications/billing';
 
 /**
  * Verifica y ejecuta auto-recarga si es necesario
@@ -145,22 +146,92 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
     .eq('id', invoice.id);
   
   // Crear pago según proveedor
-  let payment;
-  
   if (paymentMethod.provider === 'stripe') {
-    // Usar Stripe Payment Intent
-    // TODO: Implementar creación de Payment Intent con Stripe
-    throw new Error('Stripe auto-recharge not yet implemented');
+    // Crear Payment Intent con Stripe usando el método de pago guardado
+    const { createPaymentIntentForCredits } = await import('@/lib/stripe/checkout');
+    const { stripe } = await import('@/lib/stripe/client');
+    
+    const result = await createPaymentIntentForCredits(orgId, selectedPackage.id);
+    
+    // Confirmar pago automáticamente usando el método de pago guardado
+    try {
+      const paymentIntent = await stripe.paymentIntents.confirm(result.paymentIntent.id, {
+        payment_method: paymentMethod.provider_payment_method_id,
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/billing`,
+      });
+      
+      if (paymentIntent.status === 'succeeded') {
+        // Los créditos se agregarán vía webhook handlePaymentIntentSucceeded
+        // Notificar ejecución exitosa
+        try {
+          await notifyAutoRechargeExecuted(
+            orgId,
+            total,
+            selectedPackage.credits_amount
+          );
+        } catch (notifError: any) {
+          console.error('Error enviando notificación de auto-recarga:', notifError);
+        }
+        return true;
+      } else if (paymentIntent.status === 'requires_action') {
+        // Si requiere 3D Secure, no podemos procesarlo automáticamente
+        // Notificar al usuario
+        const errorMsg = 'Payment requires 3D Secure authentication. Please complete manually.';
+        try {
+          await notifyAutoRechargeFailed(orgId, errorMsg);
+        } catch (notifError: any) {
+          console.error('Error enviando notificación de auto-recarga fallida:', notifError);
+        }
+        throw new Error(errorMsg);
+      } else {
+        const errorMsg = `Payment failed: ${paymentIntent.status}`;
+        try {
+          await notifyAutoRechargeFailed(orgId, errorMsg);
+        } catch (notifError: any) {
+          console.error('Error enviando notificación de auto-recarga fallida:', notifError);
+        }
+        throw new Error(errorMsg);
+      }
+    } catch (error: any) {
+      // Si falla la confirmación automática, registrar el error pero no fallar completamente
+      // El usuario puede completar el pago manualmente más tarde
+      console.error('Error confirming auto-recharge payment:', error);
+      
+      // Notificar fallo
+      try {
+        await notifyAutoRechargeFailed(orgId, error.message);
+      } catch (notifError: any) {
+        console.error('Error enviando notificación de auto-recarga fallida:', notifError);
+      }
+      
+      throw new Error(`Error procesando auto-recarga: ${error.message}`);
+    }
   } else if (paymentMethod.provider === 'dlocal') {
-    // Usar dLocal
-    // TODO: Implementar creación de pago con dLocal
-    throw new Error('dLocal auto-recharge not yet implemented');
+    // Para dLocal, crear pago y esperar webhook
+    // Nota: dLocal generalmente requiere redirección, por lo que la auto-recarga
+    // puede no ser completamente automática. En este caso, creamos el pago y
+    // el usuario deberá completarlo manualmente si es necesario.
+    const { createDLocalPaymentForCredits } = await import('@/lib/dlocal/checkout');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const successUrl = `${baseUrl}/billing/purchase-credits/success?dlocal_payment_id={payment_id}`;
+    const cancelUrl = `${baseUrl}/billing`;
+    
+    // dLocal requiere métodos específicos, usar CARD por defecto
+    await createDLocalPaymentForCredits(
+      orgId,
+      selectedPackage.id,
+      'CARD', // Método de pago dLocal
+      successUrl,
+      cancelUrl
+    );
+    
+    // Para dLocal, el pago se procesa asíncronamente vía webhook
+    // Nota: Algunos métodos de dLocal requieren redirección, por lo que
+    // la auto-recarga puede requerir intervención manual
+    return true;
   } else {
     throw new Error(`Unknown payment provider: ${paymentMethod.provider}`);
   }
-  
-  // Si el pago es exitoso, los créditos se agregarán vía webhook
-  return true;
 }
 
 /**

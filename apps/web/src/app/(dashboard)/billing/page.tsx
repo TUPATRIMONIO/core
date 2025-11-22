@@ -64,7 +64,7 @@ export default async function BillingPage() {
               )}
             </div>
             <Button variant="outline" asChild>
-              <Link href="/billing/settings">Configurar</Link>
+              <Link href="/billing/settings">Configurar Auto-Recarga</Link>
             </Button>
           </div>
         </CardContent>

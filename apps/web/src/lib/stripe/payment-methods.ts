@@ -56,6 +56,7 @@ export async function attachPaymentMethod(
   
   // Guardar en base de datos
   const { data: existingMethods } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .select('is_default')
     .eq('organization_id', orgId)
@@ -68,6 +69,7 @@ export async function attachPaymentMethod(
   if (shouldBeDefault && existingMethods && existingMethods.length > 0) {
     // Quitar default de otros métodos
     await supabase
+      .schema('billing')
       .from('payment_methods')
       .update({ is_default: false })
       .eq('organization_id', orgId)
@@ -76,6 +78,7 @@ export async function attachPaymentMethod(
   }
   
   const { data: savedMethod, error } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .insert({
       organization_id: orgId,
@@ -107,10 +110,10 @@ export async function listPaymentMethods(orgId: string) {
   const supabase = await createClient();
   
   const { data, error } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .select('*')
     .eq('organization_id', orgId)
-    .eq('provider', 'stripe')
     .is('deleted_at', null)
     .order('is_default', { ascending: false })
     .order('created_at', { ascending: false });
@@ -141,8 +144,9 @@ export async function setDefaultPaymentMethod(orgId: string, paymentMethodId: st
   
   // Obtener método de pago de la BD
   const { data: paymentMethod } = await supabase
+    .schema('billing')
     .from('payment_methods')
-    .select('provider_payment_method_id')
+    .select('provider_payment_method_id, provider')
     .eq('id', paymentMethodId)
     .eq('organization_id', orgId)
     .single();
@@ -151,22 +155,26 @@ export async function setDefaultPaymentMethod(orgId: string, paymentMethodId: st
     throw new Error('Payment method not found');
   }
   
-  // Actualizar en Stripe
-  await stripe.customers.update(subscription.stripe_customer_id, {
-    invoice_settings: {
-      default_payment_method: paymentMethod.provider_payment_method_id,
-    },
-  });
+  // Actualizar en Stripe solo si es Stripe
+  if (paymentMethod.provider === 'stripe') {
+    await stripe.customers.update(subscription.stripe_customer_id, {
+      invoice_settings: {
+        default_payment_method: paymentMethod.provider_payment_method_id,
+      },
+    });
+  }
   
   // Actualizar en BD: quitar default de otros y poner en este
   await supabase
+    .schema('billing')
     .from('payment_methods')
     .update({ is_default: false })
     .eq('organization_id', orgId)
-    .eq('provider', 'stripe')
+    .eq('provider', paymentMethod.provider)
     .is('deleted_at', null);
   
   const { data: updated, error } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .update({ is_default: true })
     .eq('id', paymentMethodId)
@@ -188,6 +196,7 @@ export async function deletePaymentMethod(orgId: string, paymentMethodId: string
   
   // Obtener método de pago
   const { data: paymentMethod } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .select('provider_payment_method_id, provider, is_default')
     .eq('id', paymentMethodId)
@@ -218,6 +227,7 @@ export async function deletePaymentMethod(orgId: string, paymentMethodId: string
   
   // Soft delete en BD
   const { error } = await supabase
+    .schema('billing')
     .from('payment_methods')
     .update({ deleted_at: new Date().toISOString(), is_default: false })
     .eq('id', paymentMethodId);
@@ -229,6 +239,7 @@ export async function deletePaymentMethod(orgId: string, paymentMethodId: string
   // Si era el default, marcar otro como default si existe
   if (paymentMethod.is_default) {
     const { data: otherMethods } = await supabase
+      .schema('billing')
       .from('payment_methods')
       .select('id')
       .eq('organization_id', orgId)

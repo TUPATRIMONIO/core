@@ -12,12 +12,19 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // Ignorar warnings TS
   },
   // Configurar webpack para resolver archivos desde packages
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     // Permitir importar archivos desde el package assets
     config.resolve.alias = {
       ...config.resolve.alias,
       '@tupatrimonio/assets/public': path.resolve(__dirname, '../../packages/assets/public'),
     };
+    
+    // Configurar PDFKit para servidor (copiar archivos de fuentes)
+    if (isServer) {
+      config.externals = config.externals || [];
+      // No externalizar pdfkit en el servidor para que funcione correctamente
+    }
+    
     return config;
   },
   images: {

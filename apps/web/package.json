@@ -27,10 +27,13 @@
     "@tupatrimonio/assets": "*",
     "@tupatrimonio/ui": "*",
     "@tupatrimonio/update-notifier": "*",
+    "@types/pdfkit": "^0.17.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.546.0",
     "next": "15.5.6",
+    "pdfkit": "^0.17.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.1"
