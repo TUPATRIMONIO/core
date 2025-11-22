@@ -52,8 +52,8 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     return { error: translateError(error.message) }
   }
 
-  // Redirigir a página de verificación
-  redirect('/verify-email')
+  // Redirigir a onboarding (el usuario completará el onboarding antes de usar el sistema)
+  redirect('/onboarding')
 }
 
 /**
@@ -78,6 +78,26 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   if (error) {
     console.error('Error en signIn:', error)
     return { error: translateError(error.message) }
+  }
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Verificar si tiene organización
+  if (user) {
+    const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+      user_id: user.id,
+    })
+
+    revalidatePath('/', 'layout')
+
+    // Si no tiene organización, redirigir a onboarding
+    if (!hasOrg) {
+      redirect('/onboarding')
+      return
+    }
   }
 
   revalidatePath('/', 'layout')
@@ -234,6 +254,26 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
   if (error) {
     console.error('Error en verifyOTP:', error)
     return { error: translateError(error.message) }
+  }
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Verificar si tiene organización
+  if (user) {
+    const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+      user_id: user.id,
+    })
+
+    revalidatePath('/', 'layout')
+
+    // Si no tiene organización, redirigir a onboarding
+    if (!hasOrg) {
+      redirect('/onboarding')
+      return
+    }
   }
 
   revalidatePath('/', 'layout')

@@ -16,6 +16,22 @@ export async function GET(request: Request) {
         new URL(`/login?error=${encodeURIComponent('Error al autenticar')}`, origin)
       )
     }
+
+    // Verificar si tiene organización después de autenticación OAuth
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+        user_id: user.id,
+      })
+
+      // Si no tiene organización, redirigir a onboarding
+      if (!hasOrg) {
+        return NextResponse.redirect(new URL('/onboarding', origin))
+      }
+    }
   }
 
   // Redirigir al dashboard después de autenticación exitosa

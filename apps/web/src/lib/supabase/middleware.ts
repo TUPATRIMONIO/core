@@ -34,7 +34,8 @@ export async function updateSession(request: NextRequest) {
                       pathname.startsWith('/register') || 
                       pathname.startsWith('/verify-email') ||
                       pathname.startsWith('/forgot-password') ||
-                      pathname.startsWith('/reset-password')
+                      pathname.startsWith('/reset-password') ||
+                      pathname.startsWith('/onboarding')
 
   // Rutas completamente públicas donde no verificamos sesión
   if (isAuthRoute) {
@@ -55,6 +56,24 @@ export async function updateSession(request: NextRequest) {
   if (!user && isPrivateRoute) {
     const redirectUrl = new URL('/login', request.url)
     return NextResponse.redirect(redirectUrl)
+  }
+
+  // Si está autenticado pero intenta acceder a ruta privada, verificar onboarding
+  if (user && isPrivateRoute) {
+    try {
+      const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+        user_id: user.id,
+      })
+
+      // Si no tiene organización, redirigir a onboarding
+      if (!hasOrg) {
+        const redirectUrl = new URL('/onboarding', request.url)
+        return NextResponse.redirect(redirectUrl)
+      }
+    } catch (error) {
+      // Si hay error al verificar, permitir acceso (mejor UX que bloquear)
+      console.error('Error verificando organización en middleware:', error)
+    }
   }
 
   return supabaseResponse
