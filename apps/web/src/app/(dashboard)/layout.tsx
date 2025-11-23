@@ -22,14 +22,8 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  // Verificar si es platform admin - si lo es, redirigir al admin
-  const { data: isPlatformAdmin } = await supabase.rpc('is_platform_admin')
-
-  if (isPlatformAdmin) {
-    // Si está intentando acceder a /dashboard, redirigir a /admin
-    // Pero permitir acceso a rutas específicas del dashboard si vienen de ahí
-    // Por ahora, permitimos acceso a ambas áreas
-  }
+  // Los platform admins pueden acceder tanto al dashboard como al admin panel
+  // No hay restricción aquí - pueden usar ambas áreas según necesiten
 
   // Leer el estado del sidebar de las cookies
   const cookieStore = await cookies()

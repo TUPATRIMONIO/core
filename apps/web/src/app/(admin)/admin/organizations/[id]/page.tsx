@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatusBadge } from '@/components/admin/status-badge'
@@ -11,7 +11,7 @@ import { EditOrganizationButton } from '@/components/admin/edit-organization-but
 import { UserRoleActions } from '@/components/admin/user-role-actions'
 
 async function getOrganization(id: string) {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: org, error } = await supabase
     .from('organizations')
@@ -59,7 +59,7 @@ async function getOrganization(id: string) {
     return null
   }
 
-  // Obtener emails de los usuarios
+  // Obtener emails de los usuarios usando Service Role Client
   if (org?.organization_users) {
     const userIds = org.organization_users.map((ou: any) => ou.users.id)
     const { data: authUsers } = await supabase.auth.admin.listUsers()

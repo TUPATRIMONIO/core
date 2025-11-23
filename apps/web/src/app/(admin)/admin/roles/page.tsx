@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Shield } from 'lucide-react'
 
 async function getRoles() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: roles, error } = await supabase
     .from('roles')

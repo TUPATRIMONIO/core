@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -15,7 +15,7 @@ import {
 import { CreditCard, DollarSign, Star } from 'lucide-react'
 
 async function getPlans() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: plans, error } = await supabase
     .from('subscription_plans')
@@ -31,7 +31,7 @@ async function getPlans() {
 }
 
 async function getSubscriptions() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: subscriptions, error } = await supabase
     .from('organization_subscriptions')

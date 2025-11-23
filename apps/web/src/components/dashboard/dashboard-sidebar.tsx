@@ -18,6 +18,10 @@ import {
   BookOpen,
   FileText,
   BarChart3,
+  Mail,
+  Users,
+  Send,
+  BarChart,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -109,6 +113,29 @@ const billingMenuItems = [
     title: 'Configuración',
     url: '/billing/settings',
     icon: Settings,
+  },
+]
+
+const communicationsMenuItems = [
+  {
+    title: 'Campañas',
+    url: '/dashboard/crm/campaigns',
+    icon: Send,
+  },
+  {
+    title: 'Templates',
+    url: '/dashboard/crm/templates',
+    icon: FileText,
+  },
+  {
+    title: 'Listas',
+    url: '/dashboard/crm/lists',
+    icon: Users,
+  },
+  {
+    title: 'Analytics',
+    url: '/dashboard/crm/analytics',
+    icon: BarChart,
   },
 ]
 
@@ -274,6 +301,29 @@ export function DashboardSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     isActive={isActive(item.url, billingMenuItems)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Communications */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {communicationsMenuItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url, communicationsMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>

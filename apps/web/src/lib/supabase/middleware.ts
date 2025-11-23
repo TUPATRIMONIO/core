@@ -61,6 +61,15 @@ export async function updateSession(request: NextRequest) {
   // Si está autenticado pero intenta acceder a ruta privada, verificar onboarding
   if (user && isPrivateRoute) {
     try {
+      // Verificar si es platform admin primero
+      const { data: isPlatformAdmin } = await supabase.rpc('is_platform_admin')
+      
+      // Si es platform admin, permitir acceso al dashboard sin organización personal
+      if (isPlatformAdmin) {
+        return supabaseResponse
+      }
+
+      // Para usuarios normales, verificar si tienen organización
       const { data: hasOrg } = await supabase.rpc('user_has_organization', {
         user_id: user.id,
       })

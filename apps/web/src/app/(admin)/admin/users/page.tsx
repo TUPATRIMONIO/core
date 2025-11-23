@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { StatusBadge } from '@/components/admin/status-badge'
@@ -17,13 +17,13 @@ import { EmptyState } from '@/components/admin/empty-state'
 import { Badge } from '@/components/ui/badge'
 
 async function getUsers() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: users, error } = await supabase
     .from('users')
     .select(`
       *,
-      organization_users!inner(
+      organization_users!user_id(
         organization_id,
         organizations(name)
       )
@@ -35,7 +35,7 @@ async function getUsers() {
     return []
   }
 
-  // Obtener emails de auth
+  // Obtener emails de auth usando Service Role Client
   const { data: authData } = await supabase.auth.admin.listUsers()
   
   const usersWithEmail = users?.map(user => ({
@@ -91,7 +91,7 @@ export default async function UsersPage() {
                         <div className="text-sm">{user.email}</div>
                       </TableCell>
                       <TableCell>
-                        {user.organization_users?.length > 0 && (
+                        {user.organization_users?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {user.organization_users.slice(0, 2).map((ou: any, idx: number) => (
                               <Badge key={idx} variant="outline" className="text-xs">
@@ -104,6 +104,8 @@ export default async function UsersPage() {
                               </Badge>
                             )}
                           </div>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">Sin organización</span>
                         )}
                       </TableCell>
                       <TableCell>

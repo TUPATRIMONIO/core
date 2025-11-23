@@ -10,16 +10,11 @@ import { Badge } from '@/components/ui/badge';
 export default async function CompaniesPage() {
   const supabase = await createClient();
 
-  // Obtener organización del usuario
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user?.id)
-    .eq('status', 'active')
-    .single();
+  // Obtener organización del usuario (incluye platform org para platform admins)
+  const { getUserActiveOrganization } = await import('@/lib/organization/utils');
+  const orgResult = await getUserActiveOrganization(supabase);
 
-  if (!orgUser) {
+  if (!orgResult.organization) {
     return (
       <div className="container mx-auto py-8">
         <p>No se encontró organización</p>
@@ -31,7 +26,7 @@ export default async function CompaniesPage() {
   const { data: companies, error } = await supabase
     .from('crm.companies')
     .select('*')
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', orgResult.organization.id)
     .order('created_at', { ascending: false });
 
   return (
@@ -112,5 +107,6 @@ export default async function CompaniesPage() {
     </div>
   );
 }
+
 
 

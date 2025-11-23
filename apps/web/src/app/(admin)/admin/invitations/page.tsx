@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { StatusBadge } from '@/components/admin/status-badge'
@@ -16,7 +16,7 @@ import { CreateInvitationButton } from '@/components/admin/create-invitation-but
 import { CancelInvitationButton } from '@/components/admin/cancel-invitation-button'
 
 async function getInvitations() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: invitations, error } = await supabase
     .from('invitations')

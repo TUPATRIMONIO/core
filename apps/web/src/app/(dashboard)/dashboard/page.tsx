@@ -21,23 +21,21 @@ async function getDashboardData() {
     return null
   }
 
-  // Obtener organización del usuario
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single()
+  // Obtener organización del usuario (incluye platform org para platform admins)
+  const { getUserActiveOrganization } = await import('@/lib/organization/utils')
+  const orgResult = await getUserActiveOrganization(supabase)
 
-  if (!orgUser) {
+  if (!orgResult.organization) {
     return null
   }
+
+  const organizationId = orgResult.organization.id
 
   // Obtener cuenta de créditos
   const { data: creditAccount } = await supabase
     .from('credit_accounts')
     .select('balance, reserved_balance')
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', organizationId)
     .single()
 
   // Obtener estadísticas básicas del CRM (si existe función)
@@ -50,7 +48,7 @@ async function getDashboardData() {
 
   try {
     const { data: stats } = await supabase.rpc('crm.get_stats', {
-      org_id_param: orgUser.organization_id,
+      org_id_param: organizationId,
     })
     if (stats) {
       crmStats = {

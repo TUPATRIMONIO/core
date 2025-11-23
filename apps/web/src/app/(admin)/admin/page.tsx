@@ -1,9 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Users, CreditCard, AlertCircle, TrendingUp, Activity } from 'lucide-react'
 
 async function getMetrics() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   // Total de organizaciones activas
   const { count: totalOrganizations } = await supabase

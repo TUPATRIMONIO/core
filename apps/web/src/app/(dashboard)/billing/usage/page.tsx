@@ -19,16 +19,11 @@ export default async function UsagePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const supabase = await createClient();
   
-  // Obtener organización del usuario
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user?.id)
-    .eq('status', 'active')
-    .single();
-  
-  if (!orgUser) {
+  // Obtener organización del usuario (incluye platform org para platform admins)
+  const { getUserActiveOrganization } = await import('@/lib/organization/utils');
+  const orgResult = await getUserActiveOrganization(supabase);
+
+  if (!orgResult.organization) {
     return (
       <div className="container mx-auto py-8">
         <p>No se encontró organización</p>
@@ -64,7 +59,7 @@ export default async function UsagePage({ searchParams }: PageProps) {
   const { data: transactions } = await supabase
     .from('credit_transactions')
     .select('*')
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', orgResult.organization.id)
     .eq('type', 'spent')
     .gte('created_at', startDate.toISOString())
     .lte('created_at', endDate.toISOString())
@@ -74,7 +69,7 @@ export default async function UsagePage({ searchParams }: PageProps) {
   const { data: account } = await supabase
     .from('credit_accounts')
     .select('*')
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', orgResult.organization.id)
     .single();
   
   return (

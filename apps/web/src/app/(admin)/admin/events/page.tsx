@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ import { FileText, AlertCircle, AlertTriangle, Info, XCircle } from 'lucide-reac
 import { EmptyState } from '@/components/admin/empty-state'
 
 async function getSystemEvents() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: events, error } = await supabase
     .from('system_events')

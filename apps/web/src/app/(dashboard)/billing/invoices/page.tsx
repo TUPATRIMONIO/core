@@ -21,16 +21,11 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const supabase = await createClient();
   
-  // Obtener organización del usuario
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user?.id)
-    .eq('status', 'active')
-    .single();
-  
-  if (!orgUser) {
+  // Obtener organización del usuario (incluye platform org para platform admins)
+  const { getUserActiveOrganization } = await import('@/lib/organization/utils');
+  const orgResult = await getUserActiveOrganization(supabase);
+
+  if (!orgResult.organization) {
     return (
       <div className="container mx-auto py-8">
         <p>No se encontró organización</p>
@@ -42,7 +37,7 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
   let query = supabase
     .from('invoices')
     .select('*')
-    .eq('organization_id', orgUser.organization_id)
+    .eq('organization_id', orgResult.organization.id)
     .order('created_at', { ascending: false });
   
   // Aplicar filtros
@@ -68,7 +63,7 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
   const { count } = await supabase
     .from('invoices')
     .select('*', { count: 'exact', head: true })
-    .eq('organization_id', orgUser.organization_id);
+    .eq('organization_id', orgResult.organization.id);
   
   const totalPages = Math.ceil((count || 0) / pageSize);
   

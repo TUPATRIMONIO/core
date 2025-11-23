@@ -1,14 +1,14 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** 22 Noviembre 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅  
+> **📅 Última actualización:** Diciembre 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅  
 > **🎯 Próximo milestone:** Fase 3 - Comunicaciones y CRM (funcionalidades avanzadas)
 
-## 📊 Resumen Ejecutivo (Nov 2025)
+## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅
 
-Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%.
+Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS.
 
 **✅ COMPLETADO en Fase 0:**
 - ✅ Infraestructura completa (monorepo, Next.js 15, Tailwind v4, Supabase)
@@ -218,6 +218,8 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Next.js 15 params async requirement → **RESUELTO**
 - ✅ Supabase relación ambigua con users → **RESUELTO**
 - ✅ Triggers ejecutándose sin permisos → **RESUELTO con SECURITY DEFINER**
+- ✅ Usuarios sin organizaciones no visibles → **RESUELTO** (especificada relación `user_id` en consulta)
+- ✅ Platform admin con restricciones de RLS → **RESUELTO** (todas las páginas usan `createServiceRoleClient()`)
 
 ### 📋 **Funcionalidades del Admin Panel - 100% COMPLETAS**
 
@@ -235,10 +237,12 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Auto-creación de carpetas CRM** al crear organización
 
 **✅ GESTIÓN DE USUARIOS:**
-- ✅ Listado completo de usuarios del sistema
+- ✅ Listado completo de usuarios del sistema (incluye usuarios sin organizaciones)
+- ✅ Emails visibles correctamente usando ServiceRoleClient
 - ✅ Asignación de roles a usuarios
-- ✅ Ver organizaciones de cada usuario
+- ✅ Ver organizaciones de cada usuario (o "Sin organización" si no tiene)
 - ✅ Gestión de estados (activo/inactivo)
+- ✅ Corrección de relación ambigua en `organization_users` (especificada `user_id`)
 
 **✅ GESTIÓN DE INVITACIONES:**
 - ✅ **Enviar invitaciones** a nuevos usuarios
@@ -454,25 +458,30 @@ apps/web/src/app/(admin)/admin/
 ### 🚀 **Capacidades del Platform Admin**
 
 **Como Platform Admin puedes:**
-1. ✅ Ver y gestionar **todas las organizaciones** del sistema
+1. ✅ Ver y gestionar **todas las organizaciones** del sistema (sin filtros de RLS)
 2. ✅ Crear nuevas organizaciones (Personal, Business, Enterprise, Platform)
 3. ✅ Editar información de organizaciones existentes
-4. ✅ Ver todos los **usuarios** registrados
-5. ✅ Asignar y remover **roles** a usuarios
-6. ✅ Enviar **invitaciones** para nuevos usuarios
-7. ✅ Cancelar invitaciones pendientes
-8. ✅ Crear y gestionar **teams** dentro de organizaciones
-9. ✅ Agregar y remover **miembros de teams**
-10. ✅ Crear **API keys** para organizaciones
-11. ✅ Revocar API keys existentes
-12. ✅ Ver todas las **aplicaciones** del ecosistema
-13. ✅ Ver **suscripciones** activas
-14. ✅ Monitorear **eventos del sistema**
-15. ✅ Ver **créditos de todas las organizaciones** (nueva sección)
-16. ✅ Ver **facturas de todas las organizaciones** (nueva sección)
-17. ✅ Ver **pagos de todas las organizaciones** (nueva sección)
-18. ✅ Ver **estadísticas del CRM** globales (nueva sección)
-19. ✅ Acceder al **blog** desde el admin (nueva sección)
+4. ✅ Ver **todos los usuarios** registrados (incluye usuarios sin organizaciones)
+5. ✅ Ver **emails de todos los usuarios** usando ServiceRoleClient
+6. ✅ Asignar y remover **roles** a usuarios
+7. ✅ Enviar **invitaciones** para nuevos usuarios
+8. ✅ Cancelar invitaciones pendientes
+9. ✅ Ver **todas las invitaciones** del sistema (sin restricciones)
+10. ✅ Crear y gestionar **teams** dentro de organizaciones
+11. ✅ Ver **todos los teams** de todas las organizaciones
+12. ✅ Agregar y remover **miembros de teams**
+13. ✅ Crear **API keys** para organizaciones
+14. ✅ Ver **todas las API keys** del sistema
+15. ✅ Revocar API keys existentes
+16. ✅ Ver todas las **aplicaciones** del ecosistema
+17. ✅ Ver **suscripciones** activas de todas las organizaciones
+18. ✅ Monitorear **eventos del sistema** globales
+19. ✅ Ver **créditos de todas las organizaciones** (nueva sección)
+20. ✅ Ver **facturas de todas las organizaciones** (nueva sección)
+21. ✅ Ver **pagos de todas las organizaciones** (nueva sección)
+22. ✅ Ver **estadísticas del CRM** globales (nueva sección)
+23. ✅ Acceder al **blog** desde el admin (nueva sección)
+24. ✅ **Vista completa sin restricciones** - Todas las páginas usan ServiceRoleClient para bypass RLS
 
 **Como Usuario Regular puedes:**
 1. ✅ Acceder a tu **dashboard personal** con sidebar completo
@@ -492,6 +501,8 @@ apps/web/src/app/(admin)/admin/
 5. ✅ **SECURITY DEFINER** - En triggers del sistema
 6. ✅ **Validaciones robustas** - En frontend y backend
 7. ✅ **Nunca exponer tablas sensibles** - Solo via Server Actions
+8. ✅ **ServiceRoleClient en páginas admin** - Platform admin ve todo sin restricciones de RLS
+9. ✅ **Acceso completo a datos** - Todas las páginas de admin usan `createServiceRoleClient()` para bypass RLS
 
 ### 📄 **Documentación Actualizada**
 
@@ -523,6 +534,40 @@ apps/web/src/app/(admin)/admin/
 - Detección automática de tipo de usuario
 - Layouts separados pero consistentes
 - Páginas de admin para billing, CRM y blog
+
+### 🔧 **MEJORAS RECIENTES - Admin Panel (Diciembre 2025)**
+
+**✅ CORRECCIÓN CRÍTICA: Visibilidad Completa de Usuarios**
+- ✅ **Problema identificado**: Página de usuarios solo mostraba usuarios con organizaciones asignadas
+- ✅ **Causa**: Consulta usaba `!inner` (INNER JOIN) que excluía usuarios sin organizaciones
+- ✅ **Solución**: Eliminado `!inner` y especificada relación `user_id` explícitamente
+- ✅ **Resultado**: Ahora muestra **todos los usuarios** del sistema, tengan o no organizaciones
+
+**✅ CORRECCIÓN CRÍTICA: Emails No Visibles**
+- ✅ **Problema identificado**: Columna de emails mostraba "N/A" para todos los usuarios
+- ✅ **Causa**: `auth.admin.listUsers()` requiere ServiceRoleClient, no funciona con cliente normal
+- ✅ **Solución**: Actualizada función para usar `createServiceRoleClient()` para obtener emails
+- ✅ **Resultado**: Emails visibles correctamente para todos los usuarios
+
+**✅ MEJORA ARQUITECTÓNICA: Acceso Completo del Platform Admin**
+- ✅ **Problema identificado**: Algunas páginas de admin tenían restricciones de RLS que limitaban visibilidad
+- ✅ **Solución**: Actualizadas **todas las páginas de admin** para usar `createServiceRoleClient()`
+- ✅ **Páginas actualizadas** (12 páginas):
+  - Dashboard (`admin/page.tsx`)
+  - Usuarios (`admin/users/page.tsx`)
+  - Organizaciones (`admin/organizations/page.tsx` + detalle)
+  - Teams (`admin/teams/page.tsx` + detalle)
+  - Invitaciones (`admin/invitations/page.tsx`)
+  - API Keys (`admin/api-keys/page.tsx`)
+  - Suscripciones (`admin/subscriptions/page.tsx`)
+  - Aplicaciones (`admin/applications/page.tsx`)
+  - Roles (`admin/roles/page.tsx`)
+  - System Events (`admin/events/page.tsx`)
+- ✅ **Beneficios**:
+  - Platform admin ve **todo el sistema** sin restricciones
+  - No hay filtros ocultos por organización
+  - Consistencia en todas las páginas de administración
+  - Emails y datos completos visibles en todas partes
 
 **✅ LISTO PARA PRODUCCIÓN** 🚀
 

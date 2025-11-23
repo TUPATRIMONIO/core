@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceRoleClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -17,7 +17,7 @@ import { CreateTeamButton } from '@/components/admin/create-team-button'
 import { Badge } from '@/components/ui/badge'
 
 async function getTeams() {
-  const supabase = await createClient()
+  const supabase = createServiceRoleClient()
 
   const { data: teams, error } = await supabase
     .from('teams')
