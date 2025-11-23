@@ -223,3 +223,4 @@ export function getContactFullName(contact: { first_name?: string; last_name?: s
   return contact.first_name || contact.last_name || 'Sin nombre';
 }
 
+

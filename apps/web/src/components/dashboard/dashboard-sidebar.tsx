@@ -154,11 +154,32 @@ export function DashboardSidebar() {
     router.push('/login')
   }
 
-  const isActive = (url: string) => {
+  const isActive = (url: string, allItemsInGroup: Array<{ url: string }> = []) => {
+    // Para dashboard, solo activo si es exactamente igual
     if (url === '/dashboard') {
       return pathname === '/dashboard'
     }
-    return pathname.startsWith(url)
+    
+    // Verificar si el pathname coincide exactamente con la URL
+    if (pathname === url) {
+      return true
+    }
+    
+    // Verificar si el pathname empieza con la URL seguida de /
+    if (pathname.startsWith(url + '/')) {
+      // Verificar si hay una ruta más específica en el mismo grupo que también coincida
+      // Si la hay, esta ruta no debe estar activa
+      const moreSpecificMatch = allItemsInGroup.find(item => 
+        item.url !== url && 
+        pathname.startsWith(item.url) &&
+        item.url.length > url.length
+      )
+      
+      // Solo está activo si no hay una ruta más específica que coincida
+      return !moreSpecificMatch
+    }
+    
+    return false
   }
 
   const getInitials = (name?: string, email?: string) => {
@@ -206,7 +227,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={isActive(item.url)}
+                    isActive={isActive(item.url, mainMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -229,7 +250,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={isActive(item.url)}
+                    isActive={isActive(item.url, crmMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -252,7 +273,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={isActive(item.url)}
+                    isActive={isActive(item.url, billingMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -275,7 +296,7 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton 
                     asChild 
-                    isActive={isActive(item.url)}
+                    isActive={isActive(item.url, contentMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
