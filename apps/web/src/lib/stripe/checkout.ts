@@ -62,21 +62,43 @@ export async function createPaymentIntentForCredits(
   });
   
   // Crear factura en BD primero (usar vista pública)
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      organization_id: orgId,
-      invoice_number: await generateInvoiceNumber(),
-      status: 'open',
-      type: 'credit_purchase',
-      subtotal: amount,
-      tax,
-      total: amount + tax,
-      currency,
-      due_date: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  // Reintentar hasta 3 veces en caso de error de duplicado
+  let invoice = null;
+  let invoiceError = null;
+  const maxRetries = 3;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const invoiceNumber = await generateInvoiceNumber();
+    
+    const result = await supabase
+      .from('invoices')
+      .insert({
+        organization_id: orgId,
+        invoice_number: invoiceNumber,
+        status: 'open',
+        type: 'credit_purchase',
+        subtotal: amount,
+        tax,
+        total: amount + tax,
+        currency,
+        due_date: new Date().toISOString(),
+      })
+      .select()
+      .single();
+    
+    invoice = result.data;
+    invoiceError = result.error;
+    
+    // Si no hay error o el error no es de duplicado, salir del loop
+    if (!invoiceError || !invoiceError.message.includes('duplicate key')) {
+      break;
+    }
+    
+    // Si es error de duplicado y no es el último intento, esperar un poco y reintentar
+    if (attempt < maxRetries - 1) {
+      await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+    }
+  }
   
   if (invoiceError) {
     throw new Error(`Error creando factura: ${invoiceError.message}`);
