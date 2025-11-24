@@ -12,7 +12,7 @@ function AuthCallbackContent() {
 
   useEffect(() => {
     const supabase = createClient()
-    let authStateSubscription: { unsubscribe: () => void } | null = null
+    let authStateSubscription: ReturnType<typeof supabase.auth.onAuthStateChange> | null = null
     let timeoutId: NodeJS.Timeout | null = null
     let isProcessing = false
 
@@ -229,12 +229,47 @@ function AuthCallbackContent() {
         }
       }
       
-      // Manejar Magic Link con code pero sin provider_token (ya procesado por Supabase o implicit flow)
+      // Manejar Magic Link con code pero sin provider_token (PKCE flow)
+      // Con PKCE, necesitamos usar exchangeCodeForSession para procesar el code
       if (code && !providerToken) {
-        console.log('[handleAuthCallback] Detectado Magic Link (code sin provider_token) - Supabase ya lo procesó automáticamente')
-        // Supabase procesa automáticamente el code en implicit flow
-        // Solo necesitamos esperar el evento SIGNED_IN o verificar la sesión inmediatamente
-        // No intentar exchangeCodeForSession para Magic Links sin provider_token
+        console.log('[handleAuthCallback] Detectado Magic Link (code sin provider_token) - Procesando con exchangeCodeForSession...')
+        isProcessing = true
+        try {
+          const { data: exchangeData, error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code)
+
+          if (exchangeError) {
+            console.error('[handleAuthCallback] Error en exchangeCodeForSession (Magic Link):', exchangeError)
+            setStatus('error')
+            setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+            }, 3000)
+            return
+          }
+
+          if (!exchangeData.session) {
+            console.error('[handleAuthCallback] No se pudo establecer la sesión (Magic Link)')
+            setStatus('error')
+            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+            }, 3000)
+            return
+          }
+
+          console.log('[handleAuthCallback] Sesión establecida con exchangeCodeForSession (Magic Link), procesando autenticación...')
+          await processSuccessfulAuth()
+          return
+        } catch (err) {
+          console.error('[handleAuthCallback] Error inesperado en exchangeCodeForSession (Magic Link):', err)
+          setStatus('error')
+          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
+          setTimeout(() => {
+            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+          }, 3000)
+          return
+        }
       }
 
       // Para Magic Links: Supabase procesa automáticamente los hash fragments
@@ -272,7 +307,8 @@ function AuthCallbackContent() {
       authStateSubscription = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log('[onAuthStateChange] Evento:', event, { hasSession: !!session, userId: session?.user?.id })
 
-        if (event === 'SIGNED_IN' && session) {
+        // Manejar INITIAL_SESSION también (puede tener sesión válida)
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
           console.log('[onAuthStateChange] Usuario autenticado, procesando...')
           // Limpiar timeout si existe
           if (timeoutId) {
@@ -333,7 +369,16 @@ function AuthCallbackContent() {
     // Cleanup
     return () => {
       if (authStateSubscription) {
-        authStateSubscription.unsubscribe()
+        try {
+          // onAuthStateChange retorna un objeto con unsubscribe directamente
+          if (typeof authStateSubscription.unsubscribe === 'function') {
+            authStateSubscription.unsubscribe()
+          } else if (authStateSubscription.data && typeof authStateSubscription.data.unsubscribe === 'function') {
+            authStateSubscription.data.unsubscribe()
+          }
+        } catch (err) {
+          console.error('[cleanup] Error al hacer unsubscribe:', err)
+        }
       }
       if (timeoutId) {
         clearTimeout(timeoutId)
