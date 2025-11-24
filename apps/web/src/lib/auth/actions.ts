@@ -18,6 +18,7 @@ type ActionResult = {
   error?: string
   success?: boolean
   message?: string
+  waitSeconds?: number // Tiempo en segundos que debe esperar antes de intentar de nuevo
 }
 
 // ============================================================================
@@ -49,7 +50,8 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
 
   if (error) {
     console.error('Error en signUp:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   // Redirigir a onboarding (el usuario completará el onboarding antes de usar el sistema)
@@ -77,7 +79,8 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
 
   if (error) {
     console.error('Error en signIn:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   // Obtener usuario autenticado
@@ -124,7 +127,8 @@ export async function resetPassword(formData: FormData): Promise<ActionResult> {
 
   if (error) {
     console.error('Error en resetPassword:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   return { 
@@ -156,7 +160,8 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
 
   if (error) {
     console.error('Error en updatePassword:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   revalidatePath('/', 'layout')
@@ -191,7 +196,8 @@ export async function signInWithMagicLink(formData: FormData): Promise<ActionRes
 
   if (error) {
     console.error('Error en signInWithMagicLink:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   return { 
@@ -222,7 +228,8 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
 
   if (error) {
     console.error('Error en signInWithEmailOTP:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   return { 
@@ -253,7 +260,8 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
 
   if (error) {
     console.error('Error en verifyOTP:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   // Obtener usuario autenticado
@@ -305,7 +313,8 @@ export async function signInWithOAuth(provider: 'google' | 'facebook' | 'github'
 
   if (error) {
     console.error('Error en signInWithOAuth:', error)
-    redirect(`/login?error=${encodeURIComponent(translateError(error.message))}`)
+    const translated = translateError(error.message)
+    redirect(`/login?error=${encodeURIComponent(translated.message)}`)
   }
 
   if (data.url) {
@@ -362,7 +371,8 @@ export async function resendVerificationEmail(formData: FormData): Promise<Actio
 
   if (error) {
     console.error('Error en resendVerificationEmail:', error)
-    return { error: translateError(error.message) }
+    const translated = translateError(error.message)
+    return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
   return { 
@@ -373,28 +383,45 @@ export async function resendVerificationEmail(formData: FormData): Promise<Actio
 
 /**
  * Traducir errores de Supabase a español amigable
+ * Retorna un objeto con el mensaje y opcionalmente el tiempo restante en segundos
  */
-function translateError(error: string): string {
-  const errorMap: Record<string, string> = {
-    'Invalid login credentials': 'Email o contraseña incorrectos',
-    'Email not confirmed': 'Por favor verifica tu email antes de iniciar sesión',
-    'User already registered': 'Este email ya está registrado',
-    'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
-    'Unable to validate email address': 'Email inválido',
-    'Signups not allowed for otp': 'No se permiten registros con este método',
-    'Email rate limit exceeded': 'Has solicitado demasiados emails. Intenta de nuevo en unos minutos',
-    'Invalid OTP': 'Código incorrecto o expirado',
-    'Token has expired': 'El código ha expirado. Solicita uno nuevo',
+function translateError(error: string): { message: string; waitSeconds?: number } {
+  const errorMap: Record<string, { message: string; extractWaitTime?: (error: string) => number | undefined }> = {
+    'Invalid login credentials': { message: 'Email o contraseña incorrectos' },
+    'Email not confirmed': { message: 'Por favor verifica tu email antes de iniciar sesión' },
+    'User already registered': { message: 'Este email ya está registrado' },
+    'Password should be at least 6 characters': { message: 'La contraseña debe tener al menos 6 caracteres' },
+    'Unable to validate email address': { message: 'Email inválido' },
+    'Signups not allowed for otp': { message: 'No se permiten registros con este método' },
+    'Email rate limit exceeded': {
+      message: 'Has solicitado demasiados emails. Intenta de nuevo en unos minutos',
+      extractWaitTime: (err: string) => {
+        // Buscar patrones como "60 seconds", "wait 60s", etc.
+        const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)
+        return match ? parseInt(match[1], 10) : undefined
+      },
+    },
+    'Invalid OTP': { message: 'Código incorrecto o expirado' },
+    'Token has expired': { message: 'El código ha expirado. Solicita uno nuevo' },
+    'For security purposes, you can only request': {
+      message: 'Debes esperar antes de solicitar otro link',
+      extractWaitTime: (err: string) => {
+        // Buscar patrones como "request once every 60 seconds"
+        const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)
+        return match ? parseInt(match[1], 10) : undefined
+      },
+    },
   }
 
   // Buscar coincidencia parcial
-  for (const [key, value] of Object.entries(errorMap)) {
+  for (const [key, config] of Object.entries(errorMap)) {
     if (error.includes(key)) {
-      return value
+      const waitSeconds = config.extractWaitTime ? config.extractWaitTime(error) : undefined
+      return { message: config.message, waitSeconds }
     }
   }
 
   // Si no hay traducción, retornar mensaje genérico
-  return 'Ocurrió un error. Por favor intenta de nuevo'
+  return { message: 'Ocurrió un error. Por favor intenta de nuevo' }
 }
 

@@ -14,7 +14,48 @@ function AuthCallbackContent() {
     const handleAuthCallback = async () => {
       const supabase = createClient()
 
-      // Manejar hash fragments (Magic Link)
+      // Función helper para procesar autenticación exitosa
+      const processSuccessfulAuth = async () => {
+        // Esperar un momento para que la sesión se sincronice completamente
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        // Verificar si tiene organización
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
+
+        if (userError) {
+          console.error('Error al obtener usuario:', userError)
+          // Continuar de todas formas si hay sesión
+        }
+
+        if (user) {
+          try {
+            const { data: hasOrg, error: orgError } = await supabase.rpc(
+              'user_has_organization',
+              {
+                user_id: user.id,
+              }
+            )
+
+            if (orgError) {
+              console.error('Error al verificar organización:', orgError)
+            }
+
+            if (!hasOrg) {
+              router.push('/onboarding')
+              return
+            }
+          } catch (orgErr) {
+            console.error('Error al verificar organización:', orgErr)
+          }
+        }
+
+        router.push('/dashboard')
+      }
+
+      // Manejar hash fragments (Magic Link - Implicit flow o PKCE redirect)
       const hashParams = new URLSearchParams(window.location.hash.substring(1))
       const accessToken = hashParams.get('access_token')
       const refreshToken = hashParams.get('refresh_token')
@@ -44,14 +85,13 @@ function AuthCallbackContent() {
         setStatus('error')
         setErrorMessage(userFriendlyMessage)
 
-        // Redirigir después de mostrar el error
         setTimeout(() => {
           router.push(`/login?error=${encodeURIComponent(userFriendlyMessage)}`)
         }, 3000)
         return
       }
 
-      // Si hay tokens en el hash (Magic Link)
+      // Si hay tokens en el hash (Magic Link - Implicit o PKCE redirect)
       if (accessToken && refreshToken) {
         try {
           const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
@@ -69,7 +109,6 @@ function AuthCallbackContent() {
             return
           }
 
-          // Verificar que la sesión se estableció correctamente
           if (!sessionData.session) {
             console.error('No se pudo establecer la sesión')
             setStatus('error')
@@ -80,48 +119,7 @@ function AuthCallbackContent() {
             return
           }
 
-          // Esperar un momento para que la sesión se sincronice completamente
-          await new Promise((resolve) => setTimeout(resolve, 100))
-
-          // Verificar si tiene organización
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser()
-
-          if (userError) {
-            console.error('Error al obtener usuario:', userError)
-            // Si hay error pero tenemos sesión, intentar continuar de todas formas
-            // La sesión puede estar establecida aunque getUser() falle temporalmente
-          }
-
-          if (user) {
-            try {
-              const { data: hasOrg, error: orgError } = await supabase.rpc(
-                'user_has_organization',
-                {
-                  user_id: user.id,
-                }
-              )
-
-              if (orgError) {
-                console.error('Error al verificar organización:', orgError)
-                // No bloquear el flujo si falla la verificación de organización
-                // El middleware o la página de dashboard pueden manejar esto
-              }
-
-              if (!hasOrg) {
-                router.push('/onboarding')
-                return
-              }
-            } catch (orgErr) {
-              console.error('Error al verificar organización:', orgErr)
-              // Continuar al dashboard aunque falle la verificación
-            }
-          }
-
-          // Redirigir al dashboard
-          router.push('/dashboard')
+          await processSuccessfulAuth()
           return
         } catch (err) {
           console.error('Error inesperado:', err)
@@ -134,7 +132,52 @@ function AuthCallbackContent() {
         }
       }
 
-      // Manejar query params (OAuth con code)
+      // Manejar PKCE flow (Magic Link con token_hash en query params)
+      // Esto puede ocurrir si Supabase redirige directamente con el token
+      const token = searchParams.get('token')
+      const type = searchParams.get('type')
+
+      if (token && type === 'magiclink') {
+        try {
+          const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: 'magiclink',
+          })
+
+          if (verifyError) {
+            console.error('Error en verifyOtp (PKCE):', verifyError)
+            setStatus('error')
+            setErrorMessage('El enlace ha expirado o no es válido. Por favor solicita uno nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('El enlace ha expirado o no es válido')}`)
+            }, 3000)
+            return
+          }
+
+          if (!verifyData.session) {
+            console.error('No se pudo establecer la sesión (PKCE)')
+            setStatus('error')
+            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+            }, 3000)
+            return
+          }
+
+          await processSuccessfulAuth()
+          return
+        } catch (err) {
+          console.error('Error inesperado (PKCE):', err)
+          setStatus('error')
+          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
+          setTimeout(() => {
+            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+          }, 3000)
+          return
+        }
+      }
+
+      // Manejar OAuth con code
       const code = searchParams.get('code')
       if (code) {
         try {
@@ -151,7 +194,6 @@ function AuthCallbackContent() {
             return
           }
 
-          // Verificar que la sesión se estableció correctamente
           if (!exchangeData.session) {
             console.error('No se pudo establecer la sesión')
             setStatus('error')
@@ -162,45 +204,7 @@ function AuthCallbackContent() {
             return
           }
 
-          // Esperar un momento para que la sesión se sincronice completamente
-          await new Promise((resolve) => setTimeout(resolve, 100))
-
-          // Verificar si tiene organización
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser()
-
-          if (userError) {
-            console.error('Error al obtener usuario:', userError)
-            // Si hay error pero tenemos sesión, intentar continuar de todas formas
-          }
-
-          if (user) {
-            try {
-              const { data: hasOrg, error: orgError } = await supabase.rpc(
-                'user_has_organization',
-                {
-                  user_id: user.id,
-                }
-              )
-
-              if (orgError) {
-                console.error('Error al verificar organización:', orgError)
-                // No bloquear el flujo si falla la verificación de organización
-              }
-
-              if (!hasOrg) {
-                router.push('/onboarding')
-                return
-              }
-            } catch (orgErr) {
-              console.error('Error al verificar organización:', orgErr)
-              // Continuar al dashboard aunque falle la verificación
-            }
-          }
-
-          router.push('/dashboard')
+          await processSuccessfulAuth()
           return
         } catch (err) {
           console.error('Error inesperado:', err)
@@ -213,12 +217,49 @@ function AuthCallbackContent() {
         }
       }
 
-      // Si no hay ni hash ni code, redirigir a login
-      setStatus('error')
-      setErrorMessage('No se encontró información de autenticación.')
-      setTimeout(() => {
-        router.push('/login?error=No se encontró información de autenticación')
-      }, 3000)
+      // Si no hay parámetros de autenticación, puede ser que Supabase esté procesando
+      // El enlace va a /auth/v1/verify primero, luego Supabase redirige aquí
+      // Esperar un momento antes de mostrar error (puede haber un delay en la redirección)
+      console.log('Esperando redirección de Supabase...', {
+        hash: window.location.hash,
+        search: window.location.search,
+      })
+
+      // Esperar un poco y verificar nuevamente
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Verificar nuevamente después de esperar
+      const hashParamsAfterWait = new URLSearchParams(window.location.hash.substring(1))
+      const accessTokenAfterWait = hashParamsAfterWait.get('access_token')
+      const refreshTokenAfterWait = hashParamsAfterWait.get('refresh_token')
+      const codeAfterWait = searchParams.get('code')
+      const tokenAfterWait = searchParams.get('token')
+
+      if (accessTokenAfterWait && refreshTokenAfterWait) {
+        // Procesar hash fragments que llegaron después
+        try {
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessTokenAfterWait,
+            refresh_token: refreshTokenAfterWait,
+          })
+
+          if (!sessionError && sessionData.session) {
+            await processSuccessfulAuth()
+            return
+          }
+        } catch (err) {
+          console.error('Error al procesar después de esperar:', err)
+        }
+      }
+
+      // Si después de esperar aún no hay parámetros, mostrar error
+      if (!accessTokenAfterWait && !codeAfterWait && !tokenAfterWait) {
+        setStatus('error')
+        setErrorMessage('No se encontró información de autenticación. Por favor solicita un nuevo link.')
+        setTimeout(() => {
+          router.push('/login?error=No se encontró información de autenticación')
+        }, 3000)
+      }
     }
 
     handleAuthCallback()
@@ -279,4 +320,3 @@ export default function AuthCallback() {
     </Suspense>
   )
 }
-

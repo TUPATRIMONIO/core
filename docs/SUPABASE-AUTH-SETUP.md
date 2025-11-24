@@ -86,6 +86,22 @@ Supabase incluye plantillas predeterminadas para:
 - ✨ Magic Link
 - 🔄 Cambio de email
 
+### ⚠️ IMPORTANTE: Deshabilitar Link Tracking en SendGrid
+
+**Problema**: Si usas SendGrid con link tracking habilitado (como HubSpot), los enlaces de Magic Link pueden ser modificados y no funcionar correctamente.
+
+**Solución**: Deshabilitar link tracking en SendGrid para emails de autenticación:
+
+1. Ve a [SendGrid Dashboard](https://app.sendgrid.com/)
+2. Settings → **Tracking**
+3. Desactiva **Click Tracking** para el dominio que usas con Supabase
+   - O configura una excepción para emails de autenticación
+4. Alternativamente, en SendGrid Dashboard:
+   - Settings → **Mail Settings** → **Click Tracking**
+   - Desactiva "Click Tracking" o configura exclusiones
+
+**Nota**: Los enlaces de autenticación deben ser directos sin modificaciones para funcionar correctamente.
+
 ### Personalizar Plantillas
 
 **Ruta**: `Authentication > Email Templates`
@@ -440,6 +456,43 @@ ngrok http 3000
    - Abre la consola del navegador (F12)
    - Busca errores relacionados con autenticación
    - Verifica que el hash fragment se esté procesando correctamente
+
+---
+
+### Magic Link redirige a HubSpot o enlace incorrecto
+
+**Problema**: El Magic Link redirige a un dominio de HubSpot (`url9306.hub.tupatrimon.io`) en lugar del dominio de tu aplicación.
+
+**Causa**: SendGrid tiene link tracking habilitado (probablemente integrado con HubSpot), lo que modifica todos los enlaces en los emails.
+
+**Solución**:
+1. **Deshabilitar Click Tracking en SendGrid**:
+   - Ve a [SendGrid Dashboard](https://app.sendgrid.com/)
+   - Settings → **Tracking** → **Click Tracking**
+   - Desactiva "Click Tracking" completamente, O
+   - Configura exclusiones para emails de autenticación
+
+2. **Alternativa: Deshabilitar solo para dominio de autenticación**:
+   - En SendGrid Dashboard → Settings → **Mail Settings**
+   - Busca "Click Tracking" y configura exclusiones por dominio o tipo de email
+
+3. **Verificar configuración de Supabase SMTP**:
+   - Asegúrate de que el SMTP de SendGrid esté configurado correctamente
+   - Los enlaces deben llegar directamente sin modificaciones
+
+**Nota**: Los enlaces de autenticación NO deben ser modificados por servicios de tracking, ya que contienen tokens críticos en el hash fragment (`#access_token=...`).
+
+---
+
+### Rate Limit: "Debes esperar X segundos"
+
+**Problema**: Al solicitar un Magic Link antes de 60 segundos, aparece un error genérico.
+
+**Solución**: El sistema ahora muestra automáticamente cuántos segundos debes esperar. El mensaje de error incluirá el tiempo restante.
+
+**Configuración**:
+- El rate limit por defecto es de 60 segundos entre solicitudes
+- Puedes ajustarlo en Supabase Dashboard → Authentication → Settings → Email Auth → `max_frequency`
 
 ---
 

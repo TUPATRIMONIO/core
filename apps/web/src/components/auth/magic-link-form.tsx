@@ -34,6 +34,10 @@ export function MagicLinkForm() {
       
       if (result.error) {
         setError(result.error)
+        // Si hay waitSeconds, activar el countdown con ese tiempo
+        if (result.waitSeconds) {
+          setCountdown(result.waitSeconds)
+        }
       } else {
         setSuccess(true)
         setCountdown(60) // Activar countdown de 60 segundos
@@ -106,6 +110,11 @@ export function MagicLinkForm() {
       {error && (
         <div className="p-3 rounded-md bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
           <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+          {countdown > 0 && (
+            <p className="text-red-600 dark:text-red-400 text-xs mt-1">
+              Espera {countdown} segundos antes de intentar de nuevo
+            </p>
+          )}
         </div>
       )}
 
