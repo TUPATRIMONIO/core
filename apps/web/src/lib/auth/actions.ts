@@ -165,7 +165,9 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  // NO redirigir aquí para evitar errores NEXT_REDIRECT en el cliente
+  // Retornamos éxito y dejamos que el cliente redirija
+  return { success: true }
 }
 
 // ============================================================================
@@ -374,7 +376,7 @@ function translateError(error: string): { message: string; waitSeconds?: number 
     'Unable to validate email address': { message: 'Email inválido' },
     'Signups not allowed for otp': { message: 'No se permiten registros con este método' },
     'Email rate limit exceeded': {
-      message: 'Has solicitado demasiados emails. Intenta de nuevo en unos minutos',
+      message: 'Debes esperar unos minutos antes de intentar nuevamente.',
       extractWaitTime: (err: string) => {
         // Buscar patrones como "60 seconds", "wait 60s", etc.
         const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)
@@ -384,7 +386,7 @@ function translateError(error: string): { message: string; waitSeconds?: number 
     'Invalid OTP': { message: 'Código incorrecto o expirado' },
     'Token has expired': { message: 'El código ha expirado. Solicita uno nuevo' },
     'For security purposes, you can only request': {
-      message: 'Por seguridad, solo puedes solicitar un enlace cada cierto tiempo. Por favor espera un momento.',
+      message: 'Debes esperar un momento antes de solicitar un nuevo enlace.',
       extractWaitTime: (err: string) => {
         // Buscar patrones como "request once every 60 seconds"
         const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)

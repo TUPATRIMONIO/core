@@ -197,31 +197,19 @@ export default function ResetPasswordPage() {
     formData.append('password', password)
 
     try {
-      // La función updatePassword puede:
-      // 1. Retornar { error: ... } si hay un error de validación o Supabase
-      // 2. Llamar a redirect() si es exitosa, lo cual lanza un error especial de Next.js
       const result = await updatePassword(formData)
 
-      // Si llegamos aquí, es porque NO hubo redirect (que habría lanzado un error)
-      // Por lo tanto, verificamos si hay un error en el resultado
       if (result?.error) {
         setError(result.error)
         setLoading(false)
-      } else {
-        // Actualización exitosa - la redirección debería ocurrir
+      } else if (result?.success) {
         setSuccess(true)
+        // Redirección automática después de mostrar el mensaje de éxito
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
       }
-    } catch (err: any) {
-      // Cuando updatePassword() llama a redirect(), lanza un error especial de Next.js
-      // Este error DEBE ser re-lanzado para que la redirección funcione
-      // Cualquier error con la propiedad 'digest' es un error interno de Next.js
-      if (err && typeof err === 'object' && 'digest' in err) {
-        // Es un error interno de Next.js (como NEXT_REDIRECT)
-        // RE-LANZAR inmediatamente sin modificar el estado
-        throw err
-      }
-      
-      // Es un error real de la aplicación - mostrar mensaje
+    } catch (err) {
       console.error('[ResetPassword] Error al actualizar contraseña:', err)
       setError('Ocurrió un error. Por favor intenta de nuevo')
       setLoading(false)
