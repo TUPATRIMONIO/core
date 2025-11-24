@@ -197,38 +197,32 @@ export default function ResetPasswordPage() {
     formData.append('password', password)
 
     try {
+      // La función updatePassword puede:
+      // 1. Retornar { error: ... } si hay un error de validación o Supabase
+      // 2. Llamar a redirect() si es exitosa, lo cual lanza un error especial de Next.js
       const result = await updatePassword(formData)
 
+      // Si llegamos aquí, es porque NO hubo redirect (que habría lanzado un error)
+      // Por lo tanto, verificamos si hay un error en el resultado
       if (result?.error) {
         setError(result.error)
         setLoading(false)
       } else {
-        // Si no hay error, la función redirigirá automáticamente
+        // Actualización exitosa - la redirección debería ocurrir
         setSuccess(true)
       }
     } catch (err: any) {
-      // Next.js redirect() lanza un error especial que debemos re-lanzar para que funcione
-      // Verificamos si es una redirección de Next.js
-      const errorDigest = err?.digest ? String(err.digest) : ''
-      const errorMessage = err?.message ? String(err.message) : ''
-      const errorName = err?.name ? String(err.name) : ''
-      
-      // Detectar redirect de Next.js
-      const isRedirect = 
-        errorDigest.includes('NEXT_REDIRECT') ||
-        errorMessage.includes('NEXT_REDIRECT') ||
-        errorName === 'RedirectError' ||
-        errorName === 'NEXT_REDIRECT' ||
-        (typeof err === 'object' && err !== null && 'digest' in err)
-      
-      if (isRedirect) {
-        // Es una redirección - RE-LANZAR el error para que Next.js lo procese
-        // Esto permite que la redirección ocurra normalmente sin mostrar mensaje de error
+      // Cuando updatePassword() llama a redirect(), lanza un error especial de Next.js
+      // Este error DEBE ser re-lanzado para que la redirección funcione
+      // Cualquier error con la propiedad 'digest' es un error interno de Next.js
+      if (err && typeof err === 'object' && 'digest' in err) {
+        // Es un error interno de Next.js (como NEXT_REDIRECT)
+        // RE-LANZAR inmediatamente sin modificar el estado
         throw err
       }
       
-      // Es un error real - mostrar mensaje
-      console.error('Error al actualizar contraseña:', err)
+      // Es un error real de la aplicación - mostrar mensaje
+      console.error('[ResetPassword] Error al actualizar contraseña:', err)
       setError('Ocurrió un error. Por favor intenta de nuevo')
       setLoading(false)
     }
