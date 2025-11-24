@@ -133,59 +133,13 @@ function AuthCallbackContent() {
       // Manejar OAuth con code SOLO si viene de un provider social
       const code = searchParams.get('code')
       const providerToken = searchParams.get('provider_token')
-      const tokenHash = searchParams.get('token_hash')
       const type = searchParams.get('type')
       
       console.log('[handleAuthCallback] Parámetros de URL:', { 
         hasCode: !!code, 
         hasProviderToken: !!providerToken,
-        hasTokenHash: !!tokenHash,
         type 
       })
-      
-      // Manejar Magic Link con PKCE flow (token_hash en query params)
-      if (tokenHash && type === 'email') {
-        console.log('[handleAuthCallback] Detectado Magic Link con PKCE (token_hash)')
-        isProcessing = true
-        try {
-          const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: tokenHash,
-            type: 'email',
-          })
-
-          if (verifyError) {
-            console.error('[handleAuthCallback] Error en verifyOtp:', verifyError)
-            setStatus('error')
-            setErrorMessage('El enlace no es válido o ha expirado. Por favor solicita uno nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Enlace inválido o expirado')}`)
-            }, 3000)
-            return
-          }
-
-          if (!verifyData.session) {
-            console.error('[handleAuthCallback] No se pudo establecer la sesión después de verifyOtp')
-            setStatus('error')
-            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al establecer sesión')}`)
-            }, 3000)
-            return
-          }
-
-          console.log('[handleAuthCallback] Sesión establecida con verifyOtp, procesando autenticación...')
-          await processSuccessfulAuth()
-          return
-        } catch (err) {
-          console.error('[handleAuthCallback] Error inesperado en verifyOtp:', err)
-          setStatus('error')
-          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
-          setTimeout(() => {
-            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 3000)
-          return
-        }
-      }
       
       // Solo procesar OAuth si hay code Y provider_token (indicador de OAuth social)
       if (code && providerToken) {
@@ -228,52 +182,6 @@ function AuthCallbackContent() {
           return
         }
       }
-      
-      // Manejar Magic Link con code pero sin provider_token (PKCE flow)
-      // Con PKCE, necesitamos usar exchangeCodeForSession para procesar el code
-      if (code && !providerToken) {
-        console.log('[handleAuthCallback] Detectado Magic Link (code sin provider_token) - Procesando con exchangeCodeForSession...')
-        isProcessing = true
-        try {
-          const { data: exchangeData, error: exchangeError } =
-            await supabase.auth.exchangeCodeForSession(code)
-
-          if (exchangeError) {
-            console.error('[handleAuthCallback] Error en exchangeCodeForSession (Magic Link):', exchangeError)
-            setStatus('error')
-            setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 3000)
-            return
-          }
-
-          if (!exchangeData.session) {
-            console.error('[handleAuthCallback] No se pudo establecer la sesión (Magic Link)')
-            setStatus('error')
-            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 3000)
-            return
-          }
-
-          console.log('[handleAuthCallback] Sesión establecida con exchangeCodeForSession (Magic Link), procesando autenticación...')
-          await processSuccessfulAuth()
-          return
-        } catch (err) {
-          console.error('[handleAuthCallback] Error inesperado en exchangeCodeForSession (Magic Link):', err)
-          setStatus('error')
-          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
-          setTimeout(() => {
-            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 3000)
-          return
-        }
-      }
-
-      // Para Magic Links: Supabase procesa automáticamente los hash fragments
-      // cuando se inicializa el cliente. Solo necesitamos escuchar cuando la sesión cambia.
       
       // Verificar si hay errores en el hash
       if (window.location.hash) {

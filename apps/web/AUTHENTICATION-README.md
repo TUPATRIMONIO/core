@@ -13,7 +13,6 @@ Se ha implementado un sistema completo de autenticación con Supabase siguiendo 
 - ✅ Validación client-side y server-side
 
 ### 2. **Autenticación sin Contraseña (Passwordless)**
-- ✅ **Magic Link**: Link de un solo uso enviado por email
 - ✅ **Email OTP**: Código de 6 dígitos para verificación
 
 ### 3. **OAuth Social Login**
@@ -37,7 +36,6 @@ Se ha implementado un sistema completo de autenticación con Supabase siguiendo 
 ### Componentes de Formularios
 - `apps/web/src/components/auth/signup-form.tsx` - Registro
 - `apps/web/src/components/auth/login-form.tsx` - Login con tabs
-- `apps/web/src/components/auth/magic-link-form.tsx` - Magic Link
 - `apps/web/src/components/auth/email-otp-form.tsx` - Código OTP
 - `apps/web/src/components/auth/oauth-buttons.tsx` - Botones OAuth reutilizables
 - `apps/web/src/components/auth/reset-password-form.tsx` - Reset password
@@ -50,7 +48,6 @@ Se ha implementado un sistema completo de autenticación con Supabase siguiendo 
 - `apps/web/src/app/(auth)/reset-password/page.tsx` - Ya existía, mantiene funcionalidad
 - `apps/web/src/app/(auth)/auth/callback/page.tsx` - Callback unificado (cliente)
   - Maneja OAuth con `?code=` usando `exchangeCodeForSession()`
-  - Maneja Magic Links con `#access_token=` usando `setSession()`
 
 ### Documentación
 - `docs/SUPABASE-AUTH-SETUP.md` - Guía completa de configuración
@@ -108,15 +105,7 @@ npm run dev
 3. Ingresar credenciales
 4. Verificar redirección a `/dashboard`
 
-#### C. Flujo de Magic Link
-1. Ir a `http://localhost:3000/login`
-2. Tab "Magic Link"
-3. Ingresar email
-4. Revisar email con link mágico
-5. Hacer clic en link
-6. Verificar redirección a `/dashboard`
-
-#### D. Flujo de Email OTP
+#### C. Flujo de Email OTP
 1. Ir a `http://localhost:3000/login`
 2. Tab "Código OTP"
 3. Ingresar email y solicitar código

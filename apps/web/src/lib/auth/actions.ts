@@ -169,46 +169,16 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
 }
 
 // ============================================================================
-// PASSWORDLESS AUTH (MAGIC LINK & OTP)
+// PASSWORDLESS AUTH (OTP)
 // ============================================================================
-
-/**
- * Login con Magic Link
- * Referencia: https://supabase.com/docs/guides/auth/auth-email-passwordless#with-magic-link
- */
-export async function signInWithMagicLink(formData: FormData): Promise<ActionResult> {
-  const email = formData.get('email') as string
-
-  if (!email) {
-    return { error: 'Por favor ingresa tu email' }
-  }
-
-  const supabase = await createClient()
-  const origin = await getURL()
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: true,
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  })
-
-  if (error) {
-    console.error('Error en signInWithMagicLink:', error)
-    const translated = translateError(error.message)
-    return { error: translated.message, waitSeconds: translated.waitSeconds }
-  }
-
-  return { 
-    success: true, 
-    message: 'Revisa tu email, te enviamos un link mágico para iniciar sesión' 
-  }
-}
 
 /**
  * Solicitar código OTP por email
  * Referencia: https://supabase.com/docs/guides/auth/auth-email-passwordless#with-email-otp
+ * 
+ * Step 1: Send the user an OTP code
+ * Si la solicitud es exitosa, recibes una respuesta con error: null y un objeto data
+ * donde tanto user como session son null. Informa al usuario que revise su email.
  */
 export async function signInWithEmailOTP(formData: FormData): Promise<ActionResult> {
   const email = formData.get('email') as string
@@ -219,7 +189,7 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
 
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithOtp({
+  const { data, error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: false,
@@ -232,6 +202,7 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
     return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
+  // Según documentación: { data: { user: null, session: null }, error: null }
   return { 
     success: true, 
     message: 'Te enviamos un código de 6 dígitos a tu email' 
@@ -240,7 +211,10 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
 
 /**
  * Verificar código OTP
- * Referencia: https://supabase.com/docs/guides/auth/auth-email-passwordless
+ * Referencia: https://supabase.com/docs/guides/auth/auth-email-passwordless#with-email-otp
+ * 
+ * Step 2: Verify the OTP to create a session
+ * Si es exitoso, el usuario ahora está autenticado y recibes una sesión válida.
  */
 export async function verifyOTP(formData: FormData): Promise<ActionResult> {
   const email = formData.get('email') as string
@@ -252,7 +226,10 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
 
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.verifyOtp({
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.verifyOtp({
     email,
     token,
     type: 'email',
@@ -264,10 +241,13 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
     return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
-  // Obtener usuario autenticado
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  if (!session) {
+    return { error: 'No se pudo establecer la sesión. Por favor intenta de nuevo' }
+  }
+
+  // Usar la sesión retornada directamente (según documentación)
+  // El usuario ya está autenticado en este punto
+  const user = session.user
 
   // Verificar si tiene organización
   if (user) {

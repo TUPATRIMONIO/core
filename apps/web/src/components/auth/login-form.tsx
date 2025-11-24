@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { signIn } from '@/lib/auth/actions'
 import { OAuthButtons } from './oauth-buttons'
-import { MagicLinkForm } from './magic-link-form'
 import { EmailOTPForm } from './email-otp-form'
 
 export function LoginForm() {
@@ -44,9 +43,8 @@ export function LoginForm() {
   return (
     <div className="w-full space-y-6">
       <Tabs defaultValue="password" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="password">Contraseña</TabsTrigger>
-          <TabsTrigger value="magic">Magic Link</TabsTrigger>
           <TabsTrigger value="otp">Código OTP</TabsTrigger>
         </TabsList>
 
@@ -125,11 +123,6 @@ export function LoginForm() {
               )}
             </Button>
           </form>
-        </TabsContent>
-
-        {/* Tab: Magic Link */}
-        <TabsContent value="magic" className="space-y-4">
-          <MagicLinkForm />
         </TabsContent>
 
         {/* Tab: Email OTP */}
