@@ -153,6 +153,7 @@ export default function ResetPasswordPage() {
     }
 
     setLoading(true)
+    setError('') // Limpiar cualquier error previo
 
     const formData = new FormData()
     formData.append('password', password)
@@ -162,13 +163,31 @@ export default function ResetPasswordPage() {
 
       if (result?.error) {
         setError(result.error)
+        setLoading(false)
       } else {
+        // Si no hay error, la función redirigirá automáticamente
+        // No necesitamos hacer nada más aquí
         setSuccess(true)
       }
-      // Si es exitoso, updatePassword redirige automáticamente a /dashboard
-    } catch (err) {
+    } catch (err: any) {
+      // Next.js redirect() lanza un error especial (NEXT_REDIRECT) que no es un error real
+      // Verificamos si es una redirección de Next.js
+      // En Next.js 13+, el error de redirect tiene un digest que contiene 'NEXT_REDIRECT'
+      const errorDigest = err?.digest ? String(err.digest) : ''
+      const errorMessage = err?.message ? String(err.message) : ''
+      const hasRedirectDigest = errorDigest.includes('NEXT_REDIRECT')
+      const hasRedirectMessage = errorMessage.includes('NEXT_REDIRECT')
+      
+      // Si es una redirección, no hacer nada - dejar que ocurra silenciosamente
+      if (hasRedirectDigest || hasRedirectMessage || err?.name === 'RedirectError') {
+        // Es una redirección exitosa, no mostrar error
+        // La redirección ocurrirá automáticamente
+        return
+      }
+      
+      // Es un error real - mostrar mensaje
+      console.error('Error al actualizar contraseña:', err)
       setError('Ocurrió un error. Por favor intenta de nuevo')
-    } finally {
       setLoading(false)
     }
   }
