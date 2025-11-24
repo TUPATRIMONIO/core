@@ -27,7 +27,45 @@ export default function ResetPasswordPage() {
     let timeoutId: NodeJS.Timeout | null = null
 
     const initializeResetPassword = async () => {
-      // Verificar si hay un hash fragment en la URL (token de recuperación)
+      // Verificar errores en query params primero
+      const searchParams = new URLSearchParams(window.location.search)
+      const errorParam = searchParams.get('error')
+      const errorCode = searchParams.get('error_code')
+      const errorDescription = searchParams.get('error_description')
+      
+      // Verificar errores en hash fragment también
+      let hashError = null
+      let hashErrorCode = null
+      let hashErrorDescription = null
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        hashError = hashParams.get('error')
+        hashErrorCode = hashParams.get('error_code')
+        hashErrorDescription = hashParams.get('error_description')
+      }
+      
+      // Si hay errores, mostrar mensaje apropiado
+      if (errorParam || hashError) {
+        const error = errorParam || hashError
+        const code = errorCode || hashErrorCode
+        const description = errorDescription || hashErrorDescription
+        
+        let errorMessage = 'El enlace de recuperación no es válido o ha expirado. Por favor solicita uno nuevo.'
+        
+        if (code === 'otp_expired' || description?.includes('expired')) {
+          errorMessage = 'El enlace de recuperación ha expirado. Por favor solicita uno nuevo desde la página de login.'
+        } else if (code === 'access_denied' || description?.includes('invalid')) {
+          errorMessage = 'El enlace de recuperación no es válido. Por favor solicita uno nuevo desde la página de login.'
+        } else if (description) {
+          errorMessage = decodeURIComponent(description.replace(/\+/g, ' '))
+        }
+        
+        setError(errorMessage)
+        setIsInitializing(false)
+        return
+      }
+      
+      // Verificar si hay un hash fragment con access_token (token de recuperación válido)
       const hasHash = window.location.hash && window.location.hash.includes('access_token')
       
       if (hasHash) {
@@ -171,17 +209,23 @@ export default function ResetPasswordPage() {
       }
     } catch (err: any) {
       // Next.js redirect() lanza un error especial (NEXT_REDIRECT) que no es un error real
-      // Verificamos si es una redirección de Next.js
-      // En Next.js 13+, el error de redirect tiene un digest que contiene 'NEXT_REDIRECT'
+      // Verificamos si es una redirección de Next.js de múltiples formas
       const errorDigest = err?.digest ? String(err.digest) : ''
       const errorMessage = err?.message ? String(err.message) : ''
-      const hasRedirectDigest = errorDigest.includes('NEXT_REDIRECT')
-      const hasRedirectMessage = errorMessage.includes('NEXT_REDIRECT')
+      const errorName = err?.name ? String(err.name) : ''
       
-      // Si es una redirección, no hacer nada - dejar que ocurra silenciosamente
-      if (hasRedirectDigest || hasRedirectMessage || err?.name === 'RedirectError') {
-        // Es una redirección exitosa, no mostrar error
+      // Detectar redirect de Next.js
+      const isRedirect = 
+        errorDigest.includes('NEXT_REDIRECT') ||
+        errorMessage.includes('NEXT_REDIRECT') ||
+        errorName === 'RedirectError' ||
+        errorName === 'NEXT_REDIRECT' ||
+        (typeof err === 'object' && err !== null && 'digest' in err && String(err.digest).includes('NEXT_REDIRECT'))
+      
+      if (isRedirect) {
+        // Es una redirección exitosa, no mostrar error ni actualizar estado
         // La redirección ocurrirá automáticamente
+        // No hacer nada aquí - simplemente dejar que el redirect ocurra
         return
       }
       
