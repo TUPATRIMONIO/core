@@ -391,13 +391,13 @@ ngrok http 3000
 
 **Solución**:
 1. Verificar que la Redirect URL está en la lista de URLs permitidas
-2. Verificar que el callback route existe: `apps/web/src/app/(auth)/auth/callback/route.ts`
-   - Este route handler maneja OAuth con `?code=` en query params
+2. Verificar que el callback page existe: `apps/web/src/app/(auth)/auth/callback/page.tsx`
+   - Esta página cliente maneja tanto OAuth (`?code=`) como Magic Links (`#access_token=`)
 3. Verificar logs en Supabase Dashboard
 
-**Nota**: OAuth usa query params (`?code=`), mientras que Magic Links usan hash fragments (`#access_token=`). Por eso hay dos handlers:
-- `route.ts` - Maneja OAuth (servidor)
-- `page.tsx` - Maneja Magic Links (cliente)
+**Nota**: La página cliente maneja ambos casos:
+- OAuth usa query params (`?code=`) - se procesa con `exchangeCodeForSession()`
+- Magic Links usan hash fragments (`#access_token=`) - se procesa con `setSession()`
 
 ---
 

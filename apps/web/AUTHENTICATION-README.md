@@ -48,8 +48,9 @@ Se ha implementado un sistema completo de autenticación con Supabase siguiendo 
 - `apps/web/src/app/(auth)/verify-email/page.tsx` - Confirmación post-registro
 - `apps/web/src/app/(auth)/forgot-password/page.tsx` - Solicitar reset
 - `apps/web/src/app/(auth)/reset-password/page.tsx` - Ya existía, mantiene funcionalidad
-- `apps/web/src/app/(auth)/auth/callback/route.ts` - Callback OAuth (servidor, maneja `?code=`)
-- `apps/web/src/app/(auth)/auth/callback/page.tsx` - Callback Magic Link (cliente, maneja `#access_token=`)
+- `apps/web/src/app/(auth)/auth/callback/page.tsx` - Callback unificado (cliente)
+  - Maneja OAuth con `?code=` usando `exchangeCodeForSession()`
+  - Maneja Magic Links con `#access_token=` usando `setSession()`
 
 ### Documentación
 - `docs/SUPABASE-AUTH-SETUP.md` - Guía completa de configuración
