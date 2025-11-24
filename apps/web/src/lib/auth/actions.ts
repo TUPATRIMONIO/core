@@ -142,32 +142,37 @@ export async function resetPassword(formData: FormData): Promise<ActionResult> {
  * Referencia: https://supabase.com/docs/guides/auth/passwords
  */
 export async function updatePassword(formData: FormData): Promise<ActionResult> {
-  const password = formData.get('password') as string
+  try {
+    const password = formData.get('password') as string
 
-  if (!password) {
-    return { error: 'Por favor ingresa una nueva contraseña' }
+    if (!password) {
+      return { error: 'Por favor ingresa una nueva contraseña' }
+    }
+
+    if (password.length < 6) {
+      return { error: 'La contraseña debe tener al menos 6 caracteres' }
+    }
+
+    const supabase = await createClient()
+
+    const { error } = await supabase.auth.updateUser({
+      password,
+    })
+
+    if (error) {
+      console.error('Error en updatePassword:', error)
+      const translated = translateError(error.message)
+      return { error: translated.message, waitSeconds: translated.waitSeconds }
+    }
+
+    revalidatePath('/', 'layout')
+    // NO redirigir aquí para evitar errores NEXT_REDIRECT en el cliente
+    // Retornamos éxito y dejamos que el cliente redirija
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error inesperado en updatePassword:', error)
+    return { error: 'Ocurrió un error inesperado al actualizar la contraseña. Por favor intenta de nuevo.' }
   }
-
-  if (password.length < 6) {
-    return { error: 'La contraseña debe tener al menos 6 caracteres' }
-  }
-
-  const supabase = await createClient()
-
-  const { error } = await supabase.auth.updateUser({
-    password,
-  })
-
-  if (error) {
-    console.error('Error en updatePassword:', error)
-    const translated = translateError(error.message)
-    return { error: translated.message, waitSeconds: translated.waitSeconds }
-  }
-
-  revalidatePath('/', 'layout')
-  // NO redirigir aquí para evitar errores NEXT_REDIRECT en el cliente
-  // Retornamos éxito y dejamos que el cliente redirija
-  return { success: true }
 }
 
 // ============================================================================

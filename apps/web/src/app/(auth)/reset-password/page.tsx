@@ -209,9 +209,9 @@ export default function ResetPasswordPage() {
           router.push('/dashboard')
         }, 2000)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[ResetPassword] Error al actualizar contraseña:', err)
-      setError('Ocurrió un error. Por favor intenta de nuevo')
+      setError(err?.message || 'Ocurrió un error de conexión. Por favor verifica tu internet e intenta de nuevo')
       setLoading(false)
     }
   }
