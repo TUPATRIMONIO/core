@@ -13,9 +13,15 @@ import crypto from 'crypto';
 // En producción, debe ser una clave fuerte de 32 bytes (256 bits)
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
 
-// Si no hay clave configurada, generar una (solo para desarrollo)
-if (!process.env.ENCRYPTION_KEY) {
-  console.warn('⚠️  ENCRYPTION_KEY no configurada. Usando clave temporal (NO SEGURO PARA PRODUCCIÓN)');
+// Variable para rastrear si ya se mostró el warning
+let encryptionKeyWarningShown = false;
+
+// Función para mostrar warning solo cuando se use (runtime)
+function checkEncryptionKey() {
+  if (!process.env.ENCRYPTION_KEY && !encryptionKeyWarningShown && typeof window === 'undefined') {
+    console.warn('⚠️  ENCRYPTION_KEY no configurada. Usando clave temporal (NO SEGURO PARA PRODUCCIÓN)');
+    encryptionKeyWarningShown = true;
+  }
 }
 
 // Derivar clave de 32 bytes desde ENCRYPTION_KEY usando PBKDF2
@@ -35,6 +41,9 @@ export function encrypt(text: string): {
   salt: string;
   authTag: string;
 } {
+  // Verificar clave solo cuando se use la función
+  checkEncryptionKey();
+  
   // Generar salt único
   const salt = crypto.randomBytes(16);
   
@@ -74,6 +83,9 @@ export function decrypt(encryptedData: {
   salt: string;
   authTag: string;
 }): string {
+  // Verificar clave solo cuando se use la función
+  checkEncryptionKey();
+  
   try {
     // Convertir de base64 a buffers
     const salt = Buffer.from(encryptedData.salt, 'base64');

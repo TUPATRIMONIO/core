@@ -2,17 +2,25 @@
  * Cliente dLocal Go para pagos en LATAM
  */
 
-if (!process.env.DLOCAL_SECRET_KEY) {
-  console.warn('DLOCAL_SECRET_KEY is not set');
-}
-
-if (!process.env.DLOCAL_API_KEY) {
-  console.warn('DLOCAL_API_KEY is not set');
-}
-
 const DLOCAL_API_URL = process.env.DLOCAL_API_URL || 'https://api.dlocal.com';
 const DLOCAL_SECRET_KEY = process.env.DLOCAL_SECRET_KEY || '';
 const DLOCAL_API_KEY = process.env.DLOCAL_API_KEY || '';
+
+// Variable para rastrear si ya se mostraron los warnings
+let dlocalWarningsShown = false;
+
+// Función para mostrar warnings solo cuando se use (runtime)
+function checkDLocalConfig() {
+  if (!dlocalWarningsShown && typeof window === 'undefined') {
+    if (!DLOCAL_SECRET_KEY) {
+      console.warn('DLOCAL_SECRET_KEY is not set');
+    }
+    if (!DLOCAL_API_KEY) {
+      console.warn('DLOCAL_API_KEY is not set');
+    }
+    dlocalWarningsShown = true;
+  }
+}
 
 export interface DLocalPaymentRequest {
   amount: number;
@@ -78,6 +86,9 @@ function generateSignature(
 export async function createPayment(
   request: DLocalPaymentRequest
 ): Promise<DLocalPaymentResponse> {
+  // Verificar configuración solo cuando se use la función
+  checkDLocalConfig();
+  
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -127,6 +138,9 @@ export async function createPayment(
  * Consulta estado de un pago en dLocal Go
  */
 export async function getPaymentStatus(paymentId: string): Promise<DLocalPaymentResponse> {
+  // Verificar configuración solo cuando se use la función
+  checkDLocalConfig();
+  
   const headers: Record<string, string> = {};
   
   // Usar los mismos headers que en createPayment

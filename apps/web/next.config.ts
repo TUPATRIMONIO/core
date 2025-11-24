@@ -19,6 +19,15 @@ const nextConfig: NextConfig = {
       '@tupatrimonio/assets/public': path.resolve(__dirname, '../../packages/assets/public'),
     };
     
+    // Suprimir warnings de handlebars sobre require.extensions
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /node_modules\/handlebars/,
+        message: /require\.extensions/,
+      },
+    ];
+    
     // Configurar PDFKit para servidor (copiar archivos de fuentes)
     if (isServer) {
       config.externals = config.externals || [];
