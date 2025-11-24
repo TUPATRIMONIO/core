@@ -90,9 +90,21 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
 
   // Verificar si tiene organización
   if (user) {
-    const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+    const { data: hasOrg, error: orgError } = await supabase.rpc('user_has_organization', {
       user_id: user.id,
     })
+
+    // Log para debug del RPC si hay error
+    if (orgError) {
+      console.error('Error en user_has_organization RPC:', {
+        message: orgError.message,
+        code: orgError.code,
+        details: orgError.details,
+        hint: orgError.hint,
+      })
+      // No retornamos error aquí, continuamos con el flujo
+      // Si el RPC falla, asumimos que no tiene organización
+    }
 
     // La autenticación fue exitosa, intentar revalidar cache
     // Si falla, no es crítico porque la autenticación ya está completa
@@ -107,7 +119,7 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
     // Si no tiene organización, redirigir a onboarding
     if (!hasOrg) {
       redirect('/onboarding')
-      return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+      return { success: true } // Nunca se ejecutará por el redirect, pero TypeScript lo requiere
     }
   }
 
@@ -304,9 +316,21 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
 
     // Verificar si tiene organización
     if (user) {
-      const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+      const { data: hasOrg, error: orgError } = await supabase.rpc('user_has_organization', {
         user_id: user.id,
       })
+
+      // Log para debug del RPC si hay error
+      if (orgError) {
+        console.error('Error en user_has_organization RPC:', {
+          message: orgError.message,
+          code: orgError.code,
+          details: orgError.details,
+          hint: orgError.hint,
+        })
+        // No retornamos error aquí, continuamos con el flujo
+        // Si el RPC falla, asumimos que no tiene organización
+      }
 
       // La sesión se estableció correctamente, intentar revalidar cache
       // Si falla, no es crítico porque la autenticación ya está completa
@@ -321,7 +345,7 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
       // Si no tiene organización, redirigir a onboarding
       if (!hasOrg) {
         redirect('/onboarding')
-        return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+        return { success: true } // Nunca se ejecutará por el redirect, pero TypeScript lo requiere
       }
     }
 
@@ -334,9 +358,21 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
     }
 
     redirect('/dashboard')
-    return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+    return { success: true } // Nunca se ejecutará por el redirect, pero TypeScript lo requiere
   } catch (error: any) {
-    console.error('Error inesperado en verifyOTP:', error)
+    // Si el error es un NEXT_REDIRECT, dejarlo pasar (es esperado y normal)
+    // Next.js usa este mecanismo interno para manejar redirects
+    if (error?.digest?.startsWith('NEXT_REDIRECT') || error?.message?.includes('NEXT_REDIRECT')) {
+      throw error // Re-lanzar para que Next.js lo maneje correctamente
+    }
+
+    // Log detallado del error real para diagnóstico
+    console.error('Error inesperado en verifyOTP:', {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack,
+      digest: error?.digest,
+    })
     return { error: 'Ocurrió un error inesperado al verificar el código. Por favor intenta de nuevo.' }
   }
 }
