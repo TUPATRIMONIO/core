@@ -384,7 +384,7 @@ function translateError(error: string): { message: string; waitSeconds?: number 
     'Invalid OTP': { message: 'Código incorrecto o expirado' },
     'Token has expired': { message: 'El código ha expirado. Solicita uno nuevo' },
     'For security purposes, you can only request': {
-      message: 'Debes esperar antes de solicitar otro link',
+      message: 'Por seguridad, solo puedes solicitar un enlace cada cierto tiempo. Por favor espera un momento.',
       extractWaitTime: (err: string) => {
         // Buscar patrones como "request once every 60 seconds"
         const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)
