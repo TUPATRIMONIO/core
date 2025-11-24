@@ -95,3 +95,43 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos personalizados para scrollbar del sidebar */
+/* Webkit (Chrome, Safari, Edge) */
+.sidebar-scrollbar::-webkit-scrollbar,
+[data-sidebar="content"]::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track,
+[data-sidebar="content"]::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1) !important;
+  border-radius: 10px !important;
+  margin: 8px 0;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb,
+[data-sidebar="content"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover,
+[data-sidebar="content"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Firefox */
+.sidebar-scrollbar,
+[data-sidebar="content"] {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.4) rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar-scrollbar:hover,
+[data-sidebar="content"]:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.6) rgba(0, 0, 0, 0.15) !important;
+}

@@ -5,8 +5,13 @@ import { Building2, Users, CreditCard, AlertCircle, TrendingUp, Activity } from 
 async function getMetrics() {
   const supabase = createServiceRoleClient()
 
-  // Total de organizaciones activas
+  // Total de organizaciones (todas, no solo activas)
   const { count: totalOrganizations } = await supabase
+    .from('organizations')
+    .select('*', { count: 'exact', head: true })
+
+  // Organizaciones activas
+  const { count: activeOrganizations } = await supabase
     .from('organizations')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'active')
@@ -35,11 +40,10 @@ async function getMetrics() {
     .select('*', { count: 'exact', head: true })
     .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
 
-  // Distribución por tipo de org
+  // Distribución por tipo de org (todas las organizaciones)
   const { data: orgsByType } = await supabase
     .from('organizations')
     .select('org_type')
-    .eq('status', 'active')
 
   const orgDistribution = {
     personal: orgsByType?.filter((o) => o.org_type === 'personal').length || 0,
@@ -49,6 +53,7 @@ async function getMetrics() {
 
   return {
     totalOrganizations: totalOrganizations || 0,
+    activeOrganizations: activeOrganizations || 0,
     totalUsers: totalUsers || 0,
     activeSubscriptions: activeSubscriptions || 0,
     trialSubscriptions: trialSubscriptions || 0,
@@ -71,14 +76,14 @@ export default async function AdminDashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Organizaciones Activas
+                Organizaciones
               </CardTitle>
               <Building2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metrics.totalOrganizations}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {metrics.orgDistribution.personal} personal • {metrics.orgDistribution.business} business
+                {metrics.activeOrganizations} activas • {metrics.orgDistribution.personal} personal • {metrics.orgDistribution.business} business
               </p>
             </CardContent>
           </Card>
