@@ -392,7 +392,12 @@ ngrok http 3000
 **Solución**:
 1. Verificar que la Redirect URL está en la lista de URLs permitidas
 2. Verificar que el callback route existe: `apps/web/src/app/(auth)/auth/callback/route.ts`
+   - Este route handler maneja OAuth con `?code=` en query params
 3. Verificar logs en Supabase Dashboard
+
+**Nota**: OAuth usa query params (`?code=`), mientras que Magic Links usan hash fragments (`#access_token=`). Por eso hay dos handlers:
+- `route.ts` - Maneja OAuth (servidor)
+- `page.tsx` - Maneja Magic Links (cliente)
 
 ---
 
@@ -405,6 +410,36 @@ ngrok http 3000
 2. En producción: Verificar que tienes SMTP configurado o usar el servicio de Supabase
 3. Revisar spam
 4. Verificar rate limits (60 segundos entre solicitudes)
+
+---
+
+### Magic Link expira o muestra error "otp_expired"
+
+**Problema**: Al hacer clic en el Magic Link, aparece error `otp_expired` o `access_denied`.
+
+**Solución**:
+1. **Verificar configuración del callback**: 
+   - El callback debe tener una página cliente (`page.tsx`) que maneje hash fragments (`#access_token=`)
+   - Los hash fragments no están disponibles en el servidor, por eso se necesita una página cliente
+   - Verificar que existe: `apps/web/src/app/(auth)/auth/callback/page.tsx`
+
+2. **Verificar Redirect URLs en Supabase**:
+   - Asegúrate de que `https://app.tupatrimonio.app/auth/callback` esté en la lista de URLs permitidas
+   - En desarrollo: `http://localhost:3000/auth/callback`
+
+3. **Verificar tiempo de expiración**:
+   - En Supabase Dashboard → Authentication → Settings → Email Auth
+   - Verifica que `OTP expiry` sea suficiente (por defecto 3600 segundos = 1 hora)
+   - Si el usuario tarda mucho en hacer clic, el link puede expirar
+
+4. **Verificar que el link no se haya usado antes**:
+   - Los Magic Links son de un solo uso
+   - Si ya se usó, solicita uno nuevo
+
+5. **Revisar logs del navegador**:
+   - Abre la consola del navegador (F12)
+   - Busca errores relacionados con autenticación
+   - Verifica que el hash fragment se esté procesando correctamente
 
 ---
 
