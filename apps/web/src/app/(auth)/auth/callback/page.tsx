@@ -151,9 +151,13 @@ function AuthCallbackContent() {
     }
 
     const handleAuthCallback = async () => {
-      // Manejar OAuth con code (tiene prioridad)
+      // Manejar OAuth con code SOLO si viene de un provider social
+      // Los providers sociales incluyen provider_token en los query params
       const code = searchParams.get('code')
-      if (code) {
+      const providerToken = searchParams.get('provider_token')
+      
+      // Solo procesar OAuth si hay code Y provider_token (indicador de OAuth social)
+      if (code && providerToken) {
         isProcessing = true
         try {
           const { data: exchangeData, error: exchangeError } =
@@ -192,14 +196,15 @@ function AuthCallbackContent() {
         }
       }
 
-      // Para Magic Links, Supabase redirige con hash fragments
+      // Para Magic Links, Supabase usa implicit flow y redirige con hash fragments
+      // Los Magic Links NO usan code, solo hash fragments (#access_token=...)
       // Primero verificar si ya hay hash fragments disponibles
       if (window.location.hash) {
         const processed = await processHashFragments(window.location.hash.substring(1))
         if (processed) return
       }
 
-      // Si no hay parámetros de autenticación inmediatamente, esperar
+      // Si no hay hash fragments inmediatamente, esperar
       // El Magic Link redirige a /auth/v1/verify primero, luego Supabase redirige aquí con hash fragments
       console.log('Esperando redirección de Supabase...', {
         hash: window.location.hash,
@@ -222,7 +227,7 @@ function AuthCallbackContent() {
 
       // También verificar periódicamente por si el hash cambia sin disparar el evento
       let attempts = 0
-      const maxAttempts = 10 // 5 segundos máximo (500ms * 10)
+      const maxAttempts = 4 // 2 segundos máximo (500ms * 4)
       checkInterval = setInterval(async () => {
         if (isProcessing) {
           if (checkInterval) clearInterval(checkInterval)
@@ -251,7 +256,7 @@ function AuthCallbackContent() {
           }
 
           // Solo mostrar error si realmente no hay nada
-          if (!window.location.hash && !searchParams.get('code') && !isProcessing) {
+          if (!window.location.hash && !isProcessing) {
             setStatus('error')
             setErrorMessage('No se encontró información de autenticación. Por favor solicita un nuevo link.')
             setTimeout(() => {

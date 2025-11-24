@@ -430,12 +430,12 @@ ngrok http 3000
 **Solución**:
 1. Verificar que la Redirect URL está en la lista de URLs permitidas
 2. Verificar que el callback page existe: `apps/web/src/app/(auth)/auth/callback/page.tsx`
-   - Esta página cliente maneja tanto OAuth (`?code=`) como Magic Links (`#access_token=`)
+   - Esta página cliente maneja tanto OAuth (`?code=` + `provider_token`) como Magic Links (`#access_token=`)
 3. Verificar logs en Supabase Dashboard
 
 **Nota**: La página cliente maneja ambos casos:
-- OAuth usa query params (`?code=`) - se procesa con `exchangeCodeForSession()`
-- Magic Links usan hash fragments (`#access_token=`) - se procesa con `setSession()`
+- **OAuth Social** (Google, Facebook, etc.): Usa query params (`?code=` + `provider_token`) - se procesa con `exchangeCodeForSession()`
+- **Magic Links**: Usan hash fragments (`#access_token=`) - se procesa con `setSession()` usando implicit flow (configuración por defecto de Supabase)
 
 ---
 
@@ -478,6 +478,35 @@ ngrok http 3000
    - Abre la consola del navegador (F12)
    - Busca errores relacionados con autenticación
    - Verifica que el hash fragment se esté procesando correctamente
+   - Debes ver: `"Procesando hash fragments: { hasAccessToken: true, hasRefreshToken: true }"`
+   - **NO debe aparecer** error de `exchangeCodeForSession` (ese método solo se usa para OAuth social)
+
+---
+
+### Error: "invalid request: both auth code and code verifier should be non-empty"
+
+**Problema**: Al hacer clic en Magic Link, aparece error `Error en exchangeCodeForSession: invalid request: both auth code and code verifier should be non-empty`.
+
+**Causa**: El callback estaba intentando procesar Magic Links como si fueran OAuth, cuando en realidad Supabase usa **implicit flow por defecto** para Magic Links (redirige con `access_token` y `refresh_token` en hash fragments, no con `code`).
+
+**Solución Definitiva**:
+1. **Magic Links usan implicit flow**: Supabase redirige con hash fragments (`#access_token=...&refresh_token=...`), NO con query params `?code=`
+2. **OAuth Social usa authorization code flow**: Solo los providers sociales (Google, Facebook, etc.) usan `?code=` + `provider_token`
+3. **El callback ahora distingue correctamente**:
+   - Si hay `code` Y `provider_token` → Procesa como OAuth social con `exchangeCodeForSession()`
+   - Si hay hash fragments (`#access_token=`) → Procesa como Magic Link con `setSession()`
+   - Si solo hay `code` sin `provider_token` → Se ignora (no es un flujo válido)
+
+**Flujo correcto de Magic Link**:
+1. Usuario hace clic en Magic Link → Supabase procesa internamente
+2. Supabase redirige a `/auth/callback#access_token=...&refresh_token=...`
+3. El callback detecta hash fragments y llama a `supabase.auth.setSession()`
+4. Redirige al dashboard
+
+**Validación**:
+- En consola del navegador debe aparecer: `"Procesando hash fragments: { hasAccessToken: true, hasRefreshToken: true }"`
+- NO debe aparecer error de `exchangeCodeForSession`
+- Debe redirigir directamente al dashboard en menos de 1 segundo
 
 ---
 
