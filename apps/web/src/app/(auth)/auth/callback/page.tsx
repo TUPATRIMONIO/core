@@ -68,35 +68,15 @@ function AuthCallbackContent() {
       const errorDescription = hashParams.get('error_description')
       const errorCode = hashParams.get('error_code')
 
-      // Si hay error en el hash
-      if (error) {
-        console.error('Error en callback:', {
-          error,
-          errorCode,
-          errorDescription,
-        })
+      console.log('Procesando hash fragments:', {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        error,
+        errorCode,
+        errorDescription,
+      })
 
-        let userFriendlyMessage = 'Error al autenticar'
-
-        if (errorCode === 'otp_expired') {
-          userFriendlyMessage = 'El enlace ha expirado. Por favor solicita uno nuevo.'
-        } else if (errorCode === 'token_not_found') {
-          userFriendlyMessage = 'El enlace no es válido. Por favor solicita uno nuevo.'
-        } else if (errorDescription) {
-          userFriendlyMessage = errorDescription.replace(/\+/g, ' ')
-        }
-
-        isProcessing = true
-        setStatus('error')
-        setErrorMessage(userFriendlyMessage)
-
-        setTimeout(() => {
-          router.push(`/login?error=${encodeURIComponent(userFriendlyMessage)}`)
-        }, 3000)
-        return false
-      }
-
-      // Si hay tokens en el hash
+      // Si hay tokens válidos, procesarlos primero (tienen prioridad sobre errores)
       if (accessToken && refreshToken) {
         isProcessing = true
         try {
@@ -138,63 +118,40 @@ function AuthCallbackContent() {
         }
       }
 
+      // Si hay error en el hash (y no hay tokens válidos)
+      if (error) {
+        console.error('Error en callback:', {
+          error,
+          errorCode,
+          errorDescription,
+        })
+
+        let userFriendlyMessage = 'Error al autenticar'
+
+        if (errorCode === 'otp_expired') {
+          userFriendlyMessage = 'El enlace ha expirado. Por favor solicita uno nuevo.'
+        } else if (errorCode === 'token_not_found') {
+          userFriendlyMessage = 'El enlace no es válido. Por favor solicita uno nuevo.'
+        } else if (errorDescription) {
+          userFriendlyMessage = errorDescription.replace(/\+/g, ' ')
+        }
+
+        isProcessing = true
+        setStatus('error')
+        setErrorMessage(userFriendlyMessage)
+
+        setTimeout(() => {
+          router.push(`/login?error=${encodeURIComponent(userFriendlyMessage)}`)
+        }, 3000)
+        return false
+      }
+
+      // Si no hay tokens ni error, retornar false para que siga esperando
       return false
     }
 
     const handleAuthCallback = async () => {
-      // Manejar hash fragments (Magic Link - Implicit flow o PKCE redirect)
-      // Primero verificar si ya hay hash fragments disponibles
-      if (window.location.hash) {
-        const processed = await processHashFragments(window.location.hash.substring(1))
-        if (processed) return
-      }
-
-      // Manejar PKCE flow (Magic Link con token_hash en query params)
-      const token = searchParams.get('token')
-      const type = searchParams.get('type')
-
-      if (token && type === 'magiclink') {
-        isProcessing = true
-        try {
-          const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: token,
-            type: 'magiclink',
-          })
-
-          if (verifyError) {
-            console.error('Error en verifyOtp (PKCE):', verifyError)
-            setStatus('error')
-            setErrorMessage('El enlace ha expirado o no es válido. Por favor solicita uno nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('El enlace ha expirado o no es válido')}`)
-            }, 3000)
-            return
-          }
-
-          if (!verifyData.session) {
-            console.error('No se pudo establecer la sesión (PKCE)')
-            setStatus('error')
-            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 3000)
-            return
-          }
-
-          await processSuccessfulAuth()
-          return
-        } catch (err) {
-          console.error('Error inesperado (PKCE):', err)
-          setStatus('error')
-          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
-          setTimeout(() => {
-            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 3000)
-          return
-        }
-      }
-
-      // Manejar OAuth con code
+      // Manejar OAuth con code (tiene prioridad)
       const code = searchParams.get('code')
       if (code) {
         isProcessing = true
@@ -235,9 +192,15 @@ function AuthCallbackContent() {
         }
       }
 
-      // Si no hay parámetros de autenticación, puede ser que Supabase esté procesando
-      // El enlace va a /auth/v1/verify primero, luego Supabase redirige aquí con hash fragments
-      // Esperar y escuchar cambios en el hash antes de mostrar error
+      // Para Magic Links, Supabase redirige con hash fragments
+      // Primero verificar si ya hay hash fragments disponibles
+      if (window.location.hash) {
+        const processed = await processHashFragments(window.location.hash.substring(1))
+        if (processed) return
+      }
+
+      // Si no hay parámetros de autenticación inmediatamente, esperar
+      // El Magic Link redirige a /auth/v1/verify primero, luego Supabase redirige aquí con hash fragments
       console.log('Esperando redirección de Supabase...', {
         hash: window.location.hash,
         search: window.location.search,
@@ -280,18 +243,15 @@ function AuthCallbackContent() {
           }
         }
 
-        // Si después de varios intentos aún no hay hash, verificar otros métodos
+        // Si después de varios intentos aún no hay hash, mostrar error
         if (attempts >= maxAttempts) {
           if (checkInterval) clearInterval(checkInterval)
           if (hashChangeHandler) {
             window.removeEventListener('hashchange', hashChangeHandler)
           }
 
-          // Verificar otros métodos de autenticación una última vez
-          const codeAfterWait = searchParams.get('code')
-          const tokenAfterWait = searchParams.get('token')
-
-          if (!codeAfterWait && !tokenAfterWait && !window.location.hash && !isProcessing) {
+          // Solo mostrar error si realmente no hay nada
+          if (!window.location.hash && !searchParams.get('code') && !isProcessing) {
             setStatus('error')
             setErrorMessage('No se encontró información de autenticación. Por favor solicita un nuevo link.')
             setTimeout(() => {
@@ -370,3 +330,4 @@ export default function AuthCallback() {
     </Suspense>
   )
 }
+

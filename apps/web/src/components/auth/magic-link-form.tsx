@@ -18,8 +18,11 @@ export function MagicLinkForm() {
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
       return () => clearTimeout(timer)
+    } else if (countdown === 0 && error) {
+      // Limpiar el error cuando el countdown llegue a 0
+      setError('')
     }
-  }, [countdown])
+  }, [countdown, error])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
