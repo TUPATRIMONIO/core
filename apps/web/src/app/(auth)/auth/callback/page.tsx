@@ -37,6 +37,14 @@ function AuthCallbackContent() {
           error: userError,
         } = await supabase.auth.getUser()
 
+        console.log('[processSuccessfulAuth] Resultado de getUser:', { 
+          hasUser: !!user, 
+          userId: user?.id,
+          userEmail: user?.email,
+          hasError: !!userError,
+          error: userError 
+        })
+
         if (userError) {
           console.error('[processSuccessfulAuth] Error al obtener usuario:', userError)
           // Continuar de todas formas si hay sesión
@@ -47,26 +55,56 @@ function AuthCallbackContent() {
           console.log('[processSuccessfulAuth] Verificando organización...')
           
           try {
-            const { data: hasOrg, error: orgError } = await supabase.rpc(
+            // Agregar timeout a la llamada RPC para evitar que se cuelgue
+            const orgCheckPromise = supabase.rpc(
               'user_has_organization',
               {
                 user_id: user.id,
               }
             )
+            
+            // Timeout de 5 segundos para la verificación de organización
+            const timeoutPromise = new Promise<{ data: null; error: Error }>((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout en verificación de organización')), 5000)
+            )
+            
+            console.log('[processSuccessfulAuth] Esperando respuesta de RPC...')
+            let hasOrg: boolean | null = null
+            let orgError: any = null
+            
+            try {
+              const result = await Promise.race([
+                orgCheckPromise,
+                timeoutPromise
+              ]) as { data: boolean | null; error: any }
+              
+              hasOrg = result.data
+              orgError = result.error
+              
+              console.log('[processSuccessfulAuth] Respuesta de RPC recibida:', { hasOrg, orgError })
+            } catch (raceError: any) {
+              console.error('[processSuccessfulAuth] Error en Promise.race:', raceError)
+              orgError = raceError
+              // Si hay timeout o error, continuar de todas formas
+            }
 
             if (orgError) {
               console.error('[processSuccessfulAuth] Error al verificar organización:', orgError)
-            }
+              // Continuar de todas formas - redirigir a dashboard si hay error
+              // El usuario puede completar onboarding después si es necesario
+            } else {
+              console.log('[processSuccessfulAuth] Usuario tiene organización:', hasOrg)
 
-            console.log('[processSuccessfulAuth] Usuario tiene organización:', hasOrg)
-
-            if (!hasOrg) {
-              console.log('[processSuccessfulAuth] Redirigiendo a onboarding...')
-              router.push('/onboarding')
-              return
+              if (hasOrg === false) {
+                console.log('[processSuccessfulAuth] Usuario sin organización, redirigiendo a onboarding...')
+                router.push('/onboarding')
+                return
+              }
             }
           } catch (orgErr) {
-            console.error('[processSuccessfulAuth] Error al verificar organización:', orgErr)
+            console.error('[processSuccessfulAuth] Error al verificar organización (catch):', orgErr)
+            // Continuar de todas formas - redirigir a dashboard
+            // El usuario puede completar onboarding después si es necesario
           }
         } else {
           console.warn('[processSuccessfulAuth] No se encontró usuario, pero continuando...')
