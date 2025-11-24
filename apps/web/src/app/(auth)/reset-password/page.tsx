@@ -204,12 +204,11 @@ export default function ResetPasswordPage() {
         setLoading(false)
       } else {
         // Si no hay error, la función redirigirá automáticamente
-        // No necesitamos hacer nada más aquí
         setSuccess(true)
       }
     } catch (err: any) {
-      // Next.js redirect() lanza un error especial (NEXT_REDIRECT) que no es un error real
-      // Verificamos si es una redirección de Next.js de múltiples formas
+      // Next.js redirect() lanza un error especial que debemos re-lanzar para que funcione
+      // Verificamos si es una redirección de Next.js
       const errorDigest = err?.digest ? String(err.digest) : ''
       const errorMessage = err?.message ? String(err.message) : ''
       const errorName = err?.name ? String(err.name) : ''
@@ -220,13 +219,12 @@ export default function ResetPasswordPage() {
         errorMessage.includes('NEXT_REDIRECT') ||
         errorName === 'RedirectError' ||
         errorName === 'NEXT_REDIRECT' ||
-        (typeof err === 'object' && err !== null && 'digest' in err && String(err.digest).includes('NEXT_REDIRECT'))
+        (typeof err === 'object' && err !== null && 'digest' in err)
       
       if (isRedirect) {
-        // Es una redirección exitosa, no mostrar error ni actualizar estado
-        // La redirección ocurrirá automáticamente
-        // No hacer nada aquí - simplemente dejar que el redirect ocurra
-        return
+        // Es una redirección - RE-LANZAR el error para que Next.js lo procese
+        // Esto permite que la redirección ocurra normalmente sin mostrar mensaje de error
+        throw err
       }
       
       // Es un error real - mostrar mensaje
