@@ -94,17 +94,33 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
       user_id: user.id,
     })
 
-    revalidatePath('/', 'layout')
+    // La autenticación fue exitosa, intentar revalidar cache
+    // Si falla, no es crítico porque la autenticación ya está completa
+    try {
+      revalidatePath('/', 'layout')
+    } catch (revalidateError) {
+      // revalidatePath puede fallar en algunos casos, pero no es crítico
+      // La autenticación ya se completó correctamente en Supabase
+      console.warn('Error al revalidar path (no crítico, login exitoso):', revalidateError)
+    }
 
     // Si no tiene organización, redirigir a onboarding
     if (!hasOrg) {
       redirect('/onboarding')
-      return
+      return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
     }
   }
 
-  revalidatePath('/', 'layout')
+  // Revalidar cache antes de redirigir al dashboard
+  try {
+    revalidatePath('/', 'layout')
+  } catch (revalidateError) {
+    // revalidatePath puede fallar en algunos casos, pero no es crítico
+    console.warn('Error al revalidar path (no crítico, login exitoso):', revalidateError)
+  }
+
   redirect('/dashboard')
+  return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
 }
 
 /**
@@ -201,6 +217,10 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
  * Step 1: Send the user an OTP code
  * Si la solicitud es exitosa, recibes una respuesta con error: null y un objeto data
  * donde tanto user como session son null. Informa al usuario que revise su email.
+ * 
+ * IMPORTANTE: Para enviar código OTP (no magic link):
+ * - NO incluir emailRedirectTo en las opciones
+ * - Si se incluye emailRedirectTo, Supabase enviará un magic link en lugar de código OTP
  */
 export async function signInWithEmailOTP(formData: FormData): Promise<ActionResult> {
   const email = formData.get('email') as string
@@ -211,10 +231,14 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
 
   const supabase = await createClient()
 
+  // IMPORTANTE: No incluir emailRedirectTo para forzar envío de código OTP
+  // Si se incluye emailRedirectTo, Supabase enviará magic link en lugar de código
   const { data, error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: false,
+      // EXPLÍCITAMENTE no incluir emailRedirectTo
+      // Esto fuerza el envío de código OTP de 6 dígitos en lugar de magic link
     },
   })
 
@@ -239,55 +263,82 @@ export async function signInWithEmailOTP(formData: FormData): Promise<ActionResu
  * Si es exitoso, el usuario ahora está autenticado y recibes una sesión válida.
  */
 export async function verifyOTP(formData: FormData): Promise<ActionResult> {
-  const email = formData.get('email') as string
-  const token = formData.get('token') as string
+  try {
+    const email = formData.get('email') as string
+    const token = formData.get('token') as string
 
-  if (!email || !token) {
-    return { error: 'Por favor completa todos los campos' }
-  }
+    if (!email || !token) {
+      return { error: 'Por favor completa todos los campos' }
+    }
 
-  const supabase = await createClient()
+    const supabase = await createClient()
 
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'email',
-  })
-
-  if (error) {
-    console.error('Error en verifyOTP:', error)
-    const translated = translateError(error.message)
-    return { error: translated.message, waitSeconds: translated.waitSeconds }
-  }
-
-  if (!session) {
-    return { error: 'No se pudo establecer la sesión. Por favor intenta de nuevo' }
-  }
-
-  // Usar la sesión retornada directamente (según documentación)
-  // El usuario ya está autenticado en este punto
-  const user = session.user
-
-  // Verificar si tiene organización
-  if (user) {
-    const { data: hasOrg } = await supabase.rpc('user_has_organization', {
-      user_id: user.id,
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
     })
 
-    revalidatePath('/', 'layout')
-
-    // Si no tiene organización, redirigir a onboarding
-    if (!hasOrg) {
-      redirect('/onboarding')
-      return
+    if (error) {
+      // Log detallado para diagnosticar errores no mapeados
+      console.error('Error completo en verifyOTP:', {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+        code: (error as any).code,
+      })
+      const translated = translateError(error.message)
+      return { error: translated.message, waitSeconds: translated.waitSeconds }
     }
-  }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+    if (!session) {
+      return { error: 'No se pudo establecer la sesión. Por favor intenta de nuevo' }
+    }
+
+    // Usar la sesión retornada directamente (según documentación)
+    // El usuario ya está autenticado en este punto
+    const user = session.user
+
+    // Verificar si tiene organización
+    if (user) {
+      const { data: hasOrg } = await supabase.rpc('user_has_organization', {
+        user_id: user.id,
+      })
+
+      // La sesión se estableció correctamente, intentar revalidar cache
+      // Si falla, no es crítico porque la autenticación ya está completa
+      try {
+        revalidatePath('/', 'layout')
+      } catch (revalidateError) {
+        // revalidatePath puede fallar en algunos casos, pero no es crítico
+        // La autenticación ya se completó correctamente en Supabase
+        console.warn('Error al revalidar path (no crítico, OTP verificado):', revalidateError)
+      }
+
+      // Si no tiene organización, redirigir a onboarding
+      if (!hasOrg) {
+        redirect('/onboarding')
+        return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+      }
+    }
+
+    // Revalidar cache antes de redirigir al dashboard
+    try {
+      revalidatePath('/', 'layout')
+    } catch (revalidateError) {
+      // revalidatePath puede fallar en algunos casos, pero no es crítico
+      console.warn('Error al revalidar path (no crítico, OTP verificado):', revalidateError)
+    }
+
+    redirect('/dashboard')
+    return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+  } catch (error: any) {
+    console.error('Error inesperado en verifyOTP:', error)
+    return { error: 'Ocurrió un error inesperado al verificar el código. Por favor intenta de nuevo.' }
+  }
 }
 
 // ============================================================================
@@ -342,7 +393,16 @@ export async function signOut() {
     redirect(`/login?error=${encodeURIComponent('Error al cerrar sesión')}`)
   }
 
-  revalidatePath('/', 'layout')
+  // La sesión se cerró correctamente, intentar revalidar cache
+  // Si falla, no es crítico porque la sesión ya se cerró en Supabase
+  try {
+    revalidatePath('/', 'layout')
+  } catch (revalidateError) {
+    // revalidatePath puede fallar en algunos casos, pero no es crítico
+    // La sesión ya se cerró correctamente en Supabase
+    console.warn('Error al revalidar path (no crítico, sesión cerrada):', revalidateError)
+  }
+
   redirect('/login')
 }
 
