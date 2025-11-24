@@ -160,7 +160,13 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
     })
 
     if (error) {
-      console.error('Error en updatePassword:', error)
+      // Log detallado para diagnosticar errores no mapeados
+      console.error('Error completo en updatePassword:', {
+        message: error.message,
+        status: error.status,
+        name: error.name,
+        code: (error as any).code, // Código de error si existe
+      })
       const translated = translateError(error.message)
       return { error: translated.message, waitSeconds: translated.waitSeconds }
     }
@@ -398,7 +404,7 @@ function translateError(error: string): { message: string; waitSeconds?: number 
       },
     },
     'Invalid OTP': { message: 'Código incorrecto o expirado' },
-    'Token has expired': { message: 'El código ha expirado. Solicita uno nuevo' },
+    'Token has expired': { message: 'El enlace o código ha expirado. Por favor solicita uno nuevo' },
     'For security purposes, you can only request': {
       message: 'Debes esperar un momento antes de solicitar un nuevo enlace.',
       extractWaitTime: (err: string) => {
@@ -406,6 +412,22 @@ function translateError(error: string): { message: string; waitSeconds?: number 
         const match = err.match(/(\d+)\s*(?:second|segundo|s)/i)
         return match ? parseInt(match[1], 10) : undefined
       },
+    },
+    // Errores específicos de reset de contraseña
+    'New password should be different from the old password': {
+      message: 'La nueva contraseña debe ser diferente a la anterior',
+    },
+    'User not found': {
+      message: 'Sesión expirada. Por favor solicita un nuevo enlace de recuperación',
+    },
+    'Session expired': {
+      message: 'Tu sesión ha expirado. Por favor solicita un nuevo enlace de recuperación',
+    },
+    'Invalid session': {
+      message: 'Sesión inválida. Por favor solicita un nuevo enlace de recuperación',
+    },
+    'JWT expired': {
+      message: 'El enlace de recuperación ha expirado. Por favor solicita uno nuevo',
     },
   }
 
