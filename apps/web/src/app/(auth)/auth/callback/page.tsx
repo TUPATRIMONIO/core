@@ -54,7 +54,7 @@ function AuthCallbackContent() {
       // Si hay tokens en el hash (Magic Link)
       if (accessToken && refreshToken) {
         try {
-          const { error: sessionError } = await supabase.auth.setSession({
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           })
@@ -69,29 +69,58 @@ function AuthCallbackContent() {
             return
           }
 
+          // Verificar que la sesión se estableció correctamente
+          if (!sessionData.session) {
+            console.error('No se pudo establecer la sesión')
+            setStatus('error')
+            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+            }, 3000)
+            return
+          }
+
+          // Esperar un momento para que la sesión se sincronice completamente
+          await new Promise((resolve) => setTimeout(resolve, 100))
+
           // Verificar si tiene organización
           const {
             data: { user },
+            error: userError,
           } = await supabase.auth.getUser()
 
+          if (userError) {
+            console.error('Error al obtener usuario:', userError)
+            // Si hay error pero tenemos sesión, intentar continuar de todas formas
+            // La sesión puede estar establecida aunque getUser() falle temporalmente
+          }
+
           if (user) {
-            const { data: hasOrg, error: orgError } = await supabase.rpc(
-              'user_has_organization',
-              {
-                user_id: user.id,
+            try {
+              const { data: hasOrg, error: orgError } = await supabase.rpc(
+                'user_has_organization',
+                {
+                  user_id: user.id,
+                }
+              )
+
+              if (orgError) {
+                console.error('Error al verificar organización:', orgError)
+                // No bloquear el flujo si falla la verificación de organización
+                // El middleware o la página de dashboard pueden manejar esto
               }
-            )
 
-            if (orgError) {
-              console.error('Error al verificar organización:', orgError)
-            }
-
-            if (!hasOrg) {
-              router.push('/onboarding')
-              return
+              if (!hasOrg) {
+                router.push('/onboarding')
+                return
+              }
+            } catch (orgErr) {
+              console.error('Error al verificar organización:', orgErr)
+              // Continuar al dashboard aunque falle la verificación
             }
           }
 
+          // Redirigir al dashboard
           router.push('/dashboard')
           return
         } catch (err) {
@@ -109,7 +138,8 @@ function AuthCallbackContent() {
       const code = searchParams.get('code')
       if (code) {
         try {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          const { data: exchangeData, error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code)
 
           if (exchangeError) {
             console.error('Error en exchangeCodeForSession:', exchangeError)
@@ -121,26 +151,52 @@ function AuthCallbackContent() {
             return
           }
 
+          // Verificar que la sesión se estableció correctamente
+          if (!exchangeData.session) {
+            console.error('No se pudo establecer la sesión')
+            setStatus('error')
+            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
+            setTimeout(() => {
+              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+            }, 3000)
+            return
+          }
+
+          // Esperar un momento para que la sesión se sincronice completamente
+          await new Promise((resolve) => setTimeout(resolve, 100))
+
           // Verificar si tiene organización
           const {
             data: { user },
+            error: userError,
           } = await supabase.auth.getUser()
 
+          if (userError) {
+            console.error('Error al obtener usuario:', userError)
+            // Si hay error pero tenemos sesión, intentar continuar de todas formas
+          }
+
           if (user) {
-            const { data: hasOrg, error: orgError } = await supabase.rpc(
-              'user_has_organization',
-              {
-                user_id: user.id,
+            try {
+              const { data: hasOrg, error: orgError } = await supabase.rpc(
+                'user_has_organization',
+                {
+                  user_id: user.id,
+                }
+              )
+
+              if (orgError) {
+                console.error('Error al verificar organización:', orgError)
+                // No bloquear el flujo si falla la verificación de organización
               }
-            )
 
-            if (orgError) {
-              console.error('Error al verificar organización:', orgError)
-            }
-
-            if (!hasOrg) {
-              router.push('/onboarding')
-              return
+              if (!hasOrg) {
+                router.push('/onboarding')
+                return
+              }
+            } catch (orgErr) {
+              console.error('Error al verificar organización:', orgErr)
+              // Continuar al dashboard aunque falle la verificación
             }
           }
 
