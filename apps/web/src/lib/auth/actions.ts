@@ -165,7 +165,16 @@ export async function updatePassword(formData: FormData): Promise<ActionResult> 
       return { error: translated.message, waitSeconds: translated.waitSeconds }
     }
 
-    revalidatePath('/', 'layout')
+    // La contraseña se actualizó correctamente, intentar revalidar cache
+    // Si falla, no es crítico porque la contraseña ya está actualizada
+    try {
+      revalidatePath('/', 'layout')
+    } catch (revalidateError) {
+      // revalidatePath puede fallar en algunos casos, pero no es crítico
+      // La contraseña ya se actualizó correctamente en Supabase
+      console.warn('Error al revalidar path (no crítico, contraseña actualizada):', revalidateError)
+    }
+    
     // NO redirigir aquí para evitar errores NEXT_REDIRECT en el cliente
     // Retornamos éxito y dejamos que el cliente redirija
     return { success: true }
