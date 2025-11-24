@@ -86,21 +86,43 @@ Supabase incluye plantillas predeterminadas para:
 - ✨ Magic Link
 - 🔄 Cambio de email
 
-### ⚠️ IMPORTANTE: Deshabilitar Link Tracking en SendGrid
+### ⚠️ CRÍTICO: Deshabilitar Link Tracking en SendGrid
 
-**Problema**: Si usas SendGrid con link tracking habilitado (como HubSpot), los enlaces de Magic Link pueden ser modificados y no funcionar correctamente.
+**Problema**: SendGrid está aplicando link tracking a los enlaces de Magic Link, lo que los modifica y corrompe los tokens PKCE. Esto causa errores `otp_expired` incluso con enlaces recién generados.
 
-**Solución**: Deshabilitar link tracking en SendGrid para emails de autenticación:
+**Evidencia**: Los enlaces llegan como `url9306.hub.tupatrimon.io/ls/click?upn=...` en lugar del enlace directo de Supabase.
+
+**Solución OBLIGATORIA**: 
+
+#### Opción 1: Deshabilitar Click Tracking Globalmente (Recomendado)
 
 1. Ve a [SendGrid Dashboard](https://app.sendgrid.com/)
-2. Settings → **Tracking**
-3. Desactiva **Click Tracking** para el dominio que usas con Supabase
-   - O configura una excepción para emails de autenticación
-4. Alternativamente, en SendGrid Dashboard:
-   - Settings → **Mail Settings** → **Click Tracking**
-   - Desactiva "Click Tracking" o configura exclusiones
+2. Settings → **Tracking** → **Click Tracking**
+3. **Desactiva completamente** "Click Tracking"
+4. Guarda los cambios
 
-**Nota**: Los enlaces de autenticación deben ser directos sin modificaciones para funcionar correctamente.
+**Ventaja**: Los enlaces de Magic Link funcionarán correctamente sin modificaciones.
+
+**Desventaja**: Perderás métricas de clicks en otros emails (pero puedes usar otras herramientas de analytics).
+
+#### Opción 2: Configurar Exclusiones por Dominio (Si necesitas tracking en otros emails)
+
+1. Ve a SendGrid Dashboard
+2. Settings → **Mail Settings** → **Click Tracking**
+3. Configura exclusiones para URLs que contengan:
+   - `api.tupatrimonio.app/auth/v1/verify`
+   - `app.tupatrimonio.app/auth/callback`
+   - Cualquier URL con `token=pkce_`
+
+**Nota**: Esta opción es más compleja y puede no funcionar perfectamente si SendGrid procesa los enlaces antes de aplicar exclusiones.
+
+#### Opción 3: Usar un Subdominio Separado para Autenticación
+
+1. Configura un subdominio específico en SendGrid solo para emails de autenticación
+2. Deshabilita link tracking solo para ese subdominio
+3. Configura Supabase para usar ese subdominio en las plantillas de email
+
+**Por qué es crítico**: Los tokens PKCE en los Magic Links son sensibles y cualquier modificación del enlace los invalida. SendGrid modifica los enlaces agregando su propio sistema de tracking, lo que corrompe los tokens.
 
 ### Personalizar Plantillas
 
