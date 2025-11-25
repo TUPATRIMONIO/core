@@ -58,7 +58,7 @@ function AuthCallbackContent() {
           console.log('[processSuccessfulAuth] Verificando organización...')
           
           try {
-            // Agregar timeout a la llamada RPC para evitar que se cuelgue
+            // Agregar timeout reducido a la llamada RPC para evitar que se cuelgue
             const orgCheckPromise = supabase.rpc(
               'user_has_organization',
               {
@@ -66,9 +66,9 @@ function AuthCallbackContent() {
               }
             )
             
-            // Timeout de 5 segundos para la verificación de organización
+            // Timeout reducido de 2 segundos para la verificación de organización
             const timeoutPromise = new Promise<{ data: null; error: Error }>((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout en verificación de organización')), 5000)
+              setTimeout(() => reject(new Error('Timeout en verificación de organización')), 2000)
             )
             
             console.log('[processSuccessfulAuth] Esperando respuesta de RPC...')
@@ -115,11 +115,22 @@ function AuthCallbackContent() {
           console.warn('[processSuccessfulAuth] No se encontró usuario, pero continuando...')
         }
 
+        // Asegurar que siempre se ejecute el redirect, incluso si hay errores anteriores
         console.log('[processSuccessfulAuth] Redirigiendo a dashboard...')
+        redirectExecuted = true
+        
         // Usar window.location.replace en lugar de href para evitar que aparezca en el historial
         // y asegurar que el redirect sea inmediato sin esperar a React
-        redirectExecuted = true
+        // Forzar el redirect inmediatamente
         window.location.replace('/dashboard')
+        
+        // Fallback: si por alguna razón el replace no funciona, usar href después de un pequeño delay
+        setTimeout(() => {
+          if (window.location.pathname === '/auth/callback') {
+            console.warn('[processSuccessfulAuth] Replace no funcionó, usando href como fallback')
+            window.location.href = '/dashboard'
+          }
+        }, 500)
       } catch (error: any) {
         // Si ya se ejecutó el redirect, no hacer nada más
         if (redirectExecuted) {
@@ -200,7 +211,12 @@ function AuthCallbackContent() {
           // Si hay sesión (ya sea de exchangeData o currentSession), procesar autenticación
           if (exchangeData.session || currentSession) {
             console.log('[handleAuthCallback] Sesión establecida, procesando autenticación...')
-            await processSuccessfulAuth()
+            // No usar await para que el redirect se ejecute inmediatamente
+            processSuccessfulAuth().catch((err) => {
+              console.error('[handleAuthCallback] Error en processSuccessfulAuth:', err)
+              // Si falla, intentar redirect de todas formas
+              window.location.replace('/dashboard')
+            })
             return
           }
 
@@ -278,7 +294,12 @@ function AuthCallbackContent() {
             clearTimeout(timeoutId)
             timeoutId = null
           }
-          await processSuccessfulAuth()
+          // No usar await para que el redirect se ejecute inmediatamente
+          processSuccessfulAuth().catch((err) => {
+            console.error('[onAuthStateChange] Error en processSuccessfulAuth:', err)
+            // Si falla, intentar redirect de todas formas
+            window.location.replace('/dashboard')
+          })
         } else if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
           console.log('[onAuthStateChange] Sesión cerrada o sin sesión después de refresh')
           // Si se cerró sesión o no hay sesión después de refresh, redirigir a login
@@ -297,7 +318,12 @@ function AuthCallbackContent() {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
         console.log('[handleAuthCallback] Sesión encontrada inmediatamente, procesando...')
-        await processSuccessfulAuth()
+        // No usar await para que el redirect se ejecute inmediatamente
+        processSuccessfulAuth().catch((err) => {
+          console.error('[handleAuthCallback] Error en processSuccessfulAuth:', err)
+          // Si falla, intentar redirect de todas formas
+          window.location.replace('/dashboard')
+        })
         return
       } else {
         console.log('[handleAuthCallback] No hay sesión inmediata, esperando evento SIGNED_IN...')
