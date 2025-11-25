@@ -97,7 +97,7 @@ function AuthCallbackContent() {
 
               if (hasOrg === false) {
                 console.log('[processSuccessfulAuth] Usuario sin organización, redirigiendo a onboarding...')
-                router.push('/onboarding')
+                window.location.href = '/onboarding'
                 return
               }
             }
@@ -111,14 +111,14 @@ function AuthCallbackContent() {
         }
 
         console.log('[processSuccessfulAuth] Redirigiendo a dashboard...')
-        router.push('/dashboard')
+        window.location.href = '/dashboard'
       } catch (error) {
         console.error('[processSuccessfulAuth] Error inesperado:', error)
         setStatus('error')
         setErrorMessage('Ocurrió un error al procesar tu autenticación. Por favor intenta de nuevo.')
         setTimeout(() => {
-          router.push(`/login?error=${encodeURIComponent('Error al procesar autenticación')}`)
-        }, 3000)
+          window.location.href = `/login?error=${encodeURIComponent('Error al procesar autenticación')}`
+        }, 2000)
       } finally {
         // Resetear isProcessing después de un delay para permitir reintentos si es necesario
         setTimeout(() => {
@@ -130,20 +130,18 @@ function AuthCallbackContent() {
     const handleAuthCallback = async () => {
       console.log('[handleAuthCallback] Iniciando manejo de callback de autenticación')
       
-      // Manejar OAuth con code SOLO si viene de un provider social
+      // Manejar OAuth con code (Google, Facebook, GitHub, etc.)
       const code = searchParams.get('code')
-      const providerToken = searchParams.get('provider_token')
       const type = searchParams.get('type')
       
       console.log('[handleAuthCallback] Parámetros de URL:', { 
         hasCode: !!code, 
-        hasProviderToken: !!providerToken,
         type 
       })
       
-      // Solo procesar OAuth si hay code Y provider_token (indicador de OAuth social)
-      if (code && providerToken) {
-        console.log('[handleAuthCallback] Detectado OAuth social (code + provider_token)')
+      // Procesar OAuth si hay code en los query params (indica OAuth social)
+      if (code) {
+        console.log('[handleAuthCallback] Detectado OAuth social (code presente)')
         isProcessing = true
         try {
           const { data: exchangeData, error: exchangeError } =
@@ -154,8 +152,8 @@ function AuthCallbackContent() {
             setStatus('error')
             setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
             setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 3000)
+              window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
+            }, 2000)
             return
           }
 
@@ -164,8 +162,8 @@ function AuthCallbackContent() {
             setStatus('error')
             setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
             setTimeout(() => {
-              router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 3000)
+              window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
+            }, 2000)
             return
           }
 
@@ -177,8 +175,8 @@ function AuthCallbackContent() {
           setStatus('error')
           setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
           setTimeout(() => {
-            router.push(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 3000)
+            window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
+          }, 2000)
           return
         }
       }
@@ -203,8 +201,8 @@ function AuthCallbackContent() {
           setStatus('error')
           setErrorMessage(userFriendlyMessage)
           setTimeout(() => {
-            router.push(`/login?error=${encodeURIComponent(userFriendlyMessage)}`)
-          }, 3000)
+            window.location.href = `/login?error=${encodeURIComponent(userFriendlyMessage)}`
+          }, 2000)
           return
         }
       }
@@ -231,8 +229,8 @@ function AuthCallbackContent() {
             setStatus('error')
             setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
             setTimeout(() => {
-              router.push('/login?error=No se pudo establecer la sesión')
-            }, 3000)
+              window.location.href = '/login?error=No se pudo establecer la sesión'
+            }, 2000)
           }
         }
       })
@@ -259,8 +257,8 @@ function AuthCallbackContent() {
               setStatus('error')
               setErrorMessage('No se encontró información de autenticación. Por favor solicita un nuevo link.')
               setTimeout(() => {
-                router.push('/login?error=No se encontró información de autenticación')
-              }, 3000)
+                window.location.href = '/login?error=No se encontró información de autenticación'
+              }, 2000)
             } else {
               console.log('[handleAuthCallback] Sesión encontrada en verificación final, procesando...')
               processSuccessfulAuth()
