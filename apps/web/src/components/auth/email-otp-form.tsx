@@ -60,13 +60,25 @@ export function EmailOTPForm() {
     try {
       const result = await verifyOTP(formData)
       
-      if (result.error) {
+      // Si hay resultado y tiene error, mostrarlo
+      if (result?.error) {
         setError(result.error)
+        setLoading(false)
       }
-      // Si es exitoso, la función verifyOTP redirige automáticamente
-    } catch (err) {
+      // Si no hay error, el redirect se ejecutó y el usuario será redirigido
+      // No necesitamos hacer nada más aquí
+    } catch (err: any) {
+      // Si el error es un NEXT_REDIRECT, ignorarlo (es normal cuando hay redirect)
+      // Next.js usa este mecanismo interno para manejar redirects
+      if (err?.digest?.startsWith('NEXT_REDIRECT') || err?.message?.includes('NEXT_REDIRECT')) {
+        // No mostrar error, el redirect se está procesando
+        // No cambiar loading para que el usuario vea que está procesando
+        return // Salir sin mostrar error ni cambiar loading
+      }
+      
+      // Solo mostrar error si NO es un NEXT_REDIRECT
+      console.error('Error real en verifyOTP:', err)
       setError('Ocurrió un error. Por favor intenta de nuevo')
-    } finally {
       setLoading(false)
     }
   }
