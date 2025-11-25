@@ -78,7 +78,13 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
   })
 
   if (error) {
-    console.error('Error en signIn:', error)
+    // Log detallado para diagnosticar errores no mapeados
+    console.error('Error completo en signIn:', {
+      message: error.message,
+      status: error.status,
+      name: error.name,
+      code: (error as any).code,
+    })
     const translated = translateError(error.message)
     return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
