@@ -15,8 +15,81 @@ function AuthCallbackContent() {
     let authStateSubscription: ReturnType<typeof supabase.auth.onAuthStateChange> | null = null
     let timeoutId: NodeJS.Timeout | null = null
     let isProcessing = false
+    let redirected = false
+    let mounted = true
 
-    // Función helper para procesar autenticación exitosa
+    // Función helper para hacer redirect de forma robusta (solo para OAuth)
+    const forceRedirect = (path: string) => {
+      if (redirected) return
+      redirected = true
+      
+      console.log(`[forceRedirect] Redirigiendo a: ${path}`)
+      
+      // Intentar múltiples métodos de redirect
+      try {
+        window.location.replace(path)
+      } catch (e) {
+        console.error('[forceRedirect] Error en replace:', e)
+        try {
+          window.location.href = path
+        } catch (e2) {
+          console.error('[forceRedirect] Error en href:', e2)
+          router.push(path)
+        }
+      }
+    }
+
+    // Función simplificada para procesar autenticación OAuth exitosa
+    const processOAuthAuth = async (session: any) => {
+      if (redirected || !mounted) return
+      
+      console.log('[processOAuthAuth] Iniciando procesamiento OAuth...')
+      
+      try {
+        const userId = session.user.id
+        console.log('[processOAuthAuth] User ID:', userId)
+
+        // Intentar verificar organización con timeout agresivo
+        let hasOrg: boolean | null = null
+        
+        try {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 3000)
+          
+          const { data, error } = await supabase.rpc('user_has_organization', {
+            user_id: userId,
+          })
+          
+          clearTimeout(timeoutId)
+          
+          if (!error) {
+            hasOrg = data
+            console.log('[processOAuthAuth] Has org:', hasOrg)
+          } else {
+            console.error('[processOAuthAuth] Error verificando org:', error)
+          }
+        } catch (orgError) {
+          console.error('[processOAuthAuth] Error/timeout en org check:', orgError)
+          // Continuar de todas formas
+        }
+
+        // Decidir redirect basado en organización
+        if (hasOrg === false) {
+          console.log('[processOAuthAuth] Redirigiendo a onboarding')
+          forceRedirect('/onboarding')
+        } else {
+          // Si hasOrg es true, null, o hubo error, ir a dashboard
+          console.log('[processOAuthAuth] Redirigiendo a dashboard')
+          forceRedirect('/dashboard')
+        }
+      } catch (error) {
+        console.error('[processOAuthAuth] Error inesperado:', error)
+        // En caso de error, redirigir a dashboard de todas formas
+        forceRedirect('/dashboard')
+      }
+    }
+
+    // Función helper para procesar autenticación exitosa (para OTP y magic links)
     const processSuccessfulAuth = async () => {
       console.log('[processSuccessfulAuth] Iniciando procesamiento de autenticación exitosa')
       
@@ -189,68 +262,59 @@ function AuthCallbackContent() {
       if (code) {
         console.log('[handleAuthCallback] Detectado OAuth social (code presente)')
         isProcessing = true
+        
         try {
           const { data: exchangeData, error: exchangeError } =
             await supabase.auth.exchangeCodeForSession(code)
 
-          // Verificar si hay sesión válida incluso si exchangeCodeForSession retornó error
-          // A veces Supabase establece la sesión de todas formas
-          const { data: { session: currentSession } } = await supabase.auth.getSession()
-
-          if (exchangeError && !currentSession) {
-            // Solo mostrar error si realmente no hay sesión
-            console.error('[handleAuthCallback] Error en exchangeCodeForSession y no hay sesión:', exchangeError)
-            setStatus('error')
-            setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-            }, 2000)
-            return
-          }
-
-          // Si hay sesión (ya sea de exchangeData o currentSession), procesar autenticación
-          if (exchangeData.session || currentSession) {
-            console.log('[handleAuthCallback] Sesión establecida, procesando autenticación...')
-            // No usar await para que el redirect se ejecute inmediatamente
-            processSuccessfulAuth().catch((err) => {
-              console.error('[handleAuthCallback] Error en processSuccessfulAuth:', err)
-              // Si falla, intentar redirect de todas formas
-              window.location.replace('/dashboard')
-            })
-            return
-          }
-
-          // Si no hay sesión en ningún lado, mostrar error
-          console.error('[handleAuthCallback] No se pudo establecer la sesión')
-          setStatus('error')
-          setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
-          setTimeout(() => {
-            window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 2000)
-          return
-        } catch (err) {
-          console.error('[handleAuthCallback] Error inesperado en exchangeCodeForSession:', err)
-          
-          // Verificar si hay sesión válida antes de mostrar error
-          try {
-            const { data: { session: currentSession } } = await supabase.auth.getSession()
-            if (currentSession) {
-              // Si hay sesión válida, procesar autenticación en lugar de mostrar error
-              console.log('[handleAuthCallback] Hay sesión válida a pesar del error, procesando autenticación...')
-              await processSuccessfulAuth()
+          if (exchangeError) {
+            console.error('[handleAuthCallback] Error en exchange:', exchangeError)
+            // Verificar si hay sesión de todas formas
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+              await processOAuthAuth(session)
               return
             }
-          } catch (sessionError) {
-            console.error('[handleAuthCallback] Error al verificar sesión:', sessionError)
+            throw exchangeError
           }
-          
-          // Solo mostrar error si realmente no hay sesión
-          setStatus('error')
-          setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
-          setTimeout(() => {
-            window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
-          }, 2000)
+
+          if (exchangeData.session) {
+            await processOAuthAuth(exchangeData.session)
+            return
+          }
+        } catch (err) {
+          console.error('[handleAuthCallback] Error en OAuth:', err)
+          if (mounted && !redirected) {
+            setStatus('error')
+            setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
+            setTimeout(() => forceRedirect('/login?error=auth_failed'), 2000)
+          }
           return
+        }
+
+        // Timeout de emergencia para OAuth: después de 5 segundos, verificar sesión y forzar redirect
+        const emergencyTimeout = setTimeout(async () => {
+          if (redirected || !mounted) return
+          
+          console.log('[Emergency] Timeout alcanzado, verificando sesión...')
+          const { data: { session } } = await supabase.auth.getSession()
+          
+          if (session) {
+            console.log('[Emergency] Sesión encontrada, forzando redirect')
+            forceRedirect('/dashboard')
+          } else {
+            console.error('[Emergency] No hay sesión después del timeout')
+            if (mounted) {
+              setStatus('error')
+              setErrorMessage('No se pudo completar la autenticación.')
+              setTimeout(() => forceRedirect('/login?error=timeout'), 2000)
+            }
+          }
+        }, 5000)
+
+        // Cleanup del timeout de emergencia
+        return () => {
+          clearTimeout(emergencyTimeout)
         }
       }
       
@@ -357,6 +421,7 @@ function AuthCallbackContent() {
 
     // Cleanup
     return () => {
+      mounted = false
       if (authStateSubscription) {
         try {
           // onAuthStateChange retorna un objeto con unsubscribe directamente
