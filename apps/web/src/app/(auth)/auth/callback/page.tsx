@@ -182,35 +182,57 @@ function AuthCallbackContent() {
           const { data: exchangeData, error: exchangeError } =
             await supabase.auth.exchangeCodeForSession(code)
 
-          if (exchangeError) {
-            console.error('[handleAuthCallback] Error en exchangeCodeForSession:', exchangeError)
+          // Verificar si hay sesión válida incluso si exchangeCodeForSession retornó error
+          // A veces Supabase establece la sesión de todas formas
+          const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+          if (exchangeError && !currentSession) {
+            // Solo mostrar error si realmente no hay sesión
+            console.error('[handleAuthCallback] Error en exchangeCodeForSession y no hay sesión:', exchangeError)
             setStatus('error')
             setErrorMessage('Error al autenticar. Por favor intenta de nuevo.')
             setTimeout(() => {
-              window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
+              window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
             }, 2000)
             return
           }
 
-          if (!exchangeData.session) {
-            console.error('[handleAuthCallback] No se pudo establecer la sesión')
-            setStatus('error')
-            setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
-            setTimeout(() => {
-              window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
-            }, 2000)
+          // Si hay sesión (ya sea de exchangeData o currentSession), procesar autenticación
+          if (exchangeData.session || currentSession) {
+            console.log('[handleAuthCallback] Sesión establecida, procesando autenticación...')
+            await processSuccessfulAuth()
             return
           }
 
-          console.log('[handleAuthCallback] Sesión establecida con exchangeCodeForSession, procesando autenticación...')
-          await processSuccessfulAuth()
+          // Si no hay sesión en ningún lado, mostrar error
+          console.error('[handleAuthCallback] No se pudo establecer la sesión')
+          setStatus('error')
+          setErrorMessage('No se pudo establecer la sesión. Por favor intenta de nuevo.')
+          setTimeout(() => {
+            window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
+          }, 2000)
           return
         } catch (err) {
           console.error('[handleAuthCallback] Error inesperado en exchangeCodeForSession:', err)
+          
+          // Verificar si hay sesión válida antes de mostrar error
+          try {
+            const { data: { session: currentSession } } = await supabase.auth.getSession()
+            if (currentSession) {
+              // Si hay sesión válida, procesar autenticación en lugar de mostrar error
+              console.log('[handleAuthCallback] Hay sesión válida a pesar del error, procesando autenticación...')
+              await processSuccessfulAuth()
+              return
+            }
+          } catch (sessionError) {
+            console.error('[handleAuthCallback] Error al verificar sesión:', sessionError)
+          }
+          
+          // Solo mostrar error si realmente no hay sesión
           setStatus('error')
           setErrorMessage('Ocurrió un error inesperado. Por favor intenta de nuevo.')
           setTimeout(() => {
-            window.location.href = `/login?error=${encodeURIComponent('Error al autenticar')}`
+            window.location.replace(`/login?error=${encodeURIComponent('Error al autenticar')}`)
           }, 2000)
           return
         }
