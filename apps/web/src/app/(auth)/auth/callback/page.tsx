@@ -26,6 +26,9 @@ function AuthCallbackContent() {
       }
       isProcessing = true
 
+      // Variable para rastrear si ya se ejecutó el redirect
+      let redirectExecuted = false
+
       try {
         // Esperar un momento para que la sesión se sincronice completamente
         await new Promise((resolve) => setTimeout(resolve, 200))
@@ -97,7 +100,9 @@ function AuthCallbackContent() {
 
               if (hasOrg === false) {
                 console.log('[processSuccessfulAuth] Usuario sin organización, redirigiendo a onboarding...')
-                window.location.href = '/onboarding'
+                // Redirect inmediato sin esperar a que React actualice el estado
+                redirectExecuted = true
+                window.location.replace('/onboarding')
                 return
               }
             }
@@ -111,14 +116,44 @@ function AuthCallbackContent() {
         }
 
         console.log('[processSuccessfulAuth] Redirigiendo a dashboard...')
-        window.location.href = '/dashboard'
-      } catch (error) {
+        // Usar window.location.replace en lugar de href para evitar que aparezca en el historial
+        // y asegurar que el redirect sea inmediato sin esperar a React
+        redirectExecuted = true
+        window.location.replace('/dashboard')
+      } catch (error: any) {
+        // Si ya se ejecutó el redirect, no hacer nada más
+        if (redirectExecuted) {
+          console.log('[processSuccessfulAuth] Redirect ya ejecutado, ignorando error')
+          return
+        }
+
+        // Solo mostrar error si es realmente crítico y no podemos continuar
+        // Si el usuario ya está autenticado, redirigir de todas formas sin mostrar error
         console.error('[processSuccessfulAuth] Error inesperado:', error)
-        setStatus('error')
-        setErrorMessage('Ocurrió un error al procesar tu autenticación. Por favor intenta de nuevo.')
-        setTimeout(() => {
-          window.location.href = `/login?error=${encodeURIComponent('Error al procesar autenticación')}`
-        }, 2000)
+        
+        try {
+          // Verificar si hay sesión válida antes de mostrar error
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            // Si hay sesión válida, redirigir de todas formas sin mostrar error
+            console.log('[processSuccessfulAuth] Hay sesión válida, redirigiendo a pesar del error')
+            redirectExecuted = true
+            window.location.replace('/dashboard')
+            return
+          }
+        } catch (sessionError) {
+          console.error('[processSuccessfulAuth] Error al verificar sesión en catch:', sessionError)
+          // Continuar con el flujo de error solo si no hay sesión
+        }
+        
+        // Solo mostrar error si realmente no hay sesión y no se ejecutó redirect
+        if (!redirectExecuted) {
+          setStatus('error')
+          setErrorMessage('Ocurrió un error al procesar tu autenticación. Por favor intenta de nuevo.')
+          setTimeout(() => {
+            window.location.replace(`/login?error=${encodeURIComponent('Error al procesar autenticación')}`)
+          }, 2000)
+        }
       } finally {
         // Resetear isProcessing después de un delay para permitir reintentos si es necesario
         setTimeout(() => {
