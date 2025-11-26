@@ -25,32 +25,53 @@ export async function handleDLocalWebhook(event: DLocalWebhookEvent | any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
-  console.log('🔔 Webhook dLocal Go recibido:', JSON.stringify(event, null, 2));
+  console.log('🔔 [dLocal Webhook] Evento recibido:', {
+    timestamp: new Date().toISOString(),
+    eventType: event.type || 'unknown',
+    rawEvent: JSON.stringify(event, null, 2)
+  });
   
   // dLocal Go puede enviar el pago directamente o dentro de un objeto 'payment'
   // Manejar ambos casos
   const paymentData = event.payment || event;
   const paymentId = paymentData.id || event.id;
   const status = paymentData.status || event.status;
+  const orderId = paymentData.order_id || event.order_id;
+  
+  console.log('🔔 [dLocal Webhook] Datos extraídos:', {
+    paymentId,
+    status,
+    orderId,
+    amount: paymentData.amount || event.amount,
+    currency: paymentData.currency || event.currency
+  });
   
   if (!paymentId) {
-    console.error('❌ Webhook dLocal Go sin payment ID:', event);
+    console.error('❌ [dLocal Webhook] Error: Payment ID no encontrado en el evento:', event);
     throw new Error('Payment ID is required');
   }
   
   // Determinar tipo de evento basándose en el status
   // dLocal Go usa status directamente en lugar de tipos de evento separados
+  console.log(`🔔 [dLocal Webhook] Procesando evento con status: ${status}`);
+  
   if (status === 'PAID') {
+    console.log('✅ [dLocal Webhook] Procesando pago completado (PAID)');
     await handlePaymentCompleted(paymentData);
   } else if (status === 'FAILED' || status === 'REJECTED') {
+    console.log('❌ [dLocal Webhook] Procesando pago fallido:', status);
     await handlePaymentFailed(paymentData);
   } else if (status === 'CANCELLED') {
+    console.log('⚠️  [dLocal Webhook] Procesando pago cancelado');
     await handlePaymentCancelled(paymentData);
   } else if (status === 'PENDING') {
+    console.log('⏳ [dLocal Webhook] Procesando pago pendiente');
     await handlePaymentCreated(paymentData);
   } else {
-    console.log(`ℹ️  Status no manejado: ${status}`);
+    console.log(`ℹ️  [dLocal Webhook] Status no manejado: ${status}`);
   }
+  
+  console.log('✅ [dLocal Webhook] Evento procesado exitosamente');
 }
 
 /**
@@ -87,8 +108,15 @@ async function handlePaymentCompleted(payment: any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
+  console.log('💰 [dLocal Webhook] Buscando pago en BD:', {
+    providerPaymentId: payment.id,
+    orderId: payment.order_id,
+    amount: payment.amount,
+    currency: payment.currency
+  });
+  
   // Buscar pago en BD (usar vista pública)
-  const { data: paymentRecord } = await supabase
+  const { data: paymentRecord, error: searchError } = await supabase
     .from('payments')
     .select(`
       *,
@@ -104,15 +132,38 @@ async function handlePaymentCompleted(payment: any) {
     .eq('provider', 'dlocal')
     .single();
   
+  if (searchError) {
+    console.error('❌ [dLocal Webhook] Error buscando pago en BD:', {
+      error: searchError,
+      providerPaymentId: payment.id
+    });
+  }
+  
   if (!paymentRecord) {
-    console.error('Payment record not found for dLocal payment:', payment.id);
+    console.error('❌ [dLocal Webhook] Payment record not found for dLocal payment:', {
+      providerPaymentId: payment.id,
+      orderId: payment.order_id
+    });
     return;
   }
   
+  console.log('✅ [dLocal Webhook] Pago encontrado en BD:', {
+    paymentId: paymentRecord.id,
+    currentStatus: paymentRecord.status,
+    invoiceId: paymentRecord.invoice?.id,
+    invoiceType: paymentRecord.invoice?.type,
+    orgId: paymentRecord.invoice?.organization_id
+  });
+  
   const orgId = paymentRecord.invoice?.organization_id;
   
+  if (!orgId) {
+    console.error('❌ [dLocal Webhook] No se encontró organization_id para el pago:', paymentRecord.id);
+    return;
+  }
+  
   // Actualizar estado del pago (usar vista pública)
-  await supabase
+  const { error: updatePaymentError } = await supabase
     .from('payments')
     .update({
       status: 'succeeded',
@@ -121,15 +172,27 @@ async function handlePaymentCompleted(payment: any) {
     })
     .eq('id', paymentRecord.id);
   
+  if (updatePaymentError) {
+    console.error('❌ [dLocal Webhook] Error actualizando estado del pago:', updatePaymentError);
+  } else {
+    console.log('✅ [dLocal Webhook] Estado del pago actualizado a succeeded');
+  }
+  
   // Actualizar factura (usar vista pública)
   if (paymentRecord.invoice) {
-    await supabase
+    const { error: updateInvoiceError } = await supabase
       .from('invoices')
       .update({
         status: 'paid',
         paid_at: new Date().toISOString(),
       })
       .eq('id', paymentRecord.invoice.id);
+    
+    if (updateInvoiceError) {
+      console.error('❌ [dLocal Webhook] Error actualizando factura:', updateInvoiceError);
+    } else {
+      console.log('✅ [dLocal Webhook] Factura actualizada a paid');
+    }
     
     // Notificar pago exitoso
     if (orgId) {
@@ -168,8 +231,15 @@ async function handlePaymentCompleted(payment: any) {
         }
       }
       
+      console.log('💰 [dLocal Webhook] Procesando créditos:', {
+        creditsAmount,
+        orgId,
+        invoiceId: paymentRecord.invoice.id
+      });
+      
       if (creditsAmount > 0) {
         try {
+          console.log(`💰 [dLocal Webhook] Agregando ${creditsAmount} créditos a la organización ${orgId}`);
           await addCredits(
             orgId,
             creditsAmount,
@@ -181,6 +251,8 @@ async function handlePaymentCompleted(payment: any) {
             }
           );
           
+          console.log('✅ [dLocal Webhook] Créditos agregados exitosamente');
+          
           // Notificar créditos agregados
           try {
             await notifyCreditsAdded(
@@ -189,15 +261,28 @@ async function handlePaymentCompleted(payment: any) {
               'credit_purchase',
               paymentRecord.invoice.id
             );
+            console.log('✅ [dLocal Webhook] Notificación de créditos enviada');
           } catch (notifError: any) {
-            console.error('Error enviando notificación de créditos agregados dLocal:', notifError);
+            console.error('❌ [dLocal Webhook] Error enviando notificación de créditos agregados:', notifError);
           }
         } catch (error: any) {
-          console.error('Error agregando créditos dLocal:', error);
+          console.error('❌ [dLocal Webhook] Error agregando créditos:', {
+            error: error.message,
+            stack: error.stack,
+            creditsAmount,
+            orgId
+          });
         }
       } else {
-        console.warn('⚠️  No se pudo determinar la cantidad de créditos para el pago dLocal:', payment.id);
+        console.warn('⚠️  [dLocal Webhook] No se pudo determinar la cantidad de créditos para el pago:', {
+          paymentId: payment.id,
+          orderId: payment.order_id,
+          metadata: paymentRecord.metadata
+        });
       }
+    } else {
+      console.log('ℹ️  [dLocal Webhook] No es compra de créditos, saltando procesamiento de créditos');
+    }
     }
   }
 }

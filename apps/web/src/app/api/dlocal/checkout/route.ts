@@ -65,14 +65,16 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const successUrl = `${baseUrl}/billing/purchase-credits/success?dlocal_payment_id={payment_id}`;
+    // Usar placeholder que será reemplazado con invoice.id antes de crear el pago
+    // Luego se actualizará con merchant_checkout_token después de crear el pago
+    const successUrlTemplate = `${baseUrl}/billing/purchase-credits/success?merchant_checkout_token={MERCHANT_CHECKOUT_TOKEN}`;
     const cancelUrl = `${baseUrl}/billing/purchase-credits/${packageId}`;
     
     const result = await createDLocalPaymentForCredits(
       orgUser.organization_id,
       packageId,
       paymentMethodId,
-      successUrl,
+      successUrlTemplate,
       cancelUrl
     );
     
@@ -81,6 +83,7 @@ export async function POST(request: NextRequest) {
       redirectUrl: result.redirectUrl,
       requiresRedirect: result.requiresRedirect,
       invoiceId: result.invoice.id,
+      merchantCheckoutToken: result.payment.merchant_checkout_token,
     });
   } catch (error: any) {
     console.error('Error creando checkout dLocal:', error);

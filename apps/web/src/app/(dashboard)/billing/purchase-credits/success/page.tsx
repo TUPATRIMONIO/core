@@ -5,20 +5,152 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 import { getPaymentStatus } from '@/lib/dlocal/client';
+import { addCredits } from '@/lib/credits/core';
+import { notifyCreditsAdded, notifyPaymentSucceeded } from '@/lib/notifications/billing';
+
+/**
+ * Procesa un pago que está PAID en dLocal Go pero aún pending en nuestra BD
+ * Actualiza el estado del pago, la factura y procesa los créditos
+ */
+async function processPaidPayment(
+  payment: any,
+  dLocalPaymentStatus: any,
+  supabase: any,
+  orgId: string
+) {
+  console.log('[PaymentSuccess] Procesando pago PAID:', {
+    paymentId: payment.id,
+    dLocalPaymentId: dLocalPaymentStatus.id,
+    status: dLocalPaymentStatus.status
+  });
+
+  // Actualizar estado del pago
+  const { error: updateError } = await supabase
+    .from('payments')
+    .update({
+      status: 'succeeded',
+      processed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', payment.id);
+
+  if (updateError) {
+    console.error('[PaymentSuccess] Error actualizando estado del pago:', updateError);
+    return;
+  }
+
+  console.log('[PaymentSuccess] Estado del pago actualizado exitosamente');
+
+  // Obtener información completa de la factura si no está incluida
+  let invoice = payment.invoice;
+  if (!invoice || !invoice.id) {
+    const { data: invoiceData } = await supabase
+      .from('invoices')
+      .select('id, organization_id, type, total, currency, status')
+      .eq('id', payment.invoice_id)
+      .single();
+    invoice = invoiceData;
+  }
+
+  // Actualizar factura si existe
+  if (invoice) {
+    await supabase
+      .from('invoices')
+      .update({
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+      })
+      .eq('id', invoice.id);
+
+    // Notificar pago exitoso
+    try {
+      await notifyPaymentSucceeded(
+        orgId,
+        invoice.total || dLocalPaymentStatus.amount,
+        invoice.currency || dLocalPaymentStatus.currency,
+        invoice.id
+      );
+    } catch (notifError: any) {
+      console.error('[PaymentSuccess] Error enviando notificación de pago exitoso:', notifError);
+    }
+
+    // Si es compra de créditos, agregar créditos
+    if (invoice.type === 'credit_purchase') {
+      // Obtener cantidad de créditos desde metadata o invoice line items
+      let creditsAmount = 0;
+
+      if (payment.metadata?.credits_amount) {
+        creditsAmount = parseFloat(payment.metadata.credits_amount.toString());
+      } else {
+        // Buscar en invoice line items
+        const { data: lineItems } = await supabase
+          .from('invoice_line_items')
+          .select('description')
+          .eq('invoice_id', invoice.id)
+          .limit(1)
+          .maybeSingle();
+
+        if (lineItems?.description) {
+          const creditsMatch = lineItems.description.match(/(\d+)\s*créditos/i);
+          creditsAmount = creditsMatch ? parseFloat(creditsMatch[1]) : 0;
+        }
+      }
+
+      if (creditsAmount > 0) {
+        try {
+          await addCredits(
+            orgId,
+            creditsAmount,
+            'credit_purchase',
+            {
+              payment_id: payment.id,
+              dlocal_payment_id: dLocalPaymentStatus.id,
+              invoice_id: invoice.id,
+            }
+          );
+
+          console.log('[PaymentSuccess] Créditos agregados exitosamente:', creditsAmount);
+
+          // Notificar créditos agregados
+          try {
+            await notifyCreditsAdded(
+              orgId,
+              creditsAmount,
+              'credit_purchase',
+              invoice.id
+            );
+          } catch (notifError: any) {
+            console.error('[PaymentSuccess] Error enviando notificación de créditos agregados:', notifError);
+          }
+        } catch (error: any) {
+          console.error('[PaymentSuccess] Error agregando créditos:', error);
+        }
+      } else {
+        console.warn('[PaymentSuccess] No se pudo determinar la cantidad de créditos para el pago:', dLocalPaymentStatus.id);
+      }
+    }
+  }
+}
 
 interface PageProps {
   searchParams: Promise<{ 
     payment_intent?: string;
     dlocal_payment_id?: string;
+    merchant_checkout_token?: string;
+    order_id?: string;
   }>;
 }
 
 async function PaymentSuccessContent({ 
   paymentIntentId, 
-  dlocalPaymentId 
+  dlocalPaymentId,
+  merchantCheckoutToken,
+  orderId
 }: { 
   paymentIntentId?: string;
   dlocalPaymentId?: string;
+  merchantCheckoutToken?: string;
+  orderId?: string;
 }) {
   const supabase = await createClient();
   
@@ -61,7 +193,9 @@ async function PaymentSuccessContent({
 
   console.log('[PaymentSuccess] Buscando pago:', { 
     paymentIntentId, 
-    dlocalPaymentId, 
+    dlocalPaymentId,
+    merchantCheckoutToken,
+    orderId,
     orgId: orgUser.organization_id,
     userId: user.id 
   });
@@ -92,10 +226,89 @@ async function PaymentSuccessContent({
       console.warn('[PaymentSuccess] No se encontró pago Stripe con ID:', paymentIntentId);
     }
     payment = data;
-  } else if (dlocalPaymentId) {
+  } else if (merchantCheckoutToken || orderId || dlocalPaymentId) {
     // Pago de dLocal
-    // Si el payment_id viene como placeholder literal, buscar el pago más reciente
-    if (dlocalPaymentId === '{payment_id}') {
+    // Prioridad 1: Buscar por merchant_checkout_token (más confiable)
+    if (merchantCheckoutToken) {
+      console.log('[PaymentSuccess] Buscando pago por merchant_checkout_token:', merchantCheckoutToken);
+      // Buscar pagos de dLocal para esta organización y filtrar por metadata
+      const { data: allPayments, error: fetchError } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider', 'dlocal')
+        .eq('organization_id', orgUser.organization_id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (fetchError) {
+        console.error('[PaymentSuccess] Error buscando pagos por merchant_checkout_token:', fetchError);
+      } else {
+        // Filtrar por merchant_checkout_token en metadata
+        const matchingPayment = allPayments?.find(
+          (p: any) => p.metadata?.merchant_checkout_token === merchantCheckoutToken
+        );
+        
+        if (matchingPayment) {
+          console.log('[PaymentSuccess] Pago encontrado por merchant_checkout_token:', matchingPayment.id);
+          payment = matchingPayment;
+        } else {
+          console.warn('[PaymentSuccess] No se encontró pago con merchant_checkout_token:', merchantCheckoutToken);
+        }
+      }
+      
+      if (error) {
+        console.error('[PaymentSuccess] Error buscando pago por merchant_checkout_token:', error);
+      } else if (data) {
+        console.log('[PaymentSuccess] Pago encontrado por merchant_checkout_token:', data.id);
+        payment = data;
+      } else {
+        console.warn('[PaymentSuccess] No se encontró pago con merchant_checkout_token:', merchantCheckoutToken);
+      }
+    }
+    
+    // Prioridad 2: Buscar por order_id (invoice.id)
+    if (!payment && orderId) {
+      console.log('[PaymentSuccess] Buscando pago por order_id (invoice.id):', orderId);
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider', 'dlocal')
+        .eq('invoice_id', orderId)
+        .eq('organization_id', orgUser.organization_id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('[PaymentSuccess] Error buscando pago por order_id:', error);
+      } else if (data) {
+        console.log('[PaymentSuccess] Pago encontrado por order_id:', data.id);
+        payment = data;
+      } else {
+        console.warn('[PaymentSuccess] No se encontró pago con order_id:', orderId);
+      }
+    }
+    
+    // Prioridad 3: Si el payment_id viene como placeholder literal, buscar el pago más reciente
+    if (!payment && dlocalPaymentId === '{payment_id}') {
       console.log('[PaymentSuccess] Placeholder detectado, buscando pago más reciente...');
       
       // Buscar el pago más reciente de dLocal para esta organización
@@ -150,23 +363,9 @@ async function PaymentSuccessContent({
           const dLocalPaymentStatus = await getPaymentStatus(recentPayment.provider_payment_id);
           console.log('[PaymentSuccess] Estado en dLocal:', dLocalPaymentStatus.status);
           
-          // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar
+          // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar y procesar créditos
           if (dLocalPaymentStatus.status === 'PAID' && recentPayment.status === 'pending') {
-            console.log('[PaymentSuccess] Actualizando estado del pago de pending a succeeded...');
-            const { error: updateError } = await supabase
-              .from('payments') // Usar vista pública
-              .update({
-                status: 'succeeded',
-                processed_at: new Date().toISOString(),
-              })
-              .eq('id', recentPayment.id);
-            
-            if (updateError) {
-              console.error('[PaymentSuccess] Error actualizando estado del pago:', updateError);
-            } else {
-              console.log('[PaymentSuccess] Estado del pago actualizado exitosamente');
-            }
-            
+            await processPaidPayment(recentPayment, dLocalPaymentStatus, supabase, orgUser.organization_id);
             recentPayment.status = 'succeeded';
           }
         } catch (apiError) {
@@ -201,6 +400,40 @@ async function PaymentSuccessContent({
         console.log('[PaymentSuccess] Pago encontrado por ID:', data.id);
       }
       payment = data;
+      
+      // Si encontramos el pago por ID, verificar estado en dLocal Go
+      if (payment?.provider_payment_id) {
+        try {
+          console.log('[PaymentSuccess] Consultando API de dLocal para payment_id:', payment.provider_payment_id);
+          const dLocalPaymentStatus = await getPaymentStatus(payment.provider_payment_id);
+          console.log('[PaymentSuccess] Estado en dLocal:', dLocalPaymentStatus.status);
+          
+          // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar y procesar créditos
+          if (dLocalPaymentStatus.status === 'PAID' && payment.status === 'pending') {
+            await processPaidPayment(payment, dLocalPaymentStatus, supabase, orgUser.organization_id);
+            payment.status = 'succeeded';
+          }
+        } catch (apiError) {
+          console.error('[PaymentSuccess] Error consultando API de dLocal:', apiError);
+        }
+      }
+    }
+  }
+
+  // Verificar y procesar créditos para pagos encontrados por merchant_checkout_token o order_id
+  if (payment && payment.status === 'pending' && payment.provider_payment_id) {
+    try {
+      console.log('[PaymentSuccess] Verificando estado del pago en dLocal Go...');
+      const dLocalPaymentStatus = await getPaymentStatus(payment.provider_payment_id);
+      console.log('[PaymentSuccess] Estado en dLocal:', dLocalPaymentStatus.status);
+      
+      // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar y procesar créditos
+      if (dLocalPaymentStatus.status === 'PAID') {
+        await processPaidPayment(payment, dLocalPaymentStatus, supabase, orgUser.organization_id);
+        payment.status = 'succeeded';
+      }
+    } catch (apiError) {
+      console.error('[PaymentSuccess] Error consultando API de dLocal:', apiError);
     }
   }
 
@@ -293,6 +526,8 @@ export default async function SuccessPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const paymentIntentId = params.payment_intent;
   const dlocalPaymentId = params.dlocal_payment_id;
+  const merchantCheckoutToken = params.merchant_checkout_token;
+  const orderId = params.order_id;
   
   return (
     <div className="container mx-auto py-8 max-w-2xl">
@@ -306,6 +541,8 @@ export default async function SuccessPage({ searchParams }: PageProps) {
         <PaymentSuccessContent 
           paymentIntentId={paymentIntentId} 
           dlocalPaymentId={dlocalPaymentId}
+          merchantCheckoutToken={merchantCheckoutToken}
+          orderId={orderId}
         />
       </Suspense>
     </div>

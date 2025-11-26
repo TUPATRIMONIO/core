@@ -146,6 +146,14 @@ export async function createDLocalPaymentForCredits(
   const baseUrlFromSuccess = successUrl.split('/billing')[0];
   const notificationUrl = `${baseUrlFromSuccess}/api/dlocal/webhook`;
   
+  // Construir success_url usando order_id (invoice.id) como identificador temporal
+  // dLocal Go requiere la success_url al crear el pago, pero el merchant_checkout_token
+  // se genera después. Usaremos el order_id para identificar el pago inicialmente.
+  // En la página de éxito, buscaremos el pago usando el merchant_checkout_token del metadata.
+  const actualSuccessUrl = successUrl.includes('{MERCHANT_CHECKOUT_TOKEN}')
+    ? `${baseUrlFromSuccess}/billing/purchase-credits/success?order_id=${invoice.id}`
+    : successUrl;
+  
   // Crear pago en dLocal Go
   const paymentRequest: DLocalPaymentRequest = {
     amount: total,
@@ -158,7 +166,7 @@ export async function createDLocalPaymentForCredits(
     },
     order_id: invoice.id,
     description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`.substring(0, 100), // Max 100 chars
-    success_url: successUrl,
+    success_url: actualSuccessUrl,
     back_url: cancelUrl,
     notification_url: notificationUrl,
   };
