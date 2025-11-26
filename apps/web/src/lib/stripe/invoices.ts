@@ -41,27 +41,57 @@ export async function listInvoices(orgId: string, limit = 10) {
       .single();
     
     if (!dbInvoice) {
-      // Crear factura en BD
-      const { data: newInvoice } = await supabase
-    .from('invoices')
-        .insert({
-          organization_id: orgId,
-          invoice_number: await generateInvoiceNumber(),
-          status: mapStripeInvoiceStatus(invoice.status),
-          type: invoice.subscription ? 'subscription' : 'one_time',
-          subtotal: invoice.subtotal / 100,
-          tax: invoice.tax / 100,
-          total: invoice.total / 100,
-          currency: invoice.currency.toUpperCase(),
-          due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
-          paid_at: invoice.status === 'paid' && invoice.status_transitions?.paid_at
-            ? new Date(invoice.status_transitions.paid_at * 1000).toISOString()
-            : null,
-          provider_invoice_id: invoice.id,
-          pdf_url: invoice.invoice_pdf || null,
-        })
-        .select()
-        .single();
+      // Crear factura en BD con manejo de errores de duplicado
+      const maxRetries = 5;
+      let newInvoice = null;
+      
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const invoiceNumber = await generateInvoiceNumber();
+          
+          const result = await supabase
+            .from('invoices')
+            .insert({
+              organization_id: orgId,
+              invoice_number: invoiceNumber,
+              status: mapStripeInvoiceStatus(invoice.status),
+              type: invoice.subscription ? 'subscription' : 'one_time',
+              subtotal: invoice.subtotal / 100,
+              tax: invoice.tax / 100,
+              total: invoice.total / 100,
+              currency: invoice.currency.toUpperCase(),
+              due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
+              paid_at: invoice.status === 'paid' && invoice.status_transitions?.paid_at
+                ? new Date(invoice.status_transitions.paid_at * 1000).toISOString()
+                : null,
+              provider_invoice_id: invoice.id,
+              pdf_url: invoice.invoice_pdf || null,
+            })
+            .select()
+            .single();
+          
+          if (!result.error) {
+            newInvoice = result.data;
+            break;
+          }
+          
+          // Si es error de duplicado y no es el último intento, reintentar
+          if (result.error.message.includes('duplicate key') && attempt < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
+            continue;
+          }
+          
+          // Si no es error de duplicado o es el último intento, salir
+          break;
+        } catch (error: any) {
+          if (attempt < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
+            continue;
+          }
+          console.error('Error creando factura desde Stripe:', error);
+          break;
+        }
+      }
       
       if (newInvoice) {
         invoices.push(newInvoice);
@@ -154,25 +184,30 @@ function mapStripeInvoiceStatus(status: string | null): 'draft' | 'open' | 'paid
 }
 
 /**
- * Genera número de factura único
+ * Genera número de factura único usando función thread-safe de la BD
+ * Reintenta hasta 5 veces si hay errores
  */
 async function generateInvoiceNumber(): Promise<string> {
   const supabase = await createClient();
+  const maxAttempts = 5;
   
-  const { data, error } = await supabase.rpc('generate_invoice_number');
-  
-  if (error) {
-    // Fallback si la función no existe
-    const year = new Date().getFullYear();
-    const { count } = await supabase
-    .from('invoices')
-      .select('*', { count: 'exact', head: true })
-      .like('invoice_number', `INV-${year}-%`);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data, error } = await supabase.rpc('generate_invoice_number');
     
-    const seq = (count || 0) + 1;
-    return `INV-${year}-${String(seq).padStart(5, '0')}`;
+    if (!error && data) {
+      return data;
+    }
+    
+    // Si es el último intento, lanzar error
+    if (attempt === maxAttempts - 1) {
+      console.error('Error generando número de factura después de', maxAttempts, 'intentos:', error);
+      throw new Error(`No se pudo generar número de factura: ${error?.message || 'Unknown error'}`);
+    }
+    
+    // Esperar un poco antes de reintentar (exponencial backoff)
+    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
   }
   
-  return data;
+  throw new Error('No se pudo generar número de factura después de múltiples intentos');
 }
 
