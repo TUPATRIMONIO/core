@@ -94,11 +94,44 @@ export async function createPayment(
     'Authorization': `Bearer ${DLOCAL_API_KEY}:${DLOCAL_SECRET_KEY}`,
   };
   
-  // Asegurar que currency esté en uppercase
-  const requestBody = {
-    ...request,
+  // Construir request body según formato de dLocal Go
+  // Asegurar que currency esté en uppercase y order_id sea string
+  const requestBody: any = {
     currency: request.currency.toUpperCase(),
+    amount: request.amount,
+    country: request.country,
+    order_id: request.order_id?.toString(), // Asegurar que sea string
+    description: request.description,
+    success_url: request.success_url,
+    back_url: request.back_url,
+    notification_url: request.notification_url,
   };
+  
+  // Agregar campos opcionales solo si están presentes
+  if (request.payer) {
+    requestBody.payer = request.payer;
+  }
+  if (request.payment_type) {
+    requestBody.payment_type = request.payment_type;
+  }
+  if (request.expiration_type && request.expiration_value) {
+    requestBody.expiration_type = request.expiration_type;
+    requestBody.expiration_value = request.expiration_value;
+  }
+  if (request.max_installments) {
+    requestBody.max_installments = request.max_installments;
+  }
+  if (request.accepted_bins && request.accepted_bins.length > 0) {
+    requestBody.accepted_bins = request.accepted_bins;
+  }
+  if (request.rejected_bins && request.rejected_bins.length > 0) {
+    requestBody.rejected_bins = request.rejected_bins;
+  }
+  
+  console.log('📤 [dLocal API] Creando pago:', {
+    url: `${DLOCAL_API_URL}/payments`,
+    requestBody: JSON.stringify(requestBody, null, 2)
+  });
   
   const response = await fetch(`${DLOCAL_API_URL}/payments`, {
     method: 'POST',
@@ -107,11 +140,30 @@ export async function createPayment(
   });
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: response.statusText }));
+    const errorText = await response.text();
+    let error;
+    try {
+      error = JSON.parse(errorText);
+    } catch {
+      error = { message: errorText || response.statusText };
+    }
+    console.error('❌ [dLocal API] Error en respuesta:', {
+      status: response.status,
+      statusText: response.statusText,
+      error
+    });
     throw new Error(`dLocal Go API error: ${error.message || response.statusText}`);
   }
   
   const data = await response.json();
+  console.log('✅ [dLocal API] Pago creado exitosamente:', {
+    paymentId: data.id,
+    orderId: data.order_id,
+    status: data.status,
+    merchantCheckoutToken: data.merchant_checkout_token,
+    redirectUrl: data.redirect_url
+  });
+  
   return data as DLocalPaymentResponse;
 }
 

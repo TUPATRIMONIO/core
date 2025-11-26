@@ -177,6 +177,15 @@ export async function createDLocalPaymentForCredits(
   const requiresRedirect = !dLocalPayment.direct && !!dLocalPayment.redirect_url;
   
   // Crear registro de pago en BD
+  console.log('💾 [dLocal Checkout] Guardando pago en BD:', {
+    organizationId: orgId,
+    invoiceId: invoice.id,
+    providerPaymentId: dLocalPayment.id,
+    orderId: dLocalPayment.order_id || invoice.id,
+    amount: total,
+    currency
+  });
+  
   const { data: payment, error: paymentError } = await supabase
     .from('payments')
     .insert({
@@ -189,6 +198,7 @@ export async function createDLocalPaymentForCredits(
       status: 'pending',
       metadata: {
         dlocal_payment_id: dLocalPayment.id,
+        order_id: dLocalPayment.order_id || invoice.id, // Guardar order_id en metadata también
         payment_method_id: paymentMethodId,
         payment_type: paymentType,
         requires_redirect: requiresRedirect,
@@ -203,8 +213,14 @@ export async function createDLocalPaymentForCredits(
     .single();
   
   if (paymentError) {
-    console.error('Error creando registro de pago:', paymentError);
+    console.error('❌ [dLocal Checkout] Error creando registro de pago:', paymentError);
     // No fallar si hay error aquí, el webhook lo manejará
+  } else {
+    console.log('✅ [dLocal Checkout] Pago guardado en BD:', {
+      paymentId: payment.id,
+      providerPaymentId: payment.provider_payment_id,
+      invoiceId: payment.invoice_id
+    });
   }
   
   return {

@@ -112,11 +112,15 @@ async function handlePaymentCompleted(payment: any) {
     providerPaymentId: payment.id,
     orderId: payment.order_id,
     amount: payment.amount,
-    currency: payment.currency
+    currency: payment.currency,
+    fullPaymentData: JSON.stringify(payment, null, 2)
   });
   
-  // Buscar pago en BD (usar vista pública)
-  const { data: paymentRecord, error: searchError } = await supabase
+  // Buscar pago en BD primero por provider_payment_id
+  let paymentRecord = null;
+  let searchError = null;
+  
+  const { data: paymentByProviderId, error: errorByProviderId } = await supabase
     .from('payments')
     .select(`
       *,
@@ -130,20 +134,87 @@ async function handlePaymentCompleted(payment: any) {
     `)
     .eq('provider_payment_id', payment.id)
     .eq('provider', 'dlocal')
-    .single();
+    .maybeSingle();
   
-  if (searchError) {
-    console.error('❌ [dLocal Webhook] Error buscando pago en BD:', {
-      error: searchError,
+  if (errorByProviderId) {
+    console.error('❌ [dLocal Webhook] Error buscando pago por provider_payment_id:', {
+      error: errorByProviderId,
       providerPaymentId: payment.id
     });
+  }
+  
+  paymentRecord = paymentByProviderId;
+  
+  // Si no se encuentra por provider_payment_id, buscar por order_id (invoice.id)
+  if (!paymentRecord && payment.order_id) {
+    console.log('💰 [dLocal Webhook] No se encontró por provider_payment_id, buscando por order_id:', payment.order_id);
+    
+    const { data: paymentByOrderId, error: errorByOrderId } = await supabase
+      .from('payments')
+      .select(`
+        *,
+        invoice:invoices (
+          id,
+          organization_id,
+          type,
+          total,
+          currency
+        )
+      `)
+      .eq('invoice_id', payment.order_id)
+      .eq('provider', 'dlocal')
+      .maybeSingle();
+    
+    if (errorByOrderId) {
+      console.error('❌ [dLocal Webhook] Error buscando pago por order_id:', {
+        error: errorByOrderId,
+        orderId: payment.order_id
+      });
+    }
+    
+    if (paymentByOrderId) {
+      console.log('✅ [dLocal Webhook] Pago encontrado por order_id:', paymentByOrderId.id);
+      paymentRecord = paymentByOrderId;
+      
+      // Actualizar el provider_payment_id si no estaba guardado
+      if (!paymentRecord.provider_payment_id || paymentRecord.provider_payment_id !== payment.id) {
+        console.log('🔄 [dLocal Webhook] Actualizando provider_payment_id en el registro existente');
+        const { error: updateError } = await supabase
+          .from('payments')
+          .update({
+            provider_payment_id: payment.id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', paymentRecord.id);
+        
+        if (updateError) {
+          console.error('❌ [dLocal Webhook] Error actualizando provider_payment_id:', updateError);
+        } else {
+          paymentRecord.provider_payment_id = payment.id;
+        }
+      }
+    }
   }
   
   if (!paymentRecord) {
     console.error('❌ [dLocal Webhook] Payment record not found for dLocal payment:', {
       providerPaymentId: payment.id,
-      orderId: payment.order_id
+      orderId: payment.order_id,
+      searchedByProviderId: !!paymentByProviderId,
+      searchedByOrderId: !!payment.order_id,
+      fullPaymentData: JSON.stringify(payment, null, 2)
     });
+    
+    // Intentar buscar todos los pagos recientes de dLocal para debugging
+    const { data: recentPayments } = await supabase
+      .from('payments')
+      .select('id, provider_payment_id, invoice_id, order_id, status, created_at')
+      .eq('provider', 'dlocal')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    
+    console.log('🔍 [dLocal Webhook] Últimos 10 pagos dLocal en BD:', recentPayments);
+    
     return;
   }
   
@@ -152,7 +223,10 @@ async function handlePaymentCompleted(payment: any) {
     currentStatus: paymentRecord.status,
     invoiceId: paymentRecord.invoice?.id,
     invoiceType: paymentRecord.invoice?.type,
-    orgId: paymentRecord.invoice?.organization_id
+    orgId: paymentRecord.invoice?.organization_id,
+    providerPaymentId: paymentRecord.provider_payment_id,
+    orderIdFromPayment: payment.order_id,
+    orderIdFromRecord: paymentRecord.invoice_id
   });
   
   const orgId = paymentRecord.invoice?.organization_id;
