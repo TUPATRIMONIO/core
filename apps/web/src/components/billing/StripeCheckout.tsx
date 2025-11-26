@@ -40,7 +40,7 @@ function CheckoutForm({
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -49,7 +49,6 @@ function CheckoutForm({
   useEffect(() => {
     async function createPaymentIntent() {
       try {
-        setLoading(true);
         const response = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: {
