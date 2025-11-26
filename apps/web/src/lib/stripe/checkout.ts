@@ -53,7 +53,10 @@ export async function createPaymentIntentForCredits(
   });
   
   const tax = amount * (taxRate || 0);
-  const total = Math.round((amount + tax) * 100); // Convertir a centavos
+  // Stripe maneja monedas de manera diferente:
+  // - Monedas con decimales (USD, EUR, etc.): multiplicar por 100 (centavos)
+  // - Monedas sin decimales (CLP, JPY, etc.): usar monto directo (sin multiplicar)
+  const total = convertAmountForStripe(amount + tax, currency);
   
   // Crear o obtener customer
   const customer = await createOrGetCustomer(orgId, {
@@ -175,6 +178,56 @@ export async function createPaymentIntentForCredits(
     payment,
     clientSecret: paymentIntent.client_secret,
   };
+}
+
+/**
+ * Lista de monedas zero-decimal según documentación de Stripe
+ * https://stripe.com/docs/currencies#zero-decimal
+ */
+const ZERO_DECIMAL_CURRENCIES = [
+  'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 
+  'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'
+];
+
+/**
+ * Verifica si una moneda es zero-decimal
+ */
+export function isZeroDecimalCurrency(currency: string): boolean {
+  return ZERO_DECIMAL_CURRENCIES.includes(currency.toUpperCase());
+}
+
+/**
+ * Convierte el monto según el tipo de moneda para Stripe
+ * Monedas zero-decimal (CLP, JPY, etc.) no se multiplican por 100
+ * Monedas estándar (USD, EUR, etc.) se multiplican por 100 (centavos)
+ */
+export function convertAmountForStripe(amount: number, currency: string): number {
+  const currencyUpper = currency.toUpperCase();
+  
+  if (isZeroDecimalCurrency(currencyUpper)) {
+    // Moneda zero-decimal: usar monto directo (redondeado)
+    return Math.round(amount);
+  } else {
+    // Moneda estándar: convertir a centavos
+    return Math.round(amount * 100);
+  }
+}
+
+/**
+ * Convierte el monto de Stripe de vuelta a formato normal
+ * Monedas zero-decimal (CLP, JPY, etc.) no se dividen por 100
+ * Monedas estándar (USD, EUR, etc.) se dividen por 100 (centavos)
+ */
+export function convertAmountFromStripe(amount: number, currency: string): number {
+  const currencyUpper = currency.toUpperCase();
+  
+  if (isZeroDecimalCurrency(currencyUpper)) {
+    // Moneda zero-decimal: usar monto directo
+    return amount;
+  } else {
+    // Moneda estándar: convertir de centavos
+    return amount / 100;
+  }
 }
 
 /**

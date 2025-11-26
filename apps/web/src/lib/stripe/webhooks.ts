@@ -2,6 +2,7 @@ import { stripe, StripeWebhookEvent } from './client';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { addCredits } from '@/lib/credits/core';
 import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed, notifySubscriptionCancelled } from '@/lib/notifications/billing';
+import { convertAmountFromStripe } from './checkout';
 
 /**
  * Maneja eventos de webhook de Stripe
@@ -149,8 +150,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         
         // Notificar pago exitoso
         try {
-          const amount = paymentIntent.amount / 100; // Convertir de centavos
           const currency = paymentIntent.currency.toUpperCase();
+          const amount = convertAmountFromStripe(paymentIntent.amount, paymentIntent.currency);
+          
           await notifyPaymentSucceeded(
             orgId,
             amount,

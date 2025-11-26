@@ -191,7 +191,8 @@ async function PaymentSuccessContent({
     );
   }
 
-  console.log('[PaymentSuccess] Buscando pago:', { 
+  console.log('[PaymentSuccess] ===== INICIO BÚSQUEDA DE PAGO =====');
+  console.log('[PaymentSuccess] Parámetros recibidos:', { 
     paymentIntentId, 
     dlocalPaymentId,
     merchantCheckoutToken,
@@ -199,6 +200,7 @@ async function PaymentSuccessContent({
     orgId: orgUser.organization_id,
     userId: user.id 
   });
+  console.log('[PaymentSuccess] ====================================');
 
   let payment = null;
 
@@ -513,13 +515,42 @@ async function PaymentSuccessContent({
       console.log('[PaymentSuccess] Pago succeeded, verificando si los créditos se cargaron...');
       
       // Verificar si los créditos ya se cargaron buscando transacciones de créditos para esta factura
-      const { data: creditTransactions } = await supabase
+      // El tipo es 'earned' cuando se agregan créditos
+      const invoiceIdStr = payment.invoice.id;
+      const paymentIdStr = payment.id;
+      
+      console.log('[PaymentSuccess] Buscando transacciones de créditos:', {
+        orgId: orgUser.organization_id,
+        invoiceId: invoiceIdStr,
+        paymentId: paymentIdStr
+      });
+      
+      // Buscar transacciones que tengan el invoice_id o payment_id en metadata
+      const { data: allTransactions, error: creditSearchError } = await supabase
         .from('credit_transactions')
-        .select('id, amount, type')
+        .select('id, amount, type, metadata, description')
         .eq('organization_id', orgUser.organization_id)
-        .eq('type', 'credit_purchase')
-        .contains('metadata', { invoice_id: payment.invoice.id })
-        .limit(1);
+        .eq('type', 'earned')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (creditSearchError) {
+        console.error('[PaymentSuccess] Error buscando transacciones de créditos:', creditSearchError);
+      }
+      
+      // Filtrar manualmente las transacciones que coincidan con nuestro invoice_id o payment_id
+      const creditTransactions = allTransactions?.filter((t: any) => {
+        const metadata = t.metadata || {};
+        return metadata.invoice_id === invoiceIdStr || metadata.payment_id === paymentIdStr;
+      }) || [];
+      
+      console.log('[PaymentSuccess] Transacciones de créditos encontradas:', {
+        totalTransactions: allTransactions?.length || 0,
+        matchingTransactions: creditTransactions.length,
+        transactions: creditTransactions,
+        invoiceId: invoiceIdStr,
+        paymentId: paymentIdStr
+      });
       
       if (!creditTransactions || creditTransactions.length === 0) {
         console.log('[PaymentSuccess] No se encontraron transacciones de créditos, procesando créditos ahora...');
@@ -545,35 +576,69 @@ async function PaymentSuccessContent({
           }
           
           if (creditsAmount > 0) {
-            console.log(`[PaymentSuccess] Agregando ${creditsAmount} créditos...`);
-            await addCredits(
-              orgUser.organization_id,
+            console.log(`[PaymentSuccess] Agregando ${creditsAmount} créditos...`, {
+              orgId: orgUser.organization_id,
               creditsAmount,
-              'credit_purchase',
-              {
+              paymentId: payment.id,
+              invoiceId: payment.invoice.id,
+              metadata: {
                 payment_id: payment.id,
                 dlocal_payment_id: payment.provider_payment_id,
                 invoice_id: payment.invoice.id,
               }
-            );
-            console.log('[PaymentSuccess] Créditos procesados exitosamente');
+            });
             
-            // Notificar créditos agregados
             try {
-              await notifyCreditsAdded(
+              const transactionId = await addCredits(
                 orgUser.organization_id,
                 creditsAmount,
                 'credit_purchase',
-                payment.invoice.id
+                {
+                  payment_id: payment.id,
+                  dlocal_payment_id: payment.provider_payment_id,
+                  invoice_id: payment.invoice.id,
+                }
               );
-            } catch (notifError: any) {
-              console.error('[PaymentSuccess] Error enviando notificación de créditos:', notifError);
+              
+              console.log('[PaymentSuccess] Créditos procesados exitosamente:', {
+                transactionId,
+                creditsAmount,
+                orgId: orgUser.organization_id
+              });
+              
+              // Notificar créditos agregados
+              try {
+                await notifyCreditsAdded(
+                  orgUser.organization_id,
+                  creditsAmount,
+                  'credit_purchase',
+                  payment.invoice.id
+                );
+                console.log('[PaymentSuccess] Notificación de créditos enviada');
+              } catch (notifError: any) {
+                console.error('[PaymentSuccess] Error enviando notificación de créditos:', notifError);
+              }
+            } catch (addCreditsError: any) {
+              console.error('[PaymentSuccess] Error en addCredits:', {
+                error: addCreditsError.message,
+                stack: addCreditsError.stack,
+                orgId: orgUser.organization_id,
+                creditsAmount
+              });
+              // No lanzar el error, solo loguearlo para que el mensaje de éxito se muestre
             }
           } else {
-            console.warn('[PaymentSuccess] No se pudo determinar la cantidad de créditos');
+            console.warn('[PaymentSuccess] No se pudo determinar la cantidad de créditos:', {
+              metadata: payment.metadata,
+              invoiceId: payment.invoice?.id
+            });
           }
         } catch (error: any) {
-          console.error('[PaymentSuccess] Error procesando créditos:', error);
+          console.error('[PaymentSuccess] Error procesando créditos:', {
+            error: error.message,
+            stack: error.stack
+          });
+          // No lanzar el error, solo loguearlo para que el mensaje de éxito se muestre
         }
       } else {
         console.log('[PaymentSuccess] Los créditos ya fueron cargados anteriormente');

@@ -1,6 +1,7 @@
 import { stripe } from './client';
 import { createClient } from '@/lib/supabase/server';
 import { createOrGetCustomer } from './customers';
+import { convertAmountForStripe } from './checkout';
 
 /**
  * Crea una suscripción en Stripe
@@ -33,7 +34,7 @@ export async function createSubscription(
       {
         price_data: {
           currency: plan.currency || 'usd',
-          unit_amount: Math.round(plan.price_monthly * 100), // Convertir a centavos
+          unit_amount: convertAmountForStripe(plan.price_monthly, plan.currency || 'usd'),
           recurring: {
             interval: 'month',
           },
@@ -124,7 +125,7 @@ export async function updateSubscription(orgId: string, planId: string) {
         id: stripeSubscription.items.data[0].id,
         price_data: {
           currency: plan.currency || 'usd',
-          unit_amount: Math.round(plan.price_monthly * 100),
+          unit_amount: convertAmountForStripe(plan.price_monthly, plan.currency || 'usd'),
           recurring: {
             interval: 'month',
           },
@@ -240,7 +241,7 @@ export async function resumeSubscription(orgId: string) {
         id: (await stripe.subscriptions.retrieve(currentSub.stripe_subscription_id)).items.data[0].id,
         price_data: {
           currency: plan.currency || 'usd',
-          unit_amount: Math.round(plan.price_monthly * 100),
+          unit_amount: convertAmountForStripe(plan.price_monthly, plan.currency || 'usd'),
           recurring: {
             interval: 'month',
           },

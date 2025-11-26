@@ -1,5 +1,6 @@
 import { stripe } from './client';
 import { createClient } from '@/lib/supabase/server';
+import { convertAmountFromStripe } from './checkout';
 
 /**
  * Lista facturas de una organización
@@ -56,9 +57,9 @@ export async function listInvoices(orgId: string, limit = 10) {
               invoice_number: invoiceNumber,
               status: mapStripeInvoiceStatus(invoice.status),
               type: invoice.subscription ? 'subscription' : 'one_time',
-              subtotal: invoice.subtotal / 100,
-              tax: invoice.tax / 100,
-              total: invoice.total / 100,
+              subtotal: convertAmountFromStripe(invoice.subtotal, invoice.currency),
+              tax: convertAmountFromStripe(invoice.tax, invoice.currency),
+              total: convertAmountFromStripe(invoice.total, invoice.currency),
               currency: invoice.currency.toUpperCase(),
               due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
               paid_at: invoice.status === 'paid' && invoice.status_transitions?.paid_at
