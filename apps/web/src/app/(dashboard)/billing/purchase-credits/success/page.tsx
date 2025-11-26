@@ -6,13 +6,25 @@ import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 
 interface PageProps {
-  searchParams: Promise<{ payment_intent?: string }>;
+  searchParams: Promise<{ 
+    payment_intent?: string;
+    dlocal_payment_id?: string;
+  }>;
 }
 
-async function PaymentSuccessContent({ paymentIntentId }: { paymentIntentId?: string }) {
+async function PaymentSuccessContent({ 
+  paymentIntentId, 
+  dlocalPaymentId 
+}: { 
+  paymentIntentId?: string;
+  dlocalPaymentId?: string;
+}) {
   const supabase = await createClient();
   
-  if (!paymentIntentId) {
+  // Obtener usuario y organización
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -23,22 +35,103 @@ async function PaymentSuccessContent({ paymentIntentId }: { paymentIntentId?: st
       </Card>
     );
   }
-  
-  // Obtener información del pago
-  const { data: payment } = await supabase
-    .schema('billing')
-    .from('payments')
-    .select(`
-      *,
-      invoice:invoices (
-        invoice_number,
-        total,
-        currency
-      )
-    `)
-    .eq('provider_payment_id', paymentIntentId)
-    .eq('provider', 'stripe')
+
+  // Obtener organización del usuario
+  const { data: orgUser } = await supabase
+    .from('organization_users')
+    .select('organization_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
     .single();
+
+  if (!orgUser) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <p className="text-muted-foreground">
+            No se encontró información del pago. Verifica tu correo electrónico para más detalles.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  let payment = null;
+
+  if (paymentIntentId) {
+    // Pago de Stripe
+    const { data } = await supabase
+      .schema('billing')
+      .from('payments')
+      .select(`
+        *,
+        invoice:invoices (
+          invoice_number,
+          total,
+          currency
+        )
+      `)
+      .eq('provider_payment_id', paymentIntentId)
+      .eq('provider', 'stripe')
+      .single();
+    payment = data;
+  } else if (dlocalPaymentId) {
+    // Pago de dLocal
+    // Si el payment_id viene como placeholder literal, buscar el pago más reciente
+    if (dlocalPaymentId === '{payment_id}') {
+      // Buscar el pago más reciente de dLocal para esta organización
+      // Filtrar por pagos creados en los últimos 30 minutos para mayor precisión
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .schema('billing')
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency
+          )
+        `)
+        .eq('organization_id', orgUser.organization_id)
+        .eq('provider', 'dlocal')
+        .gte('created_at', thirtyMinutesAgo)
+        .in('status', ['pending', 'succeeded'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      payment = data;
+    } else {
+      // Buscar por el payment_id real
+      const { data } = await supabase
+        .schema('billing')
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency
+          )
+        `)
+        .eq('provider_payment_id', dlocalPaymentId)
+        .eq('provider', 'dlocal')
+        .single();
+      payment = data;
+    }
+  }
+
+  if (!payment) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <p className="text-muted-foreground">
+            No se encontró información del pago. Verifica tu correo electrónico para más detalles.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card>
@@ -109,6 +202,7 @@ async function PaymentSuccessContent({ paymentIntentId }: { paymentIntentId?: st
 export default async function SuccessPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const paymentIntentId = params.payment_intent;
+  const dlocalPaymentId = params.dlocal_payment_id;
   
   return (
     <div className="container mx-auto py-8 max-w-2xl">
@@ -119,7 +213,10 @@ export default async function SuccessPage({ searchParams }: PageProps) {
           </CardContent>
         </Card>
       }>
-        <PaymentSuccessContent paymentIntentId={paymentIntentId} />
+        <PaymentSuccessContent 
+          paymentIntentId={paymentIntentId} 
+          dlocalPaymentId={dlocalPaymentId}
+        />
       </Suspense>
     </div>
   );
