@@ -142,6 +142,7 @@ function CheckoutForm({
         color: '#9e2146',
       },
     },
+    hidePostalCode: true,
   };
 
   if (loading) {

@@ -130,6 +130,7 @@ function AddPaymentMethodForm({ onSuccess }: { onSuccess: () => void }) {
         color: '#9e2146',
       },
     },
+    hidePostalCode: true,
   };
 
   if (!clientSecret) {
