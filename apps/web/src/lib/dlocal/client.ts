@@ -1,8 +1,9 @@
 /**
  * Cliente dLocal Go para pagos en LATAM
+ * Documentación oficial: https://docs.dlocalgo.com/integration-api/welcome-to-dlocal-go-api/payments/create-a-payment
  */
 
-const DLOCAL_API_URL = process.env.DLOCAL_API_URL || 'https://api.dlocal.com';
+const DLOCAL_API_URL = process.env.DLOCAL_API_URL || 'https://api.dlocalgo.com/v1';
 const DLOCAL_SECRET_KEY = process.env.DLOCAL_SECRET_KEY || '';
 const DLOCAL_API_KEY = process.env.DLOCAL_API_KEY || '';
 
@@ -22,96 +23,87 @@ function checkDLocalConfig() {
   }
 }
 
+export interface DLocalAddress {
+  state?: string;
+  city?: string;
+  zip_code?: string;
+  full_address?: string;
+}
+
+export interface DLocalPayer {
+  id?: string;
+  name?: string;
+  email: string;
+  phone?: string;
+  document_type?: string;
+  document?: string;
+  user_reference?: string;
+  address?: DLocalAddress;
+}
+
 export interface DLocalPaymentRequest {
   amount: number;
-  currency: string;
-  country: string;
-  payment_method_id: string;
-  payment_method_flow: 'REDIRECT' | 'DIRECT';
-  payer: {
-    name?: string;
-    email: string;
-    document?: string;
-    user_reference?: string;
-  };
+  currency: string; // ISO-4217 currency code in uppercase (USD, BRL, CLP, etc.)
+  country?: string; // ISO 3166-1 alpha-2 country code
   order_id?: string;
-  description?: string;
-  notification_url?: string;
-  callback_url?: string;
-  back_url?: string;
+  payer?: DLocalPayer;
+  description?: string; // Max 100 characters
+  success_url?: string; // URL where dlocalgo redirects upon successful payment
+  back_url?: string; // Merchant website URL to which the client is returned
+  notification_url?: string; // Notification URL for status changes
+  payment_type?: string; // Comma-separated: "CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER, VOUCHER"
+  expiration_type?: 'MINUTES' | 'HOURS' | 'DAYS';
+  expiration_value?: number;
+  max_installments?: number;
+  accepted_bins?: string[];
+  rejected_bins?: string[];
 }
 
 export interface DLocalPaymentResponse {
   id: string;
-  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED' | 'FAILED';
   amount: number;
   currency: string;
-  payment_method_id: string;
-  payment_method_type: string;
   country: string;
-  redirect_url?: string;
+  description?: string;
   created_date: string;
-  approved_date?: string;
-}
-
-/**
- * Genera firma de autenticación para dLocal Go
- * Nota: La firma puede variar según la versión de la API
- * Consulta la documentación oficial para el formato exacto
- */
-function generateSignature(
-  apiKey: string,
-  transactionId: string,
-  secretKey: string
-): string {
-  // dLocal Go puede usar SHA256(api_key + transaction_id + secret_key)
-  // O algún otro formato - ajustar según documentación oficial
-  const crypto = require('crypto');
-  const data = `${apiKey}${transactionId}${secretKey}`;
-  return crypto.createHash('sha256').update(data).digest('hex');
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED' | 'FAILED';
+  order_id?: string;
+  notification_url?: string;
+  success_url?: string;
+  back_url?: string;
+  redirect_url?: string;
+  merchant_checkout_token?: string;
+  direct: boolean;
 }
 
 /**
  * Crea un pago en dLocal Go
- * 
- * IMPORTANTE: El formato de autenticación puede variar según la versión de la API de dLocal Go.
- * Consulta la documentación oficial en: https://helpcenter.dlocalgo.com
- * 
- * Formatos comunes de autenticación:
- * 1. Headers personalizados: X-API-Key y X-Secret-Key (implementado por defecto)
- * 2. Authorization Bearer: Authorization: Bearer {API_KEY}
- * 3. Basic Auth: Authorization: Basic {base64(api_key:secret_key)}
- * 4. Formato específico de dLocal: Authorization: dlocal {api_key}:{secret_key}
+ * Documentación: https://docs.dlocalgo.com/integration-api/welcome-to-dlocal-go-api/payments/create-a-payment
  */
 export async function createPayment(
   request: DLocalPaymentRequest
 ): Promise<DLocalPaymentResponse> {
-  // Verificar configuración solo cuando se use la función
   checkDLocalConfig();
+  
+  if (!DLOCAL_API_KEY || !DLOCAL_SECRET_KEY) {
+    throw new Error('DLOCAL_API_KEY and DLOCAL_SECRET_KEY must be set');
+  }
   
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${DLOCAL_API_KEY}:${DLOCAL_SECRET_KEY}`,
   };
   
-  // IMPLEMENTACIÓN ACTUAL: Headers personalizados (ajustar según documentación oficial)
-  // Si dLocal Go usa otro formato, descomenta la opción correcta y comenta esta:
-  headers['X-API-Key'] = DLOCAL_API_KEY;
-  headers['X-Secret-Key'] = DLOCAL_SECRET_KEY;
-  
-  // OPCIONES ALTERNATIVAS (descomentar según la documentación oficial):
-  // Opción 1: Bearer token
-  // headers['Authorization'] = `Bearer ${DLOCAL_API_KEY}`;
-  
-  // Opción 2: Basic Auth
-  // headers['Authorization'] = `Basic ${Buffer.from(`${DLOCAL_API_KEY}:${DLOCAL_SECRET_KEY}`).toString('base64')}`;
-  
-  // Opción 3: Formato específico dLocal
-  // headers['Authorization'] = `dlocal ${DLOCAL_API_KEY}:${DLOCAL_SECRET_KEY}`;
+  // Asegurar que currency esté en uppercase
+  const requestBody = {
+    ...request,
+    currency: request.currency.toUpperCase(),
+  };
   
   const response = await fetch(`${DLOCAL_API_URL}/payments`, {
     method: 'POST',
     headers,
-    body: JSON.stringify(request),
+    body: JSON.stringify(requestBody),
   });
   
   if (!response.ok) {
@@ -120,32 +112,23 @@ export async function createPayment(
   }
   
   const data = await response.json();
-  
-  // Generar firma para verificación de webhook
-  const signature = generateSignature(
-    DLOCAL_API_KEY,
-    data.id,
-    DLOCAL_SECRET_KEY
-  );
-  
-  return {
-    ...data,
-    _signature: signature, // Guardar para verificación de webhook
-  } as DLocalPaymentResponse & { _signature: string };
+  return data as DLocalPaymentResponse;
 }
 
 /**
  * Consulta estado de un pago en dLocal Go
+ * Documentación: https://docs.dlocalgo.com/integration-api/welcome-to-dlocal-go-api/payments/retrieve-a-payment
  */
 export async function getPaymentStatus(paymentId: string): Promise<DLocalPaymentResponse> {
-  // Verificar configuración solo cuando se use la función
   checkDLocalConfig();
   
-  const headers: Record<string, string> = {};
+  if (!DLOCAL_API_KEY || !DLOCAL_SECRET_KEY) {
+    throw new Error('DLOCAL_API_KEY and DLOCAL_SECRET_KEY must be set');
+  }
   
-  // Usar los mismos headers que en createPayment
-  headers['X-API-Key'] = DLOCAL_API_KEY;
-  headers['X-Secret-Key'] = DLOCAL_SECRET_KEY;
+  const headers: Record<string, string> = {
+    'Authorization': `Bearer ${DLOCAL_API_KEY}:${DLOCAL_SECRET_KEY}`,
+  };
   
   const response = await fetch(`${DLOCAL_API_URL}/payments/${paymentId}`, {
     method: 'GET',
@@ -158,22 +141,6 @@ export async function getPaymentStatus(paymentId: string): Promise<DLocalPayment
   }
   
   return await response.json();
-}
-
-/**
- * Verifica firma de webhook de dLocal Go
- */
-export function verifyWebhookSignature(
-  signature: string,
-  paymentId: string
-): boolean {
-  const expectedSignature = generateSignature(
-    DLOCAL_API_KEY,
-    paymentId,
-    DLOCAL_SECRET_KEY
-  );
-  
-  return signature.toLowerCase() === expectedSignature.toLowerCase();
 }
 
 /**

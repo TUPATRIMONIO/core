@@ -1,62 +1,62 @@
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { addCredits } from '@/lib/credits/core';
-import { verifyWebhookSignature } from './client';
 import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed } from '@/lib/notifications/billing';
 
 export interface DLocalWebhookEvent {
-  id: string;
-  type: 'payment.created' | 'payment.completed' | 'payment.failed' | 'payment.cancelled';
-  payment: {
+  id?: string;
+  type?: string;
+  payment?: {
     id: string;
     status: 'PENDING' | 'PAID' | 'CANCELLED' | 'REJECTED' | 'FAILED';
     amount: number;
     currency: string;
     order_id?: string;
   };
-  signature?: string;
 }
 
 /**
- * Maneja eventos de webhook de dLocal
+ * Maneja eventos de webhook de dLocal Go
+ * Documentación: https://docs.dlocalgo.com/integration-api/welcome-to-dlocal-go-api/notifications
+ * 
+ * Nota: dLocal Go envía notificaciones POST directamente al notification_url especificado.
+ * El formato puede variar, por lo que este handler es flexible para manejar diferentes estructuras.
  */
-export async function handleDLocalWebhook(event: DLocalWebhookEvent) {
+export async function handleDLocalWebhook(event: DLocalWebhookEvent | any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
-  // Verificar firma si está presente
-  if (event.signature) {
-    const isValid = verifyWebhookSignature(event.signature, event.payment.id);
-    if (!isValid) {
-      throw new Error('Invalid webhook signature');
-    }
+  console.log('🔔 Webhook dLocal Go recibido:', JSON.stringify(event, null, 2));
+  
+  // dLocal Go puede enviar el pago directamente o dentro de un objeto 'payment'
+  // Manejar ambos casos
+  const paymentData = event.payment || event;
+  const paymentId = paymentData.id || event.id;
+  const status = paymentData.status || event.status;
+  
+  if (!paymentId) {
+    console.error('❌ Webhook dLocal Go sin payment ID:', event);
+    throw new Error('Payment ID is required');
   }
   
-  switch (event.type) {
-    case 'payment.created':
-      await handlePaymentCreated(event.payment);
-      break;
-    
-    case 'payment.completed':
-      await handlePaymentCompleted(event.payment);
-      break;
-    
-    case 'payment.failed':
-      await handlePaymentFailed(event.payment);
-      break;
-    
-    case 'payment.cancelled':
-      await handlePaymentCancelled(event.payment);
-      break;
-    
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
+  // Determinar tipo de evento basándose en el status
+  // dLocal Go usa status directamente en lugar de tipos de evento separados
+  if (status === 'PAID') {
+    await handlePaymentCompleted(paymentData);
+  } else if (status === 'FAILED' || status === 'REJECTED') {
+    await handlePaymentFailed(paymentData);
+  } else if (status === 'CANCELLED') {
+    await handlePaymentCancelled(paymentData);
+  } else if (status === 'PENDING') {
+    await handlePaymentCreated(paymentData);
+  } else {
+    console.log(`ℹ️  Status no manejado: ${status}`);
   }
 }
 
 /**
- * Maneja creación de pago
+ * Maneja creación de pago (status: PENDING)
  */
-async function handlePaymentCreated(payment: DLocalWebhookEvent['payment']) {
+async function handlePaymentCreated(payment: any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
@@ -81,9 +81,9 @@ async function handlePaymentCreated(payment: DLocalWebhookEvent['payment']) {
 }
 
 /**
- * Maneja pago completado exitosamente
+ * Maneja pago completado exitosamente (status: PAID)
  */
-async function handlePaymentCompleted(payment: DLocalWebhookEvent['payment']) {
+async function handlePaymentCompleted(payment: any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
@@ -192,9 +192,9 @@ async function handlePaymentCompleted(payment: DLocalWebhookEvent['payment']) {
 }
 
 /**
- * Maneja pago fallido
+ * Maneja pago fallido (status: FAILED o REJECTED)
  */
-async function handlePaymentFailed(payment: DLocalWebhookEvent['payment']) {
+async function handlePaymentFailed(payment: any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   
@@ -254,9 +254,9 @@ async function handlePaymentFailed(payment: DLocalWebhookEvent['payment']) {
 }
 
 /**
- * Maneja pago cancelado
+ * Maneja pago cancelado (status: CANCELLED)
  */
-async function handlePaymentCancelled(payment: DLocalWebhookEvent['payment']) {
+async function handlePaymentCancelled(payment: any) {
   // Usar service role client para bypass RLS en webhooks
   const supabase = createServiceRoleClient();
   

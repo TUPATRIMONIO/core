@@ -116,28 +116,36 @@ export async function createDLocalPaymentForCredits(
       type: 'credits',
     });
   
-  // Determinar si el método de pago requiere redirección
-  const requiresRedirect = paymentMethodId !== 'CARD';
+  // Convertir paymentMethodId a formato payment_type según documentación dLocal Go
+  const paymentTypeMap: Record<string, string> = {
+    CARD: 'CREDIT_CARD, DEBIT_CARD',
+    BANK_TRANSFER: 'BANK_TRANSFER',
+    CASH: 'VOUCHER',
+  };
   
-  // Crear pago en dLocal
+  const paymentType = paymentTypeMap[paymentMethodId] || 'CREDIT_CARD, DEBIT_CARD';
+  
+  // Crear pago en dLocal Go
   const paymentRequest: DLocalPaymentRequest = {
     amount: total,
-    currency: currency.toLowerCase(),
+    currency: currency.toUpperCase(), // dLocal Go requiere uppercase
     country: countryCode,
-    payment_method_id: paymentMethodId,
-    payment_method_flow: requiresRedirect ? 'REDIRECT' : 'DIRECT',
+    payment_type: paymentType,
     payer: {
       email: org.email || '',
       name: org.name || undefined,
     },
     order_id: invoice.id,
-    description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`,
-    notification_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/dlocal/webhook`,
-    callback_url: successUrl,
+    description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`.substring(0, 100), // Max 100 chars
+    success_url: successUrl,
     back_url: cancelUrl,
+    notification_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/dlocal/webhook`,
   };
   
   const dLocalPayment = await createPayment(paymentRequest);
+  
+  // Determinar si requiere redirección basándose en la respuesta de dLocal Go
+  const requiresRedirect = !dLocalPayment.direct && !!dLocalPayment.redirect_url;
   
   // Crear registro de pago en BD
   const { data: payment, error: paymentError } = await supabase
@@ -154,8 +162,11 @@ export async function createDLocalPaymentForCredits(
       metadata: {
         dlocal_payment_id: dLocalPayment.id,
         payment_method_id: paymentMethodId,
+        payment_type: paymentType,
         requires_redirect: requiresRedirect,
         redirect_url: dLocalPayment.redirect_url,
+        merchant_checkout_token: dLocalPayment.merchant_checkout_token,
+        direct: dLocalPayment.direct,
       },
     })
     .select()

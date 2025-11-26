@@ -115,7 +115,7 @@ export default function DLocalCheckout({
     const labels: Record<string, string> = {
       CARD: 'Tarjeta de Crédito/Débito',
       BANK_TRANSFER: 'Transferencia Bancaria',
-      CASH: 'Pago en Efectivo',
+      CASH: 'Pago en Efectivo/Voucher',
     };
     return labels[methodId] || methodId;
   };

@@ -7,20 +7,16 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // dLocal puede enviar eventos en diferentes formatos
-    // Ajustar según la documentación oficial de dLocal Go
-    const event = {
-      id: body.id || body.event_id,
-      type: body.type || body.event_type,
-      payment: body.payment || body.data,
-      signature: request.headers.get('x-dlocal-signature') || undefined,
-    };
+    console.log('📥 Webhook dLocal Go recibido en /api/dlocal/webhook');
+    console.log('📝 Body recibido:', JSON.stringify(body, null, 2));
     
-    await handleDLocalWebhook(event);
+    // dLocal Go envía notificaciones POST directamente al notification_url
+    // El formato puede variar, así que pasamos el body completo para que el handler lo procese
+    await handleDLocalWebhook(body);
     
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Error processing dLocal webhook:', error);
+    console.error('❌ Error processing dLocal webhook:', error);
     return NextResponse.json(
       { error: error.message || 'Error processing webhook' },
       { status: 400 }

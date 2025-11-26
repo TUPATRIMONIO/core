@@ -164,8 +164,8 @@ export default async function CheckoutPage({ params }: PageProps) {
           {isLATAM ? (
             <Tabs defaultValue="dlocal" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="dlocal">Métodos Locales</TabsTrigger>
-                <TabsTrigger value="stripe">Tarjeta Internacional</TabsTrigger>
+                <TabsTrigger value="dlocal">Métodos Locales (dLocal)</TabsTrigger>
+                <TabsTrigger value="stripe">Tarjeta Internacional (Stripe)</TabsTrigger>
               </TabsList>
               <TabsContent value="dlocal" className="mt-6">
                 <DLocalCheckout
