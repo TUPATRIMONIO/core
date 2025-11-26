@@ -69,7 +69,6 @@ export async function createDLocalPaymentForCredits(
     const invoiceNumber = await generateInvoiceNumber();
     
     const result = await supabase
-      .schema('billing')
       .from('invoices')
       .insert({
         organization_id: orgId,
@@ -105,7 +104,6 @@ export async function createDLocalPaymentForCredits(
   
   // Agregar línea de detalle
   await supabase
-    .schema('billing')
     .from('invoice_line_items')
     .insert({
       invoice_id: invoice.id,
@@ -149,7 +147,6 @@ export async function createDLocalPaymentForCredits(
   
   // Crear registro de pago en BD
   const { data: payment, error: paymentError } = await supabase
-    .schema('billing')
     .from('payments')
     .insert({
       organization_id: orgId,
@@ -230,7 +227,6 @@ async function generateInvoiceNumber(): Promise<string> {
     // Fallback
     const year = new Date().getFullYear();
     const { count } = await supabase
-      .schema('billing')
       .from('invoices')
       .select('*', { count: 'exact', head: true })
       .like('invoice_number', `INV-${year}-%`);

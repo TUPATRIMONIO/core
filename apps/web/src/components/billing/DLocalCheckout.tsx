@@ -41,6 +41,7 @@ export default function DLocalCheckout({
 }: DLocalCheckoutProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [loadingMethods, setLoadingMethods] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [availableMethods, setAvailableMethods] = useState<string[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<string>('');
@@ -48,6 +49,7 @@ export default function DLocalCheckout({
   useEffect(() => {
     // Obtener métodos de pago disponibles para el país
     async function loadPaymentMethods() {
+      setLoadingMethods(true);
       try {
         const methods = await getAvailablePaymentMethods(countryCode);
         setAvailableMethods(methods);
@@ -60,6 +62,8 @@ export default function DLocalCheckout({
       } catch (err: any) {
         setError('Error cargando métodos de pago');
         console.error(err);
+      } finally {
+        setLoadingMethods(false);
       }
     }
 
@@ -128,6 +132,17 @@ export default function DLocalCheckout({
     };
     return descriptions[methodId] || '';
   };
+
+  if (loadingMethods) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-[var(--tp-buttons)]" />
+          <p className="text-muted-foreground">Cargando métodos de pago...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (availableMethods.length === 0) {
     return (
