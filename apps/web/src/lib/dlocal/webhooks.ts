@@ -283,7 +283,6 @@ async function handlePaymentCompleted(payment: any) {
     } else {
       console.log('ℹ️  [dLocal Webhook] No es compra de créditos, saltando procesamiento de créditos');
     }
-    }
   }
 }
 
