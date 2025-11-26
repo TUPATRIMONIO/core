@@ -123,6 +123,11 @@ export async function createDLocalPaymentForCredits(
   
   const paymentType = paymentTypeMap[paymentMethodId] || 'CREDIT_CARD, DEBIT_CARD';
   
+  // Construir notification_url desde successUrl para asegurar misma base URL
+  // Extraer la base URL desde successUrl (antes de /billing)
+  const baseUrlFromSuccess = successUrl.split('/billing')[0];
+  const notificationUrl = `${baseUrlFromSuccess}/api/dlocal/webhook`;
+  
   // Crear pago en dLocal Go
   const paymentRequest: DLocalPaymentRequest = {
     amount: total,
@@ -137,7 +142,7 @@ export async function createDLocalPaymentForCredits(
     description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`.substring(0, 100), // Max 100 chars
     success_url: successUrl,
     back_url: cancelUrl,
-    notification_url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/dlocal/webhook`,
+    notification_url: notificationUrl,
   };
   
   const dLocalPayment = await createPayment(paymentRequest);

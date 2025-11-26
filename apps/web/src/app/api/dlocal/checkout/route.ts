@@ -42,7 +42,29 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.headers.get('origin') || '';
+    // Construir baseUrl de forma más robusta
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    
+    if (!baseUrl) {
+      // Intentar obtener desde el header origin
+      baseUrl = request.headers.get('origin') || '';
+      
+      // Si aún no hay baseUrl, construir desde request.url
+      if (!baseUrl) {
+        const url = new URL(request.url);
+        baseUrl = `${url.protocol}//${url.host}`;
+      }
+    }
+    
+    // Validar que baseUrl sea una URL válida
+    if (!baseUrl || (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://'))) {
+      console.error('Invalid baseUrl:', baseUrl);
+      return NextResponse.json(
+        { error: 'Error de configuración: NEXT_PUBLIC_APP_URL no está configurado correctamente' },
+        { status: 500 }
+      );
+    }
+    
     const successUrl = `${baseUrl}/billing/purchase-credits/success?dlocal_payment_id={payment_id}`;
     const cancelUrl = `${baseUrl}/billing/purchase-credits/${packageId}`;
     
