@@ -26,6 +26,7 @@ async function PaymentSuccessContent({
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
+    console.error('[PaymentSuccess] No hay usuario autenticado');
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -38,14 +39,15 @@ async function PaymentSuccessContent({
   }
 
   // Obtener organización del usuario
-  const { data: orgUser } = await supabase
+  const { data: orgUser, error: orgUserError } = await supabase
     .from('organization_users')
     .select('organization_id')
     .eq('user_id', user.id)
     .eq('status', 'active')
     .single();
 
-  if (!orgUser) {
+  if (orgUserError || !orgUser) {
+    console.error('[PaymentSuccess] Error obteniendo organización:', orgUserError);
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -57,13 +59,19 @@ async function PaymentSuccessContent({
     );
   }
 
+  console.log('[PaymentSuccess] Buscando pago:', { 
+    paymentIntentId, 
+    dlocalPaymentId, 
+    orgId: orgUser.organization_id,
+    userId: user.id 
+  });
+
   let payment = null;
 
   if (paymentIntentId) {
     // Pago de Stripe
-    const { data } = await supabase
-      .schema('billing')
-      .from('payments')
+    const { data, error } = await supabase
+      .from('payments') // Usar vista pública
       .select(`
         *,
         invoice:invoices (
@@ -74,18 +82,29 @@ async function PaymentSuccessContent({
       `)
       .eq('provider_payment_id', paymentIntentId)
       .eq('provider', 'stripe')
-      .single();
+      .maybeSingle();
+    
+    if (error) {
+      console.error('[PaymentSuccess] Error buscando pago Stripe:', error);
+    } else if (data) {
+      console.log('[PaymentSuccess] Pago Stripe encontrado:', data.id);
+    } else {
+      console.warn('[PaymentSuccess] No se encontró pago Stripe con ID:', paymentIntentId);
+    }
     payment = data;
   } else if (dlocalPaymentId) {
     // Pago de dLocal
     // Si el payment_id viene como placeholder literal, buscar el pago más reciente
     if (dlocalPaymentId === '{payment_id}') {
+      console.log('[PaymentSuccess] Placeholder detectado, buscando pago más reciente...');
+      
       // Buscar el pago más reciente de dLocal para esta organización
       // Usar una ventana de tiempo más amplia (últimas 2 horas) para mayor flexibilidad
       const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      console.log('[PaymentSuccess] Buscando pagos desde:', twoHoursAgo);
+      
       const { data: recentPayment, error } = await supabase
-        .schema('billing')
-        .from('payments')
+        .from('payments') // Usar vista pública
         .select(`
           *,
           invoice:invoices (
@@ -100,33 +119,58 @@ async function PaymentSuccessContent({
         .in('status', ['pending', 'succeeded'])
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle(); // Usar maybeSingle() para evitar errores
+        .maybeSingle();
       
       if (error) {
-        console.error('Error buscando pago dLocal:', error);
+        console.error('[PaymentSuccess] Error buscando pago dLocal:', error);
+      } else if (!recentPayment) {
+        console.warn('[PaymentSuccess] No se encontró ningún pago dLocal reciente para org:', orgUser.organization_id);
+        // Intentar buscar sin filtro de tiempo para debug
+        const { data: allPayments } = await supabase
+          .from('payments')
+          .select('id, provider_payment_id, status, created_at')
+          .eq('organization_id', orgUser.organization_id)
+          .eq('provider', 'dlocal')
+          .order('created_at', { ascending: false })
+          .limit(5);
+        console.log('[PaymentSuccess] Últimos 5 pagos dLocal encontrados:', allPayments);
+      } else {
+        console.log('[PaymentSuccess] Pago dLocal encontrado:', {
+          id: recentPayment.id,
+          provider_payment_id: recentPayment.provider_payment_id,
+          status: recentPayment.status,
+          created_at: recentPayment.created_at
+        });
       }
       
       // Si encontramos un pago, intentar consultar la API de dLocal para obtener estado actualizado
       if (recentPayment?.provider_payment_id) {
         try {
+          console.log('[PaymentSuccess] Consultando API de dLocal para payment_id:', recentPayment.provider_payment_id);
           const dLocalPaymentStatus = await getPaymentStatus(recentPayment.provider_payment_id);
+          console.log('[PaymentSuccess] Estado en dLocal:', dLocalPaymentStatus.status);
           
           // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar
           if (dLocalPaymentStatus.status === 'PAID' && recentPayment.status === 'pending') {
-            // Actualizar estado en nuestra BD
-            await supabase
-              .schema('billing')
-              .from('payments')
+            console.log('[PaymentSuccess] Actualizando estado del pago de pending a succeeded...');
+            const { error: updateError } = await supabase
+              .from('payments') // Usar vista pública
               .update({
                 status: 'succeeded',
                 processed_at: new Date().toISOString(),
               })
               .eq('id', recentPayment.id);
             
+            if (updateError) {
+              console.error('[PaymentSuccess] Error actualizando estado del pago:', updateError);
+            } else {
+              console.log('[PaymentSuccess] Estado del pago actualizado exitosamente');
+            }
+            
             recentPayment.status = 'succeeded';
           }
         } catch (apiError) {
-          console.error('Error consultando API de dLocal:', apiError);
+          console.error('[PaymentSuccess] Error consultando API de dLocal:', apiError);
           // Continuar con el pago encontrado en BD aunque falle la consulta a la API
         }
       }
@@ -134,9 +178,9 @@ async function PaymentSuccessContent({
       payment = recentPayment;
     } else {
       // Buscar por el payment_id real
+      console.log('[PaymentSuccess] Buscando pago por payment_id real:', dlocalPaymentId);
       const { data, error } = await supabase
-        .schema('billing')
-        .from('payments')
+        .from('payments') // Usar vista pública
         .select(`
           *,
           invoice:invoices (
@@ -147,16 +191,21 @@ async function PaymentSuccessContent({
         `)
         .eq('provider_payment_id', dlocalPaymentId)
         .eq('provider', 'dlocal')
-        .maybeSingle(); // Usar maybeSingle() para evitar errores
+        .maybeSingle();
       
       if (error) {
-        console.error('Error buscando pago dLocal por ID:', error);
+        console.error('[PaymentSuccess] Error buscando pago dLocal por ID:', error);
+      } else if (!data) {
+        console.warn('[PaymentSuccess] No se encontró pago con payment_id:', dlocalPaymentId);
+      } else {
+        console.log('[PaymentSuccess] Pago encontrado por ID:', data.id);
       }
       payment = data;
     }
   }
 
   if (!payment) {
+    console.error('[PaymentSuccess] No se encontró ningún pago');
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -167,6 +216,12 @@ async function PaymentSuccessContent({
       </Card>
     );
   }
+
+  console.log('[PaymentSuccess] Pago encontrado exitosamente:', {
+    id: payment.id,
+    invoice_number: payment.invoice?.invoice_number,
+    status: payment.status
+  });
   
   return (
     <Card>
