@@ -154,7 +154,7 @@ export async function createDLocalPaymentForCredits(
     payment_type: paymentType,
     payer: {
       email: org.email || '',
-      name: org.name || undefined,
+      // No enviar el nombre para que el usuario pueda editarlo en el formulario de dlocalgo
     },
     order_id: invoice.id,
     description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`.substring(0, 100), // Max 100 chars
