@@ -117,7 +117,7 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
   
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const invoiceNumber = await generateInvoiceNumber();
+      const invoiceNumber = await generateInvoiceNumber(orgId);
       
       const result = await supabase
         .from('invoices')
@@ -306,14 +306,17 @@ function getPriceForCountry(pkg: any, countryCode: string): number {
 
 /**
  * Genera número de factura único usando función thread-safe de la BD
+ * Formato: {ORG_SLUG}-{NÚMERO} (ej: TU-PATRIMONIO-000001)
  * Reintenta hasta 5 veces si hay errores
  */
-async function generateInvoiceNumber(): Promise<string> {
+async function generateInvoiceNumber(orgId: string): Promise<string> {
   const supabase = await createClient();
   const maxAttempts = 5;
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { data, error } = await supabase.rpc('generate_invoice_number');
+    const { data, error } = await supabase.rpc('generate_invoice_number', {
+      org_id: orgId
+    });
     
     if (!error && data) {
       return data;
