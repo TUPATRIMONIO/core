@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AutoRechargeSettings } from '@/components/billing/AutoRechargeSettings';
+import { CountrySelector } from '@/components/billing/CountrySelector';
 
 export default async function BillingSettingsPage() {
   const overview = await getBillingOverviewAction();
@@ -47,11 +48,15 @@ export default async function BillingSettingsPage() {
         </div>
       </div>
       
-      <AutoRechargeSettings 
-        account={overview.account}
-        paymentMethods={overview.paymentMethods}
-        packages={packages}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CountrySelector currentCountry={countryCode} />
+        
+        <AutoRechargeSettings 
+          account={overview.account}
+          paymentMethods={overview.paymentMethods}
+          packages={packages}
+        />
+      </div>
     </div>
   );
 }

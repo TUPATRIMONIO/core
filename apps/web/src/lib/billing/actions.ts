@@ -206,6 +206,51 @@ export async function updateAutoRechargeSettingsAction(
 }
 
 /**
+ * Actualiza el país de la organización del usuario
+ */
+export async function updateOrganizationCountryAction(countryCode: string) {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+  
+  // Obtener organización del usuario
+  const { data: orgUser } = await supabase
+    .from('organization_users')
+    .select('organization_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .single();
+  
+  if (!orgUser) {
+    throw new Error('No organization found');
+  }
+  
+  // Validar código de país (ISO 3166-1 alpha-2)
+  const validCountryCodes = ['US', 'CL', 'AR', 'CO', 'MX', 'PE', 'BR'];
+  if (!validCountryCodes.includes(countryCode.toUpperCase())) {
+    throw new Error('Código de país no válido');
+  }
+  
+  // Actualizar país de la organización
+  const { error } = await supabase
+    .from('organizations')
+    .update({
+      country: countryCode.toUpperCase(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', orgUser.organization_id);
+  
+  if (error) {
+    throw new Error(`Error actualizando país: ${error.message}`);
+  }
+  
+  return { success: true };
+}
+
+/**
  * Obtiene resumen de facturación
  */
 export async function getBillingOverviewAction() {
