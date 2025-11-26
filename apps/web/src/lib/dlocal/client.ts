@@ -150,10 +150,10 @@ export async function getAvailablePaymentMethods(countryCode: string) {
   // dLocal tiene métodos predefinidos por país
   // Esta función puede consultar la API de dLocal o usar un mapeo estático
   const methods: Record<string, string[]> = {
-    CL: ['CARD', 'BANK_TRANSFER', 'CASH'], // Chile: Tarjeta, Transferencia, Efectivo (Khipu)
-    AR: ['CARD', 'BANK_TRANSFER', 'CASH'], // Argentina: Tarjeta, Transferencia, Efectivo (Rapipago, Pago Fácil)
+    CL: ['CARD', 'BANK_TRANSFER'], // Chile: Tarjeta, Transferencia
+    AR: ['CARD', 'BANK_TRANSFER'], // Argentina: Tarjeta, Transferencia
     CO: ['CARD', 'BANK_TRANSFER'], // Colombia: Tarjeta, Transferencia
-    MX: ['CARD', 'BANK_TRANSFER', 'CASH'], // México: Tarjeta, Transferencia, Efectivo (OXXO)
+    MX: ['CARD', 'BANK_TRANSFER'], // México: Tarjeta, Transferencia
     PE: ['CARD', 'BANK_TRANSFER'], // Perú: Tarjeta, Transferencia
   };
   

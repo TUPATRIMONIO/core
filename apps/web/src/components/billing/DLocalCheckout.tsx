@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation';
 // Mapeo estático de métodos de pago por país
 function getAvailablePaymentMethods(countryCode: string): string[] {
   const methods: Record<string, string[]> = {
-    CL: ['CARD', 'BANK_TRANSFER', 'CASH'],
-    AR: ['CARD', 'BANK_TRANSFER', 'CASH'],
+    CL: ['CARD', 'BANK_TRANSFER'],
+    AR: ['CARD', 'BANK_TRANSFER'],
     CO: ['CARD', 'BANK_TRANSFER'],
-    MX: ['CARD', 'BANK_TRANSFER', 'CASH'],
+    MX: ['CARD', 'BANK_TRANSFER'],
     PE: ['CARD', 'BANK_TRANSFER'],
   };
   return methods[countryCode.toUpperCase()] || ['CARD'];
