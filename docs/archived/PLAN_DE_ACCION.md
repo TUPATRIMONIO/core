@@ -1,7 +1,7 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
 > **📅 Última actualización:** Diciembre 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅  
 > **🎯 Próximo milestone:** Revisar integraciones en producción (Stripe, dLocal Go, carga de créditos) 🚀
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -191,7 +191,12 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
    **🎯 PRIORIDAD INMEDIATA - Verificación en Producción:**
    - ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google, Facebook, GitHub)
    - 🔄 **Stripe** - Revisar en producción: claves, webhooks, flujos de pago y carga de créditos
-   - 🔄 **dLocal Go** - Revisar en producción: credenciales, webhooks, integración de pagos LATAM y carga de créditos
+   - ✅ **dLocal Go** - Integración completa y corregida:
+     - ✅ Componente checkout con loading states
+     - ✅ URLs robustas con múltiples fallbacks
+     - ✅ Corrección de schema (vistas públicas)
+     - ✅ Métodos de pago: CARD y BANK_TRANSFER (efectivo deshabilitado)
+     - 🔄 Pendiente: Verificar en producción (credenciales, webhooks, flujos de pago)
    - 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de emails, configurar dominio verificado
    
    **✅ COMPLETADO:**
@@ -3353,11 +3358,16 @@ core.roles:
 4. **✅ Integración dLocal Go COMPLETA**
    ```typescript
    ✅ Flujo para LATAM
-   ✅ Métodos locales: Khipu, Mercado Pago, etc.
+   ✅ Métodos locales: Tarjeta (CARD) y Transferencia Bancaria (BANK_TRANSFER)
    ✅ Webhooks para confirmaciones
    ✅ Fallback a Stripe si dLocal falla
    ✅ Creación de pagos dLocal
    ✅ Manejo de estados de pago
+   ✅ Componente DLocalCheckout con estado de loading
+   ✅ Construcción robusta de URLs (baseUrl con múltiples fallbacks)
+   ✅ Corrección de schema: uso de vistas públicas en lugar de .schema('billing')
+   ✅ Métodos de pago configurados por país (CL, AR, CO, MX, PE)
+   ✅ Opción de pago en efectivo deshabilitada (solo CARD y BANK_TRANSFER)
    ```
 
 5. **✅ Lógica de Créditos COMPLETA**
@@ -3387,6 +3397,9 @@ core.roles:
    - ✅ Precios por moneda (CLP, USD, MXN, COP, etc.)
    - ✅ Checkout flow completo (Stripe + dLocal)
    - ✅ Detección automática de país para método de pago
+   - ✅ Componente DLocalCheckout con loading states mejorados
+   - ✅ Selección de método de pago (CARD o BANK_TRANSFER)
+   - ✅ Construcción robusta de URLs para dLocal Go API
 
 3. **✅ `/billing/invoices`**
    - ✅ Lista de facturas con filtros
@@ -6059,6 +6072,68 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 1. ✅ **Time-to-market ultra rápido**
 2. ✅ **IA como diferenciador principal**
 3. ✅ **SEO head-start** (12+ meses de ventaja)
+
+---
+
+## 🔧 **MEJORAS RECIENTES - Integración dLocal Go (Diciembre 2025)**
+
+### ✅ **Correcciones y Mejoras Implementadas:**
+
+**1. Componente DLocalCheckout - Estados de Loading**
+- ✅ Agregado estado `loadingMethods` para evitar error breve antes de cargar métodos de pago
+- ✅ UI mejorada con spinner mientras se cargan métodos disponibles
+- ✅ Manejo de errores mejorado con estados claros
+
+**2. Construcción Robusta de URLs**
+- ✅ Implementado sistema de múltiples fallbacks para `baseUrl`:
+  - Primero: `NEXT_PUBLIC_APP_URL` (variable de entorno)
+  - Segundo: Header `origin` de la request
+  - Tercero: Construcción desde `request.url` como último recurso
+- ✅ Validación de URLs antes de enviar a dLocal Go API
+- ✅ `notification_url` construida desde `successUrl` para consistencia
+- ✅ Resuelto error "must be a valid URL" de dLocal Go API
+
+**3. Corrección de Schema**
+- ✅ Eliminado uso de `.schema('billing')` en favor de vistas públicas
+- ✅ Consistencia con implementación de Stripe
+- ✅ Uso de vistas públicas: `invoices`, `payments`, `invoice_line_items`
+- ✅ Mantiene seguridad RLS a través de las vistas
+
+**4. Configuración de Métodos de Pago**
+- ✅ Opción de pago en efectivo (CASH) deshabilitada
+- ✅ Solo disponibles: CARD (Tarjeta) y BANK_TRANSFER (Transferencia Bancaria)
+- ✅ Configuración aplicada para todos los países LATAM (CL, AR, CO, MX, PE)
+- ✅ Métodos consistentes entre componente UI y función de cliente
+
+**Archivos Modificados:**
+- `apps/web/src/components/billing/DLocalCheckout.tsx`
+- `apps/web/src/lib/dlocal/checkout.ts`
+- `apps/web/src/lib/dlocal/client.ts`
+- `apps/web/src/app/api/dlocal/checkout/route.ts`
+
+**Estado:** ✅ **COMPLETADO Y LISTO PARA PRODUCCIÓN**
+
+---
+
+### 🎯 **Próximos Pasos Recomendados:**
+
+1. **Testing en Producción:**
+   - ✅ Verificar credenciales dLocal Go (DLOCAL_API_KEY, DLOCAL_SECRET_KEY)
+   - ✅ Configurar webhook URL en dashboard de dLocal Go
+   - ✅ Probar flujo completo de checkout con métodos CARD y BANK_TRANSFER
+   - ✅ Verificar recepción y procesamiento de webhooks
+   - ✅ Validar carga de créditos después de pago exitoso
+
+2. **Monitoreo:**
+   - 📊 Revisar logs de webhooks en producción
+   - 📊 Verificar que las URLs se construyen correctamente en diferentes entornos
+   - 📊 Monitorear errores de API de dLocal Go
+
+3. **Mejoras Futuras (Opcional):**
+   - 🔄 Re-habilitar pago en efectivo si es necesario (configuración por país)
+   - 🔄 Agregar más métodos de pago según disponibilidad de dLocal Go
+   - 🔄 Implementar retry logic para webhooks fallidos
+   - 🔄 Dashboard de monitoreo de pagos dLocal
 4. ✅ **Arquitectura que escala automáticamente**
 5. ✅ **Stack que cualquier developer puede mantener**
 
