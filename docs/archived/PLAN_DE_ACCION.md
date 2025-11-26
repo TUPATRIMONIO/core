@@ -1,14 +1,14 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅  
+> **📅 Última actualización:** Noviembre 24, 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅  
 > **🎯 Próximo milestone:** Revisar integraciones en producción (Stripe, dLocal Go, carga de créditos) 🚀
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **PRÓXIMO: REVISAR INTEGRACIONES EN PRODUCCIÓN** 🚀
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **PRÓXIMO: REVISAR INTEGRACIONES EN PRODUCCIÓN** 🚀
 
-Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones.
+Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
 **✅ COMPLETADO en Fase 0:**
 - ✅ Infraestructura completa (monorepo, Next.js 15, Tailwind v4, Supabase)
@@ -40,6 +40,11 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
   - Solución a recursión infinita en RLS implementada
   - Sistema de bypass para platform admins
   - Testing exitoso en navegador
+  - ✅ **Corrección sistema numeración facturas** (Nov 24, 2025)
+    - Formato por organización: `{ORG_SLUG}-{NÚMERO}` (ej: `TU-PATRIMONIO-000001`)
+    - Eliminadas colisiones entre organizaciones
+    - Lock por organización para paralelismo mejorado
+    - Sistema escalable y sin errores de duplicados
 - ✅ **Sidebars completos para Admin y Usuarios Regulares** (Nov 22, 2025)
   - Sidebar Admin con acceso a todas las secciones (Billing, CRM, Blog)
   - Sidebar Dashboard para usuarios regulares con navegación completa
@@ -2222,7 +2227,7 @@ Al completar Fase 0:
 
 #### ✅ **COMPLETADO - FASE 2: CRÉDITOS Y BILLING (Nov 22, 2025):**
 - ✅ **Schemas credits + billing**: Completados y funcionando
-- ✅ **Migraciones aplicadas**: 10 migraciones completas
+- ✅ **Migraciones aplicadas**: 11 migraciones completas (incluye corrección numeración facturas)
 - ✅ **Integraciones Stripe + dLocal**: Funcionando al 100%
 - ✅ **Webhooks configurados**: Stripe y dLocal operativos
 - ✅ **UI completa**: Todas las páginas de billing implementadas
@@ -2230,6 +2235,7 @@ Al completar Fase 0:
 - ✅ **Notificaciones**: Sistema completo integrado
 - ✅ **PDFs**: Generación de facturas funcionando
 - ✅ **Testing**: Flujo completo probado exitosamente
+- ✅ **Corrección numeración facturas** (Nov 24, 2025): Sistema por organización `{ORG_SLUG}-{NÚMERO}` implementado, eliminadas colisiones
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 Integración GitHub para migraciones automáticas
@@ -2264,6 +2270,10 @@ Al completar Fase 0:
    - ✅ 20251122000002_notifications-rls.sql
    - ✅ 20251122000003_notifications-functions.sql
    - ✅ 20251122000004_expose-notifications-view.sql
+✅ Migración 16: Corrección sistema numeración facturas (COMPLETADO - Nov 24, 2025)
+   - ✅ 20251123000003_fix_invoice_number_race_condition.sql (fix inicial)
+   - ✅ 20251123000004_add_public_invoice_number_wrapper.sql (wrapper public)
+   - ✅ 20251124000001_change_invoice_number_format.sql (formato por organización)
 📋 Migración 15: schema-services.sql (communications, workflows, files, audit)
 📋 Migración 16: schema-business.sql (signatures, verifications, notary, documents)
 📋 Migración 17: schema-ai.sql (ai_customer_service, ai_document_review con VECTOR)
@@ -6099,7 +6109,28 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 - ✅ Uso de vistas públicas: `invoices`, `payments`, `invoice_line_items`
 - ✅ Mantiene seguridad RLS a través de las vistas
 
-**4. Configuración de Métodos de Pago**
+**4. Corrección del Sistema de Numeración de Facturas (Nov 24, 2025)**
+- ✅ **Problema resuelto**: Error "duplicate key value violates unique constraint invoices_invoice_number_key"
+- ✅ **Causa identificada**: Sistema global de numeración causaba colisiones cuando múltiples organizaciones creaban facturas simultáneamente
+- ✅ **Solución implementada**: Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` (similar a Stripe)
+  - Ejemplo: `TU-PATRIMONIO-000001`, `MI-EMPRESA-000001`
+- ✅ **Mejoras técnicas**:
+  - Función SQL `generate_invoice_number(org_id UUID)` creada con lock por organización
+  - Numeración independiente por organización (sin colisiones entre orgs)
+  - Lock por organización permite paralelismo mejorado
+  - Reintentos automáticos con backoff exponencial en código TypeScript
+  - Formato legible y profesional
+- ✅ **Archivos actualizados**:
+  - `supabase/migrations/20251124000001_change_invoice_number_format.sql` (nueva migración)
+  - `apps/web/src/lib/stripe/checkout.ts`
+  - `apps/web/src/lib/stripe/invoices.ts`
+  - `apps/web/src/lib/dlocal/checkout.ts`
+  - `apps/web/src/lib/credits/auto-recharge.ts`
+  - `apps/web/src/lib/credits/packages.ts`
+- ✅ **Compatibilidad**: Función legacy mantenida para facturas existentes con formato `INV-YYYY-NNNNN`
+- ✅ **Estado**: Completado y listo para producción
+
+**5. Configuración de Métodos de Pago**
 - ✅ Opción de pago en efectivo (CASH) deshabilitada
 - ✅ Solo disponibles: CARD (Tarjeta) y BANK_TRANSFER (Transferencia Bancaria)
 - ✅ Configuración aplicada para todos los países LATAM (CL, AR, CO, MX, PE)
