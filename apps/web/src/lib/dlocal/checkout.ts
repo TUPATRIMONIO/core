@@ -187,6 +187,8 @@ export async function createDLocalPaymentForCredits(
         redirect_url: dLocalPayment.redirect_url,
         merchant_checkout_token: dLocalPayment.merchant_checkout_token,
         direct: dLocalPayment.direct,
+        credits_amount: pkg.credits_amount, // Agregar cantidad de créditos al metadata
+        package_id: packageId, // Agregar package_id también
       },
     })
     .select()

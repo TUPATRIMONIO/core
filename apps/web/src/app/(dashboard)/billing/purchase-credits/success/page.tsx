@@ -4,6 +4,7 @@ import { CheckCircle2, ArrowRight, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
+import { getPaymentStatus } from '@/lib/dlocal/client';
 
 interface PageProps {
   searchParams: Promise<{ 
@@ -80,9 +81,9 @@ async function PaymentSuccessContent({
     // Si el payment_id viene como placeholder literal, buscar el pago más reciente
     if (dlocalPaymentId === '{payment_id}') {
       // Buscar el pago más reciente de dLocal para esta organización
-      // Filtrar por pagos creados en los últimos 30 minutos para mayor precisión
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-      const { data } = await supabase
+      // Usar una ventana de tiempo más amplia (últimas 2 horas) para mayor flexibilidad
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      const { data: recentPayment, error } = await supabase
         .schema('billing')
         .from('payments')
         .select(`
@@ -95,15 +96,45 @@ async function PaymentSuccessContent({
         `)
         .eq('organization_id', orgUser.organization_id)
         .eq('provider', 'dlocal')
-        .gte('created_at', thirtyMinutesAgo)
+        .gte('created_at', twoHoursAgo)
         .in('status', ['pending', 'succeeded'])
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
-      payment = data;
+        .maybeSingle(); // Usar maybeSingle() para evitar errores
+      
+      if (error) {
+        console.error('Error buscando pago dLocal:', error);
+      }
+      
+      // Si encontramos un pago, intentar consultar la API de dLocal para obtener estado actualizado
+      if (recentPayment?.provider_payment_id) {
+        try {
+          const dLocalPaymentStatus = await getPaymentStatus(recentPayment.provider_payment_id);
+          
+          // Si el pago está PAID en dLocal pero aún está pending en nuestra BD, actualizar
+          if (dLocalPaymentStatus.status === 'PAID' && recentPayment.status === 'pending') {
+            // Actualizar estado en nuestra BD
+            await supabase
+              .schema('billing')
+              .from('payments')
+              .update({
+                status: 'succeeded',
+                processed_at: new Date().toISOString(),
+              })
+              .eq('id', recentPayment.id);
+            
+            recentPayment.status = 'succeeded';
+          }
+        } catch (apiError) {
+          console.error('Error consultando API de dLocal:', apiError);
+          // Continuar con el pago encontrado en BD aunque falle la consulta a la API
+        }
+      }
+      
+      payment = recentPayment;
     } else {
       // Buscar por el payment_id real
-      const { data } = await supabase
+      const { data, error } = await supabase
         .schema('billing')
         .from('payments')
         .select(`
@@ -116,7 +147,11 @@ async function PaymentSuccessContent({
         `)
         .eq('provider_payment_id', dlocalPaymentId)
         .eq('provider', 'dlocal')
-        .single();
+        .maybeSingle(); // Usar maybeSingle() para evitar errores
+      
+      if (error) {
+        console.error('Error buscando pago dLocal por ID:', error);
+      }
       payment = data;
     }
   }

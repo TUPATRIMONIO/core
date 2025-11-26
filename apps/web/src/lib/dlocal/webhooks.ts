@@ -147,17 +147,26 @@ async function handlePaymentCompleted(payment: any) {
     
     // Si es compra de créditos, agregar créditos
     if (paymentRecord.invoice.type === 'credit_purchase' && orgId) {
-      // Obtener información del paquete desde metadata o invoice line items (usar vista pública)
-      const { data: lineItems } = await supabase
-        .from('invoice_line_items')
-        .select('description')
-        .eq('invoice_id', paymentRecord.invoice.id)
-        .limit(1)
-        .single();
+      // Primero intentar obtener desde metadata del pago
+      let creditsAmount = 0;
       
-      // Extraer cantidad de créditos del description o metadata
-      const creditsMatch = lineItems?.description?.match(/(\d+)\s*créditos/i);
-      const creditsAmount = creditsMatch ? parseFloat(creditsMatch[1]) : 0;
+      if (paymentRecord.metadata?.credits_amount) {
+        creditsAmount = parseFloat(paymentRecord.metadata.credits_amount.toString());
+      } else {
+        // Si no está en metadata, buscar en invoice line items
+        const { data: lineItems } = await supabase
+          .from('invoice_line_items')
+          .select('description')
+          .eq('invoice_id', paymentRecord.invoice.id)
+          .limit(1)
+          .maybeSingle(); // Usar maybeSingle() para evitar errores
+        
+        // Extraer cantidad de créditos del description
+        if (lineItems?.description) {
+          const creditsMatch = lineItems.description.match(/(\d+)\s*créditos/i);
+          creditsAmount = creditsMatch ? parseFloat(creditsMatch[1]) : 0;
+        }
+      }
       
       if (creditsAmount > 0) {
         try {
@@ -186,6 +195,8 @@ async function handlePaymentCompleted(payment: any) {
         } catch (error: any) {
           console.error('Error agregando créditos dLocal:', error);
         }
+      } else {
+        console.warn('⚠️  No se pudo determinar la cantidad de créditos para el pago dLocal:', payment.id);
       }
     }
   }
