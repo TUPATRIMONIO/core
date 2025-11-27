@@ -100,7 +100,8 @@ BEGIN
   year_part := TO_CHAR(NOW(), 'YYYY');
   
   -- Usar hash del org_id para crear un lock único
-  lock_key := hashmac('sha256', org_id::TEXT || 'order_number', 'tupatrimonio_lock')::BIGINT;
+  -- hashtext está disponible en PostgreSQL estándar y genera un hash entero
+  lock_key := hashtext(org_id::TEXT || 'order_number')::BIGINT;
   
   -- Intentar generar número único con lock
   WHILE attempt < max_attempts LOOP
