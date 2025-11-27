@@ -121,7 +121,7 @@ export async function createTransbankPaymentForOrder(
   
   // Crear transacción en Transbank
   const transaction = await transbankClient.createWebpayPlusTransaction({
-    buy_order,
+    buy_order: buyOrder,
     session_id: sessionId,
     amount: transbankAmount,
     return_url: returnUrl,
@@ -145,7 +145,7 @@ export async function createTransbankPaymentForOrder(
       currency,
       status: 'pending',
       metadata: {
-        buy_order,
+        buy_order: buyOrder,
         session_id: sessionId,
         order_id: orderId,
         order_number: order.order_number,
@@ -287,7 +287,7 @@ export async function createTransbankPaymentForCredits(
   
   // Crear transacción en Transbank
   const transaction = await transbankClient.createWebpayPlusTransaction({
-    buy_order,
+    buy_order: buyOrder,
     session_id: sessionId,
     amount: transbankAmount,
     return_url: returnUrl,
@@ -311,7 +311,7 @@ export async function createTransbankPaymentForCredits(
       currency,
       status: 'pending',
       metadata: {
-        buy_order,
+        buy_order: buyOrder,
         session_id: sessionId,
         credits_amount: pkg.credits_amount,
         package_id: packageId,
@@ -463,7 +463,7 @@ export async function createOneclickPayment(
   const payment = await transbankClient.startOneclickPayment({
     username,
     tbk_user: tbkUser,
-    buy_order,
+    buy_order: buyOrder,
     amount: transbankAmount,
   });
   
@@ -485,7 +485,7 @@ export async function createOneclickPayment(
       currency,
       status: 'pending',
       metadata: {
-        buy_order,
+        buy_order: buyOrder,
         tbk_user: tbkUser,
         username,
         credits_amount: pkg.credits_amount,

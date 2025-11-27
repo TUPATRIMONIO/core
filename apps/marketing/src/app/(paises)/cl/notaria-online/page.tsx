@@ -538,8 +538,8 @@ export default function NotariaOnlineChilePage() {
               description: "Recibe tu documento notariado por email en < 24 horas. Descarga ilimitada, respaldo permanente y validez legal en todo Chile. Listo para usar en cualquier trámite público o privado inmediatamente."
             }
           ]}
-          ctaText="Comenzar Ahora - Gratis"
-          ctaSubtext="Paga solo por documento finalizado"
+          ctaText="Comenzar Ahora"
+          ctaSubtext="Disponible 24/7"
           ctaHref="https://tupatrimon.io/legalizacion-de-documentos-electronicos/"
         />
 
