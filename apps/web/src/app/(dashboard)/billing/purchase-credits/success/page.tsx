@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 import { addCredits } from '@/lib/credits/core';
 import { notifyCreditsAdded, notifyPaymentSucceeded } from '@/lib/notifications/billing';
+import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
 
 
 interface PageProps {
@@ -130,18 +131,13 @@ async function PaymentSuccessContent({
         if (data.status === 'pending') {
           try {
             const webhookType = data.metadata?.payment_method === 'oneclick' ? 'oneclick' : 'webpay_plus';
-            const webhookResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/transbank/webhook`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                token,
-                type: webhookType,
-              }),
-            });
             
-            if (webhookResponse.ok) {
+            console.log('[PaymentSuccess] Procesando webhook directamente:', { token: token.substring(0, 20) + '...', type: webhookType });
+            
+            // Llamar directamente a la función del webhook en lugar de hacer fetch
+            const webhookResult = await handleTransbankWebhook(token, webhookType);
+            
+            if (webhookResult.success) {
               console.log('[PaymentSuccess] Webhook procesado exitosamente');
               // Recargar datos del pago
               const { data: updatedPayment } = await supabase
@@ -161,6 +157,9 @@ async function PaymentSuccessContent({
                 .single();
               
               payment = updatedPayment || data;
+            } else {
+              console.error('[PaymentSuccess] Error en webhook:', webhookResult.error);
+              payment = data; // Usar datos existentes
             }
           } catch (error) {
             console.error('[PaymentSuccess] Error procesando webhook:', error);
