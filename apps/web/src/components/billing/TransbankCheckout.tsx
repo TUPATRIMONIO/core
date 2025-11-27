@@ -85,11 +85,25 @@ export default function TransbankCheckout({
         throw new Error(data.error || 'Error creando pago');
       }
 
-      // Redirigir a Transbank
-      if (data.url) {
-        window.location.href = data.url;
+      // Redirigir a Transbank usando formulario POST con token_ws
+      if (data.url && data.token) {
+        // Crear formulario POST oculto según documentación de Transbank
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = data.url;
+        
+        // Agregar campo token_ws requerido por Transbank
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = 'token_ws';
+        tokenInput.value = data.token;
+        form.appendChild(tokenInput);
+        
+        // Agregar formulario al DOM y auto-enviarlo
+        document.body.appendChild(form);
+        form.submit();
       } else {
-        throw new Error('No se recibió URL de redirección');
+        throw new Error('No se recibió URL o token de redirección');
       }
     } catch (err: any) {
       const errorMessage = err.message || 'Error al procesar el pago';
