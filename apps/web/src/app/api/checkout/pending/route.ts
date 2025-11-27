@@ -24,9 +24,10 @@ export async function GET(request: NextRequest) {
 
     // Obtener membresías del usuario
     const { data: memberships, error: membershipsError } = await supabase
-      .from('memberships')
+      .from('organization_users')
       .select('organization_id')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('status', 'active');
 
     if (membershipsError) {
       console.error('Error fetching memberships:', membershipsError);

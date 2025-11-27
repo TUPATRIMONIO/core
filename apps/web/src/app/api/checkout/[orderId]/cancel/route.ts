@@ -42,10 +42,11 @@ export async function POST(
 
     // Verificar que el usuario pertenece a la organización
     const { data: membership, error: membershipError } = await supabase
-      .from('memberships')
+      .from('organization_users')
       .select('id')
       .eq('user_id', user.id)
       .eq('organization_id', order.organization_id)
+      .eq('status', 'active')
       .single();
 
     if (membershipError || !membership) {
