@@ -1,12 +1,8 @@
 import { getAvailablePackages } from '@/lib/credits/packages';
 import { createClient } from '@/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Package } from 'lucide-react';
-import Link from 'next/link';
-import StripeCheckout from '@/components/billing/StripeCheckout';
-import TransbankCheckout from '@/components/billing/TransbankCheckout';
+import { createOrder } from '@/lib/checkout/core';
+import { getCurrencyForCountry, getLocalizedPrice } from '@/lib/stripe/checkout';
+import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
@@ -89,125 +85,36 @@ export default async function CheckoutPage({ params }: PageProps) {
   }
   
   const currency = getCurrencyForCountry(countryCode);
-  const amount = selectedPackage.localized_price || selectedPackage.price_usd;
+  const amount = getLocalizedPrice(selectedPackage, countryCode);
   
-  return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/billing/purchase-credits">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Completar Compra</h1>
-          <p className="text-muted-foreground mt-2">
-            Finaliza tu compra de créditos
-          </p>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Resumen del paquete */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Resumen del Paquete
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">{selectedPackage.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {selectedPackage.description}
-                </p>
-              </div>
-              
-              <div className="space-y-2 pt-4 border-t">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Créditos</span>
-                  <span className="font-semibold">
-                    {selectedPackage.credits_amount.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('es-CL', {
-                      style: 'currency',
-                      currency: currency,
-                    }).format(amount)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-base font-semibold">Total</span>
-                  <span className="text-xl font-bold text-[var(--tp-buttons)]">
-                    {new Intl.NumberFormat('es-CL', {
-                      style: 'currency',
-                      currency: currency,
-                    }).format(amount)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Formulario de pago */}
-        <div className="lg:col-span-2">
-          {countryCode === 'CL' ? (
-            <Tabs defaultValue="transbank" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="transbank">Transbank</TabsTrigger>
-                <TabsTrigger value="stripe">Stripe</TabsTrigger>
-              </TabsList>
-              <TabsContent value="transbank" className="mt-4">
-                <TransbankCheckout
-                  packageId={selectedPackage.id}
-                  packageName={selectedPackage.name}
-                  creditsAmount={selectedPackage.credits_amount}
-                  amount={amount}
-                  currency={currency}
-                />
-              </TabsContent>
-              <TabsContent value="stripe" className="mt-4">
-                <StripeCheckout
-                  packageId={selectedPackage.id}
-                  packageName={selectedPackage.name}
-                  creditsAmount={selectedPackage.credits_amount}
-                  amount={amount}
-                  currency={currency}
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <StripeCheckout
-              packageId={selectedPackage.id}
-              packageName={selectedPackage.name}
-              creditsAmount={selectedPackage.credits_amount}
-              amount={amount}
-              currency={currency}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  // Crear orden primero
+  try {
+    const order = await createOrder({
+      orgId: organizationId,
+      productType: 'credits',
+      productId: selectedPackage.id,
+      productData: {
+        package_id: selectedPackage.id,
+        name: selectedPackage.name,
+        description: selectedPackage.description,
+        credits_amount: selectedPackage.credits_amount,
+        price_usd: selectedPackage.price_usd,
+        localized_price: amount,
+        currency,
+      },
+      amount,
+      currency,
+      metadata: {},
+      expiresInHours: 24,
+    });
+    
+    // Redirigir a página de checkout de la orden
+    redirect(`/checkout/${order.id}`);
+  } catch (error: any) {
+    console.error('Error creando orden:', error);
+    // Si hay error, mostrar página de error o redirigir
+    throw error;
+  }
 }
 
-function getCurrencyForCountry(countryCode: string): string {
-  const currencyMap: Record<string, string> = {
-    CL: 'CLP',
-    AR: 'ARS',
-    CO: 'COP',
-    MX: 'MXN',
-    PE: 'PEN',
-    BR: 'BRL',
-    US: 'USD',
-  };
-  
-  return currencyMap[countryCode.toUpperCase()] || 'USD';
-}
 

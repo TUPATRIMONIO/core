@@ -3,6 +3,7 @@ import { createServiceRoleClient } from '@/lib/supabase/server';
 import { addCredits } from '@/lib/credits/core';
 import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed, notifySubscriptionCancelled } from '@/lib/notifications/billing';
 import { convertAmountFromStripe } from './checkout';
+import { updateOrderStatus } from '../checkout/core';
 
 /**
  * Maneja eventos de webhook de Stripe
@@ -93,6 +94,27 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     invoiceType: payment.invoice?.type,
   });
   
+  // Buscar orden asociada (si existe)
+  let order = null;
+  if (payment.invoice) {
+    const { data: orderData } = await supabase
+      .from('orders')
+      .select('id, status')
+      .eq('invoice_id', payment.invoice.id)
+      .single();
+    order = orderData;
+  }
+  
+  // También buscar por order_id en metadata si existe
+  if (!order && paymentIntent.metadata?.order_id) {
+    const { data: orderData } = await supabase
+      .from('orders')
+      .select('id, status')
+      .eq('id', paymentIntent.metadata.order_id)
+      .single();
+    order = orderData;
+  }
+  
   // Actualizar estado del pago (usar vista pública)
   await supabase
     .from('payments')
@@ -112,6 +134,13 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         paid_at: new Date().toISOString(),
       })
       .eq('id', payment.invoice.id);
+    
+    // Actualizar orden si existe
+    if (order && order.status === 'pending_payment') {
+      await updateOrderStatus(order.id, 'paid', {
+        paymentId: payment.id,
+      });
+    }
   }
   
   // Si es compra de créditos, agregar créditos
@@ -135,6 +164,11 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           creditsAmount,
           orgId,
         });
+        
+        // Actualizar orden a 'completed' cuando se procesa el producto
+        if (order && order.status === 'paid') {
+          await updateOrderStatus(order.id, 'completed');
+        }
         
         // Notificar créditos agregados
         try {

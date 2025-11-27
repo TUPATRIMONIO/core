@@ -1,0 +1,261 @@
+import { createClient } from '@/lib/supabase/server';
+
+export type OrderStatus = 'pending_payment' | 'paid' | 'cancelled' | 'refunded' | 'completed';
+export type ProductType = 
+  | 'credits' 
+  | 'electronic_signature' 
+  | 'notary_service' 
+  | 'company_modification' 
+  | 'advisory' 
+  | 'subscription';
+
+export interface CreateOrderParams {
+  orgId: string;
+  productType: ProductType;
+  productId?: string;
+  productData: Record<string, any>;
+  amount: number;
+  currency: string;
+  metadata?: Record<string, any>;
+  expiresInHours?: number; // Default: 24 hours
+}
+
+export interface Order {
+  id: string;
+  organization_id: string;
+  order_number: string;
+  status: OrderStatus;
+  product_type: ProductType;
+  product_id?: string;
+  product_data: Record<string, any>;
+  amount: number;
+  currency: string;
+  invoice_id?: string;
+  payment_id?: string;
+  expires_at?: string;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  cancelled_at?: string;
+}
+
+/**
+ * Crea una nueva orden pendiente de pago
+ */
+export async function createOrder(params: CreateOrderParams): Promise<Order> {
+  const supabase = await createClient();
+  
+  // Generar número de orden único
+  const { data: orderNumber, error: orderNumberError } = await supabase.rpc('generate_order_number', {
+    org_id: params.orgId
+  });
+  
+  if (orderNumberError || !orderNumber) {
+    throw new Error(`Error generando número de orden: ${orderNumberError?.message || 'Unknown error'}`);
+  }
+  
+  // Calcular fecha de expiración (default: 24 horas)
+  const expiresInHours = params.expiresInHours || 24;
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + expiresInHours);
+  
+  // Crear orden
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .insert({
+      organization_id: params.orgId,
+      order_number: orderNumber,
+      status: 'pending_payment',
+      product_type: params.productType,
+      product_id: params.productId || null,
+      product_data: params.productData,
+      amount: params.amount,
+      currency: params.currency,
+      expires_at: expiresAt.toISOString(),
+      metadata: params.metadata || {},
+    })
+    .select()
+    .single();
+  
+  if (orderError || !order) {
+    throw new Error(`Error creando orden: ${orderError?.message || 'Unknown error'}`);
+  }
+  
+  return order;
+}
+
+/**
+ * Obtiene una orden por ID
+ */
+export async function getOrder(orderId: string): Promise<Order | null> {
+  const supabase = await createClient();
+  
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
+    .single();
+  
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // No encontrada
+    }
+    throw new Error(`Error obteniendo orden: ${error.message}`);
+  }
+  
+  return order;
+}
+
+/**
+ * Obtiene una orden por número de orden
+ */
+export async function getOrderByNumber(orderNumber: string): Promise<Order | null> {
+  const supabase = await createClient();
+  
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('order_number', orderNumber)
+    .single();
+  
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // No encontrada
+    }
+    throw new Error(`Error obteniendo orden: ${error.message}`);
+  }
+  
+  return order;
+}
+
+/**
+ * Obtiene órdenes pendientes de una organización
+ */
+export async function getPendingOrders(orgId: string): Promise<Order[]> {
+  const supabase = await createClient();
+  
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('organization_id', orgId)
+    .eq('status', 'pending_payment')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    throw new Error(`Error obteniendo órdenes pendientes: ${error.message}`);
+  }
+  
+  return orders || [];
+}
+
+/**
+ * Actualiza el estado de una orden
+ */
+export async function updateOrderStatus(
+  orderId: string,
+  status: OrderStatus,
+  additionalData?: {
+    invoiceId?: string;
+    paymentId?: string;
+  }
+): Promise<Order> {
+  const supabase = await createClient();
+  
+  const updateData: any = {
+    status,
+    updated_at: new Date().toISOString(),
+  };
+  
+  if (additionalData?.invoiceId) {
+    updateData.invoice_id = additionalData.invoiceId;
+  }
+  
+  if (additionalData?.paymentId) {
+    updateData.payment_id = additionalData.paymentId;
+  }
+  
+  const { data: order, error } = await supabase
+    .from('orders')
+    .update(updateData)
+    .eq('id', orderId)
+    .select()
+    .single();
+  
+  if (error || !order) {
+    throw new Error(`Error actualizando orden: ${error?.message || 'Unknown error'}`);
+  }
+  
+  return order;
+}
+
+/**
+ * Marca órdenes expiradas como canceladas
+ * Útil para ejecutar periódicamente (ej: cron job)
+ */
+export async function expireOldOrders(): Promise<number> {
+  const supabase = await createClient();
+  
+  const { data: expiredOrders, error: selectError } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('status', 'pending_payment')
+    .lt('expires_at', new Date().toISOString());
+  
+  if (selectError) {
+    throw new Error(`Error buscando órdenes expiradas: ${selectError.message}`);
+  }
+  
+  if (!expiredOrders || expiredOrders.length === 0) {
+    return 0;
+  }
+  
+  const { error: updateError } = await supabase
+    .from('orders')
+    .update({
+      status: 'cancelled',
+      cancelled_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .in('id', expiredOrders.map(o => o.id));
+  
+  if (updateError) {
+    throw new Error(`Error cancelando órdenes expiradas: ${updateError.message}`);
+  }
+  
+  return expiredOrders.length;
+}
+
+/**
+ * Recupera una orden por número (útil para emails de seguimiento)
+ */
+export async function recoverOrder(orderNumber: string): Promise<Order | null> {
+  return getOrderByNumber(orderNumber);
+}
+
+/**
+ * Verifica si una orden está expirada
+ */
+export function isOrderExpired(order: Order): boolean {
+  if (!order.expires_at) {
+    return false;
+  }
+  
+  return new Date(order.expires_at) < new Date();
+}
+
+/**
+ * Verifica si una orden puede ser pagada (no expirada y pendiente)
+ */
+export function canPayOrder(order: Order): boolean {
+  if (order.status !== 'pending_payment') {
+    return false;
+  }
+  
+  if (isOrderExpired(order)) {
+    return false;
+  }
+  
+  return true;
+}
+

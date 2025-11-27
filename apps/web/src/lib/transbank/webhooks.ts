@@ -2,6 +2,7 @@ import { transbankClient } from './client';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { addCredits } from '@/lib/credits/core';
 import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed } from '@/lib/notifications/billing';
+import { updateOrderStatus } from '../checkout/core';
 
 /**
  * Maneja confirmación de pago Webpay Plus
@@ -111,6 +112,17 @@ export async function handleTransbankWebhook(
       })
       .eq('id', payment.id);
     
+    // Buscar orden asociada (si existe)
+    let order = null;
+    if (payment.invoice) {
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('id, status')
+        .eq('invoice_id', payment.invoice.id)
+        .single();
+      order = orderData;
+    }
+    
     // Actualizar factura si existe
     if (payment.invoice) {
       await supabase
@@ -120,6 +132,13 @@ export async function handleTransbankWebhook(
           paid_at: new Date().toISOString(),
         })
         .eq('id', payment.invoice.id);
+      
+      // Actualizar orden si existe
+      if (order && order.status === 'pending_payment') {
+        await updateOrderStatus(order.id, 'paid', {
+          paymentId: payment.id,
+        });
+      }
     }
     
     // Si es compra de créditos, agregar créditos
@@ -150,6 +169,11 @@ export async function handleTransbankWebhook(
             creditsAmount,
             orgId: payment.invoice.organization_id,
           });
+          
+          // Actualizar orden a 'completed' cuando se procesa el producto
+          if (order && order.status === 'paid') {
+            await updateOrderStatus(order.id, 'completed');
+          }
           
           // Notificar créditos agregados
           try {

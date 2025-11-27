@@ -1,6 +1,7 @@
 import { stripe } from './client';
 import { createOrGetCustomer } from './customers';
 import { createClient } from '@/lib/supabase/server';
+import { getOrder, updateOrderStatus, canPayOrder } from '../checkout/core';
 
 export interface CreateCheckoutSessionParams {
   orgId: string;
@@ -10,7 +11,234 @@ export interface CreateCheckoutSessionParams {
 }
 
 /**
- * Crea un Payment Intent para compra de créditos
+ * Crea un Payment Intent para una orden
+ * @param orderId - ID de la orden (nuevo método)
+ */
+export async function createPaymentIntentForOrder(
+  orderId: string
+) {
+  const supabase = await createClient();
+  
+  // Obtener orden
+  const order = await getOrder(orderId);
+  
+  if (!order) {
+    throw new Error('Orden no encontrada');
+  }
+  
+  // Verificar que la orden puede ser pagada
+  if (!canPayOrder(order)) {
+    throw new Error('La orden no puede ser pagada (expirada o no pendiente)');
+  }
+  
+  // Obtener organización para determinar país y moneda
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('country, email, name')
+    .eq('id', order.organization_id)
+    .single();
+  
+  if (!org) {
+    throw new Error('Organización no encontrada');
+  }
+  
+  const countryCode = org.country || 'US';
+  const currency = order.currency || getCurrencyForCountry(countryCode);
+  const amount = order.amount;
+  
+  // Obtener datos del producto desde product_data
+  const productData = order.product_data as any;
+  
+  console.log('💰 [Stripe Checkout] Configuración de pago:', {
+    countryCode,
+    currency,
+    amount,
+    orderId,
+    orderNumber: order.order_number,
+    orgId: order.organization_id,
+  });
+  
+  // Calcular impuesto
+  const { data: taxRate } = await supabase.rpc('get_tax_rate', {
+    country_code_param: countryCode,
+  });
+  
+  const tax = amount * (taxRate || 0);
+  // Stripe maneja monedas de manera diferente:
+  // - Monedas con decimales (USD, EUR, ARS, BRL, etc.): multiplicar por 100 (centavos)
+  // - Monedas sin decimales (CLP, JPY, etc.): usar monto directo (sin multiplicar)
+  const total = convertAmountForStripe(amount + tax, currency);
+  
+  console.log('💰 [Stripe Checkout] Montos calculados:', {
+    amount,
+    tax,
+    totalBeforeConversion: amount + tax,
+    totalForStripe: total,
+    currency,
+    isZeroDecimal: isZeroDecimalCurrency(currency),
+  });
+  
+  // Crear o obtener customer
+  const customer = await createOrGetCustomer(order.organization_id, {
+    email: org.email || undefined,
+    name: org.name || undefined,
+  });
+  
+  // Crear factura en BD primero
+  let invoice = null;
+  let invoiceError = null;
+  const maxRetries = 5;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const invoiceNumber = await generateInvoiceNumber(order.organization_id);
+      
+      const result = await supabase
+        .from('invoices')
+        .insert({
+          organization_id: order.organization_id,
+          invoice_number: invoiceNumber,
+          status: 'open',
+          type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
+          subtotal: amount,
+          tax,
+          total: amount + tax,
+          currency,
+          due_date: new Date().toISOString(),
+        })
+        .select()
+        .single();
+      
+      invoice = result.data;
+      invoiceError = result.error;
+      
+      // Si no hay error, salir del loop
+      if (!invoiceError) {
+        break;
+      }
+      
+      // Si es error de duplicado y no es el último intento, reintentar
+      if (invoiceError.message.includes('duplicate key') && attempt < maxRetries - 1) {
+        console.warn(`Intento ${attempt + 1}: Número de factura duplicado, reintentando...`);
+        // Esperar un poco más en cada intento (exponencial backoff)
+        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
+        continue;
+      }
+      
+      // Si no es error de duplicado o es el último intento, salir
+      break;
+    } catch (error: any) {
+      // Si generateInvoiceNumber() falla, reintentar
+      if (attempt < maxRetries - 1) {
+        console.warn(`Intento ${attempt + 1}: Error generando número de factura, reintentando...`, error);
+        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
+        continue;
+      }
+      invoiceError = error;
+      break;
+    }
+  }
+  
+  if (invoiceError || !invoice) {
+    throw new Error(`Error creando factura: ${invoiceError?.message || 'No se pudo crear la factura después de múltiples intentos'}`);
+  }
+  
+  // Agregar línea de detalle
+  const description = productData.name 
+    ? `${productData.name} - ${productData.description || ''}`
+    : `Producto ${order.product_type}`;
+  
+  await supabase
+    .from('invoice_line_items')
+    .insert({
+      invoice_id: invoice.id,
+      description,
+      quantity: 1,
+      unit_price: amount,
+      total: amount + tax,
+      type: order.product_type,
+    });
+  
+  // Actualizar orden con invoice_id
+  await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
+  
+  // Crear Payment Intent en Stripe
+  // Nota: Stripe requiere la moneda en lowercase (ars, brl, usd, etc.)
+  const stripeCurrency = currency.toLowerCase();
+  
+  console.log('💳 [Stripe Checkout] Creando Payment Intent:', {
+    amount: total,
+    currency: stripeCurrency,
+    customerId: customer.id,
+    countryCode,
+    orderId,
+  });
+  
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: total,
+    currency: stripeCurrency,
+    customer: customer.id,
+    metadata: {
+      organization_id: order.organization_id,
+      order_id: orderId,
+      order_number: order.order_number,
+      product_type: order.product_type,
+      product_id: order.product_id || '',
+      invoice_id: invoice.id,
+      type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+      ...(order.product_type === 'credits' && productData.credits_amount 
+        ? { credits_amount: productData.credits_amount.toString() }
+        : {}),
+      country_code: countryCode,
+    },
+    description: description,
+  });
+  
+  console.log('✅ [Stripe Checkout] Payment Intent creado:', {
+    paymentIntentId: paymentIntent.id,
+    status: paymentIntent.status,
+    amount: paymentIntent.amount,
+    currency: paymentIntent.currency,
+  });
+  
+  // Crear registro de pago en BD
+  const { data: payment, error: paymentError } = await supabase
+    .from('payments')
+    .insert({
+      organization_id: order.organization_id,
+      invoice_id: invoice.id,
+      provider: 'stripe',
+      provider_payment_id: paymentIntent.id,
+      amount: amount + tax,
+      currency,
+      status: 'pending',
+    })
+    .select()
+    .single();
+  
+  if (paymentError) {
+    console.error('Error creando registro de pago:', paymentError);
+    // No fallar si hay error aquí, el webhook lo manejará
+  }
+  
+  // Actualizar orden con payment_id
+  await updateOrderStatus(orderId, 'pending_payment', { 
+    invoiceId: invoice.id,
+    paymentId: payment?.id 
+  });
+  
+  return {
+    paymentIntent,
+    invoice,
+    payment,
+    clientSecret: paymentIntent.client_secret,
+    order,
+  };
+}
+
+/**
+ * Crea un Payment Intent para compra de créditos (método legacy)
+ * @deprecated Usar createPaymentIntentForOrder en su lugar
  */
 export async function createPaymentIntentForCredits(
   orgId: string,
