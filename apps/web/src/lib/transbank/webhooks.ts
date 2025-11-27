@@ -123,6 +123,16 @@ export async function handleTransbankWebhook(
       order = orderData;
     }
     
+    // También buscar por order_id en metadata si existe y no se encontró orden
+    if (!order && payment.metadata?.order_id) {
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('id, status')
+        .eq('id', payment.metadata.order_id)
+        .single();
+      order = orderData;
+    }
+    
     // Actualizar factura si existe
     if (payment.invoice) {
       await supabase
@@ -161,6 +171,7 @@ export async function handleTransbankWebhook(
               payment_id: payment.id,
               transbank_token: token,
               invoice_id: payment.invoice.id,
+              order_id: order?.id || payment.metadata?.order_id,
             }
           );
           

@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 import { getOrder } from '@/lib/checkout/core';
 import { notFound, redirect } from 'next/navigation';
+import { addCredits } from '@/lib/credits/core';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -168,8 +169,106 @@ async function OrderSuccessContent({
   // Obtener datos del producto
   const productData = order.product_data as any;
 
-  // Si el pago fue exitoso, mostrar mensaje de éxito
+  // Si el pago fue exitoso, verificar créditos y mostrar mensaje de éxito
   if (payment && payment.status === 'succeeded') {
+    // Si es compra de créditos, verificar que los créditos se hayan cargado
+    if (payment.invoice?.type === 'credit_purchase' || order.product_type === 'credits') {
+      console.log('[OrderSuccess] Pago succeeded, verificando si los créditos se cargaron...');
+      
+      // Verificar si los créditos ya se cargaron buscando transacciones de créditos
+      const invoiceIdStr = payment.invoice?.id;
+      const paymentIdStr = payment.id;
+      
+      const { data: allTransactions, error: creditSearchError } = await supabase
+        .from('credit_transactions')
+        .select('id, amount, type, metadata, description')
+        .eq('organization_id', order.organization_id)
+        .eq('type', 'earned')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (creditSearchError) {
+        console.error('[OrderSuccess] Error buscando transacciones de créditos:', creditSearchError);
+      }
+      
+      // Filtrar transacciones que coincidan con nuestro invoice_id o payment_id
+      const creditTransactions = allTransactions?.filter((t: any) => {
+        const metadata = t.metadata || {};
+        return metadata.invoice_id === invoiceIdStr || metadata.payment_id === paymentIdStr;
+      }) || [];
+      
+      console.log('[OrderSuccess] Transacciones de créditos encontradas:', {
+        totalTransactions: allTransactions?.length || 0,
+        matchingTransactions: creditTransactions.length,
+        invoiceId: invoiceIdStr,
+        paymentId: paymentIdStr
+      });
+      
+      // Si no se encontraron créditos, intentar cargarlos
+      if (!creditTransactions || creditTransactions.length === 0) {
+        console.log('[OrderSuccess] No se encontraron transacciones de créditos, procesando créditos ahora...');
+        
+        try {
+          let creditsAmount = 0;
+          
+          if (payment.metadata?.credits_amount) {
+            creditsAmount = parseFloat(payment.metadata.credits_amount.toString());
+          } else if (productData?.credits_amount) {
+            creditsAmount = parseFloat(productData.credits_amount.toString());
+          }
+          
+          if (creditsAmount > 0) {
+            console.log(`[OrderSuccess] Agregando ${creditsAmount} créditos...`, {
+              orgId: order.organization_id,
+              creditsAmount,
+              paymentId: payment.id,
+              invoiceId: payment.invoice?.id,
+            });
+            
+            try {
+              const transactionId = await addCredits(
+                order.organization_id,
+                creditsAmount,
+                'credit_purchase',
+                {
+                  payment_id: payment.id,
+                  transbank_token: tokenWs || tbkToken,
+                  invoice_id: payment.invoice?.id,
+                  order_id: orderId,
+                }
+              );
+              
+              console.log('[OrderSuccess] Créditos procesados exitosamente:', {
+                transactionId,
+                creditsAmount,
+                orgId: order.organization_id
+              });
+            } catch (addCreditsError: any) {
+              console.error('[OrderSuccess] Error en addCredits:', {
+                error: addCreditsError.message,
+                stack: addCreditsError.stack,
+                orgId: order.organization_id,
+                creditsAmount
+              });
+            }
+          } else {
+            console.warn('[OrderSuccess] No se pudo determinar la cantidad de créditos:', {
+              metadata: payment.metadata,
+              productData: productData,
+              invoiceId: payment.invoice?.id
+            });
+          }
+        } catch (error: any) {
+          console.error('[OrderSuccess] Error procesando créditos:', {
+            error: error.message,
+            stack: error.stack
+          });
+        }
+      } else {
+        console.log('[OrderSuccess] Los créditos ya fueron cargados anteriormente');
+      }
+    }
+    
     return (
       <Card>
         <CardHeader className="text-center">
