@@ -142,10 +142,10 @@ export default function OrderCheckoutForm({
         form.method = 'POST';
         form.action = data.url;
         
-        // Agregar campo token_ws requerido por Transbank (Oneclick también usa token_ws)
+        // Agregar campo TBK_TOKEN requerido por Transbank Oneclick
         const tokenInput = document.createElement('input');
         tokenInput.type = 'hidden';
-        tokenInput.name = 'token_ws';
+        tokenInput.name = 'TBK_TOKEN';
         tokenInput.value = data.token;
         form.appendChild(tokenInput);
         
