@@ -268,7 +268,7 @@ export function convertAmountFromStripe(amount: number, currency: string): numbe
 /**
  * Obtiene moneda para un país
  */
-function getCurrencyForCountry(countryCode: string): string {
+export function getCurrencyForCountry(countryCode: string): string {
   const currencyMap: Record<string, string> = {
     CL: 'CLP',
     AR: 'ARS',
@@ -285,7 +285,7 @@ function getCurrencyForCountry(countryCode: string): string {
 /**
  * Obtiene precio localizado según país
  */
-function getLocalizedPrice(pkg: any, countryCode: string): number {
+export function getLocalizedPrice(pkg: any, countryCode: string): number {
   const currencyMap: Record<string, keyof typeof pkg> = {
     CL: 'price_clp',
     AR: 'price_ars',

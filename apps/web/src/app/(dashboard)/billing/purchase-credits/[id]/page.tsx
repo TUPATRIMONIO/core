@@ -2,9 +2,11 @@ import { getAvailablePackages } from '@/lib/credits/packages';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Package } from 'lucide-react';
 import Link from 'next/link';
 import StripeCheckout from '@/components/billing/StripeCheckout';
+import TransbankCheckout from '@/components/billing/TransbankCheckout';
 import { notFound } from 'next/navigation';
 
 interface PageProps {
@@ -155,13 +157,40 @@ export default async function CheckoutPage({ params }: PageProps) {
         
         {/* Formulario de pago */}
         <div className="lg:col-span-2">
-          <StripeCheckout
-            packageId={selectedPackage.id}
-            packageName={selectedPackage.name}
-            creditsAmount={selectedPackage.credits_amount}
-            amount={amount}
-            currency={currency}
-          />
+          {countryCode === 'CL' ? (
+            <Tabs defaultValue="transbank" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="transbank">Transbank</TabsTrigger>
+                <TabsTrigger value="stripe">Stripe</TabsTrigger>
+              </TabsList>
+              <TabsContent value="transbank" className="mt-4">
+                <TransbankCheckout
+                  packageId={selectedPackage.id}
+                  packageName={selectedPackage.name}
+                  creditsAmount={selectedPackage.credits_amount}
+                  amount={amount}
+                  currency={currency}
+                />
+              </TabsContent>
+              <TabsContent value="stripe" className="mt-4">
+                <StripeCheckout
+                  packageId={selectedPackage.id}
+                  packageName={selectedPackage.name}
+                  creditsAmount={selectedPackage.credits_amount}
+                  amount={amount}
+                  currency={currency}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <StripeCheckout
+              packageId={selectedPackage.id}
+              packageName={selectedPackage.name}
+              creditsAmount={selectedPackage.credits_amount}
+              amount={amount}
+              currency={currency}
+            />
+          )}
         </div>
       </div>
     </div>

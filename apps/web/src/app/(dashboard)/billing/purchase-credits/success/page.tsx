@@ -11,13 +11,25 @@ import { notifyCreditsAdded, notifyPaymentSucceeded } from '@/lib/notifications/
 interface PageProps {
   searchParams: Promise<{ 
     payment_intent?: string;
+    provider?: string;
+    token_ws?: string;
+    TBK_TOKEN?: string;
+    type?: string;
   }>;
 }
 
 async function PaymentSuccessContent({ 
-  paymentIntentId
+  paymentIntentId,
+  provider,
+  tokenWs,
+  tbkToken,
+  type,
 }: { 
   paymentIntentId?: string;
+  provider?: string;
+  tokenWs?: string;
+  tbkToken?: string;
+  type?: string;
 }) {
   const supabase = await createClient();
   
@@ -68,10 +80,103 @@ async function PaymentSuccessContent({
 
   let payment = null;
 
-  if (paymentIntentId) {
+  // Manejar diferentes proveedores de pago
+  if (provider === 'transbank') {
+    // Pago de Transbank
+    const token = tokenWs || tbkToken;
+    
+    if (token) {
+      // Si es inscripción Oneclick, procesarla primero
+      if (type === 'oneclick_inscription') {
+        try {
+          const inscriptionResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/transbank/oneclick/inscription/finish?token=${token}`, {
+            method: 'POST',
+          });
+          
+          if (inscriptionResponse.ok) {
+            const inscriptionData = await inscriptionResponse.json();
+            console.log('[PaymentSuccess] Inscripción Oneclick completada:', inscriptionData);
+            // Aquí podrías guardar el tbk_user en el componente o en la sesión
+          }
+        } catch (error) {
+          console.error('[PaymentSuccess] Error procesando inscripción Oneclick:', error);
+        }
+      }
+      
+      // Buscar pago por token
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider_payment_id', token)
+        .eq('provider', 'transbank')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('[PaymentSuccess] Error buscando pago Transbank:', error);
+      } else if (data) {
+        console.log('[PaymentSuccess] Pago Transbank encontrado:', data.id);
+        
+        // Si el pago está pendiente, procesar webhook
+        if (data.status === 'pending') {
+          try {
+            const webhookType = data.metadata?.payment_method === 'oneclick' ? 'oneclick' : 'webpay_plus';
+            const webhookResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/transbank/webhook`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                token,
+                type: webhookType,
+              }),
+            });
+            
+            if (webhookResponse.ok) {
+              console.log('[PaymentSuccess] Webhook procesado exitosamente');
+              // Recargar datos del pago
+              const { data: updatedPayment } = await supabase
+                .from('payments')
+                .select(`
+                  *,
+                  invoice:invoices (
+                    invoice_number,
+                    total,
+                    currency,
+                    id,
+                    organization_id,
+                    type
+                  )
+                `)
+                .eq('id', data.id)
+                .single();
+              
+              payment = updatedPayment || data;
+            }
+          } catch (error) {
+            console.error('[PaymentSuccess] Error procesando webhook:', error);
+            payment = data; // Usar datos existentes
+          }
+        } else {
+          payment = data;
+        }
+      } else {
+        console.warn('[PaymentSuccess] No se encontró pago Transbank con token:', token);
+      }
+    }
+  } else if (paymentIntentId) {
     // Pago de Stripe
     const { data, error } = await supabase
-      .from('payments') // Usar vista pública
+      .from('payments')
       .select(`
         *,
         invoice:invoices (
@@ -331,6 +436,10 @@ async function PaymentSuccessContent({
 export default async function SuccessPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const paymentIntentId = params.payment_intent;
+  const provider = params.provider;
+  const tokenWs = params.token_ws;
+  const tbkToken = params.TBK_TOKEN;
+  const type = params.type;
   
   return (
     <div className="container mx-auto py-8 max-w-2xl">
@@ -343,6 +452,10 @@ export default async function SuccessPage({ searchParams }: PageProps) {
       }>
         <PaymentSuccessContent 
           paymentIntentId={paymentIntentId}
+          provider={provider}
+          tokenWs={tokenWs}
+          tbkToken={tbkToken}
+          type={type}
         />
       </Suspense>
     </div>

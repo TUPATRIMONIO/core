@@ -1,0 +1,232 @@
+import { transbankClient } from './client';
+import { createServiceRoleClient } from '@/lib/supabase/server';
+import { addCredits } from '@/lib/credits/core';
+import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed } from '@/lib/notifications/billing';
+
+/**
+ * Maneja confirmación de pago Webpay Plus
+ */
+export async function handleTransbankWebhook(
+  token: string,
+  type: 'webpay_plus' | 'oneclick'
+) {
+  // Usar service role client para bypass RLS en webhooks
+  const supabase = createServiceRoleClient();
+  
+  try {
+    let transactionData;
+    
+    if (type === 'webpay_plus') {
+      // Confirmar transacción Webpay Plus
+      transactionData = await transbankClient.commitWebpayPlusTransaction(token);
+    } else {
+      // Confirmar pago Oneclick
+      transactionData = await transbankClient.commitOneclickPayment(token);
+    }
+    
+    console.log('🔔 [Transbank Webhook] Transacción confirmada:', {
+      token,
+      type,
+      status: transactionData.status || transactionData.response_code,
+    });
+    
+    // Buscar pago en BD
+    const { data: payment, error: paymentError } = await supabase
+      .from('payments')
+      .select(`
+        *,
+        invoice:invoices (
+          id,
+          organization_id,
+          type,
+          status
+        )
+      `)
+      .eq('provider_payment_id', token)
+      .eq('provider', 'transbank')
+      .single();
+    
+    if (paymentError || !payment) {
+      console.error('❌ Payment record not found for Transbank transaction:', {
+        token,
+        error: paymentError?.message,
+      });
+      return { success: false, error: 'Payment not found' };
+    }
+    
+    console.log('✅ Payment encontrado:', {
+      paymentId: payment.id,
+      invoiceId: payment.invoice?.id,
+      invoiceType: payment.invoice?.type,
+    });
+    
+    // Verificar estado de la transacción
+    const isSuccess = type === 'webpay_plus' 
+      ? transactionData.status === 'AUTHORIZED' && transactionData.response_code === 0
+      : transactionData.response_code === 0;
+    
+    if (!isSuccess) {
+      // Pago fallido
+      await supabase
+        .from('payments')
+        .update({
+          status: 'failed',
+          failure_reason: `Transbank response code: ${transactionData.response_code || 'unknown'}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', payment.id);
+      
+      // Notificar fallo
+      try {
+        await notifyPaymentFailed(
+          payment.invoice?.organization_id || '',
+          payment.amount,
+          payment.currency,
+          payment.invoice?.id || '',
+          `Transbank response code: ${transactionData.response_code || 'unknown'}`
+        );
+      } catch (notifError: any) {
+        console.error('Error enviando notificación de pago fallido:', notifError);
+      }
+      
+      return { success: false, error: 'Transaction failed' };
+    }
+    
+    // Pago exitoso - actualizar estado
+    await supabase
+      .from('payments')
+      .update({
+        status: 'succeeded',
+        processed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        metadata: {
+          ...payment.metadata,
+          authorization_code: type === 'webpay_plus' 
+            ? (transactionData as any).authorization_code
+            : transactionData.authorization_code,
+          transaction_date: type === 'webpay_plus'
+            ? (transactionData as any).transaction_date
+            : transactionData.transaction_date,
+        },
+      })
+      .eq('id', payment.id);
+    
+    // Actualizar factura si existe
+    if (payment.invoice) {
+      await supabase
+        .from('invoices')
+        .update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', payment.invoice.id);
+    }
+    
+    // Si es compra de créditos, agregar créditos
+    if (payment.metadata?.type === 'credit_purchase') {
+      const creditsAmount = parseFloat(payment.metadata.credits_amount || '0');
+      
+      console.log('💰 Agregando créditos:', {
+        orgId: payment.invoice?.organization_id,
+        creditsAmount,
+        type: payment.metadata.type,
+      });
+      
+      if (creditsAmount > 0 && payment.invoice?.organization_id) {
+        try {
+          const transactionId = await addCredits(
+            payment.invoice.organization_id,
+            creditsAmount,
+            'credit_purchase',
+            {
+              payment_id: payment.id,
+              transbank_token: token,
+              invoice_id: payment.invoice.id,
+            }
+          );
+          
+          console.log('✅ Créditos agregados exitosamente:', {
+            transactionId,
+            creditsAmount,
+            orgId: payment.invoice.organization_id,
+          });
+          
+          // Notificar créditos agregados
+          try {
+            await notifyCreditsAdded(
+              payment.invoice.organization_id,
+              creditsAmount,
+              'credit_purchase',
+              payment.invoice.id
+            );
+          } catch (notifError: any) {
+            console.error('Error enviando notificación de créditos agregados:', notifError);
+          }
+          
+          // Notificar pago exitoso
+          try {
+            await notifyPaymentSucceeded(
+              payment.invoice.organization_id,
+              payment.amount,
+              payment.currency,
+              payment.invoice.id
+            );
+          } catch (notifError: any) {
+            console.error('Error enviando notificación de pago exitoso:', notifError);
+          }
+        } catch (error: any) {
+          console.error('❌ Error agregando créditos:', {
+            error: error.message,
+            orgId: payment.invoice?.organization_id,
+            creditsAmount,
+          });
+        }
+      }
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error('❌ Error procesando webhook de Transbank:', {
+      error: error.message,
+      token,
+      type,
+    });
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Maneja finalización de inscripción Oneclick
+ */
+export async function handleOneclickInscriptionFinish(token: string) {
+  const supabase = createServiceRoleClient();
+  
+  try {
+    // Finalizar inscripción en Transbank
+    const inscriptionData = await transbankClient.finishOneclickInscription(token);
+    
+    console.log('✅ [Transbank Oneclick] Inscripción finalizada:', {
+      token,
+      tbkUser: inscriptionData.tbk_user,
+      username: inscriptionData.username,
+    });
+    
+    // Guardar método de pago Oneclick en BD
+    // Nota: Necesitarías obtener el organization_id desde algún lugar (session, token, etc.)
+    // Por ahora solo retornamos los datos
+    
+    return {
+      success: true,
+      tbkUser: inscriptionData.tbk_user,
+      username: inscriptionData.username,
+      authorizationCode: inscriptionData.authorization_code,
+    };
+  } catch (error: any) {
+    console.error('❌ Error finalizando inscripción Oneclick:', {
+      error: error.message,
+      token,
+    });
+    return { success: false, error: error.message };
+  }
+}
+
