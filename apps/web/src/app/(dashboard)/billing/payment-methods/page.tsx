@@ -58,7 +58,7 @@ export default async function PaymentMethodsPage() {
           <div>
             <h4 className="font-semibold mb-2">¿Es seguro guardar mi tarjeta?</h4>
             <p className="text-sm text-muted-foreground">
-              Sí, utilizamos Stripe y dLocal, proveedores certificados PCI-DSS. 
+              Sí, utilizamos Stripe, un proveedor certificado PCI-DSS nivel 1. 
               Nunca almacenamos tu información de tarjeta completa en nuestros servidores.
             </p>
           </div>

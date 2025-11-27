@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 interface PaymentMethod {
   id: string;
   type: string;
-  provider: 'stripe' | 'dlocal';
+  provider: 'stripe';
   brand?: string;
   last4?: string;
   exp_month?: number;

@@ -182,6 +182,7 @@ function getLocalizedPrice(pkg: any, countryCode: string): number {
     CO: 'price_cop',
     MX: 'price_mxn',
     PE: 'price_pen',
+    BR: 'price_brl',
   };
   
   const priceKey = currencyMap[countryCode.toUpperCase()] || 'price_usd';
@@ -198,6 +199,7 @@ function getCurrencyForCountry(countryCode: string): string {
     CO: 'COP',
     MX: 'MXN',
     PE: 'PEN',
+    BR: 'BRL',
     US: 'USD',
   };
   

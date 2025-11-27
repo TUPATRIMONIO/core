@@ -47,6 +47,14 @@ export async function createPaymentIntentForCredits(
   const currency = getCurrencyForCountry(countryCode);
   const amount = getLocalizedPrice(pkg, countryCode);
   
+  console.log('💰 [Stripe Checkout] Configuración de pago:', {
+    countryCode,
+    currency,
+    amount,
+    packageId: packageId,
+    orgId,
+  });
+  
   // Calcular impuesto
   const { data: taxRate } = await supabase.rpc('get_tax_rate', {
     country_code_param: countryCode,
@@ -54,9 +62,18 @@ export async function createPaymentIntentForCredits(
   
   const tax = amount * (taxRate || 0);
   // Stripe maneja monedas de manera diferente:
-  // - Monedas con decimales (USD, EUR, etc.): multiplicar por 100 (centavos)
+  // - Monedas con decimales (USD, EUR, ARS, BRL, etc.): multiplicar por 100 (centavos)
   // - Monedas sin decimales (CLP, JPY, etc.): usar monto directo (sin multiplicar)
   const total = convertAmountForStripe(amount + tax, currency);
+  
+  console.log('💰 [Stripe Checkout] Montos calculados:', {
+    amount,
+    tax,
+    totalBeforeConversion: amount + tax,
+    totalForStripe: total,
+    currency,
+    isZeroDecimal: isZeroDecimalCurrency(currency),
+  });
   
   // Crear o obtener customer
   const customer = await createOrGetCustomer(orgId, {
@@ -138,9 +155,19 @@ export async function createPaymentIntentForCredits(
     });
   
   // Crear Payment Intent en Stripe
+  // Nota: Stripe requiere la moneda en lowercase (ars, brl, usd, etc.)
+  const stripeCurrency = currency.toLowerCase();
+  
+  console.log('💳 [Stripe Checkout] Creando Payment Intent:', {
+    amount: total,
+    currency: stripeCurrency,
+    customerId: customer.id,
+    countryCode,
+  });
+  
   const paymentIntent = await stripe.paymentIntents.create({
     amount: total,
-    currency: currency.toLowerCase(),
+    currency: stripeCurrency,
     customer: customer.id,
     metadata: {
       organization_id: orgId,
@@ -148,8 +175,16 @@ export async function createPaymentIntentForCredits(
       invoice_id: invoice.id,
       type: 'credit_purchase',
       credits_amount: pkg.credits_amount.toString(),
+      country_code: countryCode,
     },
     description: `Compra de ${pkg.credits_amount} créditos - ${pkg.name}`,
+  });
+  
+  console.log('✅ [Stripe Checkout] Payment Intent creado:', {
+    paymentIntentId: paymentIntent.id,
+    status: paymentIntent.status,
+    amount: paymentIntent.amount,
+    currency: paymentIntent.currency,
   });
   
   // Crear registro de pago en BD (usar vista pública)
@@ -240,6 +275,7 @@ function getCurrencyForCountry(countryCode: string): string {
     CO: 'COP',
     MX: 'MXN',
     PE: 'PEN',
+    BR: 'BRL',
     US: 'USD',
   };
   
@@ -256,6 +292,7 @@ function getLocalizedPrice(pkg: any, countryCode: string): number {
     CO: 'price_cop',
     MX: 'price_mxn',
     PE: 'price_pen',
+    BR: 'price_brl',
   };
   
   const priceKey = currencyMap[countryCode.toUpperCase()] || 'price_usd';

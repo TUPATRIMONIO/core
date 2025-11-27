@@ -112,7 +112,7 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
               <strong>{selectedCountryInfo?.name}</strong>.
               {isLATAM && (
                 <>
-                  {' '}Esto habilitará métodos de pago locales (dLocal Go) además de Stripe.
+                  {' '}Esto ajustará los precios y métodos de pago según tu país.
                 </>
               )}
             </p>
@@ -122,8 +122,8 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
         {isLATAM && (
           <div className="rounded-lg border-l-4 border-green-500 bg-green-50 p-4 dark:bg-green-900/20">
             <p className="text-sm text-green-800 dark:text-green-200">
-              <strong>Métodos de pago disponibles:</strong> Podrás elegir entre métodos locales
-              (transferencia bancaria, efectivo) y tarjetas internacionales (Stripe).
+              <strong>Métodos de pago disponibles:</strong> Podrás pagar con tarjetas de crédito o débito 
+              a través de Stripe, que acepta múltiples monedas y métodos de pago internacionales.
             </p>
           </div>
         )}

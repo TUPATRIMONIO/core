@@ -5,12 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Package } from 'lucide-react';
 import Link from 'next/link';
 import StripeCheckout from '@/components/billing/StripeCheckout';
-import DLocalCheckout from '@/components/billing/DLocalCheckout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { notFound } from 'next/navigation';
-
-// Países LATAM que usan dLocal
-const LATAM_COUNTRIES = ['CL', 'AR', 'CO', 'MX', 'PE'];
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -93,7 +88,6 @@ export default async function CheckoutPage({ params }: PageProps) {
   
   const currency = getCurrencyForCountry(countryCode);
   const amount = selectedPackage.localized_price || selectedPackage.price_usd;
-  const isLATAM = LATAM_COUNTRIES.includes(countryCode);
   
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -161,41 +155,13 @@ export default async function CheckoutPage({ params }: PageProps) {
         
         {/* Formulario de pago */}
         <div className="lg:col-span-2">
-          {isLATAM ? (
-            <Tabs defaultValue="dlocal" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="dlocal">Métodos Locales (dLocal)</TabsTrigger>
-                <TabsTrigger value="stripe">Tarjeta Internacional (Stripe)</TabsTrigger>
-              </TabsList>
-              <TabsContent value="dlocal" className="mt-6">
-                <DLocalCheckout
-                  packageId={selectedPackage.id}
-                  packageName={selectedPackage.name}
-                  creditsAmount={selectedPackage.credits_amount}
-                  amount={amount}
-                  currency={currency}
-                  countryCode={countryCode}
-                />
-              </TabsContent>
-              <TabsContent value="stripe" className="mt-6">
-                <StripeCheckout
-                  packageId={selectedPackage.id}
-                  packageName={selectedPackage.name}
-                  creditsAmount={selectedPackage.credits_amount}
-                  amount={amount}
-                  currency={currency}
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <StripeCheckout
-              packageId={selectedPackage.id}
-              packageName={selectedPackage.name}
-              creditsAmount={selectedPackage.credits_amount}
-              amount={amount}
-              currency={currency}
-            />
-          )}
+          <StripeCheckout
+            packageId={selectedPackage.id}
+            packageName={selectedPackage.name}
+            creditsAmount={selectedPackage.credits_amount}
+            amount={amount}
+            currency={currency}
+          />
         </div>
       </div>
     </div>
@@ -209,6 +175,7 @@ function getCurrencyForCountry(countryCode: string): string {
     CO: 'COP',
     MX: 'MXN',
     PE: 'PEN',
+    BR: 'BRL',
     US: 'USD',
   };
   
