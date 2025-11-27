@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar'
 import { Separator } from '@/components/ui/separator'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { PendingOrdersBadge } from '@/components/checkout/PendingOrdersBadge'
 
 export default async function DashboardLayout({
   children,
@@ -38,6 +39,8 @@ export default async function DashboardLayout({
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
+            <div className="flex-1" />
+            <PendingOrdersBadge />
           </header>
           <div className="flex-1 px-4 md:px-6">
             {children}

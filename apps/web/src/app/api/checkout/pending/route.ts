@@ -1,49 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getPendingOrders } from '@/lib/checkout/core';
 
 /**
  * GET /api/checkout/pending
- * Obtiene órdenes pendientes del usuario autenticado
+ * Obtiene las órdenes pendientes del usuario actual
  */
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
+
     // Verificar autenticación
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return NextResponse.json(
-        { error: 'No autenticado' },
+        { error: 'No autorizado' },
         { status: 401 }
       );
     }
-    
-    // Obtener organización activa del usuario
-    const { data: activeOrg } = await supabase.rpc('get_user_active_organization', {
-      user_id: user.id
-    });
-    
-    if (!activeOrg || activeOrg.length === 0) {
-      return NextResponse.json({
-        orders: [],
-      });
+
+    // Obtener membresías del usuario
+    const { data: memberships, error: membershipsError } = await supabase
+      .from('memberships')
+      .select('organization_id')
+      .eq('user_id', user.id);
+
+    if (membershipsError) {
+      console.error('Error fetching memberships:', membershipsError);
+      return NextResponse.json(
+        { error: 'Error obteniendo membresías' },
+        { status: 500 }
+      );
     }
-    
-    const orgId = activeOrg[0].organization_id;
-    
-    // Obtener órdenes pendientes
-    const orders = await getPendingOrders(orgId);
-    
-    return NextResponse.json({
-      orders,
-    });
-  } catch (error: any) {
-    console.error('Error obteniendo órdenes pendientes:', error);
+
+    if (!memberships || memberships.length === 0) {
+      return NextResponse.json({ orders: [] });
+    }
+
+    const organizationIds = memberships.map((m) => m.organization_id);
+
+    // Obtener órdenes pendientes de las organizaciones del usuario
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*')
+      .in('organization_id', organizationIds)
+      .eq('status', 'pending_payment')
+      .order('created_at', { ascending: false });
+
+    if (ordersError) {
+      console.error('Error fetching orders:', ordersError);
+      return NextResponse.json(
+        { error: 'Error obteniendo órdenes' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ orders: orders || [] });
+  } catch (error) {
+    console.error('Error in GET /api/checkout/pending:', error);
     return NextResponse.json(
-      { error: error.message || 'Error interno del servidor' },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
 }
-
