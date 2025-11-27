@@ -87,10 +87,42 @@ export default function TransbankCheckout({
 
       // Redirigir a Transbank usando formulario POST con token_ws
       if (data.url && data.token) {
+        // Normalizar URL: remover puerto :443 explícito si está presente
+        let normalizedUrl = data.url;
+        try {
+          const urlObj = new URL(data.url);
+          // Remover puerto 443 explícito (HTTPS ya usa 443 por defecto)
+          if (urlObj.port === '443') {
+            urlObj.port = '';
+            normalizedUrl = urlObj.toString();
+          }
+        } catch (e) {
+          console.error('[TransbankCheckout] Error normalizando URL:', e);
+        }
+        
+        console.log('[TransbankCheckout] Redirigiendo a Transbank:', {
+          originalUrl: data.url,
+          normalizedUrl,
+          token: data.token.substring(0, 20) + '...',
+        });
+        
+        // Validar que la URL sea válida
+        try {
+          const urlObj = new URL(normalizedUrl);
+          if (!urlObj.hostname.includes('transbank') && !urlObj.hostname.includes('santander')) {
+            console.warn('[TransbankCheckout] URL de Transbank inesperada:', normalizedUrl);
+          }
+        } catch (e) {
+          console.error('[TransbankCheckout] URL inválida:', normalizedUrl);
+          throw new Error('URL de redirección inválida');
+        }
+        
         // Crear formulario POST oculto según documentación de Transbank
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = data.url;
+        form.action = normalizedUrl;
+        form.style.display = 'none';
+        form.setAttribute('accept-charset', 'UTF-8');
         
         // Agregar campo token_ws requerido por Transbank
         const tokenInput = document.createElement('input');
@@ -101,7 +133,11 @@ export default function TransbankCheckout({
         
         // Agregar formulario al DOM y auto-enviarlo
         document.body.appendChild(form);
-        form.submit();
+        
+        // Pequeño delay para asegurar que el formulario está en el DOM
+        setTimeout(() => {
+          form.submit();
+        }, 100);
       } else {
         throw new Error('No se recibió URL o token de redirección');
       }

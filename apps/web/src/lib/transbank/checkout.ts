@@ -127,10 +127,12 @@ export async function createTransbankPaymentForOrder(
     return_url: returnUrl,
   });
   
-  console.log('✅ [Transbank Checkout] Transacción creada:', {
+  console.log('✅ [Transbank Checkout] Transacción creada (Order):', {
     token: transaction.token,
     url: transaction.url,
     buyOrder,
+    urlHostname: transaction.url ? new URL(transaction.url).hostname : 'N/A',
+    urlPathname: transaction.url ? new URL(transaction.url).pathname : 'N/A',
   });
   
   // Crear registro de pago en BD
@@ -293,10 +295,12 @@ export async function createTransbankPaymentForCredits(
     return_url: returnUrl,
   });
   
-  console.log('✅ [Transbank Checkout] Transacción creada:', {
+  console.log('✅ [Transbank Checkout] Transacción creada (Credits):', {
     token: transaction.token,
     url: transaction.url,
     buyOrder,
+    urlHostname: transaction.url ? new URL(transaction.url).hostname : 'N/A',
+    urlPathname: transaction.url ? new URL(transaction.url).pathname : 'N/A',
   });
   
   // Crear registro de pago en BD

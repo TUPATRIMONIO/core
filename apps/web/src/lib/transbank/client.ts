@@ -93,6 +93,16 @@ class TransbankClient {
       commerceCode: process.env.TRANSBANK_WEBPAY_PLUS_COMMERCE_CODE || '',
       apiKeySecret: process.env.TRANSBANK_WEBPAY_PLUS_API_KEY_SECRET || '',
     };
+    
+    // Validar credenciales en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      if (!this.webpayPlusCredentials.commerceCode || !this.webpayPlusCredentials.apiKeySecret) {
+        console.warn('⚠️ [Transbank] Credenciales Webpay Plus no configuradas');
+      } else {
+        console.log('✅ [Transbank] Entorno:', this.environment);
+        console.log('✅ [Transbank] Commerce Code configurado:', this.webpayPlusCredentials.commerceCode.substring(0, 10) + '...');
+      }
+    }
 
     // Credenciales Mall Oneclick
     this.oneclickCredentials = {
