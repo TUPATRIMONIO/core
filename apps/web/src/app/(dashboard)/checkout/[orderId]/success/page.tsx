@@ -318,7 +318,7 @@ async function OrderSuccessContent({
           
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-              <Link href="/checkout">
+              <Link href="/orders">
                 <CreditCard className="mr-2 h-4 w-4" />
                 Ver Mis Órdenes
               </Link>
@@ -392,7 +392,7 @@ async function OrderSuccessContent({
               </Link>
             </Button>
             <Button variant="outline" asChild className="flex-1">
-              <Link href="/checkout">
+              <Link href="/orders">
                 Ver Mis Órdenes
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -443,7 +443,7 @@ async function OrderSuccessContent({
             </Link>
           </Button>
           <Button variant="outline" asChild className="flex-1">
-            <Link href="/checkout">
+            <Link href="/orders">
               Ver Mis Órdenes
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
