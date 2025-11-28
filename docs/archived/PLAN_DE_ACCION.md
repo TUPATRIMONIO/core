@@ -1,12 +1,12 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅  
-> **🎯 Próximo milestone:** Integración de Facturación Electrónica (Stripe para Facturas/Boletas, Haulmer para Facturas con medios chilenos) 📋
+> **📅 Última actualización:** Diciembre 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅  
+> **🎯 Próximo milestone:** Integración de Facturación Electrónica Automática (Stripe genera facturas automáticamente, Haulmer genera facturas automáticamente para pagos Transbank - Solo B2B Chile con CLP) 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **PRÓXIMO: INTEGRACIÓN FACTURACIÓN ELECTRÓNICA (Stripe/Haulmer)** 📋
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **PRÓXIMO: SINCRONIZACIÓN FACTURACIÓN ELECTRÓNICA AUTOMÁTICA (Stripe/Haulmer generan facturas automáticamente)** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
@@ -197,17 +197,16 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
    - ✅ **LISTO PARA PRODUCCIÓN** 🚀
    - ✅ Listo para escalar a cientos de organizaciones
 
-**📅 PRÓXIMO PASO:** **REVISAR INTEGRACIONES EN PRODUCCIÓN** 🚀
+**📅 PRÓXIMO PASO:** **SINCRONIZACIÓN DE FACTURACIÓN ELECTRÓNICA AUTOMÁTICA** 🚀
    
-   **🎯 PRIORIDAD INMEDIATA - Verificación en Producción:**
+   **🎯 PRIORIDAD INMEDIATA - Integración de Facturación:**
    - ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google, Facebook, GitHub)
-   - 🔄 **Stripe** - Revisar en producción: claves, webhooks, flujos de pago y carga de créditos
-   - ✅ **dLocal Go** - Integración completa y corregida:
-     - ✅ Componente checkout con loading states
-     - ✅ URLs robustas con múltiples fallbacks
-     - ✅ Corrección de schema (vistas públicas)
-     - ✅ Métodos de pago: CARD y BANK_TRANSFER (efectivo deshabilitado)
-     - 🔄 Pendiente: Verificar en producción (credenciales, webhooks, flujos de pago)
+   - ✅ **Stripe** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (claves, webhooks, flujos de pago probados)
+   - ✅ **Transbank** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (Webpay Plus y OneClick probados)
+   - 📋 **Facturación Automática** - Implementar sincronización de facturas generadas por proveedores:
+     - 📋 Stripe genera facturas automáticamente → Sincronizar información en BD
+     - 📋 Haulmer genera facturas automáticamente para Transbank → Sincronizar información en BD
+     - 📋 Restricciones: Transbank solo disponible para B2B Chile con CLP configurado
    - 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de emails, configurar dominio verificado
    
    **✅ COMPLETADO:**
@@ -2242,6 +2241,21 @@ Al completar Fase 0:
 - ✅ **PDFs**: Generación de facturas funcionando
 - ✅ **Testing**: Flujo completo probado exitosamente
 - ✅ **Corrección numeración facturas** (Nov 24, 2025): Sistema por organización `{ORG_SLUG}-{NÚMERO}` implementado, eliminadas colisiones
+- ✅ **Simplificación historial de pedidos** (Dic 1, 2025): Sistema de trazabilidad optimizado para mostrar solo eventos relevantes al cliente
+  - ✅ **Migración de limpieza mejorada**: `20251201000004_improved_cleanup_order_history.sql`
+    - Elimina eventos técnicos y duplicados por descripción específica
+    - Deduplica eventos por cambio de estado (mantiene solo el más reciente)
+    - Prioriza eventos `order_completed` sobre `status_changed` duplicados
+    - Normaliza descripciones a formato amigable
+  - ✅ **Mejoras en componente OrderTimeline.tsx**:
+    - Filtrado mejorado por tipo y descripción de eventos
+    - Función `deduplicateByStatus()` para eliminar duplicados en frontend
+    - Filtrado de eventos técnicos: `invoice_created`, `payment_initiated`, `order_modified`
+    - Filtrado de descripciones técnicas: "Pago exitoso vía...", "Factura creada", etc.
+    - Resultado: Solo 3 eventos visibles para el cliente:
+      1. "Tu pedido fue creado"
+      2. "Pago confirmado"
+      3. "Pedido completado exitosamente"
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 Integración GitHub para migraciones automáticas
@@ -2280,6 +2294,11 @@ Al completar Fase 0:
    - ✅ 20251123000003_fix_invoice_number_race_condition.sql (fix inicial)
    - ✅ 20251123000004_add_public_invoice_number_wrapper.sql (wrapper public)
    - ✅ 20251124000001_change_invoice_number_format.sql (formato por organización)
+✅ Migración 17: Sistema de trazabilidad de pedidos (COMPLETADO - Dic 1, 2025)
+   - ✅ 20251201000001_create_order_history.sql (sistema de historial completo)
+   - ✅ 20251201000002_simplify_order_history_descriptions.sql (descripciones amigables)
+   - ✅ 20251201000003_cleanup_duplicate_order_history.sql (limpieza inicial)
+   - ✅ 20251201000004_improved_cleanup_order_history.sql (limpieza mejorada y deduplicación)
 📋 Migración 15: schema-services.sql (communications, workflows, files, audit)
 📋 Migración 16: schema-business.sql (signatures, verifications, notary, documents)
 📋 Migración 17: schema-ai.sql (ai_customer_service, ai_document_review con VECTOR)
@@ -6115,6 +6134,62 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 - ✅ Uso de vistas públicas: `invoices`, `payments`, `invoice_line_items`
 - ✅ Mantiene seguridad RLS a través de las vistas
 
+## 🔧 **MEJORAS RECIENTES - Simplificación Historial de Pedidos (Diciembre 2025)**
+
+### ✅ **Optimización del Sistema de Trazabilidad de Pedidos:**
+
+**Objetivo:** Simplificar el historial de pedidos para mostrar solo eventos relevantes y comprensibles para el cliente, eliminando información técnica y duplicados.
+
+**Problema identificado:**
+- El historial mostraba múltiples eventos técnicos y duplicados que confundían al cliente
+- Eventos como "invoice_created", "payment_initiated", "Estado actualizado con información adicional" no aportaban valor
+- Existían duplicados cuando el mismo cambio de estado se registraba múltiples veces
+- Descripciones técnicas como "Estado cambiado de pending_payment a paid" no eran amigables
+
+**Solución implementada:**
+
+**1. Migración SQL de Limpieza Mejorada** (`20251201000004_improved_cleanup_order_history.sql`):
+- ✅ Elimina eventos por descripción específica:
+  - "Pago exitoso vía...", "Factura creada", "Pago iniciado..."
+  - "Estado actualizado con información adicional"
+  - "Pedido completado" cuando es `status_changed` (mantiene `order_completed`)
+  - Descripciones técnicas antiguas que empiezan con "Estado cambiado de..."
+- ✅ Deduplica eventos por cambio de estado:
+  - Mantiene solo el evento más reciente cuando hay múltiples eventos para el mismo cambio
+  - Ejemplo: Si hay 3 eventos `pending_payment → paid`, mantiene solo el último
+- ✅ Deduplica eventos de completado:
+  - Si existe `order_completed` con "Pedido completado exitosamente", elimina el `status_changed` duplicado
+- ✅ Normaliza descripciones:
+  - Actualiza todas las descripciones antiguas al formato amigable estándar
+
+**2. Mejoras en Componente OrderTimeline.tsx**:
+- ✅ Filtrado mejorado por tipo y descripción:
+  - Filtra eventos técnicos: `invoice_created`, `payment_initiated`, `order_modified`
+  - Filtra descripciones técnicas: "Pago exitoso vía...", "Factura creada", etc.
+- ✅ Función `deduplicateByStatus()`:
+  - Deduplica eventos por cambio de estado en el frontend
+  - Mantiene solo el evento más reciente para cada cambio único
+  - Prioriza `order_completed` sobre `status_changed` cuando ambos existen
+  - Maneja eventos únicos como `order_created` correctamente
+
+**Resultado final:**
+El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
+1. ✅ "Tu pedido fue creado" (`order_created`)
+2. ✅ "Pago confirmado" (`status_changed` a `paid`)
+3. ✅ "Pedido completado exitosamente" (`order_completed`)
+
+**Archivos modificados:**
+- `supabase/migrations/20251201000004_improved_cleanup_order_history.sql` (nueva migración)
+- `apps/web/src/components/checkout/OrderTimeline.tsx` (mejoras en filtrado y deduplicación)
+
+**Beneficios:**
+- ✅ Experiencia de usuario más clara y comprensible
+- ✅ Eliminación de ruido técnico innecesario
+- ✅ Historial limpio y profesional
+- ✅ Mejor comprensión del estado del pedido por parte del cliente
+
+---
+
 **4. Corrección del Sistema de Numeración de Facturas (Nov 24, 2025)**
 - ✅ **Problema resuelto**: Error "duplicate key value violates unique constraint invoices_invoice_number_key"
 - ✅ **Causa identificada**: Sistema global de numeración causaba colisiones cuando múltiples organizaciones creaban facturas simultáneamente
@@ -6570,29 +6645,48 @@ Al agregar un nuevo medio de pago, verificar:
 ## 📋 **PRÓXIMO MILESTONE: Integración de Facturación Electrónica**
 
 > **📅 Planificado:** Enero 2025  
-> **🎯 Objetivo:** Establecer sistema de facturación electrónica diferenciado según tipo de documento y medio de pago
+> **🎯 Objetivo:** Establecer sistema de facturación electrónica automática según proveedor de pago
 
 ### 🎯 **Requisitos del Sistema**
 
-#### **Reglas de Facturación:**
+#### **Reglas de Facturación Automática:**
 
-1. **Si se solicita FACTURA:**
-   - **Stripe** → Factura electrónica generada por Stripe
-   - **Medios de pago chilenos** (Transbank, Flow, otros) → Factura electrónica generada por Haulmer
+**✅ CAMBIO DE LÓGICA - Facturación Externa Automática:**
 
-2. **Si se solicita BOLETA:**
-   - **Siempre mediante Stripe** (independiente del medio de pago)
+1. **Pago con Stripe** → Factura electrónica generada automáticamente por Stripe
+   - No generamos facturas manualmente
+   - Stripe maneja toda la facturación electrónica
+   - Disponible para todos los usuarios (B2C y B2B)
+
+2. **Pago con Transbank** → Factura electrónica generada automáticamente por Haulmer
+   - No generamos facturas manualmente
+   - Haulmer maneja toda la facturación electrónica
+   - Solo disponible bajo condiciones específicas (ver restricciones)
+
+#### **Restricciones de Transbank:**
+
+**Transbank SOLO está disponible cuando se cumplen TODAS estas condiciones:**
+
+1. ✅ **País:** Solo Chile (CL)
+2. ✅ **Tipo de Usuario:** Solo usuarios B2B (organizaciones empresariales)
+3. ✅ **Moneda Configurada:** La organización debe tener CLP (Peso Chileno) como moneda en su configuración
+4. ✅ **Resto de casos:** Todos los demás usuarios deben usar Stripe
+
+**Lógica de Disponibilidad:**
+- Si usuario es B2C → Solo Stripe disponible
+- Si usuario es B2B pero no tiene CLP configurado → Solo Stripe disponible
+- Si usuario es B2B con CLP pero no es de Chile → Solo Stripe disponible
+- Si usuario es B2B, tiene CLP configurado y es de Chile → Transbank disponible + Stripe disponible
 
 ### 📋 **Tareas de Implementación**
 
 #### **1. Extender Schema de Facturas**
 
-**Agregar campos a tabla `invoices`:**
+**Agregar campos a tabla `invoices` para tracking de facturas externas:**
 ```sql
-ALTER TABLE invoices ADD COLUMN document_type VARCHAR(20) DEFAULT 'invoice';
--- Valores: 'invoice' (factura), 'boleta' (boleta)
 ALTER TABLE invoices ADD COLUMN external_provider VARCHAR(50);
 -- Valores: 'stripe', 'haulmer', NULL
+-- Indica qué proveedor generó la factura automáticamente
 ALTER TABLE invoices ADD COLUMN external_document_id VARCHAR(255);
 -- ID del documento en el proveedor externo (Stripe invoice ID o Haulmer document ID)
 ALTER TABLE invoices ADD COLUMN external_pdf_url TEXT;
@@ -6603,10 +6697,11 @@ ALTER TABLE invoices ADD COLUMN external_status VARCHAR(50);
 -- Estado del documento en el proveedor externo
 ```
 
-**Agregar campo a tabla `orders`:**
+**Agregar campo de moneda a tabla `organizations` (si no existe):**
 ```sql
-ALTER TABLE orders ADD COLUMN document_type VARCHAR(20) DEFAULT 'invoice';
--- Tipo de documento solicitado: 'invoice' o 'boleta'
+ALTER TABLE organizations ADD COLUMN currency VARCHAR(3) DEFAULT 'USD';
+-- Moneda preferida de la organización: 'USD', 'CLP', 'ARS', 'COP', 'MXN', 'PEN'
+-- Usado para determinar disponibilidad de Transbank
 ```
 
 #### **2. Integración con Haulmer**
@@ -6636,82 +6731,94 @@ HAULMER_COMPANY_RUT=12345678-9
 HAULMER_ENVIRONMENT=production|sandbox
 ```
 
-#### **3. Lógica de Selección de Proveedor**
+#### **3. Lógica de Disponibilidad de Transbank**
 
-**En funciones de checkout, agregar lógica:**
+**Función para determinar si Transbank está disponible:**
+
+```typescript
+// apps/web/src/lib/checkout/transbank-availability.ts
+export async function isTransbankAvailable(organizationId: string): Promise<boolean> {
+  // Obtener datos de la organización
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('country, currency, organization_type')
+    .eq('id', organizationId)
+    .single();
+  
+  if (!org) return false;
+  
+  // Verificar todas las condiciones:
+  // 1. País debe ser Chile
+  if (org.country !== 'CL') return false;
+  
+  // 2. Debe ser organización B2B (no personal)
+  if (org.organization_type !== 'business') return false;
+  
+  // 3. Moneda debe ser CLP
+  if (org.currency !== 'CLP') return false;
+  
+  return true;
+}
+```
+
+**En funciones de checkout, filtrar métodos de pago disponibles:**
 
 ```typescript
 // apps/web/src/lib/checkout/core.ts
-export async function createOrder(params: CreateOrderParams) {
-  // ... código existente ...
+export async function getAvailablePaymentMethods(organizationId: string) {
+  const transbankAvailable = await isTransbankAvailable(organizationId);
   
-  // Determinar tipo de documento solicitado
-  const documentType = params.documentType || 'invoice'; // 'invoice' | 'boleta'
+  const methods = ['stripe']; // Stripe siempre disponible
   
-  // Si es boleta, forzar Stripe
-  if (documentType === 'boleta') {
-    // Validar que el provider sea Stripe o forzar Stripe
-    if (params.provider && params.provider !== 'stripe') {
-      throw new Error('Las boletas solo pueden generarse mediante Stripe');
-    }
-    params.provider = 'stripe';
+  if (transbankAvailable) {
+    methods.push('transbank_webpay_plus', 'transbank_oneclick');
   }
   
-  // Guardar document_type en la orden
-  const order = await supabase
-    .from('orders')
-    .insert({
-      // ... otros campos ...
-      document_type: documentType,
-    })
-    .select()
-    .single();
-  
-  return order;
+  return methods;
 }
 ```
 
-#### **4. Generación de Facturas según Provider**
+#### **4. Sincronización de Facturas Generadas por Proveedores**
 
-**Para Stripe (Facturas y Boletas):**
+**✅ IMPORTANTE:** Los proveedores generan las facturas automáticamente. Nuestro sistema solo sincroniza la información.
+
+**Para Stripe - Obtener factura generada automáticamente:**
 ```typescript
 // apps/web/src/lib/stripe/invoices.ts
-export async function generateStripeInvoice(invoiceId: string, documentType: 'invoice' | 'boleta') {
-  // Stripe genera automáticamente facturas/boletas según configuración
-  // Obtener invoice de Stripe y guardar PDF URL en nuestra BD
-  const stripeInvoice = await stripe.invoices.retrieve(stripeInvoiceId);
+export async function syncStripeInvoice(paymentIntentId: string, invoiceId: string) {
+  // Stripe genera facturas automáticamente al procesar el pago
+  // Obtener el invoice asociado al payment intent
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
   
-  await supabase
-    .from('invoices')
-    .update({
-      external_provider: 'stripe',
-      external_document_id: stripeInvoice.id,
-      external_pdf_url: stripeInvoice.invoice_pdf,
-      external_status: stripeInvoice.status,
-    })
-    .eq('id', invoiceId);
+  if (paymentIntent.invoice) {
+    const stripeInvoice = await stripe.invoices.retrieve(paymentIntent.invoice as string);
+    
+    // Sincronizar información en nuestra BD
+    await supabase
+      .from('invoices')
+      .update({
+        external_provider: 'stripe',
+        external_document_id: stripeInvoice.id,
+        external_pdf_url: stripeInvoice.invoice_pdf,
+        external_status: stripeInvoice.status,
+      })
+      .eq('id', invoiceId);
+  }
 }
 ```
 
-**Para Haulmer (Solo Facturas con medios chilenos):**
+**Para Haulmer - Obtener factura generada automáticamente:**
 ```typescript
 // apps/web/src/lib/haulmer/invoices.ts
-export async function generateHaulmerInvoice(invoiceId: string) {
-  // Obtener datos de la factura desde BD
-  const { data: invoice } = await supabase
-    .from('invoices')
-    .select('*, organization:organizations(*)')
-    .eq('id', invoiceId)
-    .single();
+export async function syncHaulmerInvoice(transactionToken: string, invoiceId: string) {
+  // Haulmer genera facturas automáticamente al procesar el pago con Transbank
+  // Obtener datos de la transacción desde Transbank
+  const transbankResponse = await transbank.getTransactionResult(transactionToken);
   
-  // Crear factura en Haulmer
-  const haulmerInvoice = await haulmerClient.createInvoice({
-    rut: invoice.organization.rut,
-    razon_social: invoice.organization.name,
-    // ... otros datos ...
-  });
+  // Obtener factura generada por Haulmer usando el token de transacción
+  const haulmerInvoice = await haulmerClient.getInvoiceByTransaction(transactionToken);
   
-  // Guardar información en BD
+  // Sincronizar información en nuestra BD
   await supabase
     .from('invoices')
     .update({
@@ -6725,9 +6832,9 @@ export async function generateHaulmerInvoice(invoiceId: string) {
 }
 ```
 
-#### **5. Procesamiento en Webhooks**
+#### **5. Procesamiento en Webhooks - Sincronización de Facturas**
 
-**Actualizar webhooks para generar facturas después del pago:**
+**Actualizar webhooks para sincronizar facturas generadas automáticamente por los proveedores:**
 
 ```typescript
 // apps/web/src/lib/transbank/webhooks.ts
@@ -6735,17 +6842,10 @@ export async function handleTransbankWebhook(token: string, type: 'webpay_plus' 
   // ... código existente de procesamiento de pago ...
   
   // Después de actualizar pago a succeeded:
-  if (payment.invoice) {
-    const { data: invoice } = await supabase
-      .from('invoices')
-      .select('*, order:orders(document_type)')
-      .eq('id', payment.invoice.id)
-      .single();
-    
-    // Si es factura y el medio de pago es chileno, generar con Haulmer
-    if (invoice.order?.document_type === 'invoice' && !invoice.external_provider) {
-      await generateHaulmerInvoice(invoice.id);
-    }
+  if (payment.invoice && payment.status === 'succeeded') {
+    // Transbank procesa el pago y Haulmer genera la factura automáticamente
+    // Sincronizar información de la factura generada por Haulmer
+    await syncHaulmerInvoice(token, payment.invoice.id);
   }
 }
 ```
@@ -6756,47 +6856,53 @@ export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.Payment
   // ... código existente ...
   
   // Después de actualizar pago:
-  if (payment.invoice) {
-    const { data: invoice } = await supabase
-      .from('invoices')
-      .select('*, order:orders(document_type)')
-      .eq('id', payment.invoice.id)
-      .single();
-    
-    // Stripe genera facturas/boletas automáticamente
-    if (!invoice.external_provider) {
-      await generateStripeInvoice(invoice.id, invoice.order?.document_type || 'invoice');
-    }
+  if (payment.invoice && paymentIntent.status === 'succeeded') {
+    // Stripe genera facturas automáticamente al procesar el pago
+    // Sincronizar información de la factura generada por Stripe
+    await syncStripeInvoice(paymentIntent.id, payment.invoice.id);
   }
 }
 ```
 
-#### **6. UI para Selección de Tipo de Documento**
+#### **6. UI para Selección de Método de Pago**
 
-**Agregar selector en formulario de checkout:**
+**Mostrar métodos disponibles según restricciones:**
 
 ```typescript
 // apps/web/src/components/checkout/OrderCheckoutForm.tsx
-const [documentType, setDocumentType] = useState<'invoice' | 'boleta'>('invoice');
+const [availableMethods, setAvailableMethods] = useState<string[]>([]);
 
-// En el formulario:
-<Select value={documentType} onValueChange={setDocumentType}>
-  <SelectTrigger>
-    <SelectValue placeholder="Tipo de documento" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="invoice">Factura</SelectItem>
-    <SelectItem value="boleta">Boleta</SelectItem>
-  </SelectContent>
-</Select>
+useEffect(() => {
+  async function loadMethods() {
+    const methods = await getAvailablePaymentMethods(organizationId);
+    setAvailableMethods(methods);
+  }
+  loadMethods();
+}, [organizationId]);
 
-// Si selecciona boleta, mostrar mensaje informativo
-{documentType === 'boleta' && (
-  <Alert>
-    <AlertDescription>
-      Las boletas se generan mediante Stripe. Si seleccionas otro medio de pago, se generará una factura.
-    </AlertDescription>
-  </Alert>
+// En el formulario, mostrar solo métodos disponibles:
+{availableMethods.includes('stripe') && (
+  <PaymentMethodOption 
+    value="stripe" 
+    label="Tarjeta de Crédito/Débito (Stripe)"
+    description="Pago seguro con Stripe"
+  />
+)}
+
+{availableMethods.includes('transbank_webpay_plus') && (
+  <PaymentMethodOption 
+    value="transbank_webpay_plus" 
+    label="Webpay Plus (Transbank)"
+    description="Solo disponible para empresas chilenas con CLP"
+  />
+)}
+
+{availableMethods.includes('transbank_oneclick') && (
+  <PaymentMethodOption 
+    value="transbank_oneclick" 
+    label="OneClick (Transbank)"
+    description="Pago rápido con tarjeta guardada"
+  />
 )}
 ```
 
@@ -6837,17 +6943,20 @@ const [documentType, setDocumentType] = useState<'invoice' | 'boleta'>('invoice'
 
 ### ✅ **Checklist de Implementación**
 
-- [ ] ✅ Migración SQL: Agregar campos `document_type`, `external_provider`, `external_document_id`, etc.
-- [ ] ✅ Integración Haulmer: Crear cliente API y funciones de facturación
-- [ ] ✅ Lógica de selección: Determinar proveedor según tipo de documento y medio de pago
-- [ ] ✅ Generación Stripe: Función para generar facturas/boletas con Stripe
-- [ ] ✅ Generación Haulmer: Función para generar facturas con Haulmer
-- [ ] ✅ Webhooks: Actualizar para generar documentos después del pago
-- [ ] ✅ UI: Selector de tipo de documento en checkout
-- [ ] ✅ Validación: Prevenir boletas con medios de pago no-Stripe
-- [ ] ✅ Visualización: Página para descargar PDFs/XMLs según proveedor
-- [ ] ✅ Testing: Probar flujo completo con ambos tipos de documento
-- [ ] ✅ Documentación: Actualizar documentación de facturación
+- [ ] ✅ Migración SQL: Agregar campos `external_provider`, `external_document_id`, `external_pdf_url`, `external_xml_url`, `external_status` a tabla `invoices`
+- [ ] ✅ Migración SQL: Agregar campo `currency` a tabla `organizations` (si no existe)
+- [ ] ✅ Lógica de disponibilidad: Función `isTransbankAvailable()` que verifica país, tipo B2B y moneda CLP
+- [ ] ✅ Integración Haulmer: Crear cliente API y función `syncHaulmerInvoice()` para sincronizar facturas generadas automáticamente
+- [ ] ✅ Integración Stripe: Función `syncStripeInvoice()` para sincronizar facturas generadas automáticamente
+- [ ] ✅ Webhooks Transbank: Actualizar para sincronizar factura de Haulmer después del pago exitoso
+- [ ] ✅ Webhooks Stripe: Actualizar para sincronizar factura de Stripe después del pago exitoso
+- [ ] ✅ UI Checkout: Filtrar métodos de pago disponibles según restricciones (mostrar Transbank solo si aplica)
+- [ ] ✅ UI Configuración: Permitir seleccionar moneda (CLP) en configuración de organización B2B
+- [ ] ✅ Visualización: Página para descargar PDFs/XMLs según proveedor externo
+- [ ] ✅ Testing: Probar flujo completo con Stripe (todos los usuarios)
+- [ ] ✅ Testing: Probar flujo completo con Transbank (solo B2B Chile con CLP)
+- [ ] ✅ Testing: Verificar que usuarios no elegibles no vean Transbank como opción
+- [ ] ✅ Documentación: Actualizar documentación de facturación con nueva lógica
 
 ### 📚 **Referencias**
 
@@ -6857,13 +6966,28 @@ const [documentType, setDocumentType] = useState<'invoice' | 'boleta'>('invoice'
 
 ### ⚠️ **Consideraciones Importantes**
 
-1. **Validación de RUT**: Haulmer requiere RUT válido de la organización
-2. **Datos de Cliente**: Asegurar que los datos de la organización estén completos para Haulmer
-3. **Ambiente**: Configurar correctamente ambiente sandbox/producción de Haulmer
-4. **Manejo de Errores**: Implementar retry logic para creación de facturas en Haulmer
-5. **Sincronización**: Mantener sincronizado estado entre nuestra BD y proveedores externos
-6. **Boletas**: Recordar que boletas SOLO pueden generarse con Stripe
+1. **Facturación Automática**: Los proveedores (Stripe y Haulmer) generan las facturas automáticamente. Nuestro sistema solo sincroniza la información, no genera facturas manualmente.
+
+2. **Restricciones de Transbank**: Transbank SOLO está disponible cuando se cumplen TODAS estas condiciones:
+   - País: Chile (CL)
+   - Tipo de usuario: B2B (organización empresarial)
+   - Moneda configurada: CLP (Peso Chileno)
+   - Si alguna condición no se cumple, solo Stripe está disponible
+
+3. **Validación de RUT**: Haulmer requiere RUT válido de la organización para generar facturas. Asegurar que las organizaciones B2B chilenas tengan RUT completo.
+
+4. **Datos de Cliente**: Asegurar que los datos de la organización estén completos para sincronización con Haulmer (RUT, razón social, dirección, etc.)
+
+5. **Ambiente**: Configurar correctamente ambiente sandbox/producción de Haulmer según el entorno.
+
+6. **Manejo de Errores**: Implementar retry logic para sincronización de facturas si falla la obtención desde los proveedores externos.
+
+7. **Sincronización**: Mantener sincronizado estado entre nuestra BD y proveedores externos. Los webhooks deben sincronizar las facturas inmediatamente después del pago exitoso.
+
+8. **Estado de Pagos**: ✅ **Los pagos con Stripe y Transbank ya están funcionando correctamente** - Solo falta implementar la sincronización de facturas.
+
+9. **Configuración de Moneda**: Las organizaciones B2B deben poder configurar su moneda preferida (CLP para habilitar Transbank). El campo `currency` debe estar en la tabla `organizations`.
 
 ---
 
-**📋 Este milestone establecerá un sistema robusto de facturación electrónica que cumple con los requisitos legales chilenos y proporciona flexibilidad según el tipo de documento solicitado.**
+**📋 Este milestone establecerá un sistema robusto de sincronización de facturación electrónica automática. Los proveedores (Stripe y Haulmer) generan las facturas automáticamente al procesar los pagos, y nuestro sistema sincroniza la información para mantener los registros actualizados. Transbank solo está disponible para organizaciones B2B chilenas con CLP configurado, mientras que Stripe está disponible para todos los usuarios.**
