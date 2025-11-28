@@ -17,6 +17,18 @@ export async function handleStripeWebhook(event: StripeWebhookEvent) {
       await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
       break;
     
+    case 'checkout.session.completed':
+      // El checkout.session.completed también dispara payment_intent.succeeded
+      // pero podemos usarlo para logging adicional
+      const session = event.data.object as Stripe.Checkout.Session;
+      console.log('🔔 Webhook recibido: checkout.session.completed', {
+        sessionId: session.id,
+        paymentIntentId: session.payment_intent,
+        metadata: session.metadata,
+      });
+      // El payment_intent.succeeded ya maneja todo, solo logueamos aquí
+      break;
+    
     case 'customer.subscription.created':
       await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
       break;
@@ -65,7 +77,8 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   }
   
   // Buscar pago en BD (usar vista pública)
-  const { data: payment, error: paymentError } = await supabase
+  // Primero buscar por payment_intent.id
+  let { data: payment, error: paymentError } = await supabase
     .from('payments')
     .select(`
       *,
@@ -78,11 +91,52 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     `)
     .eq('provider_payment_id', paymentIntent.id)
     .eq('provider', 'stripe')
-    .single();
+    .maybeSingle();
   
+  // Si no se encuentra, buscar por order_id en metadata (pago temporal con session_id)
   if (paymentError || !payment) {
+    if (paymentIntent.metadata?.order_id) {
+      console.log('🔍 Buscando pago temporal por order_id:', paymentIntent.metadata.order_id);
+      const { data: tempPayment, error: tempError } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            id,
+            organization_id,
+            type,
+            status
+          )
+        `)
+        .eq('provider', 'stripe')
+        .eq('metadata->>order_id', paymentIntent.metadata.order_id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (!tempError && tempPayment) {
+        console.log('✅ Pago temporal encontrado, actualizando provider_payment_id');
+        payment = tempPayment;
+        // Actualizar el provider_payment_id al payment_intent.id real
+        await supabase
+          .from('payments')
+          .update({
+            provider_payment_id: paymentIntent.id,
+            metadata: {
+              ...tempPayment.metadata,
+              is_temporary: false,
+            },
+          })
+          .eq('id', tempPayment.id);
+      }
+    }
+  }
+  
+  if (!payment) {
     console.error('❌ Payment record not found for Stripe PaymentIntent:', {
       paymentIntentId: paymentIntent.id,
+      orderId: paymentIntent.metadata?.order_id,
       error: paymentError?.message,
     });
     return;

@@ -252,9 +252,8 @@ async function OrderSuccessContent({
     if (sessionId) {
       console.log('[OrderSuccess] Buscando pago Stripe con session_id:', sessionId);
       
-      // Buscar pago por orderId y provider Stripe
-      // El webhook ya debería haber procesado el pago, pero buscamos el más reciente
-      const { data, error } = await supabase
+      // Primero buscar por checkout_session_id en metadata
+      const { data: sessionPayment, error: sessionError } = await supabase
         .from('payments')
         .select(`
           *,
@@ -268,24 +267,52 @@ async function OrderSuccessContent({
           )
         `)
         .eq('provider', 'stripe')
-        .eq('metadata->>order_id', orderId)
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('metadata->>checkout_session_id', sessionId)
         .maybeSingle();
       
-      if (error) {
-        console.error('[OrderSuccess] Error buscando pago Stripe:', error);
-      } else if (data) {
-        console.log('[OrderSuccess] Pago Stripe encontrado:', {
-          id: data.id,
-          status: data.status,
-          provider_payment_id: data.provider_payment_id,
+      if (sessionError) {
+        console.error('[OrderSuccess] Error buscando pago por session_id:', sessionError);
+      } else if (sessionPayment) {
+        console.log('[OrderSuccess] Pago Stripe encontrado por session_id:', {
+          id: sessionPayment.id,
+          status: sessionPayment.status,
+          provider_payment_id: sessionPayment.provider_payment_id,
         });
-        payment = data;
+        payment = sessionPayment;
       } else {
-        // Si no encontramos el pago, puede que el webhook aún no lo haya procesado
-        // Buscar por payment_intent_id si tenemos el session_id
-        console.log('[OrderSuccess] No se encontró pago, el webhook puede estar procesándolo aún');
+        // Si no encontramos por session_id, buscar por orderId
+        console.log('[OrderSuccess] No se encontró por session_id, buscando por orderId...');
+        const { data, error } = await supabase
+          .from('payments')
+          .select(`
+            *,
+            invoice:invoices (
+              invoice_number,
+              total,
+              currency,
+              id,
+              organization_id,
+              type
+            )
+          `)
+          .eq('provider', 'stripe')
+          .eq('metadata->>order_id', orderId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('[OrderSuccess] Error buscando pago Stripe por orderId:', error);
+        } else if (data) {
+          console.log('[OrderSuccess] Pago Stripe encontrado por orderId:', {
+            id: data.id,
+            status: data.status,
+            provider_payment_id: data.provider_payment_id,
+          });
+          payment = data;
+        } else {
+          console.log('[OrderSuccess] No se encontró pago, el webhook puede estar procesándolo aún');
+        }
       }
     } else {
       // Si no hay session_id, buscar el último pago de Stripe para esta orden

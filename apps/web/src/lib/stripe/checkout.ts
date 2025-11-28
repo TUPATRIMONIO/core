@@ -254,6 +254,14 @@ export async function createPaymentIntentForOrder(
         status: 'pending',
         metadata: {
           checkout_session_id: checkoutSession.id,
+          order_id: orderId,
+          order_number: order.order_number,
+          product_type: order.product_type,
+          product_id: order.product_id || '',
+          type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+          ...(order.product_type === 'credits' && productData.credits_amount 
+            ? { credits_amount: productData.credits_amount.toString() }
+            : {}),
         },
       })
       .select()
@@ -262,6 +270,46 @@ export async function createPaymentIntentForOrder(
     if (paymentError) {
       console.error('Error creando registro de pago:', paymentError);
       // No fallar si hay error aquí, el webhook lo manejará
+    } else {
+      payment = paymentData;
+      
+      // Actualizar orden con payment_id
+      await updateOrderStatus(orderId, 'pending_payment', { 
+        invoiceId: invoice.id,
+        paymentId: payment.id 
+      });
+    }
+  } else {
+    // Si no hay payment_intent aún, crear registro con checkout_session_id como provider_payment_id temporal
+    // El webhook lo actualizará cuando se complete el pago
+    const { data: paymentData, error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        organization_id: order.organization_id,
+        invoice_id: invoice.id,
+        provider: 'stripe',
+        provider_payment_id: checkoutSession.id, // Usar session_id temporalmente
+        amount: amount + tax,
+        currency,
+        status: 'pending',
+        metadata: {
+          checkout_session_id: checkoutSession.id,
+          order_id: orderId,
+          order_number: order.order_number,
+          product_type: order.product_type,
+          product_id: order.product_id || '',
+          type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+          ...(order.product_type === 'credits' && productData.credits_amount 
+            ? { credits_amount: productData.credits_amount.toString() }
+            : {}),
+          is_temporary: true, // Marcar como temporal hasta que el webhook lo actualice
+        },
+      })
+      .select()
+      .single();
+    
+    if (paymentError) {
+      console.error('Error creando registro de pago temporal:', paymentError);
     } else {
       payment = paymentData;
       
