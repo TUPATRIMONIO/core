@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createOneclickInscription } from '@/lib/transbank/checkout';
+import { listOneclickCards } from '@/lib/transbank/payment-methods';
 
 async function getOrCreateOrganization(userId: string, userEmail: string) {
   const supabase = await createClient();
@@ -44,7 +44,7 @@ async function getOrCreateOrganization(userId: string, userEmail: string) {
   return newOrg.id;
 }
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     
@@ -60,53 +60,12 @@ export async function POST(request: NextRequest) {
     // Obtener o crear organización
     const organizationId = await getOrCreateOrganization(user.id, user.email || 'test@tupatrimonio.com');
     
-    const body = await request.json();
-    let { username, returnUrl } = body;
+    // Listar tarjetas OneClick
+    const cards = await listOneclickCards(organizationId);
     
-    // Si no se proporciona username, usar email del usuario (máximo 40 caracteres según Transbank)
-    if (!username) {
-      const userEmail = user.email || '';
-      if (userEmail.length <= 40) {
-        username = userEmail;
-      } else {
-        // Si el email es muy largo, usar user.id o truncar email manteniendo dominio
-        // Usar user.id como fallback (normalmente UUID es más corto)
-        username = user.id.substring(0, 40);
-      }
-    }
-    
-    // Validar que username no exceda 40 caracteres
-    if (username.length > 40) {
-      username = username.substring(0, 40);
-    }
-    
-    if (!returnUrl) {
-      return NextResponse.json(
-        { error: 'returnUrl es requerido' },
-        { status: 400 }
-      );
-    }
-    
-    // Obtener email de la organización
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('email')
-      .eq('id', organizationId)
-      .single();
-    
-    const result = await createOneclickInscription(
-      organizationId,
-      username,
-      org?.email || user.email || '',
-      returnUrl
-    );
-    
-    return NextResponse.json({
-      token: result.token,
-      url: result.url,
-    });
+    return NextResponse.json({ cards });
   } catch (error: any) {
-    console.error('Error iniciando inscripción Oneclick:', error);
+    console.error('Error listando tarjetas OneClick:', error);
     return NextResponse.json(
       { error: error.message || 'Error interno del servidor' },
       { status: 500 }

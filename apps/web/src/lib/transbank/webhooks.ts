@@ -255,6 +255,8 @@ export async function handleOneclickInscriptionFinish(token: string) {
       tbkUser: inscriptionData.tbk_user,
       username: inscriptionData.username,
       authorizationCode: inscriptionData.authorization_code,
+      card_type: inscriptionData.card_type,
+      card_number: inscriptionData.card_number,
     };
   } catch (error: any) {
     console.error('❌ Error finalizando inscripción Oneclick:', {

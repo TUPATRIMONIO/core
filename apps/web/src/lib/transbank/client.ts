@@ -57,6 +57,13 @@ export interface OneclickInscriptionFinishResponse {
   tbk_user: string;
   username: string;
   authorization_code: string;
+  card_type?: string;
+  card_number?: string;
+}
+
+export interface OneclickInscriptionRemove {
+  tbk_user: string;
+  username: string;
 }
 
 export interface OneclickPaymentStart {
@@ -125,7 +132,7 @@ class TransbankClient {
 
   private async makeRequest<T>(
     endpoint: string,
-    method: 'GET' | 'POST' | 'PUT',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     credentials: TransbankCredentials,
     body?: any
   ): Promise<T> {
@@ -151,6 +158,17 @@ class TransbankClient {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Transbank API error: ${response.status} - ${errorText}`);
+    }
+
+    // DELETE devuelve 204 sin cuerpo
+    if (method === 'DELETE' && response.status === 204) {
+      return undefined as T;
+    }
+
+    // Si no hay contenido, retornar undefined
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return undefined as T;
     }
 
     return response.json();
@@ -261,6 +279,22 @@ class TransbankClient {
       'GET',
       this.tiendaMallOneclickCredentials
     );
+  }
+
+  /**
+   * Elimina una inscripción Oneclick
+   */
+  async removeOneclickInscription(
+    removeData: OneclickInscriptionRemove
+  ): Promise<void> {
+    const response = await this.makeRequest<any>(
+      '/rswebpaytransaction/api/oneclick/v1.2/inscriptions',
+      'DELETE',
+      this.oneclickCredentials,
+      removeData
+    );
+    // La respuesta es 204 sin cuerpo, así que no retornamos nada
+    return;
   }
 }
 

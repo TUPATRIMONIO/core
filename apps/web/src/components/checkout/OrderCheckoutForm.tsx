@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, CreditCard, XCircle } from 'lucide-react';
+import { Loader2, CreditCard, XCircle, Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
+import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
 
 interface OrderCheckoutFormProps {
   orderId: string;
@@ -27,6 +28,49 @@ export default function OrderCheckoutForm({
   const [activeTab, setActiveTab] = useState<'webpay' | 'oneclick'>('webpay');
   const [oneclickUsername, setOneclickUsername] = useState('');
   const [oneclickTbkUser, setOneclickTbkUser] = useState<string | null>(null);
+  const [savedCards, setSavedCards] = useState<OneclickCard[]>([]);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [showAddCardForm, setShowAddCardForm] = useState(false);
+  const [loadingCards, setLoadingCards] = useState(true);
+
+  // Cargar tarjetas guardadas y obtener email del usuario
+  useEffect(() => {
+    const loadCardsAndUserEmail = async () => {
+      try {
+        // Obtener email del usuario desde la sesión
+        const userResponse = await fetch('/api/auth/user');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          if (userData.email) {
+            // Pre-llenar username con email (truncado a 40 caracteres si es necesario)
+            const email = userData.email;
+            setOneclickUsername(email.length <= 40 ? email : email.substring(0, 40));
+          }
+        }
+
+        // Cargar tarjetas guardadas
+        const cardsResponse = await fetch('/api/transbank/oneclick/cards');
+        if (cardsResponse.ok) {
+          const cardsData = await cardsResponse.json();
+          setSavedCards(cardsData.cards || []);
+          
+          // Seleccionar tarjeta predeterminada si existe
+          const defaultCard = cardsData.cards?.find((c: OneclickCard) => c.is_default);
+          if (defaultCard) {
+            setSelectedCardId(defaultCard.id);
+            setOneclickTbkUser(defaultCard.provider_payment_method_id);
+            setOneclickUsername(defaultCard.metadata?.username || oneclickUsername);
+          }
+        }
+      } catch (err) {
+        console.error('Error cargando tarjetas:', err);
+      } finally {
+        setLoadingCards(false);
+      }
+    };
+
+    loadCardsAndUserEmail();
+  }, []);
 
   // Detectar si el usuario regresó de una inscripción Oneclick exitosa
   useEffect(() => {
@@ -44,6 +88,20 @@ export default function OrderCheckoutForm({
             setOneclickTbkUser(data.tbkUser);
             setOneclickUsername(data.username || '');
             setActiveTab('oneclick');
+            setShowAddCardForm(false);
+            // Recargar tarjetas
+            fetch('/api/transbank/oneclick/cards')
+              .then(res => res.json())
+              .then(cardsData => {
+                setSavedCards(cardsData.cards || []);
+                // Seleccionar la tarjeta recién creada si existe
+                const newCard = cardsData.cards?.find(
+                  (c: OneclickCard) => c.provider_payment_method_id === data.tbkUser
+                );
+                if (newCard) {
+                  setSelectedCardId(newCard.id);
+                }
+              });
             // Limpiar URL
             router.replace(window.location.pathname, { scroll: false });
           }
@@ -199,8 +257,20 @@ export default function OrderCheckoutForm({
   };
 
   const handleOneclickPayment = async () => {
-    if (!oneclickTbkUser) {
-      setError('Primero debes inscribir tu tarjeta');
+    // Obtener tbkUser y username de la tarjeta seleccionada o del estado actual
+    let tbkUserToUse = oneclickTbkUser;
+    let usernameToUse = oneclickUsername;
+
+    if (selectedCardId) {
+      const selectedCard = savedCards.find(c => c.id === selectedCardId);
+      if (selectedCard) {
+        tbkUserToUse = selectedCard.provider_payment_method_id;
+        usernameToUse = selectedCard.metadata?.username || oneclickUsername;
+      }
+    }
+
+    if (!tbkUserToUse) {
+      setError('Primero debes seleccionar o inscribir una tarjeta');
       return;
     }
 
@@ -215,8 +285,8 @@ export default function OrderCheckoutForm({
         },
         body: JSON.stringify({ 
           orderId,
-          tbkUser: oneclickTbkUser,
-          username: oneclickUsername,
+          tbkUser: tbkUserToUse,
+          username: usernameToUse,
         }),
       });
 
@@ -236,6 +306,30 @@ export default function OrderCheckoutForm({
       const errorMessage = err.message || 'Error al procesar el pago';
       setError(errorMessage);
       setLoading(false);
+    }
+  };
+
+  const handleCardSelect = (cardId: string) => {
+    setSelectedCardId(cardId);
+    const selectedCard = savedCards.find(c => c.id === cardId);
+    if (selectedCard) {
+      setOneclickTbkUser(selectedCard.provider_payment_method_id);
+      setOneclickUsername(selectedCard.metadata?.username || oneclickUsername);
+    }
+  };
+
+  const handleCardDeleted = async () => {
+    // Recargar tarjetas
+    const cardsResponse = await fetch('/api/transbank/oneclick/cards');
+    if (cardsResponse.ok) {
+      const cardsData = await cardsResponse.json();
+      setSavedCards(cardsData.cards || []);
+      
+      // Si se eliminó la tarjeta seleccionada, limpiar selección
+      if (!cardsData.cards?.find((c: OneclickCard) => c.id === selectedCardId)) {
+        setSelectedCardId(null);
+        setOneclickTbkUser(null);
+      }
     }
   };
 
@@ -403,51 +497,30 @@ export default function OrderCheckoutForm({
                 </Alert>
               )}
 
-              {!oneclickTbkUser ? (
+              {loadingCards ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : savedCards.length > 0 && !showAddCardForm ? (
                 <>
-                  <div className="space-y-2">
-                    <label htmlFor="username" className="text-sm font-medium">
-                      Nombre de usuario
-                    </label>
-                    <input
-                      id="username"
-                      type="text"
-                      value={oneclickUsername}
-                      onChange={(e) => setOneclickUsername(e.target.value)}
-                      placeholder="Ingresa un nombre de usuario"
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      disabled={loading}
+                  <div className="space-y-3">
+                    <OneclickCardsList
+                      cards={savedCards}
+                      selectedCardId={selectedCardId || undefined}
+                      onCardSelect={handleCardSelect}
+                      onCardDeleted={handleCardDeleted}
+                      showActions={true}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Este nombre identificará tu tarjeta guardada
-                    </p>
                   </div>
 
                   <Button
-                    onClick={handleOneclickInscription}
-                    disabled={loading || !oneclickUsername.trim()}
-                    className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+                    variant="outline"
+                    onClick={() => setShowAddCardForm(true)}
+                    className="w-full"
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Inscribir Tarjeta
-                      </>
-                    )}
+                    <Plus className="mr-2 h-4 w-4" />
+                    Agregar otra tarjeta
                   </Button>
-                </>
-              ) : (
-                <>
-                  <Alert>
-                    <AlertDescription>
-                      Tarjeta inscrita correctamente. Puedes proceder con el pago.
-                    </AlertDescription>
-                  </Alert>
 
                   <div className="rounded-lg border p-4 bg-muted/50">
                     <div className="flex items-center justify-between">
@@ -463,7 +536,7 @@ export default function OrderCheckoutForm({
 
                   <Button
                     onClick={handleOneclickPayment}
-                    disabled={loading}
+                    disabled={loading || !selectedCardId}
                     className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
                   >
                     {loading ? (
@@ -475,6 +548,59 @@ export default function OrderCheckoutForm({
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
                         Pagar con Oneclick
+                      </>
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="username" className="text-sm font-medium">
+                      Nombre de usuario
+                    </label>
+                    <input
+                      id="username"
+                      type="text"
+                      value={oneclickUsername}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Limitar a 40 caracteres según Transbank
+                        setOneclickUsername(value.length <= 40 ? value : value.substring(0, 40));
+                      }}
+                      placeholder="Ingresa un nombre de usuario"
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      disabled={loading}
+                      maxLength={40}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Este nombre identificará tu tarjeta guardada (máximo 40 caracteres)
+                    </p>
+                  </div>
+
+                  {savedCards.length > 0 && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAddCardForm(false)}
+                      className="w-full"
+                    >
+                      Cancelar
+                    </Button>
+                  )}
+
+                  <Button
+                    onClick={handleOneclickInscription}
+                    disabled={loading || !oneclickUsername.trim()}
+                    className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Inscribir Tarjeta
                       </>
                     )}
                   </Button>

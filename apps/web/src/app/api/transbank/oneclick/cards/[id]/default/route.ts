@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createOneclickInscription } from '@/lib/transbank/checkout';
+import { setDefaultOneclickCard } from '@/lib/transbank/payment-methods';
 
 async function getOrCreateOrganization(userId: string, userEmail: string) {
   const supabase = await createClient();
@@ -44,7 +44,10 @@ async function getOrCreateOrganization(userId: string, userEmail: string) {
   return newOrg.id;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = await createClient();
     
@@ -57,56 +60,27 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Obtener o crear organización
-    const organizationId = await getOrCreateOrganization(user.id, user.email || 'test@tupatrimonio.com');
+    const { id } = await params;
     
-    const body = await request.json();
-    let { username, returnUrl } = body;
-    
-    // Si no se proporciona username, usar email del usuario (máximo 40 caracteres según Transbank)
-    if (!username) {
-      const userEmail = user.email || '';
-      if (userEmail.length <= 40) {
-        username = userEmail;
-      } else {
-        // Si el email es muy largo, usar user.id o truncar email manteniendo dominio
-        // Usar user.id como fallback (normalmente UUID es más corto)
-        username = user.id.substring(0, 40);
-      }
-    }
-    
-    // Validar que username no exceda 40 caracteres
-    if (username.length > 40) {
-      username = username.substring(0, 40);
-    }
-    
-    if (!returnUrl) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'returnUrl es requerido' },
+        { error: 'ID de tarjeta es requerido' },
         { status: 400 }
       );
     }
     
-    // Obtener email de la organización
-    const { data: org } = await supabase
-      .from('organizations')
-      .select('email')
-      .eq('id', organizationId)
-      .single();
+    // Obtener o crear organización
+    const organizationId = await getOrCreateOrganization(user.id, user.email || 'test@tupatrimonio.com');
     
-    const result = await createOneclickInscription(
-      organizationId,
-      username,
-      org?.email || user.email || '',
-      returnUrl
-    );
+    // Marcar tarjeta como predeterminada
+    const updatedCard = await setDefaultOneclickCard(organizationId, id);
     
-    return NextResponse.json({
-      token: result.token,
-      url: result.url,
+    return NextResponse.json({ 
+      success: true,
+      card: updatedCard 
     });
   } catch (error: any) {
-    console.error('Error iniciando inscripción Oneclick:', error);
+    console.error('Error marcando tarjeta como predeterminada:', error);
     return NextResponse.json(
       { error: error.message || 'Error interno del servidor' },
       { status: 500 }
