@@ -322,10 +322,20 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         });
         
         // Actualizar orden a 'completed' cuando se procesa el producto
+        // Solo si ya está en estado 'paid' (no saltar directamente desde 'pending_payment')
         if (order) {
-          await updateOrderStatus(order.id, 'completed', {
-            supabaseClient: supabase, // Pasar service role client para bypass RLS
-          });
+          // Recargar el estado actual de la orden desde la BD para asegurar que esté actualizado
+          const { data: currentOrder } = await supabase
+            .from('orders')
+            .select('id, status')
+            .eq('id', order.id)
+            .single();
+          
+          if (currentOrder && currentOrder.status === 'paid') {
+            await updateOrderStatus(order.id, 'completed', {
+              supabaseClient: supabase, // Pasar service role client para bypass RLS
+            });
+          }
         }
         
         // Notificar créditos agregados
