@@ -122,6 +122,15 @@ class TransbankClient {
       commerceCode: process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || '',
       apiKeySecret: process.env.TRANSBANK_TIENDA_MALL_ONECLICK_API_KEY_SECRET || '',
     };
+
+    // Validar credenciales Tienda Mall Oneclick en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      if (!this.tiendaMallOneclickCredentials.commerceCode || !this.tiendaMallOneclickCredentials.apiKeySecret) {
+        console.warn('⚠️ [Transbank] Credenciales Tienda Mall Oneclick no configuradas');
+      } else {
+        console.log('✅ [Transbank] Tienda Mall Oneclick Commerce Code configurado:', this.tiendaMallOneclickCredentials.commerceCode.substring(0, 10) + '...');
+      }
+    }
   }
 
   private getBaseUrl(): string {
@@ -138,6 +147,11 @@ class TransbankClient {
   ): Promise<T> {
     const url = `${this.getBaseUrl()}${endpoint}`;
     
+    // Validar credenciales antes de hacer la petición
+    if (!credentials.commerceCode || !credentials.apiKeySecret) {
+      throw new Error(`Credenciales de Transbank no configuradas para endpoint: ${endpoint}. Commerce Code: ${credentials.commerceCode ? 'configurado' : 'FALTANTE'}, API Key Secret: ${credentials.apiKeySecret ? 'configurado' : 'FALTANTE'}`);
+    }
+    
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       'Tbk-Api-Key-Id': credentials.commerceCode, // El commerce_code es el mismo que api_key_id
@@ -153,10 +167,26 @@ class TransbankClient {
       options.body = JSON.stringify(body);
     }
 
+    console.log('📡 [Transbank API Request]', {
+      method,
+      endpoint,
+      url,
+      commerceCode: credentials.commerceCode.substring(0, 10) + '...',
+      hasBody: !!body,
+      environment: this.environment,
+    });
+
     const response = await fetch(url, options);
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('❌ [Transbank API Error]', {
+        status: response.status,
+        statusText: response.statusText,
+        endpoint,
+        errorText,
+        commerceCode: credentials.commerceCode.substring(0, 10) + '...',
+      });
       throw new Error(`Transbank API error: ${response.status} - ${errorText}`);
     }
 
@@ -247,6 +277,18 @@ class TransbankClient {
   async startOneclickPayment(
     payment: OneclickPaymentStart
   ): Promise<OneclickPaymentStartResponse> {
+    // Validar que las credenciales estén configuradas
+    if (!this.tiendaMallOneclickCredentials.commerceCode || !this.tiendaMallOneclickCredentials.apiKeySecret) {
+      throw new Error('Credenciales de Tienda Mall Oneclick no configuradas. Verifica las variables de entorno TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE y TRANSBANK_TIENDA_MALL_ONECLICK_API_KEY_SECRET');
+    }
+
+    console.log('🔐 [Transbank Oneclick Payment] Usando credenciales:', {
+      commerceCode: this.tiendaMallOneclickCredentials.commerceCode.substring(0, 10) + '...',
+      environment: this.environment,
+      buyOrder: payment.buy_order,
+      amount: payment.amount,
+    });
+
     return this.makeRequest<OneclickPaymentStartResponse>(
       '/rswebpaytransaction/api/oneclick/v1.2/transactions',
       'POST',
