@@ -8,7 +8,6 @@ export async function listOneclickCards(orgId: string) {
   const supabase = await createClient();
   
   const { data, error } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('*')
     .eq('organization_id', orgId)
@@ -33,7 +32,6 @@ export async function setDefaultOneclickCard(orgId: string, cardId: string) {
   
   // Verificar que la tarjeta pertenece a la organización
   const { data: card, error: cardError } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('*')
     .eq('id', cardId)
@@ -49,7 +47,6 @@ export async function setDefaultOneclickCard(orgId: string, cardId: string) {
   
   // Quitar default de otras tarjetas
   await supabase
-    .schema('billing')
     .from('payment_methods')
     .update({ is_default: false })
     .eq('organization_id', orgId)
@@ -59,7 +56,6 @@ export async function setDefaultOneclickCard(orgId: string, cardId: string) {
   
   // Marcar esta tarjeta como default
   const { data: updatedCard, error: updateError } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .update({ 
       is_default: true,
@@ -84,7 +80,6 @@ export async function deleteOneclickCard(orgId: string, cardId: string) {
   
   // Obtener información de la tarjeta
   const { data: card, error: cardError } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('*')
     .eq('id', cardId)
@@ -120,7 +115,6 @@ export async function deleteOneclickCard(orgId: string, cardId: string) {
   
   // Hacer soft delete en BD
   const { data: deletedCard, error: deleteError } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .update({ 
       deleted_at: new Date().toISOString(),
@@ -155,7 +149,6 @@ export async function saveOneclickCard(
   
   // Verificar si ya existe una tarjeta con este tbkUser
   const { data: existingCard } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('id')
     .eq('organization_id', orgId)
@@ -167,7 +160,6 @@ export async function saveOneclickCard(
   if (existingCard) {
     // Actualizar tarjeta existente
     const { data: updatedCard, error: updateError } = await supabase
-      .schema('billing')
       .from('payment_methods')
       .update({
         last4: cardData.card_number || null,
@@ -193,7 +185,6 @@ export async function saveOneclickCard(
   
   // Verificar si hay otras tarjetas para determinar si debe ser default
   const { data: existingMethods } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .select('is_default')
     .eq('organization_id', orgId)
@@ -206,7 +197,6 @@ export async function saveOneclickCard(
   // Si debe ser default, quitar default de otras tarjetas
   if (shouldBeDefault && existingMethods && existingMethods.length > 0) {
     await supabase
-      .schema('billing')
       .from('payment_methods')
       .update({ is_default: false })
       .eq('organization_id', orgId)
@@ -217,7 +207,6 @@ export async function saveOneclickCard(
   
   // Crear nueva tarjeta
   const { data: newCard, error: insertError } = await supabase
-    .schema('billing')
     .from('payment_methods')
     .insert({
       organization_id: orgId,
