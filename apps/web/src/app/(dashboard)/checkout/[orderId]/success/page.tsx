@@ -9,6 +9,7 @@ import { getOrder, updateOrderStatus } from '@/lib/checkout/core';
 import { notFound, redirect } from 'next/navigation';
 import { addCredits } from '@/lib/credits/core';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
+import { stripe } from '@/lib/stripe/client';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -458,7 +459,94 @@ async function OrderSuccessContent({
           status: sessionPayment.status,
           provider_payment_id: sessionPayment.provider_payment_id,
         });
-        payment = sessionPayment;
+        
+        // Si el pago está pendiente, verificar el estado del checkout session con Stripe
+        if (sessionPayment.status === 'pending') {
+          console.log('[OrderSuccess] Pago pendiente, verificando estado del checkout session con Stripe...');
+          
+          try {
+            // Obtener el checkout session de Stripe
+            const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId);
+            
+            console.log('[OrderSuccess] Estado del checkout session:', {
+              sessionId: checkoutSession.id,
+              status: checkoutSession.status,
+              paymentStatus: checkoutSession.payment_status,
+              paymentIntentId: checkoutSession.payment_intent,
+            });
+            
+            // Si el checkout session está completo y el pago fue exitoso
+            if (checkoutSession.status === 'complete' && checkoutSession.payment_status === 'paid') {
+              console.log('[OrderSuccess] Checkout session completado, actualizando estado del pago...');
+              
+              // Actualizar el provider_payment_id si es necesario (puede ser temporal con session_id)
+              const paymentIntentId = typeof checkoutSession.payment_intent === 'string' 
+                ? checkoutSession.payment_intent 
+                : checkoutSession.payment_intent?.id;
+              
+              // Actualizar pago a succeeded
+              const { data: updatedPayment, error: updateError } = await supabase
+                .from('payments')
+                .update({
+                  status: 'succeeded',
+                  provider_payment_id: paymentIntentId || sessionPayment.provider_payment_id,
+                  processed_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                  metadata: {
+                    ...sessionPayment.metadata,
+                    checkout_session_status: checkoutSession.status,
+                    payment_status: checkoutSession.payment_status,
+                  },
+                })
+                .eq('id', sessionPayment.id)
+                .select(`
+                  *,
+                  invoice:invoices (
+                    invoice_number,
+                    total,
+                    currency,
+                    id,
+                    organization_id,
+                    type
+                  )
+                `)
+                .single();
+              
+              if (updateError) {
+                console.error('[OrderSuccess] Error actualizando estado del pago:', updateError);
+                payment = sessionPayment;
+              } else {
+                console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
+                payment = updatedPayment;
+                
+                // Actualizar factura si existe
+                if (payment.invoice) {
+                  await supabase
+                    .from('invoices')
+                    .update({
+                      status: 'paid',
+                      paid_at: new Date().toISOString(),
+                    })
+                    .eq('id', payment.invoice.id);
+                }
+                
+                // Actualizar orden a 'paid'
+                await updateOrderStatus(orderId, 'paid', {
+                  paymentId: payment.id,
+                });
+              }
+            } else {
+              // El checkout session aún no está completo, usar el pago como está
+              payment = sessionPayment;
+            }
+          } catch (stripeError: any) {
+            console.error('[OrderSuccess] Error verificando checkout session con Stripe:', stripeError);
+            // Si hay error, usar el pago como está
+            payment = sessionPayment;
+          }
+        } else {
+          payment = sessionPayment;
+        }
       } else {
         // Si no encontramos por session_id, buscar por orderId
         console.log('[OrderSuccess] No se encontró por session_id, buscando por orderId...');
@@ -489,7 +577,79 @@ async function OrderSuccessContent({
             status: data.status,
             provider_payment_id: data.provider_payment_id,
           });
-          payment = data;
+          
+          // Si el pago está pendiente y tenemos session_id, verificar con Stripe
+          if (data.status === 'pending' && sessionId) {
+            console.log('[OrderSuccess] Pago pendiente encontrado por orderId, verificando checkout session...');
+            
+            try {
+              const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId);
+              
+              if (checkoutSession.status === 'complete' && checkoutSession.payment_status === 'paid') {
+                console.log('[OrderSuccess] Checkout session completado, actualizando estado del pago...');
+                
+                const paymentIntentId = typeof checkoutSession.payment_intent === 'string' 
+                  ? checkoutSession.payment_intent 
+                  : checkoutSession.payment_intent?.id;
+                
+                const { data: updatedPayment, error: updateError } = await supabase
+                  .from('payments')
+                  .update({
+                    status: 'succeeded',
+                    provider_payment_id: paymentIntentId || data.provider_payment_id,
+                    processed_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    metadata: {
+                      ...data.metadata,
+                      checkout_session_status: checkoutSession.status,
+                      payment_status: checkoutSession.payment_status,
+                    },
+                  })
+                  .eq('id', data.id)
+                  .select(`
+                    *,
+                    invoice:invoices (
+                      invoice_number,
+                      total,
+                      currency,
+                      id,
+                      organization_id,
+                      type
+                    )
+                  `)
+                  .single();
+                
+                if (updateError) {
+                  console.error('[OrderSuccess] Error actualizando estado del pago:', updateError);
+                  payment = data;
+                } else {
+                  console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
+                  payment = updatedPayment;
+                  
+                  if (payment.invoice) {
+                    await supabase
+                      .from('invoices')
+                      .update({
+                        status: 'paid',
+                        paid_at: new Date().toISOString(),
+                      })
+                      .eq('id', payment.invoice.id);
+                  }
+                  
+                  await updateOrderStatus(orderId, 'paid', {
+                    paymentId: payment.id,
+                  });
+                }
+              } else {
+                payment = data;
+              }
+            } catch (stripeError: any) {
+              console.error('[OrderSuccess] Error verificando checkout session:', stripeError);
+              payment = data;
+            }
+          } else {
+            payment = data;
+          }
         } else {
           console.log('[OrderSuccess] No se encontró pago, el webhook puede estar procesándolo aún');
         }
