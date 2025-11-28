@@ -91,10 +91,15 @@ export async function POST(request: NextRequest) {
       username
     );
     
+    // El pago ya está autorizado, verificar el status
+    const isAuthorized = result.payment?.status === 'authorized';
+    
     return NextResponse.json({
+      success: isAuthorized,
       token: result.token,
-      url: result.url,
+      url: result.url, // Vacío porque el pago ya está autorizado
       invoiceId: result.invoice.id,
+      paymentStatus: result.payment?.status, // Estado del pago (authorized/rejected)
     });
   } catch (error: any) {
     console.error('Error creando pago Oneclick:', error);

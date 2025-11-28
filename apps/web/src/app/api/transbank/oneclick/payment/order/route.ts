@@ -79,16 +79,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Crear pago Oneclick
+    // Crear pago Oneclick (autoriza directamente)
     const result = await createOneclickPaymentForOrder(orderId, tbkUser, username);
     
     return NextResponse.json({
-      success: true,
+      success: result.success, // Basado en si fue autorizado o no
       token: result.token,
-      url: result.url,
+      url: result.url, // Vacío porque el pago ya está autorizado
       orderId: order.id,
       orderNumber: order.order_number,
       invoiceId: result.invoice.id,
+      paymentStatus: result.payment?.status, // Estado del pago (authorized/rejected)
     });
   } catch (error: any) {
     console.error('Error creando pago Oneclick para orden:', error);

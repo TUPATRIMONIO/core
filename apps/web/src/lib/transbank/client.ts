@@ -66,16 +66,40 @@ export interface OneclickInscriptionRemove {
   username: string;
 }
 
+export interface OneclickPaymentDetail {
+  commerce_code: string;
+  buy_order: string;
+  amount: number;
+  installments_number?: number;
+}
+
 export interface OneclickPaymentStart {
   username: string;
   tbk_user: string;
-  buy_order: string;
+  buy_order: string; // Orden de compra del mall (padre)
+  details: OneclickPaymentDetail[]; // Array con las transacciones de cada tienda
+}
+
+export interface OneclickPaymentDetailResponse {
   amount: number;
+  status: string;
+  authorization_code: string;
+  payment_type_code: string;
+  response_code: number;
+  installments_number: number;
+  commerce_code: string;
+  buy_order: string;
+  balance?: number;
 }
 
 export interface OneclickPaymentStartResponse {
-  token: string;
-  url_webpay: string;
+  buy_order: string;
+  card_detail: {
+    card_number: string;
+  };
+  accounting_date: string;
+  transaction_date: string;
+  details: OneclickPaymentDetailResponse[];
 }
 
 export interface OneclickPaymentFinishResponse {
@@ -272,27 +296,27 @@ class TransbankClient {
   }
 
   /**
-   * Inicia pago con Oneclick
+   * Inicia pago con Oneclick (autoriza directamente según documentación)
    */
   async startOneclickPayment(
     payment: OneclickPaymentStart
   ): Promise<OneclickPaymentStartResponse> {
-    // Validar que las credenciales estén configuradas
-    if (!this.tiendaMallOneclickCredentials.commerceCode || !this.tiendaMallOneclickCredentials.apiKeySecret) {
-      throw new Error('Credenciales de Tienda Mall Oneclick no configuradas. Verifica las variables de entorno TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE y TRANSBANK_TIENDA_MALL_ONECLICK_API_KEY_SECRET');
+    // Usar credenciales del Mall Oneclick (las mismas que para inscripción)
+    if (!this.oneclickCredentials.commerceCode || !this.oneclickCredentials.apiKeySecret) {
+      throw new Error('Credenciales de Mall Oneclick no configuradas. Verifica las variables de entorno TRANSBANK_MALL_ONECLICK_COMMERCE_CODE y TRANSBANK_MALL_ONECLICK_API_KEY_SECRET');
     }
 
-    console.log('🔐 [Transbank Oneclick Payment] Usando credenciales:', {
-      commerceCode: this.tiendaMallOneclickCredentials.commerceCode.substring(0, 10) + '...',
+    console.log('🔐 [Transbank Oneclick Payment] Usando credenciales Mall:', {
+      commerceCode: this.oneclickCredentials.commerceCode.substring(0, 10) + '...',
       environment: this.environment,
       buyOrder: payment.buy_order,
-      amount: payment.amount,
+      detailsCount: payment.details.length,
     });
 
     return this.makeRequest<OneclickPaymentStartResponse>(
       '/rswebpaytransaction/api/oneclick/v1.2/transactions',
       'POST',
-      this.tiendaMallOneclickCredentials,
+      this.oneclickCredentials, // Usar credenciales del Mall Oneclick
       payment
     );
   }

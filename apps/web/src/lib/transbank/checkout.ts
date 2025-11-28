@@ -460,21 +460,45 @@ export async function createOneclickPayment(
       type: 'credits',
     });
   
-  // Generar buy_order único
+  // Generar buy_order único para el mall (padre)
   const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
+  // Generar buy_order único para la tienda (hijo)
+  const storeBuyOrder = `TP-STORE-${invoice.id.substring(0, 20)}`;
   
-  // Crear pago Oneclick en Transbank
+  // Obtener commerce_code de la tienda
+  const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
+                            process.env.TRANSBANK_WEBPAY_PLUS_COMMERCE_CODE || '';
+  
+  if (!storeCommerceCode) {
+    throw new Error('Commerce code de tienda no configurado. Configura TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE o TRANSBANK_WEBPAY_PLUS_COMMERCE_CODE');
+  }
+  
+  // Crear pago Oneclick en Transbank (autoriza directamente)
   const payment = await transbankClient.startOneclickPayment({
     username,
     tbk_user: tbkUser,
-    buy_order: buyOrder,
-    amount: transbankAmount,
+    buy_order: buyOrder, // Orden del mall (padre)
+    details: [
+      {
+        commerce_code: storeCommerceCode,
+        buy_order: storeBuyOrder, // Orden de la tienda (hijo)
+        amount: transbankAmount,
+      }
+    ]
   });
   
-  console.log('✅ [Transbank Oneclick] Pago iniciado:', {
-    token: payment.token,
-    url: payment.url_webpay,
-    buyOrder,
+  // La respuesta ya viene autorizada, verificar el resultado
+  const paymentDetail = payment.details[0];
+  const isAuthorized = paymentDetail?.response_code === 0;
+  const paymentStatus = isAuthorized ? 'authorized' : 'rejected';
+  
+  console.log('✅ [Transbank Oneclick] Pago autorizado:', {
+    buyOrder: payment.buy_order,
+    transactionDate: payment.transaction_date,
+    status: paymentDetail?.status,
+    responseCode: paymentDetail?.response_code,
+    authorizationCode: paymentDetail?.authorization_code,
+    isAuthorized,
   });
   
   // Crear registro de pago en BD
@@ -484,18 +508,25 @@ export async function createOneclickPayment(
       organization_id: orgId,
       invoice_id: invoice.id,
       provider: 'transbank',
-      provider_payment_id: payment.token,
+      provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
       currency,
-      status: 'pending',
+      status: paymentStatus,
       metadata: {
-        buy_order: buyOrder,
+        buy_order: payment.buy_order,
+        store_buy_order: storeBuyOrder,
         tbk_user: tbkUser,
         username,
         credits_amount: pkg.credits_amount,
         package_id: packageId,
         type: 'credit_purchase',
         payment_method: 'oneclick',
+        authorization_code: paymentDetail?.authorization_code,
+        transaction_date: payment.transaction_date,
+        accounting_date: payment.accounting_date,
+        card_number: payment.card_detail?.card_number,
+        response_code: paymentDetail?.response_code,
+        payment_type_code: paymentDetail?.payment_type_code,
       },
     })
     .select()
@@ -506,10 +537,11 @@ export async function createOneclickPayment(
   }
   
   return {
-    token: payment.token,
-    url: payment.url_webpay,
+    token: payment.buy_order, // Usar buy_order como token para compatibilidad
+    url: '', // No hay URL, el pago ya está autorizado
     invoice,
     payment: paymentRecord,
+    success: isAuthorized, // Retornar si fue autorizado o no
   };
 }
 
@@ -625,21 +657,45 @@ export async function createOneclickPaymentForOrder(
   // Actualizar orden con invoice_id
   await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
   
-  // Generar buy_order único (máximo 26 caracteres)
+  // Generar buy_order único para el mall (padre)
   const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
+  // Generar buy_order único para la tienda (hijo)
+  const storeBuyOrder = `TP-STORE-${invoice.id.substring(0, 20)}`;
   
-  // Crear pago Oneclick en Transbank
+  // Obtener commerce_code de la tienda
+  const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
+                            process.env.TRANSBANK_WEBPAY_PLUS_COMMERCE_CODE || '';
+  
+  if (!storeCommerceCode) {
+    throw new Error('Commerce code de tienda no configurado. Configura TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE o TRANSBANK_WEBPAY_PLUS_COMMERCE_CODE');
+  }
+  
+  // Crear pago Oneclick en Transbank (autoriza directamente)
   const payment = await transbankClient.startOneclickPayment({
     username,
     tbk_user: tbkUser,
-    buy_order: buyOrder,
-    amount: transbankAmount,
+    buy_order: buyOrder, // Orden del mall (padre)
+    details: [
+      {
+        commerce_code: storeCommerceCode,
+        buy_order: storeBuyOrder, // Orden de la tienda (hijo)
+        amount: transbankAmount,
+      }
+    ]
   });
   
-  console.log('✅ [Transbank Oneclick Order] Pago iniciado:', {
-    token: payment.token,
-    url: payment.url_webpay,
-    buyOrder,
+  // La respuesta ya viene autorizada, verificar el resultado
+  const paymentDetail = payment.details[0];
+  const isAuthorized = paymentDetail?.response_code === 0;
+  const paymentStatus = isAuthorized ? 'authorized' : 'rejected';
+  
+  console.log('✅ [Transbank Oneclick Order] Pago autorizado:', {
+    buyOrder: payment.buy_order,
+    transactionDate: payment.transaction_date,
+    status: paymentDetail?.status,
+    responseCode: paymentDetail?.response_code,
+    authorizationCode: paymentDetail?.authorization_code,
+    isAuthorized,
   });
   
   // Crear registro de pago en BD
@@ -649,12 +705,13 @@ export async function createOneclickPaymentForOrder(
       organization_id: order.organization_id,
       invoice_id: invoice.id,
       provider: 'transbank',
-      provider_payment_id: payment.token,
+      provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
       currency,
-      status: 'pending',
+      status: paymentStatus,
       metadata: {
-        buy_order: buyOrder,
+        buy_order: payment.buy_order,
+        store_buy_order: storeBuyOrder,
         tbk_user: tbkUser,
         username,
         order_id: orderId,
@@ -666,6 +723,12 @@ export async function createOneclickPaymentForOrder(
           : {}),
         type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
         payment_method: 'oneclick',
+        authorization_code: paymentDetail?.authorization_code,
+        transaction_date: payment.transaction_date,
+        accounting_date: payment.accounting_date,
+        card_number: payment.card_detail?.card_number,
+        response_code: paymentDetail?.response_code,
+        payment_type_code: paymentDetail?.payment_type_code,
       },
     })
     .select()
@@ -676,19 +739,19 @@ export async function createOneclickPaymentForOrder(
     // No fallar si hay error aquí, el webhook lo manejará
   }
   
-  // Actualizar orden con payment_id
-  await updateOrderStatus(orderId, 'pending_payment', { 
+  // Actualizar orden con payment_id y status según resultado
+  await updateOrderStatus(orderId, isAuthorized ? 'paid' : 'pending_payment', { 
     invoiceId: invoice.id,
     paymentId: paymentRecord?.id 
   });
   
   return {
-    token: payment.token,
-    url: payment.url_webpay,
+    token: payment.buy_order, // Usar buy_order como token para compatibilidad
+    url: '', // No hay URL, el pago ya está autorizado
     invoice,
     payment: paymentRecord,
     order,
-    success: true,
+    success: isAuthorized,
   };
 }
 

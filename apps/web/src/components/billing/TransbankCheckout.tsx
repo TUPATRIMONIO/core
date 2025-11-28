@@ -298,11 +298,16 @@ export default function TransbankCheckout({
         throw new Error(data.error || 'Error creando pago');
       }
 
-      // Redirigir a Transbank para confirmar pago
-      if (data.url) {
-        window.location.href = data.url;
+      // El pago Oneclick se autoriza directamente, no hay redirección
+      if (data.success) {
+        // Pago autorizado exitosamente
+        onSuccess?.();
       } else {
-        throw new Error('No se recibió URL de redirección');
+        // Pago rechazado o error
+        const errorMsg = data.paymentStatus === 'rejected' 
+          ? 'El pago fue rechazado. Por favor intenta con otra tarjeta o método de pago.'
+          : 'Error procesando el pago con Oneclick';
+        throw new Error(errorMsg);
       }
     } catch (err: any) {
       const errorMessage = err.message || 'Error al procesar el pago';
