@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { transbankClient } from './client';
 
 /**
@@ -28,7 +28,8 @@ export async function listOneclickCards(orgId: string) {
  * Marca una tarjeta OneClick como predeterminada
  */
 export async function setDefaultOneclickCard(orgId: string, cardId: string) {
-  const supabase = await createClient();
+  // Usar service role client para bypass RLS en operaciones de actualización
+  const supabase = createServiceRoleClient();
   
   // Verificar que la tarjeta pertenece a la organización
   const { data: card, error: cardError } = await supabase
@@ -76,7 +77,8 @@ export async function setDefaultOneclickCard(orgId: string, cardId: string) {
  * Elimina una tarjeta OneClick (eliminación real en Transbank + soft delete en BD)
  */
 export async function deleteOneclickCard(orgId: string, cardId: string) {
-  const supabase = await createClient();
+  // Usar service role client para bypass RLS en operaciones de eliminación
+  const supabase = createServiceRoleClient();
   
   // Obtener información de la tarjeta
   const { data: card, error: cardError } = await supabase
@@ -145,7 +147,8 @@ export async function saveOneclickCard(
   },
   setAsDefault = false
 ) {
-  const supabase = await createClient();
+  // Usar service role client para bypass RLS (operación segura después de validar con Transbank)
+  const supabase = createServiceRoleClient();
   
   // Verificar si ya existe una tarjeta con este tbkUser
   const { data: existingCard } = await supabase
