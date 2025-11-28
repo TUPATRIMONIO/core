@@ -19,6 +19,7 @@ interface PageProps {
     TBK_ORDEN_COMPRA?: string;
     TBK_ID_SESION?: string;
     type?: string;
+    method?: string;
   }>;
 }
 
@@ -30,6 +31,8 @@ async function OrderSuccessContent({
   tbkOrdenCompra,
   tbkIdSesion,
   type,
+  method,
+  searchParams,
 }: { 
   orderId: string;
   provider?: string;
@@ -38,6 +41,8 @@ async function OrderSuccessContent({
   tbkOrdenCompra?: string;
   tbkIdSesion?: string;
   type?: string;
+  method?: string;
+  searchParams?: any;
 }) {
   const supabase = await createClient();
   
@@ -73,6 +78,7 @@ async function OrderSuccessContent({
   if (provider === 'transbank') {
     // Pago de Transbank
     const token = tokenWs || tbkToken;
+    const isOneclick = type === 'oneclick' || searchParams.method === 'oneclick';
     
     if (token) {
       // Si es inscripción Oneclick, procesarla primero
@@ -158,6 +164,35 @@ async function OrderSuccessContent({
       } else {
         console.warn('[OrderSuccess] No se encontró pago Transbank con token:', token);
       }
+    } else if (isOneclick) {
+      // Si es Oneclick y no hay token, buscar el último pago de la orden
+      console.log('[OrderSuccess] Buscando pago Oneclick por orderId:', orderId);
+      const { data: orderPayments, error: orderPaymentsError } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider', 'transbank')
+        .eq('metadata->>order_id', orderId)
+        .eq('metadata->>payment_method', 'oneclick')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (orderPaymentsError) {
+        console.error('[OrderSuccess] Error buscando pago Oneclick por orderId:', orderPaymentsError);
+      } else if (orderPayments) {
+        console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', orderPayments.id);
+        payment = orderPayments;
+      }
     } else if (tbkToken && !tokenWs) {
       // Si solo viene TBK_TOKEN sin token_ws, probablemente fue cancelado
       isCancelled = true;
@@ -169,7 +204,10 @@ async function OrderSuccessContent({
   const productData = order.product_data as any;
 
   // Si el pago fue exitoso, verificar créditos y mostrar mensaje de éxito
-  if (payment && payment.status === 'succeeded') {
+  // Oneclick usa 'authorized' mientras que otros métodos usan 'succeeded'
+  const isPaymentSuccess = payment && (payment.status === 'succeeded' || payment.status === 'authorized');
+  
+  if (isPaymentSuccess) {
     // Si es compra de créditos, verificar que los créditos se hayan cargado
     if (payment.invoice?.type === 'credit_purchase' || order.product_type === 'credits') {
       console.log('[OrderSuccess] Pago succeeded, verificando si los créditos se cargaron...');
@@ -463,6 +501,7 @@ export default async function OrderSuccessPage({ params, searchParams }: PagePro
   const tbkOrdenCompra = params_search.TBK_ORDEN_COMPRA;
   const tbkIdSesion = params_search.TBK_ID_SESION;
   const type = params_search.type;
+  const method = params_search.method;
   
   return (
     <div className="container mx-auto py-8 max-w-2xl">
@@ -481,6 +520,8 @@ export default async function OrderSuccessPage({ params, searchParams }: PagePro
           tbkOrdenCompra={tbkOrdenCompra}
           tbkIdSesion={tbkIdSesion}
           type={type}
+          method={method}
+          searchParams={params_search}
         />
       </Suspense>
     </div>

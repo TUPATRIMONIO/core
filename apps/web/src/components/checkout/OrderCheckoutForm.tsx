@@ -291,8 +291,9 @@ export default function OrderCheckoutForm({
 
       // El pago Oneclick se autoriza directamente, no hay redirección
       if (data.success) {
-        // Pago autorizado exitosamente
-        router.push(`/checkout/${orderId}/success?provider=transbank&method=oneclick`);
+        // Pago autorizado exitosamente - pasar el token (buy_order) en la URL
+        const token = data.token || '';
+        router.push(`/checkout/${orderId}/success?provider=transbank&method=oneclick&token_ws=${encodeURIComponent(token)}`);
       } else {
         // Pago rechazado o error
         const errorMsg = data.paymentStatus === 'rejected' 
