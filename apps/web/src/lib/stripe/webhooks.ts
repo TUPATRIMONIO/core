@@ -93,32 +93,132 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     .eq('provider', 'stripe')
     .maybeSingle();
   
-  // Si no se encuentra, buscar por order_id en metadata (pago temporal con session_id)
+  // Si no se encuentra, intentar obtener el checkout_session_id desde Stripe
+  // y buscar por checkout_session_id en metadata o provider_payment_id
   if (paymentError || !payment) {
-    if (paymentIntent.metadata?.order_id) {
-      console.log('🔍 Buscando pago temporal por order_id:', paymentIntent.metadata.order_id);
-      const { data: tempPayment, error: tempError } = await supabase
-        .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            id,
-            organization_id,
-            type,
-            status
-          )
-        `)
-        .eq('provider', 'stripe')
-        .eq('metadata->>order_id', paymentIntent.metadata.order_id)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    try {
+      // Intentar obtener el checkout session desde el payment_intent
+      // Stripe puede tener esta información en el payment_intent
+      let checkoutSessionId = paymentIntent.metadata?.checkout_session_id;
       
-      if (!tempError && tempPayment) {
-        console.log('✅ Pago temporal encontrado, actualizando provider_payment_id');
-        payment = tempPayment;
-        // Actualizar el provider_payment_id al payment_intent.id real
+      // Si no está en metadata, intentar obtenerlo desde Stripe API
+      if (!checkoutSessionId) {
+        // Buscar checkout sessions que tengan este payment_intent
+        const sessions = await stripe.checkout.sessions.list({
+          payment_intent: paymentIntent.id,
+          limit: 1,
+        });
+        
+        if (sessions.data.length > 0) {
+          checkoutSessionId = sessions.data[0].id;
+          console.log('🔍 Checkout session encontrado desde Stripe API:', checkoutSessionId);
+        }
+      }
+      
+      if (checkoutSessionId) {
+        console.log('🔍 Buscando pago por checkout_session_id:', checkoutSessionId);
+        
+        // Buscar por checkout_session_id en metadata o provider_payment_id
+        // Primero buscar por metadata
+        let sessionPayment = null;
+        let sessionError = null;
+        
+        const { data: metadataPayment, error: metadataError } = await supabase
+          .from('payments')
+          .select(`
+            *,
+            invoice:invoices (
+              id,
+              organization_id,
+              type,
+              status
+            )
+          `)
+          .eq('provider', 'stripe')
+          .eq('metadata->>checkout_session_id', checkoutSessionId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (!metadataError && metadataPayment) {
+          sessionPayment = metadataPayment;
+        } else {
+          // Si no se encuentra por metadata, buscar por provider_payment_id
+          const { data: providerPayment, error: providerError } = await supabase
+            .from('payments')
+            .select(`
+              *,
+              invoice:invoices (
+                id,
+                organization_id,
+                type,
+                status
+              )
+            `)
+            .eq('provider', 'stripe')
+            .eq('provider_payment_id', checkoutSessionId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (!providerError && providerPayment) {
+            sessionPayment = providerPayment;
+          } else {
+            sessionError = providerError || metadataError;
+          }
+        }
+        
+        if (!sessionError && sessionPayment) {
+          console.log('✅ Pago encontrado por checkout_session_id, actualizando provider_payment_id');
+          payment = sessionPayment;
+          // Actualizar el provider_payment_id al payment_intent.id real si aún no está actualizado
+          if (sessionPayment.provider_payment_id !== paymentIntent.id) {
+            await supabase
+              .from('payments')
+              .update({
+                provider_payment_id: paymentIntent.id,
+                metadata: {
+                  ...sessionPayment.metadata,
+                  checkout_session_id: checkoutSessionId,
+                  is_temporary: false,
+                },
+              })
+              .eq('id', sessionPayment.id);
+          }
+        }
+      }
+    } catch (stripeError: any) {
+      console.warn('⚠️  Error obteniendo checkout session desde Stripe:', stripeError.message);
+      // Continuar con la búsqueda por order_id
+    }
+  }
+  
+  // Si aún no se encuentra, buscar por order_id en metadata (sin restricción de status)
+  // Esto permite encontrar pagos que ya fueron actualizados por la página de éxito
+  if (!payment && paymentIntent.metadata?.order_id) {
+    console.log('🔍 Buscando pago por order_id:', paymentIntent.metadata.order_id);
+    const { data: tempPayment, error: tempError } = await supabase
+      .from('payments')
+      .select(`
+        *,
+        invoice:invoices (
+          id,
+          organization_id,
+          type,
+          status
+        )
+      `)
+      .eq('provider', 'stripe')
+      .eq('metadata->>order_id', paymentIntent.metadata.order_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (!tempError && tempPayment) {
+      console.log('✅ Pago encontrado por order_id, actualizando provider_payment_id');
+      payment = tempPayment;
+      // Actualizar el provider_payment_id al payment_intent.id real si aún no está actualizado
+      if (tempPayment.provider_payment_id !== paymentIntent.id) {
         await supabase
           .from('payments')
           .update({
