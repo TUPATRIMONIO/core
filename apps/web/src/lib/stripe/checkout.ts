@@ -13,9 +13,11 @@ export interface CreateCheckoutSessionParams {
 /**
  * Crea un Payment Intent para una orden
  * @param orderId - ID de la orden (nuevo método)
+ * @param baseUrl - URL base del sitio (opcional, se usa para construir URLs de redirect)
  */
 export async function createPaymentIntentForOrder(
-  orderId: string
+  orderId: string,
+  baseUrl?: string
 ) {
   const supabase = await createClient();
   
@@ -167,9 +169,11 @@ export async function createPaymentIntentForOrder(
   const stripeCurrency = currency.toLowerCase();
   
   // Construir URLs de éxito y cancelación
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const successUrl = `${baseUrl}/checkout/${orderId}/success?provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${baseUrl}/checkout/${orderId}`;
+  // Usar la URL proporcionada, o intentar detectarla desde variables de entorno
+  const finalBaseUrl = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+  const successUrl = `${finalBaseUrl}/checkout/${orderId}/success?provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${finalBaseUrl}/checkout/${orderId}`;
   
   console.log('💳 [Stripe Checkout] Creando Checkout Session:', {
     amount: total,
@@ -177,6 +181,7 @@ export async function createPaymentIntentForOrder(
     customerId: customer.id,
     countryCode,
     orderId,
+    baseUrl: finalBaseUrl,
     successUrl,
     cancelUrl,
   });

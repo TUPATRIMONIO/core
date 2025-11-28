@@ -5,7 +5,7 @@ import { CheckCircle2, ArrowRight, CreditCard, XCircle, AlertCircle } from 'luci
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
-import { getOrder } from '@/lib/checkout/core';
+import { getOrder, updateOrderStatus } from '@/lib/checkout/core';
 import { notFound, redirect } from 'next/navigation';
 import { addCredits } from '@/lib/credits/core';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
@@ -131,10 +131,68 @@ async function OrderSuccessContent({
           status: data.status,
           provider_payment_id: data.provider_payment_id,
           payment_method: data.metadata?.payment_method,
+          response_code: data.metadata?.response_code,
         });
         
-        // Si el pago está pendiente, procesar webhook
-        if (data.status === 'pending') {
+        // Si es OneClick y está autorizado según los metadatos, actualizar estado inmediatamente
+        const isOneclickPayment = data.metadata?.payment_method === 'oneclick';
+        const isAuthorized = data.metadata?.response_code === 0;
+        
+        if (isOneclickPayment && isAuthorized && data.status === 'pending') {
+          console.log('[OrderSuccess] Pago OneClick autorizado detectado, actualizando estado inmediatamente...');
+          
+          try {
+            // Actualizar pago a succeeded
+            const { data: updatedPayment, error: updateError } = await supabase
+              .from('payments')
+              .update({
+                status: 'succeeded',
+                processed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', data.id)
+              .select(`
+                *,
+                invoice:invoices (
+                  invoice_number,
+                  total,
+                  currency,
+                  id,
+                  organization_id,
+                  type
+                )
+              `)
+              .single();
+            
+            if (updateError) {
+              console.error('[OrderSuccess] Error actualizando estado del pago:', updateError);
+              payment = data;
+            } else {
+              console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
+              payment = updatedPayment;
+              
+              // Actualizar factura si existe
+              if (payment.invoice) {
+                await supabase
+                  .from('invoices')
+                  .update({
+                    status: 'paid',
+                    paid_at: new Date().toISOString(),
+                  })
+                  .eq('id', payment.invoice.id);
+              }
+              
+              // Actualizar orden a 'paid'
+              await updateOrderStatus(orderId, 'paid', {
+                paymentId: payment.id,
+              });
+            }
+          } catch (error) {
+            console.error('[OrderSuccess] Error procesando pago OneClick autorizado:', error);
+            payment = data;
+          }
+        } else if (data.status === 'pending') {
+          // Para WebPay Plus u otros métodos, procesar webhook
           try {
             const webhookType = data.metadata?.payment_method === 'oneclick' ? 'oneclick' : 'webpay_plus';
             
@@ -206,8 +264,69 @@ async function OrderSuccessContent({
           if (orderPaymentsError) {
             console.error('[OrderSuccess] Error buscando pago Oneclick por orderId:', orderPaymentsError);
           } else if (orderPayments) {
-            console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', orderPayments.id);
-            payment = orderPayments;
+            console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', {
+              id: orderPayments.id,
+              status: orderPayments.status,
+              response_code: orderPayments.metadata?.response_code,
+            });
+            
+            // Si está autorizado pero pendiente, actualizar estado inmediatamente
+            const isAuthorized = orderPayments.metadata?.response_code === 0;
+            if (isAuthorized && orderPayments.status === 'pending') {
+              console.log('[OrderSuccess] Pago OneClick autorizado encontrado por orderId, actualizando estado...');
+              
+              try {
+                const { data: updatedPayment, error: updateError } = await supabase
+                  .from('payments')
+                  .update({
+                    status: 'succeeded',
+                    processed_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('id', orderPayments.id)
+                  .select(`
+                    *,
+                    invoice:invoices (
+                      invoice_number,
+                      total,
+                      currency,
+                      id,
+                      organization_id,
+                      type
+                    )
+                  `)
+                  .single();
+                
+                if (updateError) {
+                  console.error('[OrderSuccess] Error actualizando estado del pago:', updateError);
+                  payment = orderPayments;
+                } else {
+                  console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
+                  payment = updatedPayment;
+                  
+                  // Actualizar factura si existe
+                  if (payment.invoice) {
+                    await supabase
+                      .from('invoices')
+                      .update({
+                        status: 'paid',
+                        paid_at: new Date().toISOString(),
+                      })
+                      .eq('id', payment.invoice.id);
+                  }
+                  
+                  // Actualizar orden a 'paid'
+                  await updateOrderStatus(orderId, 'paid', {
+                    paymentId: payment.id,
+                  });
+                }
+              } catch (error) {
+                console.error('[OrderSuccess] Error procesando pago OneClick autorizado:', error);
+                payment = orderPayments;
+              }
+            } else {
+              payment = orderPayments;
+            }
           }
         }
       }
@@ -237,8 +356,69 @@ async function OrderSuccessContent({
       if (orderPaymentsError) {
         console.error('[OrderSuccess] Error buscando pago Oneclick por orderId:', orderPaymentsError);
       } else if (orderPayments) {
-        console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', orderPayments.id);
-        payment = orderPayments;
+        console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', {
+          id: orderPayments.id,
+          status: orderPayments.status,
+          response_code: orderPayments.metadata?.response_code,
+        });
+        
+        // Si está autorizado pero pendiente, actualizar estado inmediatamente
+        const isAuthorized = orderPayments.metadata?.response_code === 0;
+        if (isAuthorized && orderPayments.status === 'pending') {
+          console.log('[OrderSuccess] Pago OneClick autorizado encontrado por orderId, actualizando estado...');
+          
+          try {
+            const { data: updatedPayment, error: updateError } = await supabase
+              .from('payments')
+              .update({
+                status: 'succeeded',
+                processed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', orderPayments.id)
+              .select(`
+                *,
+                invoice:invoices (
+                  invoice_number,
+                  total,
+                  currency,
+                  id,
+                  organization_id,
+                  type
+                )
+              `)
+              .single();
+            
+            if (updateError) {
+              console.error('[OrderSuccess] Error actualizando estado del pago:', updateError);
+              payment = orderPayments;
+            } else {
+              console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
+              payment = updatedPayment;
+              
+              // Actualizar factura si existe
+              if (payment.invoice) {
+                await supabase
+                  .from('invoices')
+                  .update({
+                    status: 'paid',
+                    paid_at: new Date().toISOString(),
+                  })
+                  .eq('id', payment.invoice.id);
+              }
+              
+              // Actualizar orden a 'paid'
+              await updateOrderStatus(orderId, 'paid', {
+                paymentId: payment.id,
+              });
+            }
+          } catch (error) {
+            console.error('[OrderSuccess] Error procesando pago OneClick autorizado:', error);
+            payment = orderPayments;
+          }
+        } else {
+          payment = orderPayments;
+        }
       }
     } else if (tbkToken && !tokenWs) {
       // Si solo viene TBK_TOKEN sin token_ws, probablemente fue cancelado

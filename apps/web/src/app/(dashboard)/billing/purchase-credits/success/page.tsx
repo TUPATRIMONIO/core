@@ -125,10 +125,67 @@ async function PaymentSuccessContent({
       if (error) {
         console.error('[PaymentSuccess] Error buscando pago Transbank:', error);
       } else if (data) {
-        console.log('[PaymentSuccess] Pago Transbank encontrado:', data.id);
+        console.log('[PaymentSuccess] Pago Transbank encontrado:', {
+          id: data.id,
+          status: data.status,
+          payment_method: data.metadata?.payment_method,
+          response_code: data.metadata?.response_code,
+        });
         
-        // Si el pago está pendiente, procesar webhook
-        if (data.status === 'pending') {
+        // Si es OneClick y está autorizado según los metadatos, actualizar estado inmediatamente
+        const isOneclickPayment = data.metadata?.payment_method === 'oneclick';
+        const isAuthorized = data.metadata?.response_code === 0;
+        
+        if (isOneclickPayment && isAuthorized && data.status === 'pending') {
+          console.log('[PaymentSuccess] Pago OneClick autorizado detectado, actualizando estado inmediatamente...');
+          
+          try {
+            // Actualizar pago a succeeded
+            const { data: updatedPayment, error: updateError } = await supabase
+              .from('payments')
+              .update({
+                status: 'succeeded',
+                processed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', data.id)
+              .select(`
+                *,
+                invoice:invoices (
+                  invoice_number,
+                  total,
+                  currency,
+                  id,
+                  organization_id,
+                  type
+                )
+              `)
+              .single();
+            
+            if (updateError) {
+              console.error('[PaymentSuccess] Error actualizando estado del pago:', updateError);
+              payment = data;
+            } else {
+              console.log('[PaymentSuccess] Estado del pago actualizado a succeeded');
+              payment = updatedPayment;
+              
+              // Actualizar factura si existe
+              if (payment.invoice) {
+                await supabase
+                  .from('invoices')
+                  .update({
+                    status: 'paid',
+                    paid_at: new Date().toISOString(),
+                  })
+                  .eq('id', payment.invoice.id);
+              }
+            }
+          } catch (error) {
+            console.error('[PaymentSuccess] Error procesando pago OneClick autorizado:', error);
+            payment = data;
+          }
+        } else if (data.status === 'pending') {
+          // Para WebPay Plus u otros métodos, procesar webhook
           try {
             const webhookType = data.metadata?.payment_method === 'oneclick' ? 'oneclick' : 'webpay_plus';
             

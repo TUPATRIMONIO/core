@@ -65,8 +65,24 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Obtener URL base desde los headers de la request
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    console.log('🌐 [Stripe Checkout] URL base detectada:', {
+      host,
+      protocol,
+      baseUrl,
+      headers: {
+        host: request.headers.get('host'),
+        'x-forwarded-proto': request.headers.get('x-forwarded-proto'),
+        'x-forwarded-host': request.headers.get('x-forwarded-host'),
+      },
+    });
+    
     // Crear Checkout Session
-    const result = await createPaymentIntentForOrder(orderId);
+    const result = await createPaymentIntentForOrder(orderId, baseUrl);
     
     if (!result.url) {
       return NextResponse.json(
