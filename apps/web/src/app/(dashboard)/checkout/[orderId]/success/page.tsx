@@ -98,6 +98,14 @@ async function OrderSuccessContent({
       }
       
       // Buscar pago por token
+      console.log('[OrderSuccess] Buscando pago con token:', {
+        token,
+        tokenLength: token.length,
+        isOneclick,
+        provider,
+        method: searchParams?.method,
+      });
+
       const { data, error } = await supabase
         .from('payments')
         .select(`
@@ -118,7 +126,12 @@ async function OrderSuccessContent({
       if (error) {
         console.error('[OrderSuccess] Error buscando pago Transbank:', error);
       } else if (data) {
-        console.log('[OrderSuccess] Pago Transbank encontrado:', data.id);
+        console.log('[OrderSuccess] Pago Transbank encontrado:', {
+          id: data.id,
+          status: data.status,
+          provider_payment_id: data.provider_payment_id,
+          payment_method: data.metadata?.payment_method,
+        });
         
         // Si el pago está pendiente, procesar webhook
         if (data.status === 'pending') {
@@ -162,7 +175,41 @@ async function OrderSuccessContent({
           payment = data;
         }
       } else {
-        console.warn('[OrderSuccess] No se encontró pago Transbank con token:', token);
+        console.warn('[OrderSuccess] No se encontró pago Transbank con token:', {
+          token,
+          isOneclick,
+        });
+        
+        // Si es Oneclick y no encontramos por token, buscar por orderId
+        if (isOneclick) {
+          console.log('[OrderSuccess] Intentando buscar por orderId...');
+          const { data: orderPayments, error: orderPaymentsError } = await supabase
+            .from('payments')
+            .select(`
+              *,
+              invoice:invoices (
+                invoice_number,
+                total,
+                currency,
+                id,
+                organization_id,
+                type
+              )
+            `)
+            .eq('provider', 'transbank')
+            .eq('metadata->>order_id', orderId)
+            .eq('metadata->>payment_method', 'oneclick')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (orderPaymentsError) {
+            console.error('[OrderSuccess] Error buscando pago Oneclick por orderId:', orderPaymentsError);
+          } else if (orderPayments) {
+            console.log('[OrderSuccess] Pago Oneclick encontrado por orderId:', orderPayments.id);
+            payment = orderPayments;
+          }
+        }
       }
     } else if (isOneclick) {
       // Si es Oneclick y no hay token, buscar el último pago de la orden
