@@ -460,10 +460,14 @@ export async function createOneclickPayment(
       type: 'credits',
     });
   
-  // Generar buy_order único para el mall (padre)
-  const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
-  // Generar buy_order único para la tienda (hijo)
-  const storeBuyOrder = `TP-STORE-${invoice.id.substring(0, 20)}`;
+  // Generar buy_order único para el mall (padre) - máximo 26 caracteres
+  // Formato: TP + últimos 23 caracteres del invoice.id (sin guiones)
+  const invoiceIdClean = invoice.id.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP${invoiceIdClean.substring(invoiceIdClean.length - 23)}`.substring(0, 26);
+  
+  // Generar buy_order único para la tienda (hijo) - máximo 26 caracteres
+  // Formato: ST + últimos 24 caracteres del invoice.id (sin guiones)
+  const storeBuyOrder = `ST${invoiceIdClean.substring(invoiceIdClean.length - 24)}`.substring(0, 26);
   
   // Obtener commerce_code de la tienda
   const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
@@ -657,10 +661,14 @@ export async function createOneclickPaymentForOrder(
   // Actualizar orden con invoice_id
   await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
   
-  // Generar buy_order único para el mall (padre)
-  const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
-  // Generar buy_order único para la tienda (hijo)
-  const storeBuyOrder = `TP-STORE-${invoice.id.substring(0, 20)}`;
+  // Generar buy_order único para el mall (padre) - máximo 26 caracteres
+  // Formato: TP + últimos 23 caracteres del invoice.id (sin guiones)
+  const invoiceIdClean = invoice.id.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP${invoiceIdClean.substring(invoiceIdClean.length - 23)}`.substring(0, 26);
+  
+  // Generar buy_order único para la tienda (hijo) - máximo 26 caracteres
+  // Formato: ST + últimos 24 caracteres del invoice.id (sin guiones)
+  const storeBuyOrder = `ST${invoiceIdClean.substring(invoiceIdClean.length - 24)}`.substring(0, 26);
   
   // Obtener commerce_code de la tienda
   const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
