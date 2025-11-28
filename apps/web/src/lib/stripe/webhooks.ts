@@ -309,29 +309,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     })
     .eq('id', payment.id);
   
-  // Registrar evento de pago exitoso en historial de orden
-  if (order) {
-    const paymentMetadata = {
-      payment_id: payment.id,
-      payment_intent_id: paymentIntent.id,
-      provider: 'stripe',
-      amount: convertAmountFromStripe(paymentIntent.amount, paymentIntent.currency),
-      currency: paymentIntent.currency.toUpperCase(),
-      payment_method: paymentIntent.payment_method_types?.[0] || 'unknown',
-    };
-    
-    if (payment.invoice?.id) {
-      paymentMetadata.invoice_id = payment.invoice.id;
-    }
-    
-    await logOrderEvent(
-      supabase,
-      order.id,
-      'payment_succeeded',
-      `Pago exitoso vía Stripe - ${paymentIntent.currency.toUpperCase()} ${convertAmountFromStripe(paymentIntent.amount, paymentIntent.currency)}`,
-      paymentMetadata
-    );
-  }
+  // Registrar evento de pago exitoso en historial de orden (solo si el estado aún no es 'paid')
+  // El cambio de estado ya se registra automáticamente, así que solo agregamos metadata si es necesario
+  // No duplicamos el evento ya que el trigger de status_changed ya lo registra
   
   // Actualizar factura si existe (usar vista pública)
   if (payment.invoice) {

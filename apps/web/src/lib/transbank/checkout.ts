@@ -112,26 +112,7 @@ export async function createTransbankPaymentForOrder(
       type: order.product_type,
     });
   
-  // Registrar evento de factura creada
-  try {
-    await supabase.rpc('log_order_event', {
-      p_order_id: orderId,
-      p_event_type: 'invoice_created',
-      p_description: `Factura creada: ${invoice.invoice_number} - Monto: ${total} ${currency}`,
-      p_metadata: {
-        invoice_id: invoice.id,
-        invoice_number: invoice.invoice_number,
-        amount: total,
-        currency: currency,
-        tax: tax,
-      },
-      p_user_id: null,
-      p_from_status: null,
-      p_to_status: null,
-    });
-  } catch (error: any) {
-    console.error('[createTransbankPaymentForOrder] Error registrando evento de factura:', error);
-  }
+  // No registramos evento de factura creada - es un detalle técnico que no interesa al cliente
   
   // Actualizar orden con invoice_id
   await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
@@ -156,28 +137,8 @@ export async function createTransbankPaymentForOrder(
     urlPathname: transaction.url ? new URL(transaction.url).pathname : 'N/A',
   });
   
-  // Registrar evento de pago iniciado
-  try {
-    await supabase.rpc('log_order_event', {
-      p_order_id: orderId,
-      p_event_type: 'payment_initiated',
-      p_description: `Pago iniciado vía Transbank Webpay Plus`,
-      p_metadata: {
-        provider: 'transbank',
-        payment_type: 'webpay_plus',
-        token: transaction.token,
-        buy_order: buyOrder,
-        amount: transbankAmount,
-        currency: currency,
-        invoice_id: invoice.id,
-      },
-      p_user_id: null,
-      p_from_status: null,
-      p_to_status: null,
-    });
-  } catch (error: any) {
-    console.error('[createTransbankPaymentForOrder] Error registrando evento de pago iniciado:', error);
-  }
+  // No registramos evento de pago iniciado - es un detalle técnico
+  // El cliente verá "Pago confirmado" cuando el pago sea exitoso
   
   // Crear registro de pago en BD
   const { data: payment, error: paymentError } = await supabase

@@ -164,7 +164,85 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
     setExpandedEvents(newExpanded);
   };
 
-  if (!events || events.length === 0) {
+  // Función para deduplicar eventos por cambio de estado
+  const deduplicateByStatus = (eventsList: OrderHistoryEvent[]): OrderHistoryEvent[] => {
+    const seen = new Map<string, OrderHistoryEvent>();
+    
+    // Ordenar por fecha descendente para mantener el más reciente
+    const sorted = [...eventsList].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    for (const event of sorted) {
+      // Caso especial: Si hay order_completed con "Pedido completado exitosamente",
+      // eliminar cualquier status_changed con to_status = 'completed'
+      if (event.event_type === 'status_changed' && event.to_status === 'completed') {
+        const hasOrderCompleted = eventsList.some(e => 
+          e.event_type === 'order_completed' && 
+          e.event_description === 'Pedido completado exitosamente'
+        );
+        if (hasOrderCompleted) {
+          continue; // Saltar este evento duplicado
+        }
+      }
+      
+      // Crear clave única para cambios de estado
+      if (event.from_status && event.to_status) {
+        const statusKey = `${event.order_id}-${event.from_status}-${event.to_status}`;
+        
+        // Si ya existe un evento para este cambio de estado, mantener solo el más reciente
+        if (!seen.has(statusKey)) {
+          seen.set(statusKey, event);
+        }
+      } else {
+        // Para eventos sin cambio de estado (order_created, order_completed sin status_changed, etc.),
+        // usar tipo de evento como clave para evitar duplicados del mismo tipo
+        const typeKey = `${event.order_id}-${event.event_type}`;
+        if (!seen.has(typeKey)) {
+          seen.set(typeKey, event);
+        }
+      }
+    }
+    
+    return Array.from(seen.values()).sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  };
+
+  // Filtrar eventos técnicos y duplicados
+  const relevantEvents = (events || []).filter(event => {
+    // 1. Filtrar por tipo de evento técnico
+    const hiddenEventTypes = [
+      'invoice_created',      // Detalle técnico
+      'payment_initiated',    // Detalle técnico
+      'order_modified',       // Muy técnico
+    ];
+    
+    if (hiddenEventTypes.includes(event.event_type)) {
+      return false;
+    }
+    
+    // 2. Filtrar por descripción técnica o duplicada
+    const description = event.event_description || '';
+    
+    if (
+      description.includes('Pago exitoso vía') ||
+      description.includes('Factura creada') ||
+      description.includes('Pago iniciado') ||
+      description === 'Estado actualizado con información adicional' ||
+      description.startsWith('Estado cambiado de') || // Descripciones técnicas antiguas
+      (description === 'Pedido completado' && event.event_type === 'status_changed') // Duplicado de order_completed
+    ) {
+      return false;
+    }
+    
+    return true;
+  });
+
+  // Deduplicar eventos por cambio de estado
+  const deduplicatedEvents = deduplicateByStatus(relevantEvents);
+
+  if (!deduplicatedEvents || deduplicatedEvents.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -196,10 +274,10 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
           <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[var(--tp-lines-30)] hidden md:block" />
           
           <div className="space-y-6">
-            {events.map((event, index) => {
+            {deduplicatedEvents.map((event, index) => {
               const Icon = getEventIcon(event.event_type);
               const iconColor = getEventColor(event.event_type);
-              const isLast = index === events.length - 1;
+              const isLast = index === deduplicatedEvents.length - 1;
               const isExpanded = expandedEvents.has(event.id);
               const hasMetadata = event.event_metadata && Object.keys(event.event_metadata).length > 0;
 
@@ -245,48 +323,81 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
                         </div>
                       </div>
 
-                      {/* Metadata expandible */}
+                      {/* Metadata expandible - Solo mostrar si hay información relevante para el cliente */}
                       {hasMetadata && (
                         <div className="mt-3">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 text-xs text-muted-foreground hover:text-foreground"
-                            onClick={() => toggleEvent(event.id)}
-                          >
-                            {isExpanded ? (
+                          {/* Filtrar metadata técnica que no interesa al cliente */}
+                          {(() => {
+                            const clientRelevantMetadata = Object.entries(event.event_metadata).filter(([key]) => {
+                              // Ocultar IDs técnicos y detalles internos
+                              const hiddenKeys = [
+                                'payment_id',
+                                'payment_intent_id',
+                                'invoice_id',
+                                'order_number',
+                                'previous_status',
+                                'new_status',
+                                'provider',
+                                'checkout_session_id',
+                                'authorization_code',
+                                'transaction_date',
+                                'buy_order',
+                                'session_id',
+                                'token',
+                                'payment_type',
+                              ];
+                              return !hiddenKeys.includes(key);
+                            });
+
+                            // Solo mostrar si hay metadata relevante
+                            if (clientRelevantMetadata.length === 0) {
+                              return null;
+                            }
+
+                            return (
                               <>
-                                <ChevronUp className="h-3 w-3 mr-1" />
-                                Ocultar detalles
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown className="h-3 w-3 mr-1" />
-                                Ver detalles
-                              </>
-                            )}
-                          </Button>
-                          {isExpanded && (
-                            <div className="mt-2 bg-white dark:bg-[var(--tp-background-dark)] rounded-md p-3 border border-[var(--tp-lines-30)]">
-                              <dl className="space-y-2 text-xs">
-                                {Object.entries(event.event_metadata).map(([key, value]) => (
-                                  <div key={key} className="flex flex-col sm:flex-row sm:items-start gap-1">
-                                    <dt className="font-medium text-muted-foreground min-w-[120px] capitalize">
-                                      {key.replace(/_/g, ' ')}:
-                                    </dt>
-                                    <dd className="text-foreground break-all">
-                                      {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
-                                    </dd>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                                  onClick={() => toggleEvent(event.id)}
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronUp className="h-3 w-3 mr-1" />
+                                      Ocultar detalles
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="h-3 w-3 mr-1" />
+                                      Ver detalles
+                                    </>
+                                  )}
+                                </Button>
+                                {isExpanded && (
+                                  <div className="mt-2 bg-white dark:bg-[var(--tp-background-dark)] rounded-md p-3 border border-[var(--tp-lines-30)]">
+                                    <dl className="space-y-2 text-xs">
+                                      {clientRelevantMetadata.map(([key, value]) => (
+                                        <div key={key} className="flex flex-col sm:flex-row sm:items-start gap-1">
+                                          <dt className="font-medium text-muted-foreground min-w-[120px] capitalize">
+                                            {key.replace(/_/g, ' ')}:
+                                          </dt>
+                                          <dd className="text-foreground break-all">
+                                            {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                                          </dd>
+                                        </div>
+                                      ))}
+                                    </dl>
                                   </div>
-                                ))}
-                              </dl>
-                            </div>
-                          )}
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
 
-                      {/* Cambio de estado */}
-                      {event.from_status && event.to_status && (
+                      {/* Cambio de estado - Solo mostrar si es relevante y no es redundante con la descripción */}
+                      {event.from_status && event.to_status && event.event_type === 'status_changed' && (
                         <div className="mt-3 pt-3 border-t border-[var(--tp-lines-30)]">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Badge variant="outline" className="text-xs">

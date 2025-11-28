@@ -161,26 +161,8 @@ export async function createPaymentIntentForOrder(
       type: order.product_type,
     });
   
-  // Registrar evento de factura creada
-  try {
-    await supabase.rpc('log_order_event', {
-      p_order_id: orderId,
-      p_event_type: 'invoice_created',
-      p_description: `Factura creada: ${invoice.invoice_number} - Monto: ${amount + tax} ${currency}`,
-      p_metadata: {
-        invoice_id: invoice.id,
-        invoice_number: invoice.invoice_number,
-        amount: amount + tax,
-        currency: currency,
-        tax: tax,
-      },
-      p_user_id: null,
-      p_from_status: null,
-      p_to_status: null,
-    });
-  } catch (error: any) {
-    console.error('[createPaymentIntentForOrder] Error registrando evento de factura:', error);
-  }
+  // No registramos evento de factura creada - es un detalle técnico que no interesa al cliente
+  // El cliente solo necesita ver las etapas principales del pedido
   
   // Actualizar orden con invoice_id
   await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
@@ -264,27 +246,8 @@ export async function createPaymentIntentForOrder(
     paymentIntentId: checkoutSession.payment_intent,
   });
   
-  // Registrar evento de pago iniciado
-  try {
-    await supabase.rpc('log_order_event', {
-      p_order_id: orderId,
-      p_event_type: 'payment_initiated',
-      p_description: `Pago iniciado vía Stripe - Método: Tarjeta`,
-      p_metadata: {
-        provider: 'stripe',
-        checkout_session_id: checkoutSession.id,
-        payment_intent_id: checkoutSession.payment_intent || null,
-        amount: total,
-        currency: stripeCurrency,
-        invoice_id: invoice.id,
-      },
-      p_user_id: null,
-      p_from_status: null,
-      p_to_status: null,
-    });
-  } catch (error: any) {
-    console.error('[createPaymentIntentForOrder] Error registrando evento de pago iniciado:', error);
-  }
+  // No registramos evento de pago iniciado - es un detalle técnico
+  // El cliente verá "Pago confirmado" cuando el pago sea exitoso
   
   // Crear registro de pago en BD con el payment_intent_id si está disponible
   // Si no está disponible aún, el webhook lo creará cuando se complete el pago

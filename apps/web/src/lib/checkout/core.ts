@@ -238,33 +238,8 @@ export async function updateOrderStatus(
     throw new Error(`Error actualizando orden: ${error?.message || 'Unknown error'}`);
   }
   
-  // Registrar eventos adicionales según el contexto
-  if (oldStatus && oldStatus !== status) {
-    const metadata: Record<string, any> = {};
-    
-    if (additionalData?.invoiceId) {
-      metadata.invoice_id = additionalData.invoiceId;
-    }
-    
-    if (additionalData?.paymentId) {
-      metadata.payment_id = additionalData.paymentId;
-    }
-    
-    // El trigger ya registra el cambio de estado, pero podemos agregar metadata adicional
-    // si hay información específica que queremos capturar
-    if (Object.keys(metadata).length > 0) {
-      await logOrderEvent(
-        supabase,
-        orderId,
-        'status_changed',
-        `Estado actualizado con información adicional`,
-        metadata,
-        additionalData?.userId,
-        oldStatus,
-        status
-      );
-    }
-  }
+  // El trigger ya registra automáticamente el cambio de estado con descripción amigable
+  // No necesitamos registrar eventos adicionales aquí
   
   console.log('[updateOrderStatus] Orden actualizada exitosamente:', {
     orderId,
@@ -303,19 +278,8 @@ export async function expireOldOrders(): Promise<number> {
     return 0;
   }
   
-  // Registrar eventos de expiración antes de actualizar
-  for (const order of expiredOrders) {
-    await logOrderEvent(
-      supabase,
-      order.id,
-      'order_expired',
-      `Orden expirada automáticamente`,
-      { order_number: order.order_number },
-      undefined,
-      'pending_payment',
-      'cancelled'
-    );
-  }
+  // Los eventos de cancelación se registrarán automáticamente cuando se actualice el estado
+  // No necesitamos registrar eventos de expiración por separado
   
   const { error: updateError } = await supabase
     .from('orders')

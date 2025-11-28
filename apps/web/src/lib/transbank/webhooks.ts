@@ -107,22 +107,8 @@ export async function handleTransbankWebhook(
         })
         .eq('id', payment.id);
       
-      // Registrar evento de pago fallido en historial de orden
-      if (order) {
-        await logOrderEvent(
-          supabase,
-          order.id,
-          'payment_failed',
-          `Pago fallido vía Transbank - Código de respuesta: ${transactionData.response_code || 'unknown'}`,
-          {
-            payment_id: payment.id,
-            provider: 'transbank',
-            response_code: transactionData.response_code,
-            amount: payment.amount,
-            currency: payment.currency,
-          }
-        );
-      }
+      // El evento de pago fallido se registra automáticamente cuando el estado cambia
+      // No necesitamos duplicar el evento aquí
       
       // Notificar fallo
       try {
@@ -180,32 +166,8 @@ export async function handleTransbankWebhook(
       order = orderData;
     }
     
-    // Registrar evento de pago exitoso en historial de orden
-    if (order) {
-      const authorizationCode = type === 'webpay_plus' 
-        ? (transactionData as any).authorization_code
-        : transactionData.authorization_code;
-      
-      const transactionDate = type === 'webpay_plus'
-        ? (transactionData as any).transaction_date
-        : transactionData.transaction_date;
-      
-      await logOrderEvent(
-        supabase,
-        order.id,
-        'payment_succeeded',
-        `Pago exitoso vía Transbank ${type === 'webpay_plus' ? 'Webpay Plus' : 'Oneclick'} - ${payment.currency} ${payment.amount}`,
-        {
-          payment_id: payment.id,
-          provider: 'transbank',
-          payment_type: type,
-          authorization_code: authorizationCode,
-          transaction_date: transactionDate,
-          amount: payment.amount,
-          currency: payment.currency,
-        }
-      );
-    }
+    // El evento de pago exitoso se registra automáticamente cuando el estado cambia a 'paid'
+    // No necesitamos duplicar el evento aquí
     
     // Actualizar factura si existe
     if (payment.invoice) {
