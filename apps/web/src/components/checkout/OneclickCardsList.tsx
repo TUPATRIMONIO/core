@@ -127,7 +127,6 @@ export function OneclickCardsList({
       {cards.map((card) => {
         const cardBrand = card.brand || card.metadata?.card_type;
         const cardLast4 = card.last4 || card.metadata?.card_number;
-        const username = card.metadata?.username;
 
         return (
           <Card key={card.id} className={selectedCardId === card.id ? 'ring-2 ring-[var(--tp-buttons)]' : ''}>
@@ -156,11 +155,9 @@ export function OneclickCardsList({
                             </Badge>
                           )}
                         </div>
-                        {username && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Usuario: {username}
-                          </p>
-                        )}
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Tarjeta personal guardada
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Agregada el {new Date(card.created_at).toLocaleDateString('es-CL')}
                         </p>

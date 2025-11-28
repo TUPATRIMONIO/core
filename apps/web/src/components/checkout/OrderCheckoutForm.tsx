@@ -26,28 +26,16 @@ export default function OrderCheckoutForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'webpay' | 'oneclick'>('webpay');
-  const [oneclickUsername, setOneclickUsername] = useState('');
   const [oneclickTbkUser, setOneclickTbkUser] = useState<string | null>(null);
   const [savedCards, setSavedCards] = useState<OneclickCard[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [showAddCardForm, setShowAddCardForm] = useState(false);
   const [loadingCards, setLoadingCards] = useState(true);
 
-  // Cargar tarjetas guardadas y obtener email del usuario
+  // Cargar tarjetas guardadas
   useEffect(() => {
-    const loadCardsAndUserEmail = async () => {
+    const loadCards = async () => {
       try {
-        // Obtener email del usuario desde la sesión
-        const userResponse = await fetch('/api/auth/user');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          if (userData.email) {
-            // Pre-llenar username con email (truncado a 40 caracteres si es necesario)
-            const email = userData.email;
-            setOneclickUsername(email.length <= 40 ? email : email.substring(0, 40));
-          }
-        }
-
         // Cargar tarjetas guardadas
         const cardsResponse = await fetch('/api/transbank/oneclick/cards');
         if (cardsResponse.ok) {
@@ -59,7 +47,6 @@ export default function OrderCheckoutForm({
           if (defaultCard) {
             setSelectedCardId(defaultCard.id);
             setOneclickTbkUser(defaultCard.provider_payment_method_id);
-            setOneclickUsername(defaultCard.metadata?.username || oneclickUsername);
           }
         }
       } catch (err) {
@@ -69,7 +56,7 @@ export default function OrderCheckoutForm({
       }
     };
 
-    loadCardsAndUserEmail();
+    loadCards();
   }, []);
 
   // Detectar si el usuario regresó de una inscripción Oneclick exitosa
@@ -85,8 +72,13 @@ export default function OrderCheckoutForm({
         .then(res => res.json())
         .then(data => {
           if (data.success && data.tbkUser) {
+            // Mostrar error si hubo problema guardando
+            if (data.saveError) {
+              console.error('⚠️ Error guardando tarjeta:', data.saveError);
+              setError(`Inscripción exitosa pero hubo un problema guardando la tarjeta: ${data.saveError}`);
+            }
+            
             setOneclickTbkUser(data.tbkUser);
-            setOneclickUsername(data.username || '');
             setActiveTab('oneclick');
             setShowAddCardForm(false);
             // Recargar tarjetas
@@ -108,6 +100,7 @@ export default function OrderCheckoutForm({
         })
         .catch(err => {
           console.error('Error obteniendo datos de inscripción:', err);
+          setError(`Error procesando inscripción: ${err.message}`);
         });
     }
   }, [searchParams, router]);
@@ -203,12 +196,6 @@ export default function OrderCheckoutForm({
     setLoading(true);
     setError(null);
 
-    if (!oneclickUsername.trim()) {
-      setError('Por favor ingresa un nombre de usuario');
-      setLoading(false);
-      return;
-    }
-
     try {
       const returnUrl = `${window.location.origin}/checkout/${orderId}?type=oneclick_inscription`;
       
@@ -218,8 +205,7 @@ export default function OrderCheckoutForm({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          username: oneclickUsername,
-          returnUrl,
+          returnUrl, // username se maneja automáticamente en el servidor con user.id
         }),
       });
 
@@ -257,15 +243,13 @@ export default function OrderCheckoutForm({
   };
 
   const handleOneclickPayment = async () => {
-    // Obtener tbkUser y username de la tarjeta seleccionada o del estado actual
+    // Obtener tbkUser de la tarjeta seleccionada o del estado actual
     let tbkUserToUse = oneclickTbkUser;
-    let usernameToUse = oneclickUsername;
 
     if (selectedCardId) {
       const selectedCard = savedCards.find(c => c.id === selectedCardId);
       if (selectedCard) {
         tbkUserToUse = selectedCard.provider_payment_method_id;
-        usernameToUse = selectedCard.metadata?.username || oneclickUsername;
       }
     }
 
@@ -273,6 +257,15 @@ export default function OrderCheckoutForm({
       setError('Primero debes seleccionar o inscribir una tarjeta');
       return;
     }
+
+    // Obtener user.id para el username
+    const userResponse = await fetch('/api/auth/user');
+    if (!userResponse.ok) {
+      setError('Error obteniendo información del usuario');
+      return;
+    }
+    const userData = await userResponse.json();
+    const usernameToUse = userData.id;
 
     setLoading(true);
     setError(null);
@@ -314,7 +307,6 @@ export default function OrderCheckoutForm({
     const selectedCard = savedCards.find(c => c.id === cardId);
     if (selectedCard) {
       setOneclickTbkUser(selectedCard.provider_payment_method_id);
-      setOneclickUsername(selectedCard.metadata?.username || oneclickUsername);
     }
   };
 
@@ -554,28 +546,12 @@ export default function OrderCheckoutForm({
                 </>
               ) : (
                 <>
-                  <div className="space-y-2">
-                    <label htmlFor="username" className="text-sm font-medium">
-                      Nombre de usuario
-                    </label>
-                    <input
-                      id="username"
-                      type="text"
-                      value={oneclickUsername}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        // Limitar a 40 caracteres según Transbank
-                        setOneclickUsername(value.length <= 40 ? value : value.substring(0, 40));
-                      }}
-                      placeholder="Ingresa un nombre de usuario"
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      disabled={loading}
-                      maxLength={40}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Este nombre identificará tu tarjeta guardada (máximo 40 caracteres)
-                    </p>
-                  </div>
+                  <Alert>
+                    <AlertDescription>
+                      Serás redirigido a Transbank para inscribir tu tarjeta de forma segura.
+                      Podrás usarla para pagos rápidos en el futuro.
+                    </AlertDescription>
+                  </Alert>
 
                   {savedCards.length > 0 && (
                     <Button
@@ -589,7 +565,7 @@ export default function OrderCheckoutForm({
 
                   <Button
                     onClick={handleOneclickInscription}
-                    disabled={loading || !oneclickUsername.trim()}
+                    disabled={loading}
                     className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
                   >
                     {loading ? (
@@ -600,7 +576,7 @@ export default function OrderCheckoutForm({
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Inscribir Tarjeta
+                        Guardar Tarjeta
                       </>
                     )}
                   </Button>

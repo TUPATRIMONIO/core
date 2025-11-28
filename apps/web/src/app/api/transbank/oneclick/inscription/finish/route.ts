@@ -74,6 +74,15 @@ export async function POST(request: NextRequest) {
     // Finalizar inscripción en Transbank
     const result = await handleOneclickInscriptionFinish(token);
     
+    console.log('📝 Resultado de Transbank:', {
+      success: result.success,
+      tbkUser: result.tbkUser,
+      username: result.username,
+      authorizationCode: result.authorizationCode,
+      card_type: (result as any).card_type,
+      card_number: (result as any).card_number,
+    });
+    
     if (!result.success) {
       return NextResponse.json(
         { error: result.error || 'Error finalizando inscripción' },
@@ -82,12 +91,24 @@ export async function POST(request: NextRequest) {
     }
     
     // Guardar tarjeta en BD
+    // Usar user.id como username (el mismo que se usó en la inscripción)
+    const username = user.id;
+    
     let paymentMethodId = null;
+    let saveError = null;
     try {
+      console.log('💾 Intentando guardar tarjeta con:', {
+        organizationId,
+        tbkUser: result.tbkUser,
+        username: username,
+        userId: user.id,
+        hasAuthCode: !!result.authorizationCode,
+      });
+      
       const savedCard = await saveOneclickCard(
         organizationId,
         result.tbkUser,
-        result.username,
+        username,
         {
           authorization_code: result.authorizationCode,
           card_type: (result as any).card_type,
@@ -97,17 +118,24 @@ export async function POST(request: NextRequest) {
       );
       paymentMethodId = savedCard.id;
       console.log('✅ Tarjeta OneClick guardada:', { paymentMethodId, tbkUser: result.tbkUser });
-    } catch (saveError: any) {
-      console.error('⚠️ Error guardando tarjeta en BD:', saveError);
-      // Continuar aunque falle el guardado, pero registrar el error
+    } catch (err: any) {
+      saveError = err.message || 'Error desconocido al guardar tarjeta';
+      console.error('⚠️ Error guardando tarjeta en BD:', {
+        error: saveError,
+        errorStack: err.stack,
+        tbkUser: result.tbkUser,
+        username: username,
+        organizationId,
+      });
     }
     
     return NextResponse.json({
       success: true,
       tbkUser: result.tbkUser,
-      username: result.username,
+      username: username, // Retornar el username que usamos (user.id)
       authorizationCode: result.authorizationCode,
       paymentMethodId,
+      saveError, // Incluir el error si existe
     });
   } catch (error: any) {
     console.error('Error finalizando inscripción Oneclick:', error);

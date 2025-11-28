@@ -240,10 +240,19 @@ export async function handleOneclickInscriptionFinish(token: string) {
     // Finalizar inscripción en Transbank
     const inscriptionData = await transbankClient.finishOneclickInscription(token);
     
-    console.log('✅ [Transbank Oneclick] Inscripción finalizada:', {
+    console.log('✅ [Transbank Oneclick] Inscripción finalizada - Datos completos:', {
+      token,
+      fullResponse: inscriptionData,
+    });
+    
+    console.log('✅ [Transbank Oneclick] Inscripción finalizada - Datos extraídos:', {
       token,
       tbkUser: inscriptionData.tbk_user,
       username: inscriptionData.username,
+      authorizationCode: inscriptionData.authorization_code,
+      card_type: inscriptionData.card_type,
+      card_number: inscriptionData.card_number,
+      response_code: inscriptionData.response_code,
     });
     
     // Guardar método de pago Oneclick en BD
@@ -261,6 +270,7 @@ export async function handleOneclickInscriptionFinish(token: string) {
   } catch (error: any) {
     console.error('❌ Error finalizando inscripción Oneclick:', {
       error: error.message,
+      errorStack: error.stack,
       token,
     });
     return { success: false, error: error.message };

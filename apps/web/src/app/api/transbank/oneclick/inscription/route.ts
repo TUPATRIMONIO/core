@@ -61,24 +61,10 @@ export async function POST(request: NextRequest) {
     const organizationId = await getOrCreateOrganization(user.id, user.email || 'test@tupatrimonio.com');
     
     const body = await request.json();
-    let { username, returnUrl } = body;
+    const { returnUrl } = body;
     
-    // Si no se proporciona username, usar email del usuario (máximo 40 caracteres según Transbank)
-    if (!username) {
-      const userEmail = user.email || '';
-      if (userEmail.length <= 40) {
-        username = userEmail;
-      } else {
-        // Si el email es muy largo, usar user.id o truncar email manteniendo dominio
-        // Usar user.id como fallback (normalmente UUID es más corto)
-        username = user.id.substring(0, 40);
-      }
-    }
-    
-    // Validar que username no exceda 40 caracteres
-    if (username.length > 40) {
-      username = username.substring(0, 40);
-    }
+    // Usar user.id como username (inmutable, único, 36 caracteres - dentro del límite de 40)
+    const username = user.id;
     
     if (!returnUrl) {
       return NextResponse.json(
