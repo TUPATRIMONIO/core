@@ -1,12 +1,12 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Noviembre 24, 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅  
-> **🎯 Próximo milestone:** Revisar integraciones en producción (Stripe, dLocal Go, carga de créditos) 🚀
+> **📅 Última actualización:** Enero 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅  
+> **🎯 Próximo milestone:** Integración de Facturación Electrónica (Stripe para Facturas/Boletas, Haulmer para Facturas con medios chilenos) 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **PRÓXIMO: REVISAR INTEGRACIONES EN PRODUCCIÓN** 🚀
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **PRÓXIMO: INTEGRACIÓN FACTURACIÓN ELECTRÓNICA (Stripe/Haulmer)** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
@@ -28,6 +28,12 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Autenticación completa: Correo, OTP, Google, Facebook, GitHub funcionando perfectamente** (Dic 2025)
 - ✅ **Admin Panel Core - Schema Core 100% funcional** (Nov 21, 2025)
 - ✅ **Sistema de Créditos y Billing 100% completo** (Nov 22, 2025)
+- ✅ **Sistema de Pagos Completo - Stripe, Transbank Webpay Plus y OneClick funcionando correctamente** (Enero 2025)
+  - Integraciones probadas y funcionando en producción
+  - Webhooks configurados y procesando correctamente
+  - Páginas de success verificando estado inmediatamente
+  - Soporte para todos los tipos de productos (no solo créditos)
+  - Directrices documentadas para agregar nuevos medios de pago
   - Schemas credits y billing completos
   - Integraciones Stripe y dLocal funcionando
   - Webhooks configurados y operativos
@@ -6175,3 +6181,689 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 **Tu ventaja competitiva está en los servicios de IA y el SEO foundation, no en complejidad técnica innecesaria.**
 
 **¡A ejecutar! 🎯**
+
+---
+
+## 💳 **DIRECTRICES PARA AGREGAR NUEVOS MEDIOS DE PAGO**
+
+> **📅 Última actualización:** Enero 2025  
+> **✅ Estado:** Sistema de pagos funcionando correctamente con Stripe, Transbank Webpay Plus y Transbank OneClick
+
+### 🎯 **Principios Fundamentales**
+
+Estas directrices aseguran que cualquier nuevo medio de pago siga el mismo patrón probado y funcional que los medios actuales. **Aplican a TODOS los tipos de compra, no solo créditos.**
+
+### 📋 **Reglas Obligatorias**
+
+#### **1. Estado Inicial del Pago: SIEMPRE 'pending'**
+
+**❌ INCORRECTO:**
+```typescript
+status: 'authorized' // ❌ NUNCA hacer esto
+status: 'succeeded'  // ❌ NUNCA hacer esto directamente
+```
+
+**✅ CORRECTO:**
+```typescript
+status: 'pending' // ✅ SIEMPRE crear con este estado
+```
+
+**Razón:** El webhook o la página de success es responsable de actualizar el estado. Esto permite:
+- Verificación consistente del estado real del pago
+- Procesamiento de créditos/productos en el momento correcto
+- Manejo de errores y reintentos
+
+**Ejemplo de implementación:**
+```typescript
+// apps/web/src/lib/[provider]/checkout.ts
+const { data: payment } = await supabase
+  .from('payments')
+  .insert({
+    // ... otros campos
+    status: 'pending', // ✅ SIEMPRE 'pending'
+    metadata: {
+      order_id: orderId,
+      order_number: order.order_number,
+      product_type: order.product_type,
+      // ... metadata completo
+    },
+  });
+```
+
+#### **2. Crear Factura ANTES del Pago**
+
+**Orden correcto:**
+1. ✅ Crear factura en BD
+2. ✅ Agregar línea de detalle (invoice_line_items)
+3. ✅ Actualizar orden con `invoice_id` y status `'pending_payment'`
+4. ✅ Crear pago con el provider
+5. ✅ Crear registro de pago en BD con `invoice_id`
+
+**Ejemplo:**
+```typescript
+// 1. Crear factura
+const invoiceNumber = await generateInvoiceNumber(order.organization_id);
+const { data: invoice } = await supabase
+  .from('invoices')
+  .insert({
+    organization_id: order.organization_id,
+    invoice_number: invoiceNumber,
+    status: 'open',
+    type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
+    // ... otros campos
+  })
+  .select()
+  .single();
+
+// 2. Agregar línea de detalle
+await supabase
+  .from('invoice_line_items')
+  .insert({
+    invoice_id: invoice.id,
+    description: productData.name || `Producto ${order.product_type}`,
+    // ... otros campos
+  });
+
+// 3. Actualizar orden
+await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
+
+// 4. Crear pago con provider
+const paymentResult = await providerClient.createPayment({...});
+
+// 5. Crear registro de pago
+const { data: payment } = await supabase
+  .from('payments')
+  .insert({
+    invoice_id: invoice.id, // ✅ Vincular con factura
+    status: 'pending', // ✅ Estado inicial
+    // ... otros campos
+  });
+```
+
+#### **3. Metadata Completo en el Pago**
+
+**Metadata obligatorio:**
+```typescript
+metadata: {
+  order_id: orderId,                    // ✅ ID de la orden
+  order_number: order.order_number,     // ✅ Número de orden legible
+  product_type: order.product_type,     // ✅ Tipo de producto (credits, service, etc.)
+  product_id: order.product_id || '',   // ✅ ID del producto si existe
+  type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+  // Para créditos, agregar:
+  ...(order.product_type === 'credits' && productData.credits_amount 
+    ? { credits_amount: productData.credits_amount.toString() }
+    : {}),
+  // Información específica del provider:
+  payment_method: 'webpay_plus' | 'oneclick' | 'stripe' | 'nuevo_provider',
+  // ... otros campos específicos del provider
+}
+```
+
+**Razón:** Permite buscar pagos por múltiples criterios y procesar correctamente según el tipo de producto.
+
+#### **4. URLs de Redirect desde Headers de Request**
+
+**❌ INCORRECTO:**
+```typescript
+const baseUrl = 'http://localhost:3000'; // ❌ Hardcodeado
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL; // ⚠️ Puede no estar configurado
+```
+
+**✅ CORRECTO:**
+```typescript
+// En la API route (apps/web/src/app/api/[provider]/checkout/route.ts)
+const host = request.headers.get('host');
+const protocol = request.headers.get('x-forwarded-proto') || 'https';
+const baseUrl = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+// Pasar baseUrl a la función de checkout
+const result = await createPaymentForOrder(orderId, baseUrl);
+```
+
+**Razón:** Asegura que las URLs funcionen correctamente en producción, desarrollo local y diferentes entornos de deploy.
+
+#### **5. Página de Success: Verificación y Actualización Inmediata**
+
+**Patrón obligatorio en `/checkout/[orderId]/success/page.tsx`:**
+
+```typescript
+// 1. Buscar pago por provider_payment_id o metadata
+const { data: payment } = await supabase
+  .from('payments')
+  .select('*, invoice:invoices(*)')
+  .eq('provider', 'nuevo_provider')
+  .eq('provider_payment_id', token)
+  .maybeSingle();
+
+// 2. Si está pendiente, verificar estado con el provider
+if (payment?.status === 'pending') {
+  // Verificar directamente con el provider
+  const providerStatus = await providerClient.verifyPayment(token);
+  
+  // Si está autorizado/completo, actualizar inmediatamente
+  if (providerStatus.isAuthorized || providerStatus.isComplete) {
+    await supabase
+      .from('payments')
+      .update({
+        status: 'succeeded',
+        processed_at: new Date().toISOString(),
+      })
+      .eq('id', payment.id);
+    
+    // Actualizar factura
+    await supabase
+      .from('invoices')
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
+      .eq('id', payment.invoice.id);
+    
+    // Actualizar orden
+    await updateOrderStatus(orderId, 'paid', { paymentId: payment.id });
+  }
+}
+```
+
+**Razón:** Proporciona feedback inmediato al usuario sin esperar al webhook.
+
+#### **6. Webhook: Procesamiento Completo**
+
+**Patrón obligatorio en `/lib/[provider]/webhooks.ts`:**
+
+```typescript
+export async function handleProviderWebhook(event: ProviderWebhookEvent) {
+  const supabase = createServiceRoleClient(); // ✅ Usar service role
+  
+  // 1. Buscar pago
+  const { data: payment } = await supabase
+    .from('payments')
+    .select('*, invoice:invoices(*)')
+    .eq('provider_payment_id', event.paymentId)
+    .eq('provider', 'nuevo_provider')
+    .single();
+  
+  if (!payment) {
+    // Buscar por order_id si no se encuentra por payment_id
+    const { data: tempPayment } = await supabase
+      .from('payments')
+      .select('*, invoice:invoices(*)')
+      .eq('metadata->>order_id', event.metadata.order_id)
+      .eq('provider', 'nuevo_provider')
+      .maybeSingle();
+    
+    payment = tempPayment;
+  }
+  
+  // 2. Verificar estado del pago con el provider
+  const isSuccess = event.status === 'paid' || event.status === 'succeeded';
+  
+  if (!isSuccess) {
+    // Actualizar a failed
+    await supabase
+      .from('payments')
+      .update({ status: 'failed', failure_reason: event.error })
+      .eq('id', payment.id);
+    return;
+  }
+  
+  // 3. Actualizar pago a succeeded
+  await supabase
+    .from('payments')
+    .update({
+      status: 'succeeded',
+      processed_at: new Date().toISOString(),
+    })
+    .eq('id', payment.id);
+  
+  // 4. Actualizar factura
+  if (payment.invoice) {
+    await supabase
+      .from('invoices')
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
+      .eq('id', payment.invoice.id);
+  }
+  
+  // 5. Actualizar orden
+  if (payment.metadata?.order_id) {
+    await updateOrderStatus(payment.metadata.order_id, 'paid', {
+      paymentId: payment.id,
+    });
+  }
+  
+  // 6. Procesar producto según tipo (NO solo créditos)
+  if (payment.metadata?.type === 'credit_purchase') {
+    // Agregar créditos
+    await addCredits(
+      payment.invoice.organization_id,
+      parseFloat(payment.metadata.credits_amount),
+      'credit_purchase',
+      { payment_id: payment.id, invoice_id: payment.invoice.id }
+    );
+  } else if (payment.metadata?.product_type === 'service') {
+    // Activar servicio, enviar email, etc.
+    await activateService(payment.metadata.product_id, payment.invoice.organization_id);
+  } else if (payment.metadata?.product_type === 'subscription') {
+    // Activar suscripción
+    await activateSubscription(payment.metadata.product_id, payment.invoice.organization_id);
+  }
+  // ... otros tipos de productos
+  
+  // 7. Enviar notificaciones
+  await notifyPaymentSucceeded(
+    payment.invoice.organization_id,
+    payment.amount,
+    payment.currency,
+    payment.invoice.id
+  );
+}
+```
+
+**Razón:** El webhook es la fuente de verdad. Debe manejar todos los tipos de productos, no solo créditos.
+
+#### **7. Actualización de Orden: Estados Correctos**
+
+**Estados de orden:**
+- `'pending'` → Orden creada, esperando pago
+- `'pending_payment'` → Pago iniciado, factura creada
+- `'paid'` → Pago confirmado (webhook o success page)
+- `'completed'` → Producto entregado (créditos agregados, servicio activado, etc.)
+
+**Ejemplo:**
+```typescript
+// Al crear pago
+await updateOrderStatus(orderId, 'pending_payment', { 
+  invoiceId: invoice.id,
+  paymentId: payment.id 
+});
+
+// Al confirmar pago (webhook o success page)
+await updateOrderStatus(orderId, 'paid', { paymentId: payment.id });
+
+// Al entregar producto (en webhook después de agregar créditos/activar servicio)
+await updateOrderStatus(orderId, 'completed');
+```
+
+### 📁 **Estructura de Archivos Requerida**
+
+Para un nuevo provider `nuevo_provider`, crear:
+
+```
+apps/web/src/
+├── lib/
+│   └── nuevo_provider/
+│       ├── client.ts          # Cliente del provider
+│       ├── checkout.ts        # Funciones de creación de pago
+│       └── webhooks.ts        # Manejo de webhooks
+├── app/
+│   └── api/
+│       └── nuevo_provider/
+│           ├── checkout/
+│           │   └── route.ts   # API route para crear checkout
+│           └── webhook/
+│               └── route.ts   # API route para recibir webhooks
+└── components/
+    └── checkout/
+        └── NuevoProviderCheckout.tsx  # Componente UI (opcional)
+```
+
+### ✅ **Checklist de Implementación**
+
+Al agregar un nuevo medio de pago, verificar:
+
+- [ ] ✅ Pago se crea con `status: 'pending'`
+- [ ] ✅ Factura se crea ANTES del pago
+- [ ] ✅ Orden se actualiza a `'pending_payment'` con `invoice_id`
+- [ ] ✅ Metadata completo incluye `order_id`, `order_number`, `product_type`
+- [ ] ✅ URLs de redirect se construyen desde headers de request
+- [ ] ✅ Página success verifica estado y actualiza si está autorizado
+- [ ] ✅ Webhook busca pago por `provider_payment_id` y por `order_id` (fallback)
+- [ ] ✅ Webhook actualiza pago, factura y orden correctamente
+- [ ] ✅ Webhook procesa TODOS los tipos de productos (no solo créditos)
+- [ ] ✅ Webhook envía notificaciones de éxito/fallo
+- [ ] ✅ Manejo de errores en cada paso
+- [ ] ✅ Logging adecuado para debugging
+
+### 🔍 **Ejemplos de Referencia**
+
+**Implementaciones correctas actuales:**
+- **Stripe**: `apps/web/src/lib/stripe/checkout.ts` y `webhooks.ts`
+- **Transbank Webpay Plus**: `apps/web/src/lib/transbank/checkout.ts` (función `createTransbankPaymentForOrder`)
+- **Transbank OneClick**: `apps/web/src/lib/transbank/checkout.ts` (función `createOneclickPaymentForOrder`)
+
+**Página success de referencia:**
+- `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx`
+
+### ⚠️ **Errores Comunes a Evitar**
+
+1. **❌ Crear pago con status 'authorized' o 'succeeded'**
+   - ✅ Siempre usar 'pending' inicialmente
+
+2. **❌ No crear factura antes del pago**
+   - ✅ Factura debe existir antes de crear el pago
+
+3. **❌ Hardcodear URLs de redirect**
+   - ✅ Construir desde headers de request
+
+4. **❌ No verificar estado en página success**
+   - ✅ Verificar con provider y actualizar si está autorizado
+
+5. **❌ Webhook solo busca por provider_payment_id**
+   - ✅ Implementar fallback buscando por order_id
+
+6. **❌ Webhook solo procesa créditos**
+   - ✅ Procesar todos los tipos de productos según metadata
+
+7. **❌ No actualizar factura y orden en webhook**
+   - ✅ Actualizar factura a 'paid' y orden a 'paid' → 'completed'
+
+### 📚 **Documentación Adicional**
+
+- **Sistema de Créditos**: `docs/features/CREDITS-SYSTEM.md`
+- **Sistema de Facturación**: `docs/features/BILLING-SYSTEM.md`
+- **Arquitectura de Checkout**: `docs/ARCHITECTURE.md` (sección de pagos)
+
+---
+
+**✅ Con estas directrices, cualquier nuevo medio de pago seguirá el mismo patrón probado y funcionará correctamente para TODOS los tipos de compra.**
+
+---
+
+## 📋 **PRÓXIMO MILESTONE: Integración de Facturación Electrónica**
+
+> **📅 Planificado:** Enero 2025  
+> **🎯 Objetivo:** Establecer sistema de facturación electrónica diferenciado según tipo de documento y medio de pago
+
+### 🎯 **Requisitos del Sistema**
+
+#### **Reglas de Facturación:**
+
+1. **Si se solicita FACTURA:**
+   - **Stripe** → Factura electrónica generada por Stripe
+   - **Medios de pago chilenos** (Transbank, Flow, otros) → Factura electrónica generada por Haulmer
+
+2. **Si se solicita BOLETA:**
+   - **Siempre mediante Stripe** (independiente del medio de pago)
+
+### 📋 **Tareas de Implementación**
+
+#### **1. Extender Schema de Facturas**
+
+**Agregar campos a tabla `invoices`:**
+```sql
+ALTER TABLE invoices ADD COLUMN document_type VARCHAR(20) DEFAULT 'invoice';
+-- Valores: 'invoice' (factura), 'boleta' (boleta)
+ALTER TABLE invoices ADD COLUMN external_provider VARCHAR(50);
+-- Valores: 'stripe', 'haulmer', NULL
+ALTER TABLE invoices ADD COLUMN external_document_id VARCHAR(255);
+-- ID del documento en el proveedor externo (Stripe invoice ID o Haulmer document ID)
+ALTER TABLE invoices ADD COLUMN external_pdf_url TEXT;
+-- URL del PDF del documento en el proveedor externo
+ALTER TABLE invoices ADD COLUMN external_xml_url TEXT;
+-- URL del XML (solo para Haulmer)
+ALTER TABLE invoices ADD COLUMN external_status VARCHAR(50);
+-- Estado del documento en el proveedor externo
+```
+
+**Agregar campo a tabla `orders`:**
+```sql
+ALTER TABLE orders ADD COLUMN document_type VARCHAR(20) DEFAULT 'invoice';
+-- Tipo de documento solicitado: 'invoice' o 'boleta'
+```
+
+#### **2. Integración con Haulmer**
+
+**Crear módulo de integración:**
+```
+apps/web/src/lib/
+└── haulmer/
+    ├── client.ts          # Cliente API de Haulmer
+    ├── invoices.ts        # Funciones para crear/generar facturas
+    └── types.ts          # Tipos TypeScript para Haulmer
+```
+
+**Funcionalidades requeridas:**
+- Autenticación con API de Haulmer
+- Crear factura electrónica en Haulmer
+- Obtener estado de factura
+- Descargar PDF y XML de factura
+- Manejo de errores y reintentos
+
+**Variables de entorno necesarias:**
+```env
+HAULMER_API_URL=https://api.haulmer.com
+HAULMER_API_KEY=tu_api_key
+HAULMER_API_SECRET=tu_api_secret
+HAULMER_COMPANY_RUT=12345678-9
+HAULMER_ENVIRONMENT=production|sandbox
+```
+
+#### **3. Lógica de Selección de Proveedor**
+
+**En funciones de checkout, agregar lógica:**
+
+```typescript
+// apps/web/src/lib/checkout/core.ts
+export async function createOrder(params: CreateOrderParams) {
+  // ... código existente ...
+  
+  // Determinar tipo de documento solicitado
+  const documentType = params.documentType || 'invoice'; // 'invoice' | 'boleta'
+  
+  // Si es boleta, forzar Stripe
+  if (documentType === 'boleta') {
+    // Validar que el provider sea Stripe o forzar Stripe
+    if (params.provider && params.provider !== 'stripe') {
+      throw new Error('Las boletas solo pueden generarse mediante Stripe');
+    }
+    params.provider = 'stripe';
+  }
+  
+  // Guardar document_type en la orden
+  const order = await supabase
+    .from('orders')
+    .insert({
+      // ... otros campos ...
+      document_type: documentType,
+    })
+    .select()
+    .single();
+  
+  return order;
+}
+```
+
+#### **4. Generación de Facturas según Provider**
+
+**Para Stripe (Facturas y Boletas):**
+```typescript
+// apps/web/src/lib/stripe/invoices.ts
+export async function generateStripeInvoice(invoiceId: string, documentType: 'invoice' | 'boleta') {
+  // Stripe genera automáticamente facturas/boletas según configuración
+  // Obtener invoice de Stripe y guardar PDF URL en nuestra BD
+  const stripeInvoice = await stripe.invoices.retrieve(stripeInvoiceId);
+  
+  await supabase
+    .from('invoices')
+    .update({
+      external_provider: 'stripe',
+      external_document_id: stripeInvoice.id,
+      external_pdf_url: stripeInvoice.invoice_pdf,
+      external_status: stripeInvoice.status,
+    })
+    .eq('id', invoiceId);
+}
+```
+
+**Para Haulmer (Solo Facturas con medios chilenos):**
+```typescript
+// apps/web/src/lib/haulmer/invoices.ts
+export async function generateHaulmerInvoice(invoiceId: string) {
+  // Obtener datos de la factura desde BD
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('*, organization:organizations(*)')
+    .eq('id', invoiceId)
+    .single();
+  
+  // Crear factura en Haulmer
+  const haulmerInvoice = await haulmerClient.createInvoice({
+    rut: invoice.organization.rut,
+    razon_social: invoice.organization.name,
+    // ... otros datos ...
+  });
+  
+  // Guardar información en BD
+  await supabase
+    .from('invoices')
+    .update({
+      external_provider: 'haulmer',
+      external_document_id: haulmerInvoice.folio,
+      external_pdf_url: haulmerInvoice.pdf_url,
+      external_xml_url: haulmerInvoice.xml_url,
+      external_status: haulmerInvoice.estado,
+    })
+    .eq('id', invoiceId);
+}
+```
+
+#### **5. Procesamiento en Webhooks**
+
+**Actualizar webhooks para generar facturas después del pago:**
+
+```typescript
+// apps/web/src/lib/transbank/webhooks.ts
+export async function handleTransbankWebhook(token: string, type: 'webpay_plus' | 'oneclick') {
+  // ... código existente de procesamiento de pago ...
+  
+  // Después de actualizar pago a succeeded:
+  if (payment.invoice) {
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('*, order:orders(document_type)')
+      .eq('id', payment.invoice.id)
+      .single();
+    
+    // Si es factura y el medio de pago es chileno, generar con Haulmer
+    if (invoice.order?.document_type === 'invoice' && !invoice.external_provider) {
+      await generateHaulmerInvoice(invoice.id);
+    }
+  }
+}
+```
+
+```typescript
+// apps/web/src/lib/stripe/webhooks.ts
+export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  // ... código existente ...
+  
+  // Después de actualizar pago:
+  if (payment.invoice) {
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('*, order:orders(document_type)')
+      .eq('id', payment.invoice.id)
+      .single();
+    
+    // Stripe genera facturas/boletas automáticamente
+    if (!invoice.external_provider) {
+      await generateStripeInvoice(invoice.id, invoice.order?.document_type || 'invoice');
+    }
+  }
+}
+```
+
+#### **6. UI para Selección de Tipo de Documento**
+
+**Agregar selector en formulario de checkout:**
+
+```typescript
+// apps/web/src/components/checkout/OrderCheckoutForm.tsx
+const [documentType, setDocumentType] = useState<'invoice' | 'boleta'>('invoice');
+
+// En el formulario:
+<Select value={documentType} onValueChange={setDocumentType}>
+  <SelectTrigger>
+    <SelectValue placeholder="Tipo de documento" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="invoice">Factura</SelectItem>
+    <SelectItem value="boleta">Boleta</SelectItem>
+  </SelectContent>
+</Select>
+
+// Si selecciona boleta, mostrar mensaje informativo
+{documentType === 'boleta' && (
+  <Alert>
+    <AlertDescription>
+      Las boletas se generan mediante Stripe. Si seleccionas otro medio de pago, se generará una factura.
+    </AlertDescription>
+  </Alert>
+)}
+```
+
+#### **7. Visualización de Documentos**
+
+**Página para descargar facturas/boletas:**
+
+```typescript
+// apps/web/src/app/(dashboard)/billing/invoices/[id]/page.tsx
+// Mostrar botones de descarga según external_provider:
+{invoice.external_provider === 'stripe' && invoice.external_pdf_url && (
+  <Button asChild>
+    <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer">
+      Descargar PDF (Stripe)
+    </a>
+  </Button>
+)}
+
+{invoice.external_provider === 'haulmer' && (
+  <>
+    {invoice.external_pdf_url && (
+      <Button asChild>
+        <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer">
+          Descargar PDF (Haulmer)
+        </a>
+      </Button>
+    )}
+    {invoice.external_xml_url && (
+      <Button asChild variant="outline">
+        <a href={invoice.external_xml_url} target="_blank" rel="noopener noreferrer">
+          Descargar XML (Haulmer)
+        </a>
+      </Button>
+    )}
+  </>
+)}
+```
+
+### ✅ **Checklist de Implementación**
+
+- [ ] ✅ Migración SQL: Agregar campos `document_type`, `external_provider`, `external_document_id`, etc.
+- [ ] ✅ Integración Haulmer: Crear cliente API y funciones de facturación
+- [ ] ✅ Lógica de selección: Determinar proveedor según tipo de documento y medio de pago
+- [ ] ✅ Generación Stripe: Función para generar facturas/boletas con Stripe
+- [ ] ✅ Generación Haulmer: Función para generar facturas con Haulmer
+- [ ] ✅ Webhooks: Actualizar para generar documentos después del pago
+- [ ] ✅ UI: Selector de tipo de documento en checkout
+- [ ] ✅ Validación: Prevenir boletas con medios de pago no-Stripe
+- [ ] ✅ Visualización: Página para descargar PDFs/XMLs según proveedor
+- [ ] ✅ Testing: Probar flujo completo con ambos tipos de documento
+- [ ] ✅ Documentación: Actualizar documentación de facturación
+
+### 📚 **Referencias**
+
+- **API Haulmer**: Documentación oficial de Haulmer
+- **Stripe Invoicing**: [Stripe Billing Documentation](https://stripe.com/docs/billing/invoices)
+- **Sistema de Facturación Actual**: `docs/features/BILLING-SYSTEM.md`
+
+### ⚠️ **Consideraciones Importantes**
+
+1. **Validación de RUT**: Haulmer requiere RUT válido de la organización
+2. **Datos de Cliente**: Asegurar que los datos de la organización estén completos para Haulmer
+3. **Ambiente**: Configurar correctamente ambiente sandbox/producción de Haulmer
+4. **Manejo de Errores**: Implementar retry logic para creación de facturas en Haulmer
+5. **Sincronización**: Mantener sincronizado estado entre nuestra BD y proveedores externos
+6. **Boletas**: Recordar que boletas SOLO pueden generarse con Stripe
+
+---
+
+**📋 Este milestone establecerá un sistema robusto de facturación electrónica que cumple con los requisitos legales chilenos y proporciona flexibilidad según el tipo de documento solicitado.**

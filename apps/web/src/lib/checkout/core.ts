@@ -183,7 +183,27 @@ export async function updateOrderStatus(
     .single();
   
   if (error || !order) {
+    console.error('[updateOrderStatus] Error actualizando orden:', {
+      orderId,
+      status,
+      error: error?.message,
+      code: error?.code,
+      details: error,
+    });
     throw new Error(`Error actualizando orden: ${error?.message || 'Unknown error'}`);
+  }
+  
+  console.log('[updateOrderStatus] Orden actualizada exitosamente:', {
+    orderId,
+    orderNumber: order.order_number,
+    newStatus: status,
+  });
+  
+  // Disparar evento para actualizar carrito inmediatamente (solo en cliente)
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('order:status-updated', {
+      detail: { orderId, status }
+    }));
   }
   
   return order;

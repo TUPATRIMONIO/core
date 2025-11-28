@@ -159,6 +159,29 @@ npm run build:web
 
 ---
 
+## 💳 Medios de Pago
+
+El sistema soporta múltiples proveedores de pago con un patrón unificado:
+
+- **✅ Stripe** - Pagos con tarjeta internacional
+- **✅ Transbank Webpay Plus** - Pagos con tarjeta (Chile)
+- **✅ Transbank OneClick** - Pagos recurrentes (Chile)
+
+### Directrices para Agregar Nuevos Medios de Pago
+
+**Reglas fundamentales que DEBEN seguirse:**
+
+1. **Estado inicial**: Siempre crear pagos con `status: 'pending'`
+2. **Factura primero**: Crear factura ANTES del pago
+3. **Metadata completo**: Incluir `order_id`, `order_number`, `product_type` en metadata
+4. **URLs dinámicas**: Construir URLs de redirect desde headers de request
+5. **Verificación inmediata**: Página success debe verificar estado y actualizar si está autorizado
+6. **Webhook completo**: Procesar TODOS los tipos de productos (no solo créditos)
+
+📖 **Directrices completas**: Ver sección en [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md#-directrices-para-agregar-nuevos-medios-de-pago)
+
+---
+
 ## 📚 Documentación
 
 La documentación completa está organizada en `/docs`:
@@ -170,6 +193,7 @@ La documentación completa está organizada en `/docs`:
 - **⚙️ Features**: [features/](docs/features/) - Implementaciones específicas
 - **🚀 Deploy**: [deployment/](docs/deployment/) - Guías de producción
 - **🆕 CRM Universal**: [CRM-UNIVERSAL-SYSTEM.md](docs/CRM-UNIVERSAL-SYSTEM.md) - Sistema configurable
+- **💳 Medios de Pago**: [PLAN_DE_ACCION.md](docs/archived/PLAN_DE_ACCION.md#-directrices-para-agregar-nuevos-medios-de-pago) - Directrices de pagos
 
 📖 **Índice completo**: [`docs/README.md`](docs/README.md)
 

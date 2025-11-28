@@ -54,7 +54,19 @@ export function PendingOrdersBadge() {
   useEffect(() => {
     fetchPendingOrders();
     const interval = setInterval(fetchPendingOrders, 30000); // 30 segundos
-    return () => clearInterval(interval);
+    
+    // Escuchar eventos de actualización de órdenes para refrescar inmediatamente
+    const handleOrderUpdate = () => {
+      console.log('[PendingOrdersBadge] Evento de actualización recibido, refrescando órdenes...');
+      fetchPendingOrders();
+    };
+    
+    window.addEventListener('order:status-updated', handleOrderUpdate);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('order:status-updated', handleOrderUpdate);
+    };
   }, []);
 
   const handleContinuePayment = (orderId: string) => {
