@@ -158,9 +158,11 @@ export async function updateOrderStatus(
   additionalData?: {
     invoiceId?: string;
     paymentId?: string;
+    supabaseClient?: any; // Cliente opcional de Supabase (para webhooks con service role)
   }
 ): Promise<Order> {
-  const supabase = await createClient();
+  // Usar cliente proporcionado o crear uno nuevo
+  const supabase = additionalData?.supabaseClient || await createClient();
   
   const updateData: any = {
     status,

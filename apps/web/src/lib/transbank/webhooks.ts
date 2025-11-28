@@ -147,6 +147,7 @@ export async function handleTransbankWebhook(
       if (order && order.status === 'pending_payment') {
         await updateOrderStatus(order.id, 'paid', {
           paymentId: payment.id,
+          supabaseClient: supabase, // Pasar service role client para bypass RLS
         });
       }
     }
@@ -182,8 +183,10 @@ export async function handleTransbankWebhook(
           });
           
           // Actualizar orden a 'completed' cuando se procesa el producto
-          if (order && order.status === 'paid') {
-            await updateOrderStatus(order.id, 'completed');
+          if (order) {
+            await updateOrderStatus(order.id, 'completed', {
+              supabaseClient: supabase, // Pasar service role client para bypass RLS
+            });
           }
           
           // Notificar créditos agregados

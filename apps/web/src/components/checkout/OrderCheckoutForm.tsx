@@ -105,20 +105,24 @@ export default function OrderCheckoutForm({
     }
   }, [searchParams, router]);
 
-  const handleWebpayPlus = async () => {
+  /**
+   * Función unificada para manejar checkout con cualquier proveedor
+   */
+  const handleCheckout = async (provider: 'stripe' | 'transbank') => {
     setLoading(true);
     setError(null);
 
     try {
-      const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=transbank`;
+      const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=${provider}`;
       
-      const response = await fetch('/api/transbank/checkout/order', {
+      const response = await fetch('/api/payments/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
           orderId,
+          provider,
           returnUrl,
         }),
       });
@@ -129,36 +133,18 @@ export default function OrderCheckoutForm({
         throw new Error(data.error || 'Error creando pago');
       }
 
-      // Redirigir a Transbank usando formulario POST con token_ws
-      if (data.url && data.token) {
+      // Transbank requiere formulario POST con token_ws
+      if (provider === 'transbank' && data.url && data.sessionId) {
         // Normalizar URL: remover puerto :443 explícito si está presente
         let normalizedUrl = data.url;
         try {
           const urlObj = new URL(data.url);
-          // Remover puerto 443 explícito (HTTPS ya usa 443 por defecto)
           if (urlObj.port === '443') {
             urlObj.port = '';
             normalizedUrl = urlObj.toString();
           }
         } catch (e) {
           console.error('[OrderCheckoutForm] Error normalizando URL:', e);
-        }
-        
-        console.log('[OrderCheckoutForm] Redirigiendo a Transbank:', {
-          originalUrl: data.url,
-          normalizedUrl,
-          token: data.token.substring(0, 20) + '...',
-        });
-        
-        // Validar que la URL sea válida
-        try {
-          const urlObj = new URL(normalizedUrl);
-          if (!urlObj.hostname.includes('transbank') && !urlObj.hostname.includes('santander')) {
-            console.warn('[OrderCheckoutForm] URL de Transbank inesperada:', normalizedUrl);
-          }
-        } catch (e) {
-          console.error('[OrderCheckoutForm] URL inválida:', normalizedUrl);
-          throw new Error('URL de redirección inválida');
         }
         
         // Crear formulario POST oculto según documentación de Transbank
@@ -172,24 +158,27 @@ export default function OrderCheckoutForm({
         const tokenInput = document.createElement('input');
         tokenInput.type = 'hidden';
         tokenInput.name = 'token_ws';
-        tokenInput.value = data.token;
+        tokenInput.value = data.sessionId; // sessionId es el token en Transbank
         form.appendChild(tokenInput);
         
         // Agregar formulario al DOM y auto-enviarlo
         document.body.appendChild(form);
-        
-        // Pequeño delay para asegurar que el formulario está en el DOM
         setTimeout(() => {
           form.submit();
         }, 100);
       } else {
-        throw new Error('No se recibió URL o token de redirección');
+        // Stripe y otros proveedores: redirección simple
+        window.location.href = data.url;
       }
     } catch (err: any) {
       const errorMessage = err.message || 'Error al procesar el pago';
       setError(errorMessage);
       setLoading(false);
     }
+  };
+
+  const handleWebpayPlus = async () => {
+    await handleCheckout('transbank');
   };
 
   const handleOneclickInscription = async () => {
@@ -332,35 +321,7 @@ export default function OrderCheckoutForm({
   };
 
   const handleStripePayment = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/stripe/checkout/order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ orderId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error creando sesión de pago');
-      }
-
-      // Redirigir a Stripe Checkout
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No se recibió URL de redirección');
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al procesar el pago';
-      setError(errorMessage);
-      setLoading(false);
-    }
+    await handleCheckout('stripe');
   };
 
   // Si es Stripe, mostrar componente simple

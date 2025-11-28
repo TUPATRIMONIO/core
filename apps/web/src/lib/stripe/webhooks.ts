@@ -295,6 +295,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   if (order && order.status === 'pending_payment') {
     await updateOrderStatus(order.id, 'paid', {
       paymentId: payment.id,
+      supabaseClient: supabase, // Pasar service role client para bypass RLS
     });
   }
   
@@ -321,8 +322,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         });
         
         // Actualizar orden a 'completed' cuando se procesa el producto
-        if (order && order.status === 'paid') {
-          await updateOrderStatus(order.id, 'completed');
+        if (order) {
+          await updateOrderStatus(order.id, 'completed', {
+            supabaseClient: supabase, // Pasar service role client para bypass RLS
+          });
         }
         
         // Notificar créditos agregados

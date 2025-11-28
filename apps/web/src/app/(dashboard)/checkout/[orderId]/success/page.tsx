@@ -10,6 +10,7 @@ import { notFound, redirect } from 'next/navigation';
 import { addCredits } from '@/lib/credits/core';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
 import { stripe } from '@/lib/stripe/client';
+import { verifyPaymentForOrder, getPaymentById } from '@/lib/payments/verification';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -75,7 +76,7 @@ async function OrderSuccessContent({
   let payment = null;
   let isCancelled = false;
 
-  // Manejar diferentes proveedores de pago
+  // Manejar diferentes proveedores de pago usando servicio unificado cuando sea posible
   if (provider === 'transbank') {
     // Pago de Transbank
     const token = tokenWs || tbkToken;
