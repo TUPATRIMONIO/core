@@ -188,13 +188,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         paid_at: new Date().toISOString(),
       })
       .eq('id', payment.invoice.id);
-    
-    // Actualizar orden si existe
-    if (order && order.status === 'pending_payment') {
-      await updateOrderStatus(order.id, 'paid', {
-        paymentId: payment.id,
-      });
-    }
+  }
+  
+  // Actualizar orden si existe (independientemente de si hay factura)
+  // Esto asegura que las órdenes se marquen como pagadas incluso si no hay factura asociada
+  if (order && order.status === 'pending_payment') {
+    await updateOrderStatus(order.id, 'paid', {
+      paymentId: payment.id,
+    });
   }
   
   // Si es compra de créditos, agregar créditos
