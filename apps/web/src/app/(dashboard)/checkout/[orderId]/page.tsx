@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Package, Clock, XCircle, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Package, Clock, XCircle, CheckCircle2, History } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
+import OrderTimeline from '@/components/checkout/OrderTimeline';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -69,6 +70,38 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   const tax = order.amount * (taxRate || 0);
   const total = order.amount + tax;
   
+  // Obtener historial de la orden
+  const { data: historyData, error: historyError } = await supabase
+    .from('order_history')
+    .select('*')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: true });
+  
+  // Enriquecer eventos con información de usuarios si es necesario
+  const enrichedHistory = await Promise.all(
+    (historyData || []).map(async (event) => {
+      const enriched: any = { ...event };
+      
+      if (event.user_id) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('email, raw_user_meta_data')
+          .eq('id', event.user_id)
+          .single();
+        
+        if (userData) {
+          enriched.user = {
+            id: event.user_id,
+            email: userData.email,
+            name: userData.raw_user_meta_data?.name || userData.raw_user_meta_data?.full_name || null,
+          };
+        }
+      }
+      
+      return enriched;
+    })
+  );
+  
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center gap-4">
@@ -115,9 +148,19 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         </Alert>
       )}
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Resumen de la orden */}
-        <div className="lg:col-span-1">
+      <Tabs defaultValue="checkout" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="checkout">Pago</TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <History className="h-4 w-4" />
+            Historial
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="checkout" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Resumen de la orden */}
+            <div className="lg:col-span-1">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -239,6 +282,12 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
           )}
         </div>
       </div>
+        </TabsContent>
+        
+        <TabsContent value="history" className="mt-6">
+          <OrderTimeline events={enrichedHistory || []} orderNumber={order.order_number} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

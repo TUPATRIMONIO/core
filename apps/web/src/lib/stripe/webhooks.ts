@@ -6,6 +6,36 @@ import { convertAmountFromStripe } from './checkout';
 import { updateOrderStatus } from '../checkout/core';
 
 /**
+ * Helper para registrar eventos en el historial de la orden
+ */
+async function logOrderEvent(
+  supabase: any,
+  orderId: string,
+  eventType: string,
+  description: string,
+  metadata: Record<string, any> = {}
+): Promise<void> {
+  try {
+    await supabase.rpc('log_order_event', {
+      p_order_id: orderId,
+      p_event_type: eventType,
+      p_description: description,
+      p_metadata: metadata,
+      p_user_id: null,
+      p_from_status: null,
+      p_to_status: null,
+    });
+  } catch (error: any) {
+    // No fallar si el logging falla, solo loggear el error
+    console.error('[logOrderEvent] Error registrando evento:', {
+      orderId,
+      eventType,
+      error: error?.message,
+    });
+  }
+}
+
+/**
  * Maneja eventos de webhook de Stripe
  */
 export async function handleStripeWebhook(event: StripeWebhookEvent) {
@@ -278,6 +308,30 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       updated_at: new Date().toISOString(),
     })
     .eq('id', payment.id);
+  
+  // Registrar evento de pago exitoso en historial de orden
+  if (order) {
+    const paymentMetadata = {
+      payment_id: payment.id,
+      payment_intent_id: paymentIntent.id,
+      provider: 'stripe',
+      amount: convertAmountFromStripe(paymentIntent.amount, paymentIntent.currency),
+      currency: paymentIntent.currency.toUpperCase(),
+      payment_method: paymentIntent.payment_method_types?.[0] || 'unknown',
+    };
+    
+    if (payment.invoice?.id) {
+      paymentMetadata.invoice_id = payment.invoice.id;
+    }
+    
+    await logOrderEvent(
+      supabase,
+      order.id,
+      'payment_succeeded',
+      `Pago exitoso vía Stripe - ${paymentIntent.currency.toUpperCase()} ${convertAmountFromStripe(paymentIntent.amount, paymentIntent.currency)}`,
+      paymentMetadata
+    );
+  }
   
   // Actualizar factura si existe (usar vista pública)
   if (payment.invoice) {

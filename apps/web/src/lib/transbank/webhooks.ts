@@ -5,6 +5,36 @@ import { notifyCreditsAdded, notifyPaymentSucceeded, notifyPaymentFailed } from 
 import { updateOrderStatus } from '../checkout/core';
 
 /**
+ * Helper para registrar eventos en el historial de la orden
+ */
+async function logOrderEvent(
+  supabase: any,
+  orderId: string,
+  eventType: string,
+  description: string,
+  metadata: Record<string, any> = {}
+): Promise<void> {
+  try {
+    await supabase.rpc('log_order_event', {
+      p_order_id: orderId,
+      p_event_type: eventType,
+      p_description: description,
+      p_metadata: metadata,
+      p_user_id: null,
+      p_from_status: null,
+      p_to_status: null,
+    });
+  } catch (error: any) {
+    // No fallar si el logging falla, solo loggear el error
+    console.error('[logOrderEvent] Error registrando evento:', {
+      orderId,
+      eventType,
+      error: error?.message,
+    });
+  }
+}
+
+/**
  * Maneja confirmación de pago Webpay Plus
  */
 export async function handleTransbankWebhook(
@@ -77,6 +107,23 @@ export async function handleTransbankWebhook(
         })
         .eq('id', payment.id);
       
+      // Registrar evento de pago fallido en historial de orden
+      if (order) {
+        await logOrderEvent(
+          supabase,
+          order.id,
+          'payment_failed',
+          `Pago fallido vía Transbank - Código de respuesta: ${transactionData.response_code || 'unknown'}`,
+          {
+            payment_id: payment.id,
+            provider: 'transbank',
+            response_code: transactionData.response_code,
+            amount: payment.amount,
+            currency: payment.currency,
+          }
+        );
+      }
+      
       // Notificar fallo
       try {
         await notifyPaymentFailed(
@@ -131,6 +178,33 @@ export async function handleTransbankWebhook(
         .eq('id', payment.metadata.order_id)
         .single();
       order = orderData;
+    }
+    
+    // Registrar evento de pago exitoso en historial de orden
+    if (order) {
+      const authorizationCode = type === 'webpay_plus' 
+        ? (transactionData as any).authorization_code
+        : transactionData.authorization_code;
+      
+      const transactionDate = type === 'webpay_plus'
+        ? (transactionData as any).transaction_date
+        : transactionData.transaction_date;
+      
+      await logOrderEvent(
+        supabase,
+        order.id,
+        'payment_succeeded',
+        `Pago exitoso vía Transbank ${type === 'webpay_plus' ? 'Webpay Plus' : 'Oneclick'} - ${payment.currency} ${payment.amount}`,
+        {
+          payment_id: payment.id,
+          provider: 'transbank',
+          payment_type: type,
+          authorization_code: authorizationCode,
+          transaction_date: transactionDate,
+          amount: payment.amount,
+          currency: payment.currency,
+        }
+      );
     }
     
     // Actualizar factura si existe

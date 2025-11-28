@@ -150,6 +150,39 @@ export async function getPendingOrders(orgId: string): Promise<Order[]> {
 }
 
 /**
+ * Helper para registrar eventos en el historial de la orden
+ */
+async function logOrderEvent(
+  supabase: any,
+  orderId: string,
+  eventType: string,
+  description: string,
+  metadata: Record<string, any> = {},
+  userId?: string,
+  fromStatus?: OrderStatus,
+  toStatus?: OrderStatus
+): Promise<void> {
+  try {
+    await supabase.rpc('log_order_event', {
+      p_order_id: orderId,
+      p_event_type: eventType,
+      p_description: description,
+      p_metadata: metadata,
+      p_user_id: userId || null,
+      p_from_status: fromStatus || null,
+      p_to_status: toStatus || null,
+    });
+  } catch (error: any) {
+    // No fallar si el logging falla, solo loggear el error
+    console.error('[logOrderEvent] Error registrando evento:', {
+      orderId,
+      eventType,
+      error: error?.message,
+    });
+  }
+}
+
+/**
  * Actualiza el estado de una orden
  */
 export async function updateOrderStatus(
@@ -159,10 +192,20 @@ export async function updateOrderStatus(
     invoiceId?: string;
     paymentId?: string;
     supabaseClient?: any; // Cliente opcional de Supabase (para webhooks con service role)
+    userId?: string; // Usuario que realiza la acción
   }
 ): Promise<Order> {
   // Usar cliente proporcionado o crear uno nuevo
   const supabase = additionalData?.supabaseClient || await createClient();
+  
+  // Obtener orden actual para comparar estados
+  const { data: currentOrder } = await supabase
+    .from('orders')
+    .select('status, order_number')
+    .eq('id', orderId)
+    .single();
+  
+  const oldStatus = currentOrder?.status as OrderStatus | undefined;
   
   const updateData: any = {
     status,
@@ -195,6 +238,34 @@ export async function updateOrderStatus(
     throw new Error(`Error actualizando orden: ${error?.message || 'Unknown error'}`);
   }
   
+  // Registrar eventos adicionales según el contexto
+  if (oldStatus && oldStatus !== status) {
+    const metadata: Record<string, any> = {};
+    
+    if (additionalData?.invoiceId) {
+      metadata.invoice_id = additionalData.invoiceId;
+    }
+    
+    if (additionalData?.paymentId) {
+      metadata.payment_id = additionalData.paymentId;
+    }
+    
+    // El trigger ya registra el cambio de estado, pero podemos agregar metadata adicional
+    // si hay información específica que queremos capturar
+    if (Object.keys(metadata).length > 0) {
+      await logOrderEvent(
+        supabase,
+        orderId,
+        'status_changed',
+        `Estado actualizado con información adicional`,
+        metadata,
+        additionalData?.userId,
+        oldStatus,
+        status
+      );
+    }
+  }
+  
   console.log('[updateOrderStatus] Orden actualizada exitosamente:', {
     orderId,
     orderNumber: order.order_number,
@@ -220,7 +291,7 @@ export async function expireOldOrders(): Promise<number> {
   
   const { data: expiredOrders, error: selectError } = await supabase
     .from('orders')
-    .select('id')
+    .select('id, order_number')
     .eq('status', 'pending_payment')
     .lt('expires_at', new Date().toISOString());
   
@@ -230,6 +301,20 @@ export async function expireOldOrders(): Promise<number> {
   
   if (!expiredOrders || expiredOrders.length === 0) {
     return 0;
+  }
+  
+  // Registrar eventos de expiración antes de actualizar
+  for (const order of expiredOrders) {
+    await logOrderEvent(
+      supabase,
+      order.id,
+      'order_expired',
+      `Orden expirada automáticamente`,
+      { order_number: order.order_number },
+      undefined,
+      'pending_payment',
+      'cancelled'
+    );
   }
   
   const { error: updateError } = await supabase
