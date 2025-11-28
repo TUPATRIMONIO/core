@@ -200,6 +200,65 @@ export function PendingOrdersBadge() {
     router.push(`/checkout/${orderId}`);
   };
 
+  // Verificar estado de órdenes en el carrito al abrirlo
+  const verifyOrdersStatus = async () => {
+    if (orders.length === 0) return;
+
+    try {
+      // Obtener el estado actual de las órdenes desde la BD
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Obtener IDs de las órdenes actuales en el carrito
+      const orderIds = orders.map(order => order.id);
+
+      // Consultar estado actual de estas órdenes
+      const { data: currentOrders, error } = await supabase
+        .from('orders')
+        .select('id, status')
+        .in('id', orderIds);
+
+      if (error) {
+        console.error('[PendingOrdersBadge] Error verificando estado de órdenes:', error);
+        return;
+      }
+
+      if (!currentOrders || currentOrders.length === 0) {
+        // Todas las órdenes fueron eliminadas o no se encontraron
+        setOrders([]);
+        return;
+      }
+
+      // Filtrar órdenes que ya no están en pending_payment
+      const paidOrCancelledOrders = currentOrders.filter(
+        order => order.status !== 'pending_payment'
+      );
+
+      if (paidOrCancelledOrders.length > 0) {
+        console.log('[PendingOrdersBadge] Órdenes encontradas que ya no están pendientes:', paidOrCancelledOrders);
+        
+        // Remover órdenes pagadas o canceladas del estado local
+        setOrders((currentOrdersState) =>
+          currentOrdersState.filter(
+            order => !paidOrCancelledOrders.some(po => po.id === order.id)
+          )
+        );
+
+        // Mostrar notificación si alguna fue pagada
+        const paidOrders = paidOrCancelledOrders.filter(o => o.status === 'paid');
+        if (paidOrders.length > 0) {
+          toast.success(
+            paidOrders.length === 1
+              ? 'Orden pagada exitosamente'
+              : `${paidOrders.length} órdenes pagadas exitosamente`
+          );
+        }
+      }
+    } catch (error) {
+      console.error('[PendingOrdersBadge] Error en verifyOrdersStatus:', error);
+    }
+  };
+
   const handleCancelOrder = async (orderId: string) => {
     setCancellingOrderId(orderId);
     try {
@@ -273,7 +332,12 @@ export function PendingOrdersBadge() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={(open) => {
+      // Cuando se abre el carrito, verificar estado de las órdenes
+      if (open) {
+        verifyOrdersStatus();
+      }
+    }}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <ShoppingCart className="h-5 w-5" />
