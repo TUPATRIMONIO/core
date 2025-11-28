@@ -245,14 +245,84 @@ async function OrderSuccessContent({
       isCancelled = true;
       console.log('[OrderSuccess] Transacción cancelada por el usuario');
     }
+  } else if (provider === 'stripe') {
+    // Pago de Stripe
+    const sessionId = searchParams?.session_id;
+    
+    if (sessionId) {
+      console.log('[OrderSuccess] Buscando pago Stripe con session_id:', sessionId);
+      
+      // Buscar pago por orderId y provider Stripe
+      // El webhook ya debería haber procesado el pago, pero buscamos el más reciente
+      const { data, error } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider', 'stripe')
+        .eq('metadata->>order_id', orderId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('[OrderSuccess] Error buscando pago Stripe:', error);
+      } else if (data) {
+        console.log('[OrderSuccess] Pago Stripe encontrado:', {
+          id: data.id,
+          status: data.status,
+          provider_payment_id: data.provider_payment_id,
+        });
+        payment = data;
+      } else {
+        // Si no encontramos el pago, puede que el webhook aún no lo haya procesado
+        // Buscar por payment_intent_id si tenemos el session_id
+        console.log('[OrderSuccess] No se encontró pago, el webhook puede estar procesándolo aún');
+      }
+    } else {
+      // Si no hay session_id, buscar el último pago de Stripe para esta orden
+      console.log('[OrderSuccess] Buscando último pago Stripe por orderId:', orderId);
+      const { data: orderPayments, error: orderPaymentsError } = await supabase
+        .from('payments')
+        .select(`
+          *,
+          invoice:invoices (
+            invoice_number,
+            total,
+            currency,
+            id,
+            organization_id,
+            type
+          )
+        `)
+        .eq('provider', 'stripe')
+        .eq('metadata->>order_id', orderId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (orderPaymentsError) {
+        console.error('[OrderSuccess] Error buscando pago Stripe por orderId:', orderPaymentsError);
+      } else if (orderPayments) {
+        console.log('[OrderSuccess] Pago Stripe encontrado por orderId:', orderPayments.id);
+        payment = orderPayments;
+      }
+    }
   }
 
   // Obtener datos del producto
   const productData = order.product_data as any;
 
   // Si el pago fue exitoso, verificar créditos y mostrar mensaje de éxito
-  // Oneclick usa 'authorized' mientras que otros métodos usan 'succeeded'
-  const isPaymentSuccess = payment && (payment.status === 'succeeded' || payment.status === 'authorized');
+  const isPaymentSuccess = payment && payment.status === 'succeeded';
   
   if (isPaymentSuccess) {
     // Si es compra de créditos, verificar que los créditos se hayan cargado

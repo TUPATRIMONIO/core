@@ -505,7 +505,8 @@ export async function createOneclickPayment(
     isAuthorized,
   });
   
-  // Crear registro de pago en BD
+  // Crear registro de pago en BD con status 'pending'
+  // El webhook lo actualizará a 'succeeded' y agregará los créditos
   const { data: paymentRecord, error: paymentError } = await supabase
     .from('payments')
     .insert({
@@ -515,7 +516,7 @@ export async function createOneclickPayment(
       provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
       currency,
-      status: paymentStatus,
+      status: 'pending',
       metadata: {
         buy_order: payment.buy_order,
         store_buy_order: storeBuyOrder,
@@ -706,7 +707,8 @@ export async function createOneclickPaymentForOrder(
     isAuthorized,
   });
   
-  // Crear registro de pago en BD
+  // Crear registro de pago en BD con status 'pending'
+  // El webhook lo actualizará a 'succeeded' y agregará los créditos
   const { data: paymentRecord, error: paymentError } = await supabase
     .from('payments')
     .insert({
@@ -716,7 +718,7 @@ export async function createOneclickPaymentForOrder(
       provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
       currency,
-      status: paymentStatus,
+      status: 'pending',
       metadata: {
         buy_order: payment.buy_order,
         store_buy_order: storeBuyOrder,
@@ -747,8 +749,8 @@ export async function createOneclickPaymentForOrder(
     // No fallar si hay error aquí, el webhook lo manejará
   }
   
-  // Actualizar orden con payment_id y status según resultado
-  await updateOrderStatus(orderId, isAuthorized ? 'paid' : 'pending_payment', { 
+  // Actualizar orden a 'pending_payment' - el webhook la actualizará a 'paid' cuando procese el pago
+  await updateOrderStatus(orderId, 'pending_payment', { 
     invoiceId: invoice.id,
     paymentId: paymentRecord?.id 
   });

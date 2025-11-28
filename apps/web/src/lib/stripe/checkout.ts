@@ -162,22 +162,45 @@ export async function createPaymentIntentForOrder(
   // Actualizar orden con invoice_id
   await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
   
-  // Crear Payment Intent en Stripe
+  // Crear Checkout Session en Stripe (en lugar de Payment Intent)
   // Nota: Stripe requiere la moneda en lowercase (ars, brl, usd, etc.)
   const stripeCurrency = currency.toLowerCase();
   
-  console.log('💳 [Stripe Checkout] Creando Payment Intent:', {
+  // Construir URLs de éxito y cancelación
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const successUrl = `${baseUrl}/checkout/${orderId}/success?provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
+  const cancelUrl = `${baseUrl}/checkout/${orderId}`;
+  
+  console.log('💳 [Stripe Checkout] Creando Checkout Session:', {
     amount: total,
     currency: stripeCurrency,
     customerId: customer.id,
     countryCode,
     orderId,
+    successUrl,
+    cancelUrl,
   });
   
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: total,
-    currency: stripeCurrency,
+  // Crear Checkout Session
+  const checkoutSession = await stripe.checkout.sessions.create({
     customer: customer.id,
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price_data: {
+          currency: stripeCurrency,
+          product_data: {
+            name: productData.name || description,
+            description: productData.description || description,
+          },
+          unit_amount: total,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: successUrl,
+    cancel_url: cancelUrl,
     metadata: {
       organization_id: order.organization_id,
       order_id: orderId,
@@ -191,47 +214,70 @@ export async function createPaymentIntentForOrder(
         : {}),
       country_code: countryCode,
     },
-    description: description,
+    payment_intent_data: {
+      description: description,
+      metadata: {
+        organization_id: order.organization_id,
+        order_id: orderId,
+        order_number: order.order_number,
+        product_type: order.product_type,
+        product_id: order.product_id || '',
+        invoice_id: invoice.id,
+        type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+        ...(order.product_type === 'credits' && productData.credits_amount 
+          ? { credits_amount: productData.credits_amount.toString() }
+          : {}),
+        country_code: countryCode,
+      },
+    },
   });
   
-  console.log('✅ [Stripe Checkout] Payment Intent creado:', {
-    paymentIntentId: paymentIntent.id,
-    status: paymentIntent.status,
-    amount: paymentIntent.amount,
-    currency: paymentIntent.currency,
+  console.log('✅ [Stripe Checkout] Checkout Session creada:', {
+    sessionId: checkoutSession.id,
+    url: checkoutSession.url,
+    paymentIntentId: checkoutSession.payment_intent,
   });
   
-  // Crear registro de pago en BD
-  const { data: payment, error: paymentError } = await supabase
-    .from('payments')
-    .insert({
-      organization_id: order.organization_id,
-      invoice_id: invoice.id,
-      provider: 'stripe',
-      provider_payment_id: paymentIntent.id,
-      amount: amount + tax,
-      currency,
-      status: 'pending',
-    })
-    .select()
-    .single();
-  
-  if (paymentError) {
-    console.error('Error creando registro de pago:', paymentError);
-    // No fallar si hay error aquí, el webhook lo manejará
+  // Crear registro de pago en BD con el payment_intent_id si está disponible
+  // Si no está disponible aún, el webhook lo creará cuando se complete el pago
+  let payment = null;
+  if (checkoutSession.payment_intent) {
+    const { data: paymentData, error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        organization_id: order.organization_id,
+        invoice_id: invoice.id,
+        provider: 'stripe',
+        provider_payment_id: checkoutSession.payment_intent as string,
+        amount: amount + tax,
+        currency,
+        status: 'pending',
+        metadata: {
+          checkout_session_id: checkoutSession.id,
+        },
+      })
+      .select()
+      .single();
+    
+    if (paymentError) {
+      console.error('Error creando registro de pago:', paymentError);
+      // No fallar si hay error aquí, el webhook lo manejará
+    } else {
+      payment = paymentData;
+      
+      // Actualizar orden con payment_id
+      await updateOrderStatus(orderId, 'pending_payment', { 
+        invoiceId: invoice.id,
+        paymentId: payment.id 
+      });
+    }
   }
   
-  // Actualizar orden con payment_id
-  await updateOrderStatus(orderId, 'pending_payment', { 
-    invoiceId: invoice.id,
-    paymentId: payment?.id 
-  });
-  
   return {
-    paymentIntent,
+    checkoutSession,
     invoice,
     payment,
-    clientSecret: paymentIntent.client_secret,
+    url: checkoutSession.url, // URL de redirección para Stripe Checkout
     order,
   };
 }

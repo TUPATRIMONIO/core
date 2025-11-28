@@ -65,12 +65,19 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Crear Payment Intent
+    // Crear Checkout Session
     const result = await createPaymentIntentForOrder(orderId);
     
+    if (!result.url) {
+      return NextResponse.json(
+        { error: 'No se pudo crear la sesión de checkout' },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json({
-      clientSecret: result.clientSecret,
-      paymentIntentId: result.paymentIntent.id,
+      url: result.url,
+      sessionId: result.checkoutSession.id,
       orderId: order.id,
       orderNumber: order.order_number,
     });
