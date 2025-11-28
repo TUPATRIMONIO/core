@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, Loader2, XCircle, CreditCard, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface PendingOrder {
   id: string;
@@ -34,6 +36,9 @@ export function PendingOrdersBadge() {
   const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [organizationIds, setOrganizationIds] = useState<string[]>([]);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const supabase = createClient();
 
   // Función para cargar órdenes pendientes
   const fetchPendingOrders = async () => {
@@ -50,21 +55,143 @@ export function PendingOrdersBadge() {
     }
   };
 
-  // Cargar al montar y hacer polling cada 30 segundos
+  // Obtener organizaciones del usuario
+  const fetchUserOrganizations = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: memberships, error } = await supabase
+        .from('organization_users')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      if (error) {
+        console.error('[PendingOrdersBadge] Error obteniendo organizaciones:', error);
+        return;
+      }
+
+      if (memberships && memberships.length > 0) {
+        const orgIds = memberships.map((m) => m.organization_id);
+        setOrganizationIds(orgIds);
+        return orgIds;
+      }
+    } catch (error) {
+      console.error('[PendingOrdersBadge] Error en fetchUserOrganizations:', error);
+    }
+    return [];
+  };
+
+  // Ref para mantener las organizaciones actuales en el callback de Realtime
+  const orgIdsRef = useRef<string[]>([]);
+
+  // Configurar suscripción Realtime
   useEffect(() => {
-    fetchPendingOrders();
-    const interval = setInterval(fetchPendingOrders, 30000); // 30 segundos
-    
-    // Escuchar eventos de actualización de órdenes para refrescar inmediatamente
+    let interval: NodeJS.Timeout;
+    let isMounted = true;
+
+    const setupRealtime = async () => {
+      // Obtener organizaciones del usuario primero
+      const orgIds = await fetchUserOrganizations();
+      
+      if (!orgIds || orgIds.length === 0) {
+        console.log('[PendingOrdersBadge] Usuario sin organizaciones, usando solo polling');
+        // Cargar órdenes y configurar polling como fallback
+        await fetchPendingOrders();
+        interval = setInterval(fetchPendingOrders, 60000); // 60 segundos como fallback
+        return;
+      }
+
+      // Guardar organizaciones en el ref para uso en el callback
+      orgIdsRef.current = orgIds;
+
+      // Cargar órdenes iniciales
+      await fetchPendingOrders();
+
+      // Configurar suscripción Realtime
+      // Nota: RLS de Supabase protegerá los datos, solo recibiremos órdenes de las organizaciones del usuario
+      const channel = supabase
+        .channel('pending-orders-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+          },
+          (payload) => {
+            if (!isMounted) return;
+
+            const updatedOrder = payload.new as any;
+            const oldOrder = payload.old as any;
+
+            // Verificar que la orden pertenece a una de las organizaciones del usuario
+            if (!orgIdsRef.current.includes(updatedOrder?.organization_id)) {
+              return;
+            }
+
+            // Solo procesar si el status cambió de pending_payment a paid o cancelled
+            if (
+              oldOrder?.status === 'pending_payment' &&
+              (updatedOrder?.status === 'paid' || updatedOrder?.status === 'cancelled')
+            ) {
+              console.log('[PendingOrdersBadge] Orden actualizada vía Realtime:', {
+                orderId: updatedOrder.id,
+                oldStatus: oldOrder.status,
+                newStatus: updatedOrder.status,
+              });
+
+              // Remover la orden del estado local
+              setOrders((currentOrders) =>
+                currentOrders.filter((order) => order.id !== updatedOrder.id)
+              );
+
+              // Mostrar notificación si fue pagada
+              if (updatedOrder.status === 'paid') {
+                toast.success('Orden pagada exitosamente');
+              }
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('[PendingOrdersBadge] Estado de suscripción Realtime:', status);
+          
+          if (status === 'SUBSCRIBED') {
+            console.log('[PendingOrdersBadge] Suscripción Realtime activa');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('[PendingOrdersBadge] Error en canal Realtime, usando polling como fallback');
+            // Configurar polling como fallback si Realtime falla
+            interval = setInterval(fetchPendingOrders, 60000);
+          }
+        });
+
+      channelRef.current = channel;
+
+      // Configurar polling como respaldo (intervalo más largo ya que Realtime es principal)
+      interval = setInterval(fetchPendingOrders, 60000); // 60 segundos
+    };
+
+    setupRealtime();
+
+    // Escuchar eventos de actualización de órdenes para refrescar inmediatamente (compatibilidad)
     const handleOrderUpdate = () => {
       console.log('[PendingOrdersBadge] Evento de actualización recibido, refrescando órdenes...');
       fetchPendingOrders();
     };
-    
+
     window.addEventListener('order:status-updated', handleOrderUpdate);
-    
+
     return () => {
-      clearInterval(interval);
+      isMounted = false;
+      if (interval) {
+        clearInterval(interval);
+      }
+      if (channelRef.current) {
+        console.log('[PendingOrdersBadge] Limpiando suscripción Realtime');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
       window.removeEventListener('order:status-updated', handleOrderUpdate);
     };
   }, []);
