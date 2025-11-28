@@ -514,6 +514,185 @@ export async function createOneclickPayment(
 }
 
 /**
+ * Crea pago con Oneclick para una orden
+ */
+export async function createOneclickPaymentForOrder(
+  orderId: string,
+  tbkUser: string,
+  username: string
+) {
+  const supabase = await createClient();
+  
+  // Obtener orden
+  const order = await getOrder(orderId);
+  
+  if (!order) {
+    throw new Error('Orden no encontrada');
+  }
+  
+  // Verificar que la orden puede ser pagada
+  if (!canPayOrder(order)) {
+    throw new Error('La orden no puede ser pagada (expirada o no pendiente)');
+  }
+  
+  // Obtener organización para determinar país y moneda
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('country, email, name')
+    .eq('id', order.organization_id)
+    .single();
+  
+  if (!org) {
+    throw new Error('Organización no encontrada');
+  }
+  
+  const countryCode = org.country || 'CL';
+  const currency = order.currency || getCurrencyForCountry(countryCode);
+  const amount = order.amount;
+  
+  // Obtener datos del producto desde product_data
+  const productData = order.product_data as any;
+  
+  console.log('💰 [Transbank Oneclick Order] Configuración de pago:', {
+    countryCode,
+    currency,
+    amount,
+    orderId,
+    orderNumber: order.order_number,
+    orgId: order.organization_id,
+    tbkUser,
+    username,
+  });
+  
+  // Calcular impuesto
+  const { data: taxRate } = await supabase.rpc('get_tax_rate', {
+    country_code_param: countryCode,
+  });
+  
+  const tax = amount * (taxRate || 0);
+  const total = amount + tax;
+  
+  // Transbank usa CLP (moneda zero-decimal, no multiplicar por 100)
+  const transbankAmount = Math.round(total);
+  
+  console.log('💰 [Transbank Oneclick Order] Montos calculados:', {
+    amount,
+    tax,
+    total,
+    transbankAmount,
+    currency,
+  });
+  
+  // Crear factura en BD primero
+  const invoiceNumber = await generateInvoiceNumber(order.organization_id);
+  
+  const { data: invoice, error: invoiceError } = await supabase
+    .from('invoices')
+    .insert({
+      organization_id: order.organization_id,
+      invoice_number: invoiceNumber,
+      status: 'open',
+      type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
+      subtotal: amount,
+      tax,
+      total,
+      currency,
+      due_date: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  
+  if (invoiceError || !invoice) {
+    throw new Error(`Error creando factura: ${invoiceError?.message || 'Unknown error'}`);
+  }
+  
+  // Agregar línea de detalle
+  const description = productData.name 
+    ? `${productData.name} - ${productData.description || ''}`
+    : `Producto ${order.product_type}`;
+  
+  await supabase
+    .from('invoice_line_items')
+    .insert({
+      invoice_id: invoice.id,
+      description,
+      quantity: 1,
+      unit_price: amount,
+      total,
+      type: order.product_type,
+    });
+  
+  // Actualizar orden con invoice_id
+  await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
+  
+  // Generar buy_order único (máximo 26 caracteres)
+  const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
+  
+  // Crear pago Oneclick en Transbank
+  const payment = await transbankClient.startOneclickPayment({
+    username,
+    tbk_user: tbkUser,
+    buy_order: buyOrder,
+    amount: transbankAmount,
+  });
+  
+  console.log('✅ [Transbank Oneclick Order] Pago iniciado:', {
+    token: payment.token,
+    url: payment.url_webpay,
+    buyOrder,
+  });
+  
+  // Crear registro de pago en BD
+  const { data: paymentRecord, error: paymentError } = await supabase
+    .from('payments')
+    .insert({
+      organization_id: order.organization_id,
+      invoice_id: invoice.id,
+      provider: 'transbank',
+      provider_payment_id: payment.token,
+      amount: total,
+      currency,
+      status: 'pending',
+      metadata: {
+        buy_order: buyOrder,
+        tbk_user: tbkUser,
+        username,
+        order_id: orderId,
+        order_number: order.order_number,
+        product_type: order.product_type,
+        product_id: order.product_id,
+        ...(order.product_type === 'credits' && productData.credits_amount 
+          ? { credits_amount: productData.credits_amount }
+          : {}),
+        type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+        payment_method: 'oneclick',
+      },
+    })
+    .select()
+    .single();
+  
+  if (paymentError) {
+    console.error('Error creando registro de pago:', paymentError);
+    // No fallar si hay error aquí, el webhook lo manejará
+  }
+  
+  // Actualizar orden con payment_id
+  await updateOrderStatus(orderId, 'pending_payment', { 
+    invoiceId: invoice.id,
+    paymentId: paymentRecord?.id 
+  });
+  
+  return {
+    token: payment.token,
+    url: payment.url_webpay,
+    invoice,
+    payment: paymentRecord,
+    order,
+    success: true,
+  };
+}
+
+/**
  * Genera número de factura único usando función thread-safe de la BD
  */
 async function generateInvoiceNumber(orgId: string): Promise<string> {

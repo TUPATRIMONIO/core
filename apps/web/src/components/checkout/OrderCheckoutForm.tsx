@@ -289,8 +289,11 @@ export default function OrderCheckoutForm({
         throw new Error(data.error || 'Error creando pago');
       }
 
-      // Si el pago fue exitoso, redirigir
-      if (data.success) {
+      // Si hay URL de redirección, redirigir a Transbank para confirmar pago
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.success) {
+        // Si no hay URL pero fue exitoso, redirigir a success
         router.push(`/checkout/${orderId}/success?provider=transbank&method=oneclick`);
       } else {
         throw new Error('Error procesando el pago con Oneclick');
