@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
 import OrderTimeline from '@/components/checkout/OrderTimeline';
+import { isTransbankAvailable } from '@/lib/payments/availability';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -58,6 +59,9 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   const countryCode = org.country || 'US';
   const canPay = canPayOrder(order);
   const expired = isOrderExpired(order);
+  
+  // Verificar disponibilidad de Transbank (B2B Chile CLP)
+  const transbankAvailable = await isTransbankAvailable(order.organization_id);
   
   // Obtener datos del producto
   const productData = order.product_data as any;
@@ -243,7 +247,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         {/* Formulario de pago */}
         <div className="lg:col-span-2">
           {canPay ? (
-            countryCode === 'CL' ? (
+            transbankAvailable ? (
               <Tabs defaultValue="transbank" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="transbank">Transbank</TabsTrigger>

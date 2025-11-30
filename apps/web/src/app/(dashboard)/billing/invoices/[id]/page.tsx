@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, FileText, Calendar, CreditCard, Building2 } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Calendar, CreditCard, Building2, FileCode } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { InvoiceDetail } from '@/components/billing/InvoiceDetail';
@@ -98,12 +98,48 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
             </p>
           </div>
         </div>
-        <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-          <a href={`/api/billing/invoices/${invoice.id}/pdf`} target="_blank" rel="noopener noreferrer">
-            <Download className="mr-2 h-4 w-4" />
-            Ver/Descargar PDF
-          </a>
-        </Button>
+        <div className="flex gap-2">
+          {/* Mostrar botones según proveedor externo */}
+          {invoice.external_provider === 'stripe' && invoice.external_pdf_url && (
+            <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+              <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer nofollow">
+                <Download className="mr-2 h-4 w-4" />
+                Descargar PDF (Stripe)
+              </a>
+            </Button>
+          )}
+          
+          {invoice.external_provider === 'haulmer' && (
+            <>
+              {invoice.external_pdf_url && (
+                <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                  <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer nofollow">
+                    <Download className="mr-2 h-4 w-4" />
+                    Descargar PDF (Haulmer)
+                  </a>
+                </Button>
+              )}
+              {invoice.external_xml_url && (
+                <Button asChild variant="outline">
+                  <a href={invoice.external_xml_url} target="_blank" rel="noopener noreferrer nofollow">
+                    <FileCode className="mr-2 h-4 w-4" />
+                    Descargar XML (Haulmer)
+                  </a>
+                </Button>
+              )}
+            </>
+          )}
+          
+          {/* Fallback: Si no hay proveedor externo, usar PDF interno */}
+          {!invoice.external_provider && (
+            <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+              <a href={`/api/billing/invoices/${invoice.id}/pdf`} target="_blank" rel="noopener noreferrer">
+                <Download className="mr-2 h-4 w-4" />
+                Ver/Descargar PDF
+              </a>
+            </Button>
+          )}
+        </div>
       </div>
       
       {/* Información de la factura */}
