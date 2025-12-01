@@ -66,9 +66,12 @@ async function emitHaulmerDocument(
     ? TipoDTE.FACTURA_ELECTRONICA 
     : TipoDTE.BOLETA_ELECTRONICA;
 
+  // Limpiar RUT (quitar puntos, mantener guión)
+  const cleanRut = customer.tax_id?.replace(/\./g, '') || '';
+
   // Construir receptor
   const receptor: HaulmerReceptor = {
-    RUTRecep: customer.tax_id,
+    RUTRecep: cleanRut,
     RznSocRecep: customer.name,
     GiroRecep: customer.giro || 'SERVICIOS',
     DirRecep: customer.address || 'Sin dirección',
@@ -76,26 +79,47 @@ async function emitHaulmerDocument(
     CorreoRecep: customer.email,
   };
 
-  // Construir detalle
-  const detalle: HaulmerDetalle[] = items.map((item, index) => ({
-    NroLinDet: index + 1,
-    NmbItem: item.description,
-    QtyItem: item.quantity,
-    PrcItem: Math.round(item.unit_price),
-    MontoItem: Math.round(item.total),
-    IndExe: item.tax_exempt ? 1 : undefined,
-  }));
+  // Construir detalle - los montos en detalle deben ser NETOS (sin IVA)
+  // Si los items vienen con total bruto, calculamos el neto
+  const detalle: HaulmerDetalle[] = items.map((item, index) => {
+    // Calcular monto neto del item (sin IVA)
+    const montoNeto = item.tax_exempt 
+      ? Math.round(item.total) 
+      : Math.round(item.total / (1 + IVA_RATE));
+    
+    const precioUnitarioNeto = item.tax_exempt
+      ? Math.round(item.unit_price)
+      : Math.round(item.unit_price / (1 + IVA_RATE));
 
-  // Construir totales
+    return {
+      NroLinDet: index + 1,
+      NmbItem: item.description,
+      QtyItem: item.quantity || 1,
+      PrcItem: precioUnitarioNeto,
+      MontoItem: montoNeto,
+      IndExe: item.tax_exempt ? 1 : undefined,
+    };
+  });
+
+  // Construir totales - subtotal ya debería venir como monto neto
   const totales: HaulmerTotales = {
     MntNeto: Math.round(totals.subtotal),
     TasaIVA: '19',
     IVA: Math.round(totals.tax),
     MntTotal: Math.round(totals.total),
+    MontoPeriodo: Math.round(totals.total),
+    VlrPagar: Math.round(totals.total),
   };
 
   // Generar Idempotency Key
   const idempotencyKey = `doc-${documentId}-${Date.now()}`;
+
+  console.log('[emitHaulmerDocument] Datos a enviar:', {
+    tipoDTE,
+    receptor,
+    detalle,
+    totales,
+  });
 
   // Emitir documento
   const haulmerResponse = await haulmerClient.emitirDTE(

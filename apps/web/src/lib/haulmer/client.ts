@@ -82,6 +82,8 @@ export interface HaulmerTotales {
   TasaIVA?: string;
   IVA?: number;
   MntTotal: number;
+  MontoPeriodo?: number; // Igual a MntTotal para facturas
+  VlrPagar?: number; // Valor a pagar, igual a MntTotal
 }
 
 export interface HaulmerDTE {
@@ -90,6 +92,8 @@ export interface HaulmerDTE {
       TipoDTE: number;
       Folio: number; // Siempre 0, Haulmer asigna el folio
       FchEmis: string; // YYYY-MM-DD
+      TpoTranCompra?: string; // Tipo transacción compra (1: del giro)
+      TpoTranVenta?: string; // Tipo transacción venta (1: del giro)
       FmaPago?: number; // 1: Contado, 2: Crédito, 3: Sin costo
     };
     Emisor: HaulmerEmisor;
@@ -286,19 +290,28 @@ class HaulmerClient {
       idempotencyKey?: string;
     }
   ): Promise<HaulmerEmitirResponse> {
+    // Completar totales con campos obligatorios
+    const totalesCompletos: HaulmerTotales = {
+      ...totales,
+      MontoPeriodo: totales.MontoPeriodo ?? totales.MntTotal,
+      VlrPagar: totales.VlrPagar ?? totales.MntTotal,
+    };
+
     const request: HaulmerEmitirRequest = {
-      response: ['PDF', 'XML', 'FOLIO', 'TIMBRE'],
+      response: ['PDF', 'FOLIO', 'XML'],
       dte: {
         Encabezado: {
           IdDoc: {
             TipoDTE: tipoDTE,
             Folio: 0, // Haulmer asigna el folio automáticamente
             FchEmis: options?.fechaEmision || this.getCurrentDate(),
+            TpoTranCompra: '1', // Del giro
+            TpoTranVenta: '1', // Del giro
             FmaPago: options?.formaPago || 1, // 1: Contado
           },
           Emisor: this.emisor,
           Receptor: receptor,
-          Totales: totales,
+          Totales: totalesCompletos,
         },
         Detalle: detalle,
       },
@@ -307,6 +320,8 @@ class HaulmerClient {
     if (options?.sendEmail) {
       request.sendEmail = options.sendEmail;
     }
+
+    console.log('📝 [Haulmer] Enviando DTE:', JSON.stringify(request, null, 2));
 
     const response = await this.makeRequest<HaulmerEmitirResponse>(
       '/v2/dte/document',

@@ -35,7 +35,7 @@ export default function TestInvoicingPage() {
         credentials: 'include',
         body: JSON.stringify({
           customer: {
-            tax_id: '12345678-9',
+            tax_id: '12312312-3',
             name: 'Cliente Test SPA',
             email: 'test@cliente.com',
             address: 'Av. Test 123',
@@ -166,8 +166,8 @@ export default function TestInvoicingPage() {
 
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-800 font-semibold">Error:</p>
-              <p className="text-red-600">{error}</p>
+              <p className="text-red-800 font-semibold mb-2">❌ Error:</p>
+              <pre className="text-red-600 text-sm whitespace-pre-wrap">{error}</pre>
             </div>
           )}
 
