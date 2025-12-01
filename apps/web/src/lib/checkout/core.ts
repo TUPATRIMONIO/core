@@ -247,24 +247,9 @@ export async function updateOrderStatus(
     newStatus: status,
   });
   
-  // Si la orden pasa a estado "completed", sincronizar factura externa
-  if (status === 'completed' && oldStatus !== 'completed') {
-    try {
-      // Importar dinámicamente para evitar dependencias circulares
-      const { syncExternalInvoice } = await import('@/lib/billing/invoice-sync');
-      await syncExternalInvoice(orderId);
-      console.log('[updateOrderStatus] Sincronización de factura externa iniciada:', {
-        orderId,
-      });
-    } catch (syncError: any) {
-      // No fallar la actualización de estado si la sincronización falla
-      // Se puede reintentar más tarde
-      console.error('[updateOrderStatus] Error sincronizando factura externa (no crítico):', {
-        orderId,
-        error: syncError.message,
-      });
-    }
-  }
+  // Nota: La emisión de documentos externos ahora se maneja automáticamente
+  // mediante el trigger `trigger_order_completed_invoicing` en billing.orders
+  // que crea una solicitud en invoicing.document_requests y llama al webhook
   
   // Disparar evento para actualizar carrito inmediatamente (solo en cliente)
   if (typeof window !== 'undefined') {

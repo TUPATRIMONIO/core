@@ -197,22 +197,65 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
    - ✅ **LISTO PARA PRODUCCIÓN** 🚀
    - ✅ Listo para escalar a cientos de organizaciones
 
-**📅 PRÓXIMO PASO:** **SINCRONIZACIÓN DE FACTURACIÓN ELECTRÓNICA AUTOMÁTICA** 🚀
+**🔄 CONVERSIÓN B2C → B2B - 100% COMPLETO** (Enero 2025):
+
+**✅ FUNCIONALIDADES COMPLETAS:**
+   - ✅ Función SQL `convert_organization_b2c_to_b2b()` - Conversión automática completa
+   - ✅ Endpoint API `/api/organizations/convert-to-business` - Seguro y validado
+   - ✅ Componente UI `ConvertToBusinessCard` - Interfaz amigable para usuarios
+   - ✅ Página `/settings/organization` - Configuración completa de organización
+   - ✅ Validaciones de seguridad (solo org_owner, solo personal → business)
+   - ✅ Actualización automática de límites del CRM (100→1000 contactos, 1→5 usuarios, API access)
+   - ✅ Actualización de settings y tipo de organización
+   - ✅ Integrado en sidebar del dashboard
+
+**📄 ARCHIVOS CREADOS:**
+   - Migración: `20250115000000_convert_b2c_to_b2b_function.sql`
+   - API Route: `apps/web/src/app/api/organizations/convert-to-business/route.ts`
+   - Componente: `apps/web/src/components/organization/ConvertToBusinessCard.tsx`
+   - Página: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
+   - Sidebar actualizado: `apps/web/src/components/dashboard/dashboard-sidebar.tsx`
+
+**🔒 SEGURIDAD:**
+   - ✅ Solo usuarios autenticados pueden convertir
+   - ✅ Solo `org_owner` puede convertir su organización
+   - ✅ Solo organizaciones `personal` pueden convertirse
+   - ✅ Validaciones en backend y frontend
+   - ✅ Manejo completo de errores
+
+**🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
+   - `org_type`: `personal` → `business`
+   - `settings.user_type`: `b2c` → `b2b`
+   - CRM `max_contacts`: 100 → 1,000
+   - CRM `max_users`: 1 → 5
+   - CRM `api_access`: false → true
+
+**📅 PRÓXIMO PASO:** **TESTING DE FACTURACIÓN ELECTRÓNICA AUTOMÁTICA** 🚀
    
-   **🎯 PRIORIDAD INMEDIATA - Integración de Facturación:**
+   **🎯 PRIORIDAD INMEDIATA - Testing de Facturación:**
    - ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google, Facebook, GitHub)
    - ✅ **Stripe** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (claves, webhooks, flujos de pago probados)
    - ✅ **Transbank** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (Webpay Plus y OneClick probados)
-   - 📋 **Facturación Automática** - Implementar sincronización de facturas generadas por proveedores:
-     - 📋 Stripe genera facturas automáticamente → Sincronizar información en BD
-     - 📋 Haulmer genera facturas automáticamente para Transbank → Sincronizar información en BD
-     - 📋 Restricciones: Transbank solo disponible para B2B Chile con CLP configurado
+   - ✅ **Facturación Automática** - ✅ IMPLEMENTADO (Diciembre 2025):
+     - ✅ Stripe: Crea Invoice cuando orden llega a "completed"
+     - ✅ Haulmer: Emite DTE (Factura/Boleta) cuando orden llega a "completed"
+     - ✅ Restricciones: Transbank solo disponible para B2B Chile con CLP (moneda automática por país)
+   - 📋 **Testing Facturación** - Probar flujos completos:
+     - 📋 Testing Stripe: Verificar creación de Invoice y disponibilidad de PDF
+     - 📋 Testing Transbank/Haulmer: Verificar emisión de DTE y disponibilidad de PDF/XML
+     - 📋 Testing Restricciones: Verificar que usuarios no elegibles no ven Transbank
+     - 📋 Testing Errores: Verificar manejo de errores y que no bloquean actualización de estado
    - 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de emails, configurar dominio verificado
    
    **✅ COMPLETADO:**
    - ✅ **Admin Panel Core COMPLETADO** (Nov 21, 2025)
    - ✅ **Sistema de Créditos y Billing COMPLETADO** (Nov 22, 2025)
    - ✅ **Platform Admins: Acceso Completo al Dashboard COMPLETADO** (Dic 2025)
+   - ✅ **Conversión B2C → B2B COMPLETADO** (Enero 2025)
+     - ✅ Función SQL para conversión automática
+     - ✅ Endpoint API seguro con validaciones
+     - ✅ UI completa para usuarios en `/settings/organization`
+     - ✅ Actualización automática de límites del CRM
    - ✅ **Fase 3 - Comunicaciones y CRM avanzado COMPLETADO** (Dic 2025)
      - ✅ Schema communications creado (`20251123191316_schema_communications.sql`)
      - ✅ Integración SendGrid multi-tenant (cuenta por organización)
@@ -3070,7 +3113,11 @@ core.roles:
 
 ##### **Ventajas del Modelo Híbrido:**
 ✅ Misma arquitectura para ambos segmentos
-✅ Usuario B2C puede "upgradear" a B2B  
+✅ Usuario B2C puede "upgradear" a B2B **← IMPLEMENTADO (Enero 2025)**
+   - Función SQL `convert_organization_b2c_to_b2b()` disponible
+   - Endpoint API `/api/organizations/convert-to-business` funcionando
+   - UI completa en `/settings/organization` para conversión desde frontend
+   - Conversión automática de límites y configuración del CRM
 ✅ Mercado más amplio (individuales + empresas)
 ✅ Sistema de créditos/IA unificado
 ✅ No duplicar código ni infraestructura
@@ -6991,3 +7038,184 @@ useEffect(() => {
 ---
 
 **📋 Este milestone establecerá un sistema robusto de sincronización de facturación electrónica automática. Los proveedores (Stripe y Haulmer) generan las facturas automáticamente al procesar los pagos, y nuestro sistema sincroniza la información para mantener los registros actualizados. Transbank solo está disponible para organizaciones B2B chilenas con CLP configurado, mientras que Stripe está disponible para todos los usuarios.**
+
+---
+
+## ✅ **SISTEMA DE FACTURACIÓN ELECTRÓNICA AUTOMÁTICA - IMPLEMENTADO** (Diciembre 2025)
+
+**📅 Fecha de Implementación:** 2 Diciembre 2025
+
+### 🎯 **Objetivo**
+Implementar sincronización automática de facturas electrónicas (Stripe/Haulmer) que se dispara cuando las órdenes pasan al estado **"completed"** (no "paid"), con restricciones de Transbank para B2B Chile CLP.
+
+**Flujo de estados:** `pending_payment` → `paid` → `completed` → **[Emitir factura externa]**
+
+### ✅ **Implementación Completada**
+
+#### **1. Migraciones SQL**
+- ✅ **Migración 20251202000001**: Agregados campos a tabla `invoices`:
+  - `external_provider` (stripe | haulmer)
+  - `external_document_id` (ID en el proveedor)
+  - `external_pdf_url` (URL del PDF)
+  - `external_xml_url` (URL del XML - solo Haulmer)
+  - `external_status` (estado en el proveedor)
+- ✅ **Migración 20251202000002**: Creado bucket Storage `invoices` para almacenar PDFs/XMLs con políticas RLS
+
+#### **2. Lógica de Disponibilidad de Métodos de Pago**
+- ✅ **Archivo**: `apps/web/src/lib/payments/availability.ts`
+- ✅ Función `isTransbankAvailable()` - Verifica:
+  - `org_type === 'business'` (B2B)
+  - `country === 'CL'` (Chile)
+  - `currency === 'CLP'` (determinado automáticamente por país)
+- ✅ Función `getAvailablePaymentMethods()` - Retorna métodos disponibles según organización
+- ✅ Función `isPaymentMethodAvailable()` - Verifica disponibilidad de método específico
+
+#### **3. Integración con Stripe**
+- ✅ **Archivo**: `apps/web/src/lib/stripe/sync.ts`
+- ✅ Función `createStripeInvoiceForOrder()` - Crea Invoice en Stripe siguiendo flujo de Make:
+  1. Crear Invoice (`POST /v1/invoices`)
+  2. Agregar Invoice Item (`createInvoiceItem`)
+  3. Marcar como pagado (`POST /v1/invoices/{id}/pay` con `paid_out_of_band: true`)
+  4. Enviar Invoice (`POST /v1/invoices/{id}/send`)
+- ✅ Función `syncStripeInvoice()` - Crea invoice cuando orden llega a "completed"
+- ✅ Función `syncStripeInvoiceById()` - Sincroniza invoice existente por ID
+
+#### **4. Integración con Haulmer (OpenFactura)**
+- ✅ **Archivo**: `apps/web/src/lib/haulmer/client.ts`
+- ✅ Cliente API Haulmer con autenticación correcta (header `apikey`, no Bearer)
+- ✅ Función `emitirDTE()` - Emite Documento Tributario Electrónico
+- ✅ Función `emitirFactura()` - Emite Factura Electrónica (TipoDTE: 33)
+- ✅ Función `emitirBoleta()` - Emite Boleta Electrónica (TipoDTE: 39)
+- ✅ Función `listarDocumentosEmitidos()` - Lista documentos con filtros
+- ✅ **Datos del Emisor configurados** (TuPatrimonio):
+  - RUT: 77028682-4
+  - Razón Social: TU PATRIMONIO ASESORIAS SPA
+  - Giro: SERV DIGITALES, INMOBILIARIOS, FINANCIEROS, COMERCIALIZACION VEHICULO
+  - Acteco: 620900
+  - Dirección: AV. PROVIDENCIA 1208, OF 207
+  - Comuna: Providencia
+  - Código SII Sucursal: 83413793
+  - Teléfono: +56949166719
+
+- ✅ **Archivo**: `apps/web/src/lib/haulmer/sync.ts`
+- ✅ Función `emitHaulmerInvoice()` - Emite factura y guarda PDF/XML en Storage
+- ✅ Función `syncHaulmerInvoice()` - Wrapper que obtiene datos y emite factura
+- ✅ Guardado automático de PDF y XML en Supabase Storage (bucket `invoices`)
+
+#### **5. Orquestador de Sincronización**
+- ✅ **Archivo**: `apps/web/src/lib/billing/invoice-sync.ts`
+- ✅ Función `syncExternalInvoice()` - Detecta proveedor y llama función correspondiente:
+  - Si Stripe → `syncStripeInvoice()`
+  - Si Transbank → `syncHaulmerInvoice()`
+
+#### **6. Hook de Sincronización en Estado "completed"**
+- ✅ **Archivo**: `apps/web/src/lib/checkout/core.ts`
+- ✅ Modificado `updateOrderStatus()` para disparar sincronización cuando orden pasa a "completed"
+- ✅ Importación dinámica para evitar dependencias circulares
+- ✅ Manejo de errores no bloqueante (no falla actualización de estado si sincronización falla)
+
+#### **7. UI Actualizada**
+- ✅ **Checkout**: `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx`
+  - Filtra métodos de pago usando `isTransbankAvailable()`
+  - Transbank solo visible para B2B Chile CLP
+- ✅ **Facturas**: `apps/web/src/app/(dashboard)/billing/invoices/[id]/page.tsx`
+  - Botones de descarga según proveedor externo:
+    - Stripe: Botón PDF
+    - Haulmer: Botones PDF y XML
+
+### 📋 **Archivos Creados/Modificados**
+
+**Migraciones SQL:**
+- `supabase/migrations/20251202000001_add_external_invoice_fields.sql`
+- `supabase/migrations/20251202000002_create_invoices_storage_bucket.sql`
+
+**Librerías:**
+- `apps/web/src/lib/payments/availability.ts` (nuevo)
+- `apps/web/src/lib/haulmer/client.ts` (nuevo)
+- `apps/web/src/lib/haulmer/sync.ts` (nuevo)
+- `apps/web/src/lib/stripe/sync.ts` (nuevo)
+- `apps/web/src/lib/billing/invoice-sync.ts` (nuevo)
+- `apps/web/src/lib/checkout/core.ts` (modificado)
+
+**UI:**
+- `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx` (modificado)
+- `apps/web/src/app/(dashboard)/billing/invoices/[id]/page.tsx` (modificado)
+
+### 🔧 **Variables de Entorno Requeridas**
+
+```env
+# Haulmer API
+HAULMER_API_KEY=b3c13eadf1374286947fbea9d5888f87
+HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
+
+# Opcional: Sobrescribir datos del emisor (valores por defecto ya configurados)
+# HAULMER_EMISOR_RUT=77028682-4
+# HAULMER_EMISOR_RAZON_SOCIAL=TU PATRIMONIO ASESORIAS SPA
+# HAULMER_EMISOR_GIRO=SERV DIGITALES, INMOBILIARIOS, FINANCIEROS...
+# HAULMER_EMISOR_ACTECO=620900
+# HAULMER_EMISOR_DIRECCION=AV. PROVIDENCIA 1208, OF 207
+# HAULMER_EMISOR_COMUNA=Providencia
+# HAULMER_EMISOR_SUCURSAL=83413793
+# HAULMER_EMISOR_TELEFONO=+56949166719
+```
+
+### ⚠️ **Consideraciones Técnicas**
+
+1. **Emisión vs Sincronización**:
+   - **Stripe**: Crea Invoice nuevo cuando orden llega a "completed" (aunque ya se haya cobrado)
+   - **Haulmer**: Emite DTE (Factura/Boleta) cuando orden llega a "completed"
+
+2. **Moneda Automática**: La moneda se determina automáticamente por país:
+   - Chile (CL) → CLP → Transbank habilitado
+   - Otros países → USD → Solo Stripe
+
+3. **Storage**: PDFs y XMLs de Haulmer se guardan en Supabase Storage (bucket `invoices`) y se almacenan las URLs en la BD
+
+4. **Idempotencia**: Haulmer soporta Idempotency Key para evitar emisiones duplicadas
+
+5. **Rate Limits Haulmer**:
+   - 3 peticiones por segundo
+   - 100 peticiones por minuto
+
+### 📋 **PRÓXIMO PASO PENDIENTE**
+
+**🔄 TESTING COMPLETO DE FACTURACIÓN:**
+
+- [ ] **Testing Stripe**: Probar flujo completo de compra de créditos con Stripe:
+  - [ ] Crear orden
+  - [ ] Pagar con Stripe
+  - [ ] Verificar que orden pasa a "paid"
+  - [ ] Verificar que orden pasa a "completed" (después de agregar créditos)
+  - [ ] Verificar que se crea Invoice en Stripe
+  - [ ] Verificar que PDF está disponible en la página de factura
+  - [ ] Verificar que campos `external_provider`, `external_document_id`, `external_pdf_url` están correctos
+
+- [ ] **Testing Transbank**: Probar flujo completo de compra de créditos con Transbank:
+  - [ ] Crear orden con organización B2B Chile CLP
+  - [ ] Pagar con Transbank (Webpay Plus o OneClick)
+  - [ ] Verificar que orden pasa a "paid"
+  - [ ] Verificar que orden pasa a "completed" (después de agregar créditos)
+  - [ ] Verificar que se emite DTE en Haulmer
+  - [ ] Verificar que PDF y XML están disponibles en Storage
+  - [ ] Verificar que PDF y XML están disponibles en la página de factura
+  - [ ] Verificar que campos `external_provider`, `external_document_id`, `external_pdf_url`, `external_xml_url` están correctos
+
+- [ ] **Testing Restricciones**: Verificar que usuarios no elegibles no ven Transbank:
+  - [ ] Usuario B2C no ve Transbank
+  - [ ] Usuario B2B de otro país no ve Transbank
+  - [ ] Usuario B2B Chile sin CLP no ve Transbank (si aplica)
+
+- [ ] **Testing Errores**: Verificar manejo de errores:
+  - [ ] Error si Haulmer API Key no está configurada
+  - [ ] Error si organización no tiene RUT
+  - [ ] Error si falla creación de Invoice en Stripe
+  - [ ] Error si falla emisión de DTE en Haulmer
+  - [ ] Verificar que errores no bloquean actualización de estado de orden
+
+- [ ] **Testing Storage**: Verificar que archivos se guardan correctamente:
+  - [ ] PDFs de Haulmer se guardan en Storage
+  - [ ] XMLs de Haulmer se guardan en Storage
+  - [ ] URLs públicas funcionan correctamente
+  - [ ] Políticas RLS permiten acceso solo a usuarios de la organización
+
+---

@@ -19,15 +19,17 @@ const HAULMER_ENVIRONMENT = (process.env.HAULMER_ENVIRONMENT || 'sandbox') as 's
 const HAULMER_API_URL = process.env.HAULMER_API_URL || HAULMER_URLS[HAULMER_ENVIRONMENT];
 const HAULMER_API_KEY = process.env.HAULMER_API_KEY || '';
 
-// Datos del emisor (TuPatrimonio)
+// Datos del emisor (TuPatrimonio) - valores por defecto desde Make blueprint
+// Estos valores se pueden sobrescribir con variables de entorno
 const HAULMER_EMISOR = {
-  RUTEmisor: process.env.HAULMER_EMISOR_RUT || '',
-  RznSoc: process.env.HAULMER_EMISOR_RAZON_SOCIAL || '',
-  GiroEmis: process.env.HAULMER_EMISOR_GIRO || '',
-  Acteco: parseInt(process.env.HAULMER_EMISOR_ACTECO || '0'),
-  DirOrigen: process.env.HAULMER_EMISOR_DIRECCION || '',
-  CmnaOrigen: process.env.HAULMER_EMISOR_COMUNA || '',
-  CdgSIISucur: process.env.HAULMER_EMISOR_SUCURSAL || '',
+  RUTEmisor: process.env.HAULMER_EMISOR_RUT || '77028682-4',
+  RznSoc: process.env.HAULMER_EMISOR_RAZON_SOCIAL || 'TU PATRIMONIO ASESORIAS SPA',
+  GiroEmis: process.env.HAULMER_EMISOR_GIRO || 'SERV DIGITALES, INMOBILIARIOS, FINANCIEROS, COMERCIALIZACION VEHICULO',
+  Acteco: parseInt(process.env.HAULMER_EMISOR_ACTECO || '620900'),
+  DirOrigen: process.env.HAULMER_EMISOR_DIRECCION || 'AV. PROVIDENCIA 1208, OF 207',
+  CmnaOrigen: process.env.HAULMER_EMISOR_COMUNA || 'Providencia',
+  CdgSIISucur: process.env.HAULMER_EMISOR_SUCURSAL || '83413793',
+  Telefono: process.env.HAULMER_EMISOR_TELEFONO || '+56949166719',
 };
 
 // Tipos de DTE soportados
@@ -51,6 +53,7 @@ export interface HaulmerEmisor {
   CdgSIISucur?: string;
   CorreoEmisor?: string;
   Telefono?: string;
+  [key: string]: string | number | undefined;
 }
 
 export interface HaulmerReceptor {

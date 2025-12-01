@@ -90,19 +90,24 @@ interface OrganizationData {
  * 
  * @param orderData - Datos de la orden
  * @param orgData - Datos de la organización (receptor)
+ * @param options - Opciones adicionales
+ * @param options.updateDatabase - Si true, actualiza la BD directamente (default: true para compatibilidad)
  * @returns Datos de la factura emitida
  */
 export async function emitHaulmerInvoice(
   orderData: OrderDataForInvoice,
-  orgData: OrganizationData
+  orgData: OrganizationData,
+  options?: { updateDatabase?: boolean }
 ): Promise<HaulmerEmitirResponse> {
   const supabase = createServiceRoleClient();
+  const shouldUpdateDB = options?.updateDatabase !== false; // Default: true para compatibilidad
 
   console.log('[emitHaulmerInvoice] Iniciando emisión de factura:', {
     invoiceId: orderData.invoiceId,
     invoiceNumber: orderData.invoiceNumber,
     organizationId: orderData.organizationId,
     amount: orderData.amount,
+    updateDatabase: shouldUpdateDB,
   });
 
   // Verificar que Haulmer está configurado
@@ -165,51 +170,59 @@ export async function emitHaulmerInvoice(
       tieneXML: !!haulmerResponse.XML,
     });
 
-    // Guardar PDF y XML en Supabase Storage
+    // Guardar PDF y XML en Supabase Storage (siempre se guardan, independientemente de updateDatabase)
     let pdfUrl: string | null = null;
     let xmlUrl: string | null = null;
 
-    if (haulmerResponse.PDF) {
+    if (haulmerResponse.PDF && haulmerResponse.FOLIO) {
       const pdfFileName = `haulmer/${orderData.organizationId}/${orderData.invoiceNumber}-${haulmerResponse.FOLIO}.pdf`;
       pdfUrl = await saveToStorage(haulmerResponse.PDF, pdfFileName, 'application/pdf');
       console.log('[emitHaulmerInvoice] PDF guardado:', pdfUrl);
     }
 
-    if (haulmerResponse.XML) {
+    if (haulmerResponse.XML && haulmerResponse.FOLIO) {
       const xmlFileName = `haulmer/${orderData.organizationId}/${orderData.invoiceNumber}-${haulmerResponse.FOLIO}.xml`;
       xmlUrl = await saveToStorage(haulmerResponse.XML, xmlFileName, 'application/xml');
       console.log('[emitHaulmerInvoice] XML guardado:', xmlUrl);
     }
+    
+    // Agregar URLs a la respuesta para que el processor las pueda usar
+    // Nota: Esto extiende HaulmerEmitirResponse pero no rompe compatibilidad
+    (haulmerResponse as any).pdfUrl = pdfUrl;
+    (haulmerResponse as any).xmlUrl = xmlUrl;
 
-    // Actualizar factura en nuestra BD con datos externos
-    const { data: updatedInvoice, error: updateError } = await supabase
-      .from('invoices')
-      .update({
-        external_provider: 'haulmer',
-        external_document_id: haulmerResponse.FOLIO?.toString() || haulmerResponse.TOKEN,
-        external_pdf_url: pdfUrl,
-        external_xml_url: xmlUrl,
-        external_status: 'emitido',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderData.invoiceId)
-      .select()
-      .single();
+    // Actualizar factura en nuestra BD con datos externos (solo si se solicita)
+    if (shouldUpdateDB) {
+      const { data: updatedInvoice, error: updateError } = await supabase
+        .from('invoices')
+        .update({
+          external_provider: 'haulmer',
+          external_document_id: haulmerResponse.FOLIO?.toString() || haulmerResponse.TOKEN,
+          external_pdf_url: pdfUrl,
+          external_xml_url: xmlUrl,
+          external_status: 'emitido',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', orderData.invoiceId)
+        .select()
+        .single();
 
-    if (updateError || !updatedInvoice) {
-      console.error('[emitHaulmerInvoice] Error actualizando factura en BD:', {
-        invoiceId: orderData.invoiceId,
-        error: updateError?.message,
-      });
-      // No lanzar error aquí - la factura ya se emitió en Haulmer
-      // Solo logear el error
+      if (updateError || !updatedInvoice) {
+        console.error('[emitHaulmerInvoice] Error actualizando factura en BD:', {
+          invoiceId: orderData.invoiceId,
+          error: updateError?.message,
+        });
+        // No lanzar error aquí - la factura ya se emitió en Haulmer
+        // Solo logear el error
+      }
     }
 
-    console.log('[emitHaulmerInvoice] Factura emitida y sincronizada exitosamente:', {
+    console.log('[emitHaulmerInvoice] Factura emitida exitosamente:', {
       invoiceId: orderData.invoiceId,
       folio: haulmerResponse.FOLIO,
       pdfUrl,
       xmlUrl,
+      updatedDatabase: shouldUpdateDB,
     });
 
     return haulmerResponse;

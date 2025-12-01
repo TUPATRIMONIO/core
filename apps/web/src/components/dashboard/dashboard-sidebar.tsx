@@ -147,6 +147,14 @@ const contentMenuItems = [
   },
 ]
 
+const settingsMenuItems = [
+  {
+    title: 'Organización',
+    url: '/settings/organization',
+    icon: Building2,
+  },
+]
+
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -347,6 +355,29 @@ export function DashboardSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     isActive={isActive(item.url, contentMenuItems)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Settings */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Configuración</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {settingsMenuItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url, settingsMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
