@@ -7,10 +7,6 @@
     {
       "path": "/api/crm/emails/sync/cron",
       "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/invoicing/cron",
-      "schedule": "*/2 * * * *"
     }
   ]
 }

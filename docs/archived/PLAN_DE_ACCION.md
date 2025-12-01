@@ -5770,16 +5770,18 @@ describe('Document Review', () => {
 
 ## 📱 Fase 15: Mobile App (Opcional - Semanas 103-114)
 
-### 15.1 React Native App
+### 15.1 Capacitor de Ionic App
 
 **Objetivo:** Experiencia móvil nativa
 
 #### Consideraciones:
-- Expo framework
-- Shared business logic con web
-- Push notifications (Firebase)
-- Offline-first approach
-- Biometric authentication
+- Capacitor de Ionic framework
+- Reutilización del código web existente (Next.js)
+- Mismo stack tecnológico (React, TypeScript, Tailwind)
+- Push notifications (Capacitor Push Notifications o Firebase)
+- Offline-first approach con Service Worker existente
+- Biometric authentication (Capacitor plugins)
+- Acceso a APIs nativas (cámara, geolocalización, etc.)
 
 #### Features prioritarias mobile:
 - Chat con AI (notificaciones push)

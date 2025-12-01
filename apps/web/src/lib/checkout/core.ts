@@ -30,7 +30,6 @@ export interface Order {
   product_data: Record<string, any>;
   amount: number;
   currency: string;
-  invoice_id?: string;
   payment_id?: string;
   expires_at?: string;
   metadata: Record<string, any>;
@@ -189,7 +188,6 @@ export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
   additionalData?: {
-    invoiceId?: string;
     paymentId?: string;
     supabaseClient?: any; // Cliente opcional de Supabase (para webhooks con service role)
     userId?: string; // Usuario que realiza la acción
@@ -211,10 +209,6 @@ export async function updateOrderStatus(
     status,
     updated_at: new Date().toISOString(),
   };
-  
-  if (additionalData?.invoiceId) {
-    updateData.invoice_id = additionalData.invoiceId;
-  }
   
   if (additionalData?.paymentId) {
     updateData.payment_id = additionalData.paymentId;
