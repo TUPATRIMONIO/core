@@ -158,7 +158,7 @@ export default async function CRMPage() {
               </Link>
             </Button>
             <Button variant="outline" className="h-auto flex-col p-4" asChild>
-              <Link href="/dashboard/crm/campaigns">
+              <Link href="/dashboard/communications/email/campaigns">
                 <Mail className="mb-2 h-6 w-6" />
                 <span>Campañas</span>
               </Link>

@@ -18,11 +18,16 @@ import { sendBatchEmails } from '@/lib/sendgrid/client';
 import { renderTemplate } from '@/lib/communications/template-engine';
 import { hasSendGridAccount } from '@/lib/sendgrid/accounts';
 import type { SendGridMessage } from '@/lib/sendgrid/types';
+import { requireApplicationAccess } from '@/lib/access/api-access-guard';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = await createClient();

@@ -326,6 +326,14 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
      - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics, SendGrid settings)
      - ✅ Páginas del CRM completadas (contacts, deals, tickets, products)
      - ✅ Helper `getUserActiveOrganization()` para manejo de organizaciones
+     - ✅ **Arquitectura Multi-Canal Implementada** (Dic 2025)
+       - ✅ Aplicación `email_marketing` creada en `core.applications`
+       - ✅ Separación de Communications como aplicación independiente de CRM
+       - ✅ Estructura de URLs: `/dashboard/communications/email/` (campañas y templates)
+       - ✅ Listas y Analytics compartidos: `/dashboard/communications/lists` y `/analytics`
+       - ✅ Schema `communications` diseñado para múltiples canales (email, sms, whatsapp)
+       - ✅ Sistema de visibilidad integrado directamente en `core.applications`
+       - ✅ Preparado para futuras aplicaciones: `whatsapp_marketing` y `sms_marketing`
    - ✅ **Sistema de Facturación Independiente COMPLETADO** (Dic 2025)
      - ✅ Nuevo schema `invoicing` completamente independiente
      - ✅ API RESTful: `POST/GET /api/invoicing/documents`
@@ -482,7 +490,9 @@ apps/web/src/app/(admin)/admin/
 ├── api-keys/
 │   └── page.tsx                  ✅ Lista de API keys
 ├── applications/
-│   └── page.tsx                  ✅ Lista de aplicaciones
+│   ├── page.tsx                  ✅ Lista de aplicaciones
+│   └── [id]/
+│       └── page.tsx              ✅ Configuración de visibilidad de aplicación
 ├── subscriptions/
 │   └── page.tsx                  ✅ Lista de suscripciones
 ├── events/
@@ -554,7 +564,7 @@ apps/web/src/app/(admin)/admin/
 - ✅ Teams
 
 **Apps & Servicios:**
-- ✅ Aplicaciones
+- ✅ Aplicaciones (con sistema de visibilidad integrado)
 - ✅ Suscripciones
 - ✅ CRM
 - ✅ Blog
@@ -631,6 +641,13 @@ apps/web/src/app/(admin)/admin/
 14. ✅ Ver **todas las API keys** del sistema
 15. ✅ Revocar API keys existentes
 16. ✅ Ver todas las **aplicaciones** del ecosistema
+17. ✅ **Configurar visibilidad de aplicaciones** (Dic 2025)
+    - ✅ Control de visibilidad por nivel (public, platform_only, beta, restricted)
+    - ✅ Restricción por países permitidos
+    - ✅ Restricción por tiers de suscripción requeridos
+    - ✅ Overrides por organización (excepciones específicas)
+    - ✅ Habilitar/deshabilitar aplicaciones sin eliminar datos
+    - ✅ Sidebar dinámico que filtra según aplicaciones habilitadas
 17. ✅ Ver **suscripciones** activas de todas las organizaciones
 18. ✅ Monitorear **eventos del sistema** globales
 19. ✅ Ver **créditos de todas las organizaciones** (nueva sección)
@@ -661,6 +678,44 @@ apps/web/src/app/(admin)/admin/
 8. ✅ **ServiceRoleClient en páginas admin** - Platform admin ve todo sin restricciones de RLS
 9. ✅ **Acceso completo a datos** - Todas las páginas de admin usan `createServiceRoleClient()` para bypass RLS
 
+### 🎛️ **Sistema de Visibilidad de Aplicaciones** (Dic 2025)
+
+**✅ IMPLEMENTADO:** Control de visibilidad integrado directamente en `core.applications`
+
+**Arquitectura:**
+- ✅ Campos agregados a `core.applications`:
+  - `visibility_level`: public, platform_only, beta, restricted
+  - `allowed_countries`: Array de códigos de países permitidos
+  - `required_subscription_tiers`: Array de tiers requeridos (starter, pro, enterprise)
+- ✅ Tabla `core.application_overrides` para excepciones por organización
+- ✅ Funciones SQL:
+  - `can_access_application(org_id, user_id, app_slug)`: Verifica acceso individual
+  - `get_enabled_applications(org_id, user_id)`: Lista aplicaciones habilitadas
+  - `update_application(app_id, ...)`: Actualización segura desde cliente
+
+**Funcionalidades:**
+- ✅ Página `/admin/applications` lista todas las aplicaciones (incluso deshabilitadas)
+- ✅ Página `/admin/applications/[id]` para configurar visibilidad:
+  - Switch para habilitar/deshabilitar aplicación
+  - Selector de nivel de visibilidad
+  - Selector múltiple de países permitidos
+  - Selector múltiple de tiers requeridos
+  - Gestión de overrides por organización
+- ✅ Protección automática de rutas basada en aplicaciones habilitadas
+- ✅ Protección de APIs con `requireApplicationAccess()`
+- ✅ Sidebar dinámico que filtra según aplicaciones habilitadas
+- ✅ Platform admins siempre ven todas las aplicaciones (incluso deshabilitadas)
+
+**Migraciones Aplicadas:**
+- ✅ `20251205000000_applications_visibility.sql` - Campos y funciones de visibilidad
+- ✅ `20251205000001_update_application_function.sql` - Función RPC para actualización
+- ✅ `20251205000002_email_marketing_app.sql` - Aplicación email_marketing
+
+**Eliminado:**
+- ❌ Sistema de Feature Flags (`core.feature_flags`) - Duplicaba funcionalidad
+- ❌ Todas las páginas y APIs de `/admin/feature-flags`
+- ❌ Hook `useFeatureAccess` - Reemplazado por `useApplicationAccess`
+
 ### 📄 **Documentación Actualizada**
 
 **Archivos de documentación:**
@@ -668,6 +723,7 @@ apps/web/src/app/(admin)/admin/
 - ✅ Comentarios en Server Actions (arquitectura de seguridad)
 - ✅ JSDoc en componentes principales
 - ✅ README con advertencias de seguridad
+- ✅ Documentación de sistema de visibilidad de aplicaciones
 
 ### 🎉 **RESULTADO FINAL**
 
@@ -3024,7 +3080,7 @@ npm run build:packages   # Todos los packages
 - ✅ **Fase 0**: COMPLETADA AL 100%
 - ✅ **Fase 2**: COMPLETADA AL 100% (Nov 22, 2025)
 - ✅ **Platform Admins: Acceso Completo al Dashboard**: COMPLETADO AL 100% (Dic 2025)
-- 🚀 **Fase 3 - Comunicaciones y CRM avanzado**: EN PROGRESO (Dic 2025)
+- ✅ **Fase 3 - Comunicaciones y CRM avanzado**: COMPLETADO (Dic 2025)
   - ✅ Schema communications completo (`communications` schema creado)
   - ✅ Integración SendGrid multi-tenant (cuenta por organización, encriptación AES-256-GCM)
   - ✅ Motor de templates Handlebars implementado
@@ -3032,9 +3088,24 @@ npm run build:packages   # Todos los packages
   - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics, SendGrid settings)
   - ✅ Páginas del CRM completadas (contacts, deals, tickets, products, página principal CRM)
   - ✅ Helper `getUserActiveOrganization()` para manejo automático de organizaciones
+  - ✅ **Arquitectura Multi-Canal Implementada** (Dic 2025)
+    - ✅ Aplicación `email_marketing` separada de CRM
+    - ✅ Estructura de URLs: `/dashboard/communications/email/`
+    - ✅ Listas y Analytics compartidos entre canales
+    - ✅ Sistema de visibilidad integrado en `core.applications`
+    - ✅ Preparado para `whatsapp_marketing` y `sms_marketing` (futuro)
+  - ✅ **Sistema de Visibilidad de Aplicaciones** (Dic 2025)
+    - ✅ Control de visibilidad integrado directamente en `core.applications`
+    - ✅ Campos: `visibility_level`, `allowed_countries`, `required_subscription_tiers`
+    - ✅ Tabla `core.application_overrides` para excepciones por organización
+    - ✅ Funciones SQL: `can_access_application()`, `get_enabled_applications()`
+    - ✅ Protección de rutas y APIs basada en aplicaciones habilitadas
+    - ✅ Sidebar dinámico que filtra según aplicaciones habilitadas
   - 🔄 Pendiente: Testing completo de envío de campañas
   - 🔄 Pendiente: Migración a producción
   - 📋 Automatizaciones avanzadas (pendiente)
+  - 📋 Integración WhatsApp Business API (pendiente)
+  - 📋 Integración SMS (Twilio/Meta) (pendiente)
   - 📋 Reportes y analytics avanzados del CRM (pendiente)
 
 ---
@@ -3669,10 +3740,11 @@ core.roles:
 - ✅ Responder correos desde dashboard
 - ✅ Notificaciones de nuevos leads
 
-**CRM Completo Fase 3 (EN PROGRESO - Dic 2025):**
+**CRM Completo Fase 3 (COMPLETADO - Dic 2025):**
 - ✅ Gestión avanzada de contactos (páginas creadas)
 - ✅ Pipelines de ventas (deals implementado)
-- 🚀 Campañas de email marketing (EN PROGRESO)
+- ✅ Campañas de email marketing (COMPLETADO - separado como aplicación independiente)
+- ✅ Sistema de visibilidad de aplicaciones integrado en `core.applications`
 - 📋 Automatizaciones (pendiente)
 - 📋 Reportes y analytics avanzados (pendiente)
 
@@ -3680,22 +3752,60 @@ core.roles:
 
 ### 3.1 Schema Communications ✅ COMPLETADO (Dic 2025)
 
-**Objetivo:** Sistema completo de comunicación con usuarios
+**Objetivo:** Sistema completo de comunicación con usuarios - Arquitectura Multi-Canal
 
-#### Implementación:
-1. **✅ Crear schema `communications`** - COMPLETADO
+#### Arquitectura Implementada:
+**✅ Schema Compartido `communications`** - Diseñado para múltiples canales:
    ```sql
    ✅ Migración: 20251123191316_schema_communications.sql
-   - ✅ contact_lists (listas de contactos)
+   - ✅ contact_lists (listas de contactos COMPARTIDAS entre todos los canales)
    - ✅ contact_list_members (M:N entre listas y contactos)
-   - ✅ message_templates (templates reutilizables)
-   - ✅ campaigns (campañas de email marketing)
-   - ✅ campaign_messages (mensajes enviados)
-   - ✅ message_events (eventos: delivered, opened, clicked, bounced)
+   - ✅ message_templates (templates con campo 'type': email, sms, whatsapp)
+   - ✅ campaigns (campañas - tipo heredado del template)
+   - ✅ campaign_messages (mensajes enviados - email/sms/whatsapp)
+   - ✅ message_events (eventos unificados: delivered, opened, clicked, bounced)
    - ✅ user_notifications (notificaciones in-app mejoradas)
    - ✅ notification_preferences (preferencias por usuario)
    - ✅ sendgrid_accounts (cuentas SendGrid por organización, encriptadas)
+   
+   ✅ Enum template_type soporta múltiples canales:
+   CREATE TYPE communications.template_type AS ENUM (
+     'email',        -- Email
+     'sms',          -- SMS (futuro)
+     'whatsapp'      -- WhatsApp (futuro)
+   );
    ```
+
+**✅ Aplicaciones Separadas en `core.applications`:**
+   - ✅ `email_marketing` - Controla campañas/templates tipo 'email'
+   - 📋 `whatsapp_marketing` - Futuro: Controla campañas/templates tipo 'whatsapp'
+   - 📋 `sms_marketing` - Futuro: Controla campañas/templates tipo 'sms'
+
+**✅ Estructura de URLs Implementada:**
+   ```
+   /dashboard/communications/
+   ├── email/              → email_marketing app
+   │   ├── campaigns/
+   │   └── templates/
+   ├── whatsapp/          → whatsapp_marketing app (futuro)
+   │   ├── campaigns/
+   │   └── templates/
+   ├── sms/               → sms_marketing app (futuro)
+   │   ├── campaigns/
+   │   └── templates/
+   ├── lists/             → Compartido (controlado por cualquier app activa)
+   └── analytics/         → Compartido (unificado para todos los canales)
+   ```
+
+**✅ Ventajas de la Arquitectura:**
+   - ✅ Monetización granular por canal (cobrar WhatsApp, SMS, Email por separado)
+   - ✅ Listas de contactos compartidas (reutilización entre canales)
+   - ✅ Analytics unificado (comparación de rendimiento entre canales)
+   - ✅ Escalable (agregar nuevos canales = agregar app + filtros por type)
+   - ✅ Control de visibilidad independiente por canal desde `/admin/applications`
+
+#### Implementación:
+1. **✅ Crear schema `communications`** - COMPLETADO
 
 2. **✅ Integración SendGrid Multi-Tenant** - COMPLETADO
    ```typescript
@@ -3769,37 +3879,48 @@ core.roles:
    - ✅ Botón para crear nuevo producto
    - ✅ Integrado con helper `getUserActiveOrganization()`
 
-7. **✅ `/dashboard/crm/campaigns`** - COMPLETADO
+7. **✅ `/dashboard/communications/email/campaigns`** - COMPLETADO (Dic 2025)
    - ✅ Lista de campañas de email marketing
    - ✅ Botón para crear nueva campaña
    - ✅ Estado vacío con mensaje apropiado
+   - ✅ Protección por aplicación `email_marketing`
+   - ✅ Rutas: `/campaigns`, `/campaigns/new`, `/campaigns/[id]`
 
-8. **✅ `/dashboard/crm/templates`** - COMPLETADO
+8. **✅ `/dashboard/communications/email/templates`** - COMPLETADO (Dic 2025)
    - ✅ Lista de templates de email
    - ✅ Botón para crear nuevo template
    - ✅ Integrado con helper `getUserActiveOrganization()`
+   - ✅ Protección por aplicación `email_marketing`
+   - ✅ Rutas: `/templates`, `/templates/new`, `/templates/[id]`
 
-9. **✅ `/dashboard/crm/lists`** - COMPLETADO
-   - ✅ Lista de listas de contactos
+9. **✅ `/dashboard/communications/lists`** - COMPLETADO (Dic 2025)
+   - ✅ Lista de listas de contactos (COMPARTIDAS entre canales)
    - ✅ Botón para crear nueva lista
    - ✅ Integrado con helper `getUserActiveOrganization()`
+   - ✅ Protección por aplicación `email_marketing` (por ahora)
+   - ✅ Rutas: `/lists`, `/lists/new`, `/lists/[id]`
 
-10. **✅ `/dashboard/crm/analytics`** - COMPLETADO
-    - ✅ Dashboard de analytics de comunicaciones
+10. **✅ `/dashboard/communications/analytics`** - COMPLETADO (Dic 2025)
+    - ✅ Dashboard de analytics de comunicaciones (UNIFICADO para todos los canales)
     - ✅ Métricas: campañas enviadas, emails enviados, tasas de apertura/clics
     - ✅ Estado vacío cuando no hay datos
+    - ✅ Protección por aplicación `email_marketing` (por ahora)
 
 11. **✅ `/dashboard/crm/settings/sendgrid`** - COMPLETADO
     - ✅ Configuración de cuenta SendGrid por organización
     - ✅ Verificación de API keys
     - ✅ Encriptación automática de credenciales
 
+#### Páginas Implementadas Adicionales:
+- ✅ `/dashboard/communications/email/campaigns/[id]` - Detalle y gestión de campaña
+- ✅ `/dashboard/communications/email/templates/[id]` - Edición de template con preview
+- ✅ `/dashboard/communications/lists/[id]` - Gestión de miembros de lista
+
 #### Páginas Pendientes:
 - 📋 `/dashboard/crm/contacts/:id` - Perfil detallado de contacto
-- 📋 `/dashboard/crm/campaigns/:id` - Detalle y gestión de campaña
-- 📋 `/dashboard/crm/templates/:id` - Edición de template con preview
-- 📋 `/dashboard/crm/lists/:id` - Gestión de miembros de lista
 - 📋 `/dashboard/crm/pipelines` - Kanban de deals (futuro)
+- 📋 `/dashboard/communications/whatsapp/` - Futuro: Campañas y templates de WhatsApp
+- 📋 `/dashboard/communications/sms/` - Futuro: Campañas y templates de SMS
 
 **Paralelamente durante Fase 3:**
 - Lanzar primer pillar content piece sobre IA

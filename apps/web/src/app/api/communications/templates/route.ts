@@ -9,8 +9,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateTemplate, extractVariables } from '@/lib/communications/template-engine';
 import { getUserAndOrganization } from '@/lib/organization/utils';
+import { requireApplicationAccess } from '@/lib/access/api-access-guard';
 
 export async function GET(request: NextRequest) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const supabase = await createClient();
     const { user, organization, error: authError } = await getUserAndOrganization(supabase);
@@ -59,6 +64,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const supabase = await createClient();
     const { user, organization, error: authError } = await getUserAndOrganization(supabase);

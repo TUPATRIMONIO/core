@@ -46,6 +46,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { getApplicationSlugFromRoute } from '@/config/application-routes'
 
 const mainMenuItems = [
   {
@@ -119,22 +120,22 @@ const billingMenuItems = [
 const communicationsMenuItems = [
   {
     title: 'Campañas',
-    url: '/dashboard/crm/campaigns',
+    url: '/dashboard/communications/email/campaigns',
     icon: Send,
   },
   {
     title: 'Templates',
-    url: '/dashboard/crm/templates',
+    url: '/dashboard/communications/email/templates',
     icon: FileText,
   },
   {
     title: 'Listas',
-    url: '/dashboard/crm/lists',
+    url: '/dashboard/communications/lists',
     icon: Users,
   },
   {
     title: 'Analytics',
-    url: '/dashboard/crm/analytics',
+    url: '/dashboard/communications/analytics',
     icon: BarChart,
   },
 ]
@@ -159,6 +160,8 @@ export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [enabledAppSlugs, setEnabledAppSlugs] = useState<Set<string>>(new Set())
+  const [isLoadingApps, setIsLoadingApps] = useState(true)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -181,6 +184,51 @@ export function DashboardSidebar() {
     }
 
     fetchUser()
+  }, [])
+
+  useEffect(() => {
+    const fetchEnabledApps = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setIsLoadingApps(false)
+        return
+      }
+
+      // Obtener organización del usuario
+      const { data: orgUser } = await supabase
+        .from('organization_users')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      const organizationId = orgUser?.organization_id || null
+
+      // Obtener aplicaciones habilitadas
+      const { data: enabledApps, error } = await supabase.rpc('get_enabled_applications', {
+        p_organization_id: organizationId,
+        p_user_id: user.id,
+      })
+
+      if (error) {
+        console.error('Error fetching enabled apps:', error)
+        setIsLoadingApps(false)
+        return
+      }
+
+      // Extraer slugs y agregar siempre visibles
+      const slugs = enabledApps?.map((app: any) => app.slug) || []
+      const alwaysVisibleSlugs = ['marketing_site'] // marketing_site siempre visible
+      
+      setEnabledAppSlugs(new Set([...slugs, ...alwaysVisibleSlugs]))
+      setIsLoadingApps(false)
+    }
+
+    fetchEnabledApps()
   }, [])
 
   const handleSignOut = async () => {
@@ -211,7 +259,7 @@ export function DashboardSidebar() {
       )
       
       // También verificar si hay una ruta más específica en OTROS grupos que coincida
-      // Esto evita que /dashboard/crm se active cuando estás en /dashboard/crm/campaigns
+      // Esto evita que /dashboard/crm se active cuando estás en rutas anidadas
       const allOtherGroups = [
         ...communicationsMenuItems,
         ...billingMenuItems,
@@ -291,28 +339,30 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* CRM */}
-        <SidebarGroup>
-          <SidebarGroupLabel>CRM</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {crmMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, crmMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* CRM - Solo mostrar si la aplicación está habilitada */}
+        {!isLoadingApps && enabledAppSlugs.has('crm_sales') && (
+          <SidebarGroup>
+            <SidebarGroupLabel>CRM</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {crmMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive(item.url, crmMenuItems)}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Billing */}
         <SidebarGroup>
@@ -337,28 +387,30 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Communications */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {communicationsMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, communicationsMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {/* Communications - Solo mostrar si Email Marketing está habilitado */}
+        {!isLoadingApps && enabledAppSlugs.has('email_marketing') && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {communicationsMenuItems.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive(item.url, communicationsMenuItems)}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Content */}
         <SidebarGroup>

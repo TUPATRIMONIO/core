@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireApplicationAccess } from '@/lib/access/api-access-guard';
 
 export const runtime = 'nodejs';
 
@@ -8,6 +9,10 @@ export const runtime = 'nodejs';
  * Obtener lista de empresas
  */
 export async function GET(request: NextRequest) {
+  // Verificar acceso a CRM
+  const denied = await requireApplicationAccess(request, 'crm_sales');
+  if (denied) return denied;
+
   try {
     const supabase = await createClient();
 
@@ -65,6 +70,10 @@ export async function GET(request: NextRequest) {
  * Crear una nueva empresa
  */
 export async function POST(request: NextRequest) {
+  // Verificar acceso a CRM
+  const denied = await requireApplicationAccess(request, 'crm_sales');
+  if (denied) return denied;
+
   try {
     const supabase = await createClient();
     const body = await request.json();

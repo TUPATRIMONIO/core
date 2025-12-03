@@ -8,11 +8,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireApplicationAccess } from '@/lib/access/api-access-guard';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = await createClient();
@@ -88,6 +93,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = await createClient();
@@ -184,6 +193,10 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verificar acceso a Email Marketing
+  const denied = await requireApplicationAccess(request, 'email_marketing');
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const supabase = await createClient();
