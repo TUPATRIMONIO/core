@@ -210,8 +210,23 @@ export function DashboardSidebar() {
         item.url.length > url.length
       )
       
-      // Solo está activo si no hay una ruta más específica que coincida
-      return !moreSpecificMatch
+      // También verificar si hay una ruta más específica en OTROS grupos que coincida
+      // Esto evita que /dashboard/crm se active cuando estás en /dashboard/crm/campaigns
+      const allOtherGroups = [
+        ...communicationsMenuItems,
+        ...billingMenuItems,
+        ...contentMenuItems,
+        ...settingsMenuItems,
+        ...mainMenuItems
+      ]
+      const moreSpecificMatchInOtherGroups = allOtherGroups.find(item => 
+        pathname.startsWith(item.url) &&
+        item.url.length > url.length &&
+        item.url.startsWith(url + '/')
+      )
+      
+      // Solo está activo si no hay una ruta más específica que coincida (ni en el mismo grupo ni en otros)
+      return !moreSpecificMatch && !moreSpecificMatchInOtherGroups
     }
     
     return false

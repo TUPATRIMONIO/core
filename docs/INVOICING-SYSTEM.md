@@ -105,6 +105,26 @@ Configuración de emisión por organización (futuro).
 - Validación estricta de RUT (verificador matemático)
 - Almacenamiento en `invoices/haulmer/{org_id}/{doc_id}-{folio}.pdf`
 
+**⚠️ Diferencias entre Factura y Boleta (Haulmer):**
+
+Las facturas (TipoDTE 33) y boletas (TipoDTE 39) tienen estructuras XML **muy diferentes**:
+
+| Campo | Factura (33) | Boleta (39) |
+|-------|--------------|-------------|
+| `IdDoc.TpoTranCompra` | `'1'` | **No incluir** |
+| `IdDoc.TpoTranVenta` | `'1'` | **No incluir** |
+| `IdDoc.FmaPago` | Sí | **No incluir** |
+| `IdDoc.IndServicio` | No | `'3'` (string) |
+| `Emisor.RznSoc` | Sí | No |
+| `Emisor.RznSocEmisor` | No | Sí |
+| `Emisor.GiroEmis` | Sí | No |
+| `Emisor.GiroEmisor` | No | Sí |
+| `Emisor.Telefono` | Sí | **No incluir** |
+| `Receptor.GiroRecep` | Sí | **No incluir** |
+| `Receptor.CorreoRecep` | Sí | **No incluir** |
+| `Totales.MontoPeriodo` | Sí | No |
+| `Totales.TotalPeriodo` | No | Sí |
+
 **Configuración:**
 - API Key: `HAULMER_API_KEY`
 - Ambiente: `HAULMER_ENVIRONMENT` (sandbox | production)
@@ -501,6 +521,21 @@ Las siguientes migraciones crean el sistema completo:
 - [ ] Testing de emisión de factura real antes de lanzar
 - [x] Página de testing protegida (`/test-invoicing`) - Solo accesible para platform admins
 
+## ✅ Pruebas Completadas (Diciembre 2025)
+
+| Tipo Documento | Proveedor | Estado | Archivos Generados |
+|----------------|-----------|--------|-------------------|
+| Factura Electrónica (TipoDTE 33) | Haulmer | ✅ Éxito | PDF + XML |
+| Boleta Electrónica (TipoDTE 39) | Haulmer | ✅ Éxito | PDF + XML |
+| Invoice Internacional | Stripe | ✅ Éxito | PDF |
+
+**Notas de las pruebas:**
+- Todos los documentos se emiten correctamente
+- PDFs y XMLs se guardan en Supabase Storage
+- URLs públicas funcionan correctamente
+- Folio de Haulmer se asigna automáticamente
+- Invoice ID de Stripe se guarda correctamente
+
 ---
 
 ## Troubleshooting
@@ -508,6 +543,18 @@ Las siguientes migraciones crean el sistema completo:
 ### Error: "Haulmer OF-02: Faltan campos obligatorios"
 - Verificar que el RUT tenga formato correcto y dígito verificador válido
 - Verificar que todos los campos requeridos estén presentes
+
+### Error: "Haulmer OF-08: Validación de Esquema" (Boletas)
+Este error ocurre cuando se envían campos incorrectos para boletas (TipoDTE 39):
+- **`TpoTranCompra` no esperado**: No incluir este campo en boletas, usar `IndServicio: '3'`
+- **`RznSoc` no esperado**: Usar `RznSocEmisor` en lugar de `RznSoc` para boletas
+- **`GiroRecep` no esperado**: No incluir `GiroRecep` en el receptor para boletas
+- **`MontoPeriodo` no esperado**: Usar `TotalPeriodo` en lugar de `MontoPeriodo` para boletas
+- **`FmaPago` no esperado**: No incluir `FmaPago` en `IdDoc` para boletas
+- **`Telefono` no esperado**: No incluir `Telefono` en el emisor para boletas
+- **`CorreoRecep` no esperado**: No incluir `CorreoRecep` en el receptor para boletas
+
+**Solución:** Ver tabla de diferencias en la sección "Haulmer (Chile)" arriba.
 
 ### Error: "The schema must be one of the following: public, graphql_public"
 - Este error indica que se intentó acceder directamente al schema `invoicing` desde el cliente

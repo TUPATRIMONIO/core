@@ -1,14 +1,14 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
 > **📅 Última actualización:** Diciembre 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅  
-> **🎯 Próximo milestone:** Integración de Facturación Electrónica Automática (Stripe genera facturas automáticamente, Haulmer genera facturas automáticamente para pagos Transbank - Solo B2B Chile con CLP) 📋
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅  
+> **🎯 Próximo milestone:** Integración con flujos automáticos de pedidos + SendGrid producción 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **PRÓXIMO: SINCRONIZACIÓN FACTURACIÓN ELECTRÓNICA AUTOMÁTICA (Stripe/Haulmer generan facturas automáticamente)** 📋
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **PRÓXIMO: Integración con flujos automáticos de pedidos + SendGrid producción** 📋
 
-Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
+Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversión bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios pueden convertir su organización entre tipos personal y empresarial desde la interfaz, con advertencias automáticas y actualización de límites del CRM. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
 **✅ COMPLETADO en Fase 0:**
 - ✅ Infraestructura completa (monorepo, Next.js 15, Tailwind v4, Supabase)
@@ -51,6 +51,15 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
     - Eliminadas colisiones entre organizaciones
     - Lock por organización para paralelismo mejorado
     - Sistema escalable y sin errores de duplicados
+- ✅ **Sistema de Facturación Independiente - Haulmer + Stripe 100% COMPLETO** (Dic 2025)
+  - Schema `invoicing` independiente del billing
+  - API RESTful para emisión de documentos
+  - Factura Electrónica (TipoDTE 33) con Haulmer
+  - Boleta Electrónica (TipoDTE 39) con Haulmer
+  - Invoice Internacional con Stripe
+  - Almacenamiento de PDF/XML en Supabase Storage
+  - Página de testing protegida (`/test-invoicing`)
+  - Documentación completa: `docs/INVOICING-SYSTEM.md`
 - ✅ **Sidebars completos para Admin y Usuarios Regulares** (Nov 22, 2025)
   - Sidebar Admin con acceso a todas las secciones (Billing, CRM, Blog)
   - Sidebar Dashboard para usuarios regulares con navegación completa
@@ -210,7 +219,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
    - ✅ Integrado en sidebar del dashboard
 
 **📄 ARCHIVOS CREADOS:**
-   - Migración: `20250115000000_convert_b2c_to_b2b_function.sql`
+   - Migración: `20251202000003_convert_b2c_to_b2b_function.sql`
    - API Route: `apps/web/src/app/api/organizations/convert-to-business/route.ts`
    - Componente: `apps/web/src/components/organization/ConvertToBusinessCard.tsx`
    - Página: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
@@ -230,21 +239,65 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
    - CRM `max_users`: 1 → 5
    - CRM `api_access`: false → true
 
-**📅 PRÓXIMO PASO:** **TESTING DE FACTURACIÓN ELECTRÓNICA AUTOMÁTICA** 🚀
+**🔄 CONVERSIÓN B2B → B2C - 100% COMPLETO Y PROBADO** (Diciembre 2025):
+
+**✅ FUNCIONALIDADES COMPLETAS:**
+   - ✅ Función SQL `convert_organization_b2b_to_b2c()` - Conversión automática completa
+   - ✅ Endpoint API `/api/organizations/convert-to-personal` - Seguro y validado con advertencias
+   - ✅ Componente UI `ConvertToPersonalCard` - Interfaz amigable con advertencias destacadas
+   - ✅ Validaciones de seguridad (solo org_owner, solo business → personal)
+   - ✅ Advertencias automáticas si hay usuarios adicionales o contactos excedentes
+   - ✅ Actualización automática de límites del CRM (1000→100 contactos, 5→1 usuarios, API access deshabilitado)
+   - ✅ Actualización de settings y tipo de organización
+   - ✅ Los datos existentes se mantienen (solo se reducen límites)
+   - ✅ **PROBADO EXITOSAMENTE** - Migración aplicada y funcionando correctamente
+
+**📄 ARCHIVOS CREADOS:**
+   - Migración: `20251203000000_convert_b2b_to_b2c_function.sql`
+   - API Route: `apps/web/src/app/api/organizations/convert-to-personal/route.ts`
+   - Componente: `apps/web/src/components/organization/ConvertToPersonalCard.tsx`
+   - Página actualizada: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
+
+**🔒 SEGURIDAD:**
+   - ✅ Solo usuarios autenticados pueden convertir
+   - ✅ Solo `org_owner` puede convertir su organización
+   - ✅ Solo organizaciones `business` pueden convertirse
+   - ✅ Validaciones en backend y frontend
+   - ✅ Manejo completo de errores
+
+**⚠️ ADVERTENCIAS Y CONSIDERACIONES:**
+   - ✅ Si hay más de 1 usuario: Se muestra advertencia pero se permite conversión (usuarios mantienen acceso hasta remoción manual)
+   - ✅ Si hay más de 100 contactos: Se muestra advertencia pero se permite conversión (datos se mantienen pero límite se reduce)
+   - ✅ API Access se deshabilita automáticamente
+   - ✅ Advertencias se muestran en UI y en respuesta del API
+
+**🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
+   - `org_type`: `business` → `personal`
+   - `settings.user_type`: `b2b` → `b2c`
+   - CRM `max_contacts`: 1,000 → 100
+   - CRM `max_users`: 5 → 1
+   - CRM `api_access`: true → false
+
+**✅ COMPLETADO:** **SISTEMA DE FACTURACIÓN INDEPENDIENTE** 🎉 (Diciembre 2025)
    
-   **🎯 PRIORIDAD INMEDIATA - Testing de Facturación:**
+   **✅ Sistema de Facturación - 100% COMPLETO Y PROBADO:**
    - ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google, Facebook, GitHub)
    - ✅ **Stripe** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (claves, webhooks, flujos de pago probados)
    - ✅ **Transbank** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (Webpay Plus y OneClick probados)
-   - ✅ **Facturación Automática** - ✅ IMPLEMENTADO (Diciembre 2025):
-     - ✅ Stripe: Crea Invoice cuando orden llega a "completed"
-     - ✅ Haulmer: Emite DTE (Factura/Boleta) cuando orden llega a "completed"
-     - ✅ Restricciones: Transbank solo disponible para B2B Chile con CLP (moneda automática por país)
-   - 📋 **Testing Facturación** - Probar flujos completos:
-     - 📋 Testing Stripe: Verificar creación de Invoice y disponibilidad de PDF
-     - 📋 Testing Transbank/Haulmer: Verificar emisión de DTE y disponibilidad de PDF/XML
-     - 📋 Testing Restricciones: Verificar que usuarios no elegibles no ven Transbank
-     - 📋 Testing Errores: Verificar manejo de errores y que no bloquean actualización de estado
+   - ✅ **Sistema de Facturación Independiente** - ✅ COMPLETO (Diciembre 2025):
+     - ✅ Nuevo schema `invoicing` independiente del billing
+     - ✅ API RESTful para emisión de documentos
+     - ✅ Soporte multi-proveedor: Haulmer (Chile) + Stripe (Internacional)
+     - ✅ Factura Electrónica (TipoDTE 33): Emisión y almacenamiento de PDF/XML
+     - ✅ Boleta Electrónica (TipoDTE 39): Emisión y almacenamiento de PDF/XML
+     - ✅ Invoice Stripe: Emisión y almacenamiento de PDF
+     - ✅ Almacenamiento en Supabase Storage (bucket `invoices`)
+     - ✅ Página de testing protegida (`/test-invoicing`) solo para platform admins
+     - ✅ Documentación completa: `docs/INVOICING-SYSTEM.md`
+   - ✅ **Pruebas Completadas:**
+     - ✅ Testing Factura Haulmer: PDF + XML generados correctamente
+     - ✅ Testing Boleta Haulmer: PDF + XML generados correctamente
+     - ✅ Testing Invoice Stripe: PDF generado y almacenado correctamente
    - 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de emails, configurar dominio verificado
    
    **✅ COMPLETADO:**
@@ -256,6 +309,14 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
      - ✅ Endpoint API seguro con validaciones
      - ✅ UI completa para usuarios en `/settings/organization`
      - ✅ Actualización automática de límites del CRM
+   - ✅ **Conversión B2B → B2C COMPLETADO Y PROBADO** (Diciembre 2025)
+     - ✅ Función SQL para conversión automática inversa
+     - ✅ Endpoint API seguro con validaciones y advertencias
+     - ✅ UI completa con advertencias destacadas para usuarios
+     - ✅ Actualización automática de límites del CRM (reducción)
+     - ✅ Sistema de advertencias para usuarios adicionales y contactos excedentes
+     - ✅ Migración aplicada exitosamente (`20251203000000_convert_b2b_to_b2c_function.sql`)
+     - ✅ Probado en producción - Conversión funcionando correctamente
    - ✅ **Fase 3 - Comunicaciones y CRM avanzado COMPLETADO** (Dic 2025)
      - ✅ Schema communications creado (`20251123191316_schema_communications.sql`)
      - ✅ Integración SendGrid multi-tenant (cuenta por organización)
@@ -265,6 +326,16 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
      - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics, SendGrid settings)
      - ✅ Páginas del CRM completadas (contacts, deals, tickets, products)
      - ✅ Helper `getUserActiveOrganization()` para manejo de organizaciones
+   - ✅ **Sistema de Facturación Independiente COMPLETADO** (Dic 2025)
+     - ✅ Nuevo schema `invoicing` completamente independiente
+     - ✅ API RESTful: `POST/GET /api/invoicing/documents`
+     - ✅ Multi-proveedor: Haulmer (Factura/Boleta Chile) + Stripe (Invoice Internacional)
+     - ✅ Emisión correcta de Facturas Electrónicas (TipoDTE 33)
+     - ✅ Emisión correcta de Boletas Electrónicas (TipoDTE 39)
+     - ✅ Emisión correcta de Invoices Stripe
+     - ✅ Almacenamiento de PDF/XML en Supabase Storage
+     - ✅ Página de testing `/test-invoicing` (solo platform admins)
+     - ✅ Documentación: `docs/INVOICING-SYSTEM.md`
    
    **📋 SIGUIENTE FASE (Después de conectar a producción):**
    - 📋 **Servicios Core** - Firmas electrónicas como primer servicio (pendiente)
@@ -3118,9 +3189,17 @@ core.roles:
    - Endpoint API `/api/organizations/convert-to-business` funcionando
    - UI completa en `/settings/organization` para conversión desde frontend
    - Conversión automática de límites y configuración del CRM
+✅ Usuario B2B puede "downgradear" a B2C **← IMPLEMENTADO Y PROBADO (Diciembre 2025)**
+   - Función SQL `convert_organization_b2b_to_b2c()` disponible y funcionando
+   - Endpoint API `/api/organizations/convert-to-personal` funcionando correctamente
+   - UI completa con advertencias en `/settings/organization` para conversión desde frontend
+   - Conversión automática de límites (reducción) y configuración del CRM
+   - Sistema de advertencias para usuarios adicionales y contactos excedentes
+   - Migración aplicada y probada exitosamente en producción
 ✅ Mercado más amplio (individuales + empresas)
 ✅ Sistema de créditos/IA unificado
 ✅ No duplicar código ni infraestructura
+✅ Flexibilidad total: conversión bidireccional según necesidades del usuario
 
 #### ✅ Implementación COMPLETADA:
 1. **✅ Schema `core` CREADO** - Migración: `20251021120854_schema-core.sql`

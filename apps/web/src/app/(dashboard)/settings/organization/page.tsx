@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Building2, Users, Mail, Phone, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { ConvertToBusinessCard } from '@/components/organization/ConvertToBusinessCard'
+import { ConvertToPersonalCard } from '@/components/organization/ConvertToPersonalCard'
 import { Badge } from '@/components/ui/badge'
 
 export default async function OrganizationSettingsPage() {
@@ -222,12 +223,21 @@ export default async function OrganizationSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Convertir a Empresarial - Solo para organizaciones personales */}
+        {/* Convertir organización - Mostrar componente según tipo */}
         {org.org_type === 'personal' && (
           <div className="lg:col-span-2">
             <ConvertToBusinessCard 
               organizationType={org.org_type}
               organizationName={org.name}
+            />
+          </div>
+        )}
+        {org.org_type === 'business' && (
+          <div className="lg:col-span-2">
+            <ConvertToPersonalCard 
+              organizationType={org.org_type}
+              organizationName={org.name}
+              organizationId={org.id}
             />
           </div>
         )}
