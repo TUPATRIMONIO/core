@@ -114,25 +114,25 @@ export async function createStripeInvoiceForOrder(
 
     // 6. Actualizar factura en nuestra BD con datos externos (solo si se solicita)
     if (shouldUpdateDB) {
-      const { data: updatedInvoice, error: updateError } = await supabase
-        .from('invoices')
-        .update({
-          external_provider: 'stripe',
-          external_document_id: finalInvoice.id,
-          external_pdf_url: finalInvoice.invoice_pdf || finalInvoice.hosted_invoice_url || null,
-          external_status: finalInvoice.status,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderData.invoiceId)
-        .select()
-        .single();
+    const { data: updatedInvoice, error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        external_provider: 'stripe',
+        external_document_id: finalInvoice.id,
+        external_pdf_url: finalInvoice.invoice_pdf || finalInvoice.hosted_invoice_url || null,
+        external_status: finalInvoice.status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', orderData.invoiceId)
+      .select()
+      .single();
 
-      if (updateError) {
-        console.error('[createStripeInvoiceForOrder] Error actualizando BD:', {
-          invoiceId: orderData.invoiceId,
-          error: updateError.message,
-        });
-        // No lanzar error - el invoice ya se creó en Stripe
+    if (updateError) {
+      console.error('[createStripeInvoiceForOrder] Error actualizando BD:', {
+        invoiceId: orderData.invoiceId,
+        error: updateError.message,
+      });
+      // No lanzar error - el invoice ya se creó en Stripe
       }
     }
 

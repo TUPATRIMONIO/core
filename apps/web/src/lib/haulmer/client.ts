@@ -45,8 +45,10 @@ export const TipoDTE = {
 // Interfaces para la API de Haulmer
 export interface HaulmerEmisor {
   RUTEmisor: string;
-  RznSoc: string;
-  GiroEmis: string;
+  RznSoc?: string; // Para facturas
+  RznSocEmisor?: string; // Para boletas
+  GiroEmis?: string; // Para facturas
+  GiroEmisor?: string; // Para boletas
   Acteco: number;
   DirOrigen: string;
   CmnaOrigen: string;
@@ -59,7 +61,7 @@ export interface HaulmerEmisor {
 export interface HaulmerReceptor {
   RUTRecep: string;
   RznSocRecep: string;
-  GiroRecep: string;
+  GiroRecep?: string; // Solo para facturas, no para boletas
   DirRecep: string;
   CmnaRecep: string;
   Contacto?: string;
@@ -83,6 +85,7 @@ export interface HaulmerTotales {
   IVA?: number;
   MntTotal: number;
   MontoPeriodo?: number; // Igual a MntTotal para facturas
+  TotalPeriodo?: number; // Igual a MntTotal para boletas
   VlrPagar?: number; // Valor a pagar, igual a MntTotal
 }
 
@@ -92,8 +95,9 @@ export interface HaulmerDTE {
       TipoDTE: number;
       Folio: number; // Siempre 0, Haulmer asigna el folio
       FchEmis: string; // YYYY-MM-DD
-      TpoTranCompra?: string; // Tipo transacción compra (1: del giro)
-      TpoTranVenta?: string; // Tipo transacción venta (1: del giro)
+      TpoTranCompra?: string; // Tipo transacción compra (1: del giro) - Solo facturas
+      TpoTranVenta?: string; // Tipo transacción venta (1: del giro) - Solo facturas
+      IndServicio?: number; // Indicador de servicio (3: servicios) - Solo boletas
       FmaPago?: number; // 1: Contado, 2: Crédito, 3: Sin costo
     };
     Emisor: HaulmerEmisor;
@@ -290,28 +294,87 @@ class HaulmerClient {
       idempotencyKey?: string;
     }
   ): Promise<HaulmerEmitirResponse> {
-    // Completar totales con campos obligatorios
-    const totalesCompletos: HaulmerTotales = {
-      ...totales,
-      MontoPeriodo: totales.MontoPeriodo ?? totales.MntTotal,
-      VlrPagar: totales.VlrPagar ?? totales.MntTotal,
-    };
+    const isBoleta = tipoDTE === TipoDTE.BOLETA_ELECTRONICA || tipoDTE === TipoDTE.BOLETA_EXENTA;
+
+    // Construir IdDoc según tipo de documento
+    let idDoc: any;
+    if (isBoleta) {
+      // Para boletas: NO incluir FmaPago, TpoTranCompra, TpoTranVenta
+      // Solo TipoDTE, Folio, FchEmis, IndServicio
+      idDoc = {
+        TipoDTE: tipoDTE,
+        Folio: 0,
+        FchEmis: options?.fechaEmision || this.getCurrentDate(),
+        IndServicio: '3', // 3: Servicios (como string según el ejemplo)
+      };
+    } else {
+      // Para facturas: incluir FmaPago, TpoTranCompra, TpoTranVenta
+      idDoc = {
+        TipoDTE: tipoDTE,
+        Folio: 0,
+        FchEmis: options?.fechaEmision || this.getCurrentDate(),
+        TpoTranCompra: '1',
+        TpoTranVenta: '1',
+        FmaPago: options?.formaPago || 1,
+      };
+    }
+
+    // Construir Emisor según tipo de documento
+    let emisor: any;
+    if (isBoleta) {
+      // Para boletas: usar RznSocEmisor, GiroEmisor y NO incluir Telefono
+      // Orden correcto: RUTEmisor, RznSocEmisor, GiroEmisor, CdgSIISucur, DirOrigen, CmnaOrigen
+      emisor = {
+        RUTEmisor: this.emisor.RUTEmisor,
+        RznSocEmisor: this.emisor.RznSoc,
+        GiroEmisor: this.emisor.GiroEmis,
+        CdgSIISucur: this.emisor.CdgSIISucur,
+        DirOrigen: this.emisor.DirOrigen,
+        CmnaOrigen: this.emisor.CmnaOrigen,
+        // NO incluir Telefono para boletas
+      };
+    } else {
+      // Para facturas: mantener estructura original
+      emisor = { ...this.emisor };
+    }
+
+    // Construir Receptor según tipo de documento
+    const receptorFinal: any = { ...receptor };
+    if (isBoleta) {
+      // Para boletas: NO incluir GiroRecep ni CorreoRecep
+      delete receptorFinal.GiroRecep;
+      delete receptorFinal.CorreoRecep;
+    }
+    // Para facturas: mantener GiroRecep y CorreoRecep
+
+    // Construir Totales según tipo de documento
+    let totalesFinales: any;
+    if (isBoleta) {
+      // Para boletas: incluir MntNeto, IVA, MntTotal, TotalPeriodo, VlrPagar
+      totalesFinales = {
+        MntNeto: totales.MntNeto,
+        IVA: totales.IVA,
+        MntTotal: totales.MntTotal,
+        TotalPeriodo: totales.TotalPeriodo ?? totales.MntTotal,
+        VlrPagar: totales.VlrPagar ?? totales.MntTotal,
+      };
+    } else {
+      // Para facturas: completar totales con campos obligatorios
+      totalesFinales = {
+        ...totales,
+        MontoPeriodo: totales.MontoPeriodo ?? totales.MntTotal,
+        VlrPagar: totales.VlrPagar ?? totales.MntTotal,
+      };
+    }
 
     const request: HaulmerEmitirRequest = {
       response: ['PDF', 'FOLIO', 'XML'],
       dte: {
         Encabezado: {
-          IdDoc: {
-            TipoDTE: tipoDTE,
-            Folio: 0, // Haulmer asigna el folio automáticamente
-            FchEmis: options?.fechaEmision || this.getCurrentDate(),
-            TpoTranCompra: '1', // Del giro
-            TpoTranVenta: '1', // Del giro
-            FmaPago: options?.formaPago || 1, // 1: Contado
-          },
-          Emisor: this.emisor,
-          Receptor: receptor,
-          Totales: totalesCompletos,
+          IdDoc: idDoc,
+          Emisor: emisor,
+          Receptor: receptorFinal,
+          Totales: totalesFinales,
         },
         Detalle: detalle,
       },

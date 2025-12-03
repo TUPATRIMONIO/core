@@ -6691,10 +6691,98 @@ Al agregar un nuevo medio de pago, verificar:
 
 ---
 
-## 📋 **PRÓXIMO MILESTONE: Integración de Facturación Electrónica**
+## ✅ **SISTEMA DE FACTURACIÓN ELECTRÓNICA INDEPENDIENTE - COMPLETADO** (Diciembre 2025)
+
+> **📅 Completado:** Diciembre 2025  
+> **🎯 Objetivo:** Sistema de facturación API-first independiente con integración Haulmer y Stripe  
+> **📄 Documentación:** Ver `docs/INVOICING-SYSTEM.md` para detalles completos
+
+### ✅ **Resumen de Implementación**
+
+Se implementó un sistema de facturación completamente independiente en el schema `invoicing` que reemplaza el sistema anterior basado en `billing.invoices`. Este nuevo sistema:
+
+- ✅ **API-first**: Endpoints RESTful para crear y gestionar documentos desde cualquier aplicación
+- ✅ **Multi-proveedor**: Integración completa con Haulmer (Chile) y Stripe (Internacional)
+- ✅ **Multi-tenant**: Aislamiento completo por `organization_id` con RLS
+- ✅ **Almacenamiento**: PDFs y XMLs guardados automáticamente en Supabase Storage
+- ✅ **Autenticación flexible**: Supabase Auth (usuarios internos) y API Keys (sistemas externos)
+
+### ✅ **Schema `invoicing` Implementado**
+
+**Tablas principales:**
+- `invoicing.customers` - Receptores de documentos
+- `invoicing.documents` - Documentos emitidos (facturas, boletas, invoices)
+- `invoicing.document_items` - Líneas de detalle
+- `invoicing.api_keys` - API Keys para acceso externo (futuro)
+- `invoicing.emission_config` - Configuración por organización (futuro)
+
+**Migraciones aplicadas:**
+- `20251202120000_schema-invoicing-new.sql` - Schema base
+- `20251202130000_invoicing-functions.sql` - Funciones helper
+- `20251202140000_invoicing-rls.sql` - Políticas RLS
+- `20251202150000_invoicing-views.sql` - Vistas públicas
+- `20251202160000_invoicing-rpc-wrappers.sql` - Wrappers RPC
+- `20251202170000_fix-determine-provider-syntax.sql` - Fix sintaxis
+- `20251202180000_invoicing-schema-permissions.sql` - Permisos
+- `20251202190000_invoicing-crud-functions.sql` - Funciones CRUD
+- `20251202200000_fix-generate-document-number.sql` - Fix generación números
+
+### ✅ **Integraciones Completadas**
+
+**Haulmer (Chile):**
+- ✅ Cliente API completo (`apps/web/src/lib/haulmer/client.ts`)
+- ✅ Emisión de facturas electrónicas (TipoDTE: 33)
+- ✅ Emisión de boletas electrónicas (TipoDTE: 39)
+- ✅ Generación de PDF y XML
+- ✅ Almacenamiento en `invoices/haulmer/{org_id}/`
+- ✅ Datos del emisor configurados (RUT: 77028682-4)
+
+**Stripe (Internacional):**
+- ✅ Integración con Stripe Invoices
+- ✅ Generación automática de invoices
+- ✅ Descarga y almacenamiento de PDFs
+- ✅ Almacenamiento en `invoices/stripe/{org_id}/`
+
+### ✅ **API Endpoints Implementados**
+
+- ✅ `POST /api/invoicing/documents` - Crear y emitir documento
+- ✅ `GET /api/invoicing/documents` - Listar documentos
+- ✅ `GET /api/invoicing/documents/[id]` - Obtener documento específico
+- ✅ `POST /api/invoicing/documents/[id]/void` - Anular documento
+- ✅ `POST /api/invoicing/customers` - Crear cliente
+- ✅ `GET /api/invoicing/customers` - Listar clientes
+
+### ✅ **Testing Completado**
+
+- ✅ Factura Haulmer probada exitosamente (PDF + XML generados)
+- ✅ Invoice Stripe probado exitosamente (PDF generado)
+- ✅ Almacenamiento en Supabase Storage verificado
+- ✅ URLs públicas funcionando correctamente
+
+### 📋 **Configuración para Producción**
+
+**Variables de entorno necesarias:**
+- `HAULMER_API_KEY` - API Key de producción de Haulmer
+- `HAULMER_ENVIRONMENT=production` - Cambiar de sandbox a production
+- `STRIPE_SECRET_KEY` - Clave de producción de Stripe
+
+**Datos del emisor:**
+- Configurados en `apps/web/src/lib/haulmer/client.ts` (líneas 24-33)
+- Pueden sobrescribirse con variables de entorno (`HAULMER_EMISOR_*`)
+
+**Bucket Storage:**
+- Bucket `invoices` debe existir en Supabase producción
+- Políticas RLS configuradas para lectura pública
+
+Ver `docs/INVOICING-SYSTEM.md` para documentación completa y checklist pre-producción.
+
+---
+
+## 📋 **PRÓXIMO MILESTONE: Integración de Facturación Electrónica** (OBSOLETO - YA COMPLETADO)
 
 > **📅 Planificado:** Enero 2025  
-> **🎯 Objetivo:** Establecer sistema de facturación electrónica automática según proveedor de pago
+> **🎯 Objetivo:** Establecer sistema de facturación electrónica automática según proveedor de pago  
+> **⚠️ NOTA:** Este milestone fue completado en Diciembre 2025 con el nuevo sistema independiente. Ver sección anterior.
 
 ### 🎯 **Requisitos del Sistema**
 
