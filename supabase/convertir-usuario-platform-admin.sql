@@ -187,3 +187,7 @@ WHERE u.email = 'EMAIL_DEL_USUARIO@ejemplo.com'  -- ⚠️ Cambia el email aquí
 -- - Lo remueve si se desactiva o elimina de organization_users
 -- - No necesitas hacer nada manual en la tabla _bypass
 
+
+
+
+

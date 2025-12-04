@@ -22,3 +22,7 @@ export default async function TemplatesLayout({
   return <>{children}</>
 }
 
+
+
+
+

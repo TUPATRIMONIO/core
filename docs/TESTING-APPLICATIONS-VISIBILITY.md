@@ -90,3 +90,7 @@ SELECT core.can_access_application('crm_sales', 'org-uuid-here', 'user-uuid-here
 SELECT * FROM core.get_enabled_applications('org-uuid-here', 'user-uuid-here');
 ```
 
+
+
+
+

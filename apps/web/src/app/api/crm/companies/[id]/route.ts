@@ -73,10 +73,6 @@ export async function GET(
  * PATCH /api/crm/companies/[id]
  * Actualizar una empresa
  */
-  // Verificar acceso a CRM
-  const denied = await requireApplicationAccess(request, 'crm_sales');
-  if (denied) return denied;
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

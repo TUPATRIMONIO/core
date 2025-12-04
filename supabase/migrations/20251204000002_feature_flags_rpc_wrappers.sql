@@ -70,3 +70,7 @@ BEGIN
   RAISE NOTICE 'Ahora Supabase RPC puede encontrar todas las funciones de feature flags';
 END $$;
 
+
+
+
+

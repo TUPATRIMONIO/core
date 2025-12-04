@@ -59,3 +59,7 @@ GRANT EXECUTE ON FUNCTION public.update_application TO authenticated;
 COMMENT ON FUNCTION public.update_application IS 
 'Función RPC para actualizar aplicaciones. Solo platform admins pueden usarla.';
 
+
+
+
+
