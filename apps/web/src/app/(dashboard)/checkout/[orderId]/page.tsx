@@ -1,18 +1,83 @@
 import { getOrder, canPayOrder, isOrderExpired } from '@/lib/checkout/core';
 import { createClient } from '@/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Package, Clock, XCircle, CheckCircle2, History, FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Package, Clock, CheckCircle2, XCircle, AlertCircle, FileText, Download, RefreshCcw, Ban, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
 import OrderTimeline from '@/components/checkout/OrderTimeline';
 import { isTransbankAvailable } from '@/lib/payments/availability';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
+}
+
+// Helper para obtener el badge de estado
+function getStatusBadge(status: string, expired: boolean) {
+  if (expired) {
+    return (
+      <Badge variant="destructive" className="gap-1">
+        <XCircle className="h-3 w-3" />
+        Expirada
+      </Badge>
+    );
+  }
+  
+  const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
+    pending_payment: { 
+      label: 'Pendiente', 
+      variant: 'secondary',
+      icon: <Clock className="h-3 w-3" />
+    },
+    paid: { 
+      label: 'Pagada', 
+      variant: 'default',
+      icon: <CreditCard className="h-3 w-3" />
+    },
+    completed: { 
+      label: 'Completada', 
+      variant: 'default',
+      icon: <CheckCircle2 className="h-3 w-3" />
+    },
+    cancelled: { 
+      label: 'Cancelada', 
+      variant: 'destructive',
+      icon: <XCircle className="h-3 w-3" />
+    },
+    refunded: { 
+      label: 'Reembolsada', 
+      variant: 'outline',
+      icon: <AlertCircle className="h-3 w-3" />
+    },
+  };
+  
+  const config = statusConfig[status] || { label: status, variant: 'secondary', icon: null };
+  
+  return (
+    <Badge 
+      variant={config.variant} 
+      className={`gap-1 ${status === 'completed' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+    >
+      {config.icon}
+      {config.label}
+    </Badge>
+  );
+}
+
+// Helper para obtener label del documento
+function getDocumentLabel(documentType: string | null) {
+  switch (documentType) {
+    case 'boleta_electronica':
+      return 'Ver Boleta';
+    case 'factura_electronica':
+      return 'Ver Factura';
+    case 'stripe_invoice':
+    default:
+      return 'Ver Invoice';
+  }
 }
 
 export default async function CheckoutOrderPage({ params }: PageProps) {
@@ -66,22 +131,14 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   // Obtener datos del producto
   const productData = order.product_data as any;
   
-  // Calcular impuesto para mostrar en resumen
-  const { data: taxRate } = await supabase.rpc('get_tax_rate', {
-    country_code_param: countryCode,
-  });
-  
-  const tax = order.amount * (taxRate || 0);
-  const total = order.amount + tax;
-  
   // Obtener historial de la orden
-  const { data: historyData, error: historyError } = await supabase
+  const { data: historyData } = await supabase
     .from('order_history')
     .select('*')
     .eq('order_id', orderId)
     .order('created_at', { ascending: true });
   
-  // Enriquecer eventos con información de usuarios si es necesario
+  // Enriquecer eventos con información de usuarios
   const enrichedHistory = await Promise.all(
     (historyData || []).map(async (event) => {
       const enriched: any = { ...event };
@@ -108,205 +165,214 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   
   // Obtener documento de facturación si la orden está completada
   let invoiceDocument = null;
-  if (order.status === 'completed') {
-    // Primero buscar documentos con status 'issued'
-    const { data: document, error: docError } = await supabase
+  if (order.status === 'completed' || order.status === 'paid') {
+    const { data: document } = await supabase
       .from('invoicing_documents')
       .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
       .eq('order_id', orderId)
-      .eq('status', 'issued')
       .maybeSingle();
     
-    if (document) {
+    if (document?.pdf_url) {
       invoiceDocument = document;
-    } else {
-      // Si no hay documento con status 'issued', buscar cualquier documento para debugging
-      const { data: anyDocument } = await supabase
-        .from('invoicing_documents')
-        .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
-        .eq('order_id', orderId)
-        .maybeSingle();
-      
-      if (anyDocument) {
-        console.log('[CheckoutOrderPage] Documento encontrado con estado:', anyDocument.status);
-        // Si el documento existe pero no está 'issued', aún así lo mostramos si tiene pdf_url
-        if (anyDocument.pdf_url) {
-          invoiceDocument = anyDocument;
-        }
-      } else {
-        console.log('[CheckoutOrderPage] No se encontró documento para la orden:', orderId);
-      }
     }
   }
   
+  const isCompleted = order.status === 'completed' || order.status === 'paid';
+  const isCancelled = order.status === 'cancelled';
+  const isRefunded = order.status === 'refunded';
+  
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/billing">
+    <div className="container mx-auto py-4 px-4 max-w-4xl">
+      {/* Header compacto */}
+      <div className="flex items-center gap-3 mb-4">
+        <Button variant="ghost" size="icon" asChild className="shrink-0 h-8 w-8">
+          <Link href="/orders">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Completar Compra</h1>
-          <p className="text-muted-foreground mt-2">
-            Orden #{order.order_number}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg font-bold">Orden #{order.order_number}</h1>
+            {getStatusBadge(order.status, expired)}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {new Date(order.created_at).toLocaleDateString('es-CL', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </p>
         </div>
       </div>
       
-      {/* Alertas de estado */}
-      {!canPay && (
-        <Alert variant={expired ? 'destructive' : 'default'}>
-          <XCircle className="h-4 w-4" />
-          <AlertDescription>
-            {expired 
-              ? 'Esta orden ha expirado. Por favor crea una nueva orden.'
-              : `Esta orden está en estado: ${order.status}. No puede ser pagada.`}
-          </AlertDescription>
-        </Alert>
+      {/* Estado prominente - Solo para completadas (visible primero en mobile) */}
+      {isCompleted && (
+        <div className="mb-4 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-full shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-green-800 dark:text-green-200">¡Compra Exitosa!</p>
+              <p className="text-sm text-green-700 dark:text-green-300">
+                {order.product_type === 'credits' 
+                  ? `${productData.credits_amount?.toLocaleString() || ''} créditos agregados a tu cuenta`
+                  : 'Tu compra ha sido procesada exitosamente'}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
       
-      {order.status === 'paid' && (
-        <Alert>
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>
-            Esta orden ya ha sido pagada. El producto está siendo procesado.
-          </AlertDescription>
-        </Alert>
+      {/* Estado expirada */}
+      {expired && (
+        <div className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full shrink-0">
+              <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-red-800 dark:text-red-200">Orden Expirada</p>
+              <p className="text-sm text-red-700 dark:text-red-300">
+                Esta orden ya no puede ser pagada
+              </p>
+            </div>
+            <Button size="sm" asChild>
+              <Link href="/billing/purchase-credits">Nueva orden</Link>
+            </Button>
+          </div>
+        </div>
       )}
       
-      {order.status === 'completed' && (
-        <>
-          <Alert>
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              Esta orden ha sido completada exitosamente.
-            </AlertDescription>
-          </Alert>
-          {invoiceDocument?.pdf_url && (
-            <Alert>
-              <FileText className="h-4 w-4" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>Tu documento tributario está listo</span>
-                <Button variant="outline" size="sm" asChild>
-                  <a 
-                    href={invoiceDocument.pdf_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer nofollow"
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    Ver Invoice
-                  </a>
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-        </>
-      )}
-      
-      <Tabs defaultValue="checkout" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="checkout">Pago</TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
-            <History className="h-4 w-4" />
-            Historial
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="checkout" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Resumen de la orden */}
-            <div className="lg:col-span-1">
+      {/* Grid principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* Columna izquierda: Resumen */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Resumen del pedido */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Resumen de la Orden
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <Package className="h-4 w-4" />
+                Resumen
               </CardTitle>
-              <CardDescription>
-                Orden #{order.order_number}
-              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="px-4 pb-4 space-y-3">
               <div>
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-base">
                   {productData.name || `Producto ${order.product_type}`}
                 </h3>
                 {productData.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     {productData.description}
                   </p>
                 )}
               </div>
               
               {order.product_type === 'credits' && productData.credits_amount && (
-                <div className="space-y-2 pt-4 border-t">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Créditos</span>
-                    <span className="font-semibold">
-                      {productData.credits_amount.toLocaleString()}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between py-2 border-y text-sm">
+                  <span className="text-muted-foreground">Créditos</span>
+                  <span className="font-semibold text-[var(--tp-buttons)]">
+                    {productData.credits_amount.toLocaleString()}
+                  </span>
                 </div>
               )}
               
-              <div className="space-y-2 pt-4 border-t">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('es-CL', {
-                      style: 'currency',
-                      currency: order.currency,
-                    }).format(order.amount)}
-                  </span>
-                </div>
-                {tax > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Impuesto</span>
-                    <span className="font-semibold">
-                      {new Intl.NumberFormat('es-CL', {
-                        style: 'currency',
-                        currency: order.currency,
-                      }).format(tax)}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-base font-semibold">Total</span>
-                  <span className="text-xl font-bold text-[var(--tp-buttons)]">
-                    {new Intl.NumberFormat('es-CL', {
-                      style: 'currency',
-                      currency: order.currency,
-                    }).format(total)}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-sm">Total</span>
+                <span className="text-lg font-bold text-[var(--tp-buttons)]">
+                  {new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: order.currency,
+                  }).format(order.amount)}
+                </span>
               </div>
               
               {order.expires_at && canPay && (
-                <div className="pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>
-                      Expira: {new Date(order.expires_at).toLocaleString('es-CL')}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground pt-2 border-t">
+                  <Clock className="h-3 w-3" />
+                  <span>Expira: {new Date(order.expires_at).toLocaleString('es-CL')}</span>
                 </div>
               )}
             </CardContent>
           </Card>
+          
+          {/* Acciones del pedido - Escalable para futuros botones */}
+          {(isCompleted || isCancelled || isRefunded) && (
+            <Card>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-sm font-semibold">Acciones</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="flex flex-wrap gap-2">
+                  {/* Documento tributario */}
+                  {invoiceDocument?.pdf_url && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a 
+                        href={invoiceDocument.pdf_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer nofollow"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        {getDocumentLabel(invoiceDocument.document_type)}
+                      </a>
+                    </Button>
+                  )}
+                  
+                  {/* XML (si existe) - Para empresas que necesitan el XML */}
+                  {invoiceDocument?.xml_url && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a 
+                        href={invoiceDocument.xml_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer nofollow"
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        XML
+                      </a>
+                    </Button>
+                  )}
+                  
+                  {/* Placeholder: Solicitar reembolso (futuro) */}
+                  {isCompleted && order.status === 'completed' && (
+                    <Button variant="ghost" size="sm" disabled className="opacity-50">
+                      <RefreshCcw className="mr-2 h-4 w-4" />
+                      Solicitar Reembolso
+                    </Button>
+                  )}
+                  
+                  {/* Placeholder: Anular (futuro) - solo visible para admin */}
+                  {/* 
+                  <Button variant="ghost" size="sm" disabled className="opacity-50 text-destructive">
+                    <Ban className="mr-2 h-4 w-4" />
+                    Anular
+                  </Button>
+                  */}
+                </div>
+                
+                {/* Mensaje si no hay acciones disponibles */}
+                {!invoiceDocument?.pdf_url && !isRefunded && (
+                  <p className="text-xs text-muted-foreground">
+                    No hay acciones disponibles para esta orden
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
         
-        {/* Formulario de pago */}
-        <div className="lg:col-span-2">
+        {/* Columna derecha: Pago o Historial */}
+        <div className="lg:col-span-3 space-y-4">
           {canPay ? (
+            // Formulario de pago
             transbankAvailable ? (
               <Tabs defaultValue="transbank" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="transbank">Transbank</TabsTrigger>
                   <TabsTrigger value="stripe">Stripe</TabsTrigger>
                 </TabsList>
-                <TabsContent value="transbank" className="mt-4">
+                <TabsContent value="transbank" className="mt-3">
                   <OrderCheckoutForm
                     orderId={orderId}
                     order={order}
@@ -314,7 +380,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                     countryCode={countryCode}
                   />
                 </TabsContent>
-                <TabsContent value="stripe" className="mt-4">
+                <TabsContent value="stripe" className="mt-3">
                   <OrderCheckoutForm
                     orderId={orderId}
                     order={order}
@@ -332,23 +398,44 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
               />
             )
           ) : (
+            // Historial (cuando no hay formulario de pago)
             <Card>
-              <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">
-                  Esta orden no puede ser pagada en este momento.
-                </p>
+              <CardHeader className="pb-2 pt-4 px-4">
+                <CardTitle className="text-sm font-semibold">Historial</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="max-h-[350px] overflow-y-auto">
+                  <OrderTimeline 
+                    events={enrichedHistory || []} 
+                    orderNumber={order.order_number}
+                    compact
+                  />
+                </div>
               </CardContent>
             </Card>
           )}
         </div>
       </div>
-        </TabsContent>
-        
-        <TabsContent value="history" className="mt-6">
-          <OrderTimeline events={enrichedHistory || []} orderNumber={order.order_number} />
-        </TabsContent>
-      </Tabs>
+      
+      {/* Historial al final (solo si hay formulario de pago activo) */}
+      {canPay && (
+        <div className="mt-4">
+          <Card>
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-sm font-semibold">Historial</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="max-h-[200px] overflow-y-auto">
+                <OrderTimeline 
+                  events={enrichedHistory || []} 
+                  orderNumber={order.order_number}
+                  compact
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
-

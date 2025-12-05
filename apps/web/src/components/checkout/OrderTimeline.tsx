@@ -38,6 +38,7 @@ export interface OrderHistoryEvent {
 interface OrderTimelineProps {
   events: OrderHistoryEvent[];
   orderNumber?: string;
+  compact?: boolean;
 }
 
 const getEventIcon = (eventType: string) => {
@@ -151,7 +152,7 @@ const formatEventDate = (dateString: string): string => {
   }
 };
 
-export default function OrderTimeline({ events, orderNumber }: OrderTimelineProps) {
+export default function OrderTimeline({ events, orderNumber, compact = false }: OrderTimelineProps) {
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
 
   const toggleEvent = (eventId: string) => {
@@ -162,6 +163,21 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
       newExpanded.add(eventId);
     }
     setExpandedEvents(newExpanded);
+  };
+  
+  // Formato de fecha compacto
+  const formatCompactDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('es-CL', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
   };
 
   // Función para deduplicar eventos por cambio de estado
@@ -243,6 +259,13 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
   const deduplicatedEvents = deduplicateByStatus(relevantEvents);
 
   if (!deduplicatedEvents || deduplicatedEvents.length === 0) {
+    if (compact) {
+      return (
+        <div className="p-4 text-center text-sm text-muted-foreground">
+          No hay eventos registrados
+        </div>
+      );
+    }
     return (
       <Card>
         <CardContent className="pt-6">
@@ -252,6 +275,39 @@ export default function OrderTimeline({ events, orderNumber }: OrderTimelineProp
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  // Modo compacto
+  if (compact) {
+    return (
+      <div className="divide-y divide-[var(--tp-lines-20)]">
+        {deduplicatedEvents.map((event) => {
+          const Icon = getEventIcon(event.event_type);
+          const iconColor = getEventColor(event.event_type);
+          
+          return (
+            <div key={event.id} className="flex items-start gap-3 p-3 hover:bg-muted/50 transition-colors">
+              <div className={`${iconColor} rounded-full p-1.5 shrink-0`}>
+                <Icon className="h-3 w-3" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {event.event_description}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatCompactDate(event.created_at)}
+                </p>
+              </div>
+              {event.to_status && (
+                <Badge variant={getStatusBadgeVariant(event.to_status)} className="text-[10px] shrink-0">
+                  {getStatusLabel(event.to_status)}
+                </Badge>
+              )}
+            </div>
+          );
+        })}
+      </div>
     );
   }
 
