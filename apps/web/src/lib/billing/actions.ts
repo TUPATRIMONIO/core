@@ -286,9 +286,17 @@ export async function getBillingOverviewAction() {
     .is('deleted_at', null)
     .order('is_default', { ascending: false });
   
-  // Obtener facturas recientes
+  // Obtener órdenes recientes (las facturas tributarias están en invoicing.documents)
+  const { data: orders } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .order('created_at', { ascending: false })
+    .limit(5);
+  
+  // Obtener facturas recientes desde invoicing.documents
   const { data: invoices } = await supabase
-    .from('invoices')
+    .from('invoicing_documents')
     .select('*')
     .eq('organization_id', organizationId)
     .order('created_at', { ascending: false })
@@ -299,6 +307,7 @@ export async function getBillingOverviewAction() {
     balance,
     subscription,
     paymentMethods: paymentMethods || [],
+    recentOrders: orders || [],
     recentInvoices: invoices || [],
   };
 }

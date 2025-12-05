@@ -86,86 +86,13 @@ export async function createPaymentIntentForOrder(
     name: org.name || undefined,
   });
   
-  // Crear factura en BD primero
-  let invoice = null;
-  let invoiceError = null;
-  const maxRetries = 5;
-  
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const invoiceNumber = await generateInvoiceNumber(order.organization_id);
-      
-      const result = await supabase
-        .from('invoices')
-        .insert({
-          organization_id: order.organization_id,
-          invoice_number: invoiceNumber,
-          status: 'open',
-          type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
-          subtotal: amount,
-          tax,
-          total: amount + tax,
-          currency,
-          due_date: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      
-      invoice = result.data;
-      invoiceError = result.error;
-      
-      // Si no hay error, salir del loop
-      if (!invoiceError) {
-        break;
-      }
-      
-      // Si es error de duplicado y no es el último intento, reintentar
-      if (invoiceError.message.includes('duplicate key') && attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Número de factura duplicado, reintentando...`);
-        // Esperar un poco más en cada intento (exponencial backoff)
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      
-      // Si no es error de duplicado o es el último intento, salir
-      break;
-    } catch (error: any) {
-      // Si generateInvoiceNumber() falla, reintentar
-      if (attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Error generando número de factura, reintentando...`, error);
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      invoiceError = error;
-      break;
-    }
-  }
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'No se pudo crear la factura después de múltiples intentos'}`);
-  }
-  
-  // Agregar línea de detalle
+  // Descripción del producto para metadata
   const description = productData.name 
     ? `${productData.name} - ${productData.description || ''}`
     : `Producto ${order.product_type}`;
   
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description,
-      quantity: 1,
-      unit_price: amount,
-      total: amount + tax,
-      type: order.product_type,
-    });
-  
-  // No registramos evento de factura creada - es un detalle técnico que no interesa al cliente
-  // El cliente solo necesita ver las etapas principales del pedido
-  
-  // Actualizar orden con invoice_id
-  await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
+  // Actualizar orden a pending_payment (sin crear invoice)
+  await updateOrderStatus(orderId, 'pending_payment');
   
   // Crear Checkout Session en Stripe (en lugar de Payment Intent)
   // Nota: Stripe requiere la moneda en lowercase (ars, brl, usd, etc.)
@@ -215,7 +142,6 @@ export async function createPaymentIntentForOrder(
       order_number: order.order_number,
       product_type: order.product_type,
       product_id: order.product_id || '',
-      invoice_id: invoice.id,
       type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
       ...(order.product_type === 'credits' && productData.credits_amount 
         ? { credits_amount: productData.credits_amount.toString() }
@@ -230,7 +156,6 @@ export async function createPaymentIntentForOrder(
         order_number: order.order_number,
         product_type: order.product_type,
         product_id: order.product_id || '',
-        invoice_id: invoice.id,
         type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
         ...(order.product_type === 'credits' && productData.credits_amount 
           ? { credits_amount: productData.credits_amount.toString() }
@@ -249,92 +174,51 @@ export async function createPaymentIntentForOrder(
   // No registramos evento de pago iniciado - es un detalle técnico
   // El cliente verá "Pago confirmado" cuando el pago sea exitoso
   
-  // Crear registro de pago en BD con el payment_intent_id si está disponible
-  // Si no está disponible aún, el webhook lo creará cuando se complete el pago
+  // Crear registro de pago en BD siempre
+  // Usamos checkout_session_id como identificador temporal si no hay payment_intent
   let payment = null;
-  if (checkoutSession.payment_intent) {
-    const { data: paymentData, error: paymentError } = await supabase
-      .from('payments')
-      .insert({
-        organization_id: order.organization_id,
-        invoice_id: invoice.id,
-        provider: 'stripe',
-        provider_payment_id: checkoutSession.payment_intent as string,
-        amount: amount + tax,
-        currency,
-        status: 'pending',
-        metadata: {
-          checkout_session_id: checkoutSession.id,
-          order_id: orderId,
-          order_number: order.order_number,
-          product_type: order.product_type,
-          product_id: order.product_id || '',
-          type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
-          ...(order.product_type === 'credits' && productData.credits_amount 
-            ? { credits_amount: productData.credits_amount.toString() }
-            : {}),
-        },
-      })
-      .select()
-      .single();
-    
-    if (paymentError) {
-      console.error('Error creando registro de pago:', paymentError);
-      // No fallar si hay error aquí, el webhook lo manejará
-    } else {
-      payment = paymentData;
-      
-      // Actualizar orden con payment_id
-      await updateOrderStatus(orderId, 'pending_payment', { 
-        invoiceId: invoice.id,
-        paymentId: payment.id 
-      });
-    }
+  const paymentIdentifier = checkoutSession.payment_intent 
+    ? (checkoutSession.payment_intent as string)
+    : `cs_${checkoutSession.id}`;
+  
+  const { data: paymentData, error: paymentError } = await supabase
+    .from('payments')
+    .insert({
+      organization_id: order.organization_id,
+      provider: 'stripe',
+      provider_payment_id: paymentIdentifier,
+      amount: amount + tax,
+      currency,
+      status: 'pending',
+      metadata: {
+        checkout_session_id: checkoutSession.id,
+        order_id: orderId,
+        order_number: order.order_number,
+        product_type: order.product_type,
+        product_id: order.product_id || '',
+        type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
+        ...(order.product_type === 'credits' && productData.credits_amount 
+          ? { credits_amount: productData.credits_amount.toString() }
+          : {}),
+      },
+    })
+    .select()
+    .single();
+  
+  if (paymentError) {
+    console.error('Error creando registro de pago:', paymentError);
+    // No fallar si hay error aquí, el webhook lo manejará
   } else {
-    // Si no hay payment_intent aún, crear registro con checkout_session_id como provider_payment_id temporal
-    // El webhook lo actualizará cuando se complete el pago
-    const { data: paymentData, error: paymentError } = await supabase
-      .from('payments')
-      .insert({
-        organization_id: order.organization_id,
-        invoice_id: invoice.id,
-        provider: 'stripe',
-        provider_payment_id: checkoutSession.id, // Usar session_id temporalmente
-        amount: amount + tax,
-        currency,
-        status: 'pending',
-        metadata: {
-          checkout_session_id: checkoutSession.id,
-          order_id: orderId,
-          order_number: order.order_number,
-          product_type: order.product_type,
-          product_id: order.product_id || '',
-          type: order.product_type === 'credits' ? 'credit_purchase' : order.product_type,
-          ...(order.product_type === 'credits' && productData.credits_amount 
-            ? { credits_amount: productData.credits_amount.toString() }
-            : {}),
-          is_temporary: true, // Marcar como temporal hasta que el webhook lo actualice
-        },
-      })
-      .select()
-      .single();
+    payment = paymentData;
     
-    if (paymentError) {
-      console.error('Error creando registro de pago temporal:', paymentError);
-    } else {
-      payment = paymentData;
-      
-      // Actualizar orden con payment_id
-      await updateOrderStatus(orderId, 'pending_payment', { 
-        invoiceId: invoice.id,
-        paymentId: payment.id 
-      });
-    }
+    // Actualizar orden con payment_id
+    await updateOrderStatus(orderId, 'pending_payment', { 
+      paymentId: payment.id 
+    });
   }
   
   return {
     checkoutSession,
-    invoice,
     payment,
     url: checkoutSession.url, // URL de redirección para Stripe Checkout
     order,
@@ -414,79 +298,6 @@ export async function createPaymentIntentForCredits(
     name: org.name || undefined,
   });
   
-  // Crear factura en BD primero
-  // La función generateInvoiceNumber() ya es thread-safe, pero aún así
-  // manejamos errores de duplicado por si acaso
-  let invoice = null;
-  let invoiceError = null;
-  const maxRetries = 5;
-  
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const invoiceNumber = await generateInvoiceNumber(orgId);
-      
-      const result = await supabase
-        .from('invoices')
-        .insert({
-          organization_id: orgId,
-          invoice_number: invoiceNumber,
-          status: 'open',
-          type: 'credit_purchase',
-          subtotal: amount,
-          tax,
-          total: amount + tax,
-          currency,
-          due_date: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      
-      invoice = result.data;
-      invoiceError = result.error;
-      
-      // Si no hay error, salir del loop
-      if (!invoiceError) {
-        break;
-      }
-      
-      // Si es error de duplicado y no es el último intento, reintentar
-      if (invoiceError.message.includes('duplicate key') && attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Número de factura duplicado, reintentando...`);
-        // Esperar un poco más en cada intento (exponencial backoff)
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      
-      // Si no es error de duplicado o es el último intento, salir
-      break;
-    } catch (error: any) {
-      // Si generateInvoiceNumber() falla, reintentar
-      if (attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Error generando número de factura, reintentando...`, error);
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      invoiceError = error;
-      break;
-    }
-  }
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'No se pudo crear la factura después de múltiples intentos'}`);
-  }
-  
-  // Agregar línea de detalle (usar vista pública)
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description: `Paquete de ${pkg.credits_amount} créditos - ${pkg.name}`,
-      quantity: 1,
-      unit_price: amount,
-      total: amount + tax,
-      type: 'credits',
-    });
-  
   // Crear Payment Intent en Stripe
   // Nota: Stripe requiere la moneda en lowercase (ars, brl, usd, etc.)
   const stripeCurrency = currency.toLowerCase();
@@ -505,7 +316,6 @@ export async function createPaymentIntentForCredits(
     metadata: {
       organization_id: orgId,
       package_id: packageId,
-      invoice_id: invoice.id,
       type: 'credit_purchase',
       credits_amount: pkg.credits_amount.toString(),
       country_code: countryCode,
@@ -525,7 +335,6 @@ export async function createPaymentIntentForCredits(
     .from('payments')
     .insert({
       organization_id: orgId,
-      invoice_id: invoice.id,
       provider: 'stripe',
       provider_payment_id: paymentIntent.id,
       amount: amount + tax,
@@ -542,7 +351,6 @@ export async function createPaymentIntentForCredits(
   
   return {
     paymentIntent,
-    invoice,
     payment,
     clientSecret: paymentIntent.client_secret,
   };
@@ -632,34 +440,4 @@ export function getLocalizedPrice(pkg: any, countryCode: string): number {
   return pkg[priceKey] || pkg.price_usd || 0;
 }
 
-/**
- * Genera número de factura único usando función thread-safe de la BD
- * Formato: {ORG_SLUG}-{NÚMERO} (ej: TU-PATRIMONIO-000001)
- * Reintenta hasta 5 veces si hay errores
- */
-async function generateInvoiceNumber(orgId: string): Promise<string> {
-  const supabase = await createClient();
-  const maxAttempts = 5;
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { data, error } = await supabase.rpc('generate_invoice_number', {
-      org_id: orgId
-    });
-    
-    if (!error && data) {
-      return data;
-    }
-    
-    // Si es el último intento, lanzar error
-    if (attempt === maxAttempts - 1) {
-      console.error('Error generando número de factura después de', maxAttempts, 'intentos:', error);
-      throw new Error(`No se pudo generar número de factura: ${error?.message || 'Unknown error'}`);
-    }
-    
-    // Esperar un poco antes de reintentar (exponencial backoff)
-    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
-  }
-  
-  throw new Error('No se pudo generar número de factura después de múltiples intentos');
-}
 

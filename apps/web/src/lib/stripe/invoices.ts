@@ -15,15 +15,16 @@ export async function listInvoices(orgId: string, limit = 10) {
     .single();
   
   if (!subscription?.stripe_customer_id) {
-    // Retornar facturas de la BD si no hay customer en Stripe
-    const { data: invoices } = await supabase
-    .from('invoices')
+    // Retornar documentos tributarios de la BD si no hay customer en Stripe
+    const { data: documents } = await supabase
+      .from('documents')
       .select('*')
       .eq('organization_id', orgId)
+      .eq('provider', 'stripe')
       .order('created_at', { ascending: false })
       .limit(limit);
     
-    return invoices || [];
+    return documents || [];
   }
   
   // Obtener facturas de Stripe
@@ -32,73 +33,55 @@ export async function listInvoices(orgId: string, limit = 10) {
     limit,
   });
   
-  // Sincronizar con BD
+  // Sincronizar con BD (guardar en invoicing.documents)
   const invoices = [];
   for (const invoice of stripeInvoices.data) {
-    const { data: dbInvoice } = await supabase
-    .from('invoices')
+    // Buscar documento existente en invoicing.documents
+    const { data: existingDoc } = await supabase
+      .from('documents')
       .select('*')
-      .eq('provider_invoice_id', invoice.id)
-      .single();
+      .eq('organization_id', orgId)
+      .eq('provider', 'stripe')
+      .eq('external_id', invoice.id)
+      .maybeSingle();
     
-    if (!dbInvoice) {
-      // Crear factura en BD con manejo de errores de duplicado
-      const maxRetries = 5;
-      let newInvoice = null;
-      
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          const invoiceNumber = await generateInvoiceNumber(orgId);
-          
-          const result = await supabase
-            .from('invoices')
-            .insert({
-              organization_id: orgId,
-              invoice_number: invoiceNumber,
-              status: mapStripeInvoiceStatus(invoice.status),
-              type: invoice.subscription ? 'subscription' : 'one_time',
-              subtotal: convertAmountFromStripe(invoice.subtotal, invoice.currency),
-              tax: convertAmountFromStripe(invoice.tax, invoice.currency),
-              total: convertAmountFromStripe(invoice.total, invoice.currency),
-              currency: invoice.currency.toUpperCase(),
-              due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString() : null,
-              paid_at: invoice.status === 'paid' && invoice.status_transitions?.paid_at
-                ? new Date(invoice.status_transitions.paid_at * 1000).toISOString()
-                : null,
-              provider_invoice_id: invoice.id,
-              pdf_url: invoice.invoice_pdf || null,
-            })
-            .select()
-            .single();
-          
-          if (!result.error) {
-            newInvoice = result.data;
-            break;
-          }
-          
-          // Si es error de duplicado y no es el último intento, reintentar
-          if (result.error.message.includes('duplicate key') && attempt < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-            continue;
-          }
-          
-          // Si no es error de duplicado o es el último intento, salir
-          break;
-        } catch (error: any) {
-          if (attempt < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-            continue;
-          }
-          console.error('Error creando factura desde Stripe:', error);
-          break;
-        }
-      }
-      
-      if (newInvoice) {
-        invoices.push(newInvoice);
-      }
+    if (existingDoc) {
+      invoices.push(existingDoc);
     } else {
-      invoices.push(dbInvoice);
+      // Crear documento tributario en invoicing.documents
+      // Nota: Para suscripciones, necesitamos un customer_id
+      // Por ahora, creamos el documento sin customer (se puede actualizar después)
+      try {
+        const { data: newDoc, error: docError } = await supabase
+          .from('documents')
+          .insert({
+            organization_id: orgId,
+            customer_id: subscription.stripe_customer_id || null, // Temporal, debería ser customer_id real
+            document_number: `STRIPE-${invoice.id.substring(0, 20)}`, // Número temporal
+            document_type: 'stripe_invoice',
+            provider: 'stripe',
+            status: mapStripeInvoiceStatusToDocument(invoice.status),
+            subtotal: convertAmountFromStripe(invoice.subtotal, invoice.currency),
+            tax: convertAmountFromStripe(invoice.tax, invoice.currency),
+            total: convertAmountFromStripe(invoice.total, invoice.currency),
+            currency: invoice.currency.toUpperCase(),
+            external_id: invoice.id,
+            pdf_url: invoice.invoice_pdf || null,
+            issued_at: invoice.status_transitions?.paid_at 
+              ? new Date(invoice.status_transitions.paid_at * 1000).toISOString()
+              : invoice.created ? new Date(invoice.created * 1000).toISOString() : null,
+            provider_response: invoice as any,
+          })
+          .select()
+          .single();
+        
+        if (!docError && newDoc) {
+          invoices.push(newDoc);
+        }
+      } catch (error: any) {
+        console.error('Error creando documento desde Stripe invoice:', error);
+        // Continuar con el siguiente invoice
+      }
     }
   }
   
@@ -106,36 +89,35 @@ export async function listInvoices(orgId: string, limit = 10) {
 }
 
 /**
- * Obtiene una factura específica
+ * Obtiene una factura específica (documento tributario)
  */
 export async function getInvoice(invoiceId: string) {
   const supabase = await createClient();
   
-  // Buscar en BD primero
-  const { data: invoice } = await supabase
-      .from('invoices')
+  // Buscar en invoicing.documents primero
+  const { data: document } = await supabase
+    .from('documents')
     .select('*')
     .eq('id', invoiceId)
     .single();
   
-  if (!invoice) {
-    throw new Error('Invoice not found');
-  }
-  
-  // Si tiene provider_invoice_id, obtener de Stripe también
-  if (invoice.provider_invoice_id && invoice.provider_invoice_id.startsWith('in_')) {
-    try {
-      const stripeInvoice = await stripe.invoices.retrieve(invoice.provider_invoice_id);
-      return {
-        ...invoice,
-        stripe_invoice: stripeInvoice,
-      };
-    } catch (error) {
-      // Ignorar si no existe en Stripe
+  if (document) {
+    // Si es de Stripe y tiene external_id, obtener también de Stripe
+    if (document.provider === 'stripe' && document.external_id) {
+      try {
+        const stripeInvoice = await stripe.invoices.retrieve(document.external_id);
+        return {
+          ...document,
+          stripe_invoice: stripeInvoice,
+        };
+      } catch (error) {
+        // Ignorar si no existe en Stripe
+      }
     }
+    return document;
   }
   
-  return invoice;
+  throw new Error('Invoice not found');
 }
 
 /**
@@ -144,74 +126,53 @@ export async function getInvoice(invoiceId: string) {
 export async function downloadInvoicePDF(invoiceId: string) {
   const supabase = await createClient();
   
-  const { data: invoice } = await supabase
-      .from('invoices')
-    .select('provider_invoice_id')
+  // Buscar documento en invoicing.documents
+  const { data: document } = await supabase
+    .from('documents')
+    .select('external_id, pdf_url, provider')
     .eq('id', invoiceId)
     .single();
   
-  if (!invoice?.provider_invoice_id) {
-    throw new Error('Invoice not found or no PDF available');
+  if (!document) {
+    throw new Error('Invoice not found');
   }
   
-  // Obtener PDF de Stripe
-  const stripeInvoice = await stripe.invoices.retrieve(invoice.provider_invoice_id);
-  
-  if (!stripeInvoice.invoice_pdf) {
-    throw new Error('PDF not available');
+  // Si tiene PDF URL guardado, retornarlo
+  if (document.pdf_url) {
+    return document.pdf_url;
   }
   
-  return stripeInvoice.invoice_pdf;
+  // Si es de Stripe y tiene external_id, obtener PDF de Stripe
+  if (document.provider === 'stripe' && document.external_id) {
+    const stripeInvoice = await stripe.invoices.retrieve(document.external_id);
+    
+    if (!stripeInvoice.invoice_pdf) {
+      throw new Error('PDF not available');
+    }
+    
+    return stripeInvoice.invoice_pdf;
+  }
+  
+  throw new Error('PDF not available');
 }
 
 /**
- * Mapea el estado de factura de Stripe a nuestro enum
+ * Mapea el estado de factura de Stripe a nuestro enum de documentos
  */
-function mapStripeInvoiceStatus(status: string | null): 'draft' | 'open' | 'paid' | 'void' | 'uncollectible' {
+function mapStripeInvoiceStatusToDocument(status: string | null): 'pending' | 'processing' | 'issued' | 'failed' | 'voided' {
   switch (status) {
-    case 'draft':
-      return 'draft';
-    case 'open':
-      return 'open';
     case 'paid':
-      return 'paid';
+      return 'issued';
+    case 'open':
+    case 'draft':
+      return 'pending';
     case 'void':
-      return 'void';
+      return 'voided';
     case 'uncollectible':
-      return 'uncollectible';
+      return 'failed';
     default:
-      return 'open';
+      return 'pending';
   }
 }
 
-/**
- * Genera número de factura único usando función thread-safe de la BD
- * Formato: {ORG_SLUG}-{NÚMERO} (ej: TU-PATRIMONIO-000001)
- * Reintenta hasta 5 veces si hay errores
- */
-async function generateInvoiceNumber(orgId: string): Promise<string> {
-  const supabase = await createClient();
-  const maxAttempts = 5;
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { data, error } = await supabase.rpc('generate_invoice_number', {
-      org_id: orgId
-    });
-    
-    if (!error && data) {
-      return data;
-    }
-    
-    // Si es el último intento, lanzar error
-    if (attempt === maxAttempts - 1) {
-      console.error('Error generando número de factura después de', maxAttempts, 'intentos:', error);
-      throw new Error(`No se pudo generar número de factura: ${error?.message || 'Unknown error'}`);
-    }
-    
-    // Esperar un poco antes de reintentar (exponencial backoff)
-    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
-  }
-  
-  throw new Error('No se pudo generar número de factura después de múltiples intentos');
-}
 

@@ -36,23 +36,31 @@ export async function GET(
       );
     }
     
-    // Obtener factura con line items (usar vista pública)
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .select(`
-        *,
-        line_items:invoice_line_items (*)
-      `)
+    // Obtener documento tributario (invoicing.documents)
+    const { data: document, error: docError } = await supabase
+      .from('documents')
+      .select('*')
       .eq('id', id)
       .eq('organization_id', orgUser.organization_id)
       .single();
     
-    if (invoiceError || !invoice) {
+    if (docError || !document) {
       return NextResponse.json(
-        { error: 'Factura no encontrada' },
+        { error: 'Documento no encontrado' },
         { status: 404 }
       );
     }
+    
+    // Si tiene PDF URL externo, redirigir a él
+    if (document.pdf_url) {
+      return NextResponse.redirect(document.pdf_url);
+    }
+    
+    // Obtener items del documento
+    const { data: items } = await supabase
+      .from('document_items')
+      .select('*')
+      .eq('document_id', id);
     
     // Obtener información de la organización
     const { data: org } = await supabase
@@ -68,6 +76,19 @@ export async function GET(
       );
     }
     
+    // Transformar documento al formato esperado por generateInvoicePDF
+    const invoice = {
+      invoice_number: document.document_number,
+      status: document.status,
+      type: document.document_type,
+      subtotal: document.subtotal,
+      tax: document.tax,
+      total: document.total,
+      currency: document.currency,
+      created_at: document.created_at,
+      line_items: items || [],
+    };
+    
     // Generar PDF
     const pdfBuffer = await generateInvoicePDF(invoice, org);
     
@@ -75,7 +96,7 @@ export async function GET(
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="factura-${invoice.invoice_number}.pdf"`,
+        'Content-Disposition': `attachment; filename="documento-${document.document_number}.pdf"`,
       },
     });
   } catch (error: any) {
@@ -86,4 +107,3 @@ export async function GET(
     );
   }
 }
-

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 import { addCredits } from '@/lib/credits/core';
-import { notifyCreditsAdded, notifyPaymentSucceeded } from '@/lib/notifications/billing';
+import { notifyCreditsAdded } from '@/lib/notifications/billing';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
 
 
@@ -74,10 +74,12 @@ async function PaymentSuccessContent({
   console.log('[PaymentSuccess] ===== INICIO BÚSQUEDA DE PAGO =====');
   console.log('[PaymentSuccess] Parámetros recibidos:', { 
     paymentIntentId,
+    provider,
+    tokenWs,
+    tbkToken,
     orgId: orgUser.organization_id,
     userId: user.id 
   });
-  console.log('[PaymentSuccess] ====================================');
 
   let payment = null;
 
@@ -97,7 +99,6 @@ async function PaymentSuccessContent({
           if (inscriptionResponse.ok) {
             const inscriptionData = await inscriptionResponse.json();
             console.log('[PaymentSuccess] Inscripción Oneclick completada:', inscriptionData);
-            // Aquí podrías guardar el tbk_user en el componente o en la sesión
           }
         } catch (error) {
           console.error('[PaymentSuccess] Error procesando inscripción Oneclick:', error);
@@ -107,17 +108,7 @@ async function PaymentSuccessContent({
       // Buscar pago por token
       const { data, error } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider_payment_id', token)
         .eq('provider', 'transbank')
         .maybeSingle();
@@ -140,7 +131,6 @@ async function PaymentSuccessContent({
           console.log('[PaymentSuccess] Pago OneClick autorizado detectado, actualizando estado inmediatamente...');
           
           try {
-            // Actualizar pago a succeeded
             const { data: updatedPayment, error: updateError } = await supabase
               .from('payments')
               .update({
@@ -149,17 +139,7 @@ async function PaymentSuccessContent({
                 updated_at: new Date().toISOString(),
               })
               .eq('id', data.id)
-              .select(`
-                *,
-                invoice:invoices (
-                  invoice_number,
-                  total,
-                  currency,
-                  id,
-                  organization_id,
-                  type
-                )
-              `)
+              .select('*')
               .single();
             
             if (updateError) {
@@ -168,17 +148,6 @@ async function PaymentSuccessContent({
             } else {
               console.log('[PaymentSuccess] Estado del pago actualizado a succeeded');
               payment = updatedPayment;
-              
-              // Actualizar factura si existe
-              if (payment.invoice) {
-                await supabase
-                  .from('invoices')
-                  .update({
-                    status: 'paid',
-                    paid_at: new Date().toISOString(),
-                  })
-                  .eq('id', payment.invoice.id);
-              }
             }
           } catch (error) {
             console.error('[PaymentSuccess] Error procesando pago OneClick autorizado:', error);
@@ -191,36 +160,24 @@ async function PaymentSuccessContent({
             
             console.log('[PaymentSuccess] Procesando webhook directamente:', { token: token.substring(0, 20) + '...', type: webhookType });
             
-            // Llamar directamente a la función del webhook en lugar de hacer fetch
             const webhookResult = await handleTransbankWebhook(token, webhookType);
             
             if (webhookResult.success) {
               console.log('[PaymentSuccess] Webhook procesado exitosamente');
-              // Recargar datos del pago
               const { data: updatedPayment } = await supabase
                 .from('payments')
-                .select(`
-                  *,
-                  invoice:invoices (
-                    invoice_number,
-                    total,
-                    currency,
-                    id,
-                    organization_id,
-                    type
-                  )
-                `)
+                .select('*')
                 .eq('id', data.id)
                 .single();
               
               payment = updatedPayment || data;
             } else {
               console.error('[PaymentSuccess] Error en webhook:', webhookResult.error);
-              payment = data; // Usar datos existentes
+              payment = data;
             }
           } catch (error) {
             console.error('[PaymentSuccess] Error procesando webhook:', error);
-            payment = data; // Usar datos existentes
+            payment = data;
           }
         } else {
           payment = data;
@@ -233,17 +190,7 @@ async function PaymentSuccessContent({
     // Pago de Stripe
     const { data, error } = await supabase
       .from('payments')
-      .select(`
-        *,
-        invoice:invoices (
-          invoice_number,
-          total,
-          currency,
-          id,
-          organization_id,
-          type
-        )
-      `)
+      .select('*')
       .eq('provider_payment_id', paymentIntentId)
       .eq('provider', 'stripe')
       .maybeSingle();
@@ -264,26 +211,15 @@ async function PaymentSuccessContent({
       paymentId: payment.id,
       currentStatus: payment.status,
       providerPaymentId: payment.provider_payment_id,
-      invoiceId: payment.invoice_id,
-      invoiceType: payment.invoice?.type
     });
     
     // Si el pago ya está succeeded pero es compra de créditos, verificar que los créditos se hayan cargado
-    if (payment.status === 'succeeded' && payment.invoice?.type === 'credit_purchase') {
+    if (payment.status === 'succeeded' && payment.metadata?.type === 'credit_purchase') {
       console.log('[PaymentSuccess] Pago succeeded, verificando si los créditos se cargaron...');
       
-      // Verificar si los créditos ya se cargaron buscando transacciones de créditos para esta factura
-      // El tipo es 'earned' cuando se agregan créditos
-      const invoiceIdStr = payment.invoice.id;
       const paymentIdStr = payment.id;
       
-      console.log('[PaymentSuccess] Buscando transacciones de créditos:', {
-        orgId: orgUser.organization_id,
-        invoiceId: invoiceIdStr,
-        paymentId: paymentIdStr
-      });
-      
-      // Buscar transacciones que tengan el invoice_id o payment_id en metadata
+      // Buscar transacciones que tengan el payment_id en metadata
       const { data: allTransactions, error: creditSearchError } = await supabase
         .from('credit_transactions')
         .select('id, amount, type, metadata, description')
@@ -296,41 +232,26 @@ async function PaymentSuccessContent({
         console.error('[PaymentSuccess] Error buscando transacciones de créditos:', creditSearchError);
       }
       
-      // Filtrar manualmente las transacciones que coincidan con nuestro invoice_id o payment_id
+      // Filtrar transacciones que coincidan con nuestro payment_id
       const creditTransactions = allTransactions?.filter((t: any) => {
         const metadata = t.metadata || {};
-        return metadata.invoice_id === invoiceIdStr || metadata.payment_id === paymentIdStr;
+        return metadata.payment_id === paymentIdStr;
       }) || [];
       
       console.log('[PaymentSuccess] Transacciones de créditos encontradas:', {
         totalTransactions: allTransactions?.length || 0,
         matchingTransactions: creditTransactions.length,
-        transactions: creditTransactions,
-        invoiceId: invoiceIdStr,
         paymentId: paymentIdStr
       });
       
       if (!creditTransactions || creditTransactions.length === 0) {
         console.log('[PaymentSuccess] No se encontraron transacciones de créditos, procesando créditos ahora...');
-        // Los créditos no se cargaron, procesarlos ahora
+        
         try {
           let creditsAmount = 0;
           
           if (payment.metadata?.credits_amount) {
             creditsAmount = parseFloat(payment.metadata.credits_amount.toString());
-          } else if (payment.invoice) {
-            // Buscar en invoice line items
-            const { data: lineItems } = await supabase
-              .from('invoice_line_items')
-              .select('description')
-              .eq('invoice_id', payment.invoice.id)
-              .limit(1)
-              .maybeSingle();
-            
-            if (lineItems?.description) {
-              const creditsMatch = lineItems.description.match(/(\d+)\s*créditos/i);
-              creditsAmount = creditsMatch ? parseFloat(creditsMatch[1]) : 0;
-            }
           }
           
           if (creditsAmount > 0) {
@@ -338,12 +259,7 @@ async function PaymentSuccessContent({
               orgId: orgUser.organization_id,
               creditsAmount,
               paymentId: payment.id,
-              invoiceId: payment.invoice.id,
-              metadata: {
-                payment_id: payment.id,
-                stripe_payment_intent_id: payment.provider_payment_id,
-                invoice_id: payment.invoice.id,
-              }
+              orderId: payment.metadata?.order_id || '',
             });
             
             try {
@@ -354,7 +270,7 @@ async function PaymentSuccessContent({
                 {
                   payment_id: payment.id,
                   stripe_payment_intent_id: payment.provider_payment_id,
-                  invoice_id: payment.invoice.id,
+                  order_id: payment.metadata?.order_id || '',
                 }
               );
               
@@ -370,7 +286,7 @@ async function PaymentSuccessContent({
                   orgUser.organization_id,
                   creditsAmount,
                   'credit_purchase',
-                  payment.invoice.id
+                  payment.metadata?.order_id || ''
                 );
                 console.log('[PaymentSuccess] Notificación de créditos enviada');
               } catch (notifError: any) {
@@ -383,12 +299,11 @@ async function PaymentSuccessContent({
                 orgId: orgUser.organization_id,
                 creditsAmount
               });
-              // No lanzar el error, solo loguearlo para que el mensaje de éxito se muestre
             }
           } else {
             console.warn('[PaymentSuccess] No se pudo determinar la cantidad de créditos:', {
               metadata: payment.metadata,
-              invoiceId: payment.invoice?.id
+              orderId: payment.metadata?.order_id || ''
             });
           }
         } catch (error: any) {
@@ -396,7 +311,6 @@ async function PaymentSuccessContent({
             error: error.message,
             stack: error.stack
           });
-          // No lanzar el error, solo loguearlo para que el mensaje de éxito se muestre
         }
       } else {
         console.log('[PaymentSuccess] Los créditos ya fueron cargados anteriormente');
@@ -419,7 +333,7 @@ async function PaymentSuccessContent({
 
   console.log('[PaymentSuccess] Pago encontrado exitosamente:', {
     id: payment.id,
-    invoice_number: payment.invoice?.invoice_number,
+    order_number: payment.metadata?.order_number || 'N/A',
     status: payment.status
   });
   
@@ -437,20 +351,20 @@ async function PaymentSuccessContent({
       <CardContent className="space-y-6">
         {payment && (
           <div className="space-y-2 rounded-lg border p-4 bg-muted/50">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Número de factura</span>
-              <span className="font-mono font-semibold">
-                {payment.invoice?.invoice_number || 'N/A'}
-              </span>
-            </div>
+            {payment.metadata?.order_number && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Número de orden</span>
+                <span className="font-mono font-semibold">{payment.metadata.order_number}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Monto pagado</span>
               <span className="font-semibold">
-                {payment.invoice?.currency && payment.invoice?.total
+                {payment.currency && payment.amount
                   ? new Intl.NumberFormat('es-CL', {
                       style: 'currency',
-                      currency: payment.invoice.currency,
-                    }).format(payment.invoice.total)
+                      currency: payment.currency,
+                    }).format(payment.amount)
                   : 'N/A'}
               </span>
             </div>
@@ -517,4 +431,3 @@ export default async function SuccessPage({ searchParams }: PageProps) {
     </div>
   );
 }
-

@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AutoRechargeSettings } from '@/components/billing/AutoRechargeSettings';
 import { CountrySelector } from '@/components/billing/CountrySelector';
+import BillingDataSettings from '@/components/billing/BillingDataSettings';
 
 export default async function BillingSettingsPage() {
   const overview = await getBillingOverviewAction();
@@ -56,6 +57,10 @@ export default async function BillingSettingsPage() {
           paymentMethods={overview.paymentMethods}
           packages={packages}
         />
+      </div>
+
+      <div className="mt-6">
+        <BillingDataSettings countryCode={countryCode} />
       </div>
     </div>
   );

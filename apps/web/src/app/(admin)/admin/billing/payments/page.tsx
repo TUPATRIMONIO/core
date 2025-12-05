@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/admin/empty-state';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+
 // Función helper para formatear moneda
 function formatCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat('es-CL', {
@@ -27,21 +27,10 @@ function formatCurrency(amount: number, currency: string): string {
 async function getPayments() {
   const supabase = createServiceRoleClient();
 
+  // Obtener pagos con metadata de organización
   const { data: payments, error } = await supabase
     .from('payments')
-    .select(`
-      *,
-      invoice:invoices (
-        id,
-        invoice_number,
-        organization_id,
-        organization:organizations (
-          id,
-          name,
-          slug
-        )
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -50,7 +39,42 @@ async function getPayments() {
     return [];
   }
 
-  return payments || [];
+  // Para cada pago, obtener la organización
+  const paymentsWithOrg = await Promise.all(
+    (payments || []).map(async (payment: any) => {
+      // Obtener orden asociada para obtener organización
+      if (payment.metadata?.order_id) {
+        const { data: order } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            order_number,
+            organization_id,
+            organization:organizations (
+              id,
+              name,
+              slug
+            )
+          `)
+          .eq('id', payment.metadata.order_id)
+          .single();
+        
+        return {
+          ...payment,
+          order: order,
+          organization: order?.organization,
+        };
+      }
+      
+      return {
+        ...payment,
+        order: null,
+        organization: null,
+      };
+    })
+  );
+
+  return paymentsWithOrg;
 }
 
 function getStatusBadge(status: string) {
@@ -127,7 +151,7 @@ export default async function AdminPaymentsPage() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Organización</TableHead>
-                    <TableHead>Factura</TableHead>
+                    <TableHead>Orden</TableHead>
                     <TableHead>Proveedor</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead>Monto</TableHead>
@@ -141,12 +165,12 @@ export default async function AdminPaymentsPage() {
                       <TableCell className="font-mono text-xs">{payment.id.slice(0, 8)}...</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{payment.invoice?.organization?.name || 'N/A'}</div>
-                          <div className="text-sm text-muted-foreground">{payment.invoice?.organization?.slug || ''}</div>
+                          <div className="font-medium">{payment.organization?.name || 'N/A'}</div>
+                          <div className="text-sm text-muted-foreground">{payment.organization?.slug || ''}</div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {payment.invoice?.invoice_number || 'N/A'}
+                        {payment.order?.order_number || payment.metadata?.order_number || 'N/A'}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{payment.provider}</Badge>
@@ -159,9 +183,9 @@ export default async function AdminPaymentsPage() {
                         {new Date(payment.created_at).toLocaleDateString('es-CL')}
                       </TableCell>
                       <TableCell className="text-right">
-                        {payment.invoice?.organization_id && (
+                        {(payment.organization?.id || payment.order?.organization_id) && (
                           <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/admin/organizations/${payment.invoice.organization_id}`}>
+                            <Link href={`/admin/organizations/${payment.organization?.id || payment.order?.organization_id}`}>
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
@@ -178,4 +202,3 @@ export default async function AdminPaymentsPage() {
     </div>
   );
 }
-

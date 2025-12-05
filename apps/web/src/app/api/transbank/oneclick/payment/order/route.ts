@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     
     // Parsear body
     const body = await request.json();
-    const { orderId, tbkUser, username } = body;
+    const { orderId, tbkUser, username, document_type, billing_data } = body;
     
     if (!orderId) {
       return NextResponse.json(
@@ -77,6 +77,28 @@ export async function POST(request: NextRequest) {
         { error: 'La orden no puede ser pagada (expirada o no pendiente)' },
         { status: 400 }
       );
+    }
+
+    // Guardar datos de facturación en metadata de la orden si se proporcionan
+    if (document_type || billing_data) {
+      const { createServiceRoleClient } = await import('@/lib/supabase/server');
+      const serviceSupabase = createServiceRoleClient();
+      
+      const updatedMetadata = {
+        ...(order.metadata || {}),
+        ...(document_type && { document_type }),
+        ...(billing_data && { billing_data }),
+      };
+
+      const { error: updateError } = await serviceSupabase
+        .from('orders')
+        .update({ metadata: updatedMetadata })
+        .eq('id', orderId);
+
+      if (updateError) {
+        console.error('[Oneclick Payment] Error actualizando metadata de orden:', updateError);
+        // No fallar el flujo, solo loguear el error
+      }
     }
     
     // Crear pago Oneclick (autoriza directamente)

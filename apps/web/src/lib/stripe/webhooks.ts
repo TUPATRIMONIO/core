@@ -110,15 +110,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   // Primero buscar por payment_intent.id
   let { data: payment, error: paymentError } = await supabase
     .from('payments')
-    .select(`
-      *,
-      invoice:invoices (
-        id,
-        organization_id,
-        type,
-        status
-      )
-    `)
+    .select('*')
     .eq('provider_payment_id', paymentIntent.id)
     .eq('provider', 'stripe')
     .maybeSingle();
@@ -155,15 +147,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         
         const { data: metadataPayment, error: metadataError } = await supabase
           .from('payments')
-          .select(`
-            *,
-            invoice:invoices (
-              id,
-              organization_id,
-              type,
-              status
-            )
-          `)
+          .select('*')
           .eq('provider', 'stripe')
           .eq('metadata->>checkout_session_id', checkoutSessionId)
           .order('created_at', { ascending: false })
@@ -176,15 +160,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           // Si no se encuentra por metadata, buscar por provider_payment_id
           const { data: providerPayment, error: providerError } = await supabase
             .from('payments')
-            .select(`
-              *,
-              invoice:invoices (
-                id,
-                organization_id,
-                type,
-                status
-              )
-            `)
+            .select('*')
             .eq('provider', 'stripe')
             .eq('provider_payment_id', checkoutSessionId)
             .order('created_at', { ascending: false })
@@ -229,15 +205,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     console.log('🔍 Buscando pago por order_id:', paymentIntent.metadata.order_id);
     const { data: tempPayment, error: tempError } = await supabase
       .from('payments')
-      .select(`
-        *,
-        invoice:invoices (
-          id,
-          organization_id,
-          type,
-          status
-        )
-      `)
+      .select('*')
       .eq('provider', 'stripe')
       .eq('metadata->>order_id', paymentIntent.metadata.order_id)
       .order('created_at', { ascending: false })
@@ -274,27 +242,26 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   
   console.log('✅ Payment encontrado:', {
     paymentId: payment.id,
-    invoiceId: payment.invoice?.id,
-    invoiceType: payment.invoice?.type,
+    organizationId: payment.organization_id,
   });
   
-  // Buscar orden asociada (si existe)
+  // Buscar orden asociada por order_id en metadata
   let order = null;
-  if (payment.invoice) {
-    const { data: orderData } = await supabase
-      .from('orders')
-      .select('id, status')
-      .eq('invoice_id', payment.invoice.id)
-      .single();
-    order = orderData;
-  }
-  
-  // También buscar por order_id en metadata si existe
-  if (!order && paymentIntent.metadata?.order_id) {
+  if (paymentIntent.metadata?.order_id) {
     const { data: orderData } = await supabase
       .from('orders')
       .select('id, status')
       .eq('id', paymentIntent.metadata.order_id)
+      .single();
+    order = orderData;
+  }
+  
+  // También buscar por order_id en metadata del payment si no se encontró
+  if (!order && payment.metadata?.order_id) {
+    const { data: orderData } = await supabase
+      .from('orders')
+      .select('id, status')
+      .eq('id', payment.metadata.order_id)
       .single();
     order = orderData;
   }
@@ -313,19 +280,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   // El cambio de estado ya se registra automáticamente, así que solo agregamos metadata si es necesario
   // No duplicamos el evento ya que el trigger de status_changed ya lo registra
   
-  // Actualizar factura si existe (usar vista pública)
-  if (payment.invoice) {
-    await supabase
-      .from('invoices')
-      .update({
-        status: 'paid',
-        paid_at: new Date().toISOString(),
-      })
-      .eq('id', payment.invoice.id);
-  }
-  
-  // Actualizar orden si existe (independientemente de si hay factura)
-  // Esto asegura que las órdenes se marquen como pagadas incluso si no hay factura asociada
+  // Actualizar orden si existe
   if (order && order.status === 'pending_payment') {
     await updateOrderStatus(order.id, 'paid', {
       paymentId: payment.id,
@@ -347,7 +302,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         const transactionId = await addCredits(orgId, creditsAmount, 'credit_purchase', {
           payment_id: payment.id,
           stripe_payment_intent_id: paymentIntent.id,
-          invoice_id: payment.invoice?.id,
+          order_id: order?.id || paymentIntent.metadata?.order_id,
         });
         console.log('✅ Créditos agregados exitosamente:', {
           transactionId,
@@ -378,7 +333,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             orgId,
             creditsAmount,
             'credit_purchase',
-            payment.invoice?.id
+            order?.id || paymentIntent.metadata?.order_id || ''
           );
         } catch (notifError: any) {
           console.error('Error enviando notificación de créditos agregados:', notifError);
@@ -393,7 +348,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             orgId,
             amount,
             currency,
-            payment.invoice?.id || ''
+            order?.id || paymentIntent.metadata?.order_id || ''
           );
         } catch (notifError: any) {
           console.error('Error enviando notificación de pago exitoso:', notifError);
@@ -557,7 +512,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (monthlyCredits && typeof monthlyCredits === 'number' && monthlyCredits > 0) {
     // Agregar créditos mensuales
     const transactionId = await addCredits(orgId, monthlyCredits, 'subscription_monthly', {
-      invoice_id: invoice.id,
+      stripe_invoice_id: invoice.id,
       subscription_id: invoice.subscription,
       period_start: new Date(invoice.period_start * 1000).toISOString(),
       period_end: new Date(invoice.period_end * 1000).toISOString(),
@@ -569,29 +524,16 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
         orgId,
         monthlyCredits,
         'subscription_monthly',
-        existingInvoice?.id
+        invoice.id
       );
     } catch (notifError: any) {
       console.error('Error enviando notificación de créditos mensuales:', notifError);
     }
   }
   
-  // Buscar factura en BD por provider_invoice_id o crear referencia (usar vista pública)
-  const { data: existingInvoice } = await supabase
-    .from('invoices')
-    .select('id')
-    .eq('provider_invoice_id', invoice.id)
-    .single();
-  
-  if (existingInvoice) {
-    await supabase
-      .from('invoices')
-      .update({
-        status: 'paid',
-        paid_at: new Date().toISOString(),
-      })
-      .eq('id', existingInvoice.id);
-  }
+  // Las facturas de Stripe para suscripciones se manejan directamente en Stripe
+  // No necesitamos crear registros en billing.invoices (que ya no existe)
+  // El documento tributario se generará cuando sea necesario mediante invoicing.documents
 }
 
 /**
@@ -604,33 +546,18 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   const orgId = invoice.metadata?.organization_id;
   if (!orgId) return;
   
-  // Buscar factura en BD (usar vista pública)
-  const { data: existingInvoice } = await supabase
-    .from('invoices')
-    .select('id, total, currency')
-    .eq('provider_invoice_id', invoice.id)
-    .single();
-  
-  if (existingInvoice) {
-    await supabase
-      .from('invoices')
-      .update({
-        status: 'open', // Mantener como open para reintentar
-      })
-      .eq('id', existingInvoice.id);
-    
-    // Notificar fallo de pago
-    try {
-      await notifyPaymentFailed(
-        orgId,
-        existingInvoice.total || 0,
-        existingInvoice.currency || 'USD',
-        existingInvoice.id,
-        invoice.last_payment_error?.message || 'Error desconocido'
-      );
-    } catch (notifError: any) {
-      console.error('Error enviando notificación de pago fallido:', notifError);
-    }
+  // Las facturas de Stripe para suscripciones se manejan directamente en Stripe
+  // Notificar fallo de pago usando datos de la invoice de Stripe
+  try {
+    await notifyPaymentFailed(
+      orgId,
+      (invoice.amount_due || 0) / 100, // Stripe usa centavos
+      invoice.currency?.toUpperCase() || 'USD',
+      invoice.id, // Usar ID de Stripe como referencia
+      invoice.last_payment_error?.message || 'Error desconocido'
+    );
+  } catch (notifError: any) {
+    console.error('Error enviando notificación de pago fallido:', notifError);
   }
 }
 

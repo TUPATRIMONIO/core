@@ -73,52 +73,17 @@ export async function createTransbankPaymentForOrder(
     currency,
   });
   
-  // Crear factura en BD primero
-  const invoiceNumber = await generateInvoiceNumber(order.organization_id);
-  
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      organization_id: order.organization_id,
-      invoice_number: invoiceNumber,
-      status: 'open',
-      type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
-      subtotal: amount,
-      tax,
-      total,
-      currency,
-      due_date: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'Unknown error'}`);
-  }
-  
-  // Agregar línea de detalle
+  // Descripción del producto
   const description = productData.name 
     ? `${productData.name} - ${productData.description || ''}`
     : `Producto ${order.product_type}`;
   
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description,
-      quantity: 1,
-      unit_price: amount,
-      total,
-      type: order.product_type,
-    });
+  // Actualizar orden a pending_payment (sin crear invoice)
+  await updateOrderStatus(orderId, 'pending_payment');
   
-  // No registramos evento de factura creada - es un detalle técnico que no interesa al cliente
-  
-  // Actualizar orden con invoice_id
-  await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
-  
-  // Generar buy_order único (máximo 26 caracteres)
-  const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
+  // Generar buy_order único (máximo 26 caracteres) usando order_id
+  const orderIdClean = orderId.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP-${orderIdClean.substring(orderIdClean.length - 20)}`.substring(0, 26);
   const sessionId = `session-${Date.now()}-${order.organization_id.substring(0, 10)}`;
   
   // Crear transacción en Transbank
@@ -145,7 +110,6 @@ export async function createTransbankPaymentForOrder(
     .from('payments')
     .insert({
       organization_id: order.organization_id,
-      invoice_id: invoice.id,
       provider: 'transbank',
       provider_payment_id: transaction.token,
       amount: total,
@@ -174,14 +138,12 @@ export async function createTransbankPaymentForOrder(
   
   // Actualizar orden con payment_id
   await updateOrderStatus(orderId, 'pending_payment', { 
-    invoiceId: invoice.id,
     paymentId: payment?.id 
   });
   
   return {
     token: transaction.token,
     url: transaction.url,
-    invoice,
     payment,
     order,
   };
@@ -254,43 +216,11 @@ export async function createTransbankPaymentForCredits(
   });
   
   // Crear factura en BD primero
-  const invoiceNumber = await generateInvoiceNumber(orgId);
-  
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      organization_id: orgId,
-      invoice_number: invoiceNumber,
-      status: 'open',
-      type: 'credit_purchase',
-      subtotal: amount,
-      tax,
-      total,
-      currency,
-      due_date: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'Unknown error'}`);
-  }
-  
-  // Agregar línea de detalle
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description: `Paquete de ${pkg.credits_amount} créditos - ${pkg.name}`,
-      quantity: 1,
-      unit_price: amount,
-      total,
-      type: 'credits',
-    });
-  
-  // Generar buy_order único (máximo 26 caracteres)
-  const buyOrder = `TP-${invoice.id.substring(0, 20)}`;
-  const sessionId = `session-${Date.now()}-${orgId.substring(0, 10)}`;
+  // Generar buy_order único (máximo 26 caracteres) usando timestamp y orgId
+  const timestamp = Date.now().toString();
+  const orgIdClean = orgId.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP-${timestamp.substring(timestamp.length - 20)}`.substring(0, 26);
+  const sessionId = `session-${Date.now()}-${orgIdClean.substring(0, 10)}`;
   
   // Crear transacción en Transbank
   const transaction = await transbankClient.createWebpayPlusTransaction({
@@ -313,7 +243,6 @@ export async function createTransbankPaymentForCredits(
     .from('payments')
     .insert({
       organization_id: orgId,
-      invoice_id: invoice.id,
       provider: 'transbank',
       provider_payment_id: transaction.token,
       amount: total,
@@ -338,7 +267,6 @@ export async function createTransbankPaymentForCredits(
   return {
     token: transaction.token,
     url: transaction.url,
-    invoice,
     payment,
   };
 }
@@ -430,49 +358,14 @@ export async function createOneclickPayment(
   const total = amount + tax;
   const transbankAmount = Math.round(total);
   
-  // Crear factura
-  const invoiceNumber = await generateInvoiceNumber(orgId);
-  
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      organization_id: orgId,
-      invoice_number: invoiceNumber,
-      status: 'open',
-      type: 'credit_purchase',
-      subtotal: amount,
-      tax,
-      total,
-      currency,
-      due_date: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'Unknown error'}`);
-  }
-  
-  // Agregar línea de detalle
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description: `Paquete de ${pkg.credits_amount} créditos - ${pkg.name}`,
-      quantity: 1,
-      unit_price: amount,
-      total,
-      type: 'credits',
-    });
-  
   // Generar buy_order único para el mall (padre) - máximo 26 caracteres
-  // Formato: TP + últimos 23 caracteres del invoice.id (sin guiones)
-  const invoiceIdClean = invoice.id.replace(/-/g, ''); // Remover guiones
-  const buyOrder = `TP${invoiceIdClean.substring(invoiceIdClean.length - 23)}`.substring(0, 26);
+  // Usar timestamp y orgId para generar IDs únicos
+  const timestamp = Date.now().toString();
+  const orgIdClean = orgId.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP${timestamp.substring(timestamp.length - 23)}`.substring(0, 26);
   
   // Generar buy_order único para la tienda (hijo) - máximo 26 caracteres
-  // Formato: ST + últimos 24 caracteres del invoice.id (sin guiones)
-  const storeBuyOrder = `ST${invoiceIdClean.substring(invoiceIdClean.length - 24)}`.substring(0, 26);
+  const storeBuyOrder = `ST${timestamp.substring(timestamp.length - 24)}`.substring(0, 26);
   
   // Obtener commerce_code de la tienda
   const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
@@ -516,7 +409,6 @@ export async function createOneclickPayment(
     .from('payments')
     .insert({
       organization_id: orgId,
-      invoice_id: invoice.id,
       provider: 'transbank',
       provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
@@ -549,7 +441,6 @@ export async function createOneclickPayment(
   return {
     token: payment.buy_order, // Usar buy_order como token para compatibilidad
     url: '', // No hay URL, el pago ya está autorizado
-    invoice,
     payment: paymentRecord,
     success: isAuthorized, // Retornar si fue autorizado o no
   };
@@ -625,56 +516,21 @@ export async function createOneclickPaymentForOrder(
     currency,
   });
   
-  // Crear factura en BD primero
-  const invoiceNumber = await generateInvoiceNumber(order.organization_id);
-  
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
-    .insert({
-      organization_id: order.organization_id,
-      invoice_number: invoiceNumber,
-      status: 'open',
-      type: order.product_type === 'credits' ? 'credit_purchase' : 'one_time',
-      subtotal: amount,
-      tax,
-      total,
-      currency,
-      due_date: new Date().toISOString(),
-    })
-    .select()
-    .single();
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creando factura: ${invoiceError?.message || 'Unknown error'}`);
-  }
-  
-  // Agregar línea de detalle
+  // Descripción del producto
   const description = productData.name 
     ? `${productData.name} - ${productData.description || ''}`
     : `Producto ${order.product_type}`;
   
-  await supabase
-    .from('invoice_line_items')
-    .insert({
-      invoice_id: invoice.id,
-      description,
-      quantity: 1,
-      unit_price: amount,
-      total,
-      type: order.product_type,
-    });
-  
-  // Actualizar orden con invoice_id
-  await updateOrderStatus(orderId, 'pending_payment', { invoiceId: invoice.id });
+  // Actualizar orden a pending_payment (sin crear invoice)
+  await updateOrderStatus(orderId, 'pending_payment');
   
   // Generar buy_order único para el mall (padre) - máximo 26 caracteres
-  // Formato: TP + últimos 23 caracteres del invoice.id (sin guiones)
-  const invoiceIdClean = invoice.id.replace(/-/g, ''); // Remover guiones
-  const buyOrder = `TP${invoiceIdClean.substring(invoiceIdClean.length - 23)}`.substring(0, 26);
+  // Usar orderId para generar IDs únicos
+  const orderIdClean = orderId.replace(/-/g, ''); // Remover guiones
+  const buyOrder = `TP${orderIdClean.substring(orderIdClean.length - 23)}`.substring(0, 26);
   
   // Generar buy_order único para la tienda (hijo) - máximo 26 caracteres
-  // Formato: ST + últimos 24 caracteres del invoice.id (sin guiones)
-  const storeBuyOrder = `ST${invoiceIdClean.substring(invoiceIdClean.length - 24)}`.substring(0, 26);
+  const storeBuyOrder = `ST${orderIdClean.substring(orderIdClean.length - 24)}`.substring(0, 26);
   
   // Obtener commerce_code de la tienda
   const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
@@ -718,7 +574,6 @@ export async function createOneclickPaymentForOrder(
     .from('payments')
     .insert({
       organization_id: order.organization_id,
-      invoice_id: invoice.id,
       provider: 'transbank',
       provider_payment_id: payment.buy_order, // Usar buy_order como ID
       amount: total,
@@ -756,44 +611,16 @@ export async function createOneclickPaymentForOrder(
   
   // Actualizar orden a 'pending_payment' - el webhook la actualizará a 'paid' cuando procese el pago
   await updateOrderStatus(orderId, 'pending_payment', { 
-    invoiceId: invoice.id,
     paymentId: paymentRecord?.id 
   });
   
   return {
     token: payment.buy_order, // Usar buy_order como token para compatibilidad
     url: '', // No hay URL, el pago ya está autorizado
-    invoice,
     payment: paymentRecord,
     order,
     success: isAuthorized,
   };
 }
 
-/**
- * Genera número de factura único usando función thread-safe de la BD
- */
-async function generateInvoiceNumber(orgId: string): Promise<string> {
-  const supabase = await createClient();
-  const maxAttempts = 5;
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { data, error } = await supabase.rpc('generate_invoice_number', {
-      org_id: orgId
-    });
-    
-    if (!error && data) {
-      return data;
-    }
-    
-    if (attempt === maxAttempts - 1) {
-      console.error('Error generando número de factura después de', maxAttempts, 'intentos:', error);
-      throw new Error(`No se pudo generar número de factura: ${error?.message || 'Unknown error'}`);
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
-  }
-  
-  throw new Error('No se pudo generar número de factura después de múltiples intentos');
-}
 

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Package, Clock, XCircle, CheckCircle2, History } from 'lucide-react';
+import { ArrowLeft, Package, Clock, XCircle, CheckCircle2, History, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
@@ -106,6 +106,39 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
     })
   );
   
+  // Obtener documento de facturación si la orden está completada
+  let invoiceDocument = null;
+  if (order.status === 'completed') {
+    // Primero buscar documentos con status 'issued'
+    const { data: document, error: docError } = await supabase
+      .from('invoicing_documents')
+      .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
+      .eq('order_id', orderId)
+      .eq('status', 'issued')
+      .maybeSingle();
+    
+    if (document) {
+      invoiceDocument = document;
+    } else {
+      // Si no hay documento con status 'issued', buscar cualquier documento para debugging
+      const { data: anyDocument } = await supabase
+        .from('invoicing_documents')
+        .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
+        .eq('order_id', orderId)
+        .maybeSingle();
+      
+      if (anyDocument) {
+        console.log('[CheckoutOrderPage] Documento encontrado con estado:', anyDocument.status);
+        // Si el documento existe pero no está 'issued', aún así lo mostramos si tiene pdf_url
+        if (anyDocument.pdf_url) {
+          invoiceDocument = anyDocument;
+        }
+      } else {
+        console.log('[CheckoutOrderPage] No se encontró documento para la orden:', orderId);
+      }
+    }
+  }
+  
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center gap-4">
@@ -144,12 +177,32 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
       )}
       
       {order.status === 'completed' && (
-        <Alert>
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>
-            Esta orden ha sido completada exitosamente.
-          </AlertDescription>
-        </Alert>
+        <>
+          <Alert>
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertDescription>
+              Esta orden ha sido completada exitosamente.
+            </AlertDescription>
+          </Alert>
+          {invoiceDocument?.pdf_url && (
+            <Alert>
+              <FileText className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>Tu documento tributario está listo</span>
+                <Button variant="outline" size="sm" asChild>
+                  <a 
+                    href={invoiceDocument.pdf_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer nofollow"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Ver Invoice
+                  </a>
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+        </>
       )}
       
       <Tabs defaultValue="checkout" className="w-full">
@@ -258,6 +311,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                     orderId={orderId}
                     order={order}
                     provider="transbank"
+                    countryCode={countryCode}
                   />
                 </TabsContent>
                 <TabsContent value="stripe" className="mt-4">
@@ -265,6 +319,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                     orderId={orderId}
                     order={order}
                     provider="stripe"
+                    countryCode={countryCode}
                   />
                 </TabsContent>
               </Tabs>
@@ -273,6 +328,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                 orderId={orderId}
                 order={order}
                 provider="stripe"
+                countryCode={countryCode}
               />
             )
           ) : (

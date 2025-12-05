@@ -77,18 +77,8 @@ export async function GET(request: NextRequest) {
       (orders || []).map(async (order) => {
         const enriched: any = { ...order };
 
-        // Obtener invoice si existe
-        if (order.invoice_id) {
-          const { data: invoice } = await supabase
-            .from('invoices')
-            .select('id, invoice_number, total, currency, type')
-            .eq('id', order.invoice_id)
-            .single();
-          
-          if (invoice) {
-            enriched.invoice = invoice;
-          }
-        }
+        // La información de facturación ahora está en la orden directamente
+        // Los documentos tributarios se generan después de completed en invoicing.documents
 
         // Obtener payment si existe
         if (order.payment_id) {
@@ -100,6 +90,38 @@ export async function GET(request: NextRequest) {
           
           if (payment) {
             enriched.payment = payment;
+          }
+        }
+
+        // Obtener documento de facturación si la orden está completada
+        if (order.status === 'completed') {
+          // Primero buscar documentos con status 'issued'
+          const { data: document, error: docError } = await supabase
+            .from('invoicing_documents')
+            .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
+            .eq('order_id', order.id)
+            .eq('status', 'issued')
+            .maybeSingle();
+          
+          if (document) {
+            enriched.document = document;
+          } else {
+            // Si no hay documento con status 'issued', buscar cualquier documento para debugging
+            const { data: anyDocument } = await supabase
+              .from('invoicing_documents')
+              .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
+              .eq('order_id', order.id)
+              .maybeSingle();
+            
+            if (anyDocument) {
+              console.log(`[API Orders] Documento encontrado para orden ${order.id} con estado:`, anyDocument.status);
+              // Si el documento existe pero no está 'issued', aún así lo mostramos si tiene pdf_url
+              if (anyDocument.pdf_url) {
+                enriched.document = anyDocument;
+              }
+            } else {
+              console.log(`[API Orders] No se encontró documento para la orden ${order.id}`);
+            }
           }
         }
 

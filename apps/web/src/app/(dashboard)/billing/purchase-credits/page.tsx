@@ -44,16 +44,18 @@ export default async function PurchaseCreditsPage() {
             <CardContent className="flex-1 flex flex-col">
               <div className="mb-4">
                 <p className="text-3xl font-bold">
-                  {pkg.localized_price?.toLocaleString() || pkg.price_usd.toLocaleString()}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {pkg.currency || 'USD'}
+                  {new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: pkg.currency || 'USD',
+                    minimumFractionDigits: pkg.currency === 'CLP' ? 0 : 2,
+                    maximumFractionDigits: pkg.currency === 'CLP' ? 0 : 2,
+                  }).format(pkg.localized_price ?? pkg.price_usd ?? 0)}
                 </p>
                 <p className="text-lg font-semibold mt-2">
                   {pkg.credits_amount.toLocaleString()} créditos
                 </p>
               </div>
-              <Button className="w-full mt-auto" asChild>
+              <Button className="w-full mt-auto bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]" asChild>
                 <a href={`/billing/purchase-credits/${pkg.id}`}>
                   Comprar Ahora
                 </a>

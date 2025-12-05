@@ -140,7 +140,7 @@ export default async function BillingPage() {
       </Card>
       
       {/* Facturas Recientes */}
-      {overview.recentInvoices.length > 0 && (
+      {overview.recentInvoices?.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Facturas Recientes</CardTitle>
@@ -151,14 +151,14 @@ export default async function BillingPage() {
               {overview.recentInvoices.map((invoice: any) => (
                 <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div>
-                    <p className="font-medium">{invoice.invoice_number}</p>
+                    <p className="font-medium">{invoice.document_number || invoice.id}</p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(invoice.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      {invoice.currency} {invoice.total.toFixed(2)}
+                      {invoice.currency} {invoice.total?.toFixed(2) || '0.00'}
                     </p>
                     <p className="text-sm text-muted-foreground capitalize">{invoice.status}</p>
                   </div>

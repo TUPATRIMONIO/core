@@ -64,15 +64,7 @@ export async function handleTransbankWebhook(
     // Buscar pago en BD
     const { data: payment, error: paymentError } = await supabase
       .from('payments')
-      .select(`
-        *,
-        invoice:invoices (
-          id,
-          organization_id,
-          type,
-          status
-        )
-      `)
+      .select('*')
       .eq('provider_payment_id', token)
       .eq('provider', 'transbank')
       .single();
@@ -87,8 +79,7 @@ export async function handleTransbankWebhook(
     
     console.log('✅ Payment encontrado:', {
       paymentId: payment.id,
-      invoiceId: payment.invoice?.id,
-      invoiceType: payment.invoice?.type,
+      organizationId: payment.organization_id,
     });
     
     // Verificar estado de la transacción
@@ -113,10 +104,10 @@ export async function handleTransbankWebhook(
       // Notificar fallo
       try {
         await notifyPaymentFailed(
-          payment.invoice?.organization_id || '',
+          payment.organization_id || '',
           payment.amount,
           payment.currency,
-          payment.invoice?.id || '',
+          payment.metadata?.order_id || '',
           `Transbank response code: ${transactionData.response_code || 'unknown'}`
         );
       } catch (notifError: any) {
@@ -145,19 +136,9 @@ export async function handleTransbankWebhook(
       })
       .eq('id', payment.id);
     
-    // Buscar orden asociada (si existe)
+    // Buscar orden asociada por order_id en metadata
     let order = null;
-    if (payment.invoice) {
-      const { data: orderData } = await supabase
-        .from('orders')
-        .select('id, status')
-        .eq('invoice_id', payment.invoice.id)
-        .single();
-      order = orderData;
-    }
-    
-    // También buscar por order_id en metadata si existe y no se encontró orden
-    if (!order && payment.metadata?.order_id) {
+    if (payment.metadata?.order_id) {
       const { data: orderData } = await supabase
         .from('orders')
         .select('id, status')
@@ -169,23 +150,12 @@ export async function handleTransbankWebhook(
     // El evento de pago exitoso se registra automáticamente cuando el estado cambia a 'paid'
     // No necesitamos duplicar el evento aquí
     
-    // Actualizar factura si existe
-    if (payment.invoice) {
-      await supabase
-        .from('invoices')
-        .update({
-          status: 'paid',
-          paid_at: new Date().toISOString(),
-        })
-        .eq('id', payment.invoice.id);
-      
-      // Actualizar orden si existe
-      if (order && order.status === 'pending_payment') {
-        await updateOrderStatus(order.id, 'paid', {
-          paymentId: payment.id,
-          supabaseClient: supabase, // Pasar service role client para bypass RLS
-        });
-      }
+    // Actualizar orden si existe
+    if (order && order.status === 'pending_payment') {
+      await updateOrderStatus(order.id, 'paid', {
+        paymentId: payment.id,
+        supabaseClient: supabase, // Pasar service role client para bypass RLS
+      });
     }
     
     // Si es compra de créditos, agregar créditos
@@ -193,21 +163,20 @@ export async function handleTransbankWebhook(
       const creditsAmount = parseFloat(payment.metadata.credits_amount || '0');
       
       console.log('💰 Agregando créditos:', {
-        orgId: payment.invoice?.organization_id,
+        orgId: payment.organization_id,
         creditsAmount,
         type: payment.metadata.type,
       });
       
-      if (creditsAmount > 0 && payment.invoice?.organization_id) {
+      if (creditsAmount > 0 && payment.organization_id) {
         try {
           const transactionId = await addCredits(
-            payment.invoice.organization_id,
+            payment.organization_id,
             creditsAmount,
             'credit_purchase',
             {
               payment_id: payment.id,
               transbank_token: token,
-              invoice_id: payment.invoice.id,
               order_id: order?.id || payment.metadata?.order_id,
             }
           );
@@ -215,7 +184,7 @@ export async function handleTransbankWebhook(
           console.log('✅ Créditos agregados exitosamente:', {
             transactionId,
             creditsAmount,
-            orgId: payment.invoice.organization_id,
+            orgId: payment.organization_id,
           });
           
           // Actualizar orden a 'completed' cuando se procesa el producto
@@ -238,10 +207,10 @@ export async function handleTransbankWebhook(
           // Notificar créditos agregados
           try {
             await notifyCreditsAdded(
-              payment.invoice.organization_id,
+              payment.organization_id,
               creditsAmount,
               'credit_purchase',
-              payment.invoice.id
+              order?.id || payment.metadata?.order_id || ''
             );
           } catch (notifError: any) {
             console.error('Error enviando notificación de créditos agregados:', notifError);
@@ -250,10 +219,10 @@ export async function handleTransbankWebhook(
           // Notificar pago exitoso
           try {
             await notifyPaymentSucceeded(
-              payment.invoice.organization_id,
+              payment.organization_id,
               payment.amount,
               payment.currency,
-              payment.invoice.id
+              order?.id || payment.metadata?.order_id || ''
             );
           } catch (notifError: any) {
             console.error('Error enviando notificación de pago exitoso:', notifError);
@@ -261,7 +230,7 @@ export async function handleTransbankWebhook(
         } catch (error: any) {
           console.error('❌ Error agregando créditos:', {
             error: error.message,
-            orgId: payment.invoice?.organization_id,
+            orgId: payment.organization_id,
             creditsAmount,
           });
         }

@@ -65,15 +65,7 @@ export class StripeAdapter implements PaymentProvider {
       // Primero buscar por checkout_session_id en metadata
       const { data: sessionPayment } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            id,
-            organization_id,
-            type,
-            status
-          )
-        `)
+        .select('*')
         .eq('provider', 'stripe')
         .eq('metadata->>checkout_session_id', sessionId)
         .maybeSingle();
@@ -84,15 +76,7 @@ export class StripeAdapter implements PaymentProvider {
         // Si no se encuentra, buscar por order_id
         const { data: orderPayment } = await supabase
           .from('payments')
-          .select(`
-            *,
-            invoice:invoices (
-              id,
-              organization_id,
-              type,
-              status
-            )
-          `)
+          .select('*')
           .eq('provider', 'stripe')
           .eq('metadata->>order_id', orderId)
           .order('created_at', { ascending: false })
@@ -135,30 +119,11 @@ export class StripeAdapter implements PaymentProvider {
               },
             })
             .eq('id', payment.id)
-            .select(`
-              *,
-              invoice:invoices (
-                id,
-                organization_id,
-                type,
-                status
-              )
-            `)
+            .select('*')
             .single();
           
           if (!updateError && updatedPayment) {
             payment = updatedPayment;
-            
-            // Actualizar factura si existe
-            if (payment.invoice) {
-              await supabase
-                .from('invoices')
-                .update({
-                  status: 'paid',
-                  paid_at: new Date().toISOString(),
-                })
-                .eq('id', payment.invoice.id);
-            }
             
             // Actualizar orden a 'paid'
             await updateOrderStatus(orderId, 'paid', {

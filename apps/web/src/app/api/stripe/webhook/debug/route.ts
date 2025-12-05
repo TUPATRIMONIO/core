@@ -28,16 +28,7 @@ export async function GET(request: NextRequest) {
     // Buscar payment en BD
     const { data: payment, error: paymentError } = await supabase
       .from('payments')
-      .select(`
-        *,
-        invoice:invoices (
-          id,
-          organization_id,
-          type,
-          status,
-          total
-        )
-      `)
+      .select('*')
       .eq('provider_payment_id', paymentIntentId)
       .eq('provider', 'stripe')
       .single();

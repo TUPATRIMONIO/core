@@ -106,67 +106,6 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
   // Calcular precio según país
   const price = getPriceForCountry(selectedPackage, countryCode);
   
-  // Crear factura
-  // La función generateInvoiceNumber() ya es thread-safe, pero aún así
-  // manejamos errores de duplicado por si acaso
-  let invoice = null;
-  let invoiceError = null;
-  const maxRetries = 5;
-  
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const invoiceNumber = await generateInvoiceNumber(orgId);
-      
-      const result = await supabase
-        .from('invoices')
-        .insert({
-          organization_id: orgId,
-          invoice_number: invoiceNumber,
-          status: 'open',
-          type: 'credit_purchase',
-          subtotal: price,
-          tax: 0, // Se calculará después
-          total: price,
-          currency,
-          due_date: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      
-      invoice = result.data;
-      invoiceError = result.error;
-      
-      // Si no hay error, salir del loop
-      if (!invoiceError) {
-        break;
-      }
-      
-      // Si es error de duplicado y no es el último intento, reintentar
-      if (invoiceError.message.includes('duplicate key') && attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Número de factura duplicado, reintentando...`);
-        // Esperar un poco más en cada intento (exponencial backoff)
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      
-      // Si no es error de duplicado o es el último intento, salir
-      break;
-    } catch (error: any) {
-      // Si generateInvoiceNumber() falla, reintentar
-      if (attempt < maxRetries - 1) {
-        console.warn(`Intento ${attempt + 1}: Error generando número de factura, reintentando...`, error);
-        await new Promise(resolve => setTimeout(resolve, 200 * Math.pow(2, attempt)));
-        continue;
-      }
-      invoiceError = error;
-      break;
-    }
-  }
-  
-  if (invoiceError || !invoice) {
-    throw new Error(`Error creating invoice: ${invoiceError?.message || 'No se pudo crear la factura después de múltiples intentos'}`);
-  }
-  
   // Calcular impuesto
   const { data: taxRate } = await supabase.rpc('get_tax_rate', {
     country_code_param: countryCode,
@@ -175,11 +114,29 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
   const tax = price * (taxRate || 0);
   const total = price + tax;
   
-  // Actualizar factura con impuesto
-  await supabase
-    .from('invoices')
-    .update({ tax, total })
-    .eq('id', invoice.id);
+  // Crear orden de compra para auto-recarga
+  const { createOrder } = await import('@/lib/checkout/core');
+  
+  const order = await createOrder({
+    orgId,
+    productType: 'credits',
+    productId: selectedPackage.id,
+    productData: {
+      name: selectedPackage.name,
+      description: `Auto-recarga: Paquete de ${selectedPackage.credits_amount} créditos`,
+      credits_amount: selectedPackage.credits_amount,
+    },
+    amount: total,
+    currency,
+    metadata: {
+      package_id: selectedPackage.id,
+      package_name: selectedPackage.name,
+      credits_amount: selectedPackage.credits_amount,
+      subtotal: price,
+      tax,
+      auto_recharge: true,
+    },
+  });
   
   // Crear pago con Stripe usando el método de pago guardado
   if (paymentMethod.provider !== 'stripe') {
@@ -281,34 +238,4 @@ function getPriceForCountry(pkg: any, countryCode: string): number {
   return pkg[priceKey] || pkg.price_usd || 0;
 }
 
-/**
- * Genera número de factura único usando función thread-safe de la BD
- * Formato: {ORG_SLUG}-{NÚMERO} (ej: TU-PATRIMONIO-000001)
- * Reintenta hasta 5 veces si hay errores
- */
-async function generateInvoiceNumber(orgId: string): Promise<string> {
-  const supabase = await createClient();
-  const maxAttempts = 5;
-  
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const { data, error } = await supabase.rpc('generate_invoice_number', {
-      org_id: orgId
-    });
-    
-    if (!error && data) {
-      return data;
-    }
-    
-    // Si es el último intento, lanzar error
-    if (attempt === maxAttempts - 1) {
-      console.error('Error generando número de factura después de', maxAttempts, 'intentos:', error);
-      throw new Error(`No se pudo generar número de factura: ${error?.message || 'Unknown error'}`);
-    }
-    
-    // Esperar un poco antes de reintentar (exponencial backoff)
-    await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempt)));
-  }
-  
-  throw new Error('No se pudo generar número de factura después de múltiples intentos');
-}
 

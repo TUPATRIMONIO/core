@@ -56,8 +56,8 @@ async function saveToStorage(
  * Interfaz para datos de la orden necesarios para emitir factura
  */
 interface OrderDataForInvoice {
-  invoiceId: string;
-  invoiceNumber: string;
+  orderId: string;
+  orderNumber: string;
   organizationId: string;
   amount: number;
   currency: string;
@@ -103,8 +103,8 @@ export async function emitHaulmerInvoice(
   const shouldUpdateDB = options?.updateDatabase !== false; // Default: true para compatibilidad
 
   console.log('[emitHaulmerInvoice] Iniciando emisión de factura:', {
-    invoiceId: orderData.invoiceId,
-    invoiceNumber: orderData.invoiceNumber,
+    orderId: orderData.orderId,
+    orderNumber: orderData.orderNumber,
     organizationId: orderData.organizationId,
     amount: orderData.amount,
     updateDatabase: shouldUpdateDB,
@@ -149,8 +149,8 @@ export async function emitHaulmerInvoice(
       MntTotal: montoTotal,
     };
 
-    // Generar Idempotency Key única para esta factura
-    const idempotencyKey = `invoice-${orderData.invoiceId}-${Date.now()}`;
+    // Generar Idempotency Key única para esta orden
+    const idempotencyKey = `order-${orderData.orderId}-${Date.now()}`;
 
     // Emitir factura con Haulmer
     const haulmerResponse = await haulmerClient.emitirFactura(
@@ -175,13 +175,13 @@ export async function emitHaulmerInvoice(
     let xmlUrl: string | null = null;
 
     if (haulmerResponse.PDF && haulmerResponse.FOLIO) {
-      const pdfFileName = `haulmer/${orderData.organizationId}/${orderData.invoiceNumber}-${haulmerResponse.FOLIO}.pdf`;
+      const pdfFileName = `haulmer/${orderData.organizationId}/${orderData.orderNumber}-${haulmerResponse.FOLIO}.pdf`;
       pdfUrl = await saveToStorage(haulmerResponse.PDF, pdfFileName, 'application/pdf');
       console.log('[emitHaulmerInvoice] PDF guardado:', pdfUrl);
     }
 
     if (haulmerResponse.XML && haulmerResponse.FOLIO) {
-      const xmlFileName = `haulmer/${orderData.organizationId}/${orderData.invoiceNumber}-${haulmerResponse.FOLIO}.xml`;
+      const xmlFileName = `haulmer/${orderData.organizationId}/${orderData.orderNumber}-${haulmerResponse.FOLIO}.xml`;
       xmlUrl = await saveToStorage(haulmerResponse.XML, xmlFileName, 'application/xml');
       console.log('[emitHaulmerInvoice] XML guardado:', xmlUrl);
     }
@@ -191,34 +191,12 @@ export async function emitHaulmerInvoice(
     (haulmerResponse as any).pdfUrl = pdfUrl;
     (haulmerResponse as any).xmlUrl = xmlUrl;
 
-    // Actualizar factura en nuestra BD con datos externos (solo si se solicita)
-    if (shouldUpdateDB) {
-      const { data: updatedInvoice, error: updateError } = await supabase
-        .from('invoices')
-        .update({
-          external_provider: 'haulmer',
-          external_document_id: haulmerResponse.FOLIO?.toString() || haulmerResponse.TOKEN,
-          external_pdf_url: pdfUrl,
-          external_xml_url: xmlUrl,
-          external_status: 'emitido',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderData.invoiceId)
-        .select()
-        .single();
-
-      if (updateError || !updatedInvoice) {
-        console.error('[emitHaulmerInvoice] Error actualizando factura en BD:', {
-          invoiceId: orderData.invoiceId,
-          error: updateError?.message,
-        });
-        // No lanzar error aquí - la factura ya se emitió en Haulmer
-        // Solo logear el error
-      }
-    }
+    // Los datos del documento tributario se guardarán en invoicing.documents
+    // cuando el processor procese la solicitud de emisión
 
     console.log('[emitHaulmerInvoice] Factura emitida exitosamente:', {
-      invoiceId: orderData.invoiceId,
+      orderId: orderData.orderId,
+      orderNumber: orderData.orderNumber,
       folio: haulmerResponse.FOLIO,
       pdfUrl,
       xmlUrl,
@@ -228,7 +206,8 @@ export async function emitHaulmerInvoice(
     return haulmerResponse;
   } catch (error: any) {
     console.error('[emitHaulmerInvoice] Error emitiendo factura:', {
-      invoiceId: orderData.invoiceId,
+      orderId: orderData.orderId,
+      orderNumber: orderData.orderNumber,
       error: error.message,
     });
     throw error;
@@ -240,73 +219,61 @@ export async function emitHaulmerInvoice(
  * Se llama desde invoice-sync.ts cuando el proveedor es Transbank
  * 
  * @param transactionToken - Token de la transacción de Transbank (no usado directamente)
- * @param invoiceId - ID de la factura en nuestra BD
+ * @param orderId - ID de la orden en nuestra BD
  * @returns Respuesta de Haulmer
  */
 export async function syncHaulmerInvoice(
   transactionToken: string,
-  invoiceId: string
+  orderId: string
 ): Promise<HaulmerEmitirResponse> {
   const supabase = createServiceRoleClient();
 
   console.log('[syncHaulmerInvoice] Iniciando proceso:', {
     transactionToken: transactionToken.substring(0, 20) + '...',
-    invoiceId,
+    orderId,
   });
 
   try {
-    // Obtener datos de la factura y orden
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .select(`
-        id,
-        invoice_number,
-        organization_id,
-        total,
-        currency,
-        type,
-        organizations (
-          id,
-          name,
-          tax_id,
-          address,
-          city,
-          email
-        )
-      `)
-      .eq('id', invoiceId)
+    // Obtener datos de la orden
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
       .single();
 
-    if (invoiceError || !invoice) {
-      throw new Error(`Factura no encontrada: ${invoiceError?.message}`);
+    if (orderError || !order) {
+      throw new Error(`Orden no encontrada: ${orderError?.message}`);
     }
 
-    // Obtener orden asociada
-    const { data: order } = await supabase
-      .from('orders')
-      .select('product_type, product_data')
-      .eq('invoice_id', invoiceId)
+    // Obtener organización
+    const { data: org, error: orgError } = await supabase
+      .from('organizations')
+      .select('id, name, tax_id, address, city, email')
+      .eq('id', order.organization_id)
       .single();
 
-    const org = invoice.organizations as any;
+    if (orgError || !org) {
+      throw new Error(`Organización no encontrada: ${orgError?.message}`);
+    }
 
     // Verificar que la organización tenga RUT
-    if (!org?.tax_id) {
+    if (!org.tax_id) {
       console.warn('[syncHaulmerInvoice] Organización sin RUT:', {
-        organizationId: invoice.organization_id,
+        organizationId: order.organization_id,
       });
       throw new Error('La organización debe tener RUT configurado para emitir factura electrónica');
     }
 
     // Preparar datos para emisión
+    const productData = order.product_data as any || { name: 'Servicio' };
     const orderData: OrderDataForInvoice = {
-      invoiceId: invoice.id,
-      invoiceNumber: invoice.invoice_number,
-      organizationId: invoice.organization_id,
-      amount: invoice.total,
-      currency: invoice.currency,
-      productType: order?.product_type || invoice.type,
-      productData: order?.product_data || { name: 'Servicio' },
+      orderId: order.id,
+      orderNumber: order.order_number,
+      organizationId: order.organization_id,
+      amount: order.amount,
+      currency: order.currency,
+      productType: order.product_type,
+      productData: productData,
       paymentProvider: 'transbank',
       transactionToken,
     };
@@ -317,14 +284,14 @@ export async function syncHaulmerInvoice(
       giro: 'SERVICIOS', // Por defecto, idealmente obtener de la BD
       direccion: org.address || 'Sin dirección',
       comuna: org.city || 'Santiago',
-      email: org.email,
+      email: org.email || undefined,
     };
 
     // Emitir factura
     return await emitHaulmerInvoice(orderData, orgData);
   } catch (error: any) {
     console.error('[syncHaulmerInvoice] Error:', {
-      invoiceId,
+      orderId,
       error: error.message,
     });
     throw error;

@@ -11,6 +11,7 @@ import { addCredits } from '@/lib/credits/core';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
 import { stripe } from '@/lib/stripe/client';
 import { verifyPaymentForOrder, getPaymentById } from '@/lib/payments/verification';
+import InvoiceButton from '@/components/checkout/InvoiceButton';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -110,17 +111,7 @@ async function OrderSuccessContent({
 
       const { data, error } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider_payment_id', token)
         .eq('provider', 'transbank')
         .maybeSingle();
@@ -153,17 +144,7 @@ async function OrderSuccessContent({
                 updated_at: new Date().toISOString(),
               })
               .eq('id', data.id)
-              .select(`
-                *,
-                invoice:invoices (
-                  invoice_number,
-                  total,
-                  currency,
-                  id,
-                  organization_id,
-                  type
-                )
-              `)
+              .select('*')
               .single();
             
             if (updateError) {
@@ -172,17 +153,6 @@ async function OrderSuccessContent({
             } else {
               console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
               payment = updatedPayment;
-              
-              // Actualizar factura si existe
-              if (payment.invoice) {
-                await supabase
-                  .from('invoices')
-                  .update({
-                    status: 'paid',
-                    paid_at: new Date().toISOString(),
-                  })
-                  .eq('id', payment.invoice.id);
-              }
               
               // Actualizar orden a 'paid'
               await updateOrderStatus(orderId, 'paid', {
@@ -205,24 +175,14 @@ async function OrderSuccessContent({
             
             if (webhookResult.success) {
               console.log('[OrderSuccess] Webhook procesado exitosamente');
-              // Recargar datos del pago
-              const { data: updatedPayment } = await supabase
-                .from('payments')
-                .select(`
-                  *,
-                  invoice:invoices (
-                    invoice_number,
-                    total,
-                    currency,
-                    id,
-                    organization_id,
-                    type
-                  )
-                `)
-                .eq('id', data.id)
-                .single();
-              
-              payment = updatedPayment || data;
+            // Recargar datos del pago
+            const { data: updatedPayment } = await supabase
+              .from('payments')
+              .select('*')
+              .eq('id', data.id)
+              .single();
+            
+            payment = updatedPayment || data;
             } else {
               console.error('[OrderSuccess] Error en webhook:', webhookResult.error);
               payment = data; // Usar datos existentes
@@ -243,25 +203,15 @@ async function OrderSuccessContent({
         // Si es Oneclick y no encontramos por token, buscar por orderId
         if (isOneclick) {
           console.log('[OrderSuccess] Intentando buscar por orderId...');
-          const { data: orderPayments, error: orderPaymentsError } = await supabase
-            .from('payments')
-            .select(`
-              *,
-              invoice:invoices (
-                invoice_number,
-                total,
-                currency,
-                id,
-                organization_id,
-                type
-              )
-            `)
-            .eq('provider', 'transbank')
-            .eq('metadata->>order_id', orderId)
-            .eq('metadata->>payment_method', 'oneclick')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        const { data: orderPayments, error: orderPaymentsError } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('provider', 'transbank')
+          .eq('metadata->>order_id', orderId)
+          .eq('metadata->>payment_method', 'oneclick')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
           
           if (orderPaymentsError) {
             console.error('[OrderSuccess] Error buscando pago Oneclick por orderId:', orderPaymentsError);
@@ -286,17 +236,7 @@ async function OrderSuccessContent({
                     updated_at: new Date().toISOString(),
                   })
                   .eq('id', orderPayments.id)
-                  .select(`
-                    *,
-                    invoice:invoices (
-                      invoice_number,
-                      total,
-                      currency,
-                      id,
-                      organization_id,
-                      type
-                    )
-                  `)
+                  .select('*')
                   .single();
                 
                 if (updateError) {
@@ -305,17 +245,6 @@ async function OrderSuccessContent({
                 } else {
                   console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
                   payment = updatedPayment;
-                  
-                  // Actualizar factura si existe
-                  if (payment.invoice) {
-                    await supabase
-                      .from('invoices')
-                      .update({
-                        status: 'paid',
-                        paid_at: new Date().toISOString(),
-                      })
-                      .eq('id', payment.invoice.id);
-                  }
                   
                   // Actualizar orden a 'paid'
                   await updateOrderStatus(orderId, 'paid', {
@@ -337,17 +266,7 @@ async function OrderSuccessContent({
       console.log('[OrderSuccess] Buscando pago Oneclick por orderId:', orderId);
       const { data: orderPayments, error: orderPaymentsError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider', 'transbank')
         .eq('metadata->>order_id', orderId)
         .eq('metadata->>payment_method', 'oneclick')
@@ -378,17 +297,7 @@ async function OrderSuccessContent({
                 updated_at: new Date().toISOString(),
               })
               .eq('id', orderPayments.id)
-              .select(`
-                *,
-                invoice:invoices (
-                  invoice_number,
-                  total,
-                  currency,
-                  id,
-                  organization_id,
-                  type
-                )
-              `)
+              .select('*')
               .single();
             
             if (updateError) {
@@ -397,17 +306,6 @@ async function OrderSuccessContent({
             } else {
               console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
               payment = updatedPayment;
-              
-              // Actualizar factura si existe
-              if (payment.invoice) {
-                await supabase
-                  .from('invoices')
-                  .update({
-                    status: 'paid',
-                    paid_at: new Date().toISOString(),
-                  })
-                  .eq('id', payment.invoice.id);
-              }
               
               // Actualizar orden a 'paid'
               await updateOrderStatus(orderId, 'paid', {
@@ -437,17 +335,7 @@ async function OrderSuccessContent({
       // Primero buscar por checkout_session_id en metadata
       const { data: sessionPayment, error: sessionError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider', 'stripe')
         .eq('metadata->>checkout_session_id', sessionId)
         .maybeSingle();
@@ -500,17 +388,7 @@ async function OrderSuccessContent({
                   },
                 })
                 .eq('id', sessionPayment.id)
-                .select(`
-                  *,
-                  invoice:invoices (
-                    invoice_number,
-                    total,
-                    currency,
-                    id,
-                    organization_id,
-                    type
-                  )
-                `)
+                .select('*')
                 .single();
               
               if (updateError) {
@@ -519,17 +397,6 @@ async function OrderSuccessContent({
               } else {
                 console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
                 payment = updatedPayment;
-                
-                // Actualizar factura si existe
-                if (payment.invoice) {
-                  await supabase
-                    .from('invoices')
-                    .update({
-                      status: 'paid',
-                      paid_at: new Date().toISOString(),
-                    })
-                    .eq('id', payment.invoice.id);
-                }
                 
                 // Actualizar orden a 'paid'
                 await updateOrderStatus(orderId, 'paid', {
@@ -553,17 +420,7 @@ async function OrderSuccessContent({
         console.log('[OrderSuccess] No se encontró por session_id, buscando por orderId...');
         const { data, error } = await supabase
           .from('payments')
-          .select(`
-            *,
-            invoice:invoices (
-              invoice_number,
-              total,
-              currency,
-              id,
-              organization_id,
-              type
-            )
-          `)
+          .select('*')
           .eq('provider', 'stripe')
           .eq('metadata->>order_id', orderId)
           .order('created_at', { ascending: false })
@@ -607,17 +464,7 @@ async function OrderSuccessContent({
                     },
                   })
                   .eq('id', data.id)
-                  .select(`
-                    *,
-                    invoice:invoices (
-                      invoice_number,
-                      total,
-                      currency,
-                      id,
-                      organization_id,
-                      type
-                    )
-                  `)
+                  .select('*')
                   .single();
                 
                 if (updateError) {
@@ -626,16 +473,6 @@ async function OrderSuccessContent({
                 } else {
                   console.log('[OrderSuccess] Estado del pago actualizado a succeeded');
                   payment = updatedPayment;
-                  
-                  if (payment.invoice) {
-                    await supabase
-                      .from('invoices')
-                      .update({
-                        status: 'paid',
-                        paid_at: new Date().toISOString(),
-                      })
-                      .eq('id', payment.invoice.id);
-                  }
                   
                   await updateOrderStatus(orderId, 'paid', {
                     paymentId: payment.id,
@@ -660,17 +497,7 @@ async function OrderSuccessContent({
       console.log('[OrderSuccess] Buscando último pago Stripe por orderId:', orderId);
       const { data: orderPayments, error: orderPaymentsError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider', 'stripe')
         .eq('metadata->>order_id', orderId)
         .order('created_at', { ascending: false })
@@ -694,11 +521,10 @@ async function OrderSuccessContent({
   
   if (isPaymentSuccess) {
     // Si es compra de créditos, verificar que los créditos se hayan cargado
-    if (payment.invoice?.type === 'credit_purchase' || order.product_type === 'credits') {
+    if (order.product_type === 'credits') {
       console.log('[OrderSuccess] Pago succeeded, verificando si los créditos se cargaron...');
       
       // Verificar si los créditos ya se cargaron buscando transacciones de créditos
-      const invoiceIdStr = payment.invoice?.id;
       const paymentIdStr = payment.id;
       
       const { data: allTransactions, error: creditSearchError } = await supabase
@@ -713,16 +539,15 @@ async function OrderSuccessContent({
         console.error('[OrderSuccess] Error buscando transacciones de créditos:', creditSearchError);
       }
       
-      // Filtrar transacciones que coincidan con nuestro invoice_id o payment_id
+      // Filtrar transacciones que coincidan con nuestro payment_id
       const creditTransactions = allTransactions?.filter((t: any) => {
         const metadata = t.metadata || {};
-        return metadata.invoice_id === invoiceIdStr || metadata.payment_id === paymentIdStr;
+        return metadata.payment_id === paymentIdStr;
       }) || [];
       
       console.log('[OrderSuccess] Transacciones de créditos encontradas:', {
         totalTransactions: allTransactions?.length || 0,
         matchingTransactions: creditTransactions.length,
-        invoiceId: invoiceIdStr,
         paymentId: paymentIdStr
       });
       
@@ -744,7 +569,7 @@ async function OrderSuccessContent({
               orgId: order.organization_id,
               creditsAmount,
               paymentId: payment.id,
-              invoiceId: payment.invoice?.id,
+              orderId: orderId,
             });
             
             try {
@@ -755,7 +580,6 @@ async function OrderSuccessContent({
                 {
                   payment_id: payment.id,
                   transbank_token: tokenWs || tbkToken,
-                  invoice_id: payment.invoice?.id,
                   order_id: orderId,
                 }
               );
@@ -765,6 +589,31 @@ async function OrderSuccessContent({
                 creditsAmount,
                 orgId: order.organization_id
               });
+              
+              // Actualizar orden a 'completed' después de cargar los créditos exitosamente
+              // Solo si la orden está en estado 'paid' (no saltar directamente desde 'pending_payment')
+              try {
+                // Recargar el estado actual de la orden desde la BD para asegurar que esté actualizado
+                const { data: currentOrder } = await supabase
+                  .from('orders')
+                  .select('id, status')
+                  .eq('id', orderId)
+                  .single();
+                
+                if (currentOrder && currentOrder.status === 'paid') {
+                  await updateOrderStatus(orderId, 'completed', {
+                    paymentId: payment.id,
+                  });
+                  console.log('[OrderSuccess] Orden actualizada a completed después de cargar créditos');
+                } else {
+                  console.log('[OrderSuccess] Orden no está en estado paid, no se actualiza a completed:', {
+                    currentStatus: currentOrder?.status,
+                    orderId
+                  });
+                }
+              } catch (completedError: any) {
+                console.error('[OrderSuccess] Error actualizando orden a completed:', completedError);
+              }
             } catch (addCreditsError: any) {
               console.error('[OrderSuccess] Error en addCredits:', {
                 error: addCreditsError.message,
@@ -788,8 +637,33 @@ async function OrderSuccessContent({
         }
       } else {
         console.log('[OrderSuccess] Los créditos ya fueron cargados anteriormente');
+        
+        // Si los créditos ya fueron cargados, verificar si la orden debe actualizarse a completed
+        try {
+          const { data: currentOrder } = await supabase
+            .from('orders')
+            .select('id, status')
+            .eq('id', orderId)
+            .single();
+          
+          if (currentOrder && currentOrder.status === 'paid') {
+            await updateOrderStatus(orderId, 'completed', {
+              paymentId: payment.id,
+            });
+            console.log('[OrderSuccess] Orden actualizada a completed (créditos ya cargados previamente)');
+          }
+        } catch (completedError: any) {
+          console.error('[OrderSuccess] Error actualizando orden a completed (créditos ya cargados):', completedError);
+        }
       }
     }
+
+    // Obtener documento de facturación si existe
+    const { data: invoiceDocument } = await supabase
+      .from('invoicing_documents')
+      .select('id, document_number, pdf_url')
+      .eq('order_id', orderId)
+      .maybeSingle();
     
     return (
       <Card>
@@ -810,33 +684,32 @@ async function OrderSuccessContent({
                 {order.order_number}
               </span>
             </div>
-            {payment.invoice && (
-              <>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Número de factura</span>
-                  <span className="font-mono font-semibold">
-                    {payment.invoice.invoice_number}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Monto pagado</span>
-                  <span className="font-semibold">
-                    {payment.invoice.currency && payment.invoice.total
-                      ? new Intl.NumberFormat('es-CL', {
-                          style: 'currency',
-                          currency: payment.invoice.currency,
-                        }).format(payment.invoice.total)
-                      : 'N/A'}
-                  </span>
-                </div>
-              </>
-            )}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Monto pagado</span>
+              <span className="font-semibold">
+                {order.currency && order.amount
+                  ? new Intl.NumberFormat('es-CL', {
+                      style: 'currency',
+                      currency: order.currency,
+                    }).format(order.amount)
+                  : 'N/A'}
+              </span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Estado</span>
               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
                 Completado
               </span>
             </div>
+          </div>
+          
+          {/* Botón de Invoice con polling automático */}
+          <div className="flex flex-col gap-3">
+            <InvoiceButton 
+              orderId={orderId}
+              initialPdfUrl={invoiceDocument?.pdf_url}
+              initialDocumentNumber={invoiceDocument?.document_number}
+            />
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">

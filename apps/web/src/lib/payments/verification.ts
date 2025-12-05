@@ -59,24 +59,14 @@ export async function verifyPaymentForOrder(
  * Obtiene información del pago desde la base de datos
  * 
  * @param paymentId - ID del pago en la base de datos
- * @returns Datos del pago con factura asociada
+ * @returns Datos del pago
  */
 export async function getPaymentById(paymentId: string) {
   const supabase = await createClient();
   
   const { data: payment, error } = await supabase
     .from('payments')
-    .select(`
-      *,
-      invoice:invoices (
-        invoice_number,
-        total,
-        currency,
-        id,
-        organization_id,
-        type
-      )
-    `)
+    .select('*')
     .eq('id', paymentId)
     .single();
   

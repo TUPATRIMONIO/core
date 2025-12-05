@@ -9,17 +9,21 @@ import { Loader2, CreditCard, XCircle, Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
 import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
+import TransbankDocumentForm, { type BillingData } from './TransbankDocumentForm';
+import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
 
 interface OrderCheckoutFormProps {
   orderId: string;
   order: Order;
   provider: 'transbank' | 'stripe';
+  countryCode?: string;
 }
 
 export default function OrderCheckoutForm({
   orderId,
   order,
   provider,
+  countryCode = 'CL',
 }: OrderCheckoutFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,10 +35,13 @@ export default function OrderCheckoutForm({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [showAddCardForm, setShowAddCardForm] = useState(false);
   const [loadingCards, setLoadingCards] = useState(true);
+  const [billingData, setBillingData] = useState<BillingData | null>(null);
+  const [stripeBillingData, setStripeBillingData] = useState<BasicBillingData | null>(null);
+  const [loadingBillingSettings, setLoadingBillingSettings] = useState(true);
 
-  // Cargar tarjetas guardadas
+  // Cargar tarjetas guardadas y datos de facturación
   useEffect(() => {
-    const loadCards = async () => {
+    const loadData = async () => {
       try {
         // Cargar tarjetas guardadas
         const cardsResponse = await fetch('/api/transbank/oneclick/cards');
@@ -49,14 +56,31 @@ export default function OrderCheckoutForm({
             setOneclickTbkUser(defaultCard.provider_payment_method_id);
           }
         }
+
+        // Cargar datos de facturación guardados
+        const billingResponse = await fetch('/api/billing/settings');
+        if (billingResponse.ok) {
+          const billingData = await billingResponse.json();
+          if (billingData.billing_data) {
+            // Para Stripe, solo necesitamos datos básicos
+            if (billingData.billing_data.tax_id && billingData.billing_data.name) {
+              setStripeBillingData({
+                tax_id: billingData.billing_data.tax_id,
+                name: billingData.billing_data.name,
+                email: billingData.billing_data.email,
+              });
+            }
+          }
+        }
       } catch (err) {
-        console.error('Error cargando tarjetas:', err);
+        console.error('Error cargando datos:', err);
       } finally {
         setLoadingCards(false);
+        setLoadingBillingSettings(false);
       }
     };
 
-    loadCards();
+    loadData();
   }, []);
 
   // Detectar si el usuario regresó de una inscripción Oneclick exitosa
@@ -112,6 +136,38 @@ export default function OrderCheckoutForm({
     setLoading(true);
     setError(null);
 
+    // Validar datos de facturación para ambos proveedores
+    if (provider === 'transbank' && !billingData) {
+      setError('Por favor completa los datos de facturación antes de continuar');
+      setLoading(false);
+      return;
+    }
+
+    if (provider === 'stripe' && !stripeBillingData) {
+      setError('Por favor completa los datos de facturación antes de continuar');
+      setLoading(false);
+      return;
+    }
+
+    // Guardar datos de facturación antes de pagar (si no están guardados)
+    if (provider === 'stripe' && stripeBillingData) {
+      try {
+        await fetch('/api/billing/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            billing_data: {
+              ...stripeBillingData,
+              document_type: 'stripe_invoice', // Stripe siempre genera invoice
+            },
+          }),
+        });
+      } catch (err) {
+        console.warn('Error guardando datos de facturación:', err);
+        // No bloquear el pago si falla guardar
+      }
+    }
+
     try {
       const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=${provider}`;
       
@@ -124,6 +180,16 @@ export default function OrderCheckoutForm({
           orderId,
           provider,
           returnUrl,
+          ...(provider === 'transbank' && billingData && {
+            document_type: billingData.document_type,
+            billing_data: billingData,
+          }),
+          ...(provider === 'stripe' && stripeBillingData && {
+            billing_data: {
+              ...stripeBillingData,
+              document_type: 'stripe_invoice',
+            },
+          }),
         }),
       });
 
@@ -232,6 +298,12 @@ export default function OrderCheckoutForm({
   };
 
   const handleOneclickPayment = async () => {
+    // Validar datos de facturación
+    if (!billingData) {
+      setError('Por favor completa los datos de facturación antes de continuar');
+      return;
+    }
+
     // Obtener tbkUser de la tarjeta seleccionada o del estado actual
     let tbkUserToUse = oneclickTbkUser;
 
@@ -269,6 +341,8 @@ export default function OrderCheckoutForm({
           orderId,
           tbkUser: tbkUserToUse,
           username: usernameToUse,
+          document_type: billingData.document_type,
+          billing_data: billingData,
         }),
       });
 
@@ -324,55 +398,63 @@ export default function OrderCheckoutForm({
     await handleCheckout('stripe');
   };
 
-  // Si es Stripe, mostrar componente simple
+  // Si es Stripe, mostrar componente con datos de facturación
   if (provider === 'stripe') {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Pago con Stripe</CardTitle>
-          <CardDescription>
-            Completa el pago con tu tarjeta de crédito o débito
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {error && (
-            <Alert variant="destructive">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+      <div className="space-y-6">
+        <BillingDataForm
+          countryCode={countryCode}
+          defaultData={stripeBillingData || undefined}
+          onDataChange={setStripeBillingData}
+        />
 
-          <div className="rounded-lg border p-4 bg-muted/50">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Total a pagar</span>
-              <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('es-CL', {
-                  style: 'currency',
-                  currency: order.currency,
-                }).format(order.amount)}
-              </span>
-            </div>
-          </div>
-
-          <Button
-            onClick={handleStripePayment}
-            disabled={loading}
-            className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Pagar con Stripe
-              </>
+        <Card>
+          <CardHeader>
+            <CardTitle>Pago con Stripe</CardTitle>
+            <CardDescription>
+              Completa el pago con tu tarjeta de crédito o débito
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
-          </Button>
-        </CardContent>
-      </Card>
+
+            <div className="rounded-lg border p-4 bg-muted/50">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total a pagar</span>
+                <span className="text-2xl font-bold">
+                  {new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: order.currency,
+                  }).format(order.amount)}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleStripePayment}
+              disabled={loading || !stripeBillingData || loadingBillingSettings}
+              className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pagar con Stripe
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -387,6 +469,11 @@ export default function OrderCheckoutForm({
 
         {/* Tab Webpay Plus */}
         <TabsContent value="webpay" className="space-y-4">
+          <TransbankDocumentForm
+            countryCode={countryCode}
+            onDataChange={setBillingData}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>Pago con Webpay Plus</CardTitle>
@@ -416,7 +503,7 @@ export default function OrderCheckoutForm({
 
               <Button
                 onClick={handleWebpayPlus}
-                disabled={loading}
+                disabled={loading || !billingData}
                 className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
               >
                 {loading ? (
@@ -441,6 +528,11 @@ export default function OrderCheckoutForm({
 
         {/* Tab Oneclick */}
         <TabsContent value="oneclick" className="space-y-4">
+          <TransbankDocumentForm
+            countryCode={countryCode}
+            onDataChange={setBillingData}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>Pago con Oneclick</CardTitle>
@@ -495,7 +587,7 @@ export default function OrderCheckoutForm({
 
                   <Button
                     onClick={handleOneclickPayment}
-                    disabled={loading || !selectedCardId}
+                    disabled={loading || !selectedCardId || !billingData}
                     className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
                   >
                     {loading ? (

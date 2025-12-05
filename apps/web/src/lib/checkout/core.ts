@@ -241,9 +241,30 @@ export async function updateOrderStatus(
     newStatus: status,
   });
   
-  // Nota: La emisión de documentos externos ahora se maneja automáticamente
-  // mediante el trigger `trigger_order_completed_invoicing` en billing.orders
-  // que crea una solicitud en invoicing.document_requests y llama al webhook
+  // Si el nuevo estado es 'completed', procesar emisión de documentos
+  if (status === 'completed') {
+    try {
+      console.log('[updateOrderStatus] Orden completada, procesando emisión de documento...');
+      
+      // Dar tiempo al trigger para crear la emission_request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Llamar al procesador de solicitudes pendientes
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/invoicing/process-request?process_pending=true`, {
+        method: 'GET',
+        headers: { 'X-Internal-Request': 'true' },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('[updateOrderStatus] Emisión procesada:', result);
+      }
+    } catch (error: any) {
+      console.warn('[updateOrderStatus] Error procesando emisión (no crítico):', error.message);
+      // No fallar si la emisión falla - se puede procesar después manualmente
+    }
+  }
   
   // Disparar evento para actualizar carrito inmediatamente (solo en cliente)
   if (typeof window !== 'undefined') {

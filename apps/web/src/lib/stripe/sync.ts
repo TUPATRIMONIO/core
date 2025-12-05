@@ -6,8 +6,8 @@ import Stripe from 'stripe';
  * Interfaz para datos de la orden necesarios para crear invoice
  */
 interface OrderDataForStripeInvoice {
-  invoiceId: string;
-  invoiceNumber: string;
+  orderId: string;
+  orderNumber: string;
   organizationId: string;
   stripeCustomerId: string;
   amount: number;
@@ -41,7 +41,8 @@ export async function createStripeInvoiceForOrder(
   const shouldUpdateDB = options?.updateDatabase !== false; // Default: true para compatibilidad
 
   console.log('[createStripeInvoiceForOrder] Creando invoice en Stripe:', {
-    invoiceId: orderData.invoiceId,
+    orderId: orderData.orderId,
+    orderNumber: orderData.orderNumber,
     stripeCustomerId: orderData.stripeCustomerId,
     amount: orderData.amount,
     currency: orderData.currency,
@@ -56,8 +57,8 @@ export async function createStripeInvoiceForOrder(
       collection_method: 'send_invoice',
       days_until_due: 0,
       metadata: {
-        internal_invoice_id: orderData.invoiceId,
-        internal_invoice_number: orderData.invoiceNumber,
+        internal_order_id: orderData.orderId,
+        internal_order_number: orderData.orderNumber,
         organization_id: orderData.organizationId,
         product_type: orderData.productType,
       },
@@ -69,12 +70,17 @@ export async function createStripeInvoiceForOrder(
     });
 
     // 2. Agregar Invoice Item (como módulo 589 de Make)
-    const description = `Pedido ${orderData.invoiceNumber}: ${orderData.productData.name}`;
+    const description = `Pedido ${orderData.orderNumber}: ${orderData.productData.name}`;
+    
+    // Monedas "zero-decimal" que NO se multiplican por 100
+    const zeroDecimalCurrencies = ['CLP', 'JPY', 'KRW', 'VND', 'BIF', 'DJF', 'GNF', 'KMF', 'MGA', 'PYG', 'RWF', 'UGX', 'VUV', 'XAF', 'XOF', 'XPF'];
+    const isZeroDecimal = zeroDecimalCurrencies.includes(orderData.currency.toUpperCase());
+    const stripeAmount = isZeroDecimal ? Math.round(orderData.amount) : Math.round(orderData.amount * 100);
     
     await stripe.invoiceItems.create({
       customer: orderData.stripeCustomerId,
       invoice: invoice.id,
-      amount: Math.round(orderData.amount * 100), // Stripe usa centavos
+      amount: stripeAmount,
       currency: orderData.currency.toLowerCase(),
       description,
     });
@@ -112,42 +118,22 @@ export async function createStripeInvoiceForOrder(
     // 5. Obtener invoice actualizado con PDF URL
     const finalInvoice = await stripe.invoices.retrieve(paidInvoice.id);
 
-    // 6. Actualizar factura en nuestra BD con datos externos (solo si se solicita)
-    if (shouldUpdateDB) {
-    const { data: updatedInvoice, error: updateError } = await supabase
-      .from('invoices')
-      .update({
-        external_provider: 'stripe',
-        external_document_id: finalInvoice.id,
-        external_pdf_url: finalInvoice.invoice_pdf || finalInvoice.hosted_invoice_url || null,
-        external_status: finalInvoice.status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderData.invoiceId)
-      .select()
-      .single();
-
-    if (updateError) {
-      console.error('[createStripeInvoiceForOrder] Error actualizando BD:', {
-        invoiceId: orderData.invoiceId,
-        error: updateError.message,
-      });
-      // No lanzar error - el invoice ya se creó en Stripe
-      }
-    }
+    // 6. Los datos del documento tributario se guardarán en invoicing.documents
+    // cuando el processor procese la solicitud de emisión
 
     console.log('[createStripeInvoiceForOrder] Invoice creado exitosamente:', {
-      invoiceId: orderData.invoiceId,
+      orderId: orderData.orderId,
+      orderNumber: orderData.orderNumber,
       stripeInvoiceId: finalInvoice.id,
       pdfUrl: finalInvoice.invoice_pdf,
       status: finalInvoice.status,
-      updatedDatabase: shouldUpdateDB,
     });
 
     return finalInvoice;
   } catch (error: any) {
     console.error('[createStripeInvoiceForOrder] Error creando invoice:', {
-      invoiceId: orderData.invoiceId,
+      orderId: orderData.orderId,
+      orderNumber: orderData.orderNumber,
       error: error.message,
     });
     throw error;
@@ -160,64 +146,37 @@ export async function createStripeInvoiceForOrder(
  * Esta función crea un nuevo Invoice en Stripe cuando la orden se completa.
  * 
  * @param paymentIntentId - ID del Payment Intent de Stripe
- * @param invoiceId - ID de la factura en nuestra BD
+ * @param orderId - ID de la orden en nuestra BD
  * @returns Datos del invoice de Stripe creado
  */
 export async function syncStripeInvoice(
   paymentIntentId: string,
-  invoiceId: string
+  orderId: string
 ): Promise<Stripe.Invoice | null> {
   const supabase = createServiceRoleClient();
 
   console.log('[syncStripeInvoice] Iniciando creación de invoice:', {
     paymentIntentId,
-    invoiceId,
+    orderId,
   });
 
   try {
-    // Obtener datos de la factura y orden
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .select(`
-        id,
-        invoice_number,
-        organization_id,
-        total,
-        currency,
-        type,
-        external_provider,
-        external_document_id
-      `)
-      .eq('id', invoiceId)
-      .single();
-
-    if (invoiceError || !invoice) {
-      throw new Error(`Factura no encontrada: ${invoiceError?.message}`);
-    }
-
-    // Verificar si ya está sincronizada
-    if (invoice.external_provider && invoice.external_document_id) {
-      console.log('[syncStripeInvoice] Factura ya sincronizada:', {
-        invoiceId,
-        external_provider: invoice.external_provider,
-        external_document_id: invoice.external_document_id,
-      });
-      // Retornar el invoice existente
-      return await stripe.invoices.retrieve(invoice.external_document_id);
-    }
-
-    // Obtener orden asociada
-    const { data: order } = await supabase
+    // Obtener datos de la orden
+    const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('product_type, product_data')
-      .eq('invoice_id', invoiceId)
+      .select('*')
+      .eq('id', orderId)
       .single();
+
+    if (orderError || !order) {
+      throw new Error(`Orden no encontrada: ${orderError?.message}`);
+    }
 
     // Obtener Stripe Customer ID de la organización
     const { data: org } = await supabase
       .from('organizations')
-      .select('id, name, settings')
-      .eq('id', invoice.organization_id)
+      .select('id, name, email, settings')
+      .eq('id', order.organization_id)
       .single();
 
     if (!org) {
@@ -232,7 +191,7 @@ export async function syncStripeInvoice(
       // Buscar customer existente o crear uno nuevo
       const customers = await stripe.customers.list({
         limit: 1,
-        email: org.name, // O buscar por otro campo
+        email: org.email || undefined,
       });
 
       if (customers.data.length > 0) {
@@ -241,6 +200,7 @@ export async function syncStripeInvoice(
         // Crear customer si no existe
         const customer = await stripe.customers.create({
           name: org.name,
+          email: org.email || undefined,
           metadata: {
             organization_id: org.id,
           },
@@ -261,15 +221,16 @@ export async function syncStripeInvoice(
     }
 
     // Preparar datos para crear invoice
+    const productData = order.product_data as any || { name: 'Servicio' };
     const orderData: OrderDataForStripeInvoice = {
-      invoiceId: invoice.id,
-      invoiceNumber: invoice.invoice_number,
-      organizationId: invoice.organization_id,
+      orderId: order.id,
+      orderNumber: order.order_number,
+      organizationId: order.organization_id,
       stripeCustomerId,
-      amount: invoice.total,
-      currency: invoice.currency,
-      productType: order?.product_type || invoice.type,
-      productData: order?.product_data || { name: 'Servicio' },
+      amount: order.amount,
+      currency: order.currency,
+      productType: order.product_type,
+      productData: productData,
     };
 
     // Crear invoice en Stripe
@@ -277,7 +238,7 @@ export async function syncStripeInvoice(
   } catch (error: any) {
     console.error('[syncStripeInvoice] Error:', {
       paymentIntentId,
-      invoiceId,
+      orderId,
       error: error.message,
     });
     throw error;
@@ -288,18 +249,16 @@ export async function syncStripeInvoice(
  * Sincroniza una factura de Stripe usando el ID del invoice directamente
  * 
  * @param stripeInvoiceId - ID del invoice en Stripe
- * @param invoiceId - ID de la factura en nuestra BD
+ * @param orderId - ID de la orden en nuestra BD (opcional, para logging)
  * @returns Datos del invoice de Stripe sincronizado
  */
 export async function syncStripeInvoiceById(
   stripeInvoiceId: string,
-  invoiceId: string
+  orderId?: string
 ): Promise<Stripe.Invoice> {
-  const supabase = createServiceRoleClient();
-
   console.log('[syncStripeInvoiceById] Iniciando sincronización:', {
     stripeInvoiceId,
-    invoiceId,
+    orderId,
   });
 
   try {
@@ -313,38 +272,14 @@ export async function syncStripeInvoiceById(
       hostedInvoiceUrl: stripeInvoice.hosted_invoice_url,
     });
 
-    // Actualizar factura en nuestra BD
-    const { data: updatedInvoice, error: updateError } = await supabase
-      .from('invoices')
-      .update({
-        external_provider: 'stripe',
-        external_document_id: stripeInvoice.id,
-        external_pdf_url: stripeInvoice.invoice_pdf || stripeInvoice.hosted_invoice_url || null,
-        external_status: stripeInvoice.status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', invoiceId)
-      .select()
-      .single();
-
-    if (updateError || !updatedInvoice) {
-      console.error('[syncStripeInvoiceById] Error actualizando factura:', {
-        invoiceId,
-        error: updateError?.message,
-      });
-      throw new Error(`Error sincronizando factura: ${updateError?.message || 'Unknown error'}`);
-    }
-
-    console.log('[syncStripeInvoiceById] Factura sincronizada exitosamente:', {
-      invoiceId,
-      stripeInvoiceId: stripeInvoice.id,
-    });
+    // Los datos del documento tributario se guardarán en invoicing.documents
+    // cuando el processor procese la solicitud de emisión
 
     return stripeInvoice;
   } catch (error: any) {
     console.error('[syncStripeInvoiceById] Error en sincronización:', {
       stripeInvoiceId,
-      invoiceId,
+      orderId,
       error: error.message,
     });
     throw error;

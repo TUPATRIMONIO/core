@@ -11,10 +11,10 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/admin/empty-state';
-import { Receipt } from 'lucide-react';
+import { Receipt, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+
 // Función helper para formatear moneda
 function formatCurrency(amount: number, currency: string): string {
   return new Intl.NumberFormat('es-CL', {
@@ -24,11 +24,12 @@ function formatCurrency(amount: number, currency: string): string {
   }).format(amount);
 }
 
-async function getInvoices() {
+async function getDocuments() {
   const supabase = createServiceRoleClient();
 
-  const { data: invoices, error } = await supabase
-    .from('invoices')
+  // Usar invoicing.documents en lugar de billing.invoices
+  const { data: documents, error } = await supabase
+    .from('documents')
     .select(`
       *,
       organization:organizations (
@@ -41,49 +42,62 @@ async function getInvoices() {
     .limit(100);
 
   if (error) {
-    console.error('Error fetching invoices:', error);
+    console.error('Error fetching documents:', error);
     return [];
   }
 
-  return invoices || [];
+  return documents || [];
 }
 
 function getStatusBadge(status: string) {
   const variants: Record<string, string> = {
-    paid: 'bg-green-50 text-green-700',
-    open: 'bg-yellow-50 text-yellow-700',
-    draft: 'bg-gray-50 text-gray-700',
-    void: 'bg-red-50 text-red-700',
-    uncollectible: 'bg-red-50 text-red-700',
+    issued: 'bg-green-50 text-green-700',
+    pending: 'bg-yellow-50 text-yellow-700',
+    processing: 'bg-blue-50 text-blue-700',
+    failed: 'bg-red-50 text-red-700',
+    voided: 'bg-gray-50 text-gray-700',
+  };
+
+  const labels: Record<string, string> = {
+    issued: 'Emitido',
+    pending: 'Pendiente',
+    processing: 'Procesando',
+    failed: 'Fallido',
+    voided: 'Anulado',
   };
 
   return (
     <Badge variant="outline" className={variants[status] || ''}>
-      {status === 'paid' ? 'Pagada' : 
-       status === 'open' ? 'Abierta' :
-       status === 'draft' ? 'Borrador' :
-       status === 'void' ? 'Anulada' :
-       status === 'uncollectible' ? 'Incobrable' : status}
+      {labels[status] || status}
     </Badge>
   );
 }
 
-export default async function AdminInvoicesPage() {
-  const invoices = await getInvoices();
+function getDocumentTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    factura_electronica: 'Factura Electrónica',
+    boleta_electronica: 'Boleta Electrónica',
+    stripe_invoice: 'Stripe Invoice',
+  };
+  return labels[type] || type;
+}
 
-  const totalPaid = invoices
-    .filter((inv: any) => inv.status === 'paid')
-    .reduce((sum, inv: any) => sum + Number(inv.total || 0), 0);
+export default async function AdminInvoicesPage() {
+  const documents = await getDocuments();
+
+  const totalIssued = documents
+    .filter((doc: any) => doc.status === 'issued')
+    .reduce((sum, doc: any) => sum + Number(doc.total || 0), 0);
   
-  const totalOpen = invoices
-    .filter((inv: any) => inv.status === 'open')
-    .reduce((sum, inv: any) => sum + Number(inv.total || 0), 0);
+  const totalPending = documents
+    .filter((doc: any) => doc.status === 'pending' || doc.status === 'processing')
+    .reduce((sum, doc: any) => sum + Number(doc.total || 0), 0);
 
   return (
     <div className="flex flex-1 flex-col">
       <PageHeader
-        title="Facturas"
-        description="Gestiona las facturas de todas las organizaciones"
+        title="Documentos Tributarios"
+        description="Gestiona los documentos emitidos de todas las organizaciones"
       />
 
       <div className="flex-1 px-4 pb-6 space-y-4">
@@ -91,26 +105,26 @@ export default async function AdminInvoicesPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardContent className="pt-6">
-              <div className="text-sm font-medium text-muted-foreground">Total Pagado</div>
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid, 'CLP')}</div>
+              <div className="text-sm font-medium text-muted-foreground">Total Emitido</div>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(totalIssued, 'CLP')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <div className="text-sm font-medium text-muted-foreground">Pendiente</div>
-              <div className="text-2xl font-bold text-yellow-600">{formatCurrency(totalOpen, 'CLP')}</div>
+              <div className="text-2xl font-bold text-yellow-600">{formatCurrency(totalPending, 'CLP')}</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Lista de facturas */}
-        {invoices.length === 0 ? (
+        {/* Lista de documentos */}
+        {documents.length === 0 ? (
           <Card>
             <CardContent className="p-0">
               <EmptyState
                 icon={Receipt}
-                title="No hay facturas"
-                description="Aún no se han creado facturas en el sistema"
+                title="No hay documentos"
+                description="Aún no se han emitido documentos tributarios en el sistema"
               />
             </CardContent>
           </Card>
@@ -130,33 +144,38 @@ export default async function AdminInvoicesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((invoice: any) => (
-                    <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                  {documents.map((doc: any) => (
+                    <TableRow key={doc.id}>
+                      <TableCell className="font-medium">{doc.document_number}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{invoice.organization?.name || 'N/A'}</div>
-                          <div className="text-sm text-muted-foreground">{invoice.organization?.slug || ''}</div>
+                          <div className="font-medium">{doc.organization?.name || 'N/A'}</div>
+                          <div className="text-sm text-muted-foreground">{doc.organization?.slug || ''}</div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {invoice.type === 'credit_purchase' ? 'Compra de Créditos' :
-                         invoice.type === 'subscription' ? 'Suscripción' :
-                         invoice.type === 'one_time' ? 'Pago Único' : invoice.type}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(invoice.status)}</TableCell>
+                      <TableCell>{getDocumentTypeLabel(doc.document_type)}</TableCell>
+                      <TableCell>{getStatusBadge(doc.status)}</TableCell>
                       <TableCell className="font-semibold">
-                        {formatCurrency(invoice.total, invoice.currency)}
+                        {formatCurrency(doc.total, doc.currency)}
                       </TableCell>
                       <TableCell>
-                        {new Date(invoice.created_at).toLocaleDateString('es-CL')}
+                        {new Date(doc.created_at).toLocaleDateString('es-CL')}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/admin/organizations/${invoice.organization_id}`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          {doc.pdf_url && (
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={doc.pdf_url} target="_blank" rel="noopener noreferrer">
+                                PDF
+                              </a>
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/admin/organizations/${doc.organization_id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -169,4 +188,3 @@ export default async function AdminInvoicesPage() {
     </div>
   );
 }
-

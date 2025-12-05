@@ -3,8 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Search, Filter } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 import Link from 'next/link';
 import { InvoicesList } from '@/components/billing/InvoicesList';
 
@@ -33,9 +32,9 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
     );
   }
   
-  // Construir query (usar vista pública)
+  // Construir query para documentos tributarios (invoicing.documents)
   let query = supabase
-    .from('invoices')
+    .from('documents')
     .select('*')
     .eq('organization_id', orgResult.organization.id)
     .order('created_at', { ascending: false });
@@ -46,11 +45,11 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
   }
   
   if (params.type && params.type !== 'all') {
-    query = query.eq('type', params.type);
+    query = query.eq('document_type', params.type);
   }
   
   if (params.search) {
-    query = query.or(`invoice_number.ilike.%${params.search}%,description.ilike.%${params.search}%`);
+    query = query.ilike('document_number', `%${params.search}%`);
   }
   
   // Paginación
@@ -59,21 +58,33 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   
-  const { data: invoices, error } = await query.range(from, to);
+  const { data: documents, error } = await query.range(from, to);
   const { count } = await supabase
-    .from('invoices')
+    .from('documents')
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', orgResult.organization.id);
   
   const totalPages = Math.ceil((count || 0) / pageSize);
   
+  // Transformar documentos al formato esperado por InvoicesList
+  const invoices = (documents || []).map((doc: any) => ({
+    id: doc.id,
+    invoice_number: doc.document_number,
+    status: doc.status === 'issued' ? 'paid' : doc.status === 'voided' ? 'void' : doc.status,
+    type: doc.document_type === 'stripe_invoice' ? 'invoice' : doc.document_type,
+    total: doc.total,
+    currency: doc.currency,
+    created_at: doc.created_at,
+    pdf_url: doc.pdf_url,
+  }));
+  
   return (
     <div className="container mx-auto py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Facturas</h1>
+          <h1 className="text-3xl font-bold">Documentos Tributarios</h1>
           <p className="text-muted-foreground mt-2">
-            Historial completo de tus facturas y pagos
+            Historial de facturas, boletas y documentos emitidos
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -98,7 +109,7 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   name="search"
-                  placeholder="Buscar por número o descripción..."
+                  placeholder="Buscar por número..."
                   defaultValue={params.search}
                   className="pl-9"
                 />
@@ -110,10 +121,11 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="open">Abierta</SelectItem>
-                <SelectItem value="paid">Pagada</SelectItem>
-                <SelectItem value="cancelled">Cancelada</SelectItem>
-                <SelectItem value="overdue">Vencida</SelectItem>
+                <SelectItem value="pending">Pendiente</SelectItem>
+                <SelectItem value="processing">Procesando</SelectItem>
+                <SelectItem value="issued">Emitido</SelectItem>
+                <SelectItem value="failed">Fallido</SelectItem>
+                <SelectItem value="voided">Anulado</SelectItem>
               </SelectContent>
             </Select>
             <Select name="type" defaultValue={params.type || 'all'}>
@@ -122,29 +134,29 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
-                <SelectItem value="credit_purchase">Compra de créditos</SelectItem>
-                <SelectItem value="subscription">Suscripción</SelectItem>
-                <SelectItem value="auto_recharge">Auto-recarga</SelectItem>
+                <SelectItem value="factura_electronica">Factura Electrónica</SelectItem>
+                <SelectItem value="boleta_electronica">Boleta Electrónica</SelectItem>
+                <SelectItem value="stripe_invoice">Stripe Invoice</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit" className="w-full md:w-auto">
+            <Button type="submit" className="w-full md:w-auto bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
               Aplicar Filtros
             </Button>
           </form>
         </CardContent>
       </Card>
       
-      {/* Lista de facturas */}
+      {/* Lista de documentos */}
       <Card>
         <CardHeader>
-          <CardTitle>Facturas</CardTitle>
+          <CardTitle>Documentos</CardTitle>
           <CardDescription>
-            {count || 0} factura{(count || 0) !== 1 ? 's' : ''} encontrada{(count || 0) !== 1 ? 's' : ''}
+            {count || 0} documento{(count || 0) !== 1 ? 's' : ''} encontrado{(count || 0) !== 1 ? 's' : ''}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <InvoicesList 
-            invoices={invoices || []} 
+            invoices={invoices} 
             currentPage={page}
             totalPages={totalPages}
           />
@@ -153,4 +165,3 @@ export default async function InvoicesPage({ searchParams }: PageProps) {
     </div>
   );
 }
-

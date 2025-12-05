@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     
     // Parsear body
     const body = await request.json();
-    const { orderId, provider, returnUrl } = body;
+    const { orderId, provider, returnUrl, document_type, billing_data } = body;
     
     if (!orderId) {
       return NextResponse.json(
@@ -84,6 +84,28 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Guardar datos de facturación en metadata de la orden para ambos proveedores
+    if (billing_data) {
+      const { createServiceRoleClient } = await import('@/lib/supabase/server');
+      const serviceSupabase = createServiceRoleClient();
+      
+      const updatedMetadata = {
+        ...(order.metadata || {}),
+        ...(document_type && { document_type }),
+        ...(billing_data && { billing_data }),
+      };
+
+      const { error: updateError } = await serviceSupabase
+        .from('orders')
+        .update({ metadata: updatedMetadata })
+        .eq('id', orderId);
+
+      if (updateError) {
+        console.error('[Checkout] Error actualizando metadata de orden:', updateError);
+        // No fallar el flujo, solo loguear el error
+      }
+    }
     
     // Obtener proveedor de pago
     let paymentProvider;
@@ -123,6 +145,8 @@ export async function POST(request: NextRequest) {
         order_id: orderId,
         order_number: order.order_number,
         product_type: order.product_type,
+        ...(document_type && { document_type }),
+        ...(billing_data && { billing_data }),
       },
     });
     

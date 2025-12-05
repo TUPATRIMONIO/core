@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +14,13 @@ interface OrdersListProps {
 }
 
 interface OrderWithRelations extends Order {
-  invoice?: {
+  document?: {
     id: string;
-    invoice_number: string;
-    total: number;
-    currency: string;
-    type: string;
+    document_number: string;
+    document_type: string;
+    pdf_url: string | null;
+    xml_url: string | null;
+    status: string;
   } | null;
   payment?: {
     id: string;
@@ -85,30 +86,48 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const url = status === 'all' 
-          ? '/api/checkout/orders'
-          : `/api/checkout/orders?status=${status}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
+  const fetchOrders = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      
+      const url = status === 'all' 
+        ? '/api/checkout/orders'
+        : `/api/checkout/orders?status=${status}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Error obteniendo órdenes');
-        }
-
-        setOrders(data.orders || []);
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar órdenes');
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error(data.error || 'Error obteniendo órdenes');
       }
-    }
 
-    fetchOrders();
+      setOrders(data.orders || []);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar órdenes');
+    } finally {
+      setLoading(false);
+    }
   }, [status]);
+
+  // Carga inicial
+  useEffect(() => {
+    fetchOrders(true);
+  }, [fetchOrders]);
+
+  // Polling: verificar cada 5 segundos si hay órdenes completadas sin documento
+  useEffect(() => {
+    const hasOrdersWaitingForDocument = orders.some(
+      order => order.status === 'completed' && !order.document?.pdf_url
+    );
+
+    if (!hasOrdersWaitingForDocument) return;
+
+    const interval = setInterval(() => {
+      fetchOrders(false); // Sin mostrar loading para no molestar
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [orders, fetchOrders]);
 
   if (loading) {
     return (
@@ -152,6 +171,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
         const expiresAt = order.expires_at ? new Date(order.expires_at) : null;
         const isExpiringSoon = expiresAt && expiresAt.getTime() - Date.now() < 3600000; // Menos de 1 hora
         const canPay = order.status === 'pending_payment' && !isExpiringSoon && expiresAt && expiresAt > new Date();
+        const isWaitingForDocument = order.status === 'completed' && !order.document?.pdf_url;
 
         return (
           <Card key={order.id}>
@@ -232,12 +252,20 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                   </div>
                 )}
 
-                {order.invoice && (
+                {order.document && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <FileText className="h-4 w-4" />
                     <span>
-                      Factura: {order.invoice.invoice_number}
+                      Documento: {order.document.document_number}
                     </span>
+                  </div>
+                )}
+
+                {/* Indicador de generación de invoice */}
+                {isWaitingForDocument && (
+                  <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Generando invoice...</span>
                   </div>
                 )}
 
@@ -259,14 +287,23 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
 
                   {(order.status === 'paid' || order.status === 'completed') && (
                     <div className="flex flex-col sm:flex-row gap-2">
-                      {order.invoice && (
+                      {order.document?.pdf_url ? (
                         <Button variant="outline" asChild className="flex-1">
-                          <Link href={`/billing/invoices/${order.invoice.id}`}>
+                          <a 
+                            href={order.document.pdf_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer nofollow"
+                          >
                             <FileText className="mr-2 h-4 w-4" />
-                            Ver Factura
-                          </Link>
+                            Ver Invoice
+                          </a>
                         </Button>
-                      )}
+                      ) : isWaitingForDocument ? (
+                        <Button variant="outline" disabled className="flex-1">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generando...
+                        </Button>
+                      ) : null}
                       <Button variant="outline" asChild className="flex-1">
                         <Link href={`/checkout/${order.id}`}>
                           <CreditCard className="mr-2 h-4 w-4" />
@@ -299,4 +336,3 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
     </div>
   );
 }
-

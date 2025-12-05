@@ -54,17 +54,7 @@ export class TransbankAdapter implements PaymentProvider {
       // Buscar pago en BD por token
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
-        .select(`
-          *,
-          invoice:invoices (
-            invoice_number,
-            total,
-            currency,
-            id,
-            organization_id,
-            type
-          )
-        `)
+        .select('*')
         .eq('provider_payment_id', token)
         .eq('provider', 'transbank')
         .maybeSingle();
@@ -73,17 +63,7 @@ export class TransbankAdapter implements PaymentProvider {
         // Si no se encuentra por token, buscar por orderId
         const { data: orderPayment } = await supabase
           .from('payments')
-          .select(`
-            *,
-            invoice:invoices (
-              invoice_number,
-              total,
-              currency,
-              id,
-              organization_id,
-              type
-            )
-          `)
+          .select('*')
           .eq('provider', 'transbank')
           .eq('metadata->>order_id', orderId)
           .order('created_at', { ascending: false })
@@ -108,17 +88,7 @@ export class TransbankAdapter implements PaymentProvider {
             // Recargar datos del pago
             const { data: updatedPayment } = await supabase
               .from('payments')
-              .select(`
-                *,
-                invoice:invoices (
-                  invoice_number,
-                  total,
-                  currency,
-                  id,
-                  organization_id,
-                  type
-                )
-              `)
+              .select('*')
               .eq('id', orderPayment.id)
               .single();
             
@@ -151,31 +121,10 @@ export class TransbankAdapter implements PaymentProvider {
             updated_at: new Date().toISOString(),
           })
           .eq('id', payment.id)
-          .select(`
-            *,
-            invoice:invoices (
-              invoice_number,
-              total,
-              currency,
-              id,
-              organization_id,
-              type
-            )
-          `)
+          .select('*')
           .single();
         
         if (!updateError && updatedPayment) {
-          // Actualizar factura si existe
-          if (updatedPayment.invoice) {
-            await supabase
-              .from('invoices')
-              .update({
-                status: 'paid',
-                paid_at: new Date().toISOString(),
-              })
-              .eq('id', updatedPayment.invoice.id);
-          }
-          
           // Actualizar orden a 'paid'
           await updateOrderStatus(orderId, 'paid', {
             paymentId: updatedPayment.id,
@@ -199,17 +148,7 @@ export class TransbankAdapter implements PaymentProvider {
           // Recargar datos del pago
           const { data: updatedPayment } = await supabase
             .from('payments')
-            .select(`
-              *,
-              invoice:invoices (
-                invoice_number,
-                total,
-                currency,
-                id,
-                organization_id,
-                type
-              )
-            `)
+            .select('*')
             .eq('id', payment.id)
             .single();
           
