@@ -99,6 +99,39 @@ export async function POST(request: NextRequest) {
         console.error('[Oneclick Payment] Error actualizando metadata de orden:', updateError);
         // No fallar el flujo, solo loguear el error
       }
+
+      // También guardar los datos de facturación en la configuración de la organización
+      // para que se usen como valores predeterminados en futuras compras
+      if (billing_data) {
+        try {
+          const { data: org } = await serviceSupabase
+            .from('organizations')
+            .select('settings')
+            .eq('id', order.organization_id)
+            .single();
+
+          const currentSettings = (org?.settings as any) || {};
+          const savedBillingData = {
+            ...billing_data,
+            ...(document_type && { document_type }),
+          };
+
+          const updatedSettings = {
+            ...currentSettings,
+            billing_data: savedBillingData,
+          };
+
+          await serviceSupabase
+            .from('organizations')
+            .update({ settings: updatedSettings })
+            .eq('id', order.organization_id);
+
+          console.log('[Oneclick Payment] Datos de facturación guardados como predeterminados');
+        } catch (settingsError) {
+          console.error('[Oneclick Payment] Error guardando datos de facturación predeterminados:', settingsError);
+          // No fallar el flujo
+        }
+      }
     }
     
     // Crear pago Oneclick (autoriza directamente)
@@ -110,7 +143,7 @@ export async function POST(request: NextRequest) {
       url: result.url, // Vacío porque el pago ya está autorizado
       orderId: order.id,
       orderNumber: order.order_number,
-      invoiceId: result.invoice.id,
+      invoiceId: result.invoice?.id || null,
       paymentStatus: result.payment?.status, // Estado del pago (authorized/rejected)
     });
   } catch (error: any) {

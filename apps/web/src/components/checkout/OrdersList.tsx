@@ -295,13 +295,17 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                             rel="noopener noreferrer nofollow"
                           >
                             <FileText className="mr-2 h-4 w-4" />
-                            Ver Invoice
+                            {order.document.document_type === 'boleta_electronica' 
+                              ? 'Ver Boleta' 
+                              : order.document.document_type === 'factura_electronica'
+                                ? 'Ver Factura'
+                                : 'Ver Invoice'}
                           </a>
                         </Button>
                       ) : isWaitingForDocument ? (
                         <Button variant="outline" disabled className="flex-1">
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Generando...
+                          Generando documento...
                         </Button>
                       ) : null}
                       <Button variant="outline" asChild className="flex-1">

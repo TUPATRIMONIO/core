@@ -661,7 +661,7 @@ async function OrderSuccessContent({
     // Obtener documento de facturación si existe
     const { data: invoiceDocument } = await supabase
       .from('invoicing_documents')
-      .select('id, document_number, pdf_url')
+      .select('id, document_number, document_type, pdf_url')
       .eq('order_id', orderId)
       .maybeSingle();
     
@@ -703,12 +703,12 @@ async function OrderSuccessContent({
             </div>
           </div>
           
-          {/* Botón de Invoice con polling automático */}
+          {/* Botón de documento con polling automático */}
           <div className="flex flex-col gap-3">
             <InvoiceButton 
               orderId={orderId}
               initialPdfUrl={invoiceDocument?.pdf_url}
-              initialDocumentNumber={invoiceDocument?.document_number}
+              initialDocumentType={invoiceDocument?.document_type}
             />
           </div>
           

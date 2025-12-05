@@ -84,7 +84,7 @@ interface OrganizationData {
 }
 
 /**
- * Emite una factura electrónica con Haulmer y guarda los PDFs en Storage
+ * Emite un documento tributario con Haulmer (factura o boleta) y guarda los PDFs en Storage
  * 
  * Se llama cuando una orden pasa al estado "completed" y el pago fue con Transbank.
  * 
@@ -92,21 +92,25 @@ interface OrganizationData {
  * @param orgData - Datos de la organización (receptor)
  * @param options - Opciones adicionales
  * @param options.updateDatabase - Si true, actualiza la BD directamente (default: true para compatibilidad)
- * @returns Datos de la factura emitida
+ * @param options.documentType - Tipo de documento: 'factura_electronica' o 'boleta_electronica' (default: 'factura_electronica')
+ * @returns Datos del documento emitido
  */
 export async function emitHaulmerInvoice(
   orderData: OrderDataForInvoice,
   orgData: OrganizationData,
-  options?: { updateDatabase?: boolean }
+  options?: { updateDatabase?: boolean; documentType?: 'factura_electronica' | 'boleta_electronica' }
 ): Promise<HaulmerEmitirResponse> {
   const supabase = createServiceRoleClient();
   const shouldUpdateDB = options?.updateDatabase !== false; // Default: true para compatibilidad
+  const documentType = options?.documentType || 'factura_electronica';
+  const isBoleta = documentType === 'boleta_electronica';
 
-  console.log('[emitHaulmerInvoice] Iniciando emisión de factura:', {
+  console.log('[emitHaulmerInvoice] Iniciando emisión de documento:', {
     orderId: orderData.orderId,
     orderNumber: orderData.orderNumber,
     organizationId: orderData.organizationId,
     amount: orderData.amount,
+    documentType,
     updateDatabase: shouldUpdateDB,
   });
 
@@ -127,43 +131,74 @@ export async function emitHaulmerInvoice(
       CorreoRecep: orgData.email,
     };
 
+    // Calcular montos según tipo de documento
+    // Para FACTURA: el monto del pedido INCLUYE IVA, hay que desglosarlo
+    // Para BOLETA: el monto ya incluye IVA y se usa directo
+    const montoTotal = Math.round(orderData.amount);
+    
+    let montoNeto: number;
+    let iva: number;
+    let precioItem: number;
+    
+    if (isBoleta) {
+      // BOLETA: El precio ya incluye IVA, no se desglosa en el detalle
+      // El monto total es el mismo que el precio del item
+      montoNeto = Math.round(montoTotal / (1 + IVA_RATE));
+      iva = montoTotal - montoNeto;
+      precioItem = montoTotal; // Precio con IVA incluido
+    } else {
+      // FACTURA: Hay que desglosar el IVA
+      // El precio en el detalle debe ser NETO (sin IVA)
+      montoNeto = Math.round(montoTotal / (1 + IVA_RATE));
+      iva = Math.round(montoNeto * IVA_RATE);
+      precioItem = montoNeto; // Precio NETO sin IVA
+    }
+    
+    // Para factura, el total debe ser neto + IVA calculado
+    const totalFinal = isBoleta ? montoTotal : (montoNeto + iva);
+
     // Construir detalle
     const detalle: HaulmerDetalle[] = [{
       NroLinDet: 1,
       NmbItem: orderData.productData.name || `Compra de ${orderData.productType}`,
       DscItem: orderData.productData.description,
       QtyItem: 1,
-      PrcItem: Math.round(orderData.amount),
-      MontoItem: Math.round(orderData.amount),
+      PrcItem: precioItem,
+      MontoItem: precioItem,
     }];
-
-    // Calcular totales
-    const montoNeto = Math.round(orderData.amount / (1 + IVA_RATE));
-    const iva = Math.round(montoNeto * IVA_RATE);
-    const montoTotal = montoNeto + iva;
 
     const totales: HaulmerTotales = {
       MntNeto: montoNeto,
       TasaIVA: '19',
       IVA: iva,
-      MntTotal: montoTotal,
+      MntTotal: totalFinal,
     };
 
     // Generar Idempotency Key única para esta orden
     const idempotencyKey = `order-${orderData.orderId}-${Date.now()}`;
 
-    // Emitir factura con Haulmer
-    const haulmerResponse = await haulmerClient.emitirFactura(
-      receptor,
-      detalle,
-      totales,
-      {
-        idempotencyKey,
-        sendEmail: orgData.email ? { to: orgData.email } : undefined,
-      }
-    );
+    // Emitir documento con Haulmer según tipo
+    const haulmerResponse = isBoleta
+      ? await haulmerClient.emitirBoleta(
+          receptor,
+          detalle,
+          totales,
+          {
+            idempotencyKey,
+            sendEmail: orgData.email ? { to: orgData.email } : undefined,
+          }
+        )
+      : await haulmerClient.emitirFactura(
+          receptor,
+          detalle,
+          totales,
+          {
+            idempotencyKey,
+            sendEmail: orgData.email ? { to: orgData.email } : undefined,
+          }
+        );
 
-    console.log('[emitHaulmerInvoice] Factura emitida en Haulmer:', {
+    console.log(`[emitHaulmerInvoice] ${isBoleta ? 'Boleta' : 'Factura'} emitida en Haulmer:`, {
       token: haulmerResponse.TOKEN,
       folio: haulmerResponse.FOLIO,
       tienePDF: !!haulmerResponse.PDF,
@@ -194,9 +229,10 @@ export async function emitHaulmerInvoice(
     // Los datos del documento tributario se guardarán en invoicing.documents
     // cuando el processor procese la solicitud de emisión
 
-    console.log('[emitHaulmerInvoice] Factura emitida exitosamente:', {
+    console.log(`[emitHaulmerInvoice] ${isBoleta ? 'Boleta' : 'Factura'} emitida exitosamente:`, {
       orderId: orderData.orderId,
       orderNumber: orderData.orderNumber,
+      documentType,
       folio: haulmerResponse.FOLIO,
       pdfUrl,
       xmlUrl,

@@ -105,6 +105,37 @@ export async function POST(request: NextRequest) {
         console.error('[Checkout] Error actualizando metadata de orden:', updateError);
         // No fallar el flujo, solo loguear el error
       }
+
+      // También guardar los datos de facturación en la configuración de la organización
+      // para que se usen como valores predeterminados en futuras compras
+      try {
+        const { data: org } = await serviceSupabase
+          .from('organizations')
+          .select('settings')
+          .eq('id', order.organization_id)
+          .single();
+
+        const currentSettings = (org?.settings as any) || {};
+        const savedBillingData = {
+          ...billing_data,
+          ...(document_type && { document_type }),
+        };
+
+        const updatedSettings = {
+          ...currentSettings,
+          billing_data: savedBillingData,
+        };
+
+        await serviceSupabase
+          .from('organizations')
+          .update({ settings: updatedSettings })
+          .eq('id', order.organization_id);
+
+        console.log('[Checkout] Datos de facturación guardados como predeterminados');
+      } catch (settingsError) {
+        console.error('[Checkout] Error guardando datos de facturación predeterminados:', settingsError);
+        // No fallar el flujo
+      }
     }
     
     // Obtener proveedor de pago

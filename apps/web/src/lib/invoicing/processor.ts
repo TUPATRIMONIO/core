@@ -223,8 +223,12 @@ async function emitHaulmerDocument(
     email: org.email,
   };
 
-  // Emitir factura/boleta (sin actualizar BD directamente)
-  const haulmerResponse = await emitHaulmerInvoice(orderData, orgData, { updateDatabase: false });
+  // Emitir factura/boleta según tipo de documento (sin actualizar BD directamente)
+  const haulmerDocType = params.documentType === 'boleta_electronica' ? 'boleta_electronica' : 'factura_electronica';
+  const haulmerResponse = await emitHaulmerInvoice(orderData, orgData, { 
+    updateDatabase: false,
+    documentType: haulmerDocType,
+  });
 
   // emitHaulmerInvoice ya guarda los archivos y retorna las URLs en la respuesta extendida
   const pdfUrl = (haulmerResponse as any).pdfUrl || undefined;

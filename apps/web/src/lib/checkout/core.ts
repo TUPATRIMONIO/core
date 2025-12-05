@@ -249,9 +249,9 @@ export async function updateOrderStatus(
       // Dar tiempo al trigger para crear la emission_request
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Llamar al procesador de solicitudes pendientes
+      // Llamar al procesador SOLO para esta orden específica (no todas las pendientes)
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const response = await fetch(`${baseUrl}/api/invoicing/process-request?process_pending=true`, {
+      const response = await fetch(`${baseUrl}/api/invoicing/process-request?order_id=${orderId}`, {
         method: 'GET',
         headers: { 'X-Internal-Request': 'true' },
       });

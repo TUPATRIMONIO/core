@@ -4,19 +4,45 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, Loader2 } from 'lucide-react';
 
+type DocumentType = 'stripe_invoice' | 'boleta_electronica' | 'factura_electronica' | string;
+
 interface InvoiceButtonProps {
   orderId: string;
   initialPdfUrl?: string | null;
-  initialDocumentNumber?: string | null;
+  initialDocumentType?: DocumentType | null;
+}
+
+function getButtonLabel(documentType: DocumentType | null | undefined): string {
+  switch (documentType) {
+    case 'boleta_electronica':
+      return 'Ver Boleta';
+    case 'factura_electronica':
+      return 'Ver Factura';
+    case 'stripe_invoice':
+    default:
+      return 'Ver Invoice';
+  }
+}
+
+function getLoadingLabel(documentType: DocumentType | null | undefined): string {
+  switch (documentType) {
+    case 'boleta_electronica':
+      return 'Generando Boleta...';
+    case 'factura_electronica':
+      return 'Generando Factura...';
+    case 'stripe_invoice':
+    default:
+      return 'Generando Invoice...';
+  }
 }
 
 export default function InvoiceButton({ 
   orderId, 
   initialPdfUrl,
-  initialDocumentNumber 
+  initialDocumentType,
 }: InvoiceButtonProps) {
   const [pdfUrl, setPdfUrl] = useState(initialPdfUrl);
-  const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
+  const [documentType, setDocumentType] = useState<DocumentType | null>(initialDocumentType || null);
   const [loading, setLoading] = useState(!initialPdfUrl);
 
   useEffect(() => {
@@ -25,28 +51,28 @@ export default function InvoiceButton({
       return;
     }
 
-    // Polling cada 3 segundos para verificar si el invoice está listo
-    const checkInvoice = async () => {
+    // Polling cada 3 segundos para verificar si el documento está listo
+    const checkDocument = async () => {
       try {
         const response = await fetch(`/api/invoicing/document?order_id=${orderId}`);
         if (response.ok) {
           const data = await response.json();
           if (data.document?.pdf_url) {
             setPdfUrl(data.document.pdf_url);
-            setDocumentNumber(data.document.document_number);
+            setDocumentType(data.document.document_type);
             setLoading(false);
           }
         }
       } catch (error) {
-        console.error('Error checking invoice:', error);
+        console.error('Error checking document:', error);
       }
     };
 
     // Primera verificación inmediata
-    checkInvoice();
+    checkDocument();
 
     // Polling cada 3 segundos
-    const interval = setInterval(checkInvoice, 3000);
+    const interval = setInterval(checkDocument, 3000);
 
     // Timeout después de 2 minutos
     const timeout = setTimeout(() => {
@@ -64,7 +90,7 @@ export default function InvoiceButton({
     return (
       <Button variant="outline" disabled className="flex-1">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Generando Invoice...
+        {getLoadingLabel(documentType || initialDocumentType)}
       </Button>
     );
   }
@@ -81,14 +107,8 @@ export default function InvoiceButton({
         rel="noopener noreferrer nofollow"
       >
         <FileText className="mr-2 h-4 w-4" />
-        Ver Invoice
-        {documentNumber && (
-          <span className="ml-1 text-xs text-muted-foreground">
-            ({documentNumber})
-          </span>
-        )}
+        {getButtonLabel(documentType)}
       </a>
     </Button>
   );
 }
-

@@ -72,17 +72,62 @@ export async function POST(request: NextRequest) {
  * GET /api/invoicing/process-request
  * 
  * Endpoint para verificar el estado de una solicitud o procesar solicitudes pendientes
+ * 
+ * Parámetros:
+ * - order_id: Procesar SOLO la solicitud pendiente de esta orden (RECOMENDADO)
+ * - request_id: Obtener estado de una solicitud específica
+ * - process_pending: Procesar TODAS las solicitudes pendientes (solo para cron/admin)
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const request_id = searchParams.get('request_id');
+  const order_id = searchParams.get('order_id');
   const process_pending = searchParams.get('process_pending') === 'true';
 
   try {
     const { createServiceRoleClient } = await import('@/lib/supabase/server');
     const supabase = createServiceRoleClient();
 
-    // Si se solicita procesar pendientes
+    // OPTIMIZACIÓN: Si se proporciona order_id, procesar solo esa orden (mucho más rápido)
+    if (order_id) {
+      console.log('[process-request] Procesando solicitud para orden específica:', order_id);
+      
+      // Buscar solicitud pendiente para esta orden
+      const { data: pendingRequest, error } = await supabase
+        .from('emission_requests')
+        .select('id')
+        .eq('status', 'pending')
+        .filter('request_data->>order_id', 'eq', order_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[process-request] Error buscando solicitud:', error);
+        throw error;
+      }
+
+      if (!pendingRequest) {
+        return NextResponse.json({
+          success: true,
+          message: 'No hay solicitud pendiente para esta orden',
+          order_id,
+          processed: 0,
+        });
+      }
+
+      console.log('[process-request] Solicitud encontrada:', pendingRequest.id);
+      const success = await processEmissionRequest(pendingRequest.id);
+
+      return NextResponse.json({
+        success,
+        order_id,
+        request_id: pendingRequest.id,
+        processed: 1,
+      });
+    }
+
+    // Si se solicita procesar TODAS las pendientes (solo para cron/admin)
     if (process_pending) {
       // Obtener solicitudes pendientes
       const { data: pendingRequests, error } = await supabase
@@ -127,7 +172,7 @@ export async function GET(request: NextRequest) {
 
     // Si se proporciona request_id, obtener su estado
     if (request_id) {
-      const { data: request, error } = await supabase
+      const { data: requestData, error } = await supabase
         .from('emission_requests')
         .select('*')
         .eq('id', request_id)
@@ -139,12 +184,12 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        request,
+        request: requestData,
       });
     }
 
     return NextResponse.json(
-      { error: 'Se requiere request_id o process_pending=true' },
+      { error: 'Se requiere order_id, request_id o process_pending=true' },
       { status: 400 }
     );
   } catch (error: any) {

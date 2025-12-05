@@ -152,15 +152,18 @@ export default function OrderCheckoutForm({
     // Guardar datos de facturación antes de pagar (si no están guardados)
     if (provider === 'stripe' && stripeBillingData) {
       try {
+        const billingToSave = {
+          tax_id: stripeBillingData.tax_id,
+          name: stripeBillingData.name,
+          email: stripeBillingData.email || '', // Guardar email explícitamente
+          document_type: 'stripe_invoice', // Stripe siempre genera invoice
+        };
+        console.log('[Checkout] Guardando datos de facturación Stripe:', billingToSave);
+        
         await fetch('/api/billing/settings', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            billing_data: {
-              ...stripeBillingData,
-              document_type: 'stripe_invoice', // Stripe siempre genera invoice
-            },
-          }),
+          body: JSON.stringify({ billing_data: billingToSave }),
         });
       } catch (err) {
         console.warn('Error guardando datos de facturación:', err);
@@ -185,8 +188,11 @@ export default function OrderCheckoutForm({
             billing_data: billingData,
           }),
           ...(provider === 'stripe' && stripeBillingData && {
+            document_type: 'stripe_invoice',
             billing_data: {
-              ...stripeBillingData,
+              tax_id: stripeBillingData.tax_id,
+              name: stripeBillingData.name,
+              email: stripeBillingData.email || '',
               document_type: 'stripe_invoice',
             },
           }),
