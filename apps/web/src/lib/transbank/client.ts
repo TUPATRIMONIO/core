@@ -110,6 +110,15 @@ export interface OneclickPaymentFinishResponse {
   transaction_date: string;
 }
 
+export interface TransbankRefundResponse {
+  type: string;
+  authorization_code: string;
+  authorization_date: string;
+  balance: number;
+  nullified_amount: number;
+  response_code: number;
+}
+
 class TransbankClient {
   private environment: TransbankEnvironment;
   private webpayPlusCredentials: TransbankCredentials;
@@ -361,6 +370,54 @@ class TransbankClient {
     );
     // La respuesta es 204 sin cuerpo, así que no retornamos nada
     return;
+  }
+
+  /**
+   * Reembolsa una transacción WebPay Plus
+   * 
+   * @param token - Token de la transacción original
+   * @param buyOrder - Orden de compra original
+   * @param amount - Monto a reembolsar
+   * @returns Respuesta del reembolso
+   */
+  async refundWebpayPlusTransaction(
+    token: string,
+    buyOrder: string,
+    amount: number
+  ): Promise<TransbankRefundResponse> {
+    return this.makeRequest<TransbankRefundResponse>(
+      `/rswebpaytransaction/api/webpay/v1.2/transactions/${token}/refunds`,
+      'PUT',
+      this.webpayPlusCredentials,
+      {
+        buy_order: buyOrder,
+        amount: amount,
+      }
+    );
+  }
+
+  /**
+   * Reembolsa una transacción OneClick
+   * 
+   * @param token - Token de la transacción original
+   * @param buyOrder - Orden de compra original
+   * @param amount - Monto a reembolsar
+   * @returns Respuesta del reembolso
+   */
+  async refundOneclickTransaction(
+    token: string,
+    buyOrder: string,
+    amount: number
+  ): Promise<TransbankRefundResponse> {
+    return this.makeRequest<TransbankRefundResponse>(
+      `/rswebpaytransaction/api/oneclick/v1.2/transactions/${token}/refunds`,
+      'PUT',
+      this.tiendaMallOneclickCredentials,
+      {
+        buy_order: buyOrder,
+        amount: amount,
+      }
+    );
   }
 }
 

@@ -126,6 +126,11 @@ const billingMenuItems = [
     url: '/admin/billing/payments',
     icon: DollarSign,
   },
+  {
+    title: 'Retiros',
+    url: '/admin/billing/withdrawals',
+    icon: Wallet,
+  },
 ]
 
 

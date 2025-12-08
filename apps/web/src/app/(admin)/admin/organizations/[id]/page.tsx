@@ -5,7 +5,7 @@ import { StatusBadge } from '@/components/admin/status-badge'
 import { OrgTypeBadge } from '@/components/admin/org-type-badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingCart, Eye } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Eye, Wallet, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { EditOrganizationButton } from '@/components/admin/edit-organization-button'
 import { UserRoleActions } from '@/components/admin/user-role-actions'
@@ -126,6 +126,45 @@ async function getOrganizationOrders(
   return { orders: orders || [], total: count || 0 }
 }
 
+async function getCreditAccount(organizationId: string) {
+  const supabase = createServiceRoleClient()
+
+  const { data: account, error } = await supabase
+    .from('credit_accounts')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .single()
+
+  if (error) {
+    // Si no existe cuenta, retornar null (no es error crítico)
+    if (error.code === 'PGRST116') {
+      return null
+    }
+    console.error('Error fetching credit account:', error)
+    return null
+  }
+
+  return account
+}
+
+async function getCreditTransactions(organizationId: string, limit: number = 20) {
+  const supabase = createServiceRoleClient()
+
+  const { data: transactions, error } = await supabase
+    .from('credit_transactions')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching credit transactions:', error)
+    return []
+  }
+
+  return transactions || []
+}
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-CL', {
     style: 'decimal',
@@ -184,6 +223,10 @@ export default async function OrganizationDetailPage({
     to: queryParams.to,
   })
   const totalPages = Math.ceil(total / ORDERS_PER_PAGE)
+
+  // Obtener información de créditos
+  const creditAccount = await getCreditAccount(id)
+  const creditTransactions = await getCreditTransactions(id, 20)
 
   const currentOrderParams = {
     status: queryParams.status,
@@ -344,6 +387,132 @@ export default async function OrganizationDetailPage({
             </CardContent>
           </Card>
         )}
+
+        {/* Créditos y Movimientos */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Wallet className="h-5 w-5" />
+                Créditos y Movimientos
+              </CardTitle>
+              <CardDescription>
+                Balance y historial de transacciones de créditos
+              </CardDescription>
+            </div>
+            <Link href={`/admin/billing/credits`}>
+              <Button variant="outline" size="sm">Ver Todas las Cuentas</Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {creditAccount ? (
+              <>
+                {/* Balance */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm font-medium text-muted-foreground">Balance Total</div>
+                    <div className="text-2xl font-bold mt-1">
+                      {formatCurrency(Number(creditAccount.balance || 0))}
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm font-medium text-muted-foreground">Disponible</div>
+                    <div className="text-2xl font-bold text-green-600 mt-1">
+                      {formatCurrency(Number(creditAccount.balance || 0) - Number(creditAccount.reserved_balance || 0))}
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm font-medium text-muted-foreground">Reservado</div>
+                    <div className="text-2xl font-bold text-orange-600 mt-1">
+                      {formatCurrency(Number(creditAccount.reserved_balance || 0))}
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="text-sm font-medium text-muted-foreground">Total Ganado</div>
+                    <div className="text-2xl font-bold mt-1">
+                      {formatCurrency(Number(creditAccount.total_earned || 0))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Movimientos Recientes */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Movimientos Recientes</h3>
+                  {creditTransactions.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center border rounded-lg">
+                      No hay movimientos de créditos registrados
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {creditTransactions.map((transaction: any) => {
+                        const isEarned = transaction.type === 'earned' || transaction.type === 'refund'
+                        const isSpent = transaction.type === 'spent'
+                        const amount = Number(transaction.amount || 0)
+
+                        return (
+                          <div
+                            key={transaction.id}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              {isEarned ? (
+                                <ArrowUpCircle className="h-5 w-5 text-green-600" />
+                              ) : isSpent ? (
+                                <ArrowDownCircle className="h-5 w-5 text-red-600" />
+                              ) : (
+                                <Wallet className="h-5 w-5 text-muted-foreground" />
+                              )}
+                              <div>
+                                <p className="font-medium">
+                                  {transaction.description || 'Transacción de créditos'}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(transaction.created_at).toLocaleString('es-CL', {
+                                    dateStyle: 'short',
+                                    timeStyle: 'short',
+                                  })}
+                                </p>
+                                {transaction.service_code && (
+                                  <Badge variant="outline" className="mt-1 text-xs">
+                                    {transaction.service_code}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p
+                                className={`font-bold ${
+                                  isEarned
+                                    ? 'text-green-600'
+                                    : isSpent
+                                    ? 'text-red-600'
+                                    : 'text-muted-foreground'
+                                }`}
+                              >
+                                {isEarned ? '+' : isSpent ? '-' : ''}
+                                {formatCurrency(amount)}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Balance: {formatCurrency(Number(transaction.balance_after || 0))}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center border rounded-lg">
+                <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Esta organización no tiene una cuenta de créditos creada aún
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Pedidos */}
         <Card>

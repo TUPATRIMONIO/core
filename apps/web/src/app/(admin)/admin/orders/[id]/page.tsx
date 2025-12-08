@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { ArrowLeft, Calendar, Package, Wallet, User, Clock, FileText } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
+import { OrderStatusSelector } from '@/components/admin/order-status-selector'
+import { RefundModal } from '@/components/admin/refund-modal'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -131,12 +133,27 @@ export default async function OrderDetailPage({ params }: PageProps) {
                 title={`Pedido ${order.order_number}`}
                 description={`Detalle del pedido · ${order.product_type}`}
                 actions={
-                    <Link href="/admin/orders">
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Volver
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <OrderStatusSelector
+                            orderId={order.id}
+                            currentStatus={order.status}
+                        />
+                        {(order.status === 'paid' || order.status === 'completed') && order.payment && (
+                            <RefundModal
+                                orderId={order.id}
+                                orderAmount={order.amount}
+                                orderCurrency={order.currency}
+                                orderStatus={order.status}
+                                hasPayment={!!order.payment}
+                            />
+                        )}
+                        <Link href="/admin/orders">
+                            <Button variant="outline" size="sm">
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Volver
+                            </Button>
+                        </Link>
+                    </div>
                 }
             />
 
