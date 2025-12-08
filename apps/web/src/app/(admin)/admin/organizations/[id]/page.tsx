@@ -5,10 +5,22 @@ import { StatusBadge } from '@/components/admin/status-badge'
 import { OrgTypeBadge } from '@/components/admin/org-type-badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Eye } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { EditOrganizationButton } from '@/components/admin/edit-organization-button'
 import { UserRoleActions } from '@/components/admin/user-role-actions'
+import { Badge } from '@/components/ui/badge'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { OrganizationOrdersFilter, OrganizationOrdersPagination } from '@/components/admin/organization-orders-filter'
+
+const ORDERS_PER_PAGE = 10
 
 async function getOrganization(id: string) {
   const supabase = createServiceRoleClient()
@@ -63,7 +75,7 @@ async function getOrganization(id: string) {
   if (org?.organization_users) {
     const userIds = org.organization_users.map((ou: any) => ou.users.id)
     const { data: authUsers } = await supabase.auth.admin.listUsers()
-    
+
     org.organization_users = org.organization_users.map((ou: any) => ({
       ...ou,
       users: {
@@ -76,16 +88,108 @@ async function getOrganization(id: string) {
   return org
 }
 
+async function getOrganizationOrders(
+  organizationId: string,
+  params: { page: number; status?: string; from?: string; to?: string }
+): Promise<{ orders: any[]; total: number }> {
+  const supabase = createServiceRoleClient()
+  const offset = (params.page - 1) * ORDERS_PER_PAGE
+
+  let query = supabase
+    .from('orders')
+    .select('*', { count: 'exact' })
+    .eq('organization_id', organizationId)
+
+  if (params.status) {
+    query = query.eq('status', params.status)
+  }
+
+  if (params.from) {
+    query = query.gte('created_at', params.from)
+  }
+
+  if (params.to) {
+    const toDate = new Date(params.to)
+    toDate.setDate(toDate.getDate() + 1)
+    query = query.lt('created_at', toDate.toISOString().split('T')[0])
+  }
+
+  const { data: orders, error, count } = await query
+    .order('created_at', { ascending: false })
+    .range(offset, offset + ORDERS_PER_PAGE - 1)
+
+  if (error) {
+    console.error('Error fetching organization orders:', error)
+    return { orders: [], total: 0 }
+  }
+
+  return { orders: orders || [], total: count || 0 }
+}
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('es-CL', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+function getOrderStatusColor(status: string): string {
+  const colors: Record<string, string> = {
+    pending_payment: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    paid: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+    refunded: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  }
+  return colors[status] || 'bg-gray-100 text-gray-800'
+}
+
+function getOrderStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    pending_payment: 'Pendiente',
+    paid: 'Pagado',
+    completed: 'Completado',
+    cancelled: 'Cancelado',
+    refunded: 'Reembolsado',
+  }
+  return labels[status] || status
+}
+
 export default async function OrganizationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{
+    page?: string
+    status?: string
+    from?: string
+    to?: string
+  }>
 }) {
   const { id } = await params
+  const queryParams = await searchParams
   const org = await getOrganization(id)
 
   if (!org) {
     notFound()
+  }
+
+  const page = parseInt(queryParams.page || '1', 10)
+  const { orders, total } = await getOrganizationOrders(id, {
+    page,
+    status: queryParams.status,
+    from: queryParams.from,
+    to: queryParams.to,
+  })
+  const totalPages = Math.ceil(total / ORDERS_PER_PAGE)
+
+  const currentOrderParams = {
+    status: queryParams.status,
+    from: queryParams.from,
+    to: queryParams.to,
+    page: queryParams.page,
   }
 
   return (
@@ -240,8 +344,94 @@ export default async function OrganizationDetailPage({
             </CardContent>
           </Card>
         )}
+
+        {/* Pedidos */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Pedidos {total > 0 && `(${total})`}
+              </CardTitle>
+              <CardDescription>
+                {queryParams.status || queryParams.from || queryParams.to
+                  ? 'Pedidos filtrados'
+                  : 'Todos los pedidos de esta organización'}
+              </CardDescription>
+            </div>
+            <Link href={`/admin/orders?organization=${org.id}`}>
+              <Button variant="outline" size="sm">Ver en Panel Global</Button>
+            </Link>
+          </CardHeader>
+
+          {/* Filters */}
+          <OrganizationOrdersFilter
+            organizationId={org.id}
+            currentParams={currentOrderParams}
+          />
+
+          <CardContent className="p-0">
+            {orders.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">
+                {queryParams.status || queryParams.from || queryParams.to
+                  ? 'No hay pedidos con los filtros seleccionados'
+                  : 'No hay pedidos'}
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Número</TableHead>
+                    <TableHead>Producto</TableHead>
+                    <TableHead>Monto</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.map((order: any) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-mono text-sm">{order.order_number}</TableCell>
+                      <TableCell>{order.product_type}</TableCell>
+                      <TableCell>
+                        <span className="font-mono">
+                          {order.currency} {formatCurrency(order.amount)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getOrderStatusColor(order.status)}>
+                          {getOrderStatusLabel(order.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.created_at).toLocaleDateString('es-CL')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/admin/orders/${order.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+
+          {/* Pagination */}
+          <OrganizationOrdersPagination
+            organizationId={org.id}
+            currentParams={currentOrderParams}
+            currentPage={page}
+            totalPages={totalPages}
+            totalOrders={total}
+            ordersCount={orders.length}
+          />
+        </Card>
       </div>
     </div>
   )
 }
-

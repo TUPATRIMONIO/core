@@ -21,6 +21,8 @@ import {
   BookOpen,
   Receipt,
   Wallet,
+  ShoppingCart,
+  UsersRound,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -78,6 +80,11 @@ const mainMenuItems = [
     url: '/admin/teams',
     icon: UserCog,
   },
+  {
+    title: 'Pedidos',
+    url: '/admin/orders',
+    icon: ShoppingCart,
+  },
 ]
 
 const appsMenuItems = [
@@ -121,6 +128,8 @@ const billingMenuItems = [
   },
 ]
 
+
+
 const systemMenuItems = [
   {
     title: 'API Keys',
@@ -157,7 +166,7 @@ export function AppSidebar() {
     const fetchUser = async () => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (user) {
         // Obtener datos completos del usuario
         const { data: userData } = await supabase
@@ -165,7 +174,7 @@ export function AppSidebar() {
           .select('full_name, avatar_url')
           .eq('id', user.id)
           .single()
-        
+
         setUser({
           email: user.email,
           ...userData,
@@ -174,7 +183,7 @@ export function AppSidebar() {
         // Verificar si es platform admin
         const { data: isAdmin } = await supabase.rpc('is_platform_admin')
         setIsPlatformAdmin(isAdmin === true)
-        
+
         // Si es platform admin, no necesita filtrar aplicaciones
         if (isAdmin === true) {
           setIsLoadingApps(false)
@@ -201,7 +210,7 @@ export function AppSidebar() {
     const fetchEnabledAppsFromAPI = async (): Promise<string[] | null> => {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
+
       if (!user) {
         return null
       }
@@ -232,7 +241,7 @@ export function AppSidebar() {
       // Extraer slugs y agregar siempre visibles
       const slugs = enabledApps?.map((app: any) => app.slug) || []
       const alwaysVisibleSlugs = ['marketing_site'] // marketing_site siempre visible
-      
+
       return [...new Set([...slugs, ...alwaysVisibleSlugs])]
     }
 
@@ -240,17 +249,17 @@ export function AppSidebar() {
       try {
         const cachedData = sessionStorage.getItem(cacheKey)
         const cachedTimestamp = sessionStorage.getItem(cacheTimestampKey)
-        
+
         if (cachedData && cachedTimestamp) {
           const timestamp = parseInt(cachedTimestamp, 10)
           const now = Date.now()
-          
+
           if (now - timestamp < cacheTTL) {
             // Cache válido, pero aún así hacer la llamada en background para actualizar
             const slugs = JSON.parse(cachedData)
             setEnabledAppSlugs(new Set(slugs))
             setIsLoadingApps(false)
-            
+
             // Actualizar en background sin bloquear la UI
             fetchEnabledAppsFromAPI().then((newSlugs) => {
               if (newSlugs) {
@@ -280,7 +289,7 @@ export function AppSidebar() {
     }
 
     fetchEnabledApps()
-    
+
     // Escuchar eventos de storage para sincronizar entre tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === cacheKey && e.newValue) {
@@ -292,7 +301,7 @@ export function AppSidebar() {
         }
       }
     }
-    
+
     // Escuchar evento personalizado cuando se actualiza una aplicación
     const handleApplicationsUpdated = () => {
       // Limpiar cache y recargar
@@ -301,10 +310,10 @@ export function AppSidebar() {
       setIsLoadingApps(true)
       fetchEnabledApps()
     }
-    
+
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('applications-updated', handleApplicationsUpdated)
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('applications-updated', handleApplicationsUpdated)
@@ -354,7 +363,7 @@ export function AppSidebar() {
 
     // Obtener slug de la aplicación desde la ruta
     const appSlug = getApplicationSlugFromRoute(item.url)
-    
+
     // Si no hay mapeo, siempre mostrar (items fijos como Blog que no están en APPLICATION_ROUTES)
     if (!appSlug) {
       return true
@@ -397,8 +406,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
@@ -420,8 +429,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {filteredAppsMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
@@ -443,8 +452,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {billingMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
@@ -459,6 +468,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+
+
         {/* System */}
         <SidebarGroup>
           <SidebarGroupLabel>Sistema</SidebarGroupLabel>
@@ -466,8 +477,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {systemMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
