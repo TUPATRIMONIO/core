@@ -7639,3 +7639,61 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
   - [ ] Políticas RLS permiten acceso solo a usuarios de la organización
 
 ---
+
+## 🔧 Correcciones y Optimizaciones - Diciembre 9, 2025
+
+### ✅ **Corrección Página de Reembolsos (`/admin/refunds`)**
+
+**Problema identificado:**
+- Error en consola: "A <Select.Item /> must have a value prop that is not an empty string"
+- Los componentes Select de filtros (Estado, Proveedor, Destino) usaban `value=""` que no está permitido por Radix UI Select
+- Esto causaba errores en la consola y potenciales problemas de renderizado
+
+**Solución implementada:**
+- ✅ Cambiado valores vacíos (`value=""`) por `value="all"` en todos los SelectItem de filtros
+- ✅ Actualizada lógica de filtrado para tratar `"all"` como "sin filtro"
+- ✅ Actualizado estado inicial de filtros para usar `"all"` en lugar de `""`
+- ✅ Actualizada función `clearFilters()` para establecer `"all"` en lugar de `""`
+- ✅ Actualizada función `hasActiveFilters` para verificar que el valor no sea `"all"`
+
+**Archivos modificados:**
+- `apps/web/src/app/(admin)/admin/refunds/page.tsx`
+
+**Resultado:**
+- ✅ Error crítico eliminado de la consola
+- ✅ Filtros funcionando correctamente
+- ✅ Página carga sin errores
+- ✅ Sin errores de linting
+
+### ✅ **Optimización Componente PendingOrdersBadge**
+
+**Problema identificado:**
+- El componente `PendingOrdersBadge` estaba haciendo peticiones repetidas a `/api/checkout/pending` con código 401 cuando el usuario estaba en páginas de admin
+- Esto causaba:
+  - Sobrecarga del sistema con cientos de peticiones innecesarias
+  - Logs repetitivos en el terminal
+  - Peticiones que fallaban sistemáticamente (401) porque el componente no debería ejecutarse en admin
+
+**Solución implementada:**
+- ✅ Retorno temprano: El componente retorna `null` cuando detecta que está en una página de admin (`pathname?.startsWith('/admin')`)
+- ✅ Limpieza de recursos: Cuando detecta que está en admin, limpia:
+  - Intervalos de polling (`clearInterval`)
+  - Canales de Realtime (`supabase.removeChannel`)
+  - Estado del componente (`setOrders([])`)
+- ✅ Verificaciones adicionales: Cada ejecución del intervalo verifica nuevamente si está en admin antes de hacer peticiones
+- ✅ Eliminación de logs innecesarios: Removidos logs de consola que generaban ruido
+
+**Archivos modificados:**
+- `apps/web/src/components/checkout/PendingOrdersBadge.tsx`
+
+**Resultado:**
+- ✅ No más peticiones a `/api/checkout/pending` cuando el usuario está en páginas de admin
+- ✅ Reducción significativa de carga en el sistema
+- ✅ Logs más limpios en el terminal
+- ✅ Mejor rendimiento general de la aplicación
+
+**Impacto:**
+- **Antes**: Cientos de peticiones fallidas por minuto cuando navegando en admin
+- **Después**: Cero peticiones cuando en admin, solo cuando es necesario en dashboard
+
+---

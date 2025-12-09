@@ -202,6 +202,18 @@ export default function OrderTimeline({ events, orderNumber, compact = false }: 
         }
       }
       
+      // Caso especial: Si hay múltiples "Pago confirmado" (status_changed a 'paid'),
+      // mantener solo el más reciente
+      if (event.event_type === 'status_changed' && 
+          event.to_status === 'paid' && 
+          event.event_description === 'Pago confirmado') {
+        const paidKey = `${event.order_id}-paid-confirmed`;
+        if (!seen.has(paidKey)) {
+          seen.set(paidKey, event);
+        }
+        continue; // Ya procesado, saltar al siguiente
+      }
+      
       // Crear clave única para cambios de estado
       if (event.from_status && event.to_status) {
         const statusKey = `${event.order_id}-${event.from_status}-${event.to_status}`;

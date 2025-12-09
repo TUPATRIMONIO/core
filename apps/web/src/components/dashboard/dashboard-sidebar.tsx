@@ -22,6 +22,7 @@ import {
   Users,
   Send,
   BarChart,
+  ShoppingCart,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -99,6 +100,11 @@ const billingMenuItems = [
     title: 'Comprar Créditos',
     url: '/billing/purchase-credits',
     icon: Wallet,
+  },
+  {
+    title: 'Pedidos',
+    url: '/orders',
+    icon: ShoppingCart,
   },
   {
     title: 'Facturas',

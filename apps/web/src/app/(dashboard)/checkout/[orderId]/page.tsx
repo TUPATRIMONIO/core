@@ -10,6 +10,7 @@ import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
 import OrderTimeline from '@/components/checkout/OrderTimeline';
 import { isTransbankAvailable } from '@/lib/payments/availability';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ClientRefundModal } from '@/components/checkout/ClientRefundModal';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -17,7 +18,9 @@ interface PageProps {
 
 // Helper para obtener el badge de estado
 function getStatusBadge(status: string, expired: boolean) {
-  if (expired) {
+  // Solo mostrar "Expirada" si está pendiente de pago y expirada
+  // Las órdenes completadas/pagadas nunca deben mostrar "Expirada"
+  if (expired && status === 'pending_payment') {
     return (
       <Badge variant="destructive" className="gap-1">
         <XCircle className="h-3 w-3" />
@@ -80,6 +83,45 @@ function getDocumentLabel(documentType: string | null) {
   }
 }
 
+// Helper para obtener nombre amigable del proveedor de pago
+function getPaymentProviderLabel(provider: string | null | undefined, metadata?: any): string {
+  if (!provider) return 'No especificado';
+  
+  switch (provider) {
+    case 'stripe':
+      return 'Stripe';
+    case 'transbank':
+      // Determinar si es Webpay o Oneclick basándose en metadata
+      if (metadata) {
+        const meta = metadata as any;
+        if (meta.payment_method === 'oneclick' || meta.store_commerce_code || meta.store_buy_order) {
+          return 'Transbank Oneclick';
+        } else if (meta.session_id || meta.buy_order) {
+          return 'Transbank Webpay Plus';
+        }
+      }
+      return 'Transbank';
+    case 'transbank_webpay':
+      return 'Transbank Webpay Plus';
+    case 'transbank_oneclick':
+      return 'Transbank Oneclick';
+    default:
+      return provider;
+  }
+}
+
+// Helper para obtener label del destino de reembolso
+function getRefundDestinationLabel(destination: string): string {
+  switch (destination) {
+    case 'payment_method':
+      return 'Tarjeta original';
+    case 'wallet':
+      return 'Monedero digital (Créditos)';
+    default:
+      return destination;
+  }
+}
+
 export default async function CheckoutOrderPage({ params }: PageProps) {
   const { orderId } = await params;
   const supabase = await createClient();
@@ -90,11 +132,22 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
     redirect('/auth/login');
   }
   
-  // Obtener orden
+  // Obtener orden con pago
   const order = await getOrder(orderId);
   
   if (!order) {
     notFound();
+  }
+  
+  // Obtener pago asociado si existe
+  let payment = null;
+  if (order.payment_id) {
+    const { data: paymentData } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('id', order.payment_id)
+      .single();
+    payment = paymentData;
   }
   
   // Verificar que el usuario pertenece a la organización de la orden
@@ -123,7 +176,8 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   
   const countryCode = org.country || 'US';
   const canPay = canPayOrder(order);
-  const expired = isOrderExpired(order);
+  // Solo considerar expirada si está pendiente de pago y la fecha pasó
+  const expired = order.status === 'pending_payment' && isOrderExpired(order);
   
   // Verificar disponibilidad de Transbank (B2B Chile CLP)
   const transbankAvailable = await isTransbankAvailable(order.organization_id);
@@ -176,6 +230,19 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
       invoiceDocument = document;
     }
   }
+
+  // Obtener reembolsos completados de la orden
+  let refunds: any[] = [];
+  if (order.status === 'refunded' || order.status === 'completed') {
+    const { data: refundsData } = await supabase
+      .from('refund_requests')
+      .select('*')
+      .eq('order_id', orderId)
+      .eq('status', 'completed')
+      .order('processed_at', { ascending: false });
+    
+    refunds = refundsData || [];
+  }
   
   const isCompleted = order.status === 'completed' || order.status === 'paid';
   const isCancelled = order.status === 'cancelled';
@@ -226,8 +293,8 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         </div>
       )}
       
-      {/* Estado expirada */}
-      {expired && (
+      {/* Estado expirada - Solo para órdenes pendientes de pago */}
+      {expired && order.status === 'pending_payment' && (
         <div className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full shrink-0">
@@ -289,6 +356,51 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                 </span>
               </div>
               
+              {/* Medio de pago usado - Mostrar siempre que haya un pago */}
+              {payment && (
+                <div className="flex items-center justify-between py-2 border-t text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <CreditCard className="h-3 w-3" />
+                    Medio de pago
+                  </span>
+                  <span className="font-semibold">
+                    {getPaymentProviderLabel(payment.provider, payment.metadata)}
+                  </span>
+                </div>
+              )}
+              
+              {/* Información de reembolsos - Solo si hay reembolsos completados */}
+              {refunds.length > 0 && (
+                <div className="py-2 border-t space-y-2">
+                  <div className="text-xs text-muted-foreground mb-1">Reembolsos realizados:</div>
+                  {refunds.map((refund) => (
+                    <div key={refund.id} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground flex items-center gap-2">
+                        <RefreshCcw className="h-3 w-3" />
+                        {getRefundDestinationLabel(refund.refund_destination)}
+                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="font-semibold">
+                          {new Intl.NumberFormat('es-CL', {
+                            style: 'currency',
+                            currency: refund.currency,
+                          }).format(refund.amount)}
+                        </span>
+                        {refund.processed_at && (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(refund.processed_at).toLocaleDateString('es-CL', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               {order.expires_at && canPay && (
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground pt-2 border-t">
                   <Clock className="h-3 w-3" />
@@ -334,12 +446,15 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                     </Button>
                   )}
                   
-                  {/* Placeholder: Solicitar reembolso (futuro) */}
-                  {isCompleted && order.status === 'completed' && (
-                    <Button variant="ghost" size="sm" disabled className="opacity-50">
-                      <RefreshCcw className="mr-2 h-4 w-4" />
-                      Solicitar Reembolso
-                    </Button>
+                  {/* Solicitar reembolso */}
+                  {isCompleted && order.status === 'completed' && payment && (
+                    <ClientRefundModal
+                      orderId={order.id}
+                      orderAmount={order.amount}
+                      orderCurrency={order.currency}
+                      orderStatus={order.status}
+                      hasPayment={!!payment}
+                    />
                   )}
                   
                   {/* Placeholder: Anular (futuro) - solo visible para admin */}
