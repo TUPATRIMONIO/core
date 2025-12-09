@@ -195,3 +195,4 @@ WHERE u.email = 'EMAIL_DEL_USUARIO@ejemplo.com'  -- ⚠️ Cambia el email aquí
 
 
 
+

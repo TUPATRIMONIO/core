@@ -19,9 +19,10 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
   const [toEmail, setToEmail] = useState('')
   const [subject, setSubject] = useState('')
   const [bodyHtml, setBodyHtml] = useState('')
-  const [gmailAccessToken, setGmailAccessToken] = useState('')
+  const [includeSignature, setIncludeSignature] = useState(true)
   const [loading, setLoading] = useState(false)
   const [hasSendGridAccount, setHasSendGridAccount] = useState<boolean | null>(null)
+  const [hasGmailAccount, setHasGmailAccount] = useState<boolean | null>(null)
   const [checkingAccount, setCheckingAccount] = useState(true)
   const [result, setResult] = useState<{
     success: boolean
@@ -30,23 +31,34 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
     messageId?: string
   } | null>(null)
 
-  // Verificar si hay cuenta SendGrid configurada
+  // Verificar si hay cuentas configuradas
   useEffect(() => {
-    const checkSendGridAccount = async () => {
+    const checkAccounts = async () => {
       try {
-        const response = await fetch('/api/communications/sendgrid/account')
-        const data = await response.json()
-        setHasSendGridAccount(!!data.data)
+        // Verificar SendGrid
+        const sendGridResponse = await fetch('/api/communications/sendgrid/account')
+        const sendGridData = await sendGridResponse.json()
+        setHasSendGridAccount(!!sendGridData.data)
+
+        // Verificar Gmail (buscar cuenta compartida)
+        const gmailResponse = await fetch(`/api/admin/gmail/status?organizationId=${organizationId}`)
+        if (gmailResponse.ok) {
+          const gmailData = await gmailResponse.json()
+          setHasGmailAccount(gmailData.connected)
+        } else {
+          setHasGmailAccount(false)
+        }
       } catch (error) {
-        console.error('Error verificando cuenta SendGrid:', error)
+        console.error('Error verificando cuentas:', error)
         setHasSendGridAccount(false)
+        setHasGmailAccount(false)
       } finally {
         setCheckingAccount(false)
       }
     }
 
-    checkSendGridAccount()
-  }, [])
+    checkAccounts()
+  }, [organizationId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +78,7 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
           bodyHtml,
           bodyText: bodyHtml.replace(/<[^>]*>/g, ''), // Extraer texto plano del HTML
           provider,
-          ...(provider === 'gmail' && { gmailAccessToken }),
+          includeSignature,
         }),
       })
 
@@ -141,26 +153,54 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
                 </div>
               )}
               {provider === 'gmail' && (
+                <div className="space-y-2">
+                  {checkingAccount ? (
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Verificando cuenta Gmail...
+                    </p>
+                  ) : hasGmailAccount ? (
+                    <p className="text-sm text-green-600 flex items-center gap-2">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Cuenta Gmail compartida configurada correctamente
+                    </p>
+                  ) : (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        No hay cuenta Gmail compartida configurada. 
+                        <a href="/admin/communications/gmail" className="underline ml-1">
+                          Configura la cuenta Gmail compartida
+                        </a>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              )}
+              {provider === 'gmail' && (
                 <p className="text-sm text-muted-foreground">
                   Necesitas un access token de Gmail OAuth2. Puedes obtenerlo desde la configuración de Gmail.
                 </p>
               )}
             </div>
 
-            {/* Gmail Access Token (solo si es Gmail) */}
+            {/* Checkbox para incluir firma (solo si es Gmail) */}
             {provider === 'gmail' && (
               <div className="space-y-2">
-                <Label htmlFor="gmailAccessToken">Gmail Access Token</Label>
-                <Input
-                  id="gmailAccessToken"
-                  type="password"
-                  placeholder="Ingresa tu access token de Gmail OAuth2"
-                  value={gmailAccessToken}
-                  onChange={(e) => setGmailAccessToken(e.target.value)}
-                  required={provider === 'gmail'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Token de acceso OAuth2 de Gmail. Se requiere para enviar emails desde Gmail.
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="includeSignature"
+                    checked={includeSignature}
+                    onChange={(e) => setIncludeSignature(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="includeSignature" className="cursor-pointer">
+                    Incluir mi firma personal
+                  </Label>
+                </div>
+                <p className="text-xs text-muted-foreground ml-6">
+                  Si está marcado, se agregará automáticamente tu firma personal al final del email.
                 </p>
               </div>
             )}
@@ -210,7 +250,7 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
             {/* Botón de Envío */}
             <Button 
               type="submit" 
-              disabled={loading || (provider === 'sendgrid' && !hasSendGridAccount)} 
+              disabled={loading || (provider === 'sendgrid' && !hasSendGridAccount) || (provider === 'gmail' && !hasGmailAccount)} 
               className="w-full"
             >
               {loading ? (
@@ -228,6 +268,13 @@ export function TestEmailForm({ organizationId }: TestEmailFormProps) {
             {provider === 'sendgrid' && !hasSendGridAccount && !checkingAccount && (
               <p className="text-sm text-muted-foreground text-center">
                 Configura una cuenta SendGrid para habilitar el envío
+              </p>
+            )}
+            {provider === 'gmail' && !hasGmailAccount && !checkingAccount && (
+              <p className="text-sm text-muted-foreground text-center">
+                <a href="/admin/communications/gmail" className="underline">
+                  Configura la cuenta Gmail compartida
+                </a> para habilitar el envío
               </p>
             )}
           </form>

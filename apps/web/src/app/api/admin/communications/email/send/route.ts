@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@/lib/supabase/server'
-import { sendEmail as sendGmailEmail } from '@/lib/gmail/client'
+import { createServiceRoleClient, createClient } from '@/lib/supabase/server'
+import { sendEmail as sendGmailEmail, sendEmailWithSharedAccount } from '@/lib/gmail/client'
 import { sendEmail as sendSendGridEmailMultiOrg } from '@/lib/sendgrid/client'
 
 interface RouteBody {
@@ -11,7 +11,8 @@ interface RouteBody {
     bodyHtml: string
     bodyText?: string
     provider: 'gmail' | 'sendgrid'
-    gmailAccessToken?: string // Requerido si provider es 'gmail'
+    gmailAccessToken?: string // Deprecated: ya no se usa, se obtiene de la cuenta compartida
+    includeSignature?: boolean // Si incluir firma personal (default: true)
 }
 
 export async function POST(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
             bodyHtml,
             bodyText,
             provider,
-            gmailAccessToken,
+            includeSignature = true,
         } = body
 
         if (!toEmail || !subject || !bodyHtml || !provider) {
@@ -35,35 +36,51 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        if (provider === 'gmail' && !gmailAccessToken) {
+        // Obtener usuario autenticado para Gmail (necesario para firma personal)
+        const supabaseAuth = await createClient()
+        const {
+            data: { user },
+        } = await supabaseAuth.auth.getUser()
+
+        if (provider === 'gmail' && !user) {
             return NextResponse.json(
-                { error: 'gmailAccessToken es requerido cuando provider es gmail' },
-                { status: 400 }
+                { error: 'Debes estar autenticado para enviar emails con Gmail' },
+                { status: 401 }
             )
         }
 
         const supabase = createServiceRoleClient()
 
-        // Crear registro en email_history con status 'pending'
-        const { data: emailRecord, error: emailError } = await supabase
-            .from('email_history')
-            .insert({
-                organization_id: organizationId,
-                order_id: orderId || null,
-                to_email: toEmail,
-                subject,
-                body_html: bodyHtml,
-                body_text: bodyText || null,
-                provider,
-                status: 'pending',
-            })
-            .select()
-            .single()
+        // Crear registro en email_history usando función RPC (evita problema con vista)
+        const { data: emailId, error: rpcError } = await supabase.rpc('insert_email_history', {
+            p_organization_id: organizationId,
+            p_to_email: toEmail,
+            p_subject: subject,
+            p_body_html: bodyHtml,
+            p_provider: provider,
+            p_order_id: orderId || null,
+            p_body_text: bodyText || null,
+        })
 
-        if (emailError) {
-            console.error('Error creando registro de email:', emailError)
+        if (rpcError || !emailId) {
+            console.error('Error creando registro de email:', rpcError)
             return NextResponse.json(
                 { error: 'Error al crear registro de email' },
+                { status: 500 }
+            )
+        }
+
+        // Obtener el registro completo usando la vista pública (solo lectura)
+        const { data: emailRecord, error: fetchError } = await supabase
+            .from('email_history')
+            .select('*')
+            .eq('id', emailId)
+            .single()
+
+        if (fetchError || !emailRecord) {
+            console.error('Error obteniendo registro de email:', fetchError)
+            return NextResponse.json(
+                { error: 'Error al obtener registro de email creado' },
                 { status: 500 }
             )
         }
@@ -74,12 +91,15 @@ export async function POST(request: NextRequest) {
         try {
             // Enviar email según el proveedor
             if (provider === 'gmail') {
-                const result = await sendGmailEmail(
-                    gmailAccessToken!,
+                // Usar cuenta compartida con firma personal
+                const result = await sendEmailWithSharedAccount(
+                    organizationId,
+                    user!.id,
                     toEmail,
                     subject,
                     bodyHtml,
-                    bodyText
+                    bodyText,
+                    includeSignature
                 )
                 messageId = result.messageId
             } else if (provider === 'sendgrid') {

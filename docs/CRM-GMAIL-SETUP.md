@@ -57,13 +57,23 @@ En `.env.local`:
 GOOGLE_CLIENT_ID=tu_client_id_aqui.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=tu_client_secret_aqui
 
+# Clave de encriptación (OBLIGATORIA para producción)
+# Generar una clave segura:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+ENCRYPTION_KEY=tu-clave-de-64-caracteres-hex-aqui
+
 # URLs (ya configuradas)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/admin/gmail/callback
 ```
 
 En **Vercel** (producción):
 - Agregar `GOOGLE_CLIENT_ID`
 - Agregar `GOOGLE_CLIENT_SECRET`
+- Agregar `ENCRYPTION_KEY` (MUY IMPORTANTE - debe ser la misma en todos los entornos)
+- Agregar `GOOGLE_REDIRECT_URI=https://app.tupatrimonio.app/api/admin/gmail/callback`
+
+⚠️ **IMPORTANTE**: Si conectas Gmail sin `ENCRYPTION_KEY` configurada, los tokens se encriptarán con una clave temporal que cambia en cada reinicio del servidor. Esto hará que los tokens sean inutilizables. **Siempre configura `ENCRYPTION_KEY` antes de conectar Gmail.**
 
 ---
 
@@ -260,6 +270,16 @@ Usuario puede revocar en cualquier momento:
 **Causa**: Access token expiró
 
 **Solución**: El sistema debería refrescar automáticamente. Si falla, reconectar Gmail.
+
+### Error: "Los tokens no se pueden desencriptar"
+
+**Causa**: Los tokens fueron encriptados con una clave temporal (sin `ENCRYPTION_KEY` configurada) o la `ENCRYPTION_KEY` cambió.
+
+**Solución**: 
+1. Configurar `ENCRYPTION_KEY` en `.env.local` (generar con: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+2. Reiniciar el servidor
+3. Reconectar Gmail desde Configuración > Gmail (desconectar y volver a conectar)
+4. Los nuevos tokens se encriptarán con la clave correcta
 
 ### No se guarda la actividad
 
