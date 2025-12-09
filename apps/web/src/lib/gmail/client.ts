@@ -46,6 +46,7 @@ export function getAuthUrl(state?: string): string {
   const scopes = [
     'https://www.googleapis.com/auth/gmail.send',
     'https://www.googleapis.com/auth/gmail.compose',
+    'https://www.googleapis.com/auth/gmail.readonly',
   ]
 
   return client.generateAuthUrl({
@@ -223,6 +224,8 @@ export async function getUserSignature(userId: string, organizationId: string) {
  * @param bodyHtml - Cuerpo HTML del email
  * @param bodyText - Cuerpo texto plano (opcional, se genera si no se proporciona)
  * @param includeSignature - Si incluir la firma personal (default: true)
+ * @param inReplyTo - Message-ID del email al que se está respondiendo (para threading)
+ * @param references - Array de Message-IDs de emails anteriores en el thread
  */
 export async function sendEmailWithSharedAccount(
   organizationId: string,
@@ -231,7 +234,10 @@ export async function sendEmailWithSharedAccount(
   subject: string,
   bodyHtml: string,
   bodyText?: string,
-  includeSignature: boolean = true
+  includeSignature: boolean = true,
+  inReplyTo?: string,
+  references?: string[],
+  threadId?: string
 ): Promise<{ messageId: string; threadId: string }> {
   // Obtener cuenta compartida
   const account = await getSharedGmailAccount(organizationId)
@@ -281,12 +287,37 @@ export async function sendEmailWithSharedAccount(
   // Crear mensaje en formato RFC 2822 con multipart (HTML + texto)
   const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   
-  const messageParts = [
+  // Construir headers base
+  const headers: string[] = [
     `To: ${to}`,
     `Subject: ${subject}`,
     `From: ${account.gmail_email_address || account.email_address}`,
     `MIME-Version: 1.0`,
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+  ]
+
+  // Agregar headers de threading si es una respuesta
+  if (inReplyTo) {
+    // Normalizar: remover <> existentes y agregar uno solo
+    const normalizedInReplyTo = inReplyTo.replace(/^<|>$/g, '').trim()
+    headers.push(`In-Reply-To: <${normalizedInReplyTo}>`)
+  }
+  
+  if (references && references.length > 0) {
+    // El formato de References es una lista separada por espacios
+    // Normalizar cada referencia: remover <> existentes y agregar uno solo
+    const referencesHeader = references
+      .map(ref => {
+        const normalized = ref.replace(/^<|>$/g, '').trim()
+        return `<${normalized}>`
+      })
+      .join(' ')
+    headers.push(`References: ${referencesHeader}`)
+  }
+
+  headers.push(`Content-Type: multipart/alternative; boundary="${boundary}"`)
+  
+  const messageParts = [
+    ...headers,
     '',
     `--${boundary}`,
     `Content-Type: text/plain; charset=utf-8`,
@@ -312,11 +343,19 @@ export async function sendEmailWithSharedAccount(
     .replace(/\//g, '_')
     .replace(/=+$/, '')
 
+  // Construir el request body
+  const requestBody: any = {
+    raw: encodedMessage,
+  }
+
+  // Si hay threadId, incluirlo para que Gmail agrupe automáticamente
+  if (threadId) {
+    requestBody.threadId = threadId
+  }
+
   const response = await gmail.users.messages.send({
     userId: 'me',
-    requestBody: {
-      raw: encodedMessage,
-    },
+    requestBody,
   })
 
   if (!response.data.id || !response.data.threadId) {

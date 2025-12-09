@@ -30,10 +30,9 @@ El CRM incluye integración completa con Gmail para enviar y recibir emails dire
    - User support email: tu email
    - Developer contact: tu email
    - Scopes: Agregar scopes de Gmail:
-     - `.../auth/gmail.send`
-     - `.../auth/gmail.readonly`
-     - `.../auth/gmail.modify`
-     - `.../auth/gmail.compose`
+     - `https://www.googleapis.com/auth/gmail.send`
+     - `https://www.googleapis.com/auth/gmail.compose`
+     - `https://www.googleapis.com/auth/gmail.readonly` (requerido para sincronización)
    - Test users: Agregar tus emails de prueba
 
 4. Crear OAuth client:
@@ -65,6 +64,11 @@ ENCRYPTION_KEY=tu-clave-de-64-caracteres-hex-aqui
 # URLs (ya configuradas)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/admin/gmail/callback
+
+# Secret para cron job de sincronización automática (producción)
+# Generar una clave segura:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+CRON_SECRET=tu-clave-secreta-para-cron-aqui
 ```
 
 En **Vercel** (producción):
@@ -72,6 +76,7 @@ En **Vercel** (producción):
 - Agregar `GOOGLE_CLIENT_SECRET`
 - Agregar `ENCRYPTION_KEY` (MUY IMPORTANTE - debe ser la misma en todos los entornos)
 - Agregar `GOOGLE_REDIRECT_URI=https://app.tupatrimonio.app/api/admin/gmail/callback`
+- Agregar `CRON_SECRET` (requerido para sincronización automática)
 
 ⚠️ **IMPORTANTE**: Si conectas Gmail sin `ENCRYPTION_KEY` configurada, los tokens se encriptarán con una clave temporal que cambia en cada reinicio del servidor. Esto hará que los tokens sean inutilizables. **Siempre configura `ENCRYPTION_KEY` antes de conectar Gmail.**
 
@@ -271,6 +276,16 @@ Usuario puede revocar en cualquier momento:
 
 **Solución**: El sistema debería refrescar automáticamente. Si falla, reconectar Gmail.
 
+### Error: "Request had insufficient authentication scopes"
+
+**Causa**: Los tokens OAuth no tienen todos los scopes necesarios (faltan permisos de lectura).
+
+**Solución**: 
+1. Ve a `/admin/communications/gmail`
+2. Desconecta la cuenta Gmail actual
+3. Reconecta Gmail (esto solicitará los nuevos permisos incluyendo `gmail.readonly`)
+4. Los nuevos tokens tendrán todos los scopes necesarios para sincronización
+
 ### Error: "Los tokens no se pueden desencriptar"
 
 **Causa**: Los tokens fueron encriptados con una clave temporal (sin `ENCRYPTION_KEY` configurada) o la `ENCRYPTION_KEY` cambió.
@@ -339,12 +354,56 @@ WHERE organization_id = 'your-org-id';
 
 ---
 
+## 🔄 Sincronización Automática de Emails
+
+El sistema incluye dos métodos de sincronización automática:
+
+### 1. Polling Automático en Frontend
+
+Cuando el inbox está abierto, se sincroniza automáticamente cada 2 minutos:
+- ✅ Activo por defecto
+- ✅ Se puede desactivar con el switch "Auto-sincronizar"
+- ✅ Muestra la hora de la última sincronización
+- ✅ Solo funciona mientras la página está abierta
+
+### 2. Cron Job con Vercel (Producción)
+
+Sincronización automática cada 5 minutos en background:
+- ✅ Funciona aunque nadie esté viendo el inbox
+- ✅ Configurado en `vercel.json`
+- ✅ Requiere `CRON_SECRET` en variables de entorno
+- ✅ Ruta: `/api/cron/sync-emails`
+
+**Configuración del Cron:**
+
+El cron está configurado en `vercel.json`:
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/sync-emails",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
+
+**Verificar que funciona:**
+
+1. En Vercel Dashboard, ve a tu proyecto
+2. Click en **Settings** → **Cron Jobs**
+3. Deberías ver el cron `sync-emails` ejecutándose cada 5 minutos
+4. Revisa los logs para verificar que está funcionando
+
+---
+
 ## 🔮 Features Futuras
 
-- [ ] Leer emails del inbox
-- [ ] Threading de conversaciones
+- [x] Leer emails del inbox ✅
+- [x] Threading de conversaciones ✅
+- [x] Sincronización automática ✅
 - [ ] Templates de email
-- [ ] Firma automática
+- [x] Firma automática ✅
 - [ ] Tracking de opens/clicks (requiere webhook)
 - [ ] Adjuntos
 - [ ] Email scheduling
