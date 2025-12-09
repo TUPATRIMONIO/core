@@ -48,9 +48,27 @@ export function RefundModal({
     const [reason, setReason] = useState('')
     const [notes, setNotes] = useState('')
 
+    // Resetear el monto cuando se abre el modal
+    const handleOpenChange = (newOpen: boolean) => {
+        setOpen(newOpen)
+        if (newOpen) {
+            // Resetear al monto completo cuando se abre el modal
+            setAmount(orderAmount.toString())
+            setReason('')
+            setNotes('')
+        }
+    }
+
     const canRefund = orderStatus !== 'cancelled' && orderStatus !== 'refunded' && hasPayment
 
     const handleRefund = async () => {
+        // Log del estado actual antes de procesar
+        console.log('[RefundModal] Estado actual:', {
+            amountState: amount,
+            amountParsed: parseFloat(amount),
+            orderAmount,
+        })
+
         if (!amount || parseFloat(amount) <= 0) {
             toast.error('El monto debe ser mayor a 0')
             return
@@ -63,13 +81,24 @@ export function RefundModal({
 
         setIsLoading(true)
         try {
+            const refundAmount = parseFloat(amount)
+            console.log('[RefundModal] Enviando reembolso:', {
+                orderId,
+                amount: refundAmount,
+                amountString: amount,
+                currency: orderCurrency,
+                refund_destination: refundDestination,
+                orderAmount,
+            })
+            console.log('[RefundModal] Monto parseado:', refundAmount, 'Tipo:', typeof refundAmount)
+
             const response = await fetch(`/api/admin/orders/${orderId}/refund`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: parseFloat(amount),
+                    amount: refundAmount,
                     currency: orderCurrency,
                     refund_destination: refundDestination,
                     reason: reason || undefined,
@@ -95,7 +124,7 @@ export function RefundModal({
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button 
                     variant="destructive" 
@@ -161,12 +190,28 @@ export function RefundModal({
 
                     <div className="space-y-2">
                         <Label htmlFor="reason">Razón del Reembolso (Opcional)</Label>
-                        <Input
-                            id="reason"
+                        <Select
                             value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="Ej: Cliente solicitó cancelación"
-                        />
+                            onValueChange={(value) => setReason(value)}
+                        >
+                            <SelectTrigger id="reason">
+                                <SelectValue placeholder="Selecciona una razón" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="requested_by_customer">
+                                    Cliente solicitó el reembolso
+                                </SelectItem>
+                                <SelectItem value="duplicate">
+                                    Pago duplicado
+                                </SelectItem>
+                                <SelectItem value="fraudulent">
+                                    Transacción fraudulenta
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                            Selecciona la razón principal del reembolso
+                        </p>
                     </div>
 
                     <div className="space-y-2">

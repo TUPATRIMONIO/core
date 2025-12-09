@@ -375,8 +375,13 @@ class TransbankClient {
   /**
    * Reembolsa una transacción WebPay Plus
    * 
+   * Según la documentación oficial de Transbank:
+   * - El método HTTP debe ser POST
+   * - Solo se requiere el campo 'amount' en el body
+   * - El token en la URL identifica la transacción
+   * 
    * @param token - Token de la transacción original
-   * @param buyOrder - Orden de compra original
+   * @param buyOrder - Orden de compra original (no se usa en el body, solo para logging)
    * @param amount - Monto a reembolsar
    * @returns Respuesta del reembolso
    */
@@ -387,10 +392,9 @@ class TransbankClient {
   ): Promise<TransbankRefundResponse> {
     return this.makeRequest<TransbankRefundResponse>(
       `/rswebpaytransaction/api/webpay/v1.2/transactions/${token}/refunds`,
-      'PUT',
+      'POST',
       this.webpayPlusCredentials,
       {
-        buy_order: buyOrder,
         amount: amount,
       }
     );
@@ -399,22 +403,49 @@ class TransbankClient {
   /**
    * Reembolsa una transacción OneClick
    * 
-   * @param token - Token de la transacción original
-   * @param buyOrder - Orden de compra original
+   * Según la documentación oficial de Transbank:
+   * - El método HTTP debe ser POST
+   * - Solo se requiere el campo 'amount' en el body
+   * - El token (buy_order) en la URL identifica la transacción
+   * 
+   * @param token - Token de la transacción original (buy_order para OneClick)
+   * @param buyOrder - Orden de compra original (no se usa en el body, solo para logging)
    * @param amount - Monto a reembolsar
    * @returns Respuesta del reembolso
    */
   async refundOneclickTransaction(
     token: string,
-    buyOrder: string,
+    detailBuyOrder: string,
+    storeCommerceCode: string,
     amount: number
   ): Promise<TransbankRefundResponse> {
+    // Para reembolsos OneClick Mall, usar credenciales del Mall (no de la tienda)
+    // Según la documentación de Transbank:
+    // - El buy_order en la URL es el del Mall
+    // - El body debe contener: commerce_code (de la tienda), detail_buy_order (buy_order de la tienda) y amount
+    if (!this.oneclickCredentials.commerceCode || !this.oneclickCredentials.apiKeySecret) {
+      throw new Error(
+        'Credenciales de Mall OneClick no configuradas. ' +
+        'Verifica las variables de entorno TRANSBANK_MALL_ONECLICK_COMMERCE_CODE y TRANSBANK_MALL_ONECLICK_API_KEY_SECRET'
+      )
+    }
+
+    console.log('🔄 [Transbank OneClick Refund] Usando credenciales del Mall:', {
+      mallCommerceCode: this.oneclickCredentials.commerceCode.substring(0, 10) + '...',
+      storeCommerceCode: storeCommerceCode.substring(0, 10) + '...',
+      environment: this.environment,
+      token, // buy_order del Mall (en URL)
+      detailBuyOrder, // buy_order de la tienda (en body)
+      amount,
+    })
+
     return this.makeRequest<TransbankRefundResponse>(
       `/rswebpaytransaction/api/oneclick/v1.2/transactions/${token}/refunds`,
-      'PUT',
-      this.tiendaMallOneclickCredentials,
+      'POST',
+      this.oneclickCredentials, // Usar credenciales del Mall para reembolsos
       {
-        buy_order: buyOrder,
+        commerce_code: storeCommerceCode, // commerce_code de la tienda (requerido para Mall)
+        detail_buy_order: detailBuyOrder, // buy_order de la tienda (requerido para Mall)
         amount: amount,
       }
     );

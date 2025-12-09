@@ -23,6 +23,7 @@ import {
   Wallet,
   ShoppingCart,
   UsersRound,
+  RefreshCw,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -125,6 +126,11 @@ const billingMenuItems = [
     title: 'Pagos',
     url: '/admin/billing/payments',
     icon: DollarSign,
+  },
+  {
+    title: 'Reembolsos',
+    url: '/admin/refunds',
+    icon: RefreshCw,
   },
   {
     title: 'Retiros',

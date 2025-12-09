@@ -44,8 +44,9 @@ export async function createStripeRefund(
       throw new Error('Este pago no es de Stripe')
     }
 
-    if (payment.status !== 'completed') {
-      throw new Error('El pago no está completado, no se puede reembolsar')
+    // Los pagos de Stripe completados tienen status 'succeeded' en nuestra BD
+    if (payment.status !== 'succeeded' && payment.status !== 'completed') {
+      throw new Error(`El pago no está completado (estado actual: ${payment.status}), no se puede reembolsar`)
     }
 
     // El provider_payment_id puede ser un PaymentIntent ID o Charge ID
@@ -82,16 +83,42 @@ export async function createStripeRefund(
       ? Math.round(params.amount) 
       : Math.round(params.amount * 100)
 
+    console.log('[createStripeRefund] Monto del reembolso:', {
+      originalAmount: params.amount,
+      currency: params.currency,
+      isZeroDecimal,
+      refundAmount,
+      chargeId,
+    })
+
+    // Validar la razón del reembolso (debe ser uno de los valores válidos de Stripe)
+    // Stripe solo acepta: 'duplicate', 'fraudulent', 'requested_by_customer'
+    let stripeReason: Stripe.RefundCreateParams.Reason | undefined = undefined
+    if (params.reason) {
+      // Si la razón es uno de los valores válidos de Stripe, usarla directamente
+      if (['duplicate', 'fraudulent', 'requested_by_customer'].includes(params.reason)) {
+        stripeReason = params.reason as Stripe.RefundCreateParams.Reason
+      }
+      // Si no es válida, dejamos undefined (Stripe lo acepta)
+    }
+
     // Crear reembolso en Stripe
     const refundParams: Stripe.RefundCreateParams = {
       charge: chargeId,
-      amount: refundAmount,
-      reason: params.reason as Stripe.RefundCreateParams.Reason | undefined,
+      amount: refundAmount, // IMPORTANTE: Si no se especifica amount, Stripe reembolsa el total
+      reason: stripeReason,
       metadata: {
         order_id: params.orderId,
         payment_id: params.paymentId,
+        original_reason: params.reason || undefined, // Guardamos la razón original en metadata
       },
     }
+
+    console.log('[createStripeRefund] Parámetros del reembolso:', {
+      charge: chargeId,
+      amount: refundAmount,
+      reason: refundParams.reason,
+    })
 
     const refund = await stripe.refunds.create(refundParams)
 

@@ -23,7 +23,12 @@ export async function POST(
             notes 
         } = body
 
-        console.log('[refund] Request body:', { refund_destination, amount, currency })
+        console.log('[refund] Request body:', { 
+            refund_destination, 
+            amount, 
+            amountType: typeof amount,
+            currency 
+        })
 
         if (!amount || !currency || !refund_destination) {
             return NextResponse.json(
@@ -141,45 +146,52 @@ export async function POST(
                 providerRefundId = stripeResult.refundId
                 refundResult = stripeResult
             } else if (payment.provider === 'transbank') {
-                // Determinar si es WebPay Plus o OneClick
-                // Por ahora, intentamos WebPay Plus primero
-                const transbankResult = await createTransbankWebpayRefund({
-                    orderId,
-                    paymentId: payment.id,
-                    amount,
-                    currency,
-                    reason,
-                })
-
-                if (!transbankResult.success) {
-                    // Intentar OneClick si WebPay falla
-                    const oneclickResult = await createTransbankOneclickRefund({
+                // Determinar el tipo de transacción basándose en los metadatos del pago
+                const metadata = payment.metadata && typeof payment.metadata === 'object' 
+                    ? payment.metadata as any 
+                    : {}
+                
+                const isOneClick = metadata.payment_method === 'oneclick' || !!metadata.tbk_user
+                
+                let transbankResult: any
+                
+                if (isOneClick) {
+                    // Es una transacción OneClick
+                    console.log('[refund] Procesando reembolso OneClick')
+                    transbankResult = await createTransbankOneclickRefund({
                         orderId,
                         paymentId: payment.id,
                         amount,
                         currency,
                         reason,
                     })
-
-                    if (!oneclickResult.success) {
-                        await supabase.rpc('update_refund_request', {
-                            p_refund_request_id: refundRequest.id,
-                            p_status: 'rejected',
-                            p_notes: `Error: ${oneclickResult.error}`,
-                        })
-
-                        return NextResponse.json(
-                            { error: oneclickResult.error || 'Error al procesar el reembolso' },
-                            { status: 500 }
-                        )
-                    }
-
-                    providerRefundId = oneclickResult.refundId
-                    refundResult = oneclickResult
                 } else {
-                    providerRefundId = transbankResult.refundId
-                    refundResult = transbankResult
+                    // Es una transacción Webpay Plus
+                    console.log('[refund] Procesando reembolso Webpay Plus')
+                    transbankResult = await createTransbankWebpayRefund({
+                        orderId,
+                        paymentId: payment.id,
+                        amount,
+                        currency,
+                        reason,
+                    })
                 }
+
+                if (!transbankResult.success) {
+                    await supabase.rpc('update_refund_request', {
+                        p_refund_request_id: refundRequest.id,
+                        p_status: 'rejected',
+                        p_notes: `Error: ${transbankResult.error}`,
+                    })
+
+                    return NextResponse.json(
+                        { error: transbankResult.error || 'Error al procesar el reembolso' },
+                        { status: 500 }
+                    )
+                }
+
+                providerRefundId = transbankResult.refundId
+                refundResult = transbankResult
             } else {
                 return NextResponse.json(
                     { error: 'Proveedor de pago no soportado para reembolsos' },

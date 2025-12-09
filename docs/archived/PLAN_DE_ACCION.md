@@ -1,12 +1,12 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅  
-> **🎯 Próximo milestone:** Integración con flujos automáticos de pedidos + SendGrid producción 📋
+> **📅 Última actualización:** Diciembre 8, 2025  
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅  
+> **🎯 Próximo milestone:** Pruebas de reembolsos con Stripe y Transbank + Integración con flujos automáticos de pedidos 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **PRÓXIMO: Integración con flujos automáticos de pedidos + SendGrid producción** 📋
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **PRÓXIMO: Pruebas de reembolsos con Stripe y Transbank + Integración con flujos automáticos de pedidos** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversión bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios pueden convertir su organización entre tipos personal y empresarial desde la interfaz, con advertencias automáticas y actualización de límites del CRM. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
@@ -29,6 +29,13 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Admin Panel Core - Schema Core 100% funcional** (Nov 21, 2025)
 - ✅ **Sistema de Créditos y Billing 100% completo** (Nov 22, 2025)
 - ✅ **Sistema de Pagos Completo - Stripe, Transbank Webpay Plus y OneClick funcionando correctamente** (Enero 2025)
+- ✅ **Sistema de Operaciones y Reembolsos Completo** (Dic 8, 2025)
+  - Panel de operaciones con gestión de pedidos
+  - Pipelines configurables con etapas globales
+  - Sistema de reembolsos (Stripe, Transbank, Créditos)
+  - Sistema de comunicaciones (Gmail, SendGrid)
+  - Sistema de retiros de monedero digital
+  - Vista de créditos y movimientos en detalle de organización
   - Integraciones probadas y funcionando en producción
   - Webhooks configurados y procesando correctamente
   - Páginas de success verificando estado inmediatamente
@@ -2426,6 +2433,129 @@ Al completar Fase 0:
       1. "Tu pedido fue creado"
       2. "Pago confirmado"
       3. "Pedido completado exitosamente"
+
+#### ✅ **COMPLETADO - SISTEMA DE OPERACIONES Y REEMBOLSOS (Dic 8, 2025):**
+
+**🎯 Objetivo:** Reemplazar la combinación WordPress + Make.com + HubSpot con un sistema interno propio para gestión de pedidos, operaciones y reembolsos.
+
+**✅ FASE 1: PANEL DE OPERACIONES - COMPLETADO:**
+- ✅ Vista centralizada para equipo de atención al cliente
+- ✅ Lista de pedidos (`/admin/orders`) con filtros y paginación
+- ✅ Detalle de pedidos (`/admin/orders/[id]`) con información completa
+- ✅ Integración con sidebar admin
+- ✅ Sistema de navegación y filtros funcional
+
+**✅ FASE 2: PIPELINES CONFIGURABLES - COMPLETADO:**
+- ✅ Schema `billing.order_pipeline_stages` creado
+- ✅ Etapas globales por defecto:
+  - Pendiente de Pago (pending_payment) - 🟡 Yellow
+  - Pagado (paid) - 🔵 Blue
+  - En Proceso (processing) - 🟠 Orange
+  - Completado (completed) - 🟢 Green [FINAL]
+  - Cancelado (cancelled) - ⚫ Gray [FINAL]
+  - Reembolsado (refunded) - 🔴 Red [FINAL]
+- ✅ Componente `OrderStatusSelector` para cambio manual de estado
+- ✅ API route `/api/admin/orders/[id]/status` para actualización
+- ✅ API route `/api/admin/orders/pipeline-stages` para obtener etapas
+- ✅ Migración: `20251207000001_create_order_pipeline_stages.sql`
+
+**✅ FASE 3: ANULACIONES Y REEMBOLSOS - COMPLETADO:**
+- ✅ Schema `billing.refund_requests` creado con tipos:
+  - `refund_destination`: payment_method, wallet
+  - `refund_status`: pending, approved, processing, completed, rejected
+- ✅ Integración Stripe Refunds API
+  - Función `createStripeRefund()` en `lib/stripe/refunds.ts`
+  - Manejo de errores y logging completo
+- ✅ Integración Transbank Refunds
+  - Función `createTransbankWebpayRefund()` para Webpay Plus
+  - Función `createTransbankOneclickRefund()` para OneClick
+  - Cliente Transbank extendido con métodos de reembolso
+- ✅ Reembolso a Créditos/Monedero Digital
+  - Función RPC `credits.add_refund_credits()` creada
+  - Wrapper público `public.add_refund_credits()` para acceso desde API
+  - Integración con sistema de créditos existente
+- ✅ API route `/api/admin/orders/[id]/refund` unificada
+  - Maneja reembolsos a tarjeta (Stripe/Transbank)
+  - Maneja reembolsos a créditos/monedero
+  - Actualización automática de estado de pedido
+  - Logging completo de transacciones
+- ✅ Componente `RefundModal` para UI de reembolsos
+  - Selector de destino (tarjeta original o monedero)
+  - Campo de razón y notas
+  - Validaciones y manejo de errores
+- ✅ Funciones RPC para evitar problemas con vistas:
+  - `billing.create_refund_request()` + wrapper `public.create_refund_request()`
+  - `billing.update_refund_request()` + wrapper `public.update_refund_request()`
+- ✅ Migraciones aplicadas:
+  - `20251207000002_create_refund_requests.sql`
+  - `20251208000001_add_create_refund_request_rpc.sql`
+  - `20251208000002_add_public_add_refund_credits_wrapper.sql`
+  - `20251208000003_add_update_refund_request_rpc.sql`
+- ✅ **PRUEBAS EXITOSAS:**
+  - ✅ Reembolso a créditos probado y funcionando correctamente
+  - ✅ Créditos agregados correctamente a la cuenta de la organización
+  - ✅ Transacción registrada en historial de créditos
+  - ✅ Estado del pedido actualizado a "Reembolsado"
+  - ⏳ Pendiente: Pruebas con Stripe y Transbank
+
+**✅ FASE 4: COMUNICACIONES - COMPLETADO:**
+- ✅ Schema `communications.email_history` creado
+- ✅ Integración Gmail API
+  - Cliente OAuth2 configurado (`lib/gmail/client.ts`)
+  - Manejo de tokens y refresh automático
+- ✅ Integración SendGrid mejorada
+  - Cliente actualizado para compatibilidad con nuevo sistema
+- ✅ API route `/api/admin/communications/email/send`
+  - Soporte para Gmail y SendGrid
+  - Logging automático en `email_history`
+  - Manejo de errores robusto
+- ✅ Migración: `20251207000003_create_email_history.sql`
+- 📋 **PAUSADO:** WhatsApp Business API migration (requiere migración de números desde HubSpot)
+
+**✅ FASE 5: RETIROS DE MONEDERO - COMPLETADO:**
+- ✅ Schema `credits.withdrawal_requests` creado
+- ✅ Tipo `withdrawal_status`: pending, approved, processing, completed, rejected
+- ✅ Vista pública `public.withdrawal_requests` con información relacionada
+- ✅ Función RPC `credits.deduct_credits_for_withdrawal()`
+  - Deduce créditos de la cuenta
+  - Crea transacción de tipo 'spent'
+  - Validación de balance disponible
+- ✅ Página admin `/admin/billing/withdrawals` para listar solicitudes
+- ✅ Página admin `/admin/billing/withdrawals/[id]` para detalle
+- ✅ Componente `WithdrawalActions` para acciones admin (aprobar, rechazar, procesar, completar)
+- ✅ API route `/api/admin/billing/withdrawals/[id]/status` para actualizar estado
+- ✅ Página usuario `/wallet/withdraw` para solicitar retiros
+- ✅ Componente `WithdrawForm` para formulario de solicitud
+- ✅ API route `/api/wallet/withdraw` para crear solicitudes
+- ✅ Integración con sidebar admin (link "Retiros" en Facturación)
+- ✅ Migración: `20251207000004_create_withdrawal_requests.sql`
+
+**✅ MEJORAS ADICIONALES:**
+- ✅ Vista de créditos y movimientos en detalle de organización
+  - Sección agregada en `/admin/organizations/[id]`
+  - Muestra balance total, disponible, reservado y total ganado
+  - Lista de movimientos recientes (últimos 20)
+  - Indicadores visuales (verde para ingresos, rojo para gastos)
+  - Fecha, hora y balance después de cada transacción
+- ✅ Verificación de reembolsos exitosa
+  - Los créditos se agregan correctamente
+  - Las transacciones aparecen en el historial
+  - El balance se actualiza correctamente
+
+**📄 ARCHIVOS CREADOS/MODIFICADOS:**
+- Migraciones SQL: 4 nuevas migraciones
+- Componentes React: `OrderStatusSelector`, `RefundModal`, `WithdrawalActions`, `WithdrawForm`
+- API Routes: 5 nuevas rutas
+- Utilidades: `lib/stripe/refunds.ts`, `lib/transbank/refunds.ts`, `lib/credits/refunds.ts`, `lib/gmail/client.ts`
+- Páginas: 4 nuevas páginas admin/usuario
+- Funciones RPC: 4 nuevas funciones (2 en billing, 2 en credits)
+
+**🎯 PRÓXIMOS PASOS:**
+- ⏳ Pruebas de reembolsos con Stripe
+- ⏳ Pruebas de reembolsos con Transbank (Webpay Plus y OneClick)
+- 📋 Configuración de pipelines personalizados por organización (futuro)
+- 📋 Acciones automáticas en pipelines (futuro)
+- 📋 Migración WhatsApp Business API (cuando se migren números desde HubSpot)
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
 - 📋 Integración GitHub para migraciones automáticas

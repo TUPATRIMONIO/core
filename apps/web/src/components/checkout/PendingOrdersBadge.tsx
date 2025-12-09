@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ShoppingCart, Loader2, XCircle, CreditCard, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,7 @@ import {
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -33,27 +33,58 @@ interface PendingOrder {
 
 export function PendingOrdersBadge() {
   const router = useRouter();
+  const pathname = usePathname();
   const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
   const [organizationIds, setOrganizationIds] = useState<string[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const supabase = createClient();
 
+  // Verificar si estamos en una página de admin
+  const isAdminPage = pathname?.startsWith('/admin');
+
   // Función para cargar órdenes pendientes
-  const fetchPendingOrders = async () => {
+  const fetchPendingOrders = useCallback(async () => {
+    // No hacer polling en páginas de admin
+    if (isAdminPage) {
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Verificar autenticación antes de hacer la petición
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        // Limpiar interval si existe
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/checkout/pending');
       if (response.ok) {
         const data = await response.json();
         setOrders(data.orders || []);
+      } else if (response.status === 401) {
+        // Si recibimos 401, detener el polling
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        setLoading(false);
+        return;
       }
     } catch (error) {
       console.error('Error fetching pending orders:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdminPage, supabase]);
 
   // Obtener organizaciones del usuario
   const fetchUserOrganizations = async () => {
@@ -88,18 +119,44 @@ export function PendingOrdersBadge() {
 
   // Configurar suscripción Realtime
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    // No configurar nada si estamos en una página de admin
+    if (isAdminPage) {
+      // Limpiar cualquier intervalo o canal existente
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+      setLoading(false);
+      setOrders([]);
+      return;
+    }
+
     let isMounted = true;
 
     const setupRealtime = async () => {
+      // Verificar nuevamente si estamos en admin antes de continuar
+      if (isAdminPage) {
+        return;
+      }
+
       // Obtener organizaciones del usuario primero
       const orgIds = await fetchUserOrganizations();
       
       if (!orgIds || orgIds.length === 0) {
-        console.log('[PendingOrdersBadge] Usuario sin organizaciones, usando solo polling');
         // Cargar órdenes y configurar polling como fallback
         await fetchPendingOrders();
-        interval = setInterval(fetchPendingOrders, 60000); // 60 segundos como fallback
+        if (isMounted && !isAdminPage && !intervalRef.current) {
+          intervalRef.current = setInterval(() => {
+            // Verificar nuevamente antes de cada ejecución
+            if (!isAdminPage) {
+              fetchPendingOrders();
+            }
+          }, 60000); // 60 segundos como fallback
+        }
         return;
       }
 
@@ -109,92 +166,98 @@ export function PendingOrdersBadge() {
       // Cargar órdenes iniciales
       await fetchPendingOrders();
 
-      // Configurar suscripción Realtime
-      // Nota: RLS de Supabase protegerá los datos, solo recibiremos órdenes de las organizaciones del usuario
-      const channel = supabase
-        .channel('pending-orders-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-          },
-          (payload) => {
-            if (!isMounted) return;
+      // Configurar suscripción Realtime solo si no estamos en admin
+      if (!isAdminPage) {
+        // Nota: RLS de Supabase protegerá los datos, solo recibiremos órdenes de las organizaciones del usuario
+        const channel = supabase
+          .channel('pending-orders-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'orders',
+            },
+            (payload) => {
+              if (!isMounted || isAdminPage) return;
 
-            const updatedOrder = payload.new as any;
-            const oldOrder = payload.old as any;
+              const updatedOrder = payload.new as any;
+              const oldOrder = payload.old as any;
 
-            // Verificar que la orden pertenece a una de las organizaciones del usuario
-            if (!orgIdsRef.current.includes(updatedOrder?.organization_id)) {
-              return;
-            }
+              // Verificar que la orden pertenece a una de las organizaciones del usuario
+              if (!orgIdsRef.current.includes(updatedOrder?.organization_id)) {
+                return;
+              }
 
-            // Solo procesar si el status cambió de pending_payment a paid o cancelled
-            if (
-              oldOrder?.status === 'pending_payment' &&
-              (updatedOrder?.status === 'paid' || updatedOrder?.status === 'cancelled')
-            ) {
-              console.log('[PendingOrdersBadge] Orden actualizada vía Realtime:', {
-                orderId: updatedOrder.id,
-                oldStatus: oldOrder.status,
-                newStatus: updatedOrder.status,
-              });
+              // Solo procesar si el status cambió de pending_payment a paid o cancelled
+              if (
+                oldOrder?.status === 'pending_payment' &&
+                (updatedOrder?.status === 'paid' || updatedOrder?.status === 'cancelled')
+              ) {
+                // Remover la orden del estado local
+                setOrders((currentOrders) =>
+                  currentOrders.filter((order) => order.id !== updatedOrder.id)
+                );
 
-              // Remover la orden del estado local
-              setOrders((currentOrders) =>
-                currentOrders.filter((order) => order.id !== updatedOrder.id)
-              );
-
-              // Mostrar notificación si fue pagada
-              if (updatedOrder.status === 'paid') {
-                toast.success('Orden pagada exitosamente');
+                // Mostrar notificación si fue pagada
+                if (updatedOrder.status === 'paid') {
+                  toast.success('Orden pagada exitosamente');
+                }
               }
             }
-          }
-        )
-        .subscribe((status) => {
-          console.log('[PendingOrdersBadge] Estado de suscripción Realtime:', status);
-          
-          if (status === 'SUBSCRIBED') {
-            console.log('[PendingOrdersBadge] Suscripción Realtime activa');
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('[PendingOrdersBadge] Error en canal Realtime, usando polling como fallback');
-            // Configurar polling como fallback si Realtime falla
-            interval = setInterval(fetchPendingOrders, 60000);
-          }
-        });
+          )
+          .subscribe((status) => {
+            if (status === 'CHANNEL_ERROR') {
+              // Configurar polling como fallback si Realtime falla
+              if (isMounted && !isAdminPage && !intervalRef.current) {
+                intervalRef.current = setInterval(() => {
+                  // Verificar nuevamente antes de cada ejecución
+                  if (!isAdminPage) {
+                    fetchPendingOrders();
+                  }
+                }, 60000);
+              }
+            }
+          });
 
-      channelRef.current = channel;
+        channelRef.current = channel;
 
-      // Configurar polling como respaldo (intervalo más largo ya que Realtime es principal)
-      interval = setInterval(fetchPendingOrders, 60000); // 60 segundos
+        // Configurar polling como respaldo (intervalo más largo ya que Realtime es principal)
+        if (!intervalRef.current) {
+          intervalRef.current = setInterval(() => {
+            // Verificar nuevamente antes de cada ejecución
+            if (!isAdminPage) {
+              fetchPendingOrders();
+            }
+          }, 60000); // 60 segundos
+        }
+      }
     };
 
     setupRealtime();
 
     // Escuchar eventos de actualización de órdenes para refrescar inmediatamente (compatibilidad)
     const handleOrderUpdate = () => {
-      console.log('[PendingOrdersBadge] Evento de actualización recibido, refrescando órdenes...');
-      fetchPendingOrders();
+      if (!isAdminPage) {
+        fetchPendingOrders();
+      }
     };
 
     window.addEventListener('order:status-updated', handleOrderUpdate);
 
     return () => {
       isMounted = false;
-      if (interval) {
-        clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
       if (channelRef.current) {
-        console.log('[PendingOrdersBadge] Limpiando suscripción Realtime');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
       window.removeEventListener('order:status-updated', handleOrderUpdate);
     };
-  }, []);
+  }, [isAdminPage, fetchPendingOrders, supabase]);
 
   const handleContinuePayment = (orderId: string) => {
     router.push(`/checkout/${orderId}`);
@@ -313,6 +376,11 @@ export function PendingOrdersBadge() {
     
     return labels[productType] || productType;
   };
+
+  // Si estamos en una página de admin, no mostrar nada
+  if (isAdminPage) {
+    return null;
+  }
 
   if (loading) {
     return (

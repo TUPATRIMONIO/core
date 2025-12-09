@@ -81,9 +81,13 @@ export async function createTransbankPaymentForOrder(
   // Actualizar orden a pending_payment (sin crear invoice)
   await updateOrderStatus(orderId, 'pending_payment');
   
-  // Generar buy_order único (máximo 26 caracteres) usando order_id
+  // Generar buy_order único (máximo 26 caracteres) incluyendo order_number para fácil identificación
+  // Formato: TP-{order_number}-{orderId} (truncado a 26 caracteres)
   const orderIdClean = orderId.replace(/-/g, ''); // Remover guiones
-  const buyOrder = `TP-${orderIdClean.substring(orderIdClean.length - 20)}`.substring(0, 26);
+  const orderNumber = (order.order_number || '').substring(0, 6); // Máximo 6 dígitos para order_number
+  // Calcular espacio disponible: "TP-" (3) + order_number (máx 6) + "-" (1) = 10, resto 16 para orderId
+  const orderIdPart = orderIdClean.substring(orderIdClean.length - 16);
+  const buyOrder = `TP-${orderNumber}-${orderIdPart}`.substring(0, 26);
   const sessionId = `session-${Date.now()}-${order.organization_id.substring(0, 10)}`;
   
   // Crear transacción en Transbank
@@ -525,12 +529,16 @@ export async function createOneclickPaymentForOrder(
   await updateOrderStatus(orderId, 'pending_payment');
   
   // Generar buy_order único para el mall (padre) - máximo 26 caracteres
-  // Usar orderId para generar IDs únicos
+  // Formato: TP{order_number}{orderId} (sin guiones para ahorrar caracteres)
   const orderIdClean = orderId.replace(/-/g, ''); // Remover guiones
-  const buyOrder = `TP${orderIdClean.substring(orderIdClean.length - 23)}`.substring(0, 26);
+  const orderNumber = (order.order_number || '').substring(0, 6); // Máximo 6 dígitos para order_number
+  // Calcular espacio disponible: "TP" (2) + order_number (máx 6) = 8, resto 18 para orderId
+  const orderIdPart = orderIdClean.substring(orderIdClean.length - 18);
+  const buyOrder = `TP${orderNumber}${orderIdPart}`.substring(0, 26);
   
   // Generar buy_order único para la tienda (hijo) - máximo 26 caracteres
-  const storeBuyOrder = `ST${orderIdClean.substring(orderIdClean.length - 24)}`.substring(0, 26);
+  // Formato: ST{order_number}{orderId} (sin guiones para ahorrar caracteres)
+  const storeBuyOrder = `ST${orderNumber}${orderIdPart}`.substring(0, 26);
   
   // Obtener commerce_code de la tienda
   const storeCommerceCode = process.env.TRANSBANK_TIENDA_MALL_ONECLICK_COMMERCE_CODE || 
