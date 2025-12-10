@@ -1,16 +1,59 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 8, 2025  
-> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅  
-> **🎯 Próximo milestone:** Pruebas de reembolsos con Stripe y Transbank + Integración con flujos automáticos de pedidos 📋
+> **📅 Última actualización:** Diciembre 8, 2025\
+> **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
+> **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
+> ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
+> **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3:
+> COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
+> Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
+> **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
+> FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ +
+> **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
+> INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
+> B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
+> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅\
+> **🎯 Próximo milestone:** Pruebas de reembolsos con Stripe y Transbank +
+> Integración con flujos automáticos de pedidos 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
-**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **PRÓXIMO: Pruebas de reembolsos con Stripe y Transbank + Integración con flujos automáticos de pedidos** 📋
+**Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE
+FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN
+PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL
+DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN
+COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA
+NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe,
+Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN
+INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C
+↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
+(Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **PRÓXIMO:
+Pruebas de reembolsos con Stripe y Transbank + Integración con flujos
+automáticos de pedidos** 📋
 
-Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y optimizaciones están implementadas y funcionando. El sitio marketing está completamente operacional con contenido real. **NUEVO:** Sistema de administración completo para gestionar el schema core multi-tenant implementado y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):** Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS. **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen organización personal. Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversión bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios pueden convertir su organización entre tipos personal y empresarial desde la interfaz, con advertencias automáticas y actualización de límites del CRM. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
+Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y
+optimizaciones están implementadas y funcionando. El sitio marketing está
+completamente operacional con contenido real. **NUEVO:** Sistema de
+administración completo para gestionar el schema core multi-tenant implementado
+y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación
+con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):**
+Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad
+completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las
+páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS.
+**NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular
+(B2C/B2B) sin restricciones, usando la organización platform cuando no tienen
+organización personal. Helper `getUserActiveOrganization()` implementado para
+manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversión
+bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
+pueden convertir su organización entre tipos personal y empresarial desde la
+interfaz, con advertencias automáticas y actualización de límites del CRM.
+**NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de
+facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar
+colisiones entre múltiples organizaciones creando facturas simultáneamente.
+Sistema ahora escalable y sin errores de duplicados.
 
 **✅ COMPLETADO en Fase 0:**
+
 - ✅ Infraestructura completa (monorepo, Next.js 15, Tailwind v4, Supabase)
 - ✅ 60+ páginas implementadas (landing pages, blog, KB, ayuda, etc.)
 - ✅ Sistema de blog dinámico con admin panel
@@ -25,10 +68,12 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Base de conocimiento con 15-20 artículos** (Nov 2025)
 - ✅ **Optimización final y testing completados** (Nov 12, 2025)
 - ✅ **Sistema de autenticación completo con mejores prácticas** (Nov 14, 2025)
-- ✅ **Autenticación completa: Correo, OTP, Google, Facebook, GitHub funcionando perfectamente** (Dic 2025)
+- ✅ **Autenticación completa: Correo, OTP, Google, Facebook, GitHub funcionando
+  perfectamente** (Dic 2025)
 - ✅ **Admin Panel Core - Schema Core 100% funcional** (Nov 21, 2025)
 - ✅ **Sistema de Créditos y Billing 100% completo** (Nov 22, 2025)
-- ✅ **Sistema de Pagos Completo - Stripe, Transbank Webpay Plus y OneClick funcionando correctamente** (Enero 2025)
+- ✅ **Sistema de Pagos Completo - Stripe, Transbank Webpay Plus y OneClick
+  funcionando correctamente** (Enero 2025)
 - ✅ **Sistema de Operaciones y Reembolsos Completo** (Dic 8, 2025)
   - Panel de operaciones con gestión de pedidos
   - Pipelines configurables con etapas globales
@@ -54,11 +99,13 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
   - Sistema de bypass para platform admins
   - Testing exitoso en navegador
   - ✅ **Corrección sistema numeración facturas** (Nov 24, 2025)
-    - Formato por organización: `{ORG_SLUG}-{NÚMERO}` (ej: `TU-PATRIMONIO-000001`)
+    - Formato por organización: `{ORG_SLUG}-{NÚMERO}` (ej:
+      `TU-PATRIMONIO-000001`)
     - Eliminadas colisiones entre organizaciones
     - Lock por organización para paralelismo mejorado
     - Sistema escalable y sin errores de duplicados
-- ✅ **Sistema de Facturación Independiente - Haulmer + Stripe 100% COMPLETO** (Dic 2025)
+- ✅ **Sistema de Facturación Independiente - Haulmer + Stripe 100% COMPLETO**
+  (Dic 2025)
   - Schema `invoicing` independiente del billing
   - API RESTful para emisión de documentos
   - Factura Electrónica (TipoDTE 33) con Haulmer
@@ -76,14 +123,18 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
   - Página principal del dashboard con estadísticas y accesos rápidos
 - ✅ **Platform Admins: Acceso Completo al Dashboard** (Dic 2025)
   - Platform admins pueden acceder a todas las áreas B2C/B2B sin restricciones
-  - Helper `getUserActiveOrganization()` implementado para manejo automático de organizaciones
-  - Si es platform admin sin organización personal, usa organización platform automáticamente
+  - Helper `getUserActiveOrganization()` implementado para manejo automático de
+    organizaciones
+  - Si es platform admin sin organización personal, usa organización platform
+    automáticamente
   - Middleware actualizado para permitir acceso sin redirección
   - Todas las páginas del dashboard funcionan correctamente para platform admins
   - Páginas del CRM creadas y funcionando (contacts, deals, tickets, products)
-  - Página principal del CRM (`/dashboard/crm`) creada con estadísticas y accesos rápidos
+  - Página principal del CRM (`/dashboard/crm`) creada con estadísticas y
+    accesos rápidos
 
 **🚀 SISTEMA CRM MULTI-TENANT B2B - 100% COMPLETO:**
+
 - ✅ **Decisión arquitectónica**: CRM como servicio vendible multi-tenant
 - ✅ **Migración de roles** completada y corregida
   - Eliminada tabla redundante `marketing.user_roles`
@@ -91,7 +142,8 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
   - Función `can_access_admin()` actualizada
   - Función `can_access_crm()` creada
 - ✅ **Schema CRM completo** creado y funcionando
-  - 10 tablas multi-tenant: contacts, companies, deals, tickets, products, quotes, activities, emails, settings, notes
+  - 10 tablas multi-tenant: contacts, companies, deals, tickets, products,
+    quotes, activities, emails, settings, notes
   - RLS completo por organization_id
   - Roles específicos: crm_manager, sales_rep, org_owner
   - Aplicación registrada en ecosistema
@@ -111,250 +163,305 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - 📄 **Documentación completa**:
   - `docs/CRM-FINAL.md` - Documento final completo
   - `docs/CRM-MULTITENANT-GUIDE.md` - Guía multi-tenant
-  - Migraciones: `20251112185905` (roles) + `20251112190000` (schema CRM) + `20251112202031` (expansión HubSpot)
+  - Migraciones: `20251112185905` (roles) + `20251112190000` (schema CRM) +
+    `20251112202031` (expansión HubSpot)
 
 **🚀 ESTADO ACTUAL - CRM 100% COMPLETO Y PRODUCCIÓN:**
 
 ✅ **Migraciones Aplicadas** (12-14 Nov 2025):
-   - ✅ `20251112185905_limpiar-user-roles.sql` (unificación de roles)
-   - ✅ `20251112190000_schema-crm-multitenant.sql` (schema CRM base)
-   - ✅ `20251112202031_crm-base.sql` (expansión HubSpot completa)
-   - ✅ `20251113002149_creacion-org.sql` (funciones de onboarding)
+
+- ✅ `20251112185905_limpiar-user-roles.sql` (unificación de roles)
+- ✅ `20251112190000_schema-crm-multitenant.sql` (schema CRM base)
+- ✅ `20251112202031_crm-base.sql` (expansión HubSpot completa)
+- ✅ `20251113002149_creacion-org.sql` (funciones de onboarding)
 
 ✅ **Leads Importados**: Ejecutado `import_marketing_leads_to_crm()`
 
-✅ **UI del CRM - 100% COMPLETADO Y PROBADO** (12-14 Nov 2025) ✨ PRODUCTION READY:
+✅ **UI del CRM - 100% COMPLETADO Y PROBADO** (12-14 Nov 2025) ✨ PRODUCTION
+READY:
 
 **✅ MÓDULOS 100% COMPLETOS**:
-   - ✅ Dashboard principal con KPIs en tiempo real - **100%**
-   - ✅ Módulo de Contactos (lista, detalle, crear, editar, emails) - **100%**
-   - ✅ Módulo de Empresas (lista, detalle, crear, editar, stats) - **100%** ⭐
-   - ✅ Módulo de Deals (lista, detalle, crear, editar, probabilidad) - **100%** ⭐
-   - ✅ Módulo de Tickets (lista, detalle, crear, editar, SLA) - **100%** ⭐
-   - ✅ Módulo de Productos (lista, crear, editar, billing) - **100%** ⭐
-   - ✅ Módulo de Cotizaciones (lista, crear, detalle, line items, totales) - **100%**
-   
+
+- ✅ Dashboard principal con KPIs en tiempo real - **100%**
+- ✅ Módulo de Contactos (lista, detalle, crear, editar, emails) - **100%**
+- ✅ Módulo de Empresas (lista, detalle, crear, editar, stats) - **100%** ⭐
+- ✅ Módulo de Deals (lista, detalle, crear, editar, probabilidad) - **100%** ⭐
+- ✅ Módulo de Tickets (lista, detalle, crear, editar, SLA) - **100%** ⭐
+- ✅ Módulo de Productos (lista, crear, editar, billing) - **100%** ⭐
+- ✅ Módulo de Cotizaciones (lista, crear, detalle, line items, totales) -
+  **100%**
+
 **✅ INFRAESTRUCTURA COMPLETA**:
-   - ✅ **18 API Routes funcionando** (contacts, companies, deals, tickets, products, quotes, emails, stats, gmail)
-   - ✅ Componentes reutilizables (StatusBadge, EmptyState, StatsCard, EmailComposer)
-   - ✅ Types TypeScript completos (400+ líneas)
-   - ✅ Helpers y utilidades (formateo, colores, permisos)
-   - ✅ **Gmail OAuth y service completo** (oauth.ts, service.ts, types.ts)
-   - ✅ Context multi-tenant
-   - ✅ Navegación y badges funcionando
-   - ✅ **50+ archivos nuevos creados**
-   
+
+- ✅ **18 API Routes funcionando** (contacts, companies, deals, tickets,
+  products, quotes, emails, stats, gmail)
+- ✅ Componentes reutilizables (StatusBadge, EmptyState, StatsCard,
+  EmailComposer)
+- ✅ Types TypeScript completos (400+ líneas)
+- ✅ Helpers y utilidades (formateo, colores, permisos)
+- ✅ **Gmail OAuth y service completo** (oauth.ts, service.ts, types.ts)
+- ✅ Context multi-tenant
+- ✅ Navegación y badges funcionando
+- ✅ **50+ archivos nuevos creados**
+
 **📊 FUNCIONALIDADES 100% COMPLETAS**:
-   - ✅ **Gestionar contactos COMPLETO** (CRUD 100% + enviar emails desde detalle)
-   - ✅ **Gestionar empresas COMPLETO** (CRUD 100% + stats por empresa + relaciones)
-   - ✅ **Gestionar deals COMPLETO** (CRUD 100% + probabilidad + pipeline + cotizaciones)
-   - ✅ **Gestionar tickets COMPLETO** (CRUD 100% + SLA + auto-numeración + prioridades)
-   - ✅ **Catálogo de productos COMPLETO** (CRUD 100% + billing recurrente + inventario)
-   - ✅ **Sistema de cotizaciones COMPLETO** (crear con line items + cálculos automáticos + detalle)
-   - ✅ **Integración Gmail COMPLETA** (OAuth + envío + EmailComposer + guardar en BD + actividades)
-   - ✅ Relaciones HubSpot-style 100% funcionando
-   - ✅ Timeline de actividades en todas las entidades
-   - ✅ Auto-numeración de tickets y cotizaciones (TICK-00001, QUO-00001)
-   - ✅ Filtros y búsqueda en todas las listas
-   - ✅ **28 páginas de UI implementadas**
-   - ✅ **18 API endpoints funcionando**
-   
+
+- ✅ **Gestionar contactos COMPLETO** (CRUD 100% + enviar emails desde detalle)
+- ✅ **Gestionar empresas COMPLETO** (CRUD 100% + stats por empresa +
+  relaciones)
+- ✅ **Gestionar deals COMPLETO** (CRUD 100% + probabilidad + pipeline +
+  cotizaciones)
+- ✅ **Gestionar tickets COMPLETO** (CRUD 100% + SLA + auto-numeración +
+  prioridades)
+- ✅ **Catálogo de productos COMPLETO** (CRUD 100% + billing recurrente +
+  inventario)
+- ✅ **Sistema de cotizaciones COMPLETO** (crear con line items + cálculos
+  automáticos + detalle)
+- ✅ **Integración Gmail COMPLETA** (OAuth + envío + EmailComposer + guardar en
+  BD + actividades)
+- ✅ Relaciones HubSpot-style 100% funcionando
+- ✅ Timeline de actividades en todas las entidades
+- ✅ Auto-numeración de tickets y cotizaciones (TICK-00001, QUO-00001)
+- ✅ Filtros y búsqueda en todas las listas
+- ✅ **28 páginas de UI implementadas**
+- ✅ **18 API endpoints funcionando**
+
 **📄 DOCUMENTACIÓN COMPLETA**:
-   - `docs/CRM-FINAL.md` - Documento final 100% completo ⭐ NUEVO
-   - `docs/CRM-COMPLETO.md` - Resumen ejecutivo
-   - `docs/CRM-QUICKSTART.md` - Guía de inicio rápido
-   - `docs/CRM-GMAIL-SETUP.md` - Setup de Gmail paso a paso
-   - `docs/schemas/crm-hubspot-style.md` - Arquitectura HubSpot completa
-   - `docs/schemas/crm-implementation-status.md` - Estado técnico actualizado
-   - `docs/CRM-PROGRESO-SESION.md` - Log de implementación
+
+- `docs/CRM-FINAL.md` - Documento final 100% completo ⭐ NUEVO
+- `docs/CRM-COMPLETO.md` - Resumen ejecutivo
+- `docs/CRM-QUICKSTART.md` - Guía de inicio rápido
+- `docs/CRM-GMAIL-SETUP.md` - Setup de Gmail paso a paso
+- `docs/schemas/crm-hubspot-style.md` - Arquitectura HubSpot completa
+- `docs/schemas/crm-implementation-status.md` - Estado técnico actualizado
+- `docs/CRM-PROGRESO-SESION.md` - Log de implementación
 
 ✨ **CRM PRODUCTION READY - Features Nice-to-Have opcionales**:
-   - Inbox de emails (leer recibidos) - funcionalidad adicional
-   - Reportes avanzados - analytics extendidos
-   - Kanban drag & drop - UX mejorada
-   - Búsqueda global (Cmd+K) - navegación rápida
-   - Templates de email - productividad
-   - Webhooks - integraciones
+
+- Inbox de emails (leer recibidos) - funcionalidad adicional
+- Reportes avanzados - analytics extendidos
+- Kanban drag & drop - UX mejorada
+- Búsqueda global (Cmd+K) - navegación rápida
+- Templates de email - productividad
+- Webhooks - integraciones
 
 **📅 CRM AL 100% Y LISTO PARA PRODUCCIÓN** ✨
 
-🎉 **SISTEMA DE ONBOARDING B2C + B2B - 100% COMPLETO Y PROBADO** (13-14 Nov 2025):
+🎉 **SISTEMA DE ONBOARDING B2C + B2B - 100% COMPLETO Y PROBADO** (13-14 Nov
+2025):
 
 **✅ FUNCIONALIDADES COMPLETAS:**
-   - ✅ Pantalla de selección de tipo de organización (Personal vs Empresarial)
-   - ✅ Función `create_personal_organization()` - Org personal automática
-   - ✅ Función `create_business_organization()` - Org empresarial con datos
-   - ✅ Página `/onboarding` con UI completa y moderna
-   - ✅ API routes `/api/onboarding/*` (status, personal, business)
-   - ✅ RLS policies actualizadas para super admin
-   - ✅ `can_access_crm()` permite `org_owner`
-   - ✅ **Super admin puede ver TODOS los datos de TODAS las orgs** ⭐
-   - ✅ Usuarios normales solo ven datos de SU org
-   - ✅ CRM habilitado automáticamente con límites por plan
-   - ✅ Flujo de registro modificado (signUp → /onboarding)
-   - ✅ **Bug de size_category CORREGIDO** (valores del select ahora correctos)
-   - ✅ **Redirect inteligente post-onboarding con refresh de estado**
-   - ✅ **PROBADO EXITOSAMENTE** en navegador con 2 usuarios (Personal + Empresa)
-   
+
+- ✅ Pantalla de selección de tipo de organización (Personal vs Empresarial)
+- ✅ Función `create_personal_organization()` - Org personal automática
+- ✅ Función `create_business_organization()` - Org empresarial con datos
+- ✅ Página `/onboarding` con UI completa y moderna
+- ✅ API routes `/api/onboarding/*` (status, personal, business)
+- ✅ RLS policies actualizadas para super admin
+- ✅ `can_access_crm()` permite `org_owner`
+- ✅ **Super admin puede ver TODOS los datos de TODAS las orgs** ⭐
+- ✅ Usuarios normales solo ven datos de SU org
+- ✅ CRM habilitado automáticamente con límites por plan
+- ✅ Flujo de registro modificado (signUp → /onboarding)
+- ✅ **Bug de size_category CORREGIDO** (valores del select ahora correctos)
+- ✅ **Redirect inteligente post-onboarding con refresh de estado**
+- ✅ **PROBADO EXITOSAMENTE** en navegador con 2 usuarios (Personal + Empresa)
+
 **📄 DOCUMENTACIÓN**:
-   - `docs/ONBOARDING-SYSTEM.md` - Sistema completo documentado
-   
+
+- `docs/ONBOARDING-SYSTEM.md` - Sistema completo documentado
+
 **📦 ARCHIVOS**:
-   - Migración: `20251113002149_creacion-org.sql`
-   - 7 archivos creados (onboarding page, APIs, layout, docs)
+
+- Migración: `20251113002149_creacion-org.sql`
+- 7 archivos creados (onboarding page, APIs, layout, docs)
 
 **🎯 RESULTADO**:
-   - ✅ CRM multi-tenant 100% funcional y probado
-   - ✅ Onboarding automático B2C + B2B funcionando perfectamente
-   - ✅ Sistema de autenticación completo con todas las mejores prácticas
-   - ✅ Super admin con vista global
-   - ✅ Formatters completos sin errores
-   - ✅ Testing completo realizado en navegador
-   - ✅ **LISTO PARA PRODUCCIÓN** 🚀
-   - ✅ Listo para escalar a cientos de organizaciones
+
+- ✅ CRM multi-tenant 100% funcional y probado
+- ✅ Onboarding automático B2C + B2B funcionando perfectamente
+- ✅ Sistema de autenticación completo con todas las mejores prácticas
+- ✅ Super admin con vista global
+- ✅ Formatters completos sin errores
+- ✅ Testing completo realizado en navegador
+- ✅ **LISTO PARA PRODUCCIÓN** 🚀
+- ✅ Listo para escalar a cientos de organizaciones
 
 **🔄 CONVERSIÓN B2C → B2B - 100% COMPLETO** (Enero 2025):
 
 **✅ FUNCIONALIDADES COMPLETAS:**
-   - ✅ Función SQL `convert_organization_b2c_to_b2b()` - Conversión automática completa
-   - ✅ Endpoint API `/api/organizations/convert-to-business` - Seguro y validado
-   - ✅ Componente UI `ConvertToBusinessCard` - Interfaz amigable para usuarios
-   - ✅ Página `/settings/organization` - Configuración completa de organización
-   - ✅ Validaciones de seguridad (solo org_owner, solo personal → business)
-   - ✅ Actualización automática de límites del CRM (100→1000 contactos, 1→5 usuarios, API access)
-   - ✅ Actualización de settings y tipo de organización
-   - ✅ Integrado en sidebar del dashboard
+
+- ✅ Función SQL `convert_organization_b2c_to_b2b()` - Conversión automática
+  completa
+- ✅ Endpoint API `/api/organizations/convert-to-business` - Seguro y validado
+- ✅ Componente UI `ConvertToBusinessCard` - Interfaz amigable para usuarios
+- ✅ Página `/settings/organization` - Configuración completa de organización
+- ✅ Validaciones de seguridad (solo org_owner, solo personal → business)
+- ✅ Actualización automática de límites del CRM (100→1000 contactos, 1→5
+  usuarios, API access)
+- ✅ Actualización de settings y tipo de organización
+- ✅ Integrado en sidebar del dashboard
 
 **📄 ARCHIVOS CREADOS:**
-   - Migración: `20251202000003_convert_b2c_to_b2b_function.sql`
-   - API Route: `apps/web/src/app/api/organizations/convert-to-business/route.ts`
-   - Componente: `apps/web/src/components/organization/ConvertToBusinessCard.tsx`
-   - Página: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
-   - Sidebar actualizado: `apps/web/src/components/dashboard/dashboard-sidebar.tsx`
+
+- Migración: `20251202000003_convert_b2c_to_b2b_function.sql`
+- API Route: `apps/web/src/app/api/organizations/convert-to-business/route.ts`
+- Componente: `apps/web/src/components/organization/ConvertToBusinessCard.tsx`
+- Página: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
+- Sidebar actualizado: `apps/web/src/components/dashboard/dashboard-sidebar.tsx`
 
 **🔒 SEGURIDAD:**
-   - ✅ Solo usuarios autenticados pueden convertir
-   - ✅ Solo `org_owner` puede convertir su organización
-   - ✅ Solo organizaciones `personal` pueden convertirse
-   - ✅ Validaciones en backend y frontend
-   - ✅ Manejo completo de errores
+
+- ✅ Solo usuarios autenticados pueden convertir
+- ✅ Solo `org_owner` puede convertir su organización
+- ✅ Solo organizaciones `personal` pueden convertirse
+- ✅ Validaciones en backend y frontend
+- ✅ Manejo completo de errores
 
 **🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
-   - `org_type`: `personal` → `business`
-   - `settings.user_type`: `b2c` → `b2b`
-   - CRM `max_contacts`: 100 → 1,000
-   - CRM `max_users`: 1 → 5
-   - CRM `api_access`: false → true
+
+- `org_type`: `personal` → `business`
+- `settings.user_type`: `b2c` → `b2b`
+- CRM `max_contacts`: 100 → 1,000
+- CRM `max_users`: 1 → 5
+- CRM `api_access`: false → true
 
 **🔄 CONVERSIÓN B2B → B2C - 100% COMPLETO Y PROBADO** (Diciembre 2025):
 
 **✅ FUNCIONALIDADES COMPLETAS:**
-   - ✅ Función SQL `convert_organization_b2b_to_b2c()` - Conversión automática completa
-   - ✅ Endpoint API `/api/organizations/convert-to-personal` - Seguro y validado con advertencias
-   - ✅ Componente UI `ConvertToPersonalCard` - Interfaz amigable con advertencias destacadas
-   - ✅ Validaciones de seguridad (solo org_owner, solo business → personal)
-   - ✅ Advertencias automáticas si hay usuarios adicionales o contactos excedentes
-   - ✅ Actualización automática de límites del CRM (1000→100 contactos, 5→1 usuarios, API access deshabilitado)
-   - ✅ Actualización de settings y tipo de organización
-   - ✅ Los datos existentes se mantienen (solo se reducen límites)
-   - ✅ **PROBADO EXITOSAMENTE** - Migración aplicada y funcionando correctamente
+
+- ✅ Función SQL `convert_organization_b2b_to_b2c()` - Conversión automática
+  completa
+- ✅ Endpoint API `/api/organizations/convert-to-personal` - Seguro y validado
+  con advertencias
+- ✅ Componente UI `ConvertToPersonalCard` - Interfaz amigable con advertencias
+  destacadas
+- ✅ Validaciones de seguridad (solo org_owner, solo business → personal)
+- ✅ Advertencias automáticas si hay usuarios adicionales o contactos excedentes
+- ✅ Actualización automática de límites del CRM (1000→100 contactos, 5→1
+  usuarios, API access deshabilitado)
+- ✅ Actualización de settings y tipo de organización
+- ✅ Los datos existentes se mantienen (solo se reducen límites)
+- ✅ **PROBADO EXITOSAMENTE** - Migración aplicada y funcionando correctamente
 
 **📄 ARCHIVOS CREADOS:**
-   - Migración: `20251203000000_convert_b2b_to_b2c_function.sql`
-   - API Route: `apps/web/src/app/api/organizations/convert-to-personal/route.ts`
-   - Componente: `apps/web/src/components/organization/ConvertToPersonalCard.tsx`
-   - Página actualizada: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
+
+- Migración: `20251203000000_convert_b2b_to_b2c_function.sql`
+- API Route: `apps/web/src/app/api/organizations/convert-to-personal/route.ts`
+- Componente: `apps/web/src/components/organization/ConvertToPersonalCard.tsx`
+- Página actualizada:
+  `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
 
 **🔒 SEGURIDAD:**
-   - ✅ Solo usuarios autenticados pueden convertir
-   - ✅ Solo `org_owner` puede convertir su organización
-   - ✅ Solo organizaciones `business` pueden convertirse
-   - ✅ Validaciones en backend y frontend
-   - ✅ Manejo completo de errores
+
+- ✅ Solo usuarios autenticados pueden convertir
+- ✅ Solo `org_owner` puede convertir su organización
+- ✅ Solo organizaciones `business` pueden convertirse
+- ✅ Validaciones en backend y frontend
+- ✅ Manejo completo de errores
 
 **⚠️ ADVERTENCIAS Y CONSIDERACIONES:**
-   - ✅ Si hay más de 1 usuario: Se muestra advertencia pero se permite conversión (usuarios mantienen acceso hasta remoción manual)
-   - ✅ Si hay más de 100 contactos: Se muestra advertencia pero se permite conversión (datos se mantienen pero límite se reduce)
-   - ✅ API Access se deshabilita automáticamente
-   - ✅ Advertencias se muestran en UI y en respuesta del API
+
+- ✅ Si hay más de 1 usuario: Se muestra advertencia pero se permite conversión
+  (usuarios mantienen acceso hasta remoción manual)
+- ✅ Si hay más de 100 contactos: Se muestra advertencia pero se permite
+  conversión (datos se mantienen pero límite se reduce)
+- ✅ API Access se deshabilita automáticamente
+- ✅ Advertencias se muestran en UI y en respuesta del API
 
 **🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
-   - `org_type`: `business` → `personal`
-   - `settings.user_type`: `b2b` → `b2c`
-   - CRM `max_contacts`: 1,000 → 100
-   - CRM `max_users`: 5 → 1
-   - CRM `api_access`: true → false
+
+- `org_type`: `business` → `personal`
+- `settings.user_type`: `b2b` → `b2c`
+- CRM `max_contacts`: 1,000 → 100
+- CRM `max_users`: 5 → 1
+- CRM `api_access`: true → false
 
 **✅ COMPLETADO:** **SISTEMA DE FACTURACIÓN INDEPENDIENTE** 🎉 (Diciembre 2025)
-   
-   **✅ Sistema de Facturación - 100% COMPLETO Y PROBADO:**
-   - ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google, Facebook, GitHub)
-   - ✅ **Stripe** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (claves, webhooks, flujos de pago probados)
-   - ✅ **Transbank** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (Webpay Plus y OneClick probados)
-   - ✅ **Sistema de Facturación Independiente** - ✅ COMPLETO (Diciembre 2025):
-     - ✅ Nuevo schema `invoicing` independiente del billing
-     - ✅ API RESTful para emisión de documentos
-     - ✅ Soporte multi-proveedor: Haulmer (Chile) + Stripe (Internacional)
-     - ✅ Factura Electrónica (TipoDTE 33): Emisión y almacenamiento de PDF/XML
-     - ✅ Boleta Electrónica (TipoDTE 39): Emisión y almacenamiento de PDF/XML
-     - ✅ Invoice Stripe: Emisión y almacenamiento de PDF
-     - ✅ Almacenamiento en Supabase Storage (bucket `invoices`)
-     - ✅ Página de testing protegida (`/test-invoicing`) solo para platform admins
-     - ✅ Documentación completa: `docs/INVOICING-SYSTEM.md`
-   - ✅ **Pruebas Completadas:**
-     - ✅ Testing Factura Haulmer: PDF + XML generados correctamente
-     - ✅ Testing Boleta Haulmer: PDF + XML generados correctamente
-     - ✅ Testing Invoice Stripe: PDF generado y almacenado correctamente
-   - 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de emails, configurar dominio verificado
-   
-   **✅ COMPLETADO:**
-   - ✅ **Admin Panel Core COMPLETADO** (Nov 21, 2025)
-   - ✅ **Sistema de Créditos y Billing COMPLETADO** (Nov 22, 2025)
-   - ✅ **Platform Admins: Acceso Completo al Dashboard COMPLETADO** (Dic 2025)
-   - ✅ **Conversión B2C → B2B COMPLETADO** (Enero 2025)
-     - ✅ Función SQL para conversión automática
-     - ✅ Endpoint API seguro con validaciones
-     - ✅ UI completa para usuarios en `/settings/organization`
-     - ✅ Actualización automática de límites del CRM
-   - ✅ **Conversión B2B → B2C COMPLETADO Y PROBADO** (Diciembre 2025)
-     - ✅ Función SQL para conversión automática inversa
-     - ✅ Endpoint API seguro con validaciones y advertencias
-     - ✅ UI completa con advertencias destacadas para usuarios
-     - ✅ Actualización automática de límites del CRM (reducción)
-     - ✅ Sistema de advertencias para usuarios adicionales y contactos excedentes
-     - ✅ Migración aplicada exitosamente (`20251203000000_convert_b2b_to_b2c_function.sql`)
-     - ✅ Probado en producción - Conversión funcionando correctamente
-   - ✅ **Fase 3 - Comunicaciones y CRM avanzado COMPLETADO** (Dic 2025)
-     - ✅ Schema communications creado (`20251123191316_schema_communications.sql`)
-     - ✅ Integración SendGrid multi-tenant (cuenta por organización)
-     - ✅ Sistema de encriptación AES-256-GCM para API keys
-     - ✅ Motor de templates Handlebars implementado
-     - ✅ API routes de comunicaciones creadas (templates, campaigns, lists, analytics)
-     - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics, SendGrid settings)
-     - ✅ Páginas del CRM completadas (contacts, deals, tickets, products)
-     - ✅ Helper `getUserActiveOrganization()` para manejo de organizaciones
-     - ✅ **Arquitectura Multi-Canal Implementada** (Dic 2025)
-       - ✅ Aplicación `email_marketing` creada en `core.applications`
-       - ✅ Separación de Communications como aplicación independiente de CRM
-       - ✅ Estructura de URLs: `/dashboard/communications/email/` (campañas y templates)
-       - ✅ Listas y Analytics compartidos: `/dashboard/communications/lists` y `/analytics`
-       - ✅ Schema `communications` diseñado para múltiples canales (email, sms, whatsapp)
-       - ✅ Sistema de visibilidad integrado directamente en `core.applications`
-       - ✅ Preparado para futuras aplicaciones: `whatsapp_marketing` y `sms_marketing`
-   - ✅ **Sistema de Facturación Independiente COMPLETADO** (Dic 2025)
-     - ✅ Nuevo schema `invoicing` completamente independiente
-     - ✅ API RESTful: `POST/GET /api/invoicing/documents`
-     - ✅ Multi-proveedor: Haulmer (Factura/Boleta Chile) + Stripe (Invoice Internacional)
-     - ✅ Emisión correcta de Facturas Electrónicas (TipoDTE 33)
-     - ✅ Emisión correcta de Boletas Electrónicas (TipoDTE 39)
-     - ✅ Emisión correcta de Invoices Stripe
-     - ✅ Almacenamiento de PDF/XML en Supabase Storage
-     - ✅ Página de testing `/test-invoicing` (solo platform admins)
-     - ✅ Documentación: `docs/INVOICING-SYSTEM.md`
-   
-   **📋 SIGUIENTE FASE (Después de conectar a producción):**
-   - 📋 **Servicios Core** - Firmas electrónicas como primer servicio (pendiente)
-   - 📋 Dashboard B2C/B2B mejorado (pendiente)
+
+**✅ Sistema de Facturación - 100% COMPLETO Y PROBADO:**
+
+- ✅ **Login/Autenticación** - ✅ COMPLETO Y FUNCIONANDO (Correo, OTP, Google,
+  Facebook, GitHub)
+- ✅ **Stripe** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (claves, webhooks, flujos
+  de pago probados)
+- ✅ **Transbank** - ✅ PAGOS FUNCIONANDO CORRECTAMENTE (Webpay Plus y OneClick
+  probados)
+- ✅ **Sistema de Facturación Independiente** - ✅ COMPLETO (Diciembre 2025):
+  - ✅ Nuevo schema `invoicing` independiente del billing
+  - ✅ API RESTful para emisión de documentos
+  - ✅ Soporte multi-proveedor: Haulmer (Chile) + Stripe (Internacional)
+  - ✅ Factura Electrónica (TipoDTE 33): Emisión y almacenamiento de PDF/XML
+  - ✅ Boleta Electrónica (TipoDTE 39): Emisión y almacenamiento de PDF/XML
+  - ✅ Invoice Stripe: Emisión y almacenamiento de PDF
+  - ✅ Almacenamiento en Supabase Storage (bucket `invoices`)
+  - ✅ Página de testing protegida (`/test-invoicing`) solo para platform admins
+  - ✅ Documentación completa: `docs/INVOICING-SYSTEM.md`
+- ✅ **Pruebas Completadas:**
+  - ✅ Testing Factura Haulmer: PDF + XML generados correctamente
+  - ✅ Testing Boleta Haulmer: PDF + XML generados correctamente
+  - ✅ Testing Invoice Stripe: PDF generado y almacenado correctamente
+- 🔄 **SendGrid** - Configurar API keys de producción, verificar envío de
+  emails, configurar dominio verificado
+
+**✅ COMPLETADO:**
+
+- ✅ **Admin Panel Core COMPLETADO** (Nov 21, 2025)
+- ✅ **Sistema de Créditos y Billing COMPLETADO** (Nov 22, 2025)
+- ✅ **Platform Admins: Acceso Completo al Dashboard COMPLETADO** (Dic 2025)
+- ✅ **Conversión B2C → B2B COMPLETADO** (Enero 2025)
+  - ✅ Función SQL para conversión automática
+  - ✅ Endpoint API seguro con validaciones
+  - ✅ UI completa para usuarios en `/settings/organization`
+  - ✅ Actualización automática de límites del CRM
+- ✅ **Conversión B2B → B2C COMPLETADO Y PROBADO** (Diciembre 2025)
+  - ✅ Función SQL para conversión automática inversa
+  - ✅ Endpoint API seguro con validaciones y advertencias
+  - ✅ UI completa con advertencias destacadas para usuarios
+  - ✅ Actualización automática de límites del CRM (reducción)
+  - ✅ Sistema de advertencias para usuarios adicionales y contactos excedentes
+  - ✅ Migración aplicada exitosamente
+    (`20251203000000_convert_b2b_to_b2c_function.sql`)
+  - ✅ Probado en producción - Conversión funcionando correctamente
+- ✅ **Fase 3 - Comunicaciones y CRM avanzado COMPLETADO** (Dic 2025)
+  - ✅ Schema communications creado (`20251123191316_schema_communications.sql`)
+  - ✅ Integración SendGrid multi-tenant (cuenta por organización)
+  - ✅ Sistema de encriptación AES-256-GCM para API keys
+  - ✅ Motor de templates Handlebars implementado
+  - ✅ API routes de comunicaciones creadas (templates, campaigns, lists,
+    analytics)
+  - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics,
+    SendGrid settings)
+  - ✅ Páginas del CRM completadas (contacts, deals, tickets, products)
+  - ✅ Helper `getUserActiveOrganization()` para manejo de organizaciones
+  - ✅ **Arquitectura Multi-Canal Implementada** (Dic 2025)
+    - ✅ Aplicación `email_marketing` creada en `core.applications`
+    - ✅ Separación de Communications como aplicación independiente de CRM
+    - ✅ Estructura de URLs: `/dashboard/communications/email/` (campañas y
+      templates)
+    - ✅ Listas y Analytics compartidos: `/dashboard/communications/lists` y
+      `/analytics`
+    - ✅ Schema `communications` diseñado para múltiples canales (email, sms,
+      whatsapp)
+    - ✅ Sistema de visibilidad integrado directamente en `core.applications`
+    - ✅ Preparado para futuras aplicaciones: `whatsapp_marketing` y
+      `sms_marketing`
+- ✅ **Sistema de Facturación Independiente COMPLETADO** (Dic 2025)
+  - ✅ Nuevo schema `invoicing` completamente independiente
+  - ✅ API RESTful: `POST/GET /api/invoicing/documents`
+  - ✅ Multi-proveedor: Haulmer (Factura/Boleta Chile) + Stripe (Invoice
+    Internacional)
+  - ✅ Emisión correcta de Facturas Electrónicas (TipoDTE 33)
+  - ✅ Emisión correcta de Boletas Electrónicas (TipoDTE 39)
+  - ✅ Emisión correcta de Invoices Stripe
+  - ✅ Almacenamiento de PDF/XML en Supabase Storage
+  - ✅ Página de testing `/test-invoicing` (solo platform admins)
+  - ✅ Documentación: `docs/INVOICING-SYSTEM.md`
+
+**📋 SIGUIENTE FASE (Después de conectar a producción):**
+
+- 📋 **Servicios Core** - Firmas electrónicas como primer servicio (pendiente)
+- 📋 Dashboard B2C/B2B mejorado (pendiente)
 
 ---
 
@@ -365,7 +472,9 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 ### 🏗️ **Infraestructura y Soluciones Técnicas Implementadas**
 
 **✅ PROBLEMA CRÍTICO RESUELTO: Recursión Infinita en RLS**
-- ✅ Identificado problema estructural de PostgreSQL con políticas RLS recursivas
+
+- ✅ Identificado problema estructural de PostgreSQL con políticas RLS
+  recursivas
 - ✅ Solución implementada: RLS deshabilitado en `organization_users`
 - ✅ Seguridad manejada en Server Actions con verificaciones robustas
 - ✅ Tabla bypass `_bypass.platform_admins` creada (sin RLS)
@@ -373,29 +482,49 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Todos los checks de permisos actualizados para usar bypass
 - ✅ **8 migraciones aplicadas exitosamente** (20251121000000 - 20251121000008)
 
+**✅ SISTEMA DE CORREOS 1:1 - VERSIÓN 1 COMPLETA** (Diciembre 2025)
+
+- ✅ **Threading Inteligente**: Conversaciones agrupadas correctamente por hilo
+- ✅ **Prevención de Duplicados**: Safety check implementado para evitar tickets
+  dobles
+- ✅ **Outbound & Inbound Unificados**: Respuestas y mensajes salientes en el
+  mismo hilo
+- ✅ **Sincronización Bidireccional**: Gmail API ↔ CRM Tickets
+- ✅ **Migración RPC Mejorada**: Lookup robusto en base de datos
+  (`20251210000011_fix_email_threading_rpc.sql`)
+- ✅ **Probado en Producción**: Flujo completo verificado (Cliente → Admin →
+  Cliente → Admin)
+
 **🔧 MIGRACIONES APLICADAS:**
+
 1. ✅ `20251121000000` - Fix inicial RLS recursion
 2. ✅ `20251121000001` - Fix v2 con orden de políticas
 3. ✅ `20251121000002` - Fix v3 con función auxiliar
 4. ✅ `20251121000003` - Fix final con verificación directa
 5. ✅ `20251121000004` - Implementación tabla bypass
 6. ✅ `20251121000005` - Update función is_platform_admin
-7. ✅ `20251121000006` - **Disable RLS en organization_users** (solución definitiva)
-8. ✅ `20251121000007` - RLS para platform admins en `crm.folders` y `crm.thread_labels`
+7. ✅ `20251121000006` - **Disable RLS en organization_users** (solución
+   definitiva)
+8. ✅ `20251121000007` - RLS para platform admins en `crm.folders` y
+   `crm.thread_labels`
 9. ✅ `20251121000008` - SECURITY DEFINER en triggers de folders
 
 **✅ PROBLEMAS RESUELTOS:**
+
 - ✅ Recursión infinita en políticas RLS → **RESUELTO**
 - ✅ Permission denied for table folders → **RESUELTO**
 - ✅ Next.js 15 params async requirement → **RESUELTO**
 - ✅ Supabase relación ambigua con users → **RESUELTO**
 - ✅ Triggers ejecutándose sin permisos → **RESUELTO con SECURITY DEFINER**
-- ✅ Usuarios sin organizaciones no visibles → **RESUELTO** (especificada relación `user_id` en consulta)
-- ✅ Platform admin con restricciones de RLS → **RESUELTO** (todas las páginas usan `createServiceRoleClient()`)
+- ✅ Usuarios sin organizaciones no visibles → **RESUELTO** (especificada
+  relación `user_id` en consulta)
+- ✅ Platform admin con restricciones de RLS → **RESUELTO** (todas las páginas
+  usan `createServiceRoleClient()`)
 
 ### 📋 **Funcionalidades del Admin Panel - 100% COMPLETAS**
 
 **✅ GESTIÓN DE ORGANIZACIONES:**
+
 - ✅ **Crear organizaciones** - Formulario completo con validaciones
 - ✅ **Editar organizaciones** - Actualización de datos
 - ✅ **Ver listado** - Tabla con filtros y búsqueda
@@ -409,14 +538,18 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ **Auto-creación de carpetas CRM** al crear organización
 
 **✅ GESTIÓN DE USUARIOS:**
-- ✅ Listado completo de usuarios del sistema (incluye usuarios sin organizaciones)
+
+- ✅ Listado completo de usuarios del sistema (incluye usuarios sin
+  organizaciones)
 - ✅ Emails visibles correctamente usando ServiceRoleClient
 - ✅ Asignación de roles a usuarios
 - ✅ Ver organizaciones de cada usuario (o "Sin organización" si no tiene)
 - ✅ Gestión de estados (activo/inactivo)
-- ✅ Corrección de relación ambigua en `organization_users` (especificada `user_id`)
+- ✅ Corrección de relación ambigua en `organization_users` (especificada
+  `user_id`)
 
 **✅ GESTIÓN DE INVITACIONES:**
+
 - ✅ **Enviar invitaciones** a nuevos usuarios
 - ✅ **Cancelar invitaciones** pendientes
 - ✅ Ver listado de invitaciones (pendientes, aceptadas, expiradas)
@@ -424,6 +557,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Resend de invitaciones
 
 **✅ GESTIÓN DE TEAMS:**
+
 - ✅ **Crear teams** dentro de organizaciones
 - ✅ **Editar teams** (nombre, descripción, color, líder)
 - ✅ **Ver listado** de todos los teams
@@ -435,6 +569,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Roles dentro del team (member, lead, admin)
 
 **✅ GESTIÓN DE API KEYS:**
+
 - ✅ **Crear API keys** para organizaciones
 - ✅ **Revocar API keys** existentes
 - ✅ Ver listado de keys activas
@@ -442,6 +577,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ Tracking de último uso
 
 **✅ GESTIÓN DE ROLES Y PERMISOS:**
+
 - ✅ Ver todos los roles del sistema
 - ✅ Ver permisos por rol
 - ✅ Asignación de roles a usuarios
@@ -449,6 +585,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 ### 🎨 **Componentes UI Creados (20+ componentes)**
 
 **Componentes de Formularios:**
+
 - ✅ `OrganizationFormDialog` - Crear/editar organizaciones
 - ✅ `TeamFormDialog` - Crear/editar teams
 - ✅ `InvitationFormDialog` - Enviar invitaciones
@@ -457,6 +594,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ `AddTeamMemberDialog` - Agregar miembros a team
 
 **Componentes de Acciones:**
+
 - ✅ `CreateOrganizationButton`
 - ✅ `EditOrganizationButton`
 - ✅ `CreateTeamButton`
@@ -469,6 +607,7 @@ Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones
 - ✅ `UserRoleActions`
 
 **Componentes Auxiliares:**
+
 - ✅ `StatusBadge` - Estados visuales
 - ✅ `OrgTypeBadge` - Tipos de organización
 - ✅ `PageHeader` - Headers consistentes
@@ -513,31 +652,38 @@ apps/web/src/app/(admin)/admin/
 **📄 Archivo:** `apps/web/src/lib/admin/actions.ts` (566 líneas)
 
 **Funciones de Seguridad:**
+
 - ✅ `verifyPlatformAdmin()` - Verificación de permisos usando bypass
 
 **Gestión de Organizaciones:**
+
 - ✅ `createOrganization()` - Crear nueva organización
 - ✅ `updateOrganization()` - Actualizar organización existente
 
 **Gestión de Roles:**
+
 - ✅ `assignUserRole()` - Asignar rol a usuario
 - ✅ `removeUserFromOrganization()` - Remover usuario
 
 **Gestión de Invitaciones:**
+
 - ✅ `sendInvitation()` - Enviar nueva invitación
 - ✅ `cancelInvitation()` - Cancelar invitación pendiente
 
 **Gestión de Teams:**
+
 - ✅ `createTeam()` - Crear nuevo team
 - ✅ `updateTeam()` - Actualizar team existente
 - ✅ `addTeamMember()` - Agregar miembro a team
 - ✅ `removeTeamMember()` - Remover miembro de team
 
 **Gestión de API Keys:**
+
 - ✅ `createApiKey()` - Crear nueva API key
 - ✅ `revokeApiKey()` - Revocar API key existente
 
 **✅ TODAS las funciones con:**
+
 - Verificación de permisos
 - Validaciones de datos
 - Manejo de errores
@@ -547,6 +693,7 @@ apps/web/src/app/(admin)/admin/
 ### 🧪 **Testing y Validación**
 
 **✅ PROBADO EXITOSAMENTE EN NAVEGADOR:**
+
 - ✅ Creación de organización "Empresa Demo XYZ"
 - ✅ Auto-creación de carpetas CRM (Inbox, Sent, Important, Archive, Spam)
 - ✅ Visualización de detalles de organización
@@ -563,6 +710,7 @@ apps/web/src/app/(admin)/admin/
 **Secciones Organizadas:**
 
 **Principal:**
+
 - ✅ Dashboard
 - ✅ Organizaciones
 - ✅ Usuarios
@@ -571,17 +719,20 @@ apps/web/src/app/(admin)/admin/
 - ✅ Teams
 
 **Apps & Servicios:**
+
 - ✅ Aplicaciones (con sistema de visibilidad integrado)
 - ✅ Suscripciones
 - ✅ CRM
 - ✅ Blog
 
 **Facturación:**
+
 - ✅ Créditos
 - ✅ Facturas
 - ✅ Pagos
 
 **Sistema:**
+
 - ✅ API Keys
 - ✅ System Events
 - ✅ Configuración
@@ -591,9 +742,11 @@ apps/web/src/app/(admin)/admin/
 **Secciones Organizadas:**
 
 **Principal:**
+
 - ✅ Dashboard
 
 **CRM:**
+
 - ✅ CRM
 - ✅ Contactos
 - ✅ Empresas
@@ -602,6 +755,7 @@ apps/web/src/app/(admin)/admin/
 - ✅ Productos
 
 **Facturación:**
+
 - ✅ Facturación
 - ✅ Comprar Créditos
 - ✅ Facturas
@@ -609,9 +763,11 @@ apps/web/src/app/(admin)/admin/
 - ✅ Configuración
 
 **Contenido:**
+
 - ✅ Blog
 
 **Características:**
+
 - ✅ Layout con sidebar integrado (`apps/web/src/app/(dashboard)/layout.tsx`)
 - ✅ Componente `DashboardSidebar` reutilizable
 - ✅ Detección automática de tipo de usuario (platform admin vs regular)
@@ -632,10 +788,13 @@ apps/web/src/app/(admin)/admin/
 ### 🚀 **Capacidades del Platform Admin**
 
 **Como Platform Admin puedes:**
-1. ✅ Ver y gestionar **todas las organizaciones** del sistema (sin filtros de RLS)
+
+1. ✅ Ver y gestionar **todas las organizaciones** del sistema (sin filtros de
+   RLS)
 2. ✅ Crear nuevas organizaciones (Personal, Business, Enterprise, Platform)
 3. ✅ Editar información de organizaciones existentes
-4. ✅ Ver **todos los usuarios** registrados (incluye usuarios sin organizaciones)
+4. ✅ Ver **todos los usuarios** registrados (incluye usuarios sin
+   organizaciones)
 5. ✅ Ver **emails de todos los usuarios** usando ServiceRoleClient
 6. ✅ Asignar y remover **roles** a usuarios
 7. ✅ Enviar **invitaciones** para nuevos usuarios
@@ -649,22 +808,25 @@ apps/web/src/app/(admin)/admin/
 15. ✅ Revocar API keys existentes
 16. ✅ Ver todas las **aplicaciones** del ecosistema
 17. ✅ **Configurar visibilidad de aplicaciones** (Dic 2025)
-    - ✅ Control de visibilidad por nivel (public, platform_only, beta, restricted)
+    - ✅ Control de visibilidad por nivel (public, platform_only, beta,
+      restricted)
     - ✅ Restricción por países permitidos
     - ✅ Restricción por tiers de suscripción requeridos
     - ✅ Overrides por organización (excepciones específicas)
     - ✅ Habilitar/deshabilitar aplicaciones sin eliminar datos
     - ✅ Sidebar dinámico que filtra según aplicaciones habilitadas
-17. ✅ Ver **suscripciones** activas de todas las organizaciones
-18. ✅ Monitorear **eventos del sistema** globales
-19. ✅ Ver **créditos de todas las organizaciones** (nueva sección)
-20. ✅ Ver **facturas de todas las organizaciones** (nueva sección)
-21. ✅ Ver **pagos de todas las organizaciones** (nueva sección)
-22. ✅ Ver **estadísticas del CRM** globales (nueva sección)
-23. ✅ Acceder al **blog** desde el admin (nueva sección)
-24. ✅ **Vista completa sin restricciones** - Todas las páginas usan ServiceRoleClient para bypass RLS
+18. ✅ Ver **suscripciones** activas de todas las organizaciones
+19. ✅ Monitorear **eventos del sistema** globales
+20. ✅ Ver **créditos de todas las organizaciones** (nueva sección)
+21. ✅ Ver **facturas de todas las organizaciones** (nueva sección)
+22. ✅ Ver **pagos de todas las organizaciones** (nueva sección)
+23. ✅ Ver **estadísticas del CRM** globales (nueva sección)
+24. ✅ Acceder al **blog** desde el admin (nueva sección)
+25. ✅ **Vista completa sin restricciones** - Todas las páginas usan
+    ServiceRoleClient para bypass RLS
 
 **Como Usuario Regular puedes:**
+
 1. ✅ Acceder a tu **dashboard personal** con sidebar completo
 2. ✅ Gestionar tu **CRM** (contactos, empresas, deals, tickets, productos)
 3. ✅ Gestionar tu **facturación** (comprar créditos, ver facturas, uso)
@@ -675,6 +837,7 @@ apps/web/src/app/(admin)/admin/
 ### 🔐 **Arquitectura de Seguridad**
 
 **Seguridad Multi-Capa:**
+
 1. ✅ **Server Actions** - Toda lógica de negocio en el servidor
 2. ✅ **Verificación de permisos** - En cada acción
 3. ✅ **RLS deshabilitado en organization_users** - Evita recursión
@@ -682,26 +845,34 @@ apps/web/src/app/(admin)/admin/
 5. ✅ **SECURITY DEFINER** - En triggers del sistema
 6. ✅ **Validaciones robustas** - En frontend y backend
 7. ✅ **Nunca exponer tablas sensibles** - Solo via Server Actions
-8. ✅ **ServiceRoleClient en páginas admin** - Platform admin ve todo sin restricciones de RLS
-9. ✅ **Acceso completo a datos** - Todas las páginas de admin usan `createServiceRoleClient()` para bypass RLS
+8. ✅ **ServiceRoleClient en páginas admin** - Platform admin ve todo sin
+   restricciones de RLS
+9. ✅ **Acceso completo a datos** - Todas las páginas de admin usan
+   `createServiceRoleClient()` para bypass RLS
 
 ### 🎛️ **Sistema de Visibilidad de Aplicaciones** (Dic 2025)
 
-**✅ IMPLEMENTADO:** Control de visibilidad integrado directamente en `core.applications`
+**✅ IMPLEMENTADO:** Control de visibilidad integrado directamente en
+`core.applications`
 
 **Arquitectura:**
+
 - ✅ Campos agregados a `core.applications`:
   - `visibility_level`: public, platform_only, beta, restricted
   - `allowed_countries`: Array de códigos de países permitidos
-  - `required_subscription_tiers`: Array de tiers requeridos (starter, pro, enterprise)
+  - `required_subscription_tiers`: Array de tiers requeridos (starter, pro,
+    enterprise)
 - ✅ Tabla `core.application_overrides` para excepciones por organización
 - ✅ Funciones SQL:
-  - `can_access_application(org_id, user_id, app_slug)`: Verifica acceso individual
+  - `can_access_application(org_id, user_id, app_slug)`: Verifica acceso
+    individual
   - `get_enabled_applications(org_id, user_id)`: Lista aplicaciones habilitadas
   - `update_application(app_id, ...)`: Actualización segura desde cliente
 
 **Funcionalidades:**
-- ✅ Página `/admin/applications` lista todas las aplicaciones (incluso deshabilitadas)
+
+- ✅ Página `/admin/applications` lista todas las aplicaciones (incluso
+  deshabilitadas)
 - ✅ Página `/admin/applications/[id]` para configurar visibilidad:
   - Switch para habilitar/deshabilitar aplicación
   - Selector de nivel de visibilidad
@@ -714,11 +885,15 @@ apps/web/src/app/(admin)/admin/
 - ✅ Platform admins siempre ven todas las aplicaciones (incluso deshabilitadas)
 
 **Migraciones Aplicadas:**
-- ✅ `20251205000000_applications_visibility.sql` - Campos y funciones de visibilidad
-- ✅ `20251205000001_update_application_function.sql` - Función RPC para actualización
+
+- ✅ `20251205000000_applications_visibility.sql` - Campos y funciones de
+  visibilidad
+- ✅ `20251205000001_update_application_function.sql` - Función RPC para
+  actualización
 - ✅ `20251205000002_email_marketing_app.sql` - Aplicación email_marketing
 
 **Eliminado:**
+
 - ❌ Sistema de Feature Flags (`core.feature_flags`) - Duplicaba funcionalidad
 - ❌ Todas las páginas y APIs de `/admin/feature-flags`
 - ❌ Hook `useFeatureAccess` - Reemplazado por `useApplicationAccess`
@@ -726,6 +901,7 @@ apps/web/src/app/(admin)/admin/
 ### 📄 **Documentación Actualizada**
 
 **Archivos de documentación:**
+
 - ✅ Comentarios en migraciones SQL (explicación de soluciones)
 - ✅ Comentarios en Server Actions (arquitectura de seguridad)
 - ✅ JSDoc en componentes principales
@@ -735,6 +911,7 @@ apps/web/src/app/(admin)/admin/
 ### 🎉 **RESULTADO FINAL**
 
 **✅ ADMIN PANEL 100% FUNCIONAL** - Listo para gestionar:
+
 - Cientos de organizaciones
 - Miles de usuarios
 - Teams distribuidos
@@ -742,6 +919,7 @@ apps/web/src/app/(admin)/admin/
 - Suscripciones y billing (cuando se implemente)
 
 **✅ SCHEMA CORE COMPLETO** - Multi-tenant robusto con:
+
 - Organizations, Users, Teams, Roles
 - Invitations, API Keys, Applications
 - Subscriptions, System Events
@@ -749,6 +927,7 @@ apps/web/src/app/(admin)/admin/
 - Bypass system para platform admins
 
 **✅ SIDEBARS COMPLETOS** - Navegación para todos los usuarios:
+
 - Sidebar Admin: Gestión completa de plataforma (20+ secciones)
 - Sidebar Dashboard: Navegación para usuarios regulares (15+ secciones)
 - Detección automática de tipo de usuario
@@ -758,20 +937,32 @@ apps/web/src/app/(admin)/admin/
 ### 🔧 **MEJORAS RECIENTES - Admin Panel (Diciembre 2025)**
 
 **✅ CORRECCIÓN CRÍTICA: Visibilidad Completa de Usuarios**
-- ✅ **Problema identificado**: Página de usuarios solo mostraba usuarios con organizaciones asignadas
-- ✅ **Causa**: Consulta usaba `!inner` (INNER JOIN) que excluía usuarios sin organizaciones
-- ✅ **Solución**: Eliminado `!inner` y especificada relación `user_id` explícitamente
-- ✅ **Resultado**: Ahora muestra **todos los usuarios** del sistema, tengan o no organizaciones
+
+- ✅ **Problema identificado**: Página de usuarios solo mostraba usuarios con
+  organizaciones asignadas
+- ✅ **Causa**: Consulta usaba `!inner` (INNER JOIN) que excluía usuarios sin
+  organizaciones
+- ✅ **Solución**: Eliminado `!inner` y especificada relación `user_id`
+  explícitamente
+- ✅ **Resultado**: Ahora muestra **todos los usuarios** del sistema, tengan o
+  no organizaciones
 
 **✅ CORRECCIÓN CRÍTICA: Emails No Visibles**
-- ✅ **Problema identificado**: Columna de emails mostraba "N/A" para todos los usuarios
-- ✅ **Causa**: `auth.admin.listUsers()` requiere ServiceRoleClient, no funciona con cliente normal
-- ✅ **Solución**: Actualizada función para usar `createServiceRoleClient()` para obtener emails
+
+- ✅ **Problema identificado**: Columna de emails mostraba "N/A" para todos los
+  usuarios
+- ✅ **Causa**: `auth.admin.listUsers()` requiere ServiceRoleClient, no funciona
+  con cliente normal
+- ✅ **Solución**: Actualizada función para usar `createServiceRoleClient()`
+  para obtener emails
 - ✅ **Resultado**: Emails visibles correctamente para todos los usuarios
 
 **✅ MEJORA ARQUITECTÓNICA: Acceso Completo del Platform Admin**
-- ✅ **Problema identificado**: Algunas páginas de admin tenían restricciones de RLS que limitaban visibilidad
-- ✅ **Solución**: Actualizadas **todas las páginas de admin** para usar `createServiceRoleClient()`
+
+- ✅ **Problema identificado**: Algunas páginas de admin tenían restricciones de
+  RLS que limitaban visibilidad
+- ✅ **Solución**: Actualizadas **todas las páginas de admin** para usar
+  `createServiceRoleClient()`
 - ✅ **Páginas actualizadas** (12 páginas):
   - Dashboard (`admin/page.tsx`)
   - Usuarios (`admin/users/page.tsx`)
@@ -794,22 +985,31 @@ apps/web/src/app/(admin)/admin/
 ### 🔧 **MEJORAS RECIENTES - Platform Admins: Acceso Completo al Dashboard (Diciembre 2025)**
 
 **✅ FUNCIONALIDAD IMPLEMENTADA: Acceso Sin Restricciones al Dashboard**
-- ✅ **Objetivo**: Permitir que platform admins accedan a todas las áreas B2C/B2B sin restricciones
-- ✅ **Problema identificado**: Platform admins solo podían acceder a `/admin`, no al dashboard regular
+
+- ✅ **Objetivo**: Permitir que platform admins accedan a todas las áreas
+  B2C/B2B sin restricciones
+- ✅ **Problema identificado**: Platform admins solo podían acceder a `/admin`,
+  no al dashboard regular
 - ✅ **Solución implementada**:
   - Helper `getUserActiveOrganization()` creado (`lib/organization/utils.ts`)
-  - Si usuario es platform admin sin organización personal, usa organización platform automáticamente
+  - Si usuario es platform admin sin organización personal, usa organización
+    platform automáticamente
   - Middleware actualizado para permitir acceso sin redirección
   - Layout del dashboard actualizado para no bloquear platform admins
 
 **✅ ARCHIVOS CREADOS/MODIFICADOS:**
+
 - ✅ `lib/organization/utils.ts` - Helper para obtener organización activa
-  - `getUserActiveOrganization()` - Obtiene organización del usuario o platform org si es admin
+  - `getUserActiveOrganization()` - Obtiene organización del usuario o platform
+    org si es admin
   - `getUserAndOrganization()` - Helper para API routes
-- ✅ `lib/supabase/middleware.ts` - Actualizado para permitir acceso a platform admins
-- ✅ `app/(dashboard)/layout.tsx` - Comentarios actualizados, sin bloqueo de platform admins
+- ✅ `lib/supabase/middleware.ts` - Actualizado para permitir acceso a platform
+  admins
+- ✅ `app/(dashboard)/layout.tsx` - Comentarios actualizados, sin bloqueo de
+  platform admins
 
 **✅ PÁGINAS ACTUALIZADAS PARA USAR HELPER:**
+
 - ✅ `/dashboard/page.tsx` - Dashboard principal
 - ✅ `/dashboard/crm/page.tsx` - Dashboard CRM (creada)
 - ✅ `/dashboard/crm/companies/page.tsx` - Lista de empresas
@@ -822,6 +1022,7 @@ apps/web/src/app/(admin)/admin/
 - ✅ `/billing/usage/page.tsx` - Uso de créditos
 
 **✅ PÁGINAS DEL CRM CREADAS:**
+
 - ✅ `/dashboard/crm/page.tsx` - Dashboard principal del CRM con estadísticas
 - ✅ `/dashboard/crm/contacts/page.tsx` - Lista de contactos
 - ✅ `/dashboard/crm/deals/page.tsx` - Lista de deals
@@ -829,8 +1030,11 @@ apps/web/src/app/(admin)/admin/
 - ✅ `/dashboard/crm/products/page.tsx` - Lista de productos
 
 **✅ RESULTADO:**
-- ✅ Platform admins pueden acceder a todas las áreas del dashboard sin restricciones
-- ✅ Si no tienen organización personal, usan automáticamente la organización platform
+
+- ✅ Platform admins pueden acceder a todas las áreas del dashboard sin
+  restricciones
+- ✅ Si no tienen organización personal, usan automáticamente la organización
+  platform
 - ✅ Todas las páginas funcionan correctamente para platform admins
 - ✅ Testing completo realizado en navegador
 - ✅ **LISTO PARA PRODUCCIÓN** 🚀
@@ -844,26 +1048,27 @@ apps/web/src/app/(admin)/admin/
 **🔐 SISTEMA DE AUTENTICACIÓN COMPLETO CON MEJORES PRÁCTICAS 🔐**
 
 **✅ Autenticación Robusta y Completa - PRODUCCIÓN READY:**
+
 - ✅ **Ruta de logout funcional** (`/auth/signout/route.ts`)
   - Formularios de logout ahora funcionan correctamente
   - Limpieza de sesión y redirect al login
-  
+
 - ✅ **AuthListener global implementado**
   - Detecta sesiones expiradas automáticamente
   - Maneja refresh de tokens en tiempo real
   - Escucha cambios de autenticación (login, logout, updates)
   - Integrado en layout principal de la aplicación
-  
+
 - ✅ **Página de login mejorada con verificación del servidor**
   - Ahora es Server Component que verifica autenticación
   - Si usuario ya está logeado, redirige automáticamente al dashboard
   - Separado en LoginPageClient para funcionalidad del lado cliente
-  
+
 - ✅ **Funcionalidad "Remember Me" implementada**
   - Checkbox funcional con persistencia de sesión
   - Si está marcado: sesión persiste 30 días
   - Si no está marcado: sesión solo durante navegador abierto
-  
+
 - ✅ **Sistema completo de recuperación de contraseña**
   - Página `/login/forgot-password` para solicitar recuperación
   - Ruta callback `/auth/reset-password` para procesar enlace de email
@@ -871,13 +1076,13 @@ apps/web/src/app/(admin)/admin/
   - Validaciones robustas y mensajes de éxito/error
   - Enlace "¿Olvidaste tu contraseña?" en página de login
   - Manejo correcto de errores y redirects sin mostrar mensajes falsos
-  
+
 - ✅ **Redirect inteligente después de login**
   - Captura ruta original cuando usuario intenta acceder sin autenticación
   - Después de login, redirige a donde intentaba ir
   - Manejo de organizaciones múltiples
   - Redirect a `/dashboard/select-organization` si necesario
-  
+
 - ✅ **Sistema de reenvío de email de confirmación**
   - Página `/login/resend-confirmation` para reenviar email
   - Función `resendConfirmationEmail()` en actions
@@ -895,12 +1100,13 @@ apps/web/src/app/(admin)/admin/
   - Verificación de sesión antes de mostrar errores
 
 **✅ Onboarding B2C + B2B PROBADO Y FUNCIONANDO:**
+
 - ✅ **Onboarding Personal COMPLETADO Y PROBADO**
   - Creación de organización personal automática
   - Habilitación de CRM con 100 contactos
   - Redirect correcto al dashboard
   - Usuario: `test-user-20251114@example.com` ✅ EXITOSO
-  
+
 - ✅ **Onboarding Empresarial CORREGIDO Y PROBADO**
   - Error de constraint en size_category RESUELTO
   - Valores del select corregidos (startup, small, medium, large, enterprise)
@@ -910,7 +1116,9 @@ apps/web/src/app/(admin)/admin/
   - Empresa: "TechCorp SpA" ✅ EXITOSO
 
 **✅ Formatters CRM COMPLETADOS:**
-- ✅ **21 funciones de formateo creadas** en `apps/web/src/lib/crm/formatters.ts`
+
+- ✅ **21 funciones de formateo creadas** en
+  `apps/web/src/lib/crm/formatters.ts`
   - Funciones de formateo: currency, dates, phone, RUT
   - Funciones de estados: contactos, empresas, deals, tickets, cotizaciones
   - Funciones de colores: badges con Tailwind classes
@@ -918,6 +1126,7 @@ apps/web/src/app/(admin)/admin/
   - Error `formatCurrency is not a function` RESUELTO
 
 **✅ Testing en Navegador Completo:**
+
 - ✅ Registro de usuarios testeado (Personal y Empresarial)
 - ✅ Login/Logout funcionando correctamente
 - ✅ Dashboard CRM mostrando estadísticas con formato correcto ($0, etc.)
@@ -925,6 +1134,7 @@ apps/web/src/app/(admin)/admin/
 - ✅ Capturas de pantalla de funcionamiento exitoso
 
 **📁 ARCHIVOS CREADOS (14 Nov 2025):**
+
 - `apps/web/src/app/auth/signout/route.ts`
 - `apps/web/src/components/AuthListener.tsx`
 - `apps/web/src/app/login/LoginPageClient.tsx`
@@ -935,14 +1145,17 @@ apps/web/src/app/(admin)/admin/
 - `apps/web/src/lib/crm/formatters.ts` (completo con 421 líneas)
 
 **📁 ARCHIVOS MODIFICADOS (14 Nov 2025):**
+
 - `apps/web/src/app/layout.tsx` - AuthListener integrado
 - `apps/web/src/app/login/page.tsx` - Server Component con verificación
 - `apps/web/src/app/login/actions.ts` - Remember Me + Redirect + Resend
 - `apps/web/src/app/onboarding/page.tsx` - Flujo corregido y valores de select
 
 **🎯 RESULTADO:**
+
 - ✅ Sistema de autenticación con **TODAS las mejores prácticas**
-- ✅ **Todos los métodos de autenticación funcionando:** Correo, OTP, Google, Facebook, GitHub
+- ✅ **Todos los métodos de autenticación funcionando:** Correo, OTP, Google,
+  Facebook, GitHub
 - ✅ Manejo robusto de errores sin mensajes falsos
 - ✅ Callbacks de OAuth optimizados y funcionando correctamente
 - ✅ Onboarding B2C/B2B **100% funcional y probado**
@@ -978,43 +1191,48 @@ apps/web/src/app/(admin)/admin/
   - Nueva función `can_access_crm()` creada
   - Código TypeScript actualizado (`page-management.ts`, `users/page.tsx`)
   - Migración SQL corregida: `20251112185905_limpiar-user-roles.sql` ✅
-  
+
 - ✅ **Schema CRM Multi-Tenant Completo - Estilo HubSpot**:
-  - **Schema separado**: `crm` (siguiendo arquitectura de schemas por aplicación)
+  - **Schema separado**: `crm` (siguiendo arquitectura de schemas por
+    aplicación)
   - **10 tablas principales**:
-    * Base (6): `contacts`, `companies`, `deals`, `tickets`, `activities`, `emails`
-    * Comercial (3): `products`, `quotes`, `quote_line_items`
-    * Config (2): `pipelines`, `settings`, `notes`
+    - Base (6): `contacts`, `companies`, `deals`, `tickets`, `activities`,
+      `emails`
+    - Comercial (3): `products`, `quotes`, `quote_line_items`
+    - Config (2): `pipelines`, `settings`, `notes`
   - **ENUMs completos** (8):
-    * Existentes: `contact_status`, `activity_type`, `deal_stage`, `email_status`
-    * Nuevos: `company_type`, `ticket_status`, `ticket_priority`, `quote_status`
+    - Existentes: `contact_status`, `activity_type`, `deal_stage`,
+      `email_status`
+    - Nuevos: `company_type`, `ticket_status`, `ticket_priority`, `quote_status`
   - **Relaciones HubSpot-style**:
-    * Contacto ↔ Empresa (N:1)
-    * Empresa → Contactos, Deals, Tickets (1:N)
-    * Deal → Contacto/Empresa (flexible)
-    * Ticket → Contacto/Empresa (soporte)
-    * Quote → Contacto/Empresa/Deal (propuestas)
-    * Activities → Universal (timeline para todo)
+    - Contacto ↔ Empresa (N:1)
+    - Empresa → Contactos, Deals, Tickets (1:N)
+    - Deal → Contacto/Empresa (flexible)
+    - Ticket → Contacto/Empresa (soporte)
+    - Quote → Contacto/Empresa/Deal (propuestas)
+    - Activities → Universal (timeline para todo)
   - **Features automáticas**:
-    * Auto-numeración: TICK-00001, QUO-00001
-    * Cálculo automático de totales en cotizaciones
-    * Pipelines personalizables por org
-    * Subsidiarias (parent_company_id)
+    - Auto-numeración: TICK-00001, QUO-00001
+    - Cálculo automático de totales en cotizaciones
+    - Pipelines personalizables por org
+    - Subsidiarias (parent_company_id)
   - **Funciones SQL**:
-    * `import_marketing_leads_to_crm()`
-    * `crm.get_stats(org_id)` - Dashboard principal
-    * `crm.get_company_stats(company_id)` - Stats por empresa
-    * `crm.get_company_contacts(company_id)` - Contactos de empresa
+    - `import_marketing_leads_to_crm()`
+    - `crm.get_stats(org_id)` - Dashboard principal
+    - `crm.get_company_stats(company_id)` - Stats por empresa
+    - `crm.get_company_contacts(company_id)` - Contactos de empresa
   - **RLS completo** por organization_id en todas las tablas
-  - **Roles específicos** en core: `crm_manager` (nivel 6), `sales_rep` (nivel 4)
+  - **Roles específicos** en core: `crm_manager` (nivel 6), `sales_rep`
+    (nivel 4)
   - **Aplicación** `crm_sales` registrada en core.applications
   - **Migraciones SQL**:
-    * `20251112190000_schema-crm-multitenant.sql` ✅ (Base)
-    * `20251112202031_crm-base.sql` ✅ (Expansión HubSpot)
-  
+    - `20251112190000_schema-crm-multitenant.sql` ✅ (Base)
+    - `20251112202031_crm-base.sql` ✅ (Expansión HubSpot)
+
 - 📋 **Documentación Creada**:
   - `docs/schemas/crm.md` - Implementación técnica multi-tenant
-  - `docs/schemas/crm-hubspot-style.md` - Arquitectura completa estilo HubSpot ⭐ NUEVO
+  - `docs/schemas/crm-hubspot-style.md` - Arquitectura completa estilo HubSpot
+    ⭐ NUEVO
   - `docs/schemas/ARCHITECTURE-SCHEMAS.md` - Filosofía de schemas separados
   - `docs/ORGANIZATION-SUMMARY.md` - Resumen de organización de docs
   - `docs/NAVIGATION-MAP.md` - Mapa de navegación de documentación
@@ -1070,10 +1288,10 @@ apps/web/src/app/(admin)/admin/
 
 5. **Mejoras de SEO y Sitemap**
    - Sitemap dinámico que incluye:
-     * Páginas estáticas priorizadas
-     * Posts del blog con última modificación
-     * Artículos de base de conocimiento
-     * Categorías de ambos sistemas
+     - Páginas estáticas priorizadas
+     - Posts del blog con última modificación
+     - Artículos de base de conocimiento
+     - Categorías de ambos sistemas
    - Prioridades inteligentes por tipo de contenido
    - Change frequencies optimizadas
 
@@ -1087,21 +1305,21 @@ apps/web/src/app/(admin)/admin/
 
 2. **Sistema CRM y Gestión de Correos** (3-5 días) ← NUEVO
    - **Panel CRM en Dashboard**:
-     * Visualizar contactos de formularios (waitlist + contacto)
-     * Ver detalles de cada lead con toda su información
-     * Sistema de estados (nuevo, contactado, calificado, convertido)
-     * Filtros y búsqueda de contactos
-     * Notas y seguimiento por contacto
+     - Visualizar contactos de formularios (waitlist + contacto)
+     - Ver detalles de cada lead con toda su información
+     - Sistema de estados (nuevo, contactado, calificado, convertido)
+     - Filtros y búsqueda de contactos
+     - Notas y seguimiento por contacto
    - **Integración de Email Workspace**:
-     * Conectar correo del workspace (Google Workspace / Outlook)
-     * Poder responder emails directamente desde el CRM
-     * Recibir y visualizar correos entrantes
-     * Threading de conversaciones
-     * Templates de respuestas rápidas
+     - Conectar correo del workspace (Google Workspace / Outlook)
+     - Poder responder emails directamente desde el CRM
+     - Recibir y visualizar correos entrantes
+     - Threading de conversaciones
+     - Templates de respuestas rápidas
    - **Notificaciones**:
-     * Alertas cuando llega nuevo contacto
-     * Emails de notificación al equipo
-     * Dashboard de leads pendientes de respuesta
+     - Alertas cuando llega nuevo contacto
+     - Emails de notificación al equipo
+     - Dashboard de leads pendientes de respuesta
 
 3. **Sistema de Autenticación Avanzado** (opcional para MVP)
    - OAuth providers (Google, LinkedIn)
@@ -1109,15 +1327,17 @@ apps/web/src/app/(admin)/admin/
    - Verificación de correo mejorada
 
 **✅ Fase 0 COMPLETADA AL 100% - Nov 12, 2025**
-  - ✅ Contenido: COMPLETADO
-  - ✅ Optimización final: COMPLETADO
-  - CRM + Email: OPCIONAL (puede implementarse en Fase 1)
+
+- ✅ Contenido: COMPLETADO
+- ✅ Optimización final: COMPLETADO
+- CRM + Email: OPCIONAL (puede implementarse en Fase 1)
 
 ---
 
 ## 📋 Información del Proyecto
 
 ### Stack Tecnológico
+
 - **Backend:** Supabase (PostgreSQL + Auth + Storage + Realtime + pgvector)
 - **Frontend:** Next.js 14+ (App Router) + TailwindCSS
 - **Deployment:** Netlify
@@ -1125,6 +1345,7 @@ apps/web/src/app/(admin)/admin/
 - **CMS (Landing/Blog):** Contentful / Sanity / WordPress Headless (a definir)
 
 ### Servicios Externos
+
 - **Pagos:** Stripe + dLocal Go
 - **Email:** SendGrid (solo API, templates propios)
 - **Auth/SMS:** Twilio
@@ -1134,13 +1355,16 @@ apps/web/src/app/(admin)/admin/
 - **IA:** OpenAI API / Anthropic Claude API
 
 ### Principios de Diseño
-- **Base de datos ligera:** Mínima documentación almacenada, usar referencias a storage
+
+- **Base de datos ligera:** Mínima documentación almacenada, usar referencias a
+  storage
 - **Multi-tenant nativo:** Todo filtrado por organization_id
 - **API-first:** Diseño REST consistente
 - **Event-driven:** Arquitectura basada en eventos para desacoplamiento
 - **Seguridad:** RLS en todas las tablas, encriptación en reposo
 - **SEO-first:** Contenido optimizado para motores de búsqueda y IA
-- **AI schemas separados:** Customer Service y Document Review como servicios independientes
+- **AI schemas separados:** Customer Service y Document Review como servicios
+  independientes
 
 ---
 
@@ -1149,6 +1373,7 @@ apps/web/src/app/(admin)/admin/
 ### **Objetivo:** Establecer presencia digital y comenzar posicionamiento mientras se desarrolla el producto
 
 Esta fase es **CRÍTICA** porque:
+
 1. El SEO toma 3-6 meses en mostrar resultados
 2. Genera tráfico orgánico mientras desarrollas
 3. Valida messaging y value proposition
@@ -1162,6 +1387,7 @@ Esta fase es **CRÍTICA** porque:
 **Objetivo:** Infraestructura optimizada para SEO/AEO/GEO
 
 #### Arquitectura Propuesta:
+
 ```
 tupatrimonio.app/
 ├── / (landing page principal)
@@ -1202,7 +1428,7 @@ tupatrimonio.app/
        optimizeCss: true,
      },
    }
-   
+
    // app/layout.tsx - Metadata API
    export const metadata = {
      metadataBase: new URL('https://tupatrimonio.app'),
@@ -1233,7 +1459,7 @@ tupatrimonio.app/
 2. **Structured Data (Schema.org)**
    ```typescript
    // Implementar JSON-LD en cada página
-   
+
    // Homepage: Organization
    {
      "@context": "https://schema.org",
@@ -1251,7 +1477,7 @@ tupatrimonio.app/
        "ratingCount": "127"
      }
    }
-   
+
    // Blog posts: Article
    // Guías: HowTo
    // Precios: Product/Offer
@@ -1266,7 +1492,7 @@ tupatrimonio.app/
    - Bundle optimization y Code splitting
    - Edge caching global
    - ISR (Incremental Static Regeneration)
-   
+
    // Solo configurar:
    - Lazy loading de componentes pesados
    - Core Web Vitals monitoring
@@ -1276,18 +1502,18 @@ tupatrimonio.app/
    ```typescript
    // app/sitemap.ts
    export default async function sitemap() {
-     const posts = await getBlogPosts()
-     const guides = await getGuides()
-     
+     const posts = await getBlogPosts();
+     const guides = await getGuides();
+
      return [
-       { url: 'https://tupatrimonio.app', changeFrequency: 'daily' },
-       { url: 'https://tupatrimonio.app/precios', changeFrequency: 'weekly' },
-       ...posts.map(post => ({
+       { url: "https://tupatrimonio.app", changeFrequency: "daily" },
+       { url: "https://tupatrimonio.app/precios", changeFrequency: "weekly" },
+       ...posts.map((post) => ({
          url: `https://tupatrimonio.app/blog/${post.slug}`,
          lastModified: post.updatedAt,
-         changeFrequency: 'monthly',
+         changeFrequency: "monthly",
        })),
-     ]
+     ];
    }
    ```
 
@@ -1300,6 +1526,7 @@ tupatrimonio.app/
 #### Opciones y Recomendación:
 
 **Opción A: Contentful (Recomendada)**
+
 - Headless CMS robusto
 - API GraphQL/REST
 - Preview mode nativo
@@ -1307,12 +1534,14 @@ tupatrimonio.app/
 - Webhooks para rebuild automático
 
 **Opción B: Sanity**
+
 - Más flexible y customizable
 - Studio en React
 - GROQ queries poderosas
 - Real-time collaboration
 
 **Opción C: Supabase Tables**
+
 - Ya estás usando Supabase
 - Sin costo adicional
 - Menor overhead
@@ -1402,6 +1631,7 @@ Informational (Top of Funnel):
 #### Content Clusters:
 
 **Cluster 1: Firma Electrónica (Pillar)**
+
 ```
 Pillar: "Guía Completa de Firma Electrónica en Chile 2025"
 Supporting content:
@@ -1414,6 +1644,7 @@ Supporting content:
 ```
 
 **Cluster 2: Verificación de Identidad (Pillar)**
+
 ```
 Pillar: "Verificación de Identidad Digital: Guía 2025"
 Supporting content:
@@ -1424,6 +1655,7 @@ Supporting content:
 ```
 
 **Cluster 3: Notaría Digital (Pillar)**
+
 ```
 Pillar: "Notaría Digital en Chile: El Futuro es Hoy"
 Supporting content:
@@ -1434,6 +1666,7 @@ Supporting content:
 ```
 
 **Cluster 4: IA para Atención al Cliente (Pillar)** ← NUEVO
+
 ```
 Pillar: "Chatbots con IA: La Revolución en Atención al Cliente 2025"
 Supporting content:
@@ -1446,6 +1679,7 @@ Supporting content:
 ```
 
 **Cluster 5: IA para Revisión de Documentos (Pillar)** ← NUEVO
+
 ```
 Pillar: "IA para Análisis de Documentos: Guía Completa 2025"
 Supporting content:
@@ -1510,6 +1744,7 @@ Semana 15-16: ← NUEVO
 #### Landing Pages a Crear:
 
 **1. Homepage (`/`)**
+
 ```
 Estructura:
 - Hero: Value prop clara + CTA principal
@@ -1528,6 +1763,7 @@ SEO:
 ```
 
 **2. Landing: Firmas Electrónicas (`/firmas-electronicas`)**
+
 ```
 Enfoque: SEO-optimizada para "firma electrónica"
 Estructura:
@@ -1547,6 +1783,7 @@ Content additions:
 ```
 
 **3. Landing: Verificación de Identidad (`/verificacion-identidad`)**
+
 ```
 Enfoque: Para compliance officers y fintechs
 Keywords: "verificación de identidad", "KYC digital", "onboarding digital"
@@ -1558,6 +1795,7 @@ Estructura similar pero enfocada en:
 ```
 
 **4. Landing: Notaría Digital (`/notaria-digital`)**
+
 ```
 Enfoque: Disruption del modelo tradicional
 Estructura:
@@ -1569,6 +1807,7 @@ Estructura:
 ```
 
 **5. Landing: Asistente IA (`/asistente-ia`)** ← NUEVO
+
 ```
 Enfoque: Automatización de atención al cliente
 Keywords: "chatbot con IA", "asistente virtual inteligente", "atención 24/7"
@@ -1598,6 +1837,7 @@ Content additions:
 ```
 
 **6. Landing: Revisión Documentos IA (`/revision-documentos-ia`)** ← NUEVO
+
 ```
 Enfoque: Automatización de análisis legal/contractual
 Keywords: "revisión automática contratos", "IA análisis documentos", "compliance automatizado"
@@ -1635,6 +1875,7 @@ Content additions:
 ```
 
 **7. Página de Precios (`/precios`)**
+
 ```
 Estructura:
 - Tabla comparativa de planes
@@ -1737,7 +1978,7 @@ SEO considerations:
    - "FAQ: Verificación de Identidad Digital"
    - "FAQ: Chatbots con Inteligencia Artificial" ← NUEVO
    - "FAQ: Revisión Automática de Contratos con IA" ← NUEVO
-   
+
    Las IA's priorizan contenido estructurado en Q&A format
    ```
 
@@ -1758,20 +1999,20 @@ SEO considerations:
    - Párrafo expandido con contexto
    - Lista de pasos o bullets
    - Ejemplo práctico
-   
+
    Ejemplo:
    "¿Qué tan precisa es la IA en revisar contratos?
-   
+
    Los sistemas de IA para revisión de contratos alcanzan una 
    precisión del 85-95% en la detección de cláusulas estándar 
    y red flags comunes, según estudios de 2024.
-   
+
    Factores que afectan la precisión:
    - Calidad del entrenamiento del modelo
    - Tipo de contrato (estandarizado vs personalizado)
    - Complejidad del lenguaje legal
    - Idioma del documento
-   
+
    En TuPatrimonio utilizamos Claude 3.5 Sonnet para análisis 
    legal, logrando 92% de precisión en contratos comerciales 
    estándar..."
@@ -1810,7 +2051,7 @@ SEO considerations:
    - LCP: Image optimization + CDN
    - FID: Code splitting óptimo
    - CLS: Layout optimization
-   
+
    // Solo monitorear con Lighthouse
    ```
 
@@ -1868,7 +2109,7 @@ SEO considerations:
    - Publicaciones de transformación digital
    - Blogs de SaaS B2B
    - Blogs de IA y automatización ← NUEVO
-   
+
    Pitch examples:
    - "5 Formas en que la Firma Digital Acelera Ventas"
    - "Cómo la IA Reduce Costos de Atención al Cliente en 60%" ← NUEVO
@@ -1911,43 +2152,46 @@ SEO considerations:
 #### Setup:
 
 1. **✅ Google Analytics 4 - IMPLEMENTADO EN AMBAS APPS**
-   
+
    **Marketing App (tupatrimonio.app):**
    - ✅ GA4 configurado y funcionando
    - ✅ Tracking de eventos: page_view, click_cta, scroll_depth
    - ✅ Eventos de formularios: form_start, form_submit
    - ✅ Eventos de blog: blog_read, navigation_click
    - ✅ ID de medición configurado en variables de entorno
-   
+
    **Web App (app.tupatrimonio.app):**
    - ✅ GA4 configurado con propiedad separada (G-HKK7H001DB)
    - ✅ Componente GoogleAnalytics.tsx creado
    - ✅ Librería analytics.ts type-safe implementada
-   - ✅ Eventos comunes: cta_click, form_submit, navigation_click, external_link_click
+   - ✅ Eventos comunes: cta_click, form_submit, navigation_click,
+     external_link_click
    - ✅ Eventos específicos de app web implementados:
      ```typescript
      // Autenticación
-     - user_login, user_logout
-     
-     // Dashboard
-     - dashboard_view
-     
-     // Documentos
-     - document_created, document_updated, document_deleted
-     
-     // Firmas
-     - signature_requested, signature_completed
-     
-     // Verificación
-     - verification_started, verification_completed
-     
-     // Perfil y Pagos
-     - profile_updated, payment_initiated, payment_completed
+     -user_login,
+       user_logout -
+       // Dashboard
+       dashboard_view -
+       // Documentos
+       document_created,
+       document_updated,
+       document_deleted -
+       // Firmas
+       signature_requested,
+       signature_completed -
+       // Verificación
+       verification_started,
+       verification_completed -
+       // Perfil y Pagos
+       profile_updated,
+       payment_initiated,
+       payment_completed;
      ```
    - ✅ Configuración de variables de entorno para Vercel
    - ✅ Solo funciona en producción (NODE_ENV=production)
    - ✅ Logs en desarrollo para debugging
-   
+
    **Ventajas de Propiedades Separadas:**
    - Métricas específicas por aplicación
    - Análisis independiente de marketing vs producto
@@ -1972,11 +2216,11 @@ SEO considerations:
    ```
    Tools implementados:
    ✅ Google Search Console: Performance
-   
+
    Tools pendientes:
    - Ahrefs / SEMrush: Keyword tracking
    - Screaming Frog: Technical audits
-   
+
    KPIs a trackear semanalmente:
    - Organic traffic
    - Keyword rankings (top 20)
@@ -2001,7 +2245,7 @@ SEO considerations:
    - Checklist: "Cómo Elegir Software de Firma Electrónica"
    - Template: "Contrato de Confidencialidad para Firmar"
    - Webinar: "Demostración en Vivo de Firma Electrónica"
-   
+
    IA-específicos: ← NUEVO
    - eBook: "Implementar IA en tu Empresa: Guía Práctica 2025"
    - Template: "100 Prompts para Entrenar tu Chatbot"
@@ -2015,12 +2259,12 @@ SEO considerations:
    Primary CTA: "Empieza Gratis" (no credit card required)
    Secondary CTA: "Ver Demo" (video o calendario)
    Tertiary CTA: "Hablar con Ventas"
-   
+
    IA-specific CTAs: ← NUEVO
    - "Prueba el Chatbot IA"
    - "Analiza un Contrato Gratis"
    - "Ver Demo Interactiva"
-   
+
    Placement:
    - Above the fold
    - Después de cada value prop
@@ -2047,7 +2291,7 @@ SEO considerations:
    - Single column layout
    - Clear value prop sobre el form
    - Privacy assurance
-   
+
    Demo request (para IA services):
    - Email, Nombre, Empresa, Tamaño empresa
    - "¿Qué te interesa?" → Multiple select
@@ -2068,29 +2312,35 @@ SEO considerations:
 **Al finalizar la Fase 0 tendrás:**
 
 ✅ **Marketing Website Live:**
+
 - Homepage
-- 5 Landing pages específicas (firmas, verificación, notaría, chatbot IA, revisión IA)
+- 5 Landing pages específicas (firmas, verificación, notaría, chatbot IA,
+  revisión IA)
 - Página de precios (con pricing de servicios IA)
 - Sección legal (términos, privacidad)
 
 ✅ **Blog Operacional:**
+
 - ✅ 10-15 posts publicados (COMPLETADO Nov 2025)
 - 2 pillar articles (1 puede ser sobre IA)
 - ✅ CMS configurado
 - Pipeline de contenido para 4 meses
 
 ✅ **SEO Foundation:**
+
 - Technical SEO impecable (Lighthouse > 95)
 - Schema markup implementado
 - Analytics y tracking completo
 - Google Search Console configurado
 
 ✅ **Content Assets:**
+
 - 3-4 lead magnets (eBooks, templates, incluir 1-2 de IA)
 - 2 calculadoras interactivas (ROI firma + ROI chatbot)
 - Biblioteca de recursos iniciada
 
 ✅ **Early Traction:**
+
 - 50-100 visitas orgánicas diarias (optimista)
 - 15-25 signups para early access
 - Rankings top 20 para 5-7 keywords (incluir keywords IA)
@@ -2101,6 +2351,7 @@ SEO considerations:
 ### 0.12 Métricas de Éxito para Fase 0
 
 **Semana 4 (fin de fase):**
+
 - ✅ Website live y sin errores técnicos
 - ✅ 100% pages indexed en Google
 - ✅ Lighthouse score > 90 en todas las páginas
@@ -2109,6 +2360,7 @@ SEO considerations:
 - ✅ Landing pages de IA con demos funcionales
 
 **Mes 3 (mientras desarrollas Fase 1-2):**
+
 - [ ] 500+ organic visits/mes
 - [ ] Rankings top 10 para 3-4 long-tail keywords
 - [ ] 100+ signups para waitlist
@@ -2116,6 +2368,7 @@ SEO considerations:
 - [ ] 2-3 keywords de IA rankeando top 20
 
 **Mes 6 (mientras desarrollas Fase 3-5):**
+
 - [ ] 2,000+ organic visits/mes
 - [ ] Rankings top 5 para keyword principal
 - [ ] 500+ waitlist
@@ -2130,6 +2383,7 @@ SEO considerations:
 ### **Objetivo:** Establecer presencia digital y SEO foundation mientras desarrollamos el backend
 
 **¿Por qué Fase 0 primero?**
+
 1. **SEO toma 3-6 meses** en mostrar resultados
 2. **Genera tráfico orgánico** mientras desarrollas el backend
 3. **Valida messaging** y value proposition
@@ -2139,7 +2393,8 @@ SEO considerations:
 ### 0.1 **Implementación Híbrida: Supabase + Hardcodeado**
 
 **Decisión Arquitectónica:**
-- **Landing Pages**: Hardcodeadas (performance + SEO óptimo) 
+
+- **Landing Pages**: Hardcodeadas (performance + SEO óptimo)
 - **Blog**: Supabase tables (dinámico, $0 extra cost)
 - **Sin CMS externo**: Speed to market + control total
 
@@ -2162,8 +2417,10 @@ CREATE TABLE blog_posts (
 ### 0.2 **Landing Pages a Crear (Hardcodeadas)**
 
 1. **Homepage** (`/`) - Value proposition + servicios + CTA
-2. **Firmas Electrónicas** (`/firmas-electronicas`) - SEO keyword: "firma electrónica chile"
-3. **Verificación Identidad** (`/verificacion-identidad`) - Para compliance/fintechs
+2. **Firmas Electrónicas** (`/firmas-electronicas`) - SEO keyword: "firma
+   electrónica chile"
+3. **Verificación Identidad** (`/verificacion-identidad`) - Para
+   compliance/fintechs
 4. **Notaría Digital** (`/notaria-digital`) - Disruption modelo tradicional
 5. **Precios** (`/precios`) - Planes B2C/B2B diferenciados
 6. **Legal** (`/legal/*`) - Términos, privacidad, cookies
@@ -2222,20 +2479,23 @@ Al completar Fase 0:
 
 ## 🏗️ Fase 1: Fundación (Semanas 5-8) - **EN PROGRESO** ✅
 
-**Nota:** Esta fase comenzó en semana 5. **Admin Panel Core completado en Nov 21, 2025.**
+**Nota:** Esta fase comenzó en semana 5. **Admin Panel Core completado en Nov
+21, 2025.**
 
 ### 📊 **Estado Actual del Proyecto (21 Noviembre 2025):**
 
 #### ✅ **COMPLETADO (Oct 2025):**
-- ✅ Proyecto Supabase configurado y funcionando 
-- ✅ **Migración 1**: `20251021120052_enable-pgvector.sql` 
+
+- ✅ Proyecto Supabase configurado y funcionando
+- ✅ **Migración 1**: `20251021120052_enable-pgvector.sql`
   - pgvector extension habilitado para servicios de IA
   - Preparado para embeddings de chatbot y análisis de documentos
-  
+
 - ✅ **Migración 2**: `20251021120854_schema-core.sql` - **FOUNDATION COMPLETA**
   - 📊 **13 tablas principales** implementadas
   - 🏢 **Multi-tenancy nativo**: organizations como partición principal
-  - 👥 **Sistema de usuarios**: Integración con Supabase Auth + perfiles extendidos  
+  - 👥 **Sistema de usuarios**: Integración con Supabase Auth + perfiles
+    extendidos
   - 🛡️ **Roles jerárquicos**: Con permisos JSONB flexibles
   - 🔗 **Relaciones M:N**: organization_users con roles por organización
   - 👨‍👩‍👧‍👦 **Equipos**: Colaboración interna en organizaciones
@@ -2248,34 +2508,43 @@ Al completar Fase 0:
   - 🛡️ **Validaciones**: Constraints robustos + ENUMs consistentes
   - 📚 **Documentación**: Comentarios completos en todas las tablas
 
-- ✅ **Migración 3**: `20251021194734_schema-marketing.sql` - **MARKETING FOUNDATION COMPLETA**
-  - 🌐 **8 tablas marketing**: blog_posts, categories, waitlist, contact, faqs, testimonials, newsletter, case_studies
+- ✅ **Migración 3**: `20251021194734_schema-marketing.sql` - **MARKETING
+  FOUNDATION COMPLETA**
+  - 🌐 **8 tablas marketing**: blog_posts, categories, waitlist, contact, faqs,
+    testimonials, newsletter, case_studies
   - 📝 **Blog dinámico**: Sistema completo con categorías y SEO
   - 📧 **Lead capture**: Formularios de waitlist y contacto preparados
   - 🏆 **Social proof**: Testimonials con ratings y gestión
   - 📊 **Analytics ready**: Tracking de engagement y métricas
-  - 🛡️ **RLS policies**: Seguridad pública para lectura, autenticado para gestión
+  - 🛡️ **RLS policies**: Seguridad pública para lectura, autenticado para
+    gestión
   - ⚡ **Performance**: 20+ índices optimizados para marketing queries
 
 #### ✅ **COMPLETADO - ADMIN PANEL CORE (Nov 21, 2025):**
 
 - ✅ **9 Migraciones de RLS y Admin Panel**: `20251121000000` - `20251121000008`
-  - 🔐 **Solución recursión infinita RLS**: RLS deshabilitado en `organization_users`
+  - 🔐 **Solución recursión infinita RLS**: RLS deshabilitado en
+    `organization_users`
   - 🛡️ **Sistema de bypass**: Tabla `_bypass.platform_admins` sin RLS
   - ⚡ **Función bypass**: `is_platform_super_admin_bypass()` evita recursión
   - 🔑 **SECURITY DEFINER**: Triggers de folders con permisos de superusuario
   - 📁 **RLS folders CRM**: Políticas para platform admins
   - ✅ **Testing exitoso**: Creación de organizaciones funcionando
-  - 🎯 **15+ páginas admin**: Organizaciones, usuarios, teams, invitaciones, API keys
+  - 🎯 **15+ páginas admin**: Organizaciones, usuarios, teams, invitaciones, API
+    keys
   - 🧩 **20+ componentes UI**: Formularios, acciones, badges, estados
   - ⚙️ **12+ server actions**: CRUD completo con validaciones de seguridad
-  - 📊 **Sidebar admin completo**: 3 secciones organizadas (Principal, Apps, Sistema)
-  - 🔒 **Arquitectura de seguridad**: Multi-capa con verificaciones en cada acción
+  - 📊 **Sidebar admin completo**: 3 secciones organizadas (Principal, Apps,
+    Sistema)
+  - 🔒 **Arquitectura de seguridad**: Multi-capa con verificaciones en cada
+    acción
   - ✨ **Production ready**: Sistema probado en navegador con casos reales
 
-#### 🔄 **FASE 0: Marketing Web + SEO Foundation** - **EN PROGRESO** 
+#### 🔄 **FASE 0: Marketing Web + SEO Foundation** - **EN PROGRESO**
+
 - ✅ **Schema marketing completo CREADO** (21 Oct 2025)
-  - 8 tablas implementadas: blog_posts, categories, waitlist, contact, faqs, testimonials, newsletter, case_studies
+  - 8 tablas implementadas: blog_posts, categories, waitlist, contact, faqs,
+    testimonials, newsletter, case_studies
   - RLS policies, índices optimizados, datos iniciales
   - Lead capture y social proof preparados
 - ✅ **Monorepo estructura COMPLETADA** (21 Oct 2025)
@@ -2296,7 +2565,7 @@ Al completar Fase 0:
   - ✅ Apps listas para deploy en Netlify
 - ✅ **Deploy a Vercel COMPLETADO** (21 Oct 2025)
   - ✅ Marketing site deployado exitosamente
-  - ✅ Web app deployada exitosamente  
+  - ✅ Web app deployada exitosamente
   - ✅ Monorepo funcionando en producción
   - ✅ Build commands y publish directories configurados correctamente
   - ✅ Variables de entorno configuradas
@@ -2350,8 +2619,10 @@ Al completar Fase 0:
 - ✅ **Migración Admin Blog a Web App COMPLETADA** (28 Oct 2025)
   - ✅ Admin del blog migrado de apps/marketing a apps/web/dashboard/blog
   - ✅ Hook useBlogManagement.ts centralizado en apps/web
-  - ✅ Componentes admin: BlogPostsList, BlogPostEditor, CategoryManagement, MediaGallery
-  - ✅ Rutas del dashboard: /dashboard/blog, /dashboard/blog/new, /dashboard/blog/[id]/edit
+  - ✅ Componentes admin: BlogPostsList, BlogPostEditor, CategoryManagement,
+    MediaGallery
+  - ✅ Rutas del dashboard: /dashboard/blog, /dashboard/blog/new,
+    /dashboard/blog/[id]/edit
   - ✅ Gestión de categorías completa con colores y ordenamiento
   - ✅ Sistema de Storage con 6 buckets (blog-featured, blog-content, etc.)
   - ✅ Políticas RLS corregidas: admins ven TODO (borradores e inactivos)
@@ -2365,7 +2636,8 @@ Al completar Fase 0:
   - ✅ **Precisión mejorada del 60% en cálculo de tiempo de lectura** ⏱️
 - ✅ **Sistema de Storage de Imágenes DOCUMENTADO** (28 Oct 2025)
   - ✅ 6 buckets en Supabase Storage: blog-featured (5MB), blog-content (3MB)
-  - ✅ blog-categories (1MB), blog-authors (1MB), blog-thumbnails (2MB), blog-meta (2MB)
+  - ✅ blog-categories (1MB), blog-authors (1MB), blog-thumbnails (2MB),
+    blog-meta (2MB)
   - ✅ Políticas RLS: Lectura pública, escritura autenticada
   - ✅ Formatos soportados: JPG, PNG, WEBP, GIF (+ SVG en categories)
   - ✅ Nomenclatura de archivos: timestamp-random.extensión
@@ -2399,17 +2671,19 @@ Al completar Fase 0:
   - ✅ Favicons diferenciados para marketing y web apps
   - ✅ Descargadas imágenes desde Supabase Storage (512x512px)
   - ✅ Generados múltiples formatos para soporte completo:
-    * favicon.ico (32x32)
-    * icon.png (32x32 para navegadores modernos)
-    * apple-icon.png (180x180 para iOS)
+    - favicon.ico (32x32)
+    - icon.png (32x32 para navegadores modernos)
+    - apple-icon.png (180x180 para iOS)
   - ✅ Archivos colocados en apps/marketing/src/app/ y apps/web/src/app/
   - ✅ Metadata actualizada en ambos layout.tsx
   - ✅ Script automatizado con sharp para generación
   - ✅ **Branding visual completo en ambas aplicaciones** 🎨
 
 #### ✅ **COMPLETADO - FASE 2: CRÉDITOS Y BILLING (Nov 22, 2025):**
+
 - ✅ **Schemas credits + billing**: Completados y funcionando
-- ✅ **Migraciones aplicadas**: 11 migraciones completas (incluye corrección numeración facturas)
+- ✅ **Migraciones aplicadas**: 11 migraciones completas (incluye corrección
+  numeración facturas)
 - ✅ **Integraciones Stripe + dLocal**: Funcionando al 100%
 - ✅ **Webhooks configurados**: Stripe y dLocal operativos
 - ✅ **UI completa**: Todas las páginas de billing implementadas
@@ -2417,9 +2691,12 @@ Al completar Fase 0:
 - ✅ **Notificaciones**: Sistema completo integrado
 - ✅ **PDFs**: Generación de facturas funcionando
 - ✅ **Testing**: Flujo completo probado exitosamente
-- ✅ **Corrección numeración facturas** (Nov 24, 2025): Sistema por organización `{ORG_SLUG}-{NÚMERO}` implementado, eliminadas colisiones
-- ✅ **Simplificación historial de pedidos** (Dic 1, 2025): Sistema de trazabilidad optimizado para mostrar solo eventos relevantes al cliente
-  - ✅ **Migración de limpieza mejorada**: `20251201000004_improved_cleanup_order_history.sql`
+- ✅ **Corrección numeración facturas** (Nov 24, 2025): Sistema por organización
+  `{ORG_SLUG}-{NÚMERO}` implementado, eliminadas colisiones
+- ✅ **Simplificación historial de pedidos** (Dic 1, 2025): Sistema de
+  trazabilidad optimizado para mostrar solo eventos relevantes al cliente
+  - ✅ **Migración de limpieza mejorada**:
+    `20251201000004_improved_cleanup_order_history.sql`
     - Elimina eventos técnicos y duplicados por descripción específica
     - Deduplica eventos por cambio de estado (mantiene solo el más reciente)
     - Prioriza eventos `order_completed` sobre `status_changed` duplicados
@@ -2427,8 +2704,10 @@ Al completar Fase 0:
   - ✅ **Mejoras en componente OrderTimeline.tsx**:
     - Filtrado mejorado por tipo y descripción de eventos
     - Función `deduplicateByStatus()` para eliminar duplicados en frontend
-    - Filtrado de eventos técnicos: `invoice_created`, `payment_initiated`, `order_modified`
-    - Filtrado de descripciones técnicas: "Pago exitoso vía...", "Factura creada", etc.
+    - Filtrado de eventos técnicos: `invoice_created`, `payment_initiated`,
+      `order_modified`
+    - Filtrado de descripciones técnicas: "Pago exitoso vía...", "Factura
+      creada", etc.
     - Resultado: Solo 3 eventos visibles para el cliente:
       1. "Tu pedido fue creado"
       2. "Pago confirmado"
@@ -2436,9 +2715,11 @@ Al completar Fase 0:
 
 #### ✅ **COMPLETADO - SISTEMA DE OPERACIONES Y REEMBOLSOS (Dic 8, 2025):**
 
-**🎯 Objetivo:** Reemplazar la combinación WordPress + Make.com + HubSpot con un sistema interno propio para gestión de pedidos, operaciones y reembolsos.
+**🎯 Objetivo:** Reemplazar la combinación WordPress + Make.com + HubSpot con un
+sistema interno propio para gestión de pedidos, operaciones y reembolsos.
 
 **✅ FASE 1: PANEL DE OPERACIONES - COMPLETADO:**
+
 - ✅ Vista centralizada para equipo de atención al cliente
 - ✅ Lista de pedidos (`/admin/orders`) con filtros y paginación
 - ✅ Detalle de pedidos (`/admin/orders/[id]`) con información completa
@@ -2446,6 +2727,7 @@ Al completar Fase 0:
 - ✅ Sistema de navegación y filtros funcional
 
 **✅ FASE 2: PIPELINES CONFIGURABLES - COMPLETADO:**
+
 - ✅ Schema `billing.order_pipeline_stages` creado
 - ✅ Etapas globales por defecto:
   - Pendiente de Pago (pending_payment) - 🟡 Yellow
@@ -2460,6 +2742,7 @@ Al completar Fase 0:
 - ✅ Migración: `20251207000001_create_order_pipeline_stages.sql`
 
 **✅ FASE 3: ANULACIONES Y REEMBOLSOS - COMPLETADO:**
+
 - ✅ Schema `billing.refund_requests` creado con tipos:
   - `refund_destination`: payment_method, wallet
   - `refund_status`: pending, approved, processing, completed, rejected
@@ -2499,6 +2782,7 @@ Al completar Fase 0:
   - ⏳ Pendiente: Pruebas con Stripe y Transbank
 
 **✅ FASE 4: COMUNICACIONES - COMPLETADO:**
+
 - ✅ Schema `communications.email_history` creado
 - ✅ Integración Gmail API
   - Cliente OAuth2 configurado (`lib/gmail/client.ts`)
@@ -2510,11 +2794,14 @@ Al completar Fase 0:
   - Logging automático en `email_history`
   - Manejo de errores robusto
 - ✅ Migración: `20251207000003_create_email_history.sql`
-- 📋 **PAUSADO:** WhatsApp Business API migration (requiere migración de números desde HubSpot)
+- 📋 **PAUSADO:** WhatsApp Business API migration (requiere migración de números
+  desde HubSpot)
 
 **✅ FASE 5: RETIROS DE MONEDERO - COMPLETADO:**
+
 - ✅ Schema `credits.withdrawal_requests` creado
-- ✅ Tipo `withdrawal_status`: pending, approved, processing, completed, rejected
+- ✅ Tipo `withdrawal_status`: pending, approved, processing, completed,
+  rejected
 - ✅ Vista pública `public.withdrawal_requests` con información relacionada
 - ✅ Función RPC `credits.deduct_credits_for_withdrawal()`
   - Deduce créditos de la cuenta
@@ -2522,8 +2809,10 @@ Al completar Fase 0:
   - Validación de balance disponible
 - ✅ Página admin `/admin/billing/withdrawals` para listar solicitudes
 - ✅ Página admin `/admin/billing/withdrawals/[id]` para detalle
-- ✅ Componente `WithdrawalActions` para acciones admin (aprobar, rechazar, procesar, completar)
-- ✅ API route `/api/admin/billing/withdrawals/[id]/status` para actualizar estado
+- ✅ Componente `WithdrawalActions` para acciones admin (aprobar, rechazar,
+  procesar, completar)
+- ✅ API route `/api/admin/billing/withdrawals/[id]/status` para actualizar
+  estado
 - ✅ Página usuario `/wallet/withdraw` para solicitar retiros
 - ✅ Componente `WithdrawForm` para formulario de solicitud
 - ✅ API route `/api/wallet/withdraw` para crear solicitudes
@@ -2531,6 +2820,7 @@ Al completar Fase 0:
 - ✅ Migración: `20251207000004_create_withdrawal_requests.sql`
 
 **✅ MEJORAS ADICIONALES:**
+
 - ✅ Vista de créditos y movimientos en detalle de organización
   - Sección agregada en `/admin/organizations/[id]`
   - Muestra balance total, disponible, reservado y total ganado
@@ -2543,14 +2833,18 @@ Al completar Fase 0:
   - El balance se actualiza correctamente
 
 **📄 ARCHIVOS CREADOS/MODIFICADOS:**
+
 - Migraciones SQL: 4 nuevas migraciones
-- Componentes React: `OrderStatusSelector`, `RefundModal`, `WithdrawalActions`, `WithdrawForm`
+- Componentes React: `OrderStatusSelector`, `RefundModal`, `WithdrawalActions`,
+  `WithdrawForm`
 - API Routes: 5 nuevas rutas
-- Utilidades: `lib/stripe/refunds.ts`, `lib/transbank/refunds.ts`, `lib/credits/refunds.ts`, `lib/gmail/client.ts`
+- Utilidades: `lib/stripe/refunds.ts`, `lib/transbank/refunds.ts`,
+  `lib/credits/refunds.ts`, `lib/gmail/client.ts`
 - Páginas: 4 nuevas páginas admin/usuario
 - Funciones RPC: 4 nuevas funciones (2 en billing, 2 en credits)
 
 **🎯 PRÓXIMOS PASOS:**
+
 - ⏳ Pruebas de reembolsos con Stripe
 - ⏳ Pruebas de reembolsos con Transbank (Webpay Plus y OneClick)
 - 📋 Configuración de pipelines personalizados por organización (futuro)
@@ -2558,9 +2852,11 @@ Al completar Fase 0:
 - 📋 Migración WhatsApp Business API (cuando se migren números desde HubSpot)
 
 #### 📋 **PAUSADO TEMPORALMENTE (Fase 1):**
+
 - 📋 Integración GitHub para migraciones automáticas
 
 #### 📋 **ROADMAP DE MIGRACIONES PENDIENTES:**
+
 ```
 ✅ Migración 1: 20251021120052_enable-pgvector.sql
 ✅ Migración 2: 20251021120854_schema-core.sql
@@ -2613,178 +2909,195 @@ Al completar Fase 0:
 **✅ COMPLETADO - Marketing Site Foundation:**
 
 **1. Estructura y Setup (100% Completado)**
-   - ✅ Monorepo completo con apps/marketing + apps/web
-   - ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
-   - ✅ Sistema de tipografía triple (Josefin Sans, Outfit, Nunito)
-   - ✅ Sistema de colores dual (funcional gris + marca vino)
-   - ✅ SEO avanzado (metadata API, sitemap dinámico, robots.txt)
-   - ✅ Dark mode completo con next-themes
+
+- ✅ Monorepo completo con apps/marketing + apps/web
+- ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
+- ✅ Sistema de tipografía triple (Josefin Sans, Outfit, Nunito)
+- ✅ Sistema de colores dual (funcional gris + marca vino)
+- ✅ SEO avanzado (metadata API, sitemap dinámico, robots.txt)
+- ✅ Dark mode completo con next-themes
 
 **2. Landing Pages (100% Completado)**
-   - ✅ Homepage global con value proposition
-   - ✅ Landing `/cl/firmas-electronicas` completa y optimizada
-   - ✅ Landing `/cl/notaria-online` completa y optimizada
-   - ✅ Landing `/cl/modificaciones-empresa` completa
-   - ✅ Landing `/cl/contrato-de-arriendo-online` completa
-   - ✅ Landing `/cl/verificacion-identidad` (redirect configurado)
-   - ✅ Página `/cl/precios` con planes diferenciados
-   - ✅ Páginas legales completas (`/legal/terminos`, `/legal/privacidad`, `/legal/cookies`)
+
+- ✅ Homepage global con value proposition
+- ✅ Landing `/cl/firmas-electronicas` completa y optimizada
+- ✅ Landing `/cl/notaria-online` completa y optimizada
+- ✅ Landing `/cl/modificaciones-empresa` completa
+- ✅ Landing `/cl/contrato-de-arriendo-online` completa
+- ✅ Landing `/cl/verificacion-identidad` (redirect configurado)
+- ✅ Página `/cl/precios` con planes diferenciados
+- ✅ Páginas legales completas (`/legal/terminos`, `/legal/privacidad`,
+  `/legal/cookies`)
 
 **3. Sistema de Contenido Completo (100% Completado)**
-   - ✅ **Blog dinámico** con Supabase
-     * Schema `marketing.blog_posts` y `blog_categories`
-     * Páginas dinámicas `/blog/[category]/[slug]`
-     * Sistema de categorías funcionando
-     * Panel admin completo para gestionar posts
-   - ✅ **Base de Conocimiento** (Knowledge Base) - NUEVO Nov 2025
-     * Schema `marketing.kb_articles` y `kb_categories`
-     * Páginas dinámicas `/base-conocimiento/[category]/[slug]`
-     * Sistema de categorías independiente
-     * Navegación por categorías `/base-conocimiento/categoria/[slug]`
-     * Integrado en sitemap dinámico
-   - ✅ **Sistema de Gestión de Páginas**
-     * API routes para configuración de páginas
-     * `marketing.page_config` para gestión dinámica
-     * Integración con sitemap automático
-     * Estados por país (activo, coming-soon)
+
+- ✅ **Blog dinámico** con Supabase
+  - Schema `marketing.blog_posts` y `blog_categories`
+  - Páginas dinámicas `/blog/[category]/[slug]`
+  - Sistema de categorías funcionando
+  - Panel admin completo para gestionar posts
+- ✅ **Base de Conocimiento** (Knowledge Base) - NUEVO Nov 2025
+  - Schema `marketing.kb_articles` y `kb_categories`
+  - Páginas dinámicas `/base-conocimiento/[category]/[slug]`
+  - Sistema de categorías independiente
+  - Navegación por categorías `/base-conocimiento/categoria/[slug]`
+  - Integrado en sitemap dinámico
+- ✅ **Sistema de Gestión de Páginas**
+  - API routes para configuración de páginas
+  - `marketing.page_config` para gestión dinámica
+  - Integración con sitemap automático
+  - Estados por país (activo, coming-soon)
 
 **4. Deploy Infrastructure (100% Completado)**
-   - ✅ **Ambas apps en Vercel**
-     * Marketing app: `tupatrimonio.app`
-     * Web app: `app.tupatrimonio.app`
-     * Build commands optimizados
-     * Variables de entorno configuradas
-     * Edge Middleware para geolocalización
+
+- ✅ **Ambas apps en Vercel**
+  - Marketing app: `tupatrimonio.app`
+  - Web app: `app.tupatrimonio.app`
+  - Build commands optimizados
+  - Variables de entorno configuradas
+  - Edge Middleware para geolocalización
 
 **5. Páginas Adicionales (100% Completado) - NUEVO Nov 2025**
-   - ✅ `/ayuda` - Centro de ayuda completo con FAQs
-   - ✅ `/nosotros` - Página sobre TuPatrimonio
-   - ✅ `/contacto` - Formulario de contacto global
-   - ✅ `/base-conocimiento` - Hub de artículos KB
-   - ✅ Líneas de negocio:
-     * `/legal-tech` - Servicios legales digitales
-     * `/business-hub` - Soluciones empresariales
-     * `/proptech` - Tecnología inmobiliaria
-     * `/fintech` - Servicios financieros
+
+- ✅ `/ayuda` - Centro de ayuda completo con FAQs
+- ✅ `/nosotros` - Página sobre TuPatrimonio
+- ✅ `/contacto` - Formulario de contacto global
+- ✅ `/base-conocimiento` - Hub de artículos KB
+- ✅ Líneas de negocio:
+  - `/legal-tech` - Servicios legales digitales
+  - `/business-hub` - Soluciones empresariales
+  - `/proptech` - Tecnología inmobiliaria
+  - `/fintech` - Servicios financieros
 
 **6. Integraciones y APIs (NUEVO Nov 2025)**
-   - ✅ **Google Business Reviews**
-     * API completa de sincronización
-     * Cron job para actualización automática
-     * Display de reseñas en landing pages
-     * Cache de datos para performance
-     * Endpoints: `/api/google-reviews`, `/api/google-stats`
-   - ✅ **API de Gestión de Páginas**
-     * `/api/pages-config` - Configuración dinámica
-     * Sistema de estados por país
-     * Integración con sitemap
+
+- ✅ **Google Business Reviews**
+  - API completa de sincronización
+  - Cron job para actualización automática
+  - Display de reseñas en landing pages
+  - Cache de datos para performance
+  - Endpoints: `/api/google-reviews`, `/api/google-stats`
+- ✅ **API de Gestión de Páginas**
+  - `/api/pages-config` - Configuración dinámica
+  - Sistema de estados por país
+  - Integración con sitemap
 
 **7. SEO Avanzado (100% Completado)**
-   - ✅ Sitemap dinámico multicapa:
-     * Páginas estáticas con prioridades
-     * Posts del blog con última modificación
-     * Artículos KB con categorías
-     * Categorías de ambos sistemas
-     * Sistema de gestión de páginas integrado
-   - ✅ Prioridades inteligentes por tipo de contenido
-   - ✅ Change frequencies optimizadas
-   - ✅ Structured data (Organization, WebSite, Article, BreadcrumbList)
+
+- ✅ Sitemap dinámico multicapa:
+  - Páginas estáticas con prioridades
+  - Posts del blog con última modificación
+  - Artículos KB con categorías
+  - Categorías de ambos sistemas
+  - Sistema de gestión de páginas integrado
+- ✅ Prioridades inteligentes por tipo de contenido
+- ✅ Change frequencies optimizadas
+- ✅ Structured data (Organization, WebSite, Article, BreadcrumbList)
 
 #### 📊 **RESUMEN DE PROGRESO FASE 0: ✅ 100% COMPLETADO**
 
 **✅ COMPLETADO (Oct-Nov 2025):**
 
 **Infraestructura y Setup:**
-   - ✅ Monorepo completo con 2 apps + packages compartidos
-   - ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
-   - ✅ Sistema de colores dual y tipografía triple
-   - ✅ Dark mode completo
-   - ✅ Deploy en Vercel (ambas apps)
-   - ✅ PWA funcional en web app
+
+- ✅ Monorepo completo con 2 apps + packages compartidos
+- ✅ Next.js 15.5.6 + TailwindCSS v4 + Shadcn/UI
+- ✅ Sistema de colores dual y tipografía triple
+- ✅ Dark mode completo
+- ✅ Deploy en Vercel (ambas apps)
+- ✅ PWA funcional en web app
 
 **Marketing Site:**
-   - ✅ 8+ landing pages principales para Chile
-   - ✅ Estructura internacional (/cl/, /co/, /mx/, /pe/, /ar/)
-   - ✅ Detección automática de país
-   - ✅ Blog dinámico con categorías
-   - ✅ Base de conocimiento completa (NUEVO Nov 2025)
-   - ✅ Centro de ayuda
-   - ✅ Páginas legales completas
-   - ✅ Formularios de lead capture
+
+- ✅ 8+ landing pages principales para Chile
+- ✅ Estructura internacional (/cl/, /co/, /mx/, /pe/, /ar/)
+- ✅ Detección automática de país
+- ✅ Blog dinámico con categorías
+- ✅ Base de conocimiento completa (NUEVO Nov 2025)
+- ✅ Centro de ayuda
+- ✅ Páginas legales completas
+- ✅ Formularios de lead capture
 
 **Integraciones:**
-   - ✅ Google Business Reviews (NUEVO Nov 2025)
-   - ✅ Google Analytics 4 (propiedades separadas)
-   - ✅ Google Search Console
-   - ✅ Sistema de gestión de páginas dinámicas
+
+- ✅ Google Business Reviews (NUEVO Nov 2025)
+- ✅ Google Analytics 4 (propiedades separadas)
+- ✅ Google Search Console
+- ✅ Sistema de gestión de páginas dinámicas
 
 **SEO:**
-   - ✅ Sitemap dinámico multicapa
-   - ✅ Structured data completo
-   - ✅ Metadata optimizada por página
-   - ✅ Robots.txt configurado
-   - ✅ Prioridades y change frequencies optimizadas
+
+- ✅ Sitemap dinámico multicapa
+- ✅ Structured data completo
+- ✅ Metadata optimizada por página
+- ✅ Robots.txt configurado
+- ✅ Prioridades y change frequencies optimizadas
 
 **Backend (Supabase):**
-   - ✅ Schema marketing completo (13+ tablas)
-   - ✅ Sistema de blog
-   - ✅ Sistema de base de conocimiento
-   - ✅ Sistema de reviews
-   - ✅ Lead capture y contacto
-   - ✅ Storage buckets para imágenes
+
+- ✅ Schema marketing completo (13+ tablas)
+- ✅ Sistema de blog
+- ✅ Sistema de base de conocimiento
+- ✅ Sistema de reviews
+- ✅ Lead capture y contacto
+- ✅ Storage buckets para imágenes
 
 **✅ COMPLETADO - FASE 0 AL 100%:**
 
 **PRIORIDAD 1: Contenido Real** ✅ COMPLETADO
-   - ✅ **Migrar contenido del sitio actual** (COMPLETADO)
-     * ✅ Copiar textos de producción actual
-     * ✅ Actualizar landing pages con información real
-     * ✅ Revisar y optimizar mensajes
-   - ✅ **Poblar Blog** (COMPLETADO)
-     * ✅ Migrar 10-15 posts existentes
-     * ✅ Crear 3-5 posts nuevos sobre servicios
-     * ✅ Optimizar imágenes y SEO
-   - ✅ **Poblar Base de Conocimiento** (COMPLETADO)
-     * ✅ Crear 15-20 artículos iniciales
-     * ✅ Organizar por categorías
-     * ✅ Optimizar para búsqueda
-   - ✅ **Optimización Final** (COMPLETADO)
-     * ✅ Revisar todos los textos
-     * ✅ Verificar enlaces internos
-     * ✅ Testing de formularios
-     * ✅ Verificar responsive design
+
+- ✅ **Migrar contenido del sitio actual** (COMPLETADO)
+  - ✅ Copiar textos de producción actual
+  - ✅ Actualizar landing pages con información real
+  - ✅ Revisar y optimizar mensajes
+- ✅ **Poblar Blog** (COMPLETADO)
+  - ✅ Migrar 10-15 posts existentes
+  - ✅ Crear 3-5 posts nuevos sobre servicios
+  - ✅ Optimizar imágenes y SEO
+- ✅ **Poblar Base de Conocimiento** (COMPLETADO)
+  - ✅ Crear 15-20 artículos iniciales
+  - ✅ Organizar por categorías
+  - ✅ Optimizar para búsqueda
+- ✅ **Optimización Final** (COMPLETADO)
+  - ✅ Revisar todos los textos
+  - ✅ Verificar enlaces internos
+  - ✅ Testing de formularios
+  - ✅ Verificar responsive design
 
 **PRIORIDAD 2: Sistema CRM y Gestión de Correos (3-5 días)** ← NUEVO
-   - [ ] **Panel CRM en Dashboard**
-     * Vista de lista de contactos (waitlist + formulario contacto)
-     * Página de detalle por contacto con toda su información
-     * Sistema de estados: nuevo, contactado, calificado, convertido, descartado
-     * Filtros por estado, fecha, país, tipo de lead
-     * Búsqueda de contactos
-     * Sistema de notas y seguimiento
-     * Tags personalizables
-   - [ ] **Integración Email Workspace**
-     * Conectar con Google Workspace o Microsoft 365
-     * OAuth para acceso a emails
-     * Visualizar correos entrantes en el CRM
-     * Responder emails directamente desde dashboard
-     * Threading de conversaciones por contacto
-     * Templates de respuestas rápidas
-     * Firma automática de emails
-   - [ ] **Sistema de Notificaciones**
-     * Notificación en dashboard cuando llega nuevo lead
-     * Email de alerta al equipo comercial
-     * Dashboard de leads sin responder
-     * Recordatorios de seguimiento
-     * Webhook para Slack (opcional)
+
+- [ ] **Panel CRM en Dashboard**
+  - Vista de lista de contactos (waitlist + formulario contacto)
+  - Página de detalle por contacto con toda su información
+  - Sistema de estados: nuevo, contactado, calificado, convertido, descartado
+  - Filtros por estado, fecha, país, tipo de lead
+  - Búsqueda de contactos
+  - Sistema de notas y seguimiento
+  - Tags personalizables
+- [ ] **Integración Email Workspace**
+  - Conectar con Google Workspace o Microsoft 365
+  - OAuth para acceso a emails
+  - Visualizar correos entrantes en el CRM
+  - Responder emails directamente desde dashboard
+  - Threading de conversaciones por contacto
+  - Templates de respuestas rápidas
+  - Firma automática de emails
+- [ ] **Sistema de Notificaciones**
+  - Notificación en dashboard cuando llega nuevo lead
+  - Email de alerta al equipo comercial
+  - Dashboard de leads sin responder
+  - Recordatorios de seguimiento
+  - Webhook para Slack (opcional)
 
 **PRIORIDAD 3 (Opcional): Sistema de Autenticación Mejorado**
-   - [ ] OAuth providers (Google, LinkedIn)
-   - [ ] Magic Links
-   - [ ] Verificación de correo mejorada
-   - [ ] Flujo de onboarding refinado
 
-**NOTA**: El sistema de autenticación básico ya funciona. Esta prioridad es opcional para MVP.
+- [ ] OAuth providers (Google, LinkedIn)
+- [ ] Magic Links
+- [ ] Verificación de correo mejorada
+- [ ] Flujo de onboarding refinado
+
+**NOTA**: El sistema de autenticación básico ya funciona. Esta prioridad es
+opcional para MVP.
 
 - ✅ **Arquitectura Completa** (Oct-Nov 2025)
   - ✅ Sistema de rutas dinámicas por país (cl, mx, co, pe, ar)
@@ -2798,17 +3111,19 @@ Al completar Fase 0:
 **📈 PROGRESO FASE 0: ✅ 100% COMPLETADO** (Actualizado Nov 12, 2025)
 
 **🎉 FASE 0 COMPLETADA AL 100%**
-  - ✅ **Contenido real**: COMPLETADO
-    * ✅ Migración de contenido existente
-    * ✅ Población de blog y KB
-    * ✅ Optimización final
-  - **Sistema CRM y correos**: OPCIONAL (puede implementarse en Fase 1 o después)
-    * Panel de gestión de leads
-    * Integración con email workspace
-    * Sistema de notificaciones
-  - **Sistema de autenticación avanzado**: Opcional para MVP
+
+- ✅ **Contenido real**: COMPLETADO
+  - ✅ Migración de contenido existente
+  - ✅ Población de blog y KB
+  - ✅ Optimización final
+- **Sistema CRM y correos**: OPCIONAL (puede implementarse en Fase 1 o después)
+  - Panel de gestión de leads
+  - Integración con email workspace
+  - Sistema de notificaciones
+- **Sistema de autenticación avanzado**: Opcional para MVP
 
 **🎯 ÚLTIMAS MEJORAS (Nov 2025):**
+
 - ✅ **Sistema de Base de Conocimiento** completo (kb_articles, kb_categories)
 - ✅ **Integración Google Business Reviews** con API y cron jobs
 - ✅ **Sistema de gestión de páginas dinámicas** con page_config
@@ -2819,6 +3134,7 @@ Al completar Fase 0:
 - ✅ **Sistema completo de contenido** listo para población masiva
 
 **🎯 MEJORAS PREVIAS (Oct 2025):**
+
 - ✅ Admin del blog centralizado en apps/web/dashboard/blog
 - ✅ RLS policies corregidas para mostrar borradores e inactivos
 - ✅ Cálculo de tiempo de lectura mejorado con limpieza de Markdown
@@ -2831,13 +3147,16 @@ Al completar Fase 0:
 #### 📝 **NOTAS IMPORTANTES:**
 
 **🌐 URLs de Desarrollo:**
-- **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing` desde raíz)
+
+- **Marketing Local**: `http://localhost:3001` (comando: `npm run dev:marketing`
+  desde raíz)
 - **Web Local**: `http://localhost:3000` (comando: `npm run dev` desde raíz)
 - **Supabase Local Studio**: `http://localhost:54323`
 - **Netlify Marketing**: https://tupatrimonio.app
 - **Netlify Web**: https://app.tupatrimonio.app
 
 **📝 Comandos Útiles:**
+
 ```bash
 # Desarrollo
 npm run dev              # Web app (puerto 3000)
@@ -2853,6 +3172,7 @@ npm run build:packages   # Todos los packages
 ```
 
 **📂 Estructura del Proyecto (Actualizada - Oct 27, 2025):**
+
 ```
 /apps/marketing  # Marketing site (tupatrimonio.app)
 ├── /src/app
@@ -2921,11 +3241,12 @@ npm run build:packages   # Todos los packages
 ```
 
 **🗄️ Base de Datos (Actualizado Nov 2025):**
+
 - **Schema core**: 13 tablas ✅ COMPLETO
   - organizations, users, teams, roles, subscriptions, api_keys, etc.
   - Multi-tenancy nativo con RLS
   - Platform organization configurada
-  
+
 - **Schema marketing**: 13+ tablas ✅ COMPLETO
   - **Blog**: blog_posts, blog_categories
   - **Knowledge Base**: kb_articles, kb_categories ← NUEVO Nov 2025
@@ -2933,53 +3254,56 @@ npm run build:packages   # Todos los packages
   - **Lead Capture**: waitlist_subscribers, contact_messages
   - **Content**: testimonials, faqs, case_studies
   - **Config**: page_config ← NUEVO Nov 2025
-  
+
 - **Storage buckets**: 6 buckets optimizados ✅
   - blog-featured, blog-content, blog-categories
   - blog-authors, blog-thumbnails, blog-meta
-  
+
 - **Roles y permisos**: Sistema completo ✅
   - platform_super_admin, marketing_admin
   - Función RPC: public.is_platform_admin()
   - RLS policies completas para todos los schemas
 
 **📦 Packages Compartidos:**
+
 - **@tupatrimonio/location**: Sistema de ubicación ✅ COMPLETO
 - **@tupatrimonio/ui**: Componentes Shadcn/UI ✅ COMPLETO
 - **@tupatrimonio/utils**: Helpers de imágenes ✅ COMPLETO
-- **@tupatrimonio/update-notifier**: Notificaciones de actualizaciones ✅ COMPLETO
+- **@tupatrimonio/update-notifier**: Notificaciones de actualizaciones ✅
+  COMPLETO
 
 **🎯 Siguiente Task**: Escribir contenido para blog y finalizar SEO + DNS
 
 #### 🎉 **LOGROS PRINCIPALES (Oct-Nov 2025):**
 
 **🆕 NUEVAS FUNCIONALIDADES (Nov 2025):**
+
 - ✅ **Sistema de Base de Conocimiento Completo**:
   - Tablas kb_articles y kb_categories
   - Páginas dinámicas con routing SEO-friendly
   - Navegación por categorías
   - Integrado en sitemap automático
-  
+
 - ✅ **Integración Google Business Reviews**:
   - API completa de sincronización
   - Cron jobs para actualización automática
   - Display dinámico en landing pages
   - Sistema de cache para performance
   - Endpoints: /api/google-reviews, /api/google-stats
-  
+
 - ✅ **Sistema de Gestión de Páginas**:
   - Tabla page_config para configuración dinámica
   - API routes para gestión
   - Estados por país (active, coming-soon)
   - Integración con sitemap
-  
+
 - ✅ **Sitemap Multicapa Avanzado**:
   - Páginas estáticas con prioridades
   - Blog posts dinámicos
   - Artículos KB dinámicos
   - Categorías de ambos sistemas
   - Páginas gestionadas desde BD
-  
+
 - ✅ **Páginas Adicionales Completas**:
   - /ayuda - Centro de ayuda
   - /nosotros - Sobre TuPatrimonio
@@ -2988,6 +3312,7 @@ npm run build:packages   # Todos los packages
   - Líneas de negocio (4 páginas)
 
 **🎯 MEJORAS OCTUBRE 2025:**
+
 - ✅ Migración Admin Blog a apps/web/dashboard/blog
 - ✅ Fix RLS Crítico para borradores e inactivos
 - ✅ Cálculo de Tiempo de Lectura mejorado (limpieza Markdown)
@@ -2998,7 +3323,9 @@ npm run build:packages   # Todos los packages
 - ✅ PWA funcional en web app
 
 **🗄️ BACKEND & FOUNDATION:**
-- ✅ **15+ migraciones aplicadas** (pgvector + core + marketing + KB + reviews + content + storage + RLS)
+
+- ✅ **15+ migraciones aplicadas** (pgvector + core + marketing + KB + reviews +
+  content + storage + RLS)
 - ✅ **3 schemas completos**:
   - Core: 13 tablas (multi-tenant B2C/B2B)
   - Marketing: 13+ tablas (blog + KB + reviews + config)
@@ -3011,6 +3338,7 @@ npm run build:packages   # Todos los packages
 - ✅ **Seguridad robusta** (RLS + GRANT + políticas completas)
 
 **🌍 MARKETING SITE INTERNACIONAL:**
+
 - ✅ **Estructura por países** /cl/, /co/, /mx/, /pe/, /ar/
 - ✅ **8+ landing pages Chile**:
   - Homepage, firmas electrónicas, notaría online
@@ -3028,24 +3356,31 @@ npm run build:packages   # Todos los packages
 - ✅ **Structured Data** en todas las páginas
 
 **📧 LEAD CAPTURE SYSTEM:**
+
 - ✅ **WaitlistForm + ContactForm** components funcionando
-- ✅ **Formularios conectados** a marketing schema (waitlist_subscribers + contact_messages)
+- ✅ **Formularios conectados** a marketing schema (waitlist_subscribers +
+  contact_messages)
 - ✅ **Tracking por país** y fuente de leads
 - ✅ **Páginas de contacto** específicas por mercado
 
 **📸 SISTEMA DE IMÁGENES DEL BLOG:**
-- ✅ **4 buckets de storage** organizados (marketing-images, public-assets, documents, ai-training-data)
+
+- ✅ **4 buckets de storage** organizados (marketing-images, public-assets,
+  documents, ai-training-data)
 - ✅ **Políticas RLS diferenciadas** (público vs privado, platform admins)
 - ✅ **Transformaciones automáticas** (resize, format, quality) via Supabase
-- ✅ **Campos adicionales en BD** (icon_url en categories, content_images en posts)
+- ✅ **Campos adicionales en BD** (icon_url en categories, content_images en
+  posts)
 - ✅ **Documentación completa** con ejemplos y workflow
 - ✅ **Upload integrado** en panel admin
 
 **🎨 PANEL DE ADMINISTRACIÓN DEL BLOG:**
+
 - ✅ **Ubicación**: apps/web/dashboard/blog (centralizado con otros dashboards)
 - ✅ **Sistema de autenticación** con @supabase/ssr (versión recomendada)
 - ✅ **Middleware de protección** (solo platform admins acceden)
-- ✅ **Dashboard con métricas** (total posts, publicados, borradores, categorías)
+- ✅ **Dashboard con métricas** (total posts, publicados, borradores,
+  categorías)
 - ✅ **Lista de posts** con tabla interactiva y acciones (ver, editar, eliminar)
 - ✅ **Editor completo** de posts con Markdown y preview
 - ✅ **Upload de imágenes** integrado a Storage (6 buckets)
@@ -3065,27 +3400,29 @@ npm run build:packages   # Todos los packages
 - ✅ **Gestión sin Supabase Studio** - 100% desde frontend
 
 **🎨 BRANDING Y ANALYTICS:**
+
 - ✅ **Google Analytics 4** configurado y recabando datos (27-28 Oct 2025)
   - **Marketing App (tupatrimonio.app):**
-    * Componente GoogleAnalytics.tsx implementado
-    * Librería analytics.ts con helpers type-safe
-    * Eventos: cta_click, form_submit, blog_read, navigation_click
-    * Configurado en Vercel
+    - Componente GoogleAnalytics.tsx implementado
+    - Librería analytics.ts con helpers type-safe
+    - Eventos: cta_click, form_submit, blog_read, navigation_click
+    - Configurado en Vercel
   - **Web App (app.tupatrimonio.app):**
-    * GA4 con propiedad separada (G-HKK7H001DB)
-    * Componente GoogleAnalytics.tsx creado
-    * Librería analytics.ts extendida con eventos específicos:
+    - GA4 con propiedad separada (G-HKK7H001DB)
+    - Componente GoogleAnalytics.tsx creado
+    - Librería analytics.ts extendida con eventos específicos:
       - Autenticación: user_login, user_logout
       - Dashboard: dashboard_view
       - Documentos: document_created, document_updated, document_deleted
       - Firmas: signature_requested, signature_completed
       - Verificación: verification_started, verification_completed
       - Perfil/Pagos: profile_updated, payment_initiated, payment_completed
-    * Configurado para Vercel (variable de entorno)
-    * Type-safe con TypeScript
-    * Solo funciona en producción
-    * Logs en desarrollo para debugging
-  - **Ventajas:** Métricas separadas por aplicación, análisis independiente, mejor segmentación
+    - Configurado para Vercel (variable de entorno)
+    - Type-safe con TypeScript
+    - Solo funciona en producción
+    - Logs en desarrollo para debugging
+  - **Ventajas:** Métricas separadas por aplicación, análisis independiente,
+    mejor segmentación
 - ✅ **Google Search Console** configurado y verificado
 - ✅ **Favicons personalizados** en ambas apps (marketing + web)
   - Descarga automática desde Supabase Storage
@@ -3094,6 +3431,7 @@ npm run build:packages   # Todos los packages
   - Branding visual diferenciado por aplicación
 
 **🔧 CONFIGURACIÓN VERCEL (Web App):**
+
 - ✅ **Headers de seguridad** migrados a next.config.ts (28 Oct 2025)
   - X-Frame-Options, XSS-Protection, Content-Type-Options
   - Headers específicos para dashboard (no-index, no-cache)
@@ -3114,29 +3452,44 @@ npm run build:packages   # Todos los packages
   - Diferencias Netlify vs Vercel
   - Troubleshooting
 - ✅ **Sistema de Notificaciones de Actualización COMPLETADO** (28 Oct 2025)
-  - ✅ **Problema identificado y solucionado**: Archivos version.json estáticos no estaban siendo servidos (404)
-  - ✅ **API Routes dinámicas implementadas**: `/src/app/version.json/route.ts` en ambas apps
+  - ✅ **Problema identificado y solucionado**: Archivos version.json estáticos
+    no estaban siendo servidos (404)
+  - ✅ **API Routes dinámicas implementadas**: `/src/app/version.json/route.ts`
+    en ambas apps
   - ✅ **Packages rebuildeados**: update-notifier y ui con mejoras incluidas
   - ✅ **Testing completo**: Sistema funcionando con logging limpio
-  - ✅ **Configuración simplificada**: Removida lógica compleja de generación de archivos estáticos
-  - ✅ **Documentación organizada**: Documentación movida a `docs/update-notifications/`
-  - ✅ **Sistema limpio y funcional**: Consola sin logs verbosos, funcionamiento silencioso
+  - ✅ **Configuración simplificada**: Removida lógica compleja de generación de
+    archivos estáticos
+  - ✅ **Documentación organizada**: Documentación movida a
+    `docs/update-notifications/`
+  - ✅ **Sistema limpio y funcional**: Consola sin logs verbosos, funcionamiento
+    silencioso
   - ✅ **BUG FIX CRÍTICO - BUCLE INFINITO SOLUCIONADO** (28 Oct 2025)
-    * **PROBLEMA**: API routes generaban versión nueva con `Date.now()` en cada request
-    * **CAUSA**: Cada verificación de actualización detectaba nueva versión → popup infinito
-    * **SOLUCIÓN**: Cambié a versiones estables usando `SERVER_START_TIME` y `BUILD_ID` 
-    * **IMPLEMENTACIÓN**: Variables generadas al iniciar servidor (no per request)
-    * **ARCHIVOS**: `apps/marketing/src/app/version.json/route.ts` + `apps/web/src/app/version.json/route.ts`
-    * **LÓGICA**: Usa `process.env.VERCEL_GIT_COMMIT_SHA` o `NEXT_BUILD_ID` como base
-    * **RESULTADO**: Popup solo aparece con deployments reales, no bucle infinito
-  - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas aplicaciones
-  - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles técnicos
+    - **PROBLEMA**: API routes generaban versión nueva con `Date.now()` en cada
+      request
+    - **CAUSA**: Cada verificación de actualización detectaba nueva versión →
+      popup infinito
+    - **SOLUCIÓN**: Cambié a versiones estables usando `SERVER_START_TIME` y
+      `BUILD_ID`
+    - **IMPLEMENTACIÓN**: Variables generadas al iniciar servidor (no per
+      request)
+    - **ARCHIVOS**: `apps/marketing/src/app/version.json/route.ts` +
+      `apps/web/src/app/version.json/route.ts`
+    - **LÓGICA**: Usa `process.env.VERCEL_GIT_COMMIT_SHA` o `NEXT_BUILD_ID` como
+      base
+    - **RESULTADO**: Popup solo aparece con deployments reales, no bucle
+      infinito
+  - 🎯 **Resultado**: Sistema de notificaciones 100% funcional en ambas
+    aplicaciones
+  - 📂 **Documentación**: Ver `docs/update-notifications/` para detalles
+    técnicos
 
 **📈 PROGRESO FASE 0: ✅ 100% COMPLETADO** (Actualizado Nov 12, 2025)
 
 **🎉 FASE 0 COMPLETADA AL 100% 🎉**
 
 **✅ COMPLETADOS en Nov 2025:**
+
 - ✅ Sistema de Base de Conocimiento completo
 - ✅ Integración Google Business Reviews
 - ✅ Sistema de gestión de páginas dinámicas
@@ -3150,6 +3503,7 @@ npm run build:packages   # Todos los packages
 - ✅ **Testing completo realizado**
 
 **✅ COMPLETADOS en Oct 2025:**
+
 - ✅ Google Analytics 4 + Search Console
 - ✅ Favicons personalizados
 - ✅ Deploy completo en Vercel
@@ -3160,21 +3514,24 @@ npm run build:packages   # Todos los packages
 **📋 OPCIONAL (para implementar después):**
 
 **1. CRM Básico (puede implementarse en Fase 1)**
-   - Panel de visualización de leads
-   - Integración email workspace
-   - Sistema de notificaciones
+
+- Panel de visualización de leads
+- Integración email workspace
+- Sistema de notificaciones
 
 **2. Auth Avanzado (Opcional para MVP)**
-   - OAuth providers
-   - Magic Links
-   - Mejoras UX
 
-**✅ FASE 0 COMPLETA AL 100%**
-**🚀 Próximo paso: INICIAR FASE 1 - Backend Foundation**
+- OAuth providers
+- Magic Links
+- Mejoras UX
+
+**✅ FASE 0 COMPLETA AL 100%** **🚀 Próximo paso: INICIAR FASE 1 - Backend
+Foundation**
 
 **📅 Última actualización: 12 Noviembre 2025**
 
 **🔄 MIGRACIÓN A VERCEL (Web App):**
+
 - ✅ **Headers** migrados de netlify.toml a next.config.ts
 - ✅ **Redirects** migrados de netlify.toml a next.config.ts
 - ✅ **Middleware** actualizado con lógica mejorada de autenticación
@@ -3185,7 +3542,9 @@ npm run build:packages   # Todos los packages
 **✅ FASE 0 100% COMPLETADA → LISTO PARA FASE 1 (Backend Foundation):**
 
 **Criterios para considerar Fase 0 COMPLETA - TODOS CUMPLIDOS:**
-1. ✅ Sistema de autenticación completo con mejores prácticas (COMPLETADO - Nov 14, 2025)
+
+1. ✅ Sistema de autenticación completo con mejores prácticas (COMPLETADO - Nov
+   14, 2025)
 2. ✅ Contenido real migrado y optimizado (COMPLETADO - Nov 2025)
 3. ✅ Landing pages con información definitiva (COMPLETADO - Nov 2025)
 4. ✅ Blog poblado con posts reales (COMPLETADO - Nov 2025)
@@ -3199,6 +3558,7 @@ npm run build:packages   # Todos los packages
 12. ✅ Testing en navegador exitoso (COMPLETADO - Nov 14, 2025)
 
 **Tareas de Fase 1 (después de completar contenido y CRM básico):**
+
 - ✅ Completar schemas credits + billing (COMPLETADO - Nov 22, 2025)
 - [ ] Mejorar dashboard apps/web (B2C/B2B)
 - ✅ RLS policies adicionales (COMPLETADO para credits + billing)
@@ -3207,17 +3567,24 @@ npm run build:packages   # Todos los packages
 - [ ] Expandir funcionalidades del CRM (reportes, automatizaciones)
 
 **🎯 ENFOQUE ACTUAL:**
+
 - ✅ **Fase 0**: COMPLETADA AL 100%
 - ✅ **Fase 2**: COMPLETADA AL 100% (Nov 22, 2025)
-- ✅ **Platform Admins: Acceso Completo al Dashboard**: COMPLETADO AL 100% (Dic 2025)
+- ✅ **Platform Admins: Acceso Completo al Dashboard**: COMPLETADO AL 100%
+  (Dic 2025)
 - ✅ **Fase 3 - Comunicaciones y CRM avanzado**: COMPLETADO (Dic 2025)
   - ✅ Schema communications completo (`communications` schema creado)
-  - ✅ Integración SendGrid multi-tenant (cuenta por organización, encriptación AES-256-GCM)
+  - ✅ Integración SendGrid multi-tenant (cuenta por organización, encriptación
+    AES-256-GCM)
   - ✅ Motor de templates Handlebars implementado
-  - ✅ API routes de comunicaciones creadas (templates, campaigns, lists, analytics, webhooks)
-  - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics, SendGrid settings)
-  - ✅ Páginas del CRM completadas (contacts, deals, tickets, products, página principal CRM)
-  - ✅ Helper `getUserActiveOrganization()` para manejo automático de organizaciones
+  - ✅ API routes de comunicaciones creadas (templates, campaigns, lists,
+    analytics, webhooks)
+  - ✅ UI de comunicaciones creada (templates, campaigns, lists, analytics,
+    SendGrid settings)
+  - ✅ Páginas del CRM completadas (contacts, deals, tickets, products, página
+    principal CRM)
+  - ✅ Helper `getUserActiveOrganization()` para manejo automático de
+    organizaciones
   - ✅ **Arquitectura Multi-Canal Implementada** (Dic 2025)
     - ✅ Aplicación `email_marketing` separada de CRM
     - ✅ Estructura de URLs: `/dashboard/communications/email/`
@@ -3226,7 +3593,8 @@ npm run build:packages   # Todos los packages
     - ✅ Preparado para `whatsapp_marketing` y `sms_marketing` (futuro)
   - ✅ **Sistema de Visibilidad de Aplicaciones** (Dic 2025)
     - ✅ Control de visibilidad integrado directamente en `core.applications`
-    - ✅ Campos: `visibility_level`, `allowed_countries`, `required_subscription_tiers`
+    - ✅ Campos: `visibility_level`, `allowed_countries`,
+      `required_subscription_tiers`
     - ✅ Tabla `core.application_overrides` para excepciones por organización
     - ✅ Funciones SQL: `can_access_application()`, `get_enabled_applications()`
     - ✅ Protección de rutas y APIs basada en aplicaciones habilitadas
@@ -3245,11 +3613,12 @@ npm run build:packages   # Todos los packages
 **Objetivo:** Establecer la base técnica del proyecto (simplificada)
 
 #### Tareas:
+
 1. **Setup de Repositorio Simple**
    - Monorepo con npm workspaces
    - ESLint + Prettier básico
    - **Deploy automático**: Netlify + Supabase manejan CI/CD
-   - **Estructura simple:** 
+   - **Estructura simple:**
      ```
      /apps/marketing (tupatrimonio.app)
      /apps/web (app.tupatrimonio.app)
@@ -3307,14 +3676,16 @@ npm run build:packages   # Todos los packages
 
 ### 1.2 ✅ Modelado de Base de Datos - Schema Core (COMPLETADO)
 
-**Objetivo:** ✅ Implementar el corazón del sistema multi-tenant híbrido B2C + B2B
+**Objetivo:** ✅ Implementar el corazón del sistema multi-tenant híbrido B2C +
+B2B
 
 #### 🏢➕🏠 **Modelo Híbrido B2C + B2B** ← ACTUALIZADO
 
-**Concepto Principal:** 
-Mismo sistema para usuarios individuales (B2C) y empresas (B2B) usando "organizaciones personales" automáticas.
+**Concepto Principal:** Mismo sistema para usuarios individuales (B2C) y
+empresas (B2B) usando "organizaciones personales" automáticas.
 
 ##### **Tipos de Organizaciones:**
+
 ```sql
 -- Modificación requerida al schema
 ALTER TABLE core.organizations 
@@ -3326,6 +3697,7 @@ ADD COLUMN is_personal_org BOOLEAN DEFAULT false;
 ```
 
 ##### **Organización Platform (Super Admin):**
+
 ```sql
 -- Organización especial para administradores de la plataforma
 INSERT INTO core.organizations (
@@ -3341,6 +3713,7 @@ INSERT INTO core.organizations (
 ```
 
 ##### **Roles de Plataforma:**
+
 ```sql
 -- Roles específicos para la organización platform
 core.roles:
@@ -3352,23 +3725,27 @@ core.roles:
 ##### **Flujos de Usuario:**
 
 **B2C (Usuario Individual):**
+
 - Al registrarse: Sistema crea automáticamente "organización personal"
-- Usuario = owner de su org personal  
+- Usuario = owner de su org personal
 - UI simplificada (sin gestión de equipos)
 - Planes: Personal Free ($0), Pro ($9), Business ($29)
 
 **B2B (Empresa):**
+
 - Al registrarse: Crea organización empresarial
 - Puede invitar usuarios con roles
 - UI completa (teams, admin, etc.)
 - Planes: Team Starter ($49), Business ($199), Enterprise (Custom)
 
 **Platform Admin (Nosotros):**
+
 - Organización especial "TuPatrimonio Platform"
 - Vista "de Dios" de todo el sistema
 - Puede acceder a cualquier organización para soporte
 
 ##### **Registro con Intención Clara:**
+
 ```typescript
 // Pantalla de registro con opciones claras
 ¿Cómo vas a usar TuPatrimonio?
@@ -3384,25 +3761,29 @@ core.roles:
 ```
 
 ##### **Ventajas del Modelo Híbrido:**
-✅ Misma arquitectura para ambos segmentos
-✅ Usuario B2C puede "upgradear" a B2B **← IMPLEMENTADO (Enero 2025)**
-   - Función SQL `convert_organization_b2c_to_b2b()` disponible
-   - Endpoint API `/api/organizations/convert-to-business` funcionando
-   - UI completa en `/settings/organization` para conversión desde frontend
-   - Conversión automática de límites y configuración del CRM
-✅ Usuario B2B puede "downgradear" a B2C **← IMPLEMENTADO Y PROBADO (Diciembre 2025)**
-   - Función SQL `convert_organization_b2b_to_b2c()` disponible y funcionando
-   - Endpoint API `/api/organizations/convert-to-personal` funcionando correctamente
-   - UI completa con advertencias en `/settings/organization` para conversión desde frontend
-   - Conversión automática de límites (reducción) y configuración del CRM
-   - Sistema de advertencias para usuarios adicionales y contactos excedentes
-   - Migración aplicada y probada exitosamente en producción
-✅ Mercado más amplio (individuales + empresas)
-✅ Sistema de créditos/IA unificado
-✅ No duplicar código ni infraestructura
-✅ Flexibilidad total: conversión bidireccional según necesidades del usuario
+
+✅ Misma arquitectura para ambos segmentos ✅ Usuario B2C puede "upgradear" a
+B2B **← IMPLEMENTADO (Enero 2025)**
+
+- Función SQL `convert_organization_b2c_to_b2b()` disponible
+- Endpoint API `/api/organizations/convert-to-business` funcionando
+- UI completa en `/settings/organization` para conversión desde frontend
+- Conversión automática de límites y configuración del CRM ✅ Usuario B2B puede
+  "downgradear" a B2C **← IMPLEMENTADO Y PROBADO (Diciembre 2025)**
+- Función SQL `convert_organization_b2b_to_b2c()` disponible y funcionando
+- Endpoint API `/api/organizations/convert-to-personal` funcionando
+  correctamente
+- UI completa con advertencias en `/settings/organization` para conversión desde
+  frontend
+- Conversión automática de límites (reducción) y configuración del CRM
+- Sistema de advertencias para usuarios adicionales y contactos excedentes
+- Migración aplicada y probada exitosamente en producción ✅ Mercado más amplio
+  (individuales + empresas) ✅ Sistema de créditos/IA unificado ✅ No duplicar
+  código ni infraestructura ✅ Flexibilidad total: conversión bidireccional
+  según necesidades del usuario
 
 #### ✅ Implementación COMPLETADA:
+
 1. **✅ Schema `core` CREADO** - Migración: `20251021120854_schema-core.sql`
    ```sql
    ✅ COMPLETADO - 13 tablas principales:
@@ -3417,7 +3798,8 @@ core.roles:
    - invitations (sistema de invitaciones con tokens)
    - api_keys (claves hasheadas con scopes)
    - system_events (audit trail completo)
-   
+   ```
+
 2. **✅ ADMIN PANEL CORE COMPLETADO** - (Nov 21, 2025)
    ```
    ✅ FUNCIONAL AL 100% - 9 migraciones aplicadas:
@@ -3429,7 +3811,7 @@ core.roles:
    - CRUD completo de organizaciones, usuarios, teams, invitaciones, API keys
    - Testing exitoso en navegador
    - Production ready y escalable
-   
+
    BONUS implementado:
    - ✅ 5 ENUMs para status consistentes
    - ✅ 20+ índices optimizados para performance
@@ -3441,81 +3823,90 @@ core.roles:
 #### 🔄 PRÓXIMOS PASOS TÉCNICOS (Consolidado desde Setup):
 
 **2. Configuración Supabase Completa:**
-   - 🔄 Conectar con GitHub para migraciones automáticas
-   - 🔄 Configurar Storage buckets:
-     * `documents` (privado, RLS)
-     * `public-assets` (público) 
-     * `ai-training-data` (privado)
+
+- 🔄 Conectar con GitHub para migraciones automáticas
+- 🔄 Configurar Storage buckets:
+  - `documents` (privado, RLS)
+  - `public-assets` (público)
+  - `ai-training-data` (privado)
 
 **3. RLS Policies (Multi-tenant Híbrido):**
-   - Usuario solo ve sus organizaciones
-   - Usuario solo ve miembros de sus organizaciones  
-   - Solo org_admin puede modificar configuraciones
-   - Solo org_owner puede eliminar organización
-   - Platform admin puede acceder a todas las orgs
+
+- Usuario solo ve sus organizaciones
+- Usuario solo ve miembros de sus organizaciones
+- Solo org_admin puede modificar configuraciones
+- Solo org_owner puede eliminar organización
+- Platform admin puede acceder a todas las orgs
 
 **4. Functions y Triggers:**
-   - `create_organization()`: Crea org + asigna owner + detecta tipo
-   - `invite_user()`: Genera token + envía invitación
-   - `accept_invitation()`: Agrega usuario a org
-   - `update_user_last_seen()`: Trigger automático
-   - Functions para manejo de créditos
+
+- `create_organization()`: Crea org + asigna owner + detecta tipo
+- `invite_user()`: Genera token + envía invitación
+- `accept_invitation()`: Agrega usuario a org
+- `update_user_last_seen()`: Trigger automático
+- Functions para manejo de créditos
 
 **5. Datos Semilla:**
-   - Roles estándar (incluir roles platform: platform_super_admin, platform_admin, platform_billing)
-   - Aplicaciones del ecosistema (incluir ai_customer_service y ai_document_review)
-   - Planes de suscripción diferenciados B2C/B2B
-   - **Organización platform "TuPatrimonio Platform"**
-   - Super admin inicial
-   - Credit prices para servicios IA
+
+- Roles estándar (incluir roles platform: platform_super_admin, platform_admin,
+  platform_billing)
+- Aplicaciones del ecosistema (incluir ai_customer_service y ai_document_review)
+- Planes de suscripción diferenciados B2C/B2B
+- **Organización platform "TuPatrimonio Platform"**
+- Super admin inicial
+- Credit prices para servicios IA
 
 **6. Stack y Configuración:**
-   ```
-   GitHub → Netlify (Frontend + CI/CD automático)
-   GitHub → Supabase (Database + migraciones automáticas)
-   
-   Monorepo Structure:
-   /apps/marketing      # Marketing site (tupatrimonio.app)
-   /apps/web           # App principal (app.tupatrimonio.app) 
-   /packages/ui        # Componentes compartidos Shadcn/UI
-   /packages/database  # Types de Supabase
-   /packages/utils     # Utilidades compartidas
-   /packages/config    # Configuraciones
-   /packages/ai        # Utilidades de IA (futuro)
-   ```
+
+```
+GitHub → Netlify (Frontend + CI/CD automático)
+GitHub → Supabase (Database + migraciones automáticas)
+
+Monorepo Structure:
+/apps/marketing      # Marketing site (tupatrimonio.app)
+/apps/web           # App principal (app.tupatrimonio.app) 
+/packages/ui        # Componentes compartidos Shadcn/UI
+/packages/database  # Types de Supabase
+/packages/utils     # Utilidades compartidas
+/packages/config    # Configuraciones
+/packages/ai        # Utilidades de IA (futuro)
+```
 
 **7. Variables de Entorno Esenciales:**
-   ```bash
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL=
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=
-   SUPABASE_SERVICE_ROLE_KEY=
-   
-   # IA Services
-   OPENAI_API_KEY=
-   ANTHROPIC_API_KEY=
-   AI_MODEL_DEFAULT=claude-3-5-sonnet-20241022
-   
-   # App URLs
-   NEXT_PUBLIC_APP_URL=https://app.tupatrimonio.app
-   NEXT_PUBLIC_MARKETING_URL=https://tupatrimonio.app
-   
-   # Platform Configuration
-   PLATFORM_ORG_ID=
-   DEFAULT_PERSONAL_ORG_SETTINGS={}
-   
-   # Servicios externos (placeholder)
-   STRIPE_SECRET_KEY=
-   SENDGRID_API_KEY=
-   TWILIO_ACCOUNT_SID=
-   VERIFF_API_KEY=
-   ```
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# IA Services
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+AI_MODEL_DEFAULT=claude-3-5-sonnet-20241022
+
+# App URLs
+NEXT_PUBLIC_APP_URL=https://app.tupatrimonio.app
+NEXT_PUBLIC_MARKETING_URL=https://tupatrimonio.app
+
+# Platform Configuration
+PLATFORM_ORG_ID=
+DEFAULT_PERSONAL_ORG_SETTINGS={}
+
+# Servicios externos (placeholder)
+STRIPE_SECRET_KEY=
+SENDGRID_API_KEY=
+TWILIO_ACCOUNT_SID=
+VERIFF_API_KEY=
+```
 
 ### 1.3 Sistema de Autenticación - ✅ **COMPLETADO AL 100%** (14 Nov 2025)
 
-**Objetivo:** ✅ Auth robusto con múltiples métodos y verificación completa - **LOGRADO**
+**Objetivo:** ✅ Auth robusto con múltiples métodos y verificación completa -
+**LOGRADO**
 
 #### ✅ Estado Actual - TODAS LAS MEJORES PRÁCTICAS IMPLEMENTADAS:
+
 - ✅ Login con email/password funcionando
 - ✅ **Logout funcional con ruta `/auth/signout`**
 - ✅ **AuthListener global para sesiones expiradas**
@@ -3620,11 +4011,13 @@ core.roles:
     - ✅ `/auth/signout` - Logout funcionando
 
 #### ✅ COMPLETADO EN TIEMPO RÉCORD:
+
 - **Todas las funcionalidades**: 1 día
 - **Testing completo**: Mismo día
 - **Sin errores de linter**: ✅
 
 #### 🎯 Criterios de Completitud - TODOS CUMPLIDOS:
+
 - ✅ Usuario puede registrarse y crear organización
 - ✅ Usuario puede hacer login con email/password
 - ✅ Usuario puede hacer login con GitHub OAuth
@@ -3642,6 +4035,7 @@ core.roles:
 **Objetivo:** UI foundation con cambio de contexto organizacional
 
 #### Implementación:
+
 1. **Layout Principal**
    - Sidebar con navegación (incluir secciones de IA)
    - Organization Switcher (dropdown)
@@ -3672,14 +4066,17 @@ core.roles:
 
 ## 🔧 Fase 2: Sistema de Créditos y Facturación (Semanas 11-16) - **✅ COMPLETADA AL 100%** (22 Nov 2025)
 
-**Nota:** ✅ Schema core ya completado, podemos proceder directamente con credits + billing
+**Nota:** ✅ Schema core ya completado, podemos proceder directamente con
+credits + billing
 
 ### 2.1 Schema Credits + Billing - **✅ COMPLETADO** ✅
 
 **Objetivo:** Sistema de monetización completo - **LOGRADO**
 
 #### ✅ Implementación COMPLETADA:
-1. **✅ Schema `core` YA COMPLETADO** (organizations, subscription_plans, organization_subscriptions)
+
+1. **✅ Schema `core` YA COMPLETADO** (organizations, subscription_plans,
+   organization_subscriptions)
 2. **✅ Schemas `credits` y `billing` CREADOS Y FUNCIONANDO** - **COMPLETADO**
    ```sql
    Credits:
@@ -3696,7 +4093,7 @@ core.roles:
    - tax_rates
    ```
 
-2. **Credit Prices para IA Services** ← NUEVO
+3. **Credit Prices para IA Services** ← NUEVO
    ```sql
    -- Precios específicos para servicios de IA
    INSERT INTO credits.credit_prices (service_code, application_code, operation, credit_cost) VALUES
@@ -3707,7 +4104,7 @@ core.roles:
    ('ai_document_compare', 'ai_document_review', 'compare_documents', 15.0);
    ```
 
-3. **✅ Integración Stripe COMPLETA**
+4. **✅ Integración Stripe COMPLETA**
    ```typescript
    ✅ setupIntent para guardar payment methods
    ✅ Webhooks: payment_intent.succeeded, customer.subscription.*
@@ -3717,7 +4114,7 @@ core.roles:
    ✅ Service role client para webhooks (bypass RLS)
    ```
 
-4. **✅ Integración dLocal Go COMPLETA**
+5. **✅ Integración dLocal Go COMPLETA**
    ```typescript
    ✅ Flujo para LATAM
    ✅ Métodos locales: Tarjeta (CARD) y Transferencia Bancaria (BANK_TRANSFER)
@@ -3732,7 +4129,7 @@ core.roles:
    ✅ Opción de pago en efectivo deshabilitada (solo CARD y BANK_TRANSFER)
    ```
 
-5. **✅ Lógica de Créditos COMPLETA**
+6. **✅ Lógica de Créditos COMPLETA**
    ```typescript
    ✅ reserveCredits(): Bloquea créditos antes de operación + verificación auto-recarga
    ✅ confirmCredits(): Confirma uso después de éxito
@@ -3747,6 +4144,7 @@ core.roles:
 **Objetivo:** Experiencia de usuario para gestión de pagos - **LOGRADO**
 
 #### ✅ Páginas IMPLEMENTADAS Y FUNCIONANDO:
+
 1. **✅ `/billing` (overview)**
    - ✅ Balance de créditos en tiempo real
    - ✅ Próxima factura
@@ -3796,38 +4194,49 @@ core.roles:
 ### ✅ **FUNCIONALIDADES ADICIONALES IMPLEMENTADAS:**
 
 **✅ Sistema de Auto-Recarga:**
+
 - ✅ Verificación automática antes de reservar créditos
 - ✅ Ejecución automática cuando balance < threshold
 - ✅ Configuración por organización
 - ✅ Notificaciones de ejecución y fallos
 
 **✅ Sistema de Notificaciones de Billing:**
+
 - ✅ Schema `core.notifications` completo
 - ✅ 13 tipos de notificaciones soportados
 - ✅ Integración con webhooks de Stripe y dLocal
-- ✅ Notificaciones para: créditos agregados, pagos exitosos/fallidos, auto-recarga, suscripciones, facturas
+- ✅ Notificaciones para: créditos agregados, pagos exitosos/fallidos,
+  auto-recarga, suscripciones, facturas
 - ✅ Componentes UI: NotificationBell, NotificationsList
 - ✅ Endpoints de API para gestión
 
 **✅ Generación de PDFs:**
+
 - ✅ Facturas en formato PDF profesional
 - ✅ Usando jsPDF (compatible con Next.js)
 - ✅ Incluye: header con marca, información de factura, items, totales, footer
 - ✅ Descarga y visualización en navegador
 
 **✅ Migraciones Aplicadas:**
+
 - ✅ `20251121220000_schema-credits.sql` - Schema completo de créditos
 - ✅ `20251121220001_schema-billing.sql` - Schema completo de billing
-- ✅ `20251121220002_credits-functions.sql` - Funciones SQL (reserve, confirm, release, add)
+- ✅ `20251121220002_credits-functions.sql` - Funciones SQL (reserve, confirm,
+  release, add)
 - ✅ `20251121220003_credits-billing-rls.sql` - Políticas RLS completas
-- ✅ `20251121220004_seed-credits-billing.sql` - Datos iniciales (paquetes, precios)
-- ✅ `20251121220005_add-credits-to-plans.sql` - Créditos en planes de suscripción
+- ✅ `20251121220004_seed-credits-billing.sql` - Datos iniciales (paquetes,
+  precios)
+- ✅ `20251121220005_add-credits-to-plans.sql` - Créditos en planes de
+  suscripción
 - ✅ `20251122000001_schema-notifications.sql` - Schema de notificaciones
 - ✅ `20251122000002_notifications-rls.sql` - RLS para notificaciones
-- ✅ `20251122000003_notifications-functions.sql` - Funciones SQL de notificaciones
-- ✅ `20251122000004_expose-notifications-view.sql` - Vista pública de notificaciones
+- ✅ `20251122000003_notifications-functions.sql` - Funciones SQL de
+  notificaciones
+- ✅ `20251122000004_expose-notifications-view.sql` - Vista pública de
+  notificaciones
 
 **✅ Testing Completo:**
+
 - ✅ Flujo completo de compra probado (Stripe test cards)
 - ✅ Webhooks funcionando correctamente
 - ✅ Créditos agregándose automáticamente
@@ -3837,11 +4246,13 @@ core.roles:
 - ✅ Notificaciones creándose en eventos de billing
 
 **📄 Documentación:**
+
 - ✅ `docs/STRIPE-WEBHOOK-SETUP.md` - Guía de configuración de webhooks
 - ✅ `docs/BILLING-NOTIFICATIONS.md` - Sistema de notificaciones documentado
 - ✅ Scripts PowerShell para facilitar testing local
 
 **🎯 RESULTADO FINAL:**
+
 - ✅ Sistema de créditos y billing 100% funcional y probado
 - ✅ Integraciones Stripe y dLocal operativas
 - ✅ Webhooks configurados y funcionando
@@ -3852,6 +4263,7 @@ core.roles:
 - ✅ **LISTO PARA PRODUCCIÓN** 🚀
 
 **Paralelamente durante Fase 2:**
+
 - Continuar publicando 2 blog posts/semana (incluir 1 sobre IA cada 2 semanas)
 - Optimizar landings según analytics
 - Responder comentarios y engagement en blog
@@ -3861,9 +4273,13 @@ core.roles:
 
 ## 📧 Fase 3: Comunicaciones y CRM (Semanas 17-22) 🚀 EN PROGRESO
 
-> **📝 NOTA IMPORTANTE (Nov 2025):** Se implementó una **versión básica del CRM** al final de Fase 0 para gestionar los leads de los formularios y conectar el email del workspace. Esta sección describe el CRM completo que se está desarrollando en Fase 3 con funcionalidades avanzadas.
+> **📝 NOTA IMPORTANTE (Nov 2025):** Se implementó una **versión básica del
+> CRM** al final de Fase 0 para gestionar los leads de los formularios y
+> conectar el email del workspace. Esta sección describe el CRM completo que se
+> está desarrollando en Fase 3 con funcionalidades avanzadas.
 
 **CRM Básico Fase 0 (COMPLETADO):**
+
 - ✅ Vista de contactos de formularios
 - ✅ Sistema de estados básico
 - ✅ Integración con email workspace (Google/Microsoft)
@@ -3871,9 +4287,11 @@ core.roles:
 - ✅ Notificaciones de nuevos leads
 
 **CRM Completo Fase 3 (COMPLETADO - Dic 2025):**
+
 - ✅ Gestión avanzada de contactos (páginas creadas)
 - ✅ Pipelines de ventas (deals implementado)
-- ✅ Campañas de email marketing (COMPLETADO - separado como aplicación independiente)
+- ✅ Campañas de email marketing (COMPLETADO - separado como aplicación
+  independiente)
 - ✅ Sistema de visibilidad de aplicaciones integrado en `core.applications`
 - 📋 Automatizaciones (pendiente)
 - 📋 Reportes y analytics avanzados (pendiente)
@@ -3882,59 +4300,66 @@ core.roles:
 
 ### 3.1 Schema Communications ✅ COMPLETADO (Dic 2025)
 
-**Objetivo:** Sistema completo de comunicación con usuarios - Arquitectura Multi-Canal
+**Objetivo:** Sistema completo de comunicación con usuarios - Arquitectura
+Multi-Canal
 
 #### Arquitectura Implementada:
+
 **✅ Schema Compartido `communications`** - Diseñado para múltiples canales:
-   ```sql
-   ✅ Migración: 20251123191316_schema_communications.sql
-   - ✅ contact_lists (listas de contactos COMPARTIDAS entre todos los canales)
-   - ✅ contact_list_members (M:N entre listas y contactos)
-   - ✅ message_templates (templates con campo 'type': email, sms, whatsapp)
-   - ✅ campaigns (campañas - tipo heredado del template)
-   - ✅ campaign_messages (mensajes enviados - email/sms/whatsapp)
-   - ✅ message_events (eventos unificados: delivered, opened, clicked, bounced)
-   - ✅ user_notifications (notificaciones in-app mejoradas)
-   - ✅ notification_preferences (preferencias por usuario)
-   - ✅ sendgrid_accounts (cuentas SendGrid por organización, encriptadas)
-   
-   ✅ Enum template_type soporta múltiples canales:
-   CREATE TYPE communications.template_type AS ENUM (
-     'email',        -- Email
-     'sms',          -- SMS (futuro)
-     'whatsapp'      -- WhatsApp (futuro)
-   );
-   ```
+
+```sql
+✅ Migración: 20251123191316_schema_communications.sql
+- ✅ contact_lists (listas de contactos COMPARTIDAS entre todos los canales)
+- ✅ contact_list_members (M:N entre listas y contactos)
+- ✅ message_templates (templates con campo 'type': email, sms, whatsapp)
+- ✅ campaigns (campañas - tipo heredado del template)
+- ✅ campaign_messages (mensajes enviados - email/sms/whatsapp)
+- ✅ message_events (eventos unificados: delivered, opened, clicked, bounced)
+- ✅ user_notifications (notificaciones in-app mejoradas)
+- ✅ notification_preferences (preferencias por usuario)
+- ✅ sendgrid_accounts (cuentas SendGrid por organización, encriptadas)
+
+✅ Enum template_type soporta múltiples canales:
+CREATE TYPE communications.template_type AS ENUM (
+  'email',        -- Email
+  'sms',          -- SMS (futuro)
+  'whatsapp'      -- WhatsApp (futuro)
+);
+```
 
 **✅ Aplicaciones Separadas en `core.applications`:**
-   - ✅ `email_marketing` - Controla campañas/templates tipo 'email'
-   - 📋 `whatsapp_marketing` - Futuro: Controla campañas/templates tipo 'whatsapp'
-   - 📋 `sms_marketing` - Futuro: Controla campañas/templates tipo 'sms'
+
+- ✅ `email_marketing` - Controla campañas/templates tipo 'email'
+- 📋 `whatsapp_marketing` - Futuro: Controla campañas/templates tipo 'whatsapp'
+- 📋 `sms_marketing` - Futuro: Controla campañas/templates tipo 'sms'
 
 **✅ Estructura de URLs Implementada:**
-   ```
-   /dashboard/communications/
-   ├── email/              → email_marketing app
-   │   ├── campaigns/
-   │   └── templates/
-   ├── whatsapp/          → whatsapp_marketing app (futuro)
-   │   ├── campaigns/
-   │   └── templates/
-   ├── sms/               → sms_marketing app (futuro)
-   │   ├── campaigns/
-   │   └── templates/
-   ├── lists/             → Compartido (controlado por cualquier app activa)
-   └── analytics/         → Compartido (unificado para todos los canales)
-   ```
+
+```
+/dashboard/communications/
+├── email/              → email_marketing app
+│   ├── campaigns/
+│   └── templates/
+├── whatsapp/          → whatsapp_marketing app (futuro)
+│   ├── campaigns/
+│   └── templates/
+├── sms/               → sms_marketing app (futuro)
+│   ├── campaigns/
+│   └── templates/
+├── lists/             → Compartido (controlado por cualquier app activa)
+└── analytics/         → Compartido (unificado para todos los canales)
+```
 
 **✅ Ventajas de la Arquitectura:**
-   - ✅ Monetización granular por canal (cobrar WhatsApp, SMS, Email por separado)
-   - ✅ Listas de contactos compartidas (reutilización entre canales)
-   - ✅ Analytics unificado (comparación de rendimiento entre canales)
-   - ✅ Escalable (agregar nuevos canales = agregar app + filtros por type)
-   - ✅ Control de visibilidad independiente por canal desde `/admin/applications`
+
+- ✅ Monetización granular por canal (cobrar WhatsApp, SMS, Email por separado)
+- ✅ Listas de contactos compartidas (reutilización entre canales)
+- ✅ Analytics unificado (comparación de rendimiento entre canales)
+- ✅ Escalable (agregar nuevos canales = agregar app + filtros por type)
+- ✅ Control de visibilidad independiente por canal desde `/admin/applications`
 
 #### Implementación:
+
 1. **✅ Crear schema `communications`** - COMPLETADO
 
 2. **✅ Integración SendGrid Multi-Tenant** - COMPLETADO
@@ -3977,6 +4402,7 @@ core.roles:
 **Objetivo:** Herramientas de gestión de contactos y ventas
 
 #### Páginas Implementadas:
+
 1. **✅ `/dashboard/crm`** - Dashboard principal del CRM
    - ✅ Estadísticas en tiempo real (contactos, empresas, deals, tickets)
    - ✅ Accesos rápidos a todas las secciones
@@ -4031,7 +4457,8 @@ core.roles:
    - ✅ Rutas: `/lists`, `/lists/new`, `/lists/[id]`
 
 10. **✅ `/dashboard/communications/analytics`** - COMPLETADO (Dic 2025)
-    - ✅ Dashboard de analytics de comunicaciones (UNIFICADO para todos los canales)
+    - ✅ Dashboard de analytics de comunicaciones (UNIFICADO para todos los
+      canales)
     - ✅ Métricas: campañas enviadas, emails enviados, tasas de apertura/clics
     - ✅ Estado vacío cuando no hay datos
     - ✅ Protección por aplicación `email_marketing` (por ahora)
@@ -4042,17 +4469,23 @@ core.roles:
     - ✅ Encriptación automática de credenciales
 
 #### Páginas Implementadas Adicionales:
-- ✅ `/dashboard/communications/email/campaigns/[id]` - Detalle y gestión de campaña
-- ✅ `/dashboard/communications/email/templates/[id]` - Edición de template con preview
+
+- ✅ `/dashboard/communications/email/campaigns/[id]` - Detalle y gestión de
+  campaña
+- ✅ `/dashboard/communications/email/templates/[id]` - Edición de template con
+  preview
 - ✅ `/dashboard/communications/lists/[id]` - Gestión de miembros de lista
 
 #### Páginas Pendientes:
+
 - 📋 `/dashboard/crm/contacts/:id` - Perfil detallado de contacto
 - 📋 `/dashboard/crm/pipelines` - Kanban de deals (futuro)
-- 📋 `/dashboard/communications/whatsapp/` - Futuro: Campañas y templates de WhatsApp
+- 📋 `/dashboard/communications/whatsapp/` - Futuro: Campañas y templates de
+  WhatsApp
 - 📋 `/dashboard/communications/sms/` - Futuro: Campañas y templates de SMS
 
 **Paralelamente durante Fase 3:**
+
 - Lanzar primer pillar content piece sobre IA
 - Comenzar link building activo
 - Crear primer lead magnet interactivo (calculadora ROI chatbot)
@@ -4067,6 +4500,7 @@ core.roles:
 **Objetivo:** Sistema de automatización tipo Make.com
 
 #### Implementación:
+
 1. **Crear schema `workflows`**
    ```sql
    - workflows
@@ -4127,6 +4561,7 @@ core.roles:
 **Objetivo:** Visual workflow builder
 
 #### Páginas:
+
 1. **`/workflows`**
    - Lista de workflows
    - Filtros por status/trigger
@@ -4159,6 +4594,7 @@ core.roles:
    - Export logs
 
 **Workflow Templates Sugeridos con IA:** ← NUEVO
+
 ```
 1. "Auto-responder con IA"
    Trigger: Nuevo mensaje en chat
@@ -4180,6 +4616,7 @@ core.roles:
 ```
 
 **Paralelamente durante Fase 4:**
+
 - Segundo cluster de contenido (sobre IA)
 - Case studies de beta users
 - Webinar o demo en vivo (enfoque en automatización con IA)
@@ -4194,6 +4631,7 @@ core.roles:
 **Objetivo:** Sistema centralizado de archivos con versionado
 
 #### Implementación:
+
 1. **Crear schema `files`**
    ```sql
    - file_storage
@@ -4238,7 +4676,7 @@ core.roles:
    - Compresión de imágenes
    - Generación de thumbnails
    - CDN global automático
-   
+
    // Configurar manualmente:
    - OCR para documentos (preparación para IA Review)
    ```
@@ -4248,6 +4686,7 @@ core.roles:
 **Objetivo:** Drive-like experience
 
 #### Páginas:
+
 1. **`/files`**
    - Vista de lista/grid
    - Drag & drop upload
@@ -4271,6 +4710,7 @@ core.roles:
 **Objetivo:** Trazabilidad completa para compliance
 
 #### Implementación:
+
 1. **Crear schema `audit`**
    ```sql
    - audit_logs
@@ -4311,6 +4751,7 @@ core.roles:
 **Objetivo:** Herramientas para compliance officers
 
 #### Páginas:
+
 1. **`/audit/logs`**
    - Log explorer avanzado
    - Filtros: user, resource, date range, action
@@ -4337,6 +4778,7 @@ core.roles:
 **Objetivo:** Primer servicio core del ecosistema
 
 #### Implementación:
+
 1. **Crear schema `signatures`**
    ```sql
    - signature_documents
@@ -4380,6 +4822,7 @@ core.roles:
 **Objetivo:** Experiencia fluida de firma de documentos
 
 #### Páginas:
+
 1. **`/signatures`**
    - Documentos pendientes/completados
    - Crear nuevo documento
@@ -4409,6 +4852,7 @@ core.roles:
    - Campos predefinidos
 
 **Nota:** Al lanzar este servicio, actualizar:
+
 - Landing de firmas con features reales
 - Blog post anunciando lanzamiento
 - Case studies de early adopters
@@ -4423,6 +4867,7 @@ core.roles:
 **Objetivo:** Sistema de verificación de identidad standalone
 
 #### Implementación:
+
 1. **Schema `verifications`**
    ```sql
    - verification_requests
@@ -4449,6 +4894,7 @@ core.roles:
 **Objetivo:** Servicios notariales digitales
 
 #### Implementación:
+
 1. **Schema `notary`**
    ```sql
    - notary_certificates
@@ -4467,6 +4913,7 @@ core.roles:
 **Objetivo:** Editor colaborativo de documentos
 
 #### Implementación:
+
 1. **Schema `documents`**
    ```sql
    - documents
@@ -4486,6 +4933,7 @@ core.roles:
 **Objetivo:** CRM específico para inmobiliarias
 
 #### Implementación:
+
 1. **Schema `real_estate`**
    ```sql
    - properties
@@ -4505,6 +4953,7 @@ core.roles:
 **Objetivo:** Gestión de arriendos y condominios
 
 #### Implementación:
+
 1. **Schema `property_admin`**
    ```sql
    - rental_contracts
@@ -4520,7 +4969,8 @@ core.roles:
 
 ### **Objetivo:** Chatbot inteligente 24/7 para atención al cliente
 
-Esta es una fase crítica ya que es uno de los diferenciadores principales del producto.
+Esta es una fase crítica ya que es uno de los diferenciadores principales del
+producto.
 
 ### 9.1 Schema AI Customer Service
 
@@ -4532,7 +4982,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    ```sql
    -- Habilitar pgvector extension primero
    CREATE EXTENSION IF NOT EXISTS vector;
-   
+
    -- Tablas principales
    - chatbot_configurations
    - knowledge_bases
@@ -4557,11 +5007,11 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    - chat(messages, model, options)
    - embed(text, model)
    - streamChat(messages, model, onChunk)
-   
+
    Implementaciones:
    - OpenAIProvider (GPT-4)
    - AnthropicProvider (Claude 3.5 Sonnet) - RECOMENDADO
-   
+
    Razones para Claude:
    - Mejor comprensión de contexto largo
    - Menos alucinaciones
@@ -4576,7 +5026,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    - searchSimilar(query, topK) → relevant chunks
    - buildContext(chunks) → formatted context
    - generateResponse(query, context) → answer
-   
+
    Pipeline:
    1. Usuario pregunta
    2. Embed pregunta
@@ -4594,7 +5044,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    - deleteDocument(id)
    - syncFromURL(url) → scrape → process
    - syncFromNotion(notionPageId)
-   
+
    Chunking strategies:
    - Fixed size: 500 tokens con 50 overlap
    - Semantic: Por párrafos/secciones
@@ -4609,7 +5059,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    - getHistory(conversationId, limit)
    - transferToHuman(conversationId, reason)
    - endConversation(conversationId)
-   
+
    Features:
    - Context window management (últimos 10 mensajes)
    - Intent detection
@@ -4625,7 +5075,7 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    - Slack
    - Telegram (futuro)
    - Email (futuro)
-   
+
    Abstracción:
    ChannelAdapter Interface:
    - sendMessage(to, message)
@@ -4698,29 +5148,29 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
 6. **`/ai/chat/settings`**
    ```
    Configuración del chatbot:
-   
+
    General:
    - Nombre del bot
    - Avatar
    - Bienvenida
    - Horario de operación
-   
+
    AI Configuration:
    - Model selection (GPT-4, Claude 3.5)
    - Temperature (0-1)
    - Max tokens
    - System prompt customization
-   
+
    Personality:
    - Tone (profesional, casual, friendly)
    - Language (es-CL, es-MX, en)
    - Custom instructions
-   
+
    Escalation Rules:
    - Confidence threshold para transferir
    - Keywords que disparan transferencia
    - Usuarios/equipos para asignar
-   
+
    Channels:
    - Enable/disable por canal
    - Configuración específica (WhatsApp number, etc.)
@@ -4756,17 +5206,18 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
 <script src="https://tupatrimonio.app/widgets/ai-chat-widget.js"></script>
 <script>
   TuPatrimonioChat.init({
-    organizationId: 'org_123',
-    chatbotId: 'bot_456',
-    position: 'bottom-right', // o 'bottom-left'
-    theme: 'light', // o 'dark'
-    primaryColor: '#0070f3',
-    locale: 'es-CL'
-  })
+    organizationId: "org_123",
+    chatbotId: "bot_456",
+    position: "bottom-right", // o 'bottom-left'
+    theme: "light", // o 'dark'
+    primaryColor: "#0070f3",
+    locale: "es-CL",
+  });
 </script>
 ```
 
 **Features del widget:**
+
 - Bubble indicator (para abrir chat)
 - Chat window con historial
 - Typing indicators
@@ -4784,12 +5235,12 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    ```typescript
    // Detectar intención del usuario
    const intents = {
-     'pricing_inquiry': ['precio', 'costo', 'cuánto cuesta', 'plan'],
-     'technical_support': ['error', 'no funciona', 'problema', 'bug'],
-     'sales_inquiry': ['comprar', 'contratar', 'demo', 'prueba'],
-     'cancellation': ['cancelar', 'dar de baja', 'terminar suscripción']
-   }
-   
+     "pricing_inquiry": ["precio", "costo", "cuánto cuesta", "plan"],
+     "technical_support": ["error", "no funciona", "problema", "bug"],
+     "sales_inquiry": ["comprar", "contratar", "demo", "prueba"],
+     "cancellation": ["cancelar", "dar de baja", "terminar suscripción"],
+   };
+
    function detectIntent(message: string): Intent {
      // Usar embeddings similarity o keyword matching
      // Priorizar intents que requieren escalación
@@ -4799,10 +5250,10 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
 2. **Confidence Scoring**
    ```typescript
    function shouldEscalate(response: AIResponse): boolean {
-     if (response.confidence < 0.6) return true
-     if (detectSensitiveTopic(response.message)) return true
-     if (userRequestsHuman(response.userMessage)) return true
-     return false
+     if (response.confidence < 0.6) return true;
+     if (detectSensitiveTopic(response.message)) return true;
+     if (userRequestsHuman(response.userMessage)) return true;
+     return false;
    }
    ```
 
@@ -4811,20 +5262,23 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    // Mantener contexto relevante sin explotar token limit
    function buildConversationContext(
      conversationId: string,
-     maxMessages: number = 10
+     maxMessages: number = 10,
    ): Message[] {
-     const messages = getRecentMessages(conversationId, maxMessages)
-     
+     const messages = getRecentMessages(conversationId, maxMessages);
+
      // Summarize older messages if needed
      if (messages.length > maxMessages) {
-       const summary = summarizeMessages(messages.slice(0, -maxMessages))
+       const summary = summarizeMessages(messages.slice(0, -maxMessages));
        return [
-         { role: 'system', content: `Resumen de conversación previa: ${summary}` },
-         ...messages.slice(-maxMessages)
-       ]
+         {
+           role: "system",
+           content: `Resumen de conversación previa: ${summary}`,
+         },
+         ...messages.slice(-maxMessages),
+       ];
      }
-     
-     return messages
+
+     return messages;
    }
    ```
 
@@ -4833,16 +5287,16 @@ Esta es una fase crítica ya que es uno de los diferenciadores principales del p
    async function trackAIUsage(
      conversationId: string,
      messageId: string,
-     tokensUsed: { prompt: number, completion: number }
+     tokensUsed: { prompt: number; completion: number },
    ) {
-     const totalTokens = tokensUsed.prompt + tokensUsed.completion
-     const creditCost = calculateCreditCost(totalTokens, hasKBSearch)
-     
+     const totalTokens = tokensUsed.prompt + tokensUsed.completion;
+     const creditCost = calculateCreditCost(totalTokens, hasKBSearch);
+
      await reserveAndConfirmCredits(organizationId, creditCost, {
-       service: 'ai_customer_service',
-       operation: 'send_message',
-       metadata: { conversationId, messageId, tokensUsed }
-     })
+       service: "ai_customer_service",
+       operation: "send_message",
+       metadata: { conversationId, messageId, tokensUsed },
+     });
    }
    ```
 
@@ -4915,13 +5369,13 @@ test('Escalates low confidence responses', async () => {
 1. **Caching**
    ```typescript
    // Cache de embeddings frecuentes
-   const embeddingCache = new Map<string, number[]>()
-   
+   const embeddingCache = new Map<string, number[]>();
+
    // Cache de respuestas a preguntas comunes
    const responseCache = new TTLCache({
      ttl: 3600, // 1 hora
-     maxSize: 1000
-   })
+     maxSize: 1000,
+   });
    ```
 
 2. **Streaming Responses**
@@ -4929,14 +5383,14 @@ test('Escalates low confidence responses', async () => {
    // Para mejor UX, hacer streaming de respuestas
    async function* streamChatResponse(prompt: string) {
      const stream = await anthropic.messages.stream({
-       model: 'claude-3-5-sonnet-20241022',
-       messages: [{ role: 'user', content: prompt }],
+       model: "claude-3-5-sonnet-20241022",
+       messages: [{ role: "user", content: prompt }],
        max_tokens: 1024,
-     })
-     
+     });
+
      for await (const chunk of stream) {
-       if (chunk.type === 'content_block_delta') {
-         yield chunk.delta.text
+       if (chunk.type === "content_block_delta") {
+         yield chunk.delta.text;
        }
      }
    }
@@ -4946,21 +5400,24 @@ test('Escalates low confidence responses', async () => {
    ```typescript
    // Procesar embeddings en batch para eficiencia
    async function batchEmbed(texts: string[]): Promise<number[][]> {
-     const batchSize = 20
-     const batches = chunk(texts, batchSize)
-     
+     const batchSize = 20;
+     const batches = chunk(texts, batchSize);
+
      const results = await Promise.all(
-       batches.map(batch => openai.embeddings.create({
-         model: 'text-embedding-ada-002',
-         input: batch
-       }))
-     )
-     
-     return results.flatMap(r => r.data.map(d => d.embedding))
+       batches.map((batch) =>
+         openai.embeddings.create({
+           model: "text-embedding-ada-002",
+           input: batch,
+         })
+       ),
+     );
+
+     return results.flatMap((r) => r.data.map((d) => d.embedding));
    }
    ```
 
 **Paralelamente durante Fase 9:**
+
 - Blog posts sobre el lanzamiento del chatbot IA
 - Case study de beta users usando chatbot
 - Video tutorial: "Configura tu chatbot en 10 minutos"
@@ -5002,7 +5459,7 @@ test('Escalates low confidence responses', async () => {
    - extractText(file)
    - extractTables(file)
    - detectLayout(file)
-   
+
    Implementaciones:
    - GPT-4-Vision (OpenAI)
    - Claude 3 Opus (mejor para documentos largos)
@@ -5011,36 +5468,36 @@ test('Escalates low confidence responses', async () => {
 4. **Document Processing Pipeline**
    ```typescript
    DocumentReviewPipeline:
-   
+
    1. Upload & Validation
       - Verificar formato (PDF, DOCX, images)
       - Validar tamaño (max 50MB)
       - Extraer metadata
-   
+
    2. Text Extraction
       - Si PDF: usar pdf.js o pdfplumber
       - Si DOCX: usar mammoth
       - Si imagen: OCR con Tesseract o Vision API
       - Preservar estructura (headers, lists, tables)
-   
+
    3. Preprocessing
       - Limpiar texto
       - Identificar secciones
       - Extraer tablas
       - Detectar idioma
-   
+
    4. AI Analysis
       - Seleccionar template apropiado
       - Construir prompt con criteria
       - Enviar a LLM (Claude 3.5 Sonnet recomendado)
       - Parse structured response
-   
+
    5. Post-processing
       - Calcular risk score
       - Generar anotaciones
       - Extraer red flags
       - Crear recomendaciones
-   
+
    6. Storage
       - Guardar resultados
       - Link a documento original
@@ -5159,38 +5616,38 @@ test('Escalates low confidence responses', async () => {
    interface AIReviewResponse {
      extracted_sections: {
        [key: string]: {
-         content: string
-         location: string // "Section 5.2, Page 8"
-         analysis: string
-       }
-     }
+         content: string;
+         location: string; // "Section 5.2, Page 8"
+         analysis: string;
+       };
+     };
      red_flags: Array<{
-       type: string
-       severity: 'low' | 'medium' | 'high' | 'critical'
-       location: string
-       description: string
-       recommendation: string
-     }>
+       type: string;
+       severity: "low" | "medium" | "high" | "critical";
+       location: string;
+       description: string;
+       recommendation: string;
+     }>;
      compliance_status: {
        [key: string]: {
-         compliant: boolean
-         details: string
-       }
-     }
+         compliant: boolean;
+         details: string;
+       };
+     };
      risk_assessment: {
-       overall_score: number // 0-100
+       overall_score: number; // 0-100
        category_scores: {
-         financial_risk: number
-         legal_risk: number
-         operational_risk: number
-       }
-       justification: string
-     }
+         financial_risk: number;
+         legal_risk: number;
+         operational_risk: number;
+       };
+       justification: string;
+     };
      recommendations: Array<{
-       priority: 'low' | 'medium' | 'high'
-       action: string
-       rationale: string
-     }>
+       priority: "low" | "medium" | "high";
+       action: string;
+       rationale: string;
+     }>;
    }
    ```
 
@@ -5223,22 +5680,22 @@ test('Escalates low confidence responses', async () => {
 3. **`/ai/review/new`**
    ```
    Iniciar nueva revisión:
-   
+
    Step 1: Upload
    - Drag & drop o seleccionar archivo
    - Múltiples archivos soportados
    - Preview del documento
-   
+
    Step 2: Select Template
    - Grid de templates disponibles
    - "Contrato Comercial", "NDA", "Arrendamiento", etc.
    - Preview de qué se analizará
-   
+
    Step 3: Configure (opcional)
    - Ajustar criteria específicos
    - Agregar custom red flags
    - Set priority
-   
+
    Step 4: Review & Submit
    - Resumen de configuración
    - Estimación de tiempo/costo
@@ -5248,21 +5705,21 @@ test('Escalates low confidence responses', async () => {
 4. **`/ai/review/reviews/:id`**
    ```
    Vista de resultados (dos paneles):
-   
+
    Panel Izquierdo: Documento
    - PDF viewer o document renderer
    - Anotaciones highlighteadas
    - Click en anotación → scroll a ubicación
    - Zoom, navegación por páginas
-   
+
    Panel Derecho: Análisis
-   
+
    Tab "Overview":
    - Risk Score (visual gauge)
    - Executive Summary
    - Key Findings (top 3-5)
    - Quick Stats
-   
+
    Tab "Sections":
    - Accordion de secciones extraídas
    - Cada sección:
@@ -5270,7 +5727,7 @@ test('Escalates low confidence responses', async () => {
      * Análisis
      * Location en documento
      * Risk indicator
-   
+
    Tab "Red Flags":
    - Lista de issues encontrados
    - Agrupados por severity
@@ -5279,18 +5736,18 @@ test('Escalates low confidence responses', async () => {
      * Ubicación (clickeable)
      * Recomendación
      * Mark as "Reviewed" o "False Positive"
-   
+
    Tab "Recommendations":
    - Lista priorizada de acciones
    - Checkbox para marcar completadas
    - Assign to team member
    - Add notes
-   
+
    Tab "Compliance":
    - Checklist de compliance items
    - Status por item
    - Details/evidence
-   
+
    Actions:
    - Download PDF Report
    - Share with team
@@ -5370,23 +5827,23 @@ test('Escalates low confidence responses', async () => {
 10. **`/ai/review/settings`**
     ```
     Configuración:
-    
+
     General:
     - Default template
     - Auto-analyze on upload
     - Notification preferences
-    
+
     AI Configuration:
     - Model selection (Claude 3.5, GPT-4, etc.)
     - Temperature
     - Max tokens per analysis
     - Confidence threshold
-    
+
     Cost Controls:
     - Budget limits
     - Approval required for documents > X pages
     - Rate limiting
-    
+
     Integrations:
     - Google Drive: Auto-analyze new docs
     - Dropbox
@@ -5401,63 +5858,66 @@ test('Escalates low confidence responses', async () => {
 
 ```typescript
 async function generatePDFReport(reviewId: string): Promise<Buffer> {
-  const review = await getReview(reviewId)
-  const result = await getReviewResult(reviewId)
-  
+  const review = await getReview(reviewId);
+  const result = await getReviewResult(reviewId);
+
   // Usar biblioteca como PDFKit o Puppeteer
-  const pdf = new PDFDocument()
-  
+  const pdf = new PDFDocument();
+
   // Header
-  pdf.image('logo.png', 50, 45, { width: 50 })
-  pdf.fontSize(20).text('Análisis de Documento con IA', 120, 50)
-  
+  pdf.image("logo.png", 50, 45, { width: 50 });
+  pdf.fontSize(20).text("Análisis de Documento con IA", 120, 50);
+
   // Executive Summary
-  pdf.moveDown()
-  pdf.fontSize(16).text('Resumen Ejecutivo')
-  pdf.fontSize(12).text(result.summary)
-  
+  pdf.moveDown();
+  pdf.fontSize(16).text("Resumen Ejecutivo");
+  pdf.fontSize(12).text(result.summary);
+
   // Risk Score
-  pdf.moveDown()
-  pdf.fontSize(16).text('Nivel de Riesgo')
+  pdf.moveDown();
+  pdf.fontSize(16).text("Nivel de Riesgo");
   // Visual gauge o color-coded box
   pdf.rect(50, pdf.y, 200, 30)
-    .fillAndStroke(getRiskColor(result.riskLevel), '#000')
-  pdf.fontSize(12).text(`Score: ${result.overallScore}/100`)
-  
+    .fillAndStroke(getRiskColor(result.riskLevel), "#000");
+  pdf.fontSize(12).text(`Score: ${result.overallScore}/100`);
+
   // Sections
-  pdf.addPage()
-  pdf.fontSize(16).text('Secciones Analizadas')
+  pdf.addPage();
+  pdf.fontSize(16).text("Secciones Analizadas");
   for (const [key, section] of Object.entries(result.extractedData)) {
-    pdf.fontSize(14).text(key)
-    pdf.fontSize(10).text(section.content)
-    pdf.moveDown()
+    pdf.fontSize(14).text(key);
+    pdf.fontSize(10).text(section.content);
+    pdf.moveDown();
   }
-  
+
   // Red Flags
-  pdf.addPage()
-  pdf.fontSize(16).text('Red Flags Detectados')
+  pdf.addPage();
+  pdf.fontSize(16).text("Red Flags Detectados");
   for (const flag of result.redFlags) {
     pdf.fontSize(12)
       .fillColor(getSeverityColor(flag.severity))
-      .text(`[${flag.severity.toUpperCase()}] ${flag.description}`)
-    pdf.fillColor('#000')
+      .text(`[${flag.severity.toUpperCase()}] ${flag.description}`);
+    pdf.fillColor("#000")
       .fontSize(10)
       .text(`Ubicación: ${flag.location}`)
-      .text(`Recomendación: ${flag.recommendation}`)
-    pdf.moveDown()
+      .text(`Recomendación: ${flag.recommendation}`);
+    pdf.moveDown();
   }
-  
+
   // Recommendations
-  pdf.addPage()
-  pdf.fontSize(16).text('Recomendaciones')
+  pdf.addPage();
+  pdf.fontSize(16).text("Recomendaciones");
   // ... similar structure
-  
+
   // Footer
   pdf.fontSize(8)
-    .text(`Generado por TuPatrimonio.app - ${new Date().toLocaleDateString()}`, 
-          50, pdf.page.height - 50)
-  
-  return pdf.pipe(/* output stream */)
+    .text(
+      `Generado por TuPatrimonio.app - ${new Date().toLocaleDateString()}`,
+      50,
+      pdf.page.height - 50,
+    );
+
+  return pdf.pipe(); /* output stream */
 }
 ```
 
@@ -5470,20 +5930,20 @@ async function generatePDFReport(reviewId: string): Promise<Buffer> {
    // Para procesar múltiples documentos en paralelo
    async function batchReview(
      fileIds: string[],
-     templateId: string
+     templateId: string,
    ): Promise<BatchReviewJob> {
-     const jobId = generateId()
-     
+     const jobId = generateId();
+
      // Queue jobs
      for (const fileId of fileIds) {
-       await queue.add('document-review', {
+       await queue.add("document-review", {
          jobId,
          fileId,
-         templateId
-       })
+         templateId,
+       });
      }
-     
-     return { jobId, status: 'queued', total: fileIds.length }
+
+     return { jobId, status: "queued", total: fileIds.length };
    }
    ```
 
@@ -5491,18 +5951,18 @@ async function generatePDFReport(reviewId: string): Promise<Buffer> {
    ```typescript
    async function compareVersions(
      docId1: string,
-     docId2: string
+     docId2: string,
    ): Promise<ComparisonResult> {
      const [review1, review2] = await Promise.all([
        getReview(docId1),
-       getReview(docId2)
-     ])
-     
+       getReview(docId2),
+     ]);
+
      // AI-powered diff
      const diffAnalysis = await claude.messages.create({
-       model: 'claude-3-5-sonnet-20241022',
+       model: "claude-3-5-sonnet-20241022",
        messages: [{
-         role: 'user',
+         role: "user",
          content: `
            Compara estas dos versiones de contrato y explica qué cambió:
            
@@ -5513,15 +5973,15 @@ async function generatePDFReport(reviewId: string): Promise<Buffer> {
            ${review2.documentText}
            
            Enfócate en cambios significativos en términos, condiciones, riesgos.
-         `
-       }]
-     })
-     
+         `,
+       }],
+     });
+
      return {
        changes: parseDiffAnalysis(diffAnalysis),
        riskDelta: review2.overallScore - review1.overallScore,
-       newRedFlags: findNewRedFlags(review1, review2)
-     }
+       newRedFlags: findNewRedFlags(review1, review2),
+     };
    }
    ```
 
@@ -5529,13 +5989,13 @@ async function generatePDFReport(reviewId: string): Promise<Buffer> {
    ```typescript
    // Permitir a usuarios entrenar patrones específicos
    interface CustomRedFlag {
-     organizationId: string
-     name: string
-     pattern: string // regex o descripción en lenguaje natural
-     severity: 'low' | 'medium' | 'high' | 'critical'
-     examples: string[] // ejemplos de texto que deberían matchear
+     organizationId: string;
+     name: string;
+     pattern: string; // regex o descripción en lenguaje natural
+     severity: "low" | "medium" | "high" | "critical";
+     examples: string[]; // ejemplos de texto que deberían matchear
    }
-   
+
    // El sistema aprende de feedback y ajusta detección
    ```
 
@@ -5547,35 +6007,35 @@ async function generatePDFReport(reviewId: string): Promise<Buffer> {
 // 1. Smart chunking - solo analizar secciones relevantes
 function smartChunk(document: string, template: Template): string[] {
   // Usar modelo más barato para identificar secciones relevantes
-  const sectionMap = identifySections(document) // GPT-3.5-turbo
-  
+  const sectionMap = identifySections(document); // GPT-3.5-turbo
+
   // Luego usar Claude 3.5 solo en secciones importantes
   const relevantSections = template.sectionsToExtract
-    .map(section => sectionMap[section])
-    .filter(Boolean)
-  
-  return relevantSections
+    .map((section) => sectionMap[section])
+    .filter(Boolean);
+
+  return relevantSections;
 }
 
 // 2. Caching de análisis comunes
-const analysisCache = new Map<string, ReviewResult>()
+const analysisCache = new Map<string, ReviewResult>();
 
 function getCacheKey(document: string, template: string): string {
-  return `${hashDocument(document)}_${template}`
+  return `${hashDocument(document)}_${template}`;
 }
 
 // 3. Progressive analysis
 // Análisis rápido (barato) primero, profundo solo si se solicita
 async function progressiveReview(docId: string) {
   // Paso 1: Quick scan (GPT-3.5)
-  const quickScan = await quickAnalysis(docId)
-  
+  const quickScan = await quickAnalysis(docId);
+
   if (quickScan.riskScore > 70 || userRequestsDeep) {
     // Paso 2: Deep analysis (Claude 3.5 Opus)
-    return await deepAnalysis(docId)
+    return await deepAnalysis(docId);
   }
-  
-  return quickScan
+
+  return quickScan;
 }
 ```
 
@@ -5584,42 +6044,43 @@ async function progressiveReview(docId: string) {
 #### Test Suite:
 
 ```typescript
-describe('Document Review', () => {
-  test('extracts payment terms correctly', async () => {
-    const sample = loadSampleContract('commercial.pdf')
-    const result = await analyzeDocument(sample, 'commercial_template')
-    
-    expect(result.extractedData.payment_terms).toBeDefined()
-    expect(result.extractedData.payment_terms.content).toContain('Net 30')
-  })
-  
-  test('detects unlimited liability red flag', async () => {
-    const sample = loadSampleContract('high_risk.pdf')
-    const result = await analyzeDocument(sample, 'commercial_template')
-    
+describe("Document Review", () => {
+  test("extracts payment terms correctly", async () => {
+    const sample = loadSampleContract("commercial.pdf");
+    const result = await analyzeDocument(sample, "commercial_template");
+
+    expect(result.extractedData.payment_terms).toBeDefined();
+    expect(result.extractedData.payment_terms.content).toContain("Net 30");
+  });
+
+  test("detects unlimited liability red flag", async () => {
+    const sample = loadSampleContract("high_risk.pdf");
+    const result = await analyzeDocument(sample, "commercial_template");
+
     const unlimitedLiabilityFlag = result.redFlags.find(
-      f => f.type === 'unlimited_liability'
-    )
-    expect(unlimitedLiabilityFlag).toBeDefined()
-    expect(unlimitedLiabilityFlag.severity).toBe('critical')
-  })
-  
-  test('calculates risk score accurately', async () => {
-    const lowRiskDoc = loadSampleContract('low_risk.pdf')
-    const highRiskDoc = loadSampleContract('high_risk.pdf')
-    
+      (f) => f.type === "unlimited_liability",
+    );
+    expect(unlimitedLiabilityFlag).toBeDefined();
+    expect(unlimitedLiabilityFlag.severity).toBe("critical");
+  });
+
+  test("calculates risk score accurately", async () => {
+    const lowRiskDoc = loadSampleContract("low_risk.pdf");
+    const highRiskDoc = loadSampleContract("high_risk.pdf");
+
     const [lowResult, highResult] = await Promise.all([
-      analyzeDocument(lowRiskDoc, 'commercial_template'),
-      analyzeDocument(highRiskDoc, 'commercial_template')
-    ])
-    
-    expect(lowResult.overallScore).toBeLessThan(40)
-    expect(highResult.overallScore).toBeGreaterThan(70)
-  })
-})
+      analyzeDocument(lowRiskDoc, "commercial_template"),
+      analyzeDocument(highRiskDoc, "commercial_template"),
+    ]);
+
+    expect(lowResult.overallScore).toBeLessThan(40);
+    expect(highResult.overallScore).toBeGreaterThan(70);
+  });
+});
 ```
 
 **Paralelamente durante Fase 10:**
+
 - Blog posts sobre lanzamiento de Document Review
 - Case studies con métricas reales (tiempo ahorrado, errores evitados)
 - Webinar: "Cómo la IA Revoluciona la Revisión de Contratos"
@@ -5634,6 +6095,7 @@ describe('Document Review', () => {
 **Objetivo:** Data-driven decision making
 
 #### Implementación:
+
 1. **Crear schema `analytics`**
    ```sql
    - usage_metrics (particionado por fecha)
@@ -5698,6 +6160,7 @@ describe('Document Review', () => {
 **Objetivo:** Insights accionables
 
 #### Páginas:
+
 1. **`/analytics/overview`**
    ```
    KPIs principales:
@@ -5732,7 +6195,7 @@ describe('Document Review', () => {
 4. **`/analytics/ai`** ← NUEVO
    ```
    Dashboard específico de IA:
-   
+
    Customer Service:
    - Conversations handled by AI vs humans
    - Resolution rate
@@ -5740,7 +6203,7 @@ describe('Document Review', () => {
    - Top intents
    - Escalation reasons
    - Cost per conversation
-   
+
    Document Review:
    - Documents analyzed
    - Average risk score distribution
@@ -5748,7 +6211,7 @@ describe('Document Review', () => {
    - Processing time trends
    - Cost per document
    - Accuracy feedback
-   
+
    ROI Calculator:
    - Time saved (estimated)
    - Cost savings (vs manual)
@@ -5772,6 +6235,7 @@ describe('Document Review', () => {
 **Objetivo:** Conectar con ecosistema externo
 
 #### Implementación:
+
 1. **Crear schema `integrations`**
    ```sql
    - integration_providers
@@ -5803,6 +6267,7 @@ describe('Document Review', () => {
 **Objetivo:** API REST completa para B2B
 
 #### Implementación:
+
 1. **Documentación OpenAPI**
    - Swagger/Redoc
    - SDK generation
@@ -5828,7 +6293,7 @@ describe('Document Review', () => {
    GET  /api/v1/ai/chat/conversations/:id
    GET  /api/v1/ai/chat/conversations/:id/history
    POST /api/v1/ai/chat/knowledge-base/ingest
-   
+
    // Document Review API
    POST /api/v1/ai/review/analyze
    GET  /api/v1/ai/review/:id/status
@@ -5863,6 +6328,7 @@ describe('Document Review', () => {
 **Objetivo:** Self-service para developers
 
 #### Páginas:
+
 1. **`/developers/api-keys`**
    - Crear/revocar API keys
    - Usage por key
@@ -5897,6 +6363,7 @@ describe('Document Review', () => {
 **Objetivo:** Sub-second response times
 
 #### Tareas:
+
 1. **Database Optimization**
    ```sql
    - Analizar slow queries
@@ -5921,7 +6388,7 @@ describe('Document Review', () => {
    - Code splitting óptimo
    - Image optimization
    - Bundle optimization
-   
+
    // Solo configurar manualmente:
    - Lazy loading de componentes pesados
    - Virtualización de listas largas (si necesario)
@@ -5942,6 +6409,7 @@ describe('Document Review', () => {
 **Objetivo:** Detectar problemas antes que usuarios
 
 #### Implementación:
+
 1. **APM**
    ```typescript
    - Integrar Sentry (errors)
@@ -5984,6 +6452,7 @@ describe('Document Review', () => {
 **Objetivo:** Confianza en deployments
 
 #### Estrategia:
+
 1. **Unit Tests**
    ```typescript
    - Utils y funciones puras
@@ -6033,6 +6502,7 @@ describe('Document Review', () => {
 **Objetivo:** Experiencia delightful
 
 #### Tareas:
+
 1. **Micro-interactions**
    - Animaciones suaves (Framer Motion)
    - Loading skeletons (especialmente para AI responses)
@@ -6063,6 +6533,7 @@ describe('Document Review', () => {
 **Objetivo:** Nice-to-haves que marcan diferencia
 
 #### Lista:
+
 1. **Command Palette (Cmd+K)**
    - Búsqueda global
    - Quick actions (incluir "Ask AI", "Analyze Document")
@@ -6105,6 +6576,7 @@ describe('Document Review', () => {
 **Objetivo:** Experiencia móvil nativa
 
 #### Consideraciones:
+
 - Capacitor de Ionic framework
 - Reutilización del código web existente (Next.js)
 - Mismo stack tecnológico (React, TypeScript, Tailwind)
@@ -6114,6 +6586,7 @@ describe('Document Review', () => {
 - Acceso a APIs nativas (cámara, geolocalización, etc.)
 
 #### Features prioritarias mobile:
+
 - Chat con AI (notificaciones push)
 - Ver análisis de documentos
 - Firmar documentos
@@ -6129,6 +6602,7 @@ describe('Document Review', () => {
 **Objetivo:** Launch ready
 
 #### Checklist:
+
 1. **Legal**
    - Términos de servicio (actualizados con uso de IA)
    - Privacy policy (incluir procesamiento de datos por IA)
@@ -6181,6 +6655,7 @@ describe('Document Review', () => {
 **Objetivo:** Convertir tráfico orgánico en customers
 
 **Ventaja competitiva:** Llegas al launch con:
+
 - ✅ SEO maduro (12+ meses de antigüedad)
 - ✅ 10,000+ visitas orgánicas/mes
 - ✅ 1,000+ waitlist
@@ -6190,6 +6665,7 @@ describe('Document Review', () => {
 - ✅ **Diferenciadores de IA probados y funcionando**
 
 #### Launch Day Strategy:
+
 ```
 T-7 días: Email a waitlist (teaser)
 T-3 días: Soft launch para early adopters
@@ -6209,6 +6685,7 @@ T+30: Launch retrospective
 ## 📊 **Métricas de Éxito Actualizadas**
 
 ### Fase 0 (Semanas 1-4):
+
 - Website live con Lighthouse > 95
 - 10-14 blog posts publicados (incluir 2 sobre IA)
 - 100% páginas indexadas
@@ -6216,7 +6693,9 @@ T+30: Launch retrospective
 - Landings de IA con demos funcionales
 
 ### Durante Fases 1-6 (Semanas 5-38):
+
 **Marketing parallels:**
+
 - Mes 3: 500+ organic visits/mes
 - Mes 6: 2,000+ organic visits/mes
 - Rankings top 10 para 5+ keywords (incluir 2 de IA)
@@ -6224,13 +6703,16 @@ T+30: Launch retrospective
 - 25+ quality backlinks
 
 **Desarrollo:**
+
 - ✅ Foundation completa (auth, credits, billing) - **COMPLETADO Nov 22, 2025**
 - ✅ CRM operacional - **COMPLETADO Nov 12, 2025**
 - 📋 Workflows funcionales (pendiente)
 - 📋 Compliance ready (pendiente)
 
 ### Durante Fases 7-12 (Semanas 39-88):
+
 **Marketing parallels:**
+
 - Mes 9: 5,000+ organic visits/mes
 - Mes 12: 10,000+ organic visits/mes
 - Rankings top 5 para keyword principal
@@ -6240,6 +6722,7 @@ T+30: Launch retrospective
 - 60+ backlinks DA > 30
 
 **Desarrollo:**
+
 - Servicios core operacionales (firmas, verificación, notaría)
 - **AI Customer Service live y probado**
 - **AI Document Review live y probado**
@@ -6247,12 +6730,14 @@ T+30: Launch retrospective
 - Analytics completo
 
 ### Fases 13-14 - Optimization (Semanas 89-102):
+
 - Performance optimizada
 - AI costs optimizados
 - UX refinado
 - Tests comprehensivos
 
 ### Fase 16 - Launch (Semanas 115-121):
+
 - 15,000+ organic visits/mes
 - 15-20% signup rate (2,000-3,000 signups/mes orgánico)
 - Rankings dominantes (incluir IA)
@@ -6264,6 +6749,7 @@ T+30: Launch retrospective
 ## 🎯 **Priorización Final Actualizada**
 
 ### Absolutely Critical (No lanzar sin esto):
+
 1. **Fase 0:** Marketing + SEO foundation
 2. Fase 1-2: Foundation + Credits
 3. Fase 3: Comunicaciones básicas
@@ -6273,6 +6759,7 @@ T+30: Launch retrospective
 7. Seguridad completa
 
 ### High Priority:
+
 - Fase 4: Workflows
 - Fase 5: Files
 - Fase 6: Audit
@@ -6280,11 +6767,13 @@ T+30: Launch retrospective
 - **Contenido continuo (paralelo a todo)**
 
 ### Medium Priority:
+
 - Otros servicios (8.x)
 - Fase 11: Analytics
 - Fase 13: Optimization
 
 ### Nice to Have:
+
 - Fase 15: Mobile app
 - Integraciones avanzadas
 - AI features avanzados (fine-tuning, custom models)
@@ -6296,21 +6785,24 @@ T+30: Launch retrospective
 Mientras desarrollas las Fases 1-16, mantén este ritmo:
 
 ### Mensual:
+
 - 8 blog posts (2/semana)
-  * 6 posts tradicionales
-  * 2 posts sobre IA
+  - 6 posts tradicionales
+  - 2 posts sobre IA
 - 1 pillar content piece o guía larga
 - 2 actualizaciones de contenido existente
 - 1 guest post o PR initiative
 - Análisis de rankings y ajustes
 
 ### Trimestral:
+
 - 1 lead magnet nuevo (incluir 1 de IA cada 2 trimestres)
 - Content audit y actualización
 - Backlink campaign
 - Video content (tutoriales, incluir demos de IA)
 
 ### Semestral:
+
 - Comprehensive SEO audit
 - Content cluster expansion
 - Competitor analysis
@@ -6321,6 +6813,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 ## 🛠️ **Stack Tecnológico Final Simplificado**
 
 ### Frontend:
+
 - Next.js 14+ (App Router)
 - React 18
 - TypeScript
@@ -6330,32 +6823,39 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - PDF.js (document viewer)
 
 ### Backend (Todo en Supabase):
+
 - Supabase (PostgreSQL + Auth + Storage + Realtime)
 - pgvector extension (AI embeddings)
 - Supabase Edge Functions (si necesario)
 
 ### AI & ML:
+
 - Anthropic Claude API (primary)
 - OpenAI API (secondary/fallback)
 - Vector search: pgvector integrado
 
 ### Servicios Externos:
+
 - Stripe + dLocal Go (pagos)
 - SendGrid (email)
 - Twilio (SMS/auth)
 - Veriff (identity verification)
 
 ### Deploy y Hosting (Ultra Simple):
-- **Vercel**: Ambas apps (tupatrimonio.app + app.tupatrimonio.app) + CI/CD automático
+
+- **Vercel**: Ambas apps (tupatrimonio.app + app.tupatrimonio.app) + CI/CD
+  automático
 - **Supabase**: Backend + Migraciones automáticas
 - **DNS**: Solo configurar dominios
 - **Analytics**: Google Analytics 4 con propiedades separadas por app
 
 ### Monitoring (Básico):
+
 - Sentry (errors)
 - Supabase Analytics (built-in)
 
 ### CMS:
+
 - Contentful/Sanity (marketing content)
 
 ---
@@ -6363,6 +6863,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 ## ✅ **Checklist de Launch Simplificado**
 
 ### Pre-Launch:
+
 - [ ] **Base de datos completa** (todas las migraciones aplicadas)
 - [ ] **Marketing site optimizado** (SEO + contenido)
 - [ ] **App funcional** con servicios core
@@ -6373,6 +6874,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - [ ] **Costos controlados** (especialmente IA)
 
 ### Launch:
+
 - [ ] **Deploy a producción** (automático con Vercel)
 - [ ] **Email a waitlist**
 - [ ] **Product Hunt launch**
@@ -6381,8 +6883,9 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - [ ] **Google Analytics** recabando datos en ambas apps
 
 ### Post-Launch:
+
 - [ ] **Feedback loop** activo
-- [ ] **Hotfixes** según necesidad  
+- [ ] **Hotfixes** según necesidad
 - [ ] **Case studies** reales
 - [ ] **Optimización** basada en datos
 - [ ] **Scaling** según demanda
@@ -6392,6 +6895,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 ## 🎓 **Principios de Desarrollo Simplificados**
 
 ### Filosofía Core:
+
 1. **Simple pero robusto:** Evitar over-engineering
 2. **Type-safe:** TypeScript + Supabase types automáticos
 3. **Mobile-first:** Responsive desde el inicio
@@ -6401,6 +6905,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 7. **Data-driven:** Medir lo importante, no todo
 
 ### Stack Ultra-Simple:
+
 - **Backend:** Solo Supabase (base de datos + auth + storage)
 - **Frontend:** Next.js + Tailwind + Shadcn/UI
 - **Deploy:** Vercel (ambas apps) - todo automático
@@ -6408,6 +6913,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 - **No necesitas:** Docker, CI/CD complex, CDN manual, SSL config
 
 ### Flujo de Desarrollo:
+
 1. **Codigo** → Push a GitHub
 2. **Deploy automático** → Vercel (ambas apps)
 3. **Migraciones** → Supabase automático
@@ -6415,6 +6921,7 @@ Mientras desarrollas las Fases 1-16, mantén este ritmo:
 5. **Variables de entorno** → Vercel Dashboard
 
 ### AI Development Best Practices:
+
 ```typescript
 // 1. Siempre manejar errores de API
 try {
@@ -6458,6 +6965,7 @@ for await (const chunk of stream) {
 Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 
 ### Producto (Simple pero Completo):
+
 1. ✅ **Base robusta multi-tenant** (Supabase)
 2. ✅ **Servicios core** (firmas, verificación, notaría)
 3. ✅ **IA diferenciadora** (chatbot + document review)
@@ -6465,6 +6973,7 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 5. ✅ **Mobile responsive** (Next.js + Tailwind)
 
 ### Marketing (SEO-First):
+
 1. ✅ **Tráfico orgánico** creciendo desde día 1
 2. ✅ **Authority establecida** (contenido + backlinks)
 3. ✅ **Waitlist cualificada**
@@ -6472,6 +6981,7 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 5. ✅ **Keywords dominantes** (incluir IA)
 
 ### Tecnología (Ultra-Simple):
+
 1. ✅ **Solo 3 servicios principales**:
    - GitHub (código)
    - Vercel (ambas apps + deploy automático)
@@ -6483,6 +6993,7 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 6. ✅ **Mantenimiento mínimo**
 
 ### Ventajas Competitivas:
+
 1. ✅ **Time-to-market ultra rápido**
 2. ✅ **IA como diferenciador principal**
 3. ✅ **SEO head-start** (12+ meses de ventaja)
@@ -6494,11 +7005,14 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 ### ✅ **Correcciones y Mejoras Implementadas:**
 
 **1. Componente DLocalCheckout - Estados de Loading**
-- ✅ Agregado estado `loadingMethods` para evitar error breve antes de cargar métodos de pago
+
+- ✅ Agregado estado `loadingMethods` para evitar error breve antes de cargar
+  métodos de pago
 - ✅ UI mejorada con spinner mientras se cargan métodos disponibles
 - ✅ Manejo de errores mejorado con estados claros
 
 **2. Construcción Robusta de URLs**
+
 - ✅ Implementado sistema de múltiples fallbacks para `baseUrl`:
   - Primero: `NEXT_PUBLIC_APP_URL` (variable de entorno)
   - Segundo: Header `origin` de la request
@@ -6508,6 +7022,7 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 - ✅ Resuelto error "must be a valid URL" de dLocal Go API
 
 **3. Corrección de Schema**
+
 - ✅ Eliminado uso de `.schema('billing')` en favor de vistas públicas
 - ✅ Consistencia con implementación de Stripe
 - ✅ Uso de vistas públicas: `invoices`, `payments`, `invoice_line_items`
@@ -6517,33 +7032,46 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
 
 ### ✅ **Optimización del Sistema de Trazabilidad de Pedidos:**
 
-**Objetivo:** Simplificar el historial de pedidos para mostrar solo eventos relevantes y comprensibles para el cliente, eliminando información técnica y duplicados.
+**Objetivo:** Simplificar el historial de pedidos para mostrar solo eventos
+relevantes y comprensibles para el cliente, eliminando información técnica y
+duplicados.
 
 **Problema identificado:**
-- El historial mostraba múltiples eventos técnicos y duplicados que confundían al cliente
-- Eventos como "invoice_created", "payment_initiated", "Estado actualizado con información adicional" no aportaban valor
-- Existían duplicados cuando el mismo cambio de estado se registraba múltiples veces
-- Descripciones técnicas como "Estado cambiado de pending_payment a paid" no eran amigables
+
+- El historial mostraba múltiples eventos técnicos y duplicados que confundían
+  al cliente
+- Eventos como "invoice_created", "payment_initiated", "Estado actualizado con
+  información adicional" no aportaban valor
+- Existían duplicados cuando el mismo cambio de estado se registraba múltiples
+  veces
+- Descripciones técnicas como "Estado cambiado de pending_payment a paid" no
+  eran amigables
 
 **Solución implementada:**
 
-**1. Migración SQL de Limpieza Mejorada** (`20251201000004_improved_cleanup_order_history.sql`):
+**1. Migración SQL de Limpieza Mejorada**
+(`20251201000004_improved_cleanup_order_history.sql`):
+
 - ✅ Elimina eventos por descripción específica:
   - "Pago exitoso vía...", "Factura creada", "Pago iniciado..."
   - "Estado actualizado con información adicional"
   - "Pedido completado" cuando es `status_changed` (mantiene `order_completed`)
   - Descripciones técnicas antiguas que empiezan con "Estado cambiado de..."
 - ✅ Deduplica eventos por cambio de estado:
-  - Mantiene solo el evento más reciente cuando hay múltiples eventos para el mismo cambio
+  - Mantiene solo el evento más reciente cuando hay múltiples eventos para el
+    mismo cambio
   - Ejemplo: Si hay 3 eventos `pending_payment → paid`, mantiene solo el último
 - ✅ Deduplica eventos de completado:
-  - Si existe `order_completed` con "Pedido completado exitosamente", elimina el `status_changed` duplicado
+  - Si existe `order_completed` con "Pedido completado exitosamente", elimina el
+    `status_changed` duplicado
 - ✅ Normaliza descripciones:
   - Actualiza todas las descripciones antiguas al formato amigable estándar
 
 **2. Mejoras en Componente OrderTimeline.tsx**:
+
 - ✅ Filtrado mejorado por tipo y descripción:
-  - Filtra eventos técnicos: `invoice_created`, `payment_initiated`, `order_modified`
+  - Filtra eventos técnicos: `invoice_created`, `payment_initiated`,
+    `order_modified`
   - Filtra descripciones técnicas: "Pago exitoso vía...", "Factura creada", etc.
 - ✅ Función `deduplicateByStatus()`:
   - Deduplica eventos por cambio de estado en el frontend
@@ -6551,17 +7079,22 @@ Llegas al lanzamiento con una **arquitectura ultra-simple pero poderosa**:
   - Prioriza `order_completed` sobre `status_changed` cuando ambos existen
   - Maneja eventos únicos como `order_created` correctamente
 
-**Resultado final:**
-El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
+**Resultado final:** El historial de pedidos ahora muestra solo **3 eventos
+claros y relevantes**:
+
 1. ✅ "Tu pedido fue creado" (`order_created`)
 2. ✅ "Pago confirmado" (`status_changed` a `paid`)
 3. ✅ "Pedido completado exitosamente" (`order_completed`)
 
 **Archivos modificados:**
-- `supabase/migrations/20251201000004_improved_cleanup_order_history.sql` (nueva migración)
-- `apps/web/src/components/checkout/OrderTimeline.tsx` (mejoras en filtrado y deduplicación)
+
+- `supabase/migrations/20251201000004_improved_cleanup_order_history.sql` (nueva
+  migración)
+- `apps/web/src/components/checkout/OrderTimeline.tsx` (mejoras en filtrado y
+  deduplicación)
 
 **Beneficios:**
+
 - ✅ Experiencia de usuario más clara y comprensible
 - ✅ Eliminación de ruido técnico innecesario
 - ✅ Historial limpio y profesional
@@ -6570,33 +7103,42 @@ El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
 ---
 
 **4. Corrección del Sistema de Numeración de Facturas (Nov 24, 2025)**
-- ✅ **Problema resuelto**: Error "duplicate key value violates unique constraint invoices_invoice_number_key"
-- ✅ **Causa identificada**: Sistema global de numeración causaba colisiones cuando múltiples organizaciones creaban facturas simultáneamente
-- ✅ **Solución implementada**: Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` (similar a Stripe)
+
+- ✅ **Problema resuelto**: Error "duplicate key value violates unique
+  constraint invoices_invoice_number_key"
+- ✅ **Causa identificada**: Sistema global de numeración causaba colisiones
+  cuando múltiples organizaciones creaban facturas simultáneamente
+- ✅ **Solución implementada**: Cambio a formato por organización
+  `{ORG_SLUG}-{NÚMERO}` (similar a Stripe)
   - Ejemplo: `TU-PATRIMONIO-000001`, `MI-EMPRESA-000001`
 - ✅ **Mejoras técnicas**:
-  - Función SQL `generate_invoice_number(org_id UUID)` creada con lock por organización
+  - Función SQL `generate_invoice_number(org_id UUID)` creada con lock por
+    organización
   - Numeración independiente por organización (sin colisiones entre orgs)
   - Lock por organización permite paralelismo mejorado
   - Reintentos automáticos con backoff exponencial en código TypeScript
   - Formato legible y profesional
 - ✅ **Archivos actualizados**:
-  - `supabase/migrations/20251124000001_change_invoice_number_format.sql` (nueva migración)
+  - `supabase/migrations/20251124000001_change_invoice_number_format.sql` (nueva
+    migración)
   - `apps/web/src/lib/stripe/checkout.ts`
   - `apps/web/src/lib/stripe/invoices.ts`
   - `apps/web/src/lib/dlocal/checkout.ts`
   - `apps/web/src/lib/credits/auto-recharge.ts`
   - `apps/web/src/lib/credits/packages.ts`
-- ✅ **Compatibilidad**: Función legacy mantenida para facturas existentes con formato `INV-YYYY-NNNNN`
+- ✅ **Compatibilidad**: Función legacy mantenida para facturas existentes con
+  formato `INV-YYYY-NNNNN`
 - ✅ **Estado**: Completado y listo para producción
 
 **5. Configuración de Métodos de Pago**
+
 - ✅ Opción de pago en efectivo (CASH) deshabilitada
 - ✅ Solo disponibles: CARD (Tarjeta) y BANK_TRANSFER (Transferencia Bancaria)
 - ✅ Configuración aplicada para todos los países LATAM (CL, AR, CO, MX, PE)
 - ✅ Métodos consistentes entre componente UI y función de cliente
 
 **Archivos Modificados:**
+
 - `apps/web/src/components/billing/DLocalCheckout.tsx`
 - `apps/web/src/lib/dlocal/checkout.ts`
 - `apps/web/src/lib/dlocal/client.ts`
@@ -6617,7 +7159,8 @@ El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
 
 2. **Monitoreo:**
    - 📊 Revisar logs de webhooks en producción
-   - 📊 Verificar que las URLs se construyen correctamente en diferentes entornos
+   - 📊 Verificar que las URLs se construyen correctamente en diferentes
+     entornos
    - 📊 Monitorear errores de API de dLocal Go
 
 3. **Mejoras Futuras (Opcional):**
@@ -6630,9 +7173,13 @@ El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
 
 ---
 
-**🚀 Con esta arquitectura simplificada tienes lo mejor de ambos mundos: la robustez de un sistema enterprise pero la simplicidad de un startup. Puedes enfocarte en construir features y conseguir clientes, no en mantener infraestructura.**
+**🚀 Con esta arquitectura simplificada tienes lo mejor de ambos mundos: la
+robustez de un sistema enterprise pero la simplicidad de un startup. Puedes
+enfocarte en construir features y conseguir clientes, no en mantener
+infraestructura.**
 
-**Tu ventaja competitiva está en los servicios de IA y el SEO foundation, no en complejidad técnica innecesaria.**
+**Tu ventaja competitiva está en los servicios de IA y el SEO foundation, no en
+complejidad técnica innecesaria.**
 
 **¡A ejecutar! 🎯**
 
@@ -6640,41 +7187,49 @@ El historial de pedidos ahora muestra solo **3 eventos claros y relevantes**:
 
 ## 💳 **DIRECTRICES PARA AGREGAR NUEVOS MEDIOS DE PAGO**
 
-> **📅 Última actualización:** Enero 2025  
-> **✅ Estado:** Sistema de pagos funcionando correctamente con Stripe, Transbank Webpay Plus y Transbank OneClick
+> **📅 Última actualización:** Enero 2025\
+> **✅ Estado:** Sistema de pagos funcionando correctamente con Stripe,
+> Transbank Webpay Plus y Transbank OneClick
 
 ### 🎯 **Principios Fundamentales**
 
-Estas directrices aseguran que cualquier nuevo medio de pago siga el mismo patrón probado y funcional que los medios actuales. **Aplican a TODOS los tipos de compra, no solo créditos.**
+Estas directrices aseguran que cualquier nuevo medio de pago siga el mismo
+patrón probado y funcional que los medios actuales. **Aplican a TODOS los tipos
+de compra, no solo créditos.**
 
 ### 📋 **Reglas Obligatorias**
 
 #### **1. Estado Inicial del Pago: SIEMPRE 'pending'**
 
 **❌ INCORRECTO:**
+
 ```typescript
-status: 'authorized' // ❌ NUNCA hacer esto
-status: 'succeeded'  // ❌ NUNCA hacer esto directamente
+status: "authorized"; // ❌ NUNCA hacer esto
+status: "succeeded"; // ❌ NUNCA hacer esto directamente
 ```
 
 **✅ CORRECTO:**
+
 ```typescript
-status: 'pending' // ✅ SIEMPRE crear con este estado
+status: "pending"; // ✅ SIEMPRE crear con este estado
 ```
 
-**Razón:** El webhook o la página de success es responsable de actualizar el estado. Esto permite:
+**Razón:** El webhook o la página de success es responsable de actualizar el
+estado. Esto permite:
+
 - Verificación consistente del estado real del pago
 - Procesamiento de créditos/productos en el momento correcto
 - Manejo de errores y reintentos
 
 **Ejemplo de implementación:**
+
 ```typescript
 // apps/web/src/lib/[provider]/checkout.ts
 const { data: payment } = await supabase
-  .from('payments')
+  .from("payments")
   .insert({
     // ... otros campos
-    status: 'pending', // ✅ SIEMPRE 'pending'
+    status: "pending", // ✅ SIEMPRE 'pending'
     metadata: {
       order_id: orderId,
       order_number: order.order_number,
@@ -6687,6 +7242,7 @@ const { data: payment } = await supabase
 #### **2. Crear Factura ANTES del Pago**
 
 **Orden correcto:**
+
 1. ✅ Crear factura en BD
 2. ✅ Agregar línea de detalle (invoice_line_items)
 3. ✅ Actualizar orden con `invoice_id` y status `'pending_payment'`
@@ -6694,6 +7250,7 @@ const { data: payment } = await supabase
 5. ✅ Crear registro de pago en BD con `invoice_id`
 
 **Ejemplo:**
+
 ```typescript
 // 1. Crear factura
 const invoiceNumber = await generateInvoiceNumber(order.organization_id);
@@ -6737,6 +7294,7 @@ const { data: payment } = await supabase
 #### **3. Metadata Completo en el Pago**
 
 **Metadata obligatorio:**
+
 ```typescript
 metadata: {
   order_id: orderId,                    // ✅ ID de la orden
@@ -6754,28 +7312,34 @@ metadata: {
 }
 ```
 
-**Razón:** Permite buscar pagos por múltiples criterios y procesar correctamente según el tipo de producto.
+**Razón:** Permite buscar pagos por múltiples criterios y procesar correctamente
+según el tipo de producto.
 
 #### **4. URLs de Redirect desde Headers de Request**
 
 **❌ INCORRECTO:**
+
 ```typescript
-const baseUrl = 'http://localhost:3000'; // ❌ Hardcodeado
+const baseUrl = "http://localhost:3000"; // ❌ Hardcodeado
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL; // ⚠️ Puede no estar configurado
 ```
 
 **✅ CORRECTO:**
+
 ```typescript
 // En la API route (apps/web/src/app/api/[provider]/checkout/route.ts)
-const host = request.headers.get('host');
-const protocol = request.headers.get('x-forwarded-proto') || 'https';
-const baseUrl = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const host = request.headers.get("host");
+const protocol = request.headers.get("x-forwarded-proto") || "https";
+const baseUrl = host
+  ? `${protocol}://${host}`
+  : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 // Pasar baseUrl a la función de checkout
 const result = await createPaymentForOrder(orderId, baseUrl);
 ```
 
-**Razón:** Asegura que las URLs funcionen correctamente en producción, desarrollo local y diferentes entornos de deploy.
+**Razón:** Asegura que las URLs funcionen correctamente en producción,
+desarrollo local y diferentes entornos de deploy.
 
 #### **5. Página de Success: Verificación y Actualización Inmediata**
 
@@ -6784,35 +7348,35 @@ const result = await createPaymentForOrder(orderId, baseUrl);
 ```typescript
 // 1. Buscar pago por provider_payment_id o metadata
 const { data: payment } = await supabase
-  .from('payments')
-  .select('*, invoice:invoices(*)')
-  .eq('provider', 'nuevo_provider')
-  .eq('provider_payment_id', token)
+  .from("payments")
+  .select("*, invoice:invoices(*)")
+  .eq("provider", "nuevo_provider")
+  .eq("provider_payment_id", token)
   .maybeSingle();
 
 // 2. Si está pendiente, verificar estado con el provider
-if (payment?.status === 'pending') {
+if (payment?.status === "pending") {
   // Verificar directamente con el provider
   const providerStatus = await providerClient.verifyPayment(token);
-  
+
   // Si está autorizado/completo, actualizar inmediatamente
   if (providerStatus.isAuthorized || providerStatus.isComplete) {
     await supabase
-      .from('payments')
+      .from("payments")
       .update({
-        status: 'succeeded',
+        status: "succeeded",
         processed_at: new Date().toISOString(),
       })
-      .eq('id', payment.id);
-    
+      .eq("id", payment.id);
+
     // Actualizar factura
     await supabase
-      .from('invoices')
-      .update({ status: 'paid', paid_at: new Date().toISOString() })
-      .eq('id', payment.invoice.id);
-    
+      .from("invoices")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", payment.invoice.id);
+
     // Actualizar orden
-    await updateOrderStatus(orderId, 'paid', { paymentId: payment.id });
+    await updateOrderStatus(orderId, "paid", { paymentId: payment.id });
   }
 }
 ```
@@ -6826,114 +7390,124 @@ if (payment?.status === 'pending') {
 ```typescript
 export async function handleProviderWebhook(event: ProviderWebhookEvent) {
   const supabase = createServiceRoleClient(); // ✅ Usar service role
-  
+
   // 1. Buscar pago
   const { data: payment } = await supabase
-    .from('payments')
-    .select('*, invoice:invoices(*)')
-    .eq('provider_payment_id', event.paymentId)
-    .eq('provider', 'nuevo_provider')
+    .from("payments")
+    .select("*, invoice:invoices(*)")
+    .eq("provider_payment_id", event.paymentId)
+    .eq("provider", "nuevo_provider")
     .single();
-  
+
   if (!payment) {
     // Buscar por order_id si no se encuentra por payment_id
     const { data: tempPayment } = await supabase
-      .from('payments')
-      .select('*, invoice:invoices(*)')
-      .eq('metadata->>order_id', event.metadata.order_id)
-      .eq('provider', 'nuevo_provider')
+      .from("payments")
+      .select("*, invoice:invoices(*)")
+      .eq("metadata->>order_id", event.metadata.order_id)
+      .eq("provider", "nuevo_provider")
       .maybeSingle();
-    
+
     payment = tempPayment;
   }
-  
+
   // 2. Verificar estado del pago con el provider
-  const isSuccess = event.status === 'paid' || event.status === 'succeeded';
-  
+  const isSuccess = event.status === "paid" || event.status === "succeeded";
+
   if (!isSuccess) {
     // Actualizar a failed
     await supabase
-      .from('payments')
-      .update({ status: 'failed', failure_reason: event.error })
-      .eq('id', payment.id);
+      .from("payments")
+      .update({ status: "failed", failure_reason: event.error })
+      .eq("id", payment.id);
     return;
   }
-  
+
   // 3. Actualizar pago a succeeded
   await supabase
-    .from('payments')
+    .from("payments")
     .update({
-      status: 'succeeded',
+      status: "succeeded",
       processed_at: new Date().toISOString(),
     })
-    .eq('id', payment.id);
-  
+    .eq("id", payment.id);
+
   // 4. Actualizar factura
   if (payment.invoice) {
     await supabase
-      .from('invoices')
-      .update({ status: 'paid', paid_at: new Date().toISOString() })
-      .eq('id', payment.invoice.id);
+      .from("invoices")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", payment.invoice.id);
   }
-  
+
   // 5. Actualizar orden
   if (payment.metadata?.order_id) {
-    await updateOrderStatus(payment.metadata.order_id, 'paid', {
+    await updateOrderStatus(payment.metadata.order_id, "paid", {
       paymentId: payment.id,
     });
   }
-  
+
   // 6. Procesar producto según tipo (NO solo créditos)
-  if (payment.metadata?.type === 'credit_purchase') {
+  if (payment.metadata?.type === "credit_purchase") {
     // Agregar créditos
     await addCredits(
       payment.invoice.organization_id,
       parseFloat(payment.metadata.credits_amount),
-      'credit_purchase',
-      { payment_id: payment.id, invoice_id: payment.invoice.id }
+      "credit_purchase",
+      { payment_id: payment.id, invoice_id: payment.invoice.id },
     );
-  } else if (payment.metadata?.product_type === 'service') {
+  } else if (payment.metadata?.product_type === "service") {
     // Activar servicio, enviar email, etc.
-    await activateService(payment.metadata.product_id, payment.invoice.organization_id);
-  } else if (payment.metadata?.product_type === 'subscription') {
+    await activateService(
+      payment.metadata.product_id,
+      payment.invoice.organization_id,
+    );
+  } else if (payment.metadata?.product_type === "subscription") {
     // Activar suscripción
-    await activateSubscription(payment.metadata.product_id, payment.invoice.organization_id);
+    await activateSubscription(
+      payment.metadata.product_id,
+      payment.invoice.organization_id,
+    );
   }
   // ... otros tipos de productos
-  
+
   // 7. Enviar notificaciones
   await notifyPaymentSucceeded(
     payment.invoice.organization_id,
     payment.amount,
     payment.currency,
-    payment.invoice.id
+    payment.invoice.id,
   );
 }
 ```
 
-**Razón:** El webhook es la fuente de verdad. Debe manejar todos los tipos de productos, no solo créditos.
+**Razón:** El webhook es la fuente de verdad. Debe manejar todos los tipos de
+productos, no solo créditos.
 
 #### **7. Actualización de Orden: Estados Correctos**
 
 **Estados de orden:**
+
 - `'pending'` → Orden creada, esperando pago
 - `'pending_payment'` → Pago iniciado, factura creada
 - `'paid'` → Pago confirmado (webhook o success page)
-- `'completed'` → Producto entregado (créditos agregados, servicio activado, etc.)
+- `'completed'` → Producto entregado (créditos agregados, servicio activado,
+  etc.)
 
 **Ejemplo:**
+
 ```typescript
 // Al crear pago
-await updateOrderStatus(orderId, 'pending_payment', { 
+await updateOrderStatus(orderId, "pending_payment", {
   invoiceId: invoice.id,
-  paymentId: payment.id 
+  paymentId: payment.id,
 });
 
 // Al confirmar pago (webhook o success page)
-await updateOrderStatus(orderId, 'paid', { paymentId: payment.id });
+await updateOrderStatus(orderId, "paid", { paymentId: payment.id });
 
 // Al entregar producto (en webhook después de agregar créditos/activar servicio)
-await updateOrderStatus(orderId, 'completed');
+await updateOrderStatus(orderId, "completed");
 ```
 
 ### 📁 **Estructura de Archivos Requerida**
@@ -6969,7 +7543,8 @@ Al agregar un nuevo medio de pago, verificar:
 - [ ] ✅ Metadata completo incluye `order_id`, `order_number`, `product_type`
 - [ ] ✅ URLs de redirect se construyen desde headers de request
 - [ ] ✅ Página success verifica estado y actualiza si está autorizado
-- [ ] ✅ Webhook busca pago por `provider_payment_id` y por `order_id` (fallback)
+- [ ] ✅ Webhook busca pago por `provider_payment_id` y por `order_id`
+      (fallback)
 - [ ] ✅ Webhook actualiza pago, factura y orden correctamente
 - [ ] ✅ Webhook procesa TODOS los tipos de productos (no solo créditos)
 - [ ] ✅ Webhook envía notificaciones de éxito/fallo
@@ -6979,11 +7554,15 @@ Al agregar un nuevo medio de pago, verificar:
 ### 🔍 **Ejemplos de Referencia**
 
 **Implementaciones correctas actuales:**
+
 - **Stripe**: `apps/web/src/lib/stripe/checkout.ts` y `webhooks.ts`
-- **Transbank Webpay Plus**: `apps/web/src/lib/transbank/checkout.ts` (función `createTransbankPaymentForOrder`)
-- **Transbank OneClick**: `apps/web/src/lib/transbank/checkout.ts` (función `createOneclickPaymentForOrder`)
+- **Transbank Webpay Plus**: `apps/web/src/lib/transbank/checkout.ts` (función
+  `createTransbankPaymentForOrder`)
+- **Transbank OneClick**: `apps/web/src/lib/transbank/checkout.ts` (función
+  `createOneclickPaymentForOrder`)
 
 **Página success de referencia:**
+
 - `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx`
 
 ### ⚠️ **Errores Comunes a Evitar**
@@ -7017,29 +7596,38 @@ Al agregar un nuevo medio de pago, verificar:
 
 ---
 
-**✅ Con estas directrices, cualquier nuevo medio de pago seguirá el mismo patrón probado y funcionará correctamente para TODOS los tipos de compra.**
+**✅ Con estas directrices, cualquier nuevo medio de pago seguirá el mismo
+patrón probado y funcionará correctamente para TODOS los tipos de compra.**
 
 ---
 
 ## ✅ **SISTEMA DE FACTURACIÓN ELECTRÓNICA INDEPENDIENTE - COMPLETADO** (Diciembre 2025)
 
-> **📅 Completado:** Diciembre 2025  
-> **🎯 Objetivo:** Sistema de facturación API-first independiente con integración Haulmer y Stripe  
+> **📅 Completado:** Diciembre 2025\
+> **🎯 Objetivo:** Sistema de facturación API-first independiente con
+> integración Haulmer y Stripe\
 > **📄 Documentación:** Ver `docs/INVOICING-SYSTEM.md` para detalles completos
 
 ### ✅ **Resumen de Implementación**
 
-Se implementó un sistema de facturación completamente independiente en el schema `invoicing` que reemplaza el sistema anterior basado en `billing.invoices`. Este nuevo sistema:
+Se implementó un sistema de facturación completamente independiente en el schema
+`invoicing` que reemplaza el sistema anterior basado en `billing.invoices`. Este
+nuevo sistema:
 
-- ✅ **API-first**: Endpoints RESTful para crear y gestionar documentos desde cualquier aplicación
-- ✅ **Multi-proveedor**: Integración completa con Haulmer (Chile) y Stripe (Internacional)
+- ✅ **API-first**: Endpoints RESTful para crear y gestionar documentos desde
+  cualquier aplicación
+- ✅ **Multi-proveedor**: Integración completa con Haulmer (Chile) y Stripe
+  (Internacional)
 - ✅ **Multi-tenant**: Aislamiento completo por `organization_id` con RLS
-- ✅ **Almacenamiento**: PDFs y XMLs guardados automáticamente en Supabase Storage
-- ✅ **Autenticación flexible**: Supabase Auth (usuarios internos) y API Keys (sistemas externos)
+- ✅ **Almacenamiento**: PDFs y XMLs guardados automáticamente en Supabase
+  Storage
+- ✅ **Autenticación flexible**: Supabase Auth (usuarios internos) y API Keys
+  (sistemas externos)
 
 ### ✅ **Schema `invoicing` Implementado**
 
 **Tablas principales:**
+
 - `invoicing.customers` - Receptores de documentos
 - `invoicing.documents` - Documentos emitidos (facturas, boletas, invoices)
 - `invoicing.document_items` - Líneas de detalle
@@ -7047,6 +7635,7 @@ Se implementó un sistema de facturación completamente independiente en el sche
 - `invoicing.emission_config` - Configuración por organización (futuro)
 
 **Migraciones aplicadas:**
+
 - `20251202120000_schema-invoicing-new.sql` - Schema base
 - `20251202130000_invoicing-functions.sql` - Funciones helper
 - `20251202140000_invoicing-rls.sql` - Políticas RLS
@@ -7060,6 +7649,7 @@ Se implementó un sistema de facturación completamente independiente en el sche
 ### ✅ **Integraciones Completadas**
 
 **Haulmer (Chile):**
+
 - ✅ Cliente API completo (`apps/web/src/lib/haulmer/client.ts`)
 - ✅ Emisión de facturas electrónicas (TipoDTE: 33)
 - ✅ Emisión de boletas electrónicas (TipoDTE: 39)
@@ -7068,6 +7658,7 @@ Se implementó un sistema de facturación completamente independiente en el sche
 - ✅ Datos del emisor configurados (RUT: 77028682-4)
 
 **Stripe (Internacional):**
+
 - ✅ Integración con Stripe Invoices
 - ✅ Generación automática de invoices
 - ✅ Descarga y almacenamiento de PDFs
@@ -7092,27 +7683,33 @@ Se implementó un sistema de facturación completamente independiente en el sche
 ### 📋 **Configuración para Producción**
 
 **Variables de entorno necesarias:**
+
 - `HAULMER_API_KEY` - API Key de producción de Haulmer
 - `HAULMER_ENVIRONMENT=production` - Cambiar de sandbox a production
 - `STRIPE_SECRET_KEY` - Clave de producción de Stripe
 
 **Datos del emisor:**
+
 - Configurados en `apps/web/src/lib/haulmer/client.ts` (líneas 24-33)
 - Pueden sobrescribirse con variables de entorno (`HAULMER_EMISOR_*`)
 
 **Bucket Storage:**
+
 - Bucket `invoices` debe existir en Supabase producción
 - Políticas RLS configuradas para lectura pública
 
-Ver `docs/INVOICING-SYSTEM.md` para documentación completa y checklist pre-producción.
+Ver `docs/INVOICING-SYSTEM.md` para documentación completa y checklist
+pre-producción.
 
 ---
 
 ## 📋 **PRÓXIMO MILESTONE: Integración de Facturación Electrónica** (OBSOLETO - YA COMPLETADO)
 
-> **📅 Planificado:** Enero 2025  
-> **🎯 Objetivo:** Establecer sistema de facturación electrónica automática según proveedor de pago  
-> **⚠️ NOTA:** Este milestone fue completado en Diciembre 2025 con el nuevo sistema independiente. Ver sección anterior.
+> **📅 Planificado:** Enero 2025\
+> **🎯 Objetivo:** Establecer sistema de facturación electrónica automática
+> según proveedor de pago\
+> **⚠️ NOTA:** Este milestone fue completado en Diciembre 2025 con el nuevo
+> sistema independiente. Ver sección anterior.
 
 ### 🎯 **Requisitos del Sistema**
 
@@ -7125,7 +7722,8 @@ Ver `docs/INVOICING-SYSTEM.md` para documentación completa y checklist pre-prod
    - Stripe maneja toda la facturación electrónica
    - Disponible para todos los usuarios (B2C y B2B)
 
-2. **Pago con Transbank** → Factura electrónica generada automáticamente por Haulmer
+2. **Pago con Transbank** → Factura electrónica generada automáticamente por
+   Haulmer
    - No generamos facturas manualmente
    - Haulmer maneja toda la facturación electrónica
    - Solo disponible bajo condiciones específicas (ver restricciones)
@@ -7136,20 +7734,24 @@ Ver `docs/INVOICING-SYSTEM.md` para documentación completa y checklist pre-prod
 
 1. ✅ **País:** Solo Chile (CL)
 2. ✅ **Tipo de Usuario:** Solo usuarios B2B (organizaciones empresariales)
-3. ✅ **Moneda Configurada:** La organización debe tener CLP (Peso Chileno) como moneda en su configuración
+3. ✅ **Moneda Configurada:** La organización debe tener CLP (Peso Chileno) como
+   moneda en su configuración
 4. ✅ **Resto de casos:** Todos los demás usuarios deben usar Stripe
 
 **Lógica de Disponibilidad:**
+
 - Si usuario es B2C → Solo Stripe disponible
 - Si usuario es B2B pero no tiene CLP configurado → Solo Stripe disponible
 - Si usuario es B2B con CLP pero no es de Chile → Solo Stripe disponible
-- Si usuario es B2B, tiene CLP configurado y es de Chile → Transbank disponible + Stripe disponible
+- Si usuario es B2B, tiene CLP configurado y es de Chile → Transbank
+  disponible + Stripe disponible
 
 ### 📋 **Tareas de Implementación**
 
 #### **1. Extender Schema de Facturas**
 
 **Agregar campos a tabla `invoices` para tracking de facturas externas:**
+
 ```sql
 ALTER TABLE invoices ADD COLUMN external_provider VARCHAR(50);
 -- Valores: 'stripe', 'haulmer', NULL
@@ -7165,6 +7767,7 @@ ALTER TABLE invoices ADD COLUMN external_status VARCHAR(50);
 ```
 
 **Agregar campo de moneda a tabla `organizations` (si no existe):**
+
 ```sql
 ALTER TABLE organizations ADD COLUMN currency VARCHAR(3) DEFAULT 'USD';
 -- Moneda preferida de la organización: 'USD', 'CLP', 'ARS', 'COP', 'MXN', 'PEN'
@@ -7174,6 +7777,7 @@ ALTER TABLE organizations ADD COLUMN currency VARCHAR(3) DEFAULT 'USD';
 #### **2. Integración con Haulmer**
 
 **Crear módulo de integración:**
+
 ```
 apps/web/src/lib/
 └── haulmer/
@@ -7183,6 +7787,7 @@ apps/web/src/lib/
 ```
 
 **Funcionalidades requeridas:**
+
 - Autenticación con API de Haulmer
 - Crear factura electrónica en Haulmer
 - Obtener estado de factura
@@ -7190,6 +7795,7 @@ apps/web/src/lib/
 - Manejo de errores y reintentos
 
 **Variables de entorno necesarias:**
+
 ```env
 HAULMER_API_URL=https://api.haulmer.com
 HAULMER_API_KEY=tu_api_key
@@ -7204,26 +7810,28 @@ HAULMER_ENVIRONMENT=production|sandbox
 
 ```typescript
 // apps/web/src/lib/checkout/transbank-availability.ts
-export async function isTransbankAvailable(organizationId: string): Promise<boolean> {
+export async function isTransbankAvailable(
+  organizationId: string,
+): Promise<boolean> {
   // Obtener datos de la organización
   const { data: org } = await supabase
-    .from('organizations')
-    .select('country, currency, organization_type')
-    .eq('id', organizationId)
+    .from("organizations")
+    .select("country, currency, organization_type")
+    .eq("id", organizationId)
     .single();
-  
+
   if (!org) return false;
-  
+
   // Verificar todas las condiciones:
   // 1. País debe ser Chile
-  if (org.country !== 'CL') return false;
-  
+  if (org.country !== "CL") return false;
+
   // 2. Debe ser organización B2B (no personal)
-  if (org.organization_type !== 'business') return false;
-  
+  if (org.organization_type !== "business") return false;
+
   // 3. Moneda debe ser CLP
-  if (org.currency !== 'CLP') return false;
-  
+  if (org.currency !== "CLP") return false;
+
   return true;
 }
 ```
@@ -7234,82 +7842,101 @@ export async function isTransbankAvailable(organizationId: string): Promise<bool
 // apps/web/src/lib/checkout/core.ts
 export async function getAvailablePaymentMethods(organizationId: string) {
   const transbankAvailable = await isTransbankAvailable(organizationId);
-  
-  const methods = ['stripe']; // Stripe siempre disponible
-  
+
+  const methods = ["stripe"]; // Stripe siempre disponible
+
   if (transbankAvailable) {
-    methods.push('transbank_webpay_plus', 'transbank_oneclick');
+    methods.push("transbank_webpay_plus", "transbank_oneclick");
   }
-  
+
   return methods;
 }
 ```
 
 #### **4. Sincronización de Facturas Generadas por Proveedores**
 
-**✅ IMPORTANTE:** Los proveedores generan las facturas automáticamente. Nuestro sistema solo sincroniza la información.
+**✅ IMPORTANTE:** Los proveedores generan las facturas automáticamente. Nuestro
+sistema solo sincroniza la información.
 
 **Para Stripe - Obtener factura generada automáticamente:**
+
 ```typescript
 // apps/web/src/lib/stripe/invoices.ts
-export async function syncStripeInvoice(paymentIntentId: string, invoiceId: string) {
+export async function syncStripeInvoice(
+  paymentIntentId: string,
+  invoiceId: string,
+) {
   // Stripe genera facturas automáticamente al procesar el pago
   // Obtener el invoice asociado al payment intent
   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-  
+
   if (paymentIntent.invoice) {
-    const stripeInvoice = await stripe.invoices.retrieve(paymentIntent.invoice as string);
-    
+    const stripeInvoice = await stripe.invoices.retrieve(
+      paymentIntent.invoice as string,
+    );
+
     // Sincronizar información en nuestra BD
     await supabase
-      .from('invoices')
+      .from("invoices")
       .update({
-        external_provider: 'stripe',
+        external_provider: "stripe",
         external_document_id: stripeInvoice.id,
         external_pdf_url: stripeInvoice.invoice_pdf,
         external_status: stripeInvoice.status,
       })
-      .eq('id', invoiceId);
+      .eq("id", invoiceId);
   }
 }
 ```
 
 **Para Haulmer - Obtener factura generada automáticamente:**
+
 ```typescript
 // apps/web/src/lib/haulmer/invoices.ts
-export async function syncHaulmerInvoice(transactionToken: string, invoiceId: string) {
+export async function syncHaulmerInvoice(
+  transactionToken: string,
+  invoiceId: string,
+) {
   // Haulmer genera facturas automáticamente al procesar el pago con Transbank
   // Obtener datos de la transacción desde Transbank
-  const transbankResponse = await transbank.getTransactionResult(transactionToken);
-  
+  const transbankResponse = await transbank.getTransactionResult(
+    transactionToken,
+  );
+
   // Obtener factura generada por Haulmer usando el token de transacción
-  const haulmerInvoice = await haulmerClient.getInvoiceByTransaction(transactionToken);
-  
+  const haulmerInvoice = await haulmerClient.getInvoiceByTransaction(
+    transactionToken,
+  );
+
   // Sincronizar información en nuestra BD
   await supabase
-    .from('invoices')
+    .from("invoices")
     .update({
-      external_provider: 'haulmer',
+      external_provider: "haulmer",
       external_document_id: haulmerInvoice.folio,
       external_pdf_url: haulmerInvoice.pdf_url,
       external_xml_url: haulmerInvoice.xml_url,
       external_status: haulmerInvoice.estado,
     })
-    .eq('id', invoiceId);
+    .eq("id", invoiceId);
 }
 ```
 
 #### **5. Procesamiento en Webhooks - Sincronización de Facturas**
 
-**Actualizar webhooks para sincronizar facturas generadas automáticamente por los proveedores:**
+**Actualizar webhooks para sincronizar facturas generadas automáticamente por
+los proveedores:**
 
 ```typescript
 // apps/web/src/lib/transbank/webhooks.ts
-export async function handleTransbankWebhook(token: string, type: 'webpay_plus' | 'oneclick') {
+export async function handleTransbankWebhook(
+  token: string,
+  type: "webpay_plus" | "oneclick",
+) {
   // ... código existente de procesamiento de pago ...
-  
+
   // Después de actualizar pago a succeeded:
-  if (payment.invoice && payment.status === 'succeeded') {
+  if (payment.invoice && payment.status === "succeeded") {
     // Transbank procesa el pago y Haulmer genera la factura automáticamente
     // Sincronizar información de la factura generada por Haulmer
     await syncHaulmerInvoice(token, payment.invoice.id);
@@ -7319,11 +7946,13 @@ export async function handleTransbankWebhook(token: string, type: 'webpay_plus' 
 
 ```typescript
 // apps/web/src/lib/stripe/webhooks.ts
-export async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+export async function handlePaymentIntentSucceeded(
+  paymentIntent: Stripe.PaymentIntent,
+) {
   // ... código existente ...
-  
+
   // Después de actualizar pago:
-  if (payment.invoice && paymentIntent.status === 'succeeded') {
+  if (payment.invoice && paymentIntent.status === "succeeded") {
     // Stripe genera facturas automáticamente al procesar el pago
     // Sincronizar información de la factura generada por Stripe
     await syncStripeInvoice(paymentIntent.id, payment.invoice.id);
@@ -7348,29 +7977,35 @@ useEffect(() => {
 }, [organizationId]);
 
 // En el formulario, mostrar solo métodos disponibles:
-{availableMethods.includes('stripe') && (
-  <PaymentMethodOption 
-    value="stripe" 
-    label="Tarjeta de Crédito/Débito (Stripe)"
-    description="Pago seguro con Stripe"
-  />
-)}
+{
+  availableMethods.includes("stripe") && (
+    <PaymentMethodOption
+      value="stripe"
+      label="Tarjeta de Crédito/Débito (Stripe)"
+      description="Pago seguro con Stripe"
+    />
+  );
+}
 
-{availableMethods.includes('transbank_webpay_plus') && (
-  <PaymentMethodOption 
-    value="transbank_webpay_plus" 
-    label="Webpay Plus (Transbank)"
-    description="Solo disponible para empresas chilenas con CLP"
-  />
-)}
+{
+  availableMethods.includes("transbank_webpay_plus") && (
+    <PaymentMethodOption
+      value="transbank_webpay_plus"
+      label="Webpay Plus (Transbank)"
+      description="Solo disponible para empresas chilenas con CLP"
+    />
+  );
+}
 
-{availableMethods.includes('transbank_oneclick') && (
-  <PaymentMethodOption 
-    value="transbank_oneclick" 
-    label="OneClick (Transbank)"
-    description="Pago rápido con tarjeta guardada"
-  />
-)}
+{
+  availableMethods.includes("transbank_oneclick") && (
+    <PaymentMethodOption
+      value="transbank_oneclick"
+      label="OneClick (Transbank)"
+      description="Pago rápido con tarjeta guardada"
+    />
+  );
+}
 ```
 
 #### **7. Visualización de Documentos**
@@ -7380,84 +8015,132 @@ useEffect(() => {
 ```typescript
 // apps/web/src/app/(dashboard)/billing/invoices/[id]/page.tsx
 // Mostrar botones de descarga según external_provider:
-{invoice.external_provider === 'stripe' && invoice.external_pdf_url && (
-  <Button asChild>
-    <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer">
-      Descargar PDF (Stripe)
-    </a>
-  </Button>
-)}
+{
+  invoice.external_provider === "stripe" && invoice.external_pdf_url && (
+    <Button asChild>
+      <a
+        href={invoice.external_pdf_url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Descargar PDF (Stripe)
+      </a>
+    </Button>
+  );
+}
 
-{invoice.external_provider === 'haulmer' && (
-  <>
-    {invoice.external_pdf_url && (
-      <Button asChild>
-        <a href={invoice.external_pdf_url} target="_blank" rel="noopener noreferrer">
-          Descargar PDF (Haulmer)
-        </a>
-      </Button>
-    )}
-    {invoice.external_xml_url && (
-      <Button asChild variant="outline">
-        <a href={invoice.external_xml_url} target="_blank" rel="noopener noreferrer">
-          Descargar XML (Haulmer)
-        </a>
-      </Button>
-    )}
-  </>
-)}
+{
+  invoice.external_provider === "haulmer" && (
+    <>
+      {invoice.external_pdf_url && (
+        <Button asChild>
+          <a
+            href={invoice.external_pdf_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Descargar PDF (Haulmer)
+          </a>
+        </Button>
+      )}
+      {invoice.external_xml_url && (
+        <Button asChild variant="outline">
+          <a
+            href={invoice.external_xml_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Descargar XML (Haulmer)
+          </a>
+        </Button>
+      )}
+    </>
+  );
+}
 ```
 
 ### ✅ **Checklist de Implementación**
 
-- [ ] ✅ Migración SQL: Agregar campos `external_provider`, `external_document_id`, `external_pdf_url`, `external_xml_url`, `external_status` a tabla `invoices`
-- [ ] ✅ Migración SQL: Agregar campo `currency` a tabla `organizations` (si no existe)
-- [ ] ✅ Lógica de disponibilidad: Función `isTransbankAvailable()` que verifica país, tipo B2B y moneda CLP
-- [ ] ✅ Integración Haulmer: Crear cliente API y función `syncHaulmerInvoice()` para sincronizar facturas generadas automáticamente
-- [ ] ✅ Integración Stripe: Función `syncStripeInvoice()` para sincronizar facturas generadas automáticamente
-- [ ] ✅ Webhooks Transbank: Actualizar para sincronizar factura de Haulmer después del pago exitoso
-- [ ] ✅ Webhooks Stripe: Actualizar para sincronizar factura de Stripe después del pago exitoso
-- [ ] ✅ UI Checkout: Filtrar métodos de pago disponibles según restricciones (mostrar Transbank solo si aplica)
-- [ ] ✅ UI Configuración: Permitir seleccionar moneda (CLP) en configuración de organización B2B
+- [ ] ✅ Migración SQL: Agregar campos `external_provider`,
+      `external_document_id`, `external_pdf_url`, `external_xml_url`,
+      `external_status` a tabla `invoices`
+- [ ] ✅ Migración SQL: Agregar campo `currency` a tabla `organizations` (si no
+      existe)
+- [ ] ✅ Lógica de disponibilidad: Función `isTransbankAvailable()` que verifica
+      país, tipo B2B y moneda CLP
+- [ ] ✅ Integración Haulmer: Crear cliente API y función `syncHaulmerInvoice()`
+      para sincronizar facturas generadas automáticamente
+- [ ] ✅ Integración Stripe: Función `syncStripeInvoice()` para sincronizar
+      facturas generadas automáticamente
+- [ ] ✅ Webhooks Transbank: Actualizar para sincronizar factura de Haulmer
+      después del pago exitoso
+- [ ] ✅ Webhooks Stripe: Actualizar para sincronizar factura de Stripe después
+      del pago exitoso
+- [ ] ✅ UI Checkout: Filtrar métodos de pago disponibles según restricciones
+      (mostrar Transbank solo si aplica)
+- [ ] ✅ UI Configuración: Permitir seleccionar moneda (CLP) en configuración de
+      organización B2B
 - [ ] ✅ Visualización: Página para descargar PDFs/XMLs según proveedor externo
 - [ ] ✅ Testing: Probar flujo completo con Stripe (todos los usuarios)
 - [ ] ✅ Testing: Probar flujo completo con Transbank (solo B2B Chile con CLP)
-- [ ] ✅ Testing: Verificar que usuarios no elegibles no vean Transbank como opción
+- [ ] ✅ Testing: Verificar que usuarios no elegibles no vean Transbank como
+      opción
 - [ ] ✅ Documentación: Actualizar documentación de facturación con nueva lógica
 
 ### 📚 **Referencias**
 
 - **API Haulmer**: Documentación oficial de Haulmer
-- **Stripe Invoicing**: [Stripe Billing Documentation](https://stripe.com/docs/billing/invoices)
+- **Stripe Invoicing**:
+  [Stripe Billing Documentation](https://stripe.com/docs/billing/invoices)
 - **Sistema de Facturación Actual**: `docs/features/BILLING-SYSTEM.md`
 
 ### ⚠️ **Consideraciones Importantes**
 
-1. **Facturación Automática**: Los proveedores (Stripe y Haulmer) generan las facturas automáticamente. Nuestro sistema solo sincroniza la información, no genera facturas manualmente.
+1. **Facturación Automática**: Los proveedores (Stripe y Haulmer) generan las
+   facturas automáticamente. Nuestro sistema solo sincroniza la información, no
+   genera facturas manualmente.
 
-2. **Restricciones de Transbank**: Transbank SOLO está disponible cuando se cumplen TODAS estas condiciones:
+2. **Restricciones de Transbank**: Transbank SOLO está disponible cuando se
+   cumplen TODAS estas condiciones:
    - País: Chile (CL)
    - Tipo de usuario: B2B (organización empresarial)
    - Moneda configurada: CLP (Peso Chileno)
    - Si alguna condición no se cumple, solo Stripe está disponible
 
-3. **Validación de RUT**: Haulmer requiere RUT válido de la organización para generar facturas. Asegurar que las organizaciones B2B chilenas tengan RUT completo.
+3. **Validación de RUT**: Haulmer requiere RUT válido de la organización para
+   generar facturas. Asegurar que las organizaciones B2B chilenas tengan RUT
+   completo.
 
-4. **Datos de Cliente**: Asegurar que los datos de la organización estén completos para sincronización con Haulmer (RUT, razón social, dirección, etc.)
+4. **Datos de Cliente**: Asegurar que los datos de la organización estén
+   completos para sincronización con Haulmer (RUT, razón social, dirección,
+   etc.)
 
-5. **Ambiente**: Configurar correctamente ambiente sandbox/producción de Haulmer según el entorno.
+5. **Ambiente**: Configurar correctamente ambiente sandbox/producción de Haulmer
+   según el entorno.
 
-6. **Manejo de Errores**: Implementar retry logic para sincronización de facturas si falla la obtención desde los proveedores externos.
+6. **Manejo de Errores**: Implementar retry logic para sincronización de
+   facturas si falla la obtención desde los proveedores externos.
 
-7. **Sincronización**: Mantener sincronizado estado entre nuestra BD y proveedores externos. Los webhooks deben sincronizar las facturas inmediatamente después del pago exitoso.
+7. **Sincronización**: Mantener sincronizado estado entre nuestra BD y
+   proveedores externos. Los webhooks deben sincronizar las facturas
+   inmediatamente después del pago exitoso.
 
-8. **Estado de Pagos**: ✅ **Los pagos con Stripe y Transbank ya están funcionando correctamente** - Solo falta implementar la sincronización de facturas.
+8. **Estado de Pagos**: ✅ **Los pagos con Stripe y Transbank ya están
+   funcionando correctamente** - Solo falta implementar la sincronización de
+   facturas.
 
-9. **Configuración de Moneda**: Las organizaciones B2B deben poder configurar su moneda preferida (CLP para habilitar Transbank). El campo `currency` debe estar en la tabla `organizations`.
+9. **Configuración de Moneda**: Las organizaciones B2B deben poder configurar su
+   moneda preferida (CLP para habilitar Transbank). El campo `currency` debe
+   estar en la tabla `organizations`.
 
 ---
 
-**📋 Este milestone establecerá un sistema robusto de sincronización de facturación electrónica automática. Los proveedores (Stripe y Haulmer) generan las facturas automáticamente al procesar los pagos, y nuestro sistema sincroniza la información para mantener los registros actualizados. Transbank solo está disponible para organizaciones B2B chilenas con CLP configurado, mientras que Stripe está disponible para todos los usuarios.**
+**📋 Este milestone establecerá un sistema robusto de sincronización de
+facturación electrónica automática. Los proveedores (Stripe y Haulmer) generan
+las facturas automáticamente al procesar los pagos, y nuestro sistema sincroniza
+la información para mantener los registros actualizados. Transbank solo está
+disponible para organizaciones B2B chilenas con CLP configurado, mientras que
+Stripe está disponible para todos los usuarios.**
 
 ---
 
@@ -7466,41 +8149,55 @@ useEffect(() => {
 **📅 Fecha de Implementación:** 2 Diciembre 2025
 
 ### 🎯 **Objetivo**
-Implementar sincronización automática de facturas electrónicas (Stripe/Haulmer) que se dispara cuando las órdenes pasan al estado **"completed"** (no "paid"), con restricciones de Transbank para B2B Chile CLP.
 
-**Flujo de estados:** `pending_payment` → `paid` → `completed` → **[Emitir factura externa]**
+Implementar sincronización automática de facturas electrónicas (Stripe/Haulmer)
+que se dispara cuando las órdenes pasan al estado **"completed"** (no "paid"),
+con restricciones de Transbank para B2B Chile CLP.
+
+**Flujo de estados:** `pending_payment` → `paid` → `completed` → **[Emitir
+factura externa]**
 
 ### ✅ **Implementación Completada**
 
 #### **1. Migraciones SQL**
+
 - ✅ **Migración 20251202000001**: Agregados campos a tabla `invoices`:
   - `external_provider` (stripe | haulmer)
   - `external_document_id` (ID en el proveedor)
   - `external_pdf_url` (URL del PDF)
   - `external_xml_url` (URL del XML - solo Haulmer)
   - `external_status` (estado en el proveedor)
-- ✅ **Migración 20251202000002**: Creado bucket Storage `invoices` para almacenar PDFs/XMLs con políticas RLS
+- ✅ **Migración 20251202000002**: Creado bucket Storage `invoices` para
+  almacenar PDFs/XMLs con políticas RLS
 
 #### **2. Lógica de Disponibilidad de Métodos de Pago**
+
 - ✅ **Archivo**: `apps/web/src/lib/payments/availability.ts`
 - ✅ Función `isTransbankAvailable()` - Verifica:
   - `org_type === 'business'` (B2B)
   - `country === 'CL'` (Chile)
   - `currency === 'CLP'` (determinado automáticamente por país)
-- ✅ Función `getAvailablePaymentMethods()` - Retorna métodos disponibles según organización
-- ✅ Función `isPaymentMethodAvailable()` - Verifica disponibilidad de método específico
+- ✅ Función `getAvailablePaymentMethods()` - Retorna métodos disponibles según
+  organización
+- ✅ Función `isPaymentMethodAvailable()` - Verifica disponibilidad de método
+  específico
 
 #### **3. Integración con Stripe**
+
 - ✅ **Archivo**: `apps/web/src/lib/stripe/sync.ts`
-- ✅ Función `createStripeInvoiceForOrder()` - Crea Invoice en Stripe siguiendo flujo de Make:
+- ✅ Función `createStripeInvoiceForOrder()` - Crea Invoice en Stripe siguiendo
+  flujo de Make:
   1. Crear Invoice (`POST /v1/invoices`)
   2. Agregar Invoice Item (`createInvoiceItem`)
-  3. Marcar como pagado (`POST /v1/invoices/{id}/pay` con `paid_out_of_band: true`)
+  3. Marcar como pagado (`POST /v1/invoices/{id}/pay` con
+     `paid_out_of_band: true`)
   4. Enviar Invoice (`POST /v1/invoices/{id}/send`)
-- ✅ Función `syncStripeInvoice()` - Crea invoice cuando orden llega a "completed"
+- ✅ Función `syncStripeInvoice()` - Crea invoice cuando orden llega a
+  "completed"
 - ✅ Función `syncStripeInvoiceById()` - Sincroniza invoice existente por ID
 
 #### **4. Integración con Haulmer (OpenFactura)**
+
 - ✅ **Archivo**: `apps/web/src/lib/haulmer/client.ts`
 - ✅ Cliente API Haulmer con autenticación correcta (header `apikey`, no Bearer)
 - ✅ Función `emitirDTE()` - Emite Documento Tributario Electrónico
@@ -7523,18 +8220,24 @@ Implementar sincronización automática de facturas electrónicas (Stripe/Haulme
 - ✅ Guardado automático de PDF y XML en Supabase Storage (bucket `invoices`)
 
 #### **5. Orquestador de Sincronización**
+
 - ✅ **Archivo**: `apps/web/src/lib/billing/invoice-sync.ts`
-- ✅ Función `syncExternalInvoice()` - Detecta proveedor y llama función correspondiente:
+- ✅ Función `syncExternalInvoice()` - Detecta proveedor y llama función
+  correspondiente:
   - Si Stripe → `syncStripeInvoice()`
   - Si Transbank → `syncHaulmerInvoice()`
 
 #### **6. Hook de Sincronización en Estado "completed"**
+
 - ✅ **Archivo**: `apps/web/src/lib/checkout/core.ts`
-- ✅ Modificado `updateOrderStatus()` para disparar sincronización cuando orden pasa a "completed"
+- ✅ Modificado `updateOrderStatus()` para disparar sincronización cuando orden
+  pasa a "completed"
 - ✅ Importación dinámica para evitar dependencias circulares
-- ✅ Manejo de errores no bloqueante (no falla actualización de estado si sincronización falla)
+- ✅ Manejo de errores no bloqueante (no falla actualización de estado si
+  sincronización falla)
 
 #### **7. UI Actualizada**
+
 - ✅ **Checkout**: `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx`
   - Filtra métodos de pago usando `isTransbankAvailable()`
   - Transbank solo visible para B2B Chile CLP
@@ -7546,10 +8249,12 @@ Implementar sincronización automática de facturas electrónicas (Stripe/Haulme
 ### 📋 **Archivos Creados/Modificados**
 
 **Migraciones SQL:**
+
 - `supabase/migrations/20251202000001_add_external_invoice_fields.sql`
 - `supabase/migrations/20251202000002_create_invoices_storage_bucket.sql`
 
 **Librerías:**
+
 - `apps/web/src/lib/payments/availability.ts` (nuevo)
 - `apps/web/src/lib/haulmer/client.ts` (nuevo)
 - `apps/web/src/lib/haulmer/sync.ts` (nuevo)
@@ -7558,6 +8263,7 @@ Implementar sincronización automática de facturas electrónicas (Stripe/Haulme
 - `apps/web/src/lib/checkout/core.ts` (modificado)
 
 **UI:**
+
 - `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx` (modificado)
 - `apps/web/src/app/(dashboard)/billing/invoices/[id]/page.tsx` (modificado)
 
@@ -7582,16 +8288,19 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
 ### ⚠️ **Consideraciones Técnicas**
 
 1. **Emisión vs Sincronización**:
-   - **Stripe**: Crea Invoice nuevo cuando orden llega a "completed" (aunque ya se haya cobrado)
+   - **Stripe**: Crea Invoice nuevo cuando orden llega a "completed" (aunque ya
+     se haya cobrado)
    - **Haulmer**: Emite DTE (Factura/Boleta) cuando orden llega a "completed"
 
 2. **Moneda Automática**: La moneda se determina automáticamente por país:
    - Chile (CL) → CLP → Transbank habilitado
    - Otros países → USD → Solo Stripe
 
-3. **Storage**: PDFs y XMLs de Haulmer se guardan en Supabase Storage (bucket `invoices`) y se almacenan las URLs en la BD
+3. **Storage**: PDFs y XMLs de Haulmer se guardan en Supabase Storage (bucket
+   `invoices`) y se almacenan las URLs en la BD
 
-4. **Idempotencia**: Haulmer soporta Idempotency Key para evitar emisiones duplicadas
+4. **Idempotencia**: Haulmer soporta Idempotency Key para evitar emisiones
+   duplicadas
 
 5. **Rate Limits Haulmer**:
    - 3 peticiones por segundo
@@ -7601,16 +8310,19 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
 
 **🔄 TESTING COMPLETO DE FACTURACIÓN:**
 
-- [ ] **Testing Stripe**: Probar flujo completo de compra de créditos con Stripe:
+- [ ] **Testing Stripe**: Probar flujo completo de compra de créditos con
+      Stripe:
   - [ ] Crear orden
   - [ ] Pagar con Stripe
   - [ ] Verificar que orden pasa a "paid"
   - [ ] Verificar que orden pasa a "completed" (después de agregar créditos)
   - [ ] Verificar que se crea Invoice en Stripe
   - [ ] Verificar que PDF está disponible en la página de factura
-  - [ ] Verificar que campos `external_provider`, `external_document_id`, `external_pdf_url` están correctos
+  - [ ] Verificar que campos `external_provider`, `external_document_id`,
+        `external_pdf_url` están correctos
 
-- [ ] **Testing Transbank**: Probar flujo completo de compra de créditos con Transbank:
+- [ ] **Testing Transbank**: Probar flujo completo de compra de créditos con
+      Transbank:
   - [ ] Crear orden con organización B2B Chile CLP
   - [ ] Pagar con Transbank (Webpay Plus o OneClick)
   - [ ] Verificar que orden pasa a "paid"
@@ -7618,9 +8330,11 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
   - [ ] Verificar que se emite DTE en Haulmer
   - [ ] Verificar que PDF y XML están disponibles en Storage
   - [ ] Verificar que PDF y XML están disponibles en la página de factura
-  - [ ] Verificar que campos `external_provider`, `external_document_id`, `external_pdf_url`, `external_xml_url` están correctos
+  - [ ] Verificar que campos `external_provider`, `external_document_id`,
+        `external_pdf_url`, `external_xml_url` están correctos
 
-- [ ] **Testing Restricciones**: Verificar que usuarios no elegibles no ven Transbank:
+- [ ] **Testing Restricciones**: Verificar que usuarios no elegibles no ven
+      Transbank:
   - [ ] Usuario B2C no ve Transbank
   - [ ] Usuario B2B de otro país no ve Transbank
   - [ ] Usuario B2B Chile sin CLP no ve Transbank (si aplica)
@@ -7645,21 +8359,30 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
 ### ✅ **Corrección Página de Reembolsos (`/admin/refunds`)**
 
 **Problema identificado:**
-- Error en consola: "A <Select.Item /> must have a value prop that is not an empty string"
-- Los componentes Select de filtros (Estado, Proveedor, Destino) usaban `value=""` que no está permitido por Radix UI Select
+
+- Error en consola: "A <Select.Item /> must have a value prop that is not an
+  empty string"
+- Los componentes Select de filtros (Estado, Proveedor, Destino) usaban
+  `value=""` que no está permitido por Radix UI Select
 - Esto causaba errores en la consola y potenciales problemas de renderizado
 
 **Solución implementada:**
-- ✅ Cambiado valores vacíos (`value=""`) por `value="all"` en todos los SelectItem de filtros
+
+- ✅ Cambiado valores vacíos (`value=""`) por `value="all"` en todos los
+  SelectItem de filtros
 - ✅ Actualizada lógica de filtrado para tratar `"all"` como "sin filtro"
 - ✅ Actualizado estado inicial de filtros para usar `"all"` en lugar de `""`
-- ✅ Actualizada función `clearFilters()` para establecer `"all"` en lugar de `""`
-- ✅ Actualizada función `hasActiveFilters` para verificar que el valor no sea `"all"`
+- ✅ Actualizada función `clearFilters()` para establecer `"all"` en lugar de
+  `""`
+- ✅ Actualizada función `hasActiveFilters` para verificar que el valor no sea
+  `"all"`
 
 **Archivos modificados:**
+
 - `apps/web/src/app/(admin)/admin/refunds/page.tsx`
 
 **Resultado:**
+
 - ✅ Error crítico eliminado de la consola
 - ✅ Filtros funcionando correctamente
 - ✅ Página carga sin errores
@@ -7668,32 +8391,45 @@ HAULMER_ENVIRONMENT=production  # o 'sandbox' para pruebas
 ### ✅ **Optimización Componente PendingOrdersBadge**
 
 **Problema identificado:**
-- El componente `PendingOrdersBadge` estaba haciendo peticiones repetidas a `/api/checkout/pending` con código 401 cuando el usuario estaba en páginas de admin
+
+- El componente `PendingOrdersBadge` estaba haciendo peticiones repetidas a
+  `/api/checkout/pending` con código 401 cuando el usuario estaba en páginas de
+  admin
 - Esto causaba:
   - Sobrecarga del sistema con cientos de peticiones innecesarias
   - Logs repetitivos en el terminal
-  - Peticiones que fallaban sistemáticamente (401) porque el componente no debería ejecutarse en admin
+  - Peticiones que fallaban sistemáticamente (401) porque el componente no
+    debería ejecutarse en admin
 
 **Solución implementada:**
-- ✅ Retorno temprano: El componente retorna `null` cuando detecta que está en una página de admin (`pathname?.startsWith('/admin')`)
+
+- ✅ Retorno temprano: El componente retorna `null` cuando detecta que está en
+  una página de admin (`pathname?.startsWith('/admin')`)
 - ✅ Limpieza de recursos: Cuando detecta que está en admin, limpia:
   - Intervalos de polling (`clearInterval`)
   - Canales de Realtime (`supabase.removeChannel`)
   - Estado del componente (`setOrders([])`)
-- ✅ Verificaciones adicionales: Cada ejecución del intervalo verifica nuevamente si está en admin antes de hacer peticiones
-- ✅ Eliminación de logs innecesarios: Removidos logs de consola que generaban ruido
+- ✅ Verificaciones adicionales: Cada ejecución del intervalo verifica
+  nuevamente si está en admin antes de hacer peticiones
+- ✅ Eliminación de logs innecesarios: Removidos logs de consola que generaban
+  ruido
 
 **Archivos modificados:**
+
 - `apps/web/src/components/checkout/PendingOrdersBadge.tsx`
 
 **Resultado:**
-- ✅ No más peticiones a `/api/checkout/pending` cuando el usuario está en páginas de admin
+
+- ✅ No más peticiones a `/api/checkout/pending` cuando el usuario está en
+  páginas de admin
 - ✅ Reducción significativa de carga en el sistema
 - ✅ Logs más limpios en el terminal
 - ✅ Mejor rendimiento general de la aplicación
 
 **Impacto:**
+
 - **Antes**: Cientos de peticiones fallidas por minuto cuando navegando en admin
-- **Después**: Cero peticiones cuando en admin, solo cuando es necesario en dashboard
+- **Después**: Cero peticiones cuando en admin, solo cuando es necesario en
+  dashboard
 
 ---
