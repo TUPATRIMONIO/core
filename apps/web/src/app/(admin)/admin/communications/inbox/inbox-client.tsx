@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RefreshCw, Mail, Clock, User, ArrowRight, Filter, ChevronDown, ChevronUp, Search, X, Trash2 } from 'lucide-react'
+import { RefreshCw, Mail, Clock, User, ArrowRight, Filter, ChevronDown, ChevronUp, Search, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Switch } from '@/components/ui/switch'
@@ -51,6 +51,15 @@ export function InboxClient() {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
   const [cleaningDuplicates, setCleaningDuplicates] = useState(false)
   
+  // Paginación
+  const [page, setPage] = useState(1)
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 50,
+    totalPages: 1
+  })
+  
   // Filtros avanzados
   const [dateFrom, setDateFrom] = useState<string>('')
   const [dateTo, setDateTo] = useState<string>('')
@@ -59,10 +68,13 @@ export function InboxClient() {
   const [subject, setSubject] = useState<string>('')
   const [bodyText, setBodyText] = useState<string>('')
 
-  const fetchTickets = async () => {
+  const fetchTickets = async (pageNum = page) => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
+      params.append('page', pageNum.toString())
+      params.append('limit', '50')
+      
       if (statusFilter !== 'all') params.append('status', statusFilter)
       if (priorityFilter !== 'all') params.append('priority', priorityFilter)
       if (unreadOnly) params.append('unread_only', 'true')
@@ -80,6 +92,9 @@ export function InboxClient() {
 
       if (response.ok) {
         setTickets(data.tickets || [])
+        if (data.meta) {
+          setMeta(data.meta)
+        }
       } else {
         console.error('Error obteniendo tickets:', data.error)
       }
@@ -97,6 +112,7 @@ export function InboxClient() {
     setToEmail('')
     setSubject('')
     setBodyText('')
+    setPage(1)
   }
   
   const hasActiveFilters = dateFrom || dateTo || fromEmail || toEmail || subject || bodyText
@@ -157,7 +173,8 @@ export function InboxClient() {
   // Ejecutar filtros cuando cambien los filtros avanzados
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      fetchTickets()
+      setPage(1)
+      fetchTickets(1)
     }, 500) // Debounce de 500ms
 
     return () => clearTimeout(timeoutId)
@@ -180,10 +197,15 @@ export function InboxClient() {
   useEffect(() => {
     syncEmails(true)
   }, [])
-
-  useEffect(() => {
-    fetchTickets()
-  }, [statusFilter, priorityFilter, unreadOnly, dateFrom, dateTo, fromEmail, toEmail, subject, bodyText])
+  
+  // Handlers for pagination
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.totalPages) {
+      setPage(newPage)
+      fetchTickets(newPage)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -425,58 +447,91 @@ export function InboxClient() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
-          {tickets.map((ticket) => (
-            <Card
-              key={ticket.id}
-              className="cursor-pointer hover:bg-accent transition-colors"
-              onClick={() => router.push(`/admin/communications/tickets/${ticket.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold text-sm text-muted-foreground">
-                        {ticket.ticket_number}
-                      </span>
-                      <Badge className={`${getStatusColor(ticket.status)} border`}>
-                        {ticket.status}
-                      </Badge>
-                      <Badge className={`${getPriorityColor(ticket.priority)} border`}>
-                        {ticket.priority}
-                      </Badge>
-                    </div>
-                    <h3 className="font-semibold text-lg mb-1 truncate">
-                      {ticket.subject}
-                    </h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      {ticket.contact && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            {tickets.map((ticket) => (
+              <Card
+                key={ticket.id}
+                className="cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => router.push(`/admin/communications/tickets/${ticket.id}`)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-semibold text-sm text-muted-foreground">
+                          {ticket.ticket_number}
+                        </span>
+                        <Badge className={`${getStatusColor(ticket.status)} border`}>
+                          {ticket.status}
+                        </Badge>
+                        <Badge className={`${getPriorityColor(ticket.priority)} border`}>
+                          {ticket.priority}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold text-lg mb-1 truncate">
+                        {ticket.subject}
+                      </h3>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {ticket.contact && (
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            <span className="truncate">
+                              {ticket.contact.full_name || ticket.contact.email}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          <span className="truncate">
-                            {ticket.contact.full_name || ticket.contact.email}
+                          <Clock className="h-3 w-3" />
+                          <span>
+                            {formatDistanceToNow(new Date(ticket.updated_at), {
+                              addSuffix: true,
+                              locale: es,
+                            })}
                           </span>
                         </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>
-                          {formatDistanceToNow(new Date(ticket.updated_at), {
-                            addSuffix: true,
-                            locale: es,
-                          })}
-                        </span>
                       </div>
                     </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Paginación */}
+          {meta.totalPages > 1 && (
+            <div className="flex items-center justify-between py-4">
+              <div className="text-sm text-muted-foreground">
+                Mostrando {((meta.page - 1) * meta.limit) + 1} a {Math.min(meta.page * meta.limit, meta.total)} de {meta.total} tickets
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page <= 1 || loading}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <div className="text-sm font-medium">
+                  Página {meta.page} de {meta.totalPages}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page >= meta.totalPages || loading}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   )
 }
-
