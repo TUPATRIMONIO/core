@@ -112,11 +112,7 @@ const appsMenuItems = [
     url: '/admin/blog',
     icon: BookOpen,
   },
-  {
-    title: 'Blog',
-    url: '/admin/blog',
-    icon: BookOpen,
-  },
+
 ]
 
 const communicationsMenuItems = [

@@ -55,6 +55,7 @@ interface Activity {
   } | null
 }
 
+// Update Ticket interface
 interface Ticket {
   id: string
   ticket_number: string
@@ -63,27 +64,88 @@ interface Ticket {
   status: string
   priority: string
   category: string
-  created_at: string
-  updated_at: string
-  contact: {
+  created_at: string     // Restore created_at
+  updated_at: string     // Restore updated_at
+  contact?: {
     id: string
+    full_name: string
     email: string
-    full_name: string | null
-  } | null
-  assigned_user: {
+    phone?: string
+  }
+  company?: {
     id: string
+    name: string
+    industry?: string
+    domain?: string
+  }
+  assigned_user?: {
+    id: string
+    first_name: string
+    last_name: string
     email: string
-    first_name: string | null
-    last_name: string | null
-  } | null
-  order: {
+  }
+  attachments?: {
     id: string
-    order_number: string
-    status: string
-    amount: number
-    currency: string
-  } | null
+    file_name: string
+    file_path: string
+    file_type?: string
+    file_size?: number
+    public_url?: string 
+    created_at: string
+  }[]
+  // New associations
+  ticket_organizations?: {
+    organization: {
+      id: string
+      name: string
+      industry?: string
+      slug?: string
+    }
+  }[]
+  ticket_users?: {
+    user: {
+      id: string
+      first_name?: string
+      last_name?: string
+      email?: string
+      avatar_url?: string
+    }
+  }[]
+  // Legacy associations needed until fully removed
+  ticket_companies?: {
+    company: {
+      id: string
+      name: string
+      industry: string
+    }
+  }[]
+  ticket_contacts?: {
+    contact: {
+      id: string
+      full_name: string
+      email: string
+    }
+  }[]
+  ticket_orders?: {
+    order: {
+      id: string
+      order_number: string
+      amount: number
+      currency: string
+      status: string
+      created_at: string
+    }
+  }[]
+  // Explicitly remove single 'order' if it's not used or expected
+  order?: any 
 }
+
+import { AssociationList, AssociatedItem } from '@/components/crm/tickets/AssociationList'
+import { AssociationSelector } from '@/components/crm/tickets/AssociationSelector'
+import { AttachmentList } from '@/components/crm/tickets/AttachmentList'
+import { linkEntity, unlinkEntity, AssociationType } from '@/app/actions/crm/associations'
+import { uploadAttachment, deleteAttachment } from '@/app/actions/crm/attachments'
+import { toast } from 'sonner'
 
 interface TicketDetailClientProps {
   ticket: Ticket
@@ -96,6 +158,7 @@ export function TicketDetailClient({
   emails: initialEmails,
   activities,
 }: TicketDetailClientProps) {
+
   const router = useRouter()
   const [emails, setEmails] = useState(initialEmails)
   const [replying, setReplying] = useState(false)
@@ -106,6 +169,62 @@ export function TicketDetailClient({
   const [priority, setPriority] = useState(ticket.priority)
   const [updating, setUpdating] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  
+  // Selector state
+  const [selectorOpen, setSelectorOpen] = useState(false)
+  const [selectorType, setSelectorType] = useState<AssociationType>('contact')
+  
+  // Helpers para AssociationList
+  const contactItems: AssociatedItem[] = (ticket.ticket_users || []).map((tu) => ({
+    id: tu.user.id,
+    name: `${tu.user.first_name || ''} ${tu.user.last_name || ''}`.trim() || tu.user.email || 'Sin nombre',
+    subtext: tu.user.email || '',
+    avatar: tu.user.avatar_url,
+    type: 'contact',
+    href: `/admin/users/${tu.user.id}`
+  }))
+
+  const companyItems: AssociatedItem[] = (ticket.ticket_organizations || []).map((to) => ({
+    id: to.organization.id,
+    name: to.organization.name,
+    subtext: to.organization.industry || 'Organización',
+    type: 'company',
+    href: `/admin/organizations/${to.organization.id}`
+  }))
+
+  const orderItems: AssociatedItem[] = (ticket.ticket_orders || []).map((to) => ({
+    id: to.order.id,
+    name: `Pedido #${to.order.order_number}`,
+    subtext: `${to.order.currency} ${to.order.amount} - ${to.order.status}`,
+    type: 'order',
+    href: `/admin/orders/${to.order.id}`
+  }))
+
+  const openSelector = (type: AssociationType) => {
+    setSelectorType(type)
+    setSelectorOpen(true)
+  }
+
+  const handleAddAssociation = async (entityId: string, source: string) => {
+    const res = await linkEntity(ticket.id, selectorType, entityId, source)
+    if (res.success) {
+      toast.success('Asociación creada')
+      router.refresh()
+    } else {
+      toast.error(res.error || 'Error al asociar')
+    }
+  }
+
+  const handleRemoveAssociation = async (type: AssociationType, entityId: string) => {
+    const res = await unlinkEntity(ticket.id, type, entityId)
+    if (res.success) {
+      toast.success('Asociación eliminada')
+      router.refresh()
+    } else {
+      toast.error(res.error || 'Error al eliminar asociación')
+    }
+  }
+
 
   // Auto-refresh cada 30 segundos
   useEffect(() => {
@@ -128,16 +247,40 @@ export function TicketDetailClient({
       } else {
         const data = await response.json()
         console.error('Error syncing:', data.error)
+        toast.error(`Error syncing: ${data.error}`)
       }
     } catch (error) {
       console.error('Error syncing:', error)
+      toast.error(`Error syncing: ${error}`)
     } finally {
       setSyncing(false)
     }
   }
+  
+  const handleUploadAttachment = async (formData: FormData) => {
+    const result = await uploadAttachment(ticket.id, formData)
+    if (result.success) {
+      router.refresh()
+    }
+    return result
+  }
+
+  const handleRemoveAttachment = async (id: string) => {
+    const result = await deleteAttachment(ticket.id, id)
+    if (result.success) {
+      router.refresh()
+    }
+    return result
+  }
 
   const handleReply = async () => {
-    if (!replyBody.trim() || !ticket.contact) return
+    // Usar el primer contacto disponible para responder
+    const targetEmail = ticket.contact?.email || ticket.ticket_contacts?.[0]?.contact.email;
+
+    if (!replyBody.trim() || !targetEmail) {
+        if (!targetEmail) toast.error('No hay un contacto asociado para responder.');
+        return
+    }
 
     setSending(true)
     try {
@@ -147,7 +290,7 @@ export function TicketDetailClient({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: ticket.contact.email,
+          to: targetEmail,
           subject: replySubject,
           body_html: replyBody.replace(/\n/g, '<br>'),
           body_text: replyBody,
@@ -162,12 +305,12 @@ export function TicketDetailClient({
         router.refresh()
         setReplyBody('')
         setReplying(false)
-        alert('Email enviado exitosamente')
+        toast.success('Email enviado exitosamente')
       } else {
-        alert(`Error: ${data.error}`)
+        if(data.error) toast.error(`Error: ${data.error}`)
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      toast.error(`Error: ${error.message}`)
     } finally {
       setSending(false)
     }
@@ -189,10 +332,10 @@ export function TicketDetailClient({
         router.refresh()
       } else {
         const data = await response.json()
-        alert(`Error: ${data.error}`)
+        toast.error(`Error: ${data.error}`)
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      toast.error(`Error: ${error.message}`)
     } finally {
       setUpdating(false)
     }
@@ -214,10 +357,10 @@ export function TicketDetailClient({
         router.refresh()
       } else {
         const data = await response.json()
-        alert(`Error: ${data.error}`)
+        toast.error(`Error: ${data.error}`)
       }
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      toast.error(`Error: ${error.message}`)
     } finally {
       setUpdating(false)
     }
@@ -253,6 +396,13 @@ export function TicketDetailClient({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <AssociationSelector
+        open={selectorOpen}
+        onOpenChange={setSelectorOpen}
+        type={selectorType}
+        onSelect={handleAddAssociation}
+      />
+      
       {/* Columna principal - Hilo de emails */}
       <div className="lg:col-span-2 space-y-4">
         {/* Información del ticket */}
@@ -373,7 +523,7 @@ export function TicketDetailClient({
                 <label className="text-sm font-medium mb-2 block">Para:</label>
                 <input
                   type="text"
-                  value={ticket.contact?.email || ''}
+                  value={ticket.contact?.email || ticket.ticket_contacts?.[0]?.contact.email || ''} // Mostrar el principal
                   disabled
                   className="w-full px-3 py-2 border rounded-md bg-muted"
                 />
@@ -427,53 +577,38 @@ export function TicketDetailClient({
 
       {/* Sidebar */}
       <div className="space-y-4">
-        {/* Información del contacto */}
-        {ticket.contact && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Contacto</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">
-                  {ticket.contact.full_name || ticket.contact.email}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {ticket.contact.email}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <AssociationList
+           title="Contactos"
+           items={contactItems}
+           type="contact"
+           onAdd={() => openSelector('contact')}
+           onRemove={(id) => handleRemoveAssociation('contact', id)}
+        />
 
-        {/* Pedido asociado */}
-        {ticket.order && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Pedido</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Link href={`/admin/orders/${ticket.order.id}`}>
-                <div className="flex items-center gap-2 text-blue-600 hover:underline">
-                  <Package className="h-4 w-4" />
-                  <span className="font-medium">{ticket.order.order_number}</span>
-                </div>
-              </Link>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Estado: {ticket.order.status}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Monto: {ticket.order.amount} {ticket.order.currency}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <AssociationList
+           title="Empresas"
+           items={companyItems}
+           type="company"
+           onAdd={() => openSelector('company')}
+           onRemove={(id) => handleRemoveAssociation('company', id)}
+        />
 
-        {/* Estado y prioridad */}
+        <AssociationList
+           title="Pedidos"
+           items={orderItems}
+           type="order"
+           onAdd={() => openSelector('order')}
+           onRemove={(id) => handleRemoveAssociation('order', id)}
+        />
+
+        <AttachmentList
+           items={ticket.attachments || []}
+           ticketId={ticket.id}
+           onUpload={handleUploadAttachment}
+           onRemove={handleRemoveAttachment}
+        />
+
+        {/* Estado y prioridad (Mantener esto como Cards separadas porque son controles, no listas) */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Estado</CardTitle>

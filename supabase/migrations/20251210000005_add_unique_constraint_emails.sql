@@ -86,3 +86,4 @@ BEGIN
   RAISE NOTICE '✅ Función check_email_exists creada';
 END $$;
 
+

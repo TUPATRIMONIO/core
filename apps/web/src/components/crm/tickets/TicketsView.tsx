@@ -20,6 +20,8 @@ import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import { getLatestTickets } from '@/app/actions/crm/tickets';
+
 interface Ticket {
   id: string;
   ticket_number: string;
@@ -36,15 +38,21 @@ interface TicketsViewProps {
   tickets: Ticket[];
 }
 
-export function TicketsView({ tickets }: TicketsViewProps) {
+export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [syncing, setSyncing] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
-  // Filter states initialized from URL
+  // Update local tickets when props change (e.g. navigation)
+  useEffect(() => {
+    setTickets(initialTickets);
+  }, [initialTickets]);
+
+  // Filter states
   const [dateFrom, setDateFrom] = useState(searchParams.get('date_from') || '');
   const [dateTo, setDateTo] = useState(searchParams.get('date_to') || '');
   const [fromEmail, setFromEmail] = useState(searchParams.get('from_email') || '');
@@ -54,10 +62,39 @@ export function TicketsView({ tickets }: TicketsViewProps) {
 
   const hasActiveFilters = dateFrom || dateTo || fromEmail || toEmail || subject || bodyText;
 
+  // Function to fetch latest tickets
+  const fetchLatestTickets = async () => {
+    const filters = {
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+      from_email: fromEmail || undefined,
+      to_email: toEmail || undefined,
+      subject: subject || undefined,
+      body_text: bodyText || undefined,
+      status: searchParams.get('status') || undefined,
+      priority: searchParams.get('priority') || undefined,
+    };
+
+    const result = await getLatestTickets(filters);
+    if (result.success && result.data) {
+      setTickets(result.data);
+    }
+  };
+
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchLatestTickets();
+    }, 60000); // 1 minute
+
+    return () => clearInterval(intervalId);
+  }, [dateFrom, dateTo, fromEmail, toEmail, subject, bodyText, searchParams]);
+
   // Sync logic
   const syncEmails = async (silent: boolean = false) => {
     setSyncing(true);
     try {
+      // 1. Trigger backend sync (Slow)
       const response = await fetch('/api/admin/gmail/sync', {
         method: 'POST',
       });
@@ -65,10 +102,15 @@ export function TicketsView({ tickets }: TicketsViewProps) {
 
       if (response.ok) {
         setLastSyncTime(new Date());
+        
+        // 2. Fetch latest data (Fast)
+        await fetchLatestTickets();
+
         if (!silent) {
-          alert(`Sincronización completada: ${data.message}`);
+          // toast ? or alert
+           // For now keeping alert as in original but toast is better
+           // alert(`Sincronización completada: ${data.message}`);
         }
-        router.refresh();
       } else {
         if (!silent) {
           alert(`Error sincronizando: ${data.error}`);
@@ -82,6 +124,9 @@ export function TicketsView({ tickets }: TicketsViewProps) {
       setSyncing(false);
     }
   };
+
+  // ... rest of filters and render logic ...
+
 
   // Apply filters to URL
   const applyFilters = () => {

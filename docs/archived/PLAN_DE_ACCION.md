@@ -465,6 +465,50 @@ READY:
 
 ---
 
+## 🔗 **SISTEMA CRM UNIFICADO (Core + CRM)** (10 Diciembre 2025) ✨
+
+**✅ INTEGRACIÓN COMPLETA PLATFORM ↔ CRM:**
+
+**1. Modal de Asociaciones Inteligente:**
+
+- ✅ **Unificación de Fuentes**: Búsqueda simultánea en
+  `core.users`/`organizations` y `crm.contacts`/`companies`
+- ✅ **Indicadores Visuales**: Badges automáticos (🟢 Plataforma vs 🔵 CRM)
+- ✅ **Deduplicación Automática**: Priorización inteligente de usuarios
+  registrados sobre contactos CRM
+- ✅ **Paginación y Búsqueda**: Optimizado para grandes volúmenes de datos
+- ✅ **Schema Safety**: Implementación vía RPC functions para bypass seguro de
+  restricciones de acceso
+
+**2. Estrategia de Vinculación Automática:**
+
+- ✅ **Auto-Link Triggers**:
+  - Al crear contacto CRM: Se vincula si existe el usuario en plataforma (match
+    por email)
+  - Al registrar usuario Core: Se vinculan automáticamente sus contactos
+    históricos del CRM
+  - Al crear empresa CRM: Se vincula si existe organización en plataforma (match
+    por nombre)
+- ✅ **Base de Datos Optimizada**:
+  - Nuevas columnas `linked_user_id` y `linked_organization_id`
+  - Índices para performance en búsquedas cruzadas
+  - Constraints para integridad referencial
+
+**3. Correcciones de Acceso Multi-Schema:**
+
+- ✅ Solución a errores `PGRST106` mediante `createServiceRoleClient`
+  encapsulado en RPCs
+- ✅ Permisos granulares para funciones de búsqueda y listado
+- ✅ Acceso seguro a datos de `auth.users` sin exponer información sensible
+
+**📄 ARCHIVOS CLAVE:**
+
+- Migración: `20251210000020_unified_contact_linking.sql`
+- Componentes: `AssociationSelector.tsx`, `AssociationList.tsx`
+- Actions: `associations.ts` (con lógica unificada)
+
+---
+
 ## 🎉 **ADMIN PANEL CORE - 100% FUNCIONAL** (21 Noviembre 2025) ✨
 
 **✅ SISTEMA DE ADMINISTRACIÓN COMPLETO Y PROBADO**
@@ -798,6 +842,17 @@ apps/web/src/app/(admin)/admin/
 5. ✅ Ver **emails de todos los usuarios** usando ServiceRoleClient
 6. ✅ Asignar y remover **roles** a usuarios
 7. ✅ Enviar **invitaciones** para nuevos usuarios
+
+### 🎨 **Optimización UX - Kanban CRM** (Diciembre 2025)
+
+- ✅ **Drag & Drop Fluido**: Implementación de **Optimistic UI** para movimiento
+  instantáneo
+- ✅ **Estética Refinada**:
+  - Eliminada rotación al arrastrar
+  - Sombra difuminada suave (`shadow-2xl` custom)
+  - Eliminado borde en placeholder
+- ✅ **Correcciones**: Solucionado conflicto de keys en sidebar (Blog duplicado)
+
 8. ✅ Cancelar invitaciones pendientes
 9. ✅ Ver **todas las invitaciones** del sistema (sin restricciones)
 10. ✅ Crear y gestionar **teams** dentro de organizaciones

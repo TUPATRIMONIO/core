@@ -127,3 +127,4 @@ BEGIN
   RAISE NOTICE '✅ Duplicados consolidados. Tickets restantes: %', v_count;
 END $$;
 
+

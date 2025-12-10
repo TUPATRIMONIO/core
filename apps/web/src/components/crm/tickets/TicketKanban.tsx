@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -76,8 +76,8 @@ function KanbanCard({ ticket, isOverlay = false }: { ticket: Ticket; isOverlay?:
       {...listeners}
       {...attributes}
       className={`mb-3 cursor-grab hover:shadow-md transition-shadow bg-card text-card-foreground ${
-        isDragging ? 'opacity-50 ring-2 ring-primary' : ''
-      } ${isOverlay ? 'shadow-xl rotate-2 cursor-grabbing' : ''}`}
+        isDragging ? 'opacity-50' : ''
+      } ${isOverlay ? 'shadow-[0_20px_50px_rgba(0,0,0,0.25)] cursor-grabbing' : ''}`}
     >
       <CardHeader className="p-3 pb-2">
         <div className="flex justify-between items-start">
@@ -147,13 +147,15 @@ function KanbanColumn({ column, tickets }: { column: typeof COLUMNS[0]; tickets:
   );
 }
 
-export function TicketKanban({ tickets }: TicketKanbanProps) {
+export function TicketKanban({ tickets: initialTickets }: TicketKanbanProps) {
+  const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [activeId, setActiveId] = useState<string | null>(null);
   const router = useRouter();
 
-  // Optimistic UI could be added here, but for now relying on props update from server refetch
-  // To prevent flicker, we might want local state that syncs with props, but let's try direct props first.
-  
+  useEffect(() => {
+    setTickets(initialTickets);
+  }, [initialTickets]);
+
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
@@ -166,12 +168,23 @@ export function TicketKanban({ tickets }: TicketKanbanProps) {
       const newStatus = over.id as string;
 
       // Find original status to check if changed
-      const ticket = tickets.find(t => t.id === ticketId);
-      if (ticket && ticket.status !== newStatus) {
+      const ticketIndex = tickets.findIndex(t => t.id === ticketId);
+      if (ticketIndex !== -1 && tickets[ticketIndex].status !== newStatus) {
+         const oldStatus = tickets[ticketIndex].status;
+         
+         // Optimistic update
+         const newTickets = [...tickets];
+         newTickets[ticketIndex] = { ...newTickets[ticketIndex], status: newStatus };
+         setTickets(newTickets);
+
          // Call server action
          const result = await updateTicketStatus(ticketId, newStatus);
          if (!result.success) {
             toast.error('Error al actualizar estado');
+            // Revert on failure
+            const revertedTickets = [...tickets];
+            revertedTickets[ticketIndex] = { ...revertedTickets[ticketIndex], status: oldStatus };
+            setTickets(revertedTickets);
          } else {
              toast.success('Estado actualizado');
          }
