@@ -24,6 +24,9 @@ import {
   ShoppingCart,
   UsersRound,
   RefreshCw,
+  Ticket,
+  Mails,
+  PenTool,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -108,6 +111,29 @@ const appsMenuItems = [
     title: 'Blog',
     url: '/admin/blog',
     icon: BookOpen,
+  },
+  {
+    title: 'Blog',
+    url: '/admin/blog',
+    icon: BookOpen,
+  },
+]
+
+const communicationsMenuItems = [
+  {
+    title: 'Tickets',
+    url: '/admin/communications/tickets',
+    icon: Ticket,
+  },
+  {
+    title: 'Configuración Email',
+    url: '/admin/communications/gmail',
+    icon: Mails,
+  },
+  {
+    title: 'Firmas',
+    url: '/admin/communications/gmail/signature',
+    icon: PenTool,
   },
 ]
 
@@ -439,6 +465,29 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {filteredAppsMenuItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Comunicaciones */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {communicationsMenuItems.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     asChild

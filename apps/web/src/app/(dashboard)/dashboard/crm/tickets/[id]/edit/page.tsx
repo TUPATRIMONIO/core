@@ -14,25 +14,11 @@ export default async function EditTicketPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  // Obtener organización del usuario
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user?.id)
-    .eq('status', 'active')
-    .single();
-
-  if (!orgUser) {
-    notFound();
-  }
-
-  // Obtener ticket
+  // Obtener ticket de vista pública
   const { data: ticket, error } = await supabase
-    .from('crm.tickets')
+    .from('tickets')
     .select('*')
     .eq('id', id)
-    .eq('organization_id', orgUser.organization_id)
     .single();
 
   if (error || !ticket) {

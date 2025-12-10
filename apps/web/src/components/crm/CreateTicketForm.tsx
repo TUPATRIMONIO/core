@@ -43,7 +43,7 @@ export function CreateTicketForm() {
         throw new Error(error.error || 'Error al crear ticket');
       }
 
-      router.push('/dashboard/crm/tickets');
+      router.push('/admin/communications/tickets');
       router.refresh();
     } catch (error: any) {
       alert(error.message || 'Error al crear ticket');

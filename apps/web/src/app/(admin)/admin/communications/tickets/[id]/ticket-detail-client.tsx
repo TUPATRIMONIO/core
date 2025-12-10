@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,7 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  RefreshCw,
 } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -104,6 +105,36 @@ export function TicketDetailClient({
   const [status, setStatus] = useState(ticket.status)
   const [priority, setPriority] = useState(ticket.priority)
   const [updating, setUpdating] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+
+  // Auto-refresh cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh()
+    }, 30 * 1000)
+
+    return () => clearInterval(interval)
+  }, [router])
+
+  const handleSync = async () => {
+    setSyncing(true)
+    try {
+      const response = await fetch('/api/admin/gmail/sync', {
+        method: 'POST',
+      })
+      
+      if (response.ok) {
+        router.refresh()
+      } else {
+        const data = await response.json()
+        console.error('Error syncing:', data.error)
+      }
+    } catch (error) {
+      console.error('Error syncing:', error)
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const handleReply = async () => {
     if (!replyBody.trim() || !ticket.contact) return
@@ -238,12 +269,17 @@ export function TicketDetailClient({
                   </span>
                 </div>
               </div>
-              <Link href="/admin/communications/inbox">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Volver
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing}>
+                  <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
                 </Button>
-              </Link>
+                <Link href="/admin/communications/tickets">
+                  <Button variant="outline" size="sm">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Volver
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
