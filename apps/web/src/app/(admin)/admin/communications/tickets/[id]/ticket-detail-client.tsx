@@ -175,22 +175,40 @@ export function TicketDetailClient({
   const [selectorType, setSelectorType] = useState<AssociationType>('contact')
   
   // Helpers para AssociationList
-  const contactItems: AssociatedItem[] = (ticket.ticket_users || []).map((tu) => ({
-    id: tu.user.id,
-    name: `${tu.user.first_name || ''} ${tu.user.last_name || ''}`.trim() || tu.user.email || 'Sin nombre',
-    subtext: tu.user.email || '',
-    avatar: tu.user.avatar_url,
-    type: 'contact',
-    href: `/admin/users/${tu.user.id}`
-  }))
+  const contactItems: AssociatedItem[] = [
+    ...(ticket.ticket_users || []).map((tu) => ({
+      id: tu.user.id,
+      name: `${tu.user.first_name || ''} ${tu.user.last_name || ''}`.trim() || tu.user.email || 'Sin nombre',
+      subtext: tu.user.email || '',
+      avatar: tu.user.avatar_url,
+      type: 'contact' as const,
+      href: `/admin/users/${tu.user.id}`
+    })),
+    ...(ticket.ticket_contacts || []).map((tc) => ({
+      id: tc.contact.id,
+      name: tc.contact.full_name,
+      subtext: tc.contact.email,
+      type: 'contact' as const,
+      href: `/admin/contacts/${tc.contact.id}`
+    }))
+  ]
 
-  const companyItems: AssociatedItem[] = (ticket.ticket_organizations || []).map((to) => ({
-    id: to.organization.id,
-    name: to.organization.name,
-    subtext: to.organization.industry || 'Organización',
-    type: 'company',
-    href: `/admin/organizations/${to.organization.id}`
-  }))
+  const companyItems: AssociatedItem[] = [
+    ...(ticket.ticket_organizations || []).map((to) => ({
+      id: to.organization.id,
+      name: to.organization.name,
+      subtext: to.organization.industry || 'Organización',
+      type: 'company' as const,
+      href: `/admin/organizations/${to.organization.id}`
+    })),
+    ...(ticket.ticket_companies || []).map((tc) => ({
+      id: tc.company.id,
+      name: tc.company.name,
+      subtext: tc.company.industry || 'Empresa',
+      type: 'company' as const,
+      href: `/admin/companies/${tc.company.id}`
+    }))
+  ]
 
   const orderItems: AssociatedItem[] = (ticket.ticket_orders || []).map((to) => ({
     id: to.order.id,

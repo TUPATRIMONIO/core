@@ -57,84 +57,20 @@ export default async function TicketDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  // Fetch all CRM association tables manually with explicit schema
-  const { data: ticketOrders } = await serviceSupabase
-    .schema('crm')
-    .from('ticket_orders')
-    .select('*')
-    .eq('ticket_id', id)
+  // Obtener todas las asociaciones (RPC para acceso cross-schema)
+  const { data: associations, error: assocError } = await serviceSupabase.rpc(
+    "get_ticket_associations",
+    { p_ticket_id: id }
+  );
 
-  const { data: ticketOrganizations } = await serviceSupabase
-    .schema('crm')
-    .from('ticket_organizations')
-    .select('*')
-    .eq('ticket_id', id)
-
-  const { data: ticketUsers } = await serviceSupabase
-    .schema('crm')
-    .from('ticket_users')
-    .select('*')
-    .eq('ticket_id', id)
-
-  // Fetch orders data
-  const orderIds = ticketOrders?.map((to: any) => to.order_id) || []
-  let ordersMap = new Map()
-  if (orderIds.length > 0) {
-    const { data: orders } = await serviceSupabase
-      .from('orders')
-      .select('*')
-      .in('id', orderIds)
-    
-    if (orders) {
-      orders.forEach((o: any) => ordersMap.set(o.id, o))
-    }
-  }
-
-  // Fetch Core Organizations manually
-  const orgIds = ticketOrganizations?.map((to: any) => to.organization_id) || []
-  let organizationsMap = new Map()
-  if (orgIds.length > 0) {
-    const { data: orgs } = await serviceSupabase
-       .schema('core')
-       .from('organizations')
-       .select('id, name, industry, slug')
-       .in('id', orgIds)
-    
-    if (orgs) {
-       orgs.forEach((o: any) => organizationsMap.set(o.id, o))
-    }
-  }
-
-  // Fetch Core Users manually
-  const userIds = ticketUsers?.map((tu: any) => tu.user_id) || []
-  let usersMap = new Map()
-  if (userIds.length > 0) {
-    const { data: users } = await serviceSupabase
-        .schema('core')
-        .from('users')
-        .select('id, first_name, last_name, email, avatar_url')
-        .in('id', userIds)
-
-    if (users) {
-        users.forEach((u: any) => usersMap.set(u.id, u))
-    }
+  if (assocError) {
+    console.error("Error fetching associations:", assocError);
   }
 
   // Reconstruct ticket object with enriched data
   const ticket = {
       ...rawTicket,
-      ticket_orders: ticketOrders?.map((to: any) => ({
-          ...to,
-          order: ordersMap.get(to.order_id) || { id: to.order_id, order_number: 'Desconocido' }
-      })) || [],
-      ticket_organizations: ticketOrganizations?.map((to: any) => ({
-          ...to,
-          organization: organizationsMap.get(to.organization_id) || { id: to.organization_id, name: 'Desconocido' }
-      })) || [],
-      ticket_users: ticketUsers?.map((tu: any) => ({
-          ...tu,
-          user: usersMap.get(tu.user_id) || { id: tu.user_id, email: 'Desconocido' }
-      })) || []
+      ...(associations || {})
   }
 
   // Obtener emails del ticket

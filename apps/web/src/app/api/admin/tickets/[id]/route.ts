@@ -44,16 +44,6 @@ export async function GET(
         contact:contacts(*),
         assigned_user:users!tickets_assigned_to_fkey(*),
         order:orders(*),
-        ticket_contacts:ticket_contacts(
-          contact:contacts(*),
-          contact_role
-        ),
-        ticket_companies:ticket_companies(
-          company:companies(*)
-        ),
-        ticket_orders:ticket_orders(
-          order:orders(*)
-        ),
         attachments:ticket_attachments(*)
       `)
       .eq("id", id)
@@ -65,6 +55,22 @@ export async function GET(
         { status: 404 },
       );
     }
+
+    // Obtener todas las asociaciones (RPC para acceso cross-schema)
+    const { data: associations, error: assocError } = await serviceSupabase.rpc(
+      "get_ticket_associations",
+      { p_ticket_id: id },
+    );
+
+    if (assocError) {
+      console.error("Error obteniendo asociaciones:", assocError);
+    }
+
+    // Combinar ticket con asociaciones
+    const fullTicket = {
+      ...ticket,
+      ...associations,
+    };
 
     // Obtener emails del ticket ordenados por fecha
     const { data: emails, error: emailsError } = await serviceSupabase
@@ -92,7 +98,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      ticket,
+      ticket: fullTicket,
       emails: emails || [],
       activities: activities || [],
     });

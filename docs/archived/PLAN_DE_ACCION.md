@@ -500,6 +500,10 @@ READY:
   encapsulado en RPCs
 - ✅ Permisos granulares para funciones de búsqueda y listado
 - ✅ Acceso seguro a datos de `auth.users` sin exponer información sensible
+- ✅ **Corrección de tipos RPC (Dic 2025)**: Solucionado error `42804` mediante
+  casting explícito
+- ✅ **Soporte completo de Source**: Frontend y Backend manejan correctamente
+  `platform` vs `crm`
 
 **📄 ARCHIVOS CLAVE:**
 
