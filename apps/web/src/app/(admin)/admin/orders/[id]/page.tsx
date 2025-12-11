@@ -17,6 +17,8 @@ import { Badge } from '@/components/ui/badge'
 import { OrderStatusSelector } from '@/components/admin/order-status-selector'
 import { RefundModal } from '@/components/admin/refund-modal'
 import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-buttons'
+import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
+import { OrderAssociationsClient } from '@/components/admin/OrderAssociationsClient'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -87,6 +89,9 @@ async function getOrderDetails(orderId: string) {
         return sum
     }, 0) || 0
 
+    // Get associations for this order
+    const { data: associations } = await supabase.rpc('get_order_associations', { p_order_id: orderId })
+
     return {
         ...order,
         organization: org,
@@ -95,6 +100,7 @@ async function getOrderDetails(orderId: string) {
         invoice,
         refunds: refunds || [],
         totalRefunded,
+        associations: associations || { contacts: [], tickets: [], organizations: [] },
     }
 }
 
@@ -145,6 +151,13 @@ export default async function OrderDetailPage({ params }: PageProps) {
 
     const productData = order.product_data as Record<string, any> || {}
 
+    const customerItem = order.organization ? [{
+        id: order.organization.id,
+        name: order.organization.name,
+        subtext: order.organization.email || order.organization.slug,
+        href: `/admin/organizations/${order.organization.id}`,
+    }] : [];
+
     return (
         <div className="flex flex-1 flex-col">
             <PageHeader
@@ -180,73 +193,74 @@ export default async function OrderDetailPage({ params }: PageProps) {
                 }
             />
 
-            <div className="flex-1 px-4 pb-6 space-y-6">
-                {/* Status and Quick Info */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card>
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <Package className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <Badge className={`${getOrderStatusColor(order.status)} text-sm`}>
-                                    {getOrderStatusLabel(order.status)}
-                                </Badge>
-                                <div className="text-sm text-muted-foreground mt-1">Estado</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-green-500/10">
-                                <Wallet className="h-5 w-5 text-green-500" />
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-xl font-bold">
-                                    {order.currency} {formatCurrency(order.amount)}
-                                </div>
-                                {order.totalRefunded > 0 && (
-                                    <div className="text-sm text-red-600 dark:text-red-400 mt-1">
-                                        Reembolsado: {order.currency} {formatCurrency(order.totalRefunded)}
+            <DetailPageLayout
+                sidePanel={
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Resumen</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Estado</label>
+                                    <div className="mt-1">
+                                        <Badge className={getOrderStatusColor(order.status)}>
+                                            {getOrderStatusLabel(order.status)}
+                                        </Badge>
                                     </div>
-                                )}
-                                <div className="text-sm text-muted-foreground">Monto</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10">
-                                <User className="h-5 w-5 text-blue-500" />
-                            </div>
-                            <div>
-                                <Link
-                                    href={`/admin/organizations/${order.organization_id}`}
-                                    className="font-medium hover:underline"
-                                >
-                                    {order.organization?.name || 'N/A'}
-                                </Link>
-                                <div className="text-sm text-muted-foreground">Cliente</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-purple-500/10">
-                                <Calendar className="h-5 w-5 text-purple-500" />
-                            </div>
-                            <div>
-                                <div className="font-medium">
-                                    {formatDateTime(order.created_at)}
                                 </div>
-                                <div className="text-sm text-muted-foreground">Creado</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Monto</label>
+                                    <div className="text-xl font-bold mt-1">
+                                        {order.currency} {formatCurrency(order.amount)}
+                                    </div>
+                                    {order.totalRefunded > 0 && (
+                                        <div className="text-sm text-red-600 dark:text-red-400 mt-1">
+                                            Reembolsado: {order.currency} {formatCurrency(order.totalRefunded)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-muted-foreground">Fecha</label>
+                                    <div className="mt-1 flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{formatDateTime(order.created_at)}</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <OrderAssociationsClient
+                            orderId={order.id}
+                            initialOrganizations={[
+                                ...(order.organization ? [{
+                                    id: order.organization.id,
+                                    name: order.organization.name,
+                                    subtext: order.organization.email || order.organization.slug,
+                                    href: `/admin/organizations/${order.organization.id}`,
+                                }] : []),
+                                ...(order.associations?.organizations || []).map((o: any) => ({
+                                    id: o.id,
+                                    name: o.name,
+                                    subtext: o.subtext,
+                                    href: `/admin/organizations/${o.id}`,
+                                }))
+                            ].filter((v,i,a)=>a.findIndex(v2=>(v2.id===v.id))===i)} // dedupe
+                            initialContacts={(order.associations?.contacts || []).map((c: any) => ({
+                                id: c.id,
+                                name: c.name,
+                                subtext: c.subtext,
+                            }))}
+                            initialTickets={(order.associations?.tickets || []).map((t: any) => ({
+                                id: t.id,
+                                name: t.name,
+                                subtext: t.subtext,
+                            }))}
+                        />
+                    </div>
+                }
+            >
+                <div className="space-y-6">
                     {/* Order Info */}
                     <Card>
                         <CardHeader>
@@ -343,193 +357,193 @@ export default async function OrderDetailPage({ params }: PageProps) {
                             )}
                         </CardContent>
                     </Card>
-                </div>
 
-                {/* Refunds Section */}
-                {order.refunds && order.refunds.length > 0 && (
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <RefreshCw className="h-5 w-5" />
-                                    Reembolsos ({order.refunds.length})
-                                </CardTitle>
-                                <Link href={`/admin/refunds?order_id=${order.id}`}>
-                                    <Button variant="outline" size="sm">
-                                        <ExternalLink className="h-4 w-4 mr-2" />
-                                        Ver todos los reembolsos
-                                    </Button>
-                                </Link>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="divide-y">
-                                {order.refunds.map((refund: any) => (
-                                    <div key={refund.id} className="p-4 hover:bg-muted/50 transition-colors">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            {/* Información Principal */}
-                                            <div className="space-y-2">
-                                                <div className="text-xs text-muted-foreground">Fecha de Solicitud</div>
-                                                <div className="text-sm font-medium">
-                                                    {formatDateTime(refund.created_at)}
-                                                </div>
-                                                {refund.processed_at && (
-                                                    <>
-                                                        <div className="text-xs text-muted-foreground mt-2">Fecha de Procesamiento</div>
-                                                        <div className="text-sm">
-                                                            {formatDateTime(refund.processed_at)}
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-
-                                            {/* Monto y Destino */}
-                                            <div className="space-y-2">
-                                                <div className="text-xs text-muted-foreground">Monto Reembolsado</div>
-                                                <div className="text-lg font-bold text-red-600 dark:text-red-400">
-                                                    {refund.currency} {formatCurrency(parseFloat(refund.amount.toString()))}
-                                                </div>
-                                                <div>
-                                                    <Badge variant={refund.refund_destination === 'wallet' ? 'default' : 'outline'}>
-                                                        {refund.refund_destination === 'wallet' ? (
-                                                            <>
-                                                                <Wallet className="h-3 w-3 mr-1" />
-                                                                Monedero Digital
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <CreditCard className="h-3 w-3 mr-1" />
-                                                                Tarjeta Original
-                                                            </>
-                                                        )}
-                                                    </Badge>
-                                                </div>
-                                            </div>
-
-                                            {/* Proveedor y Estado */}
-                                            <div className="space-y-2">
-                                                <div className="text-xs text-muted-foreground">Proveedor</div>
-                                                <div>
-                                                    {refund.provider ? (
-                                                        <Badge variant="outline">
-                                                            {refund.provider === 'stripe' ? 'Stripe' : 
-                                                             refund.provider === 'transbank_webpay' ? 'Transbank Webpay' :
-                                                             refund.provider === 'transbank_oneclick' ? 'Transbank OneClick' :
-                                                             refund.provider}
-                                                        </Badge>
-                                                    ) : (
-                                                        <span className="text-sm text-muted-foreground">-</span>
+                    {/* Refunds Section */}
+                    {order.refunds && order.refunds.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <RefreshCw className="h-5 w-5" />
+                                        Reembolsos ({order.refunds.length})
+                                    </CardTitle>
+                                    <Link href={`/admin/refunds?order_id=${order.id}`}>
+                                        <Button variant="outline" size="sm">
+                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                            Ver todos los reembolsos
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="divide-y">
+                                    {order.refunds.map((refund: any) => (
+                                        <div key={refund.id} className="p-4 hover:bg-muted/50 transition-colors">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {/* Información Principal */}
+                                                <div className="space-y-2">
+                                                    <div className="text-xs text-muted-foreground">Fecha de Solicitud</div>
+                                                    <div className="text-sm font-medium">
+                                                        {formatDateTime(refund.created_at)}
+                                                    </div>
+                                                    {refund.processed_at && (
+                                                        <>
+                                                            <div className="text-xs text-muted-foreground mt-2">Fecha de Procesamiento</div>
+                                                            <div className="text-sm">
+                                                                {formatDateTime(refund.processed_at)}
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-muted-foreground mt-2">Estado</div>
-                                                <div>
-                                                    <Badge 
-                                                        className={
-                                                            refund.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                                            refund.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                                            refund.status === 'processing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                                            refund.status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                                            'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                                                        }
-                                                    >
-                                                        {refund.status === 'completed' ? 'Completado' :
-                                                         refund.status === 'rejected' ? 'Rechazado' :
-                                                         refund.status === 'processing' ? 'Procesando' :
-                                                         refund.status === 'approved' ? 'Aprobado' :
-                                                         'Pendiente'}
-                                                    </Badge>
+
+                                                {/* Monto y Destino */}
+                                                <div className="space-y-2">
+                                                    <div className="text-xs text-muted-foreground">Monto Reembolsado</div>
+                                                    <div className="text-lg font-bold text-red-600 dark:text-red-400">
+                                                        {refund.currency} {formatCurrency(parseFloat(refund.amount.toString()))}
+                                                    </div>
+                                                    <div>
+                                                        <Badge variant={refund.refund_destination === 'wallet' ? 'default' : 'outline'}>
+                                                            {refund.refund_destination === 'wallet' ? (
+                                                                <>
+                                                                    <Wallet className="h-3 w-3 mr-1" />
+                                                                    Monedero Digital
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <CreditCard className="h-3 w-3 mr-1" />
+                                                                    Tarjeta Original
+                                                                </>
+                                                            )}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+
+                                                {/* Proveedor y Estado */}
+                                                <div className="space-y-2">
+                                                    <div className="text-xs text-muted-foreground">Proveedor</div>
+                                                    <div>
+                                                        {refund.provider ? (
+                                                            <Badge variant="outline">
+                                                                {refund.provider === 'stripe' ? 'Stripe' : 
+                                                                    refund.provider === 'transbank_webpay' ? 'Transbank Webpay' :
+                                                                    refund.provider === 'transbank_oneclick' ? 'Transbank OneClick' :
+                                                                    refund.provider}
+                                                            </Badge>
+                                                        ) : (
+                                                            <span className="text-sm text-muted-foreground">-</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground mt-2">Estado</div>
+                                                    <div>
+                                                        <Badge 
+                                                            className={
+                                                                refund.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                                refund.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                                                refund.status === 'processing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                                                refund.status === 'approved' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                                                'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                                            }
+                                                        >
+                                                            {refund.status === 'completed' ? 'Completado' :
+                                                                refund.status === 'rejected' ? 'Rechazado' :
+                                                                refund.status === 'processing' ? 'Procesando' :
+                                                                refund.status === 'approved' ? 'Aprobado' :
+                                                                'Pendiente'}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+
+                                                {/* ID Proveedor y Razón */}
+                                                <div className="space-y-2">
+                                                    {refund.provider_refund_id && (
+                                                        <>
+                                                            <div className="text-xs text-muted-foreground">ID Proveedor</div>
+                                                            <div className="font-mono text-xs break-all bg-muted p-2 rounded">
+                                                                {refund.provider_refund_id}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                    {refund.reason && (
+                                                        <>
+                                                            <div className="text-xs text-muted-foreground mt-2">Razón</div>
+                                                            <div className="text-sm">{refund.reason}</div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* ID Proveedor y Razón */}
-                                            <div className="space-y-2">
-                                                {refund.provider_refund_id && (
-                                                    <>
-                                                        <div className="text-xs text-muted-foreground">ID Proveedor</div>
-                                                        <div className="font-mono text-xs break-all bg-muted p-2 rounded">
-                                                            {refund.provider_refund_id}
-                                                        </div>
-                                                    </>
-                                                )}
-                                                {refund.reason && (
-                                                    <>
-                                                        <div className="text-xs text-muted-foreground mt-2">Razón</div>
-                                                        <div className="text-sm">{refund.reason}</div>
-                                                    </>
-                                                )}
-                                            </div>
+                                            {/* Notas Adicionales (si existen) */}
+                                            {refund.notes && (
+                                                <div className="mt-4 pt-4 border-t">
+                                                    <div className="text-xs text-muted-foreground mb-1">Notas Adicionales</div>
+                                                    <div className="text-sm bg-muted/50 p-3 rounded-lg">
+                                                        {refund.notes}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-
-                                        {/* Notas Adicionales (si existen) */}
-                                        {refund.notes && (
-                                            <div className="mt-4 pt-4 border-t">
-                                                <div className="text-xs text-muted-foreground mb-1">Notas Adicionales</div>
-                                                <div className="text-sm bg-muted/50 p-3 rounded-lg">
-                                                    {refund.notes}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            
-                            {/* Resumen Total */}
-                            {order.totalRefunded > 0 && (
-                                <div className="p-4 border-t bg-muted/50">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-medium">Total Reembolsado:</span>
-                                        <span className="text-lg font-bold text-red-600 dark:text-red-400">
-                                            {order.currency} {formatCurrency(order.totalRefunded)}
-                                        </span>
-                                    </div>
-                                    <div className="mt-2 text-xs text-muted-foreground">
-                                        {order.refunds.filter((r: any) => r.status === 'completed').length} de {order.refunds.length} reembolsos completados
-                                    </div>
+                                    ))}
                                 </div>
+                                
+                                {/* Resumen Total */}
+                                {order.totalRefunded > 0 && (
+                                    <div className="p-4 border-t bg-muted/50">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium">Total Reembolsado:</span>
+                                            <span className="text-lg font-bold text-red-600 dark:text-red-400">
+                                                {order.currency} {formatCurrency(order.totalRefunded)}
+                                            </span>
+                                        </div>
+                                        <div className="mt-2 text-xs text-muted-foreground">
+                                            {order.refunds.filter((r: any) => r.status === 'completed').length} de {order.refunds.length} reembolsos completados
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Order History */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Historial del Pedido</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {order.history?.length === 0 ? (
+                                <div className="p-4 text-sm text-muted-foreground">
+                                    No hay historial disponible
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Fecha</TableHead>
+                                            <TableHead>Evento</TableHead>
+                                            <TableHead>Descripción</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {order.history?.map((event: any) => (
+                                            <TableRow key={event.id}>
+                                                <TableCell className="text-sm">
+                                                    {formatDateTime(event.created_at)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant="outline">{event.event_type}</Badge>
+                                                </TableCell>
+                                                <TableCell className="text-sm">
+                                                    {event.event_description}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             )}
                         </CardContent>
                     </Card>
-                )}
-
-                {/* Order History */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">Historial del Pedido</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {order.history?.length === 0 ? (
-                            <div className="p-4 text-sm text-muted-foreground">
-                                No hay historial disponible
-                            </div>
-                        ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Fecha</TableHead>
-                                        <TableHead>Evento</TableHead>
-                                        <TableHead>Descripción</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {order.history?.map((event: any) => (
-                                        <TableRow key={event.id}>
-                                            <TableCell className="text-sm">
-                                                {formatDateTime(event.created_at)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">{event.event_type}</Badge>
-                                            </TableCell>
-                                            <TableCell className="text-sm">
-                                                {event.event_description}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                </div>
+            </DetailPageLayout>
         </div>
     )
 }

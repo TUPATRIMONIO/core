@@ -20,6 +20,9 @@ import {
 } from '@/components/ui/table'
 import { OrganizationOrdersFilter, OrganizationOrdersPagination } from '@/components/admin/organization-orders-filter'
 import { CreateTicketButtonForOrganization } from '@/components/admin/create-ticket-buttons'
+import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
+import { AssociationsPanel } from '@/components/shared/AssociationsPanel'
+import { OrganizationAssociationsClient } from '@/components/admin/OrganizationAssociationsClient'
 
 const ORDERS_PER_PAGE = 10
 
@@ -236,6 +239,19 @@ export default async function OrganizationDetailPage({
     page: queryParams.page,
   }
 
+  const appItems = (org.organization_applications || [])
+    .filter((oa: any) => oa.is_enabled)
+    .map((oa: any) => ({
+      id: oa.id,
+      name: oa.applications.name,
+      subtext: oa.applications.slug,
+    }))
+
+  // Get organization associations (contacts, tickets)
+  const supabaseForAssociations = createServiceRoleClient()
+  const { data: associations } = await supabaseForAssociations.rpc('get_organization_associations', { p_organization_id: id })
+  const orgAssociations = associations || { contacts: [], tickets: [], orders: [] }
+
   return (
     <div className="flex flex-1 flex-col">
       <PageHeader
@@ -270,52 +286,78 @@ export default async function OrganizationDetailPage({
         }
       />
 
-      <div className="flex-1 px-4 pb-6 space-y-6">
-        {/* Información General */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Información General</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-                <p className="text-sm mt-1">{org.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Slug</label>
-                <p className="text-sm mt-1">{org.slug}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Tipo</label>
-                <div className="mt-1">
-                  <OrgTypeBadge type={org.org_type} />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Estado</label>
-                <div className="mt-1">
-                  <StatusBadge status={org.status} />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Email</label>
-                <p className="text-sm mt-1">{org.email || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Teléfono</label>
-                <p className="text-sm mt-1">{org.phone || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Creada</label>
-                <p className="text-sm mt-1">
-                  {new Date(org.created_at).toLocaleDateString('es-CL')}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <DetailPageLayout
+        sidePanel={
+            <div className="space-y-6">
+                 {/* Información General */}
+                <Card>
+                <CardHeader>
+                    <CardTitle>Información General</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Nombre</label>
+                        <p className="text-sm mt-1">{org.name}</p>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Slug</label>
+                        <p className="text-sm mt-1">{org.slug}</p>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Tipo</label>
+                        <div className="mt-1">
+                        <OrgTypeBadge type={org.org_type} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Estado</label>
+                        <div className="mt-1">
+                        <StatusBadge status={org.status} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Email</label>
+                        <p className="text-sm mt-1">{org.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Teléfono</label>
+                        <p className="text-sm mt-1">{org.phone || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-muted-foreground">Creada</label>
+                        <p className="text-sm mt-1">
+                        {new Date(org.created_at).toLocaleDateString('es-CL')}
+                        </p>
+                    </div>
+                    </div>
+                </CardContent>
+                </Card>
 
+                <OrganizationAssociationsClient
+                    organizationId={org.id}
+                    initialContacts={(orgAssociations.contacts || []).map((c: any) => ({
+                        id: c.id,
+                        name: c.name,
+                        subtext: c.subtext,
+                    }))}
+                    initialTickets={(orgAssociations.tickets || []).map((t: any) => ({
+                        id: t.id,
+                        name: t.name,
+                        subtext: t.subtext,
+                    }))}
+                    initialApps={appItems}
+                    initialOrders={(orgAssociations.orders || []).map((o: any) => ({
+                        id: o.id,
+                        name: o.name,
+                        subtext: o.subtext,
+                    }))}
+                />
+            </div>
+        }
+      >
+        <div className="space-y-6">
+        
         {/* Miembros */}
         <Card>
           <CardHeader>
@@ -341,24 +383,6 @@ export default async function OrganizationDetailPage({
                       currentRoleName={ou.roles.name}
                     />
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Aplicaciones */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Aplicaciones Habilitadas</CardTitle>
-            <CardDescription>Apps activas para esta organización</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {org.organization_applications?.filter((oa: any) => oa.is_enabled).map((oa: any) => (
-                <div key={oa.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <span className="font-medium">{oa.applications.name}</span>
-                  <span className="text-sm text-muted-foreground">{oa.applications.slug}</span>
                 </div>
               ))}
             </div>
@@ -607,6 +631,8 @@ export default async function OrganizationDetailPage({
           />
         </Card>
       </div>
+    </DetailPageLayout>
+  
     </div>
   )
 }

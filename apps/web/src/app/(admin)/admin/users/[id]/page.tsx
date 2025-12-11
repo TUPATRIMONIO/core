@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { CreateTicketButtonForUser } from '@/components/admin/create-ticket-buttons'
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
-import { AssociationsPanel } from '@/components/shared/AssociationsPanel'
+import { UserAssociationsClient } from '@/components/admin/UserAssociationsClient'
 
 async function getUser(id: string) {
   const supabase = createServiceRoleClient()
@@ -52,30 +52,7 @@ async function getUser(id: string) {
   }
 }
 
-async function getUserOrders(userId: string): Promise<any[]> {
-  const supabase = createServiceRoleClient()
-  
-  // Get user's organizations first
-  const { data: orgUsers } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-  
-  if (!orgUsers || orgUsers.length === 0) return []
-  
-  const orgIds = orgUsers.map(ou => ou.organization_id)
-  
-  // Get orders for those organizations
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('id, order_number, amount, currency, status, created_at')
-    .in('organization_id', orgIds)
-    .order('created_at', { ascending: false })
-    .limit(5)
-  
-  return orders || []
-}
+
 
 export default async function UserDetailPage({
   params,
@@ -83,12 +60,15 @@ export default async function UserDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  const supabase = createServiceRoleClient()
   const user = await getUser(id)
-  const recentOrders = await getUserOrders(id)
-
+  
   if (!user) {
     notFound()
   }
+
+  // Get associations for this user
+  const { data: associations } = await supabase.rpc('get_user_associations', { p_user_id: id })
 
   return (
     <div className="flex flex-1 flex-col">
@@ -114,36 +94,23 @@ export default async function UserDetailPage({
 
       <DetailPageLayout
         sidePanel={
-          <AssociationsPanel
-            title="Asociaciones"
-            sections={[
-              {
-                id: 'organizations',
-                title: 'Organizaciones',
-                type: 'organization',
-                items: (user.organization_users || []).map((ou: any) => ({
-                  id: ou.organizations.id,
-                  name: ou.organizations.name,
-                  subtext: `${ou.roles.name} · ${ou.organizations.org_type}`,
-                  href: `/admin/organizations/${ou.organizations.id}`,
-                })),
-                canAdd: false,
-                canRemove: false,
-              },
-              {
-                id: 'orders',
-                title: 'Pedidos Recientes',
-                type: 'order',
-                items: recentOrders.map((order: any) => ({
-                  id: order.id,
-                  name: `#${order.order_number}`,
-                  subtext: `${order.currency} ${order.amount} · ${order.status}`,
-                  href: `/admin/orders/${order.id}`,
-                })),
-                canAdd: false,
-                canRemove: false,
-              },
-            ]}
+          <UserAssociationsClient
+            userId={user.id}
+            initialOrganizations={(associations?.organizations || []).map((o: any) => ({
+              id: o.id,
+              name: o.name,
+              subtext: o.subtext,
+            }))}
+            initialOrders={(associations?.orders || []).map((o: any) => ({
+              id: o.id,
+              name: o.name,
+              subtext: o.subtext,
+            }))}
+            initialTickets={(associations?.tickets || []).map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              subtext: t.subtext,
+            }))}
           />
         }
       >

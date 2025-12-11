@@ -17,7 +17,7 @@ interface AssociationSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   type: AssociationType;
-  onSelect: (id: string, source: string) => Promise<void>;
+  onSelect: (id: string, source: string, item?: any) => Promise<void>;
 }
 
 const PAGE_SIZE = 10;
@@ -83,10 +83,10 @@ export function AssociationSelector({
     }
   };
 
-  const handleSelect = async (id: string, source: string) => {
+  const handleSelect = async (id: string, source: string, item?: any) => {
     setAssociating(id);
     try {
-      await onSelect(id, source);
+      await onSelect(id, source, item);
       onOpenChange(false);
       setQuery("");
       setResults([]);
@@ -180,7 +180,7 @@ export function AssociationSelector({
                       key={item.id}
                       variant="ghost"
                       className="w-full justify-start h-auto py-2 px-3"
-                      onClick={() => handleSelect(item.id, item.source)}
+                      onClick={() => handleSelect(item.id, item.source, item)}
                       disabled={!!associating}
                     >
                       {associating === item.id ? (

@@ -27,6 +27,7 @@ import {
   Ticket,
   Mails,
   PenTool,
+  FileSignature,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -112,7 +113,11 @@ const appsMenuItems = [
     url: '/admin/blog',
     icon: BookOpen,
   },
-
+  {
+    title: 'Firma Electrónica',
+    url: '/admin/signing/documents',
+    icon: FileSignature,
+  },
 ]
 
 const communicationsMenuItems = [

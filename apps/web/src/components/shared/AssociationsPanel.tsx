@@ -17,7 +17,7 @@ export interface AssociatedItem {
 export interface AssociationSection {
   id: string;
   title: string;
-  type: 'contact' | 'company' | 'order' | 'ticket' | 'organization' | 'user';
+  type: 'contact' | 'company' | 'order' | 'ticket' | 'organization' | 'user' | 'application';
   items: AssociatedItem[];
   canAdd?: boolean;
   canRemove?: boolean;
@@ -41,6 +41,7 @@ const defaultIconConfig: Record<string, { icon: LucideIcon; color: string; bgCol
   organization: { icon: Building2, color: 'text-purple-500', bgColor: 'bg-purple-100 dark:bg-purple-900/30' },
   order: { icon: Package, color: 'text-orange-500', bgColor: 'bg-orange-100 dark:bg-orange-900/30' },
   ticket: { icon: Ticket, color: 'text-green-500', bgColor: 'bg-green-100 dark:bg-green-900/30' },
+  application: { icon: Package, color: 'text-cyan-500', bgColor: 'bg-cyan-100 dark:bg-cyan-900/30' },
 };
 
 /**

@@ -2,25 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { LayoutGrid, List, Plus, RefreshCw, Filter, Search, ChevronDown, ChevronUp, X, Mail } from 'lucide-react';
+import { Plus, RefreshCw, Search, ChevronDown, ChevronUp, X, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { TicketList } from './TicketList';
-import { TicketKanban } from './TicketKanban';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
 
-import { getLatestTickets } from '@/app/actions/crm/tickets';
+import { getLatestTickets, updateTicketStatus } from '@/app/actions/crm/tickets';
+import { 
+  RecordListView, 
+  RecordKanbanView, 
+  RecordsViewToggle,
+  ColumnDefinition,
+  RowAction,
+  KanbanColumn
+} from '@/components/shared';
 
 interface Ticket {
   id: string;
@@ -31,12 +31,65 @@ interface Ticket {
   created_at: string;
   assigned_to: string;
   owner_name?: string;
-  description?: string; // Added for Kanban
+  description?: string;
 }
 
 interface TicketsViewProps {
   tickets: Ticket[];
 }
+
+const KANBAN_COLUMNS: KanbanColumn[] = [
+  { id: 'new', label: 'Nuevo', color: 'bg-blue-100 border-blue-200 dark:bg-blue-950/40 dark:border-blue-800' },
+  { id: 'open', label: 'Abierto', color: 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-900' },
+  { id: 'in_progress', label: 'En Progreso', color: 'bg-yellow-50 border-yellow-100 dark:bg-yellow-950/20 dark:border-yellow-900' },
+  { id: 'waiting', label: 'Esperando', color: 'bg-purple-50 border-purple-100 dark:bg-purple-950/20 dark:border-purple-900' },
+  { id: 'resolved', label: 'Resuelto', color: 'bg-green-50 border-green-100 dark:bg-green-950/20 dark:border-green-900' },
+  { id: 'closed', label: 'Cerrado', color: 'bg-gray-50 border-gray-100 dark:bg-gray-900/20 dark:border-gray-800' },
+];
+
+const getStatusColor = (status: string) => {
+  const colors: Record<string, string> = {
+    new: 'bg-blue-500 hover:bg-blue-600 dark:bg-blue-900/50 dark:text-blue-100',
+    open: 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-800/50 dark:text-blue-100',
+    in_progress: 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-100',
+    waiting: 'bg-purple-500 hover:bg-purple-600 dark:bg-purple-900/50 dark:text-purple-100',
+    resolved: 'bg-green-500 hover:bg-green-600 dark:bg-green-900/50 dark:text-green-100',
+    closed: 'bg-gray-500 hover:bg-gray-600 dark:bg-gray-800/50 dark:text-gray-100',
+  };
+  return colors[status] || 'bg-gray-500 dark:bg-gray-800/50';
+};
+
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    new: 'Nuevo',
+    open: 'Abierto',
+    in_progress: 'En Progreso',
+    waiting: 'Esperando',
+    resolved: 'Resuelto',
+    closed: 'Cerrado',
+  };
+  return labels[status] || status;
+};
+
+const getPriorityLabel = (priority: string) => {
+  const labels: Record<string, string> = {
+    low: 'Baja',
+    medium: 'Media',
+    high: 'Alta',
+    urgent: 'Urgente',
+  };
+  return labels[priority] || priority;
+};
+
+const getPriorityColor = (priority: string) => {
+  const colors: Record<string, string> = {
+    low: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300',
+    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
+    high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
+    urgent: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+  };
+  return colors[priority] || 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300';
+};
 
 export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
   const router = useRouter();
@@ -107,39 +160,25 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
         await fetchLatestTickets();
 
         if (!silent) {
-          // toast ? or alert
-           // For now keeping alert as in original but toast is better
-           // alert(`Sincronización completada: ${data.message}`);
+           toast.success('Sincronización completada');
         }
       } else {
         if (!silent) {
-          alert(`Error sincronizando: ${data.error}`);
+          toast.error(`Error sincronizando: ${data.error}`);
         }
       }
     } catch (error: any) {
       if (!silent) {
-        alert(`Error: ${error.message}`);
+        toast.error(`Error: ${error.message}`);
       }
     } finally {
       setSyncing(false);
     }
   };
 
-  // ... rest of filters and render logic ...
-
-
   // Apply filters to URL
   const applyFilters = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (dateFrom) params.set('date_from', dateFrom); else params.delete('date_from');
-    if (dateTo) params.set('date_to', dateTo); else params.delete('date_to');
-    if (fromEmail) params.set('from_email', fromEmail); else params.delete('from_email');
-    if (toEmail) params.set('to_email', toEmail); else params.delete('to_email');
-    if (subject) params.set('subject', subject); else params.delete('subject');
-    if (bodyText) params.set('body_text', bodyText); else params.delete('body_text');
-
-    router.push(`?${params.toString()}`);
+      // The useEffect below handles this with debitnce
   };
 
   const clearFilters = () => {
@@ -183,6 +222,132 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
     return () => clearTimeout(timeoutId);
   }, [dateFrom, dateTo, fromEmail, toEmail, subject, bodyText, router, searchParams]);
 
+  // Define Columns for List View
+  const listColumns: ColumnDefinition<Ticket>[] = [
+    {
+      id: 'ticket',
+      header: 'Nombre del Ticket',
+      accessor: (ticket) => (
+        <div className="flex flex-col">
+          <Link
+            href={`/admin/communications/tickets/${ticket.id}`}
+            className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {ticket.ticket_number} {ticket.subject}
+          </Link>
+        </div>
+      ),
+    },
+    {
+      id: 'status',
+      header: 'Estado',
+      accessor: (ticket) => (
+        <Badge className={getStatusColor(ticket.status)}>
+          {getStatusLabel(ticket.status)}
+        </Badge>
+      ),
+    },
+    {
+      id: 'priority',
+      header: 'Prioridad',
+      accessor: (ticket) => (
+        <span className="capitalize">{getPriorityLabel(ticket.priority)}</span>
+      ),
+    },
+    {
+      id: 'date',
+      header: 'Fecha de Creación',
+      accessor: (ticket) => format(new Date(ticket.created_at), "d 'de' MMM, yyyy HH:mm", { locale: es }),
+    },
+    {
+      id: 'owner',
+      header: 'Propietario',
+      accessor: (ticket) => ticket.owner_name || 'Sin propietario',
+    },
+  ];
+
+  const listActions: RowAction<Ticket>[] = [
+    {
+      label: 'Ver detalles',
+      href: (ticket) => `/admin/communications/tickets/${ticket.id}`,
+    },
+  ];
+
+  // Render Kanban Card
+  const renderKanbanCard = (ticket: Ticket, isOverlay?: boolean) => {
+    return (
+      <Card
+        className={`cursor-grab hover:shadow-md transition-shadow bg-card text-card-foreground h-full min-h-[100px] flex flex-col justify-between ${
+          isOverlay ? 'shadow-[0_20px_50px_rgba(0,0,0,0.25)] cursor-grabbing' : ''
+        }`}
+      >
+        <CardHeader className="p-3 pb-2">
+          <div className="flex justify-between items-start">
+            <Badge variant="outline" className="text-xs font-normal">
+              {ticket.ticket_number}
+            </Badge>
+            <Badge className={`text-[10px] px-1.5 py-0 ${getPriorityColor(ticket.priority)} border-0`}>
+              {ticket.priority}
+            </Badge>
+          </div>
+          <CardTitle className="text-sm font-medium mt-1 leading-tight line-clamp-2">
+            {isOverlay ? (
+              <span>{ticket.subject}</span>
+            ) : (
+              <Link 
+                href={`/admin/communications/tickets/${ticket.id}`}
+                className="hover:underline hover:text-blue-600 dark:hover:text-blue-400 decoration-2 decoration-blue-500/30 underline-offset-2"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                {ticket.subject}
+              </Link>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="flex flex-col gap-2 mt-2 text-xs text-muted-foreground">
+              {ticket.owner_name && (
+                  <div className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      <span>{ticket.owner_name}</span>
+                  </div>
+              )}
+              <div className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>
+                      {format(new Date(ticket.created_at), "d MMM", { locale: es })}
+                  </span>
+              </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const handleKanbanColumnChange = async (recordId: string, newColumnId: string, oldColumnId: string) => {
+     // Optimistic update handled by RecordKanbanView if we passed it state, 
+     // but here RecordKanbanView handles internal state and we just confirm.
+     // However, TicketsView also holds 'tickets' state. 
+     // We need to update local state to match the change.
+     
+     const updatedTickets = tickets.map(t => 
+       t.id === recordId ? { ...t, status: newColumnId } : t
+     );
+     setTickets(updatedTickets);
+
+     const result = await updateTicketStatus(recordId, newColumnId);
+     
+     if (!result.success) {
+        // Revert
+        const revertedTickets = tickets.map(t => 
+             t.id === recordId ? { ...t, status: oldColumnId } : t
+        );
+        setTickets(revertedTickets);
+        return { success: false };
+     }
+     
+     return { success: true };
+  };
 
   return (
     <div className="space-y-4">
@@ -193,81 +358,58 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
             Gestiona tus tickets y solicitudes de soporte
           </p>
         </div>
-        <div className="flex items-center gap-2">
-           <div className="flex items-center bg-muted rounded-md p-1 border">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className={`h-8 w-8 p-0 ${viewMode === 'list' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-              title="Vista de lista"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setViewMode('kanban')}
-              className={`h-8 w-8 p-0 ${viewMode === 'kanban' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
-              title="Vista Kanban"
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <Button
-            onClick={() => syncEmails(false)}
-            disabled={syncing}
-            variant="outline"
-            size="sm"
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Sincronizando...' : 'Sincronizar'}
-          </Button>
-
-          <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-            <Link href="/admin/communications/tickets/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo
-            </Link>
-          </Button>
-        </div>
       </div>
 
+      {/* Main Content Area with Toggle and Views */}
       <div className="flex flex-col gap-4 border rounded-lg p-4 bg-card">
-         <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+         <RecordsViewToggle 
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onRefresh={() => syncEmails(false)}
+            isRefreshing={syncing}
+            actions={
+               <>
+                 {lastSyncTime && (
+                    <span className="text-xs text-muted-foreground hidden sm:inline-block mr-2">
+                      Sincronizado: {format(lastSyncTime, 'HH:mm', { locale: es })}
+                    </span>
+                 )}
+                 <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] h-8 text-xs sm:text-sm">
+                    <Link href="/admin/communications/tickets/new">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo
+                    </Link>
+                 </Button>
+               </>
+            }
+            filterComponent={
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="p-0 hover:bg-transparent"
+                    className="p-0 hover:bg-transparent h-8"
                     onClick={() => setFiltersOpen(!filtersOpen)}
                 >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 border rounded-md px-3 py-1 text-sm bg-background hover:bg-muted font-normal">
                         <Search className="h-4 w-4" />
-                        <span className="font-medium">Filtros Avanzados</span>
-                         {hasActiveFilters && (
-                            <Badge variant="secondary">
+                        <span>Filtros</span>
+                        {hasActiveFilters && (
+                            <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
                             {[dateFrom, dateTo, fromEmail, toEmail, subject, bodyText].filter(Boolean).length}
                             </Badge>
                         )}
-                         {filtersOpen ? (
-                        <ChevronUp className="h-4 w-4 ml-1" />
+                        {filtersOpen ? (
+                           <ChevronUp className="h-4 w-4 ml-1 opacity-50" />
                         ) : (
-                        <ChevronDown className="h-4 w-4 ml-1" />
+                           <ChevronDown className="h-4 w-4 ml-1 opacity-50" />
                         )}
                     </div>
                 </Button>
-            </div>
-             {lastSyncTime && (
-                <span className="text-xs text-muted-foreground">
-                  Sincronizado: {format(lastSyncTime, 'HH:mm', { locale: es })}
-                </span>
-             )}
-         </div>
+            }
+         />
 
+         {/* Advanced Filters Panel */}
          {filtersOpen && (
-            <div className="space-y-4 pt-2 border-t">
+            <div className="space-y-4 pt-4 pb-2 border-t">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Fecha desde</label>
@@ -332,16 +474,30 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
                 )}
             </div>
          )}
-      </div>
-
-      <div className="h-[calc(100vh-320px)] overflow-hidden">
-         {viewMode === 'list' ? (
-           <div className="h-full overflow-y-auto">
-             <TicketList tickets={tickets} />
-           </div>
-         ) : (
-           <TicketKanban tickets={tickets} />
-         )}
+         
+         {/* View Content */}
+         <div className="h-[calc(100vh-320px)] overflow-hidden">
+            {viewMode === 'list' ? (
+                <div className="h-full overflow-y-auto">
+                    <RecordListView 
+                        records={tickets}
+                        columns={listColumns}
+                        rowActions={listActions}
+                        isLoading={false}
+                        emptyMessage="No se encontraron tickets."
+                    />
+                </div>
+            ) : (
+                <RecordKanbanView
+                    records={tickets}
+                    columns={KANBAN_COLUMNS}
+                    getRecordColumn={(t) => t.status}
+                    renderCard={renderKanbanCard}
+                    onColumnChange={handleKanbanColumnChange}
+                    minColumnHeight="100%"
+                />
+            )}
+         </div>
       </div>
     </div>
   );
