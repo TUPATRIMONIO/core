@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { PDFViewer } from './PDFViewer'
 
 interface SigningData {
   document_id: string
@@ -220,18 +221,12 @@ export function PublicSigningClient({ signingData, token }: PublicSigningClientP
               )}
             </CardHeader>
             <CardContent className="flex-1 bg-gray-100 p-0 overflow-hidden relative">
-              {/* PDF Preview Placeholder */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                 <FileSignature className="w-16 h-16 mb-4 opacity-50" />
-                 <p>Vista previa del documento</p>
-                 <Button 
-                   variant="link" 
-                   // En producción, usar URL firmada de Storage
-                   onClick={() => alert('En producción esto abriría el visualizador PDF')}
-                 >
-                   Ver documento completo
-                 </Button>
-              </div>
+              <PDFViewer
+                bucket="signing-documents"
+                filePath={signingData.current_file_path || signingData.original_file_path}
+                documentTitle={signingData.document_title}
+                className="h-full"
+              />
             </CardContent>
           </Card>
         </div>

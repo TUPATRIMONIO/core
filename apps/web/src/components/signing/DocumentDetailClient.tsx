@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { PageHeader } from '@/components/admin/page-header'
+// PageHeader no se usa en este componente, se eliminó la importación
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -26,6 +26,7 @@ import { es } from 'date-fns/locale'
 import { SignerManager } from './SignerManager'
 import { ReviewerManager } from './ReviewerManager'
 import { ApprovalInterface } from './ApprovalInterface'
+import { PDFViewer } from './PDFViewer'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -38,12 +39,14 @@ interface DocumentDetailClientProps {
   initialDocument: any
   initialSigners: any[]
   initialReviewers: any[]
+  basePath?: string
 }
 
 export function DocumentDetailClient({ 
   initialDocument, 
   initialSigners, 
-  initialReviewers 
+  initialReviewers,
+  basePath = '/dashboard/signing/documents'
 }: DocumentDetailClientProps) {
   const router = useRouter()
   const [document, setDocument] = useState(initialDocument)
@@ -304,18 +307,11 @@ export function DocumentDetailClient({
         </TabsContent>
         
         <TabsContent value="preview">
-          <Card>
-             <CardContent className="p-0 overflow-hidden min-h-[500px] flex items-center justify-center bg-gray-100">
-               {/* Aquí idealmente iría un visor PDF */}
-               <div className="text-center">
-                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                 <p className="text-gray-500">Vista previa del PDF</p>
-                 <Button variant="link" onClick={() => window.open(document.current_signed_file_path || document.original_file_path, '_blank')}>
-                   Abrir archivo original
-                 </Button>
-               </div>
-             </CardContent>
-          </Card>
+          <PDFViewer
+            bucket="signing-documents"
+            filePath={document.current_signed_file_path || document.original_file_path}
+            documentTitle={document.title}
+          />
         </TabsContent>
         
         <TabsContent value="history">

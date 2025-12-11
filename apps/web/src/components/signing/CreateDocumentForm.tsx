@@ -44,7 +44,11 @@ const formSchema = z.object({
     .refine((file) => file?.size <= 50 * 1024 * 1024, 'El archivo no debe superar los 50MB'),
 })
 
-export function CreateDocumentForm() {
+interface CreateDocumentFormProps {
+  basePath?: string
+}
+
+export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }: CreateDocumentFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -143,7 +147,7 @@ export function CreateDocumentForm() {
       toast.success('Documento creado exitosamente')
       
       // Redirigir a la página de detalle/edición para agregar firmantes
-      router.push(`/admin/signing/documents/${newDoc.id}`)
+      router.push(`${basePath}/${newDoc.id}`)
       router.refresh()
 
     } catch (error: any) {

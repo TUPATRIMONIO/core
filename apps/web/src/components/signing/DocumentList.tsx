@@ -33,9 +33,10 @@ import { cn } from '@/lib/utils'
 
 interface DocumentListProps {
   initialDocuments: any[]
+  basePath?: string
 }
 
-export function DocumentList({ initialDocuments }: DocumentListProps) {
+export function DocumentList({ initialDocuments, basePath = '/dashboard/signing/documents' }: DocumentListProps) {
   if (initialDocuments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 border rounded-lg bg-background border-dashed min-h-[300px]">
@@ -46,7 +47,7 @@ export function DocumentList({ initialDocuments }: DocumentListProps) {
         <p className="text-muted-foreground text-center max-w-sm mb-6">
           Comienza subiendo un documento para enviarlo a firmar o notarizar.
         </p>
-        <Link href="/admin/signing/documents/new">
+        <Link href={`${basePath}/new`}>
           <Button>Crear primer documento</Button>
         </Link>
       </div>
@@ -99,7 +100,7 @@ export function DocumentList({ initialDocuments }: DocumentListProps) {
             <TableRow key={doc.id}>
               <TableCell>
                 <Link 
-                  href={`/admin/signing/documents/${doc.id}`}
+                  href={`${basePath}/${doc.id}`}
                   className="font-medium hover:underline block"
                 >
                   {doc.title}
@@ -148,7 +149,7 @@ export function DocumentList({ initialDocuments }: DocumentListProps) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
-                      <Link href={`/admin/signing/documents/${doc.id}`}>
+                      <Link href={`${basePath}/${doc.id}`}>
                         <Eye className="mr-2 h-4 w-4" />
                         Ver detalles
                       </Link>

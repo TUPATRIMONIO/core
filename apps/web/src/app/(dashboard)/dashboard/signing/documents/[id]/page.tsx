@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { DocumentDetailClient } from '@/components/signing/DocumentDetailClient'
-import { Card, CardContent } from '@/components/ui/card'
 
 interface PageProps {
   params: {
@@ -44,11 +43,13 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     .eq('document_id', id)
 
   return (
-    <DocumentDetailClient 
-      initialDocument={document} 
-      initialSigners={signers || []}
-      initialReviewers={reviewers || []}
-      basePath="/admin/signing/documents"
-    />
+    <div className="px-4 pb-6">
+      <DocumentDetailClient 
+        initialDocument={document} 
+        initialSigners={signers || []}
+        initialReviewers={reviewers || []}
+        basePath="/dashboard/signing/documents"
+      />
+    </div>
   )
 }

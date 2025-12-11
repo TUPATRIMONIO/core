@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { PageHeader } from '@/components/admin/page-header'
+import { PageHeader } from '@/components/shared/page-header'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
@@ -16,19 +16,17 @@ export default async function SigningDocumentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-1 flex-col px-4 pb-6">
       <PageHeader
         title="Documentos"
         description="Gestiona tus documentos para firma electrónica y notarización"
         actions={
-          <div className="flex gap-2">
-            <Link href="/admin/signing/documents/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Documento
-              </Button>
-            </Link>
-          </div>
+          <Link href="/dashboard/signing/documents/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Documento
+            </Button>
+          </Link>
         }
       />
 
@@ -53,5 +51,5 @@ async function DocumentListWrapper() {
     return <Card><CardContent className="p-6 text-red-500">Error al cargar documentos: {error.message}</CardContent></Card>
   }
 
-  return <DocumentList initialDocuments={documents || []} basePath="/admin/signing/documents" />
+  return <DocumentList initialDocuments={documents || []} basePath="/dashboard/signing/documents" />
 }

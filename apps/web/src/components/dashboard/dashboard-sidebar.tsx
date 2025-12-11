@@ -23,6 +23,8 @@ import {
   Send,
   BarChart,
   ShoppingCart,
+  FileSignature,
+  FilePlus,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -143,6 +145,19 @@ const communicationsMenuItems = [
     title: 'Analytics',
     url: '/dashboard/communications/analytics',
     icon: BarChart,
+  },
+]
+
+const signingMenuItems = [
+  {
+    title: 'Documentos',
+    url: '/dashboard/signing/documents',
+    icon: FileSignature,
+  },
+  {
+    title: 'Nuevo Documento',
+    url: '/dashboard/signing/documents/new',
+    icon: FilePlus,
   },
 ]
 
@@ -369,6 +384,29 @@ export function DashboardSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        {/* Firma Electrónica */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Firma Electrónica</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {signingMenuItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url, signingMenuItems)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Billing */}
         <SidebarGroup>
