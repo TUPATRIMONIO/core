@@ -347,11 +347,13 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                                                 {new Date(order.created_at).toLocaleDateString('es-CL')}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Link href={`/admin/orders/${order.id}`}>
-                                                    <Button variant="ghost" size="sm">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Link href={`/admin/orders/${order.id}`}>
+                                                        <Button variant="ghost" size="sm" title="Ver Detalles">
+                                                            <Eye className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

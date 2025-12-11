@@ -140,6 +140,7 @@ interface Ticket {
   order?: any 
 }
 
+import { AssociationsPanel, AssociationSection } from '@/components/shared/AssociationsPanel'
 import { AssociationList, AssociatedItem } from '@/components/crm/tickets/AssociationList'
 import { AssociationSelector } from '@/components/crm/tickets/AssociationSelector'
 import { AttachmentList } from '@/components/crm/tickets/AttachmentList'

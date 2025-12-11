@@ -11,11 +11,12 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Package, Wallet, User, Clock, FileText, RefreshCw, CreditCard, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Calendar, Package, Wallet, User, Clock, FileText, RefreshCw, CreditCard, ExternalLink, ChevronDown, ChevronRight, Ticket } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { OrderStatusSelector } from '@/components/admin/order-status-selector'
 import { RefundModal } from '@/components/admin/refund-modal'
+import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-buttons'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -164,6 +165,11 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                 hasPayment={!!order.payment}
                             />
                         )}
+                        <CreateTicketButtonForOrder
+                            orderId={order.id}
+                            orderNumber={order.order_number}
+                            organizationName={order.organization?.name}
+                        />
                         <Link href="/admin/orders">
                             <Button variant="outline" size="sm">
                                 <ArrowLeft className="h-4 w-4 mr-2" />

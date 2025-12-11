@@ -5,7 +5,7 @@ import { StatusBadge } from '@/components/admin/status-badge'
 import { OrgTypeBadge } from '@/components/admin/org-type-badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingCart, Eye, Wallet, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Eye, Wallet, ArrowUpCircle, ArrowDownCircle, Ticket } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { EditOrganizationButton } from '@/components/admin/edit-organization-button'
 import { UserRoleActions } from '@/components/admin/user-role-actions'
@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { OrganizationOrdersFilter, OrganizationOrdersPagination } from '@/components/admin/organization-orders-filter'
+import { CreateTicketButtonForOrganization } from '@/components/admin/create-ticket-buttons'
 
 const ORDERS_PER_PAGE = 10
 
@@ -242,6 +243,11 @@ export default async function OrganizationDetailPage({
         description={`Detalles de la organización ${org.slug}`}
         actions={
           <div className="flex items-center gap-2">
+            <CreateTicketButtonForOrganization
+              organizationId={org.id}
+              organizationName={org.name}
+              organizationSlug={org.slug}
+            />
             <EditOrganizationButton
               organization={{
                 id: org.id,

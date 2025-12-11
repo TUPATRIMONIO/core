@@ -3,7 +3,13 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { CreateTicketForm } from '@/components/crm/CreateTicketForm';
 
-export default async function AdminNewTicketPage() {
+export default async function AdminNewTicketPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>
+}) {
+  const params = await searchParams
+  
   return (
     <div className="container mx-auto py-8 space-y-6 max-w-4xl">
       <div className="flex items-center justify-between">
@@ -22,7 +28,7 @@ export default async function AdminNewTicketPage() {
         </div>
       </div>
 
-      <CreateTicketForm />
+      <CreateTicketForm initialAssociations={params} />
     </div>
   );
 }

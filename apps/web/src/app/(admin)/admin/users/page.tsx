@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Eye, Users } from 'lucide-react'
+import { Eye, Users, Ticket } from 'lucide-react'
 import { EmptyState } from '@/components/admin/empty-state'
 import { Badge } from '@/components/ui/badge'
 
@@ -118,11 +118,19 @@ export default async function UsersPage() {
                         }
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/admin/users/${user.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <div className="flex items-center justify-end gap-2">
+                          <Link href={`/admin/communications/tickets/new?userId=${user.id}`}>
+                            <Button variant="ghost" size="sm" title="Crear Ticket">
+                              <Ticket className="h-4 w-4" />
+                              <span className="sr-only">Crear Ticket</span>
+                            </Button>
+                          </Link>
+                          <Link href={`/admin/users/${user.id}`}>
+                            <Button variant="ghost" size="sm" title="Ver Detalles">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
