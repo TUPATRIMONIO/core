@@ -143,13 +143,25 @@ export async function fetchEntities(
 
             case "ticket": {
                 // Fetch tickets for association
+                // First, get platform organization
+                const { data: platformOrg } = await supabase
+                    .from("organizations")
+                    .select("id")
+                    .eq("org_type", "platform")
+                    .eq("status", "active")
+                    .single();
+
+                if (!platformOrg) {
+                    return { success: false, error: "No se encontró la organización platform" };
+                }
+
                 const serviceSupabase = createServiceRoleClient();
                 const { data: tickets, error, count } = await serviceSupabase
-                    .schema("crm")
                     .from("tickets")
                     .select("id, ticket_number, subject, status", {
                         count: "exact",
                     })
+                    .eq("organization_id", platformOrg.id)
                     .order("created_at", { ascending: false })
                     .range(offset, offset + PAGE_SIZE - 1);
 
@@ -270,11 +282,23 @@ export async function searchEntities(type: AssociationType, query: string) {
             }
 
             case "ticket": {
+                // First, get platform organization
+                const { data: platformOrg } = await supabase
+                    .from("organizations")
+                    .select("id")
+                    .eq("org_type", "platform")
+                    .eq("status", "active")
+                    .single();
+
+                if (!platformOrg) {
+                    return { success: true, data: [] };
+                }
+
                 const serviceSupabase = createServiceRoleClient();
                 const { data: tickets, error } = await serviceSupabase
-                    .schema("crm")
                     .from("tickets")
                     .select("id, ticket_number, subject, status")
+                    .eq("organization_id", platformOrg.id)
                     .or(`ticket_number.ilike.%${query}%,subject.ilike.%${query}%`)
                     .limit(LIMIT);
 

@@ -22,9 +22,10 @@ interface CreateTicketFormProps {
     companyId?: string;
     [key: string]: string | undefined;
   };
+  redirectUrl?: string;
 }
 
-export function CreateTicketForm({ initialAssociations }: CreateTicketFormProps) {
+export function CreateTicketForm({ initialAssociations, redirectUrl = '/admin/communications/tickets' }: CreateTicketFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [sendEmail, setSendEmail] = useState(true);
@@ -68,7 +69,7 @@ export function CreateTicketForm({ initialAssociations }: CreateTicketFormProps)
         throw new Error(error.error || 'Error al crear ticket');
       }
 
-      router.push('/admin/communications/tickets');
+      router.push(redirectUrl);
       router.refresh();
     } catch (error: any) {
       alert(error.message || 'Error al crear ticket');

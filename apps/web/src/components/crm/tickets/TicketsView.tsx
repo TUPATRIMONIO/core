@@ -36,6 +36,7 @@ interface Ticket {
 
 interface TicketsViewProps {
   tickets: Ticket[];
+  basePath?: string;
 }
 
 const KANBAN_COLUMNS: KanbanColumn[] = [
@@ -91,7 +92,7 @@ const getPriorityColor = (priority: string) => {
   return colors[priority] || 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300';
 };
 
-export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
+export function TicketsView({ tickets: initialTickets, basePath = '/dashboard/crm/tickets' }: TicketsViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
@@ -230,7 +231,7 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
       accessor: (ticket) => (
         <div className="flex flex-col">
           <Link
-            href={`/admin/communications/tickets/${ticket.id}`}
+            href={`${basePath}/${ticket.id}`}
             className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
           >
             {ticket.ticket_number} {ticket.subject}
@@ -269,7 +270,7 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
   const listActions: RowAction<Ticket>[] = [
     {
       label: 'Ver detalles',
-      href: (ticket) => `/admin/communications/tickets/${ticket.id}`,
+      href: (ticket) => `${basePath}/${ticket.id}`,
     },
   ];
 
@@ -295,7 +296,7 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
               <span>{ticket.subject}</span>
             ) : (
               <Link 
-                href={`/admin/communications/tickets/${ticket.id}`}
+                href={`${basePath}/${ticket.id}`}
                 className="hover:underline hover:text-blue-600 dark:hover:text-blue-400 decoration-2 decoration-blue-500/30 underline-offset-2"
                 onPointerDown={(e) => e.stopPropagation()}
               >
@@ -375,7 +376,7 @@ export function TicketsView({ tickets: initialTickets }: TicketsViewProps) {
                     </span>
                  )}
                  <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] h-8 text-xs sm:text-sm">
-                    <Link href="/admin/communications/tickets/new">
+                    <Link href={`${basePath}/new`}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nuevo
                     </Link>

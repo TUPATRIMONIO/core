@@ -13,7 +13,7 @@ let oauth2Client: OAuth2Client | null = null
 /**
  * Inicializa el cliente OAuth2 de Google
  */
-export function initGmailClient() {
+export function initGmailClient(redirectUri?: string) {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     throw new Error('GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET deben estar configurados')
   }
@@ -21,7 +21,7 @@ export function initGmailClient() {
   oauth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/gmail/callback`
+    redirectUri || process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/gmail/callback`
   )
 
   return oauth2Client
@@ -29,8 +29,20 @@ export function initGmailClient() {
 
 /**
  * Obtiene el cliente OAuth2 (lo inicializa si no existe)
+ * Si se pasa redirectUri, crea una nueva instancia para ese URI
  */
-export function getOAuth2Client(): OAuth2Client {
+export function getOAuth2Client(redirectUri?: string): OAuth2Client {
+  if (redirectUri) {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      throw new Error('GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET deben estar configurados')
+    }
+    return new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      redirectUri
+    )
+  }
+
   if (!oauth2Client) {
     return initGmailClient()
   }
@@ -40,8 +52,8 @@ export function getOAuth2Client(): OAuth2Client {
 /**
  * Genera URL de autorización OAuth2
  */
-export function getAuthUrl(state?: string): string {
-  const client = getOAuth2Client()
+export function getAuthUrl(state?: string, redirectUri?: string): string {
+  const client = getOAuth2Client(redirectUri)
   
   const scopes = [
     'https://www.googleapis.com/auth/gmail.send',
@@ -60,8 +72,8 @@ export function getAuthUrl(state?: string): string {
 /**
  * Intercambia código de autorización por tokens
  */
-export async function getTokensFromCode(code: string) {
-  const client = getOAuth2Client()
+export async function getTokensFromCode(code: string, redirectUri?: string) {
+  const client = getOAuth2Client(redirectUri)
   const { tokens } = await client.getToken(code)
   client.setCredentials(tokens)
   return tokens
@@ -367,4 +379,3 @@ export async function sendEmailWithSharedAccount(
     threadId: response.data.threadId,
   }
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Loader2, ChevronLeft, ChevronRight, Ticket, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { searchEntities, fetchEntities, AssociationType } from "@/app/actions/crm/associations";
 import { toast } from "sonner";
 
@@ -104,7 +105,44 @@ export function AssociationSelector({
       case "contact": return "Asociar Contacto";
       case "company": return "Asociar Empresa";
       case "order": return "Asociar Pedido";
+      case "ticket": return "Asociar Ticket";
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      new: { label: "Nuevo", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+      open: { label: "Abierto", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+      pending: { label: "Pendiente", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+      resolved: { label: "Resuelto", className: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400" },
+      closed: { label: "Cerrado", className: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400" },
+    };
+
+    const config = statusConfig[status?.toLowerCase()] || { label: status, className: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400" };
+    
+    return (
+      <Badge variant="outline" className={`text-[10px] px-1.5 py-0.5 h-5 ${config.className} border-0`}>
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const parseTicketData = (topText: string, subText: string) => {
+    // Para tickets, el formato es "TICK-00302 Asunto del ticket"
+    const ticketMatch = topText.match(/^(TICK-\d+)\s+(.+)$/);
+    if (ticketMatch) {
+      return {
+        ticketNumber: ticketMatch[1],
+        subject: ticketMatch[2],
+        status: subText,
+      };
+    }
+    // Si no coincide el formato, devolver como está
+    return {
+      ticketNumber: topText.split(' ')[0] || topText,
+      subject: topText,
+      status: subText,
+    };
   };
 
   const renderItem = (item: any) => {
@@ -126,6 +164,36 @@ export function AssociationSelector({
       return null;
     };
 
+    // Si es un ticket, usar renderizado especial
+    if (type === "ticket") {
+      const { ticketNumber, subject, status } = parseTicketData(item.top_text, item.sub_text);
+      const isRejected = subject.toLowerCase().includes("rechazo") || subject.toLowerCase().includes("rejected");
+      
+      return (
+        <div className="flex items-start gap-3 w-full overflow-hidden">
+          <div className="flex-shrink-0">
+            {isRejected ? (
+              <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <Ticket className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col min-w-0 flex-1 gap-1 overflow-hidden">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-sm font-bold text-foreground">{ticketNumber}</span>
+              {getStatusBadge(status)}
+            </div>
+            <span className="text-sm text-foreground/90 leading-snug line-clamp-2 break-words text-left">{subject}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Renderizado estándar para otros tipos
     return (
       <div className="flex items-center gap-3 w-full">
         {item.avatar && (
@@ -146,11 +214,11 @@ export function AssociationSelector({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px]">
+      <DialogContent className="sm:max-w-[600px] max-w-[95vw]">
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-4">
+        <div className="space-y-4 pt-4 overflow-hidden">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -162,8 +230,8 @@ export function AssociationSelector({
             />
           </div>
           
-          <div className="h-[350px] border rounded-md overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-y-auto p-2">
+          <div className="h-[350px] border rounded-md overflow-hidden flex flex-col w-full">
+            <div className="flex-1 overflow-y-auto p-2 w-full">
               {loading ? (
                 <div className="flex items-center justify-center h-20 text-muted-foreground">
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
@@ -174,20 +242,20 @@ export function AssociationSelector({
                   {query ? "No se encontraron resultados" : "No hay datos disponibles"}
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-1 w-full">
                   {results.map((item) => (
                     <Button
                       key={item.id}
                       variant="ghost"
-                      className="w-full justify-start h-auto py-2 px-3"
+                      className={`w-full justify-start h-auto py-3 px-3 hover:bg-accent/50 transition-all rounded-lg overflow-hidden ${
+                        type === "ticket" ? "items-start" : "items-center"
+                      }`}
                       onClick={() => handleSelect(item.id, item.source, item)}
                       disabled={!!associating}
                     >
                       {associating === item.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        <div className="w-4 mr-2" />
-                      )}
+                        <Loader2 className="h-5 w-5 animate-spin mr-2 flex-shrink-0" />
+                      ) : null}
                       {renderItem(item)}
                     </Button>
                   ))}

@@ -11,14 +11,14 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Package, Wallet, User, Clock, FileText, RefreshCw, CreditCard, ExternalLink, ChevronDown, ChevronRight, Ticket } from 'lucide-react'
+import { ArrowLeft, Calendar, Package, Wallet, User, Clock, FileText, RefreshCw, CreditCard, ExternalLink, ChevronDown, ChevronRight, Ticket, Building2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { OrderStatusSelector } from '@/components/admin/order-status-selector'
 import { RefundModal } from '@/components/admin/refund-modal'
 import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-buttons'
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
-import { OrderAssociationsClient } from '@/components/admin/OrderAssociationsClient'
+import { OrderTicketsPanel } from '@/components/admin/OrderTicketsPanel'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -92,6 +92,25 @@ async function getOrderDetails(orderId: string) {
     // Get associations for this order
     const { data: associations } = await supabase.rpc('get_order_associations', { p_order_id: orderId })
 
+    // Get creator user if exists (using created_by_user_id)
+    let creatorUser = null;
+    if (order.created_by_user_id) {
+        // Get core user data
+        const { data: userData } = await supabase
+            .schema('core')
+            .from('users')
+            .select('id, first_name, last_name, avatar_url')
+            .eq('id', order.created_by_user_id)
+            .single();
+        
+        // Also get email from auth.users via admin API
+        const { data: authData } = await supabase.auth.admin.getUserById(order.created_by_user_id);
+        
+        if (userData) {
+            creatorUser = { ...userData, email: authData?.user?.email };
+        }
+    }
+
     return {
         ...order,
         organization: org,
@@ -101,6 +120,7 @@ async function getOrderDetails(orderId: string) {
         refunds: refunds || [],
         totalRefunded,
         associations: associations || { contacts: [], tickets: [], organizations: [] },
+        creatorUser,
     }
 }
 
@@ -150,13 +170,6 @@ export default async function OrderDetailPage({ params }: PageProps) {
     }
 
     const productData = order.product_data as Record<string, any> || {}
-
-    const customerItem = order.organization ? [{
-        id: order.organization.id,
-        name: order.organization.name,
-        subtext: order.organization.email || order.organization.slug,
-        href: `/admin/organizations/${order.organization.id}`,
-    }] : [];
 
     return (
         <div className="flex flex-1 flex-col">
@@ -230,27 +243,102 @@ export default async function OrderDetailPage({ params }: PageProps) {
                             </CardContent>
                         </Card>
 
-                        <OrderAssociationsClient
+                        {/* Información del Usuario Creador (Solo Lectura) */}
+                        {order.creatorUser ? (
+                            <Card>
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                        <User className="h-4 w-4 text-muted-foreground" />
+                                        Solicitante
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center gap-3">
+                                        {order.creatorUser.avatar_url ? (
+                                            <img 
+                                                src={order.creatorUser.avatar_url} 
+                                                alt="" 
+                                                className="h-10 w-10 rounded-full object-cover" 
+                                            />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                                <User className="h-5 w-5" />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">
+                                                {order.creatorUser.first_name} {order.creatorUser.last_name}
+                                            </div>
+                                            <div className="text-sm text-muted-foreground truncate">
+                                                {order.creatorUser.email}
+                                            </div>
+                                            <Link href={`/admin/contacts/${order.creatorUser.id}`} className="text-xs text-blue-500 hover:underline mt-1 block">
+                                                Ver perfil
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            // Si no hay created_by_user_id, intentamos mostrar contactos asociados como fallback informativo
+                             order.associations?.contacts?.length > 0 && (
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                            <User className="h-4 w-4 text-muted-foreground" />
+                                            Contactos Asociados
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            {order.associations.contacts.map((contact: any) => (
+                                                <div key={contact.id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                                    <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                                        <User className="h-4 w-4" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-medium truncate">{contact.name}</div>
+                                                        <div className="text-xs text-muted-foreground truncate">{contact.subtext}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )
+                        )}
+
+                        {/* Información de la Organización (Solo Lectura) */}
+                        {order.organization && (
+                            <Card>
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                                        Organización
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                            <Building2 className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">{order.organization.name}</div>
+                                            <div className="text-sm text-muted-foreground truncate">
+                                                {order.organization.email || order.organization.slug}
+                                            </div>
+                                            <Link href={`/admin/organizations/${order.organization.id}`} className="text-xs text-blue-500 hover:underline mt-1 block">
+                                                Ver organización
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Tickets (Editable) */}
+                        <OrderTicketsPanel
                             orderId={order.id}
-                            initialOrganizations={[
-                                ...(order.organization ? [{
-                                    id: order.organization.id,
-                                    name: order.organization.name,
-                                    subtext: order.organization.email || order.organization.slug,
-                                    href: `/admin/organizations/${order.organization.id}`,
-                                }] : []),
-                                ...(order.associations?.organizations || []).map((o: any) => ({
-                                    id: o.id,
-                                    name: o.name,
-                                    subtext: o.subtext,
-                                    href: `/admin/organizations/${o.id}`,
-                                }))
-                            ].filter((v,i,a)=>a.findIndex(v2=>(v2.id===v.id))===i)} // dedupe
-                            initialContacts={(order.associations?.contacts || []).map((c: any) => ({
-                                id: c.id,
-                                name: c.name,
-                                subtext: c.subtext,
-                            }))}
                             initialTickets={(order.associations?.tickets || []).map((t: any) => ({
                                 id: t.id,
                                 name: t.name,

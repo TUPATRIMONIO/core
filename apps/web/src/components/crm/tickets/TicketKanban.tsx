@@ -35,6 +35,7 @@ interface Ticket {
 
 interface TicketKanbanProps {
   tickets: Ticket[];
+  basePath?: string;
 }
 
 const COLUMNS = [
@@ -56,7 +57,7 @@ const getPriorityColor = (priority: string) => {
   return colors[priority] || 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300';
 };
 
-function KanbanCard({ ticket, isOverlay = false }: { ticket: Ticket; isOverlay?: boolean }) {
+function KanbanCard({ ticket, isOverlay = false, basePath = '/dashboard/crm/tickets' }: { ticket: Ticket; isOverlay?: boolean; basePath?: string }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: ticket.id,
     data: { ticket },
@@ -93,7 +94,7 @@ function KanbanCard({ ticket, isOverlay = false }: { ticket: Ticket; isOverlay?:
             <span>{ticket.subject}</span>
           ) : (
             <Link 
-              href={`/admin/communications/tickets/${ticket.id}`}
+              href={`${basePath}/${ticket.id}`}
               className="hover:underline hover:text-blue-600 dark:hover:text-blue-400 decoration-2 decoration-blue-500/30 underline-offset-2"
               onPointerDown={(e) => e.stopPropagation()}
             >
@@ -122,7 +123,7 @@ function KanbanCard({ ticket, isOverlay = false }: { ticket: Ticket; isOverlay?:
   );
 }
 
-function KanbanColumn({ column, tickets }: { column: typeof COLUMNS[0]; tickets: Ticket[] }) {
+function KanbanColumn({ column, tickets, basePath }: { column: typeof COLUMNS[0]; tickets: Ticket[]; basePath?: string }) {
   const { setNodeRef } = useDroppable({
     id: column.id,
   });
@@ -140,14 +141,14 @@ function KanbanColumn({ column, tickets }: { column: typeof COLUMNS[0]; tickets:
         className={`flex-1 bg-muted/30 p-2 rounded-b-md border border-t-0 border-border overflow-y-auto min-h-[500px]`}
       >
         {tickets.map((ticket) => (
-          <KanbanCard key={ticket.id} ticket={ticket} />
+          <KanbanCard key={ticket.id} ticket={ticket} basePath={basePath} />
         ))}
       </div>
     </div>
   );
 }
 
-export function TicketKanban({ tickets: initialTickets }: TicketKanbanProps) {
+export function TicketKanban({ tickets: initialTickets, basePath = '/dashboard/crm/tickets' }: TicketKanbanProps) {
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [activeId, setActiveId] = useState<string | null>(null);
   const router = useRouter();
@@ -208,12 +209,13 @@ export function TicketKanban({ tickets: initialTickets }: TicketKanbanProps) {
             key={col.id}
             column={col}
             tickets={tickets.filter((t) => t.status === col.id)}
+            basePath={basePath}
           />
         ))}
       </div>
 
       <DragOverlay>
-        {activeTicket ? <KanbanCard ticket={activeTicket} isOverlay /> : null}
+        {activeTicket ? <KanbanCard ticket={activeTicket} isOverlay basePath={basePath} /> : null}
       </DragOverlay>
     </DndContext>
   );

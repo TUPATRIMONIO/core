@@ -115,7 +115,7 @@ export default async function AdminTicketsPage({ searchParams }: PageProps) {
 
   return (
     <div className="container mx-auto py-8">
-      <TicketsView tickets={finalTickets} />
+      <TicketsView tickets={finalTickets} basePath="/admin/communications/tickets" />
     </div>
   );
 }

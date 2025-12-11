@@ -1,9 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, X, ChevronRight, ChevronDown, User, Building2, Package, Ticket, LucideIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, X, ChevronRight, ChevronDown, User, Building2, Package, Ticket, LucideIcon, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
+
+const MAX_VISIBLE_ITEMS = 5;
 
 export interface AssociatedItem {
   id: string;
@@ -58,10 +67,27 @@ export function AssociationsPanel({
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
     sections.reduce((acc, section) => ({ ...acc, [section.id]: true }), {})
   );
+  const [modalSection, setModalSection] = useState<AssociationSection | null>(null);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
+
+  const openAllItemsModal = (section: AssociationSection) => {
+    setModalSection(section);
+  };
+
+  // Sincronizar modalSection con sections cuando cambian (ej: al eliminar un item)
+  useEffect(() => {
+    if (modalSection) {
+      const updatedSection = sections.find(s => s.id === modalSection.id);
+      if (updatedSection) {
+        setModalSection(updatedSection);
+      } else {
+        setModalSection(null);
+      }
+    }
+  }, [sections]);
 
   const getIconForType = (section: AssociationSection, avatar?: string | null) => {
     if (avatar) {
@@ -136,51 +162,134 @@ export function AssociationsPanel({
                   No hay {section.title.toLowerCase()} asociados
                 </div>
               ) : (
-                section.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="group flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
-                  >
-                    <div className="mt-0.5">
-                      {getIconForType(section, item.avatar)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {item.href ? (
-                        <Link
-                          href={item.href}
-                          className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline truncate block"
+                <>
+                  {section.items.slice(0, MAX_VISIBLE_ITEMS).map((item) => (
+                    <div
+                      key={item.id}
+                      className="group flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                    >
+                      <div className="mt-0.5">
+                        {getIconForType(section, item.avatar)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {item.href ? (
+                          <Link
+                            href={item.href}
+                            className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline truncate block"
+                          >
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <div className="text-sm font-medium text-foreground truncate">
+                            {item.name}
+                          </div>
+                        )}
+                        {item.subtext && (
+                          <div className="text-xs text-muted-foreground truncate">
+                            {item.subtext}
+                          </div>
+                        )}
+                      </div>
+                      {section.canRemove !== false && onRemoveItem && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                          onClick={() => onRemoveItem(section.id, item.id)}
+                          disabled={isLoading}
                         >
-                          {item.name}
-                        </Link>
-                      ) : (
-                        <div className="text-sm font-medium text-foreground truncate">
-                          {item.name}
-                        </div>
-                      )}
-                      {item.subtext && (
-                        <div className="text-xs text-muted-foreground truncate">
-                          {item.subtext}
-                        </div>
+                          <X className="h-3 w-3" />
+                        </Button>
                       )}
                     </div>
-                    {section.canRemove !== false && onRemoveItem && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                        onClick={() => onRemoveItem(section.id, item.id)}
-                        disabled={isLoading}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                ))
+                  ))}
+                  
+                  {/* Botón para ver todos cuando hay más de MAX_VISIBLE_ITEMS */}
+                  {section.items.length > MAX_VISIBLE_ITEMS && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-1 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => openAllItemsModal(section)}
+                    >
+                      Ver todos ({section.items.length})
+                      <ExternalLink className="h-3 w-3 ml-1.5" />
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           )}
         </div>
       ))}
+
+      {/* Modal para ver todos los items */}
+      <Dialog open={!!modalSection} onOpenChange={(open) => !open && setModalSection(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {modalSection && (
+                <>
+                  {(() => {
+                    const config = defaultIconConfig[modalSection.type] || defaultIconConfig.contact;
+                    const IconComponent = modalSection.icon || config.icon;
+                    return <IconComponent className={`h-5 w-5 ${config.color}`} />;
+                  })()}
+                  {modalSection.title} ({modalSection.items.length})
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[60vh]">
+            <div className="space-y-2 pr-4">
+              {modalSection?.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="group flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                >
+                  <div className="mt-0.5">
+                    {modalSection && getIconForType(modalSection, item.avatar)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        className="text-sm font-medium text-foreground hover:text-blue-600 hover:underline truncate block"
+                        onClick={() => setModalSection(null)}
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <div className="text-sm font-medium text-foreground truncate">
+                        {item.name}
+                      </div>
+                    )}
+                    {item.subtext && (
+                      <div className="text-xs text-muted-foreground truncate">
+                        {item.subtext}
+                      </div>
+                    )}
+                  </div>
+                  {modalSection?.canRemove !== false && onRemoveItem && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        onRemoveItem(modalSection.id, item.id);
+                      }}
+                      disabled={isLoading}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
