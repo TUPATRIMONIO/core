@@ -104,11 +104,15 @@ export async function sendEmail(
 
   const gmail = google.gmail({ version: 'v1', auth: client })
 
+  // Codificar asunto según RFC 2047
+  const encodedSubject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`
+
   // Crear mensaje en formato RFC 2822
   const messageParts = [
     `To: ${to}`,
-    `Subject: ${subject}`,
+    `Subject: ${encodedSubject}`,
     'Content-Type: text/html; charset=utf-8',
+    'Content-Transfer-Encoding: 8bit',
     '',
     bodyHtml,
   ]
@@ -299,10 +303,13 @@ export async function sendEmailWithSharedAccount(
   // Crear mensaje en formato RFC 2822 con multipart (HTML + texto)
   const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   
+  // Codificar asunto según RFC 2047
+  const encodedSubject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`
+
   // Construir headers base
   const headers: string[] = [
     `To: ${to}`,
-    `Subject: ${subject}`,
+    `Subject: ${encodedSubject}`,
     `From: ${account.gmail_email_address || account.email_address}`,
     `MIME-Version: 1.0`,
   ]
@@ -333,13 +340,13 @@ export async function sendEmailWithSharedAccount(
     '',
     `--${boundary}`,
     `Content-Type: text/plain; charset=utf-8`,
-    `Content-Transfer-Encoding: 7bit`,
+    `Content-Transfer-Encoding: 8bit`,
     '',
     finalBodyText,
     '',
     `--${boundary}`,
     `Content-Type: text/html; charset=utf-8`,
-    `Content-Transfer-Encoding: 7bit`,
+    `Content-Transfer-Encoding: 8bit`,
     '',
     finalBodyHtml,
     '',
