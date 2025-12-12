@@ -53,3 +53,4 @@ async function DocumentListWrapper() {
 
   return <DocumentList initialDocuments={documents || []} basePath="/dashboard/signing/documents" />
 }
+

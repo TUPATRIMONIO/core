@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { AssociationsPanel, AssociationSection, AssociatedItem } from '@/components/shared/AssociationsPanel';
 import { AssociationSelector } from '@/components/crm/tickets/AssociationSelector';
 import { linkEntityGeneric, unlinkEntityGeneric, AssociationType, EntityType } from '@/app/actions/crm/associations';
@@ -29,6 +29,22 @@ export function OrganizationAssociationsClient({
 
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectorType, setSelectorType] = useState<AssociationType>('contact');
+
+  useEffect(() => {
+    setContacts(initialContacts);
+  }, [initialContacts]);
+
+  useEffect(() => {
+    setTickets(initialTickets);
+  }, [initialTickets]);
+
+  useEffect(() => {
+    setApps(initialApps);
+  }, [initialApps]);
+
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
 
   const handleAddToSection = (sectionId: string, sectionType: string) => {
     const typeMap: Record<string, AssociationType> = {

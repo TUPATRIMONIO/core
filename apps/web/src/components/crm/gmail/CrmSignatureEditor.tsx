@@ -221,3 +221,4 @@ export function CrmSignatureEditor({ organizationId }: CrmSignatureEditorProps) 
     </div>
   )
 }
+

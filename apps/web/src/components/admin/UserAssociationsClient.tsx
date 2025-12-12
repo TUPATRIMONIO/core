@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import {
     AssociationsPanel,
     AssociationSection,
@@ -36,6 +36,18 @@ export function UserAssociationsClient({
     const [selectorOpen, setSelectorOpen] = useState(false);
     const [selectorType, setSelectorType] =
         useState<AssociationType>("organization"); // Default
+
+    useEffect(() => {
+        setOrganizations(initialOrganizations);
+    }, [initialOrganizations]);
+
+    useEffect(() => {
+        setOrders(initialOrders);
+    }, [initialOrders]);
+
+    useEffect(() => {
+        setTickets(initialTickets);
+    }, [initialTickets]);
 
     const handleAddToSection = (sectionId: string, sectionType: string) => {
         // Map section type to association type

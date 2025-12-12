@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { requireApplicationAccess } from "@/lib/access/api-access-guard";
+import { createServiceRoleClient } from "@/lib/supabase/server";
+import { sendEmailWithSharedAccount } from "@/lib/gmail/client";
 
 export const runtime = "nodejs";
 
@@ -69,10 +71,6 @@ export async function GET(request: NextRequest) {
  * POST /api/crm/tickets
  * Crear un nuevo ticket
  */
-// ... imports
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { sendEmailWithSharedAccount } from "@/lib/gmail/client";
-
 export async function POST(request: NextRequest) {
   // Verificar acceso a CRM
   const denied = await requireApplicationAccess(request, "crm_sales");
@@ -157,8 +155,6 @@ export async function POST(request: NextRequest) {
       created_by: user.id,
     };
 
-    // Note: If passed via associations param (core entities), we will link them after creation
-
     // Crear ticket
     const { data: newTicket, error } = await supabase
       .from("tickets")
@@ -174,186 +170,220 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Manejar Asociaciones (Core y CRM) desde `associations` param
+    // Manejar Asociaciones
     const associations = body.associations || {};
+    const recipients = body.recipients || [];
+    let toEmails: string[] = [];
 
-    // 1. Link Order
+    // 1. Link Order (Always if present)
     if (associations.orderId) {
       await serviceSupabase.rpc("link_ticket_order", {
         p_ticket_id: newTicket.id,
         p_order_id: associations.orderId,
       });
+    }
 
-      // Obtener usuario y organización responsable del pedido para asociarlos
-      const { data: orderData } = await serviceSupabase
-        .from("orders")
-        .select("user_id, organization_id")
-        .eq("id", associations.orderId)
-        .single();
-
-      // Asociar automáticamente el usuario responsable del pedido
-      if (orderData?.user_id && !associations.userId) {
-        associations.userId = orderData.user_id;
+    // 2. Handle Linking based on Recipients or Fallback
+    if (recipients.length > 0) {
+      // Use recipients list
+      toEmails = recipients.map((r: any) => r.email);
+      
+      for (const recipient of recipients) {
+        if (recipient.id) {
+          if (recipient.type === 'user') {
+            await serviceSupabase.rpc("link_ticket_user", {
+              p_ticket_id: newTicket.id,
+              p_user_id: recipient.id,
+            });
+          } else if (recipient.type === 'organization') {
+            await serviceSupabase.rpc("link_ticket_organization", {
+              p_ticket_id: newTicket.id,
+              p_organization_id: recipient.id,
+            });
+          } else if (recipient.type === 'contact') {
+            // Check if not already linked by main insert
+            if (insertData.contact_id !== recipient.id) {
+                await serviceSupabase.rpc("link_ticket_contact", {
+                  p_ticket_id: newTicket.id,
+                  p_contact_id: recipient.id,
+                });
+            }
+          }
+        }
       }
 
-      // Asociar automáticamente la organización del pedido si no está especificada
-      if (orderData?.organization_id && !associations.organizationId) {
-        associations.organizationId = orderData.organization_id;
+    } else {
+      // Legacy behavior: Use associations param
+      
+      // Auto-link from Order context if no specific user/org provided
+      if (associations.orderId) {
+        const { data: orderData } = await serviceSupabase
+            .from("orders")
+            .select("user_id, organization_id")
+            .eq("id", associations.orderId)
+            .single();
+
+        if (orderData?.user_id && !associations.userId) {
+            associations.userId = orderData.user_id;
+        }
+        if (orderData?.organization_id && !associations.organizationId) {
+            associations.organizationId = orderData.organization_id;
+        }
       }
-    }
 
-    // 2. Link Core User
-    if (associations.userId) {
-      await serviceSupabase.rpc("link_ticket_user", {
-        p_ticket_id: newTicket.id,
-        p_user_id: associations.userId,
-      });
-    }
-
-    // 3. Link Core Organization
-    if (associations.organizationId) {
-      await serviceSupabase.rpc("link_ticket_organization", {
-        p_ticket_id: newTicket.id,
-        p_organization_id: associations.organizationId,
-      });
-    }
-
-    // 4. Link CRM Contact (explicit association)
-    if (associations.contactId) {
-      // If not already set in main ticket creation
-      if (!insertData.contact_id) {
-        await serviceSupabase.rpc("link_ticket_contact", {
+      if (associations.userId) {
+        await serviceSupabase.rpc("link_ticket_user", {
           p_ticket_id: newTicket.id,
-          p_contact_id: associations.contactId,
+          p_user_id: associations.userId,
         });
+        
+        // Resolve email
+        const { data: userData } = await serviceSupabase.auth.admin.getUserById(associations.userId);
+        if (userData?.user?.email) toEmails.push(userData.user.email);
       }
-    }
 
-    // 5. Link CRM Company (explicit association)
-    if (associations.companyId) {
-      // If not already set in main ticket creation
-      if (!insertData.company_id) {
-        await serviceSupabase.rpc("link_ticket_company", {
+      if (associations.organizationId) {
+        await serviceSupabase.rpc("link_ticket_organization", {
           p_ticket_id: newTicket.id,
-          p_company_id: associations.companyId,
+          p_organization_id: associations.organizationId,
         });
+        
+        // Resolve email if no user email found (or add to list?)
+        // Legacy only sent to ONE email. Prioritizing User > Contact > Org.
+        if (toEmails.length === 0) {
+             const { data: org } = await serviceSupabase
+              .from("organizations")
+              .select("email")
+              .eq("id", associations.organizationId)
+              .single();
+             if (org?.email) toEmails.push(org.email);
+        }
+      }
+
+      if (associations.contactId) {
+        if (!insertData.contact_id) {
+            await serviceSupabase.rpc("link_ticket_contact", {
+                p_ticket_id: newTicket.id,
+                p_contact_id: associations.contactId,
+            });
+        }
+        // Resolve email if no user email found
+        if (toEmails.length === 0) {
+             const { data: contact } = await serviceSupabase
+              .schema("crm") // Explicit schema just in case
+              .from("contacts")
+              .select("email")
+              .eq("id", associations.contactId)
+              .single();
+             if (contact?.email) toEmails.push(contact.email);
+        }
+      }
+      
+      if (associations.companyId) {
+          if (!insertData.company_id) {
+            await serviceSupabase.rpc("link_ticket_company", {
+              p_ticket_id: newTicket.id,
+              p_company_id: associations.companyId,
+            });
+          }
       }
     }
 
     // Manejar Envío de Email
-    if (body.sendEmailNotification) {
-      let toEmail = "";
+    if (body.sendEmailNotification && toEmails.length > 0) {
+      const toEmailString = toEmails.join(', ');
 
-      // Resolver email destino
-      if (associations.userId) {
-        // Fetch user email
-        const { data: userData } = await serviceSupabase.auth.admin.getUserById(
-          associations.userId,
-        );
-        toEmail = userData?.user?.email || "";
-      } else if (associations.contactId) {
-        const { data: contact } = await serviceSupabase
-          .from("crm.contacts")
-          .select("email")
-          .eq("id", associations.contactId)
-          .single();
-        toEmail = contact?.email || "";
-      } else if (associations.organizationId) {
-        const { data: org } = await serviceSupabase
+      try {
+        // Get platform org for email sending context
+        const { data: platformOrg } = await supabase
           .from("organizations")
-          .select("email")
-          .eq("id", associations.organizationId)
+          .select("id")
+          .eq("org_type", "platform")
+          .eq("status", "active")
           .single();
-        toEmail = org?.email || "";
-      }
 
-      if (toEmail) {
-        try {
-          // Get platform org for email sending context
-          const { data: platformOrg } = await supabase
-            .from("organizations")
-            .select("id")
-            .eq("org_type", "platform")
-            .eq("status", "active")
-            .single();
+        if (platformOrg) {
+          // Send Email with Threading Support
+          const { messageId, threadId } = await sendEmailWithSharedAccount(
+            platformOrg.id,
+            user.id,
+            toEmailString, // Comma separated list
+            `[TICKET #${newTicket.ticket_number}] ${body.subject}`,
+            body.description,
+            undefined, // Text body auto-generated
+            true, // Include signature
+            undefined, // No In-Reply-To
+            undefined, // No References
+            undefined, // New Thread
+          );
 
-          if (platformOrg) {
-            // Send Email with Threading Support
-            const { messageId, threadId } = await sendEmailWithSharedAccount(
-              platformOrg.id,
-              user.id,
-              toEmail,
-              `[TICKET #${newTicket.ticket_number}] ${body.subject}`, // Add ticket # to subject
-              body.description, // HTML Body (assuming description is rich text or plain)
-              undefined, // Text body auto-generated
-              true, // Include signature
-              undefined, // No In-Reply-To (New Thread)
-              undefined, // No References
-              undefined, // New Thread
-            );
-
-            // Create CRM Thread
-            let threadIdCrm = null;
-            if (threadId) {
-              const { data: newThread } = await serviceSupabase
-                .from("email_threads")
-                .insert({
-                  organization_id: platformOrg.id,
-                  gmail_thread_id: threadId,
-                  contact_id: insertData.contact_id || null, // Link to CRM contact if available
-                  subject: body.subject,
-                  snippet: body.description.substring(0, 100),
-                  participants: [toEmail],
-                  last_email_at: new Date().toISOString(),
-                  last_email_from: toEmail, // Or 'me'? Technically initiated by us.
-                  email_count: 1,
-                })
-                .select("id")
-                .single();
-              threadIdCrm = newThread?.id;
-            }
-
-            // Save Email to DB for Threading History
-            const { data: gmailAccount } = await serviceSupabase
-              .from("email_accounts")
-              .select("id, email_address")
-              .eq("organization_id", platformOrg.id)
-              .eq("account_type", "shared")
-              .eq("is_active", true)
-              .single();
-
-            await serviceSupabase
-              .from("emails")
+          // Create CRM Thread
+          let threadIdCrm = null;
+          if (threadId) {
+            const { data: newThread } = await serviceSupabase
+              .from("email_threads")
               .insert({
                 organization_id: platformOrg.id,
-                contact_id: insertData.contact_id || null,
-                ticket_id: newTicket.id,
-                thread_id_crm: threadIdCrm,
-                gmail_message_id: messageId,
-                thread_id: threadId,
-                from_email: gmailAccount?.email_address ||
-                  "contacto@tupatrimonio.app",
-                to_emails: [toEmail],
+                gmail_thread_id: threadId,
+                contact_id: insertData.contact_id || null, // Link to CRM contact if available
                 subject: body.subject,
-                body_html: body.description.replace(/\n/g, "<br>"), // Convert newlines to br for HTML
-                body_text: body.description, // Plain text keeps newlines
-                direction: "outbound", // Sent by us
-                status: "sent",
-                sent_at: new Date().toISOString(),
-                sent_by: user.id,
-                sent_from_account_id: gmailAccount?.id || null,
-                is_read: true,
                 snippet: body.description.substring(0, 100),
-              });
-
-            console.log(
-              `Ticket creation email sent. Ticket: ${newTicket.id}, Thread: ${threadId}`,
-            );
+                participants: toEmails,
+                last_email_at: new Date().toISOString(),
+                last_email_from: toEmails[0], // First recipient as proxy? or 'me'? 
+                // DB expects string? "last_email_from" usually is the sender of the last email.
+                // If outbound, it should be us. But here we are initializing the thread.
+                // Let's use the first 'to' email as the "other party" or just leave it.
+                // Actually, if we sent it, `last_email_from` should be our email.
+                // But typically this field is used to show "who replied last".
+                // I'll leave as is or use the first recipient.
+                email_count: 1,
+              })
+              .select("id")
+              .single();
+            threadIdCrm = newThread?.id;
           }
-        } catch (emailError) {
-          console.error("Failed to send ticket creation email:", emailError);
-          // Don't fail the request, just log error. Ticket is created.
+
+          // Save Email to DB for Threading History
+          const { data: gmailAccount } = await serviceSupabase
+            .from("email_accounts")
+            .select("id, email_address")
+            .eq("organization_id", platformOrg.id)
+            .eq("account_type", "shared")
+            .eq("is_active", true)
+            .single();
+
+          await serviceSupabase
+            .from("emails")
+            .insert({
+              organization_id: platformOrg.id,
+              contact_id: insertData.contact_id || null,
+              ticket_id: newTicket.id,
+              thread_id_crm: threadIdCrm,
+              gmail_message_id: messageId,
+              thread_id: threadId,
+              from_email: gmailAccount?.email_address ||
+                "contacto@tupatrimonio.app",
+              to_emails: toEmails,
+              subject: body.subject,
+              body_html: body.description.replace(/\n/g, "<br>"),
+              body_text: body.description,
+              direction: "outbound",
+              status: "sent",
+              sent_at: new Date().toISOString(),
+              sent_by: user.id,
+              sent_from_account_id: gmailAccount?.id || null,
+              is_read: true,
+              snippet: body.description.substring(0, 100),
+            });
+
+          console.log(
+            `Ticket creation email sent. Ticket: ${newTicket.id}, Thread: ${threadId}, Recipients: ${toEmails.length}`,
+          );
         }
+      } catch (emailError) {
+        console.error("Failed to send ticket creation email:", emailError);
+        // Don't fail the request, just log error. Ticket is created.
       }
     }
 

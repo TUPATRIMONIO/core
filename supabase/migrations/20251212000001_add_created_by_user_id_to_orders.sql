@@ -13,3 +13,4 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_by
 ON billing.orders(created_by_user_id);
 
 COMMENT ON COLUMN billing.orders.created_by_user_id IS 'Usuario que creó el pedido (puede ser distinto al contacto asociado)';
+

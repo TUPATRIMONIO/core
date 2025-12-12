@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { AssociationsPanel, AssociationSection, AssociatedItem } from '@/components/shared/AssociationsPanel';
 import { AssociationSelector } from '@/components/crm/tickets/AssociationSelector';
 import { linkEntityGeneric, unlinkEntityGeneric } from '@/app/actions/crm/associations';
@@ -19,6 +19,10 @@ export function OrderTicketsPanel({
   const [isPending, startTransition] = useTransition();
 
   const [selectorOpen, setSelectorOpen] = useState(false);
+
+  useEffect(() => {
+    setTickets(initialTickets);
+  }, [initialTickets]);
 
   const handleAddToSection = (sectionId: string, sectionType: string) => {
     // Solo permitimos tickets aquí
@@ -90,3 +94,4 @@ export function OrderTicketsPanel({
     </>
   );
 }
+

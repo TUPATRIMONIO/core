@@ -335,3 +335,4 @@ Este es un email automático de TuPatrimonio. Por favor, no respondas a este men
       throw new Error(`Tipo de notificación no válido: ${payload.type}`);
   }
 }
+

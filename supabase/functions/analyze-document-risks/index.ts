@@ -286,3 +286,4 @@ IMPORTANTE: Responde SOLO con JSON válido, sin texto adicional antes o después
     );
   }
 });
+

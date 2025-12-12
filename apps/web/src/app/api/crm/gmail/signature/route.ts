@@ -148,3 +148,4 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   return POST(request)
 }
+
