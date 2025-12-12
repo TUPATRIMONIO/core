@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -38,8 +38,13 @@ const formSchema = z.object({
   requiresApproval: z.boolean().default(false),
   requiresAiReview: z.boolean().default(true),
   file: z.any()
-    .refine((file) => file instanceof FileList ? file.length > 0 : file instanceof File, 'Debes seleccionar un archivo')
-    .transform((file) => file instanceof FileList ? file[0] : file)
+    .refine((file) => !!file, 'Debes seleccionar un archivo')
+    .refine((file) => {
+      if (typeof FileList !== 'undefined' && file instanceof FileList) return file.length > 0
+      if (typeof File !== 'undefined' && file instanceof File) return true
+      return false
+    }, 'Debes seleccionar un archivo')
+    .transform((file) => (typeof FileList !== 'undefined' && file instanceof FileList) ? file[0] : file)
     .refine((file) => file?.type === 'application/pdf', 'El archivo debe ser un PDF')
     .refine((file) => file?.size <= 50 * 1024 * 1024, 'El archivo no debe superar los 50MB'),
 })
@@ -52,6 +57,20 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile)
+      setPreviewUrl(url)
+      
+      return () => {
+        URL.revokeObjectURL(url)
+      }
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [selectedFile])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,20 +90,25 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
       const supabase = createClient()
       
       // 1. Obtener usuario y organización
-      // Nota: En una app real, esto debería venir del contexto o validarse mejor
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
         toast.error('No estás autenticado')
         return
       }
 
-      const { data: orgUser } = await supabase
+      const { data: orgUser, error: orgError } = await supabase
         .from('organization_users')
         .select('organization_id')
         .eq('user_id', user.id)
         .eq('status', 'active')
         .single()
       
+      if (orgError) {
+        console.error('Error fetching organization:', orgError)
+        toast.error('Error al verificar organización')
+        return
+      }
+
       if (!orgUser) {
         toast.error('No tienes una organización activa')
         return
@@ -101,7 +125,10 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
         p_requires_ai_review: values.requiresAiReview
       })
 
-      if (createError) throw new Error(createError.message)
+      if (createError) {
+        console.error('RPC Error:', createError)
+        throw new Error(createError.message)
+      }
       if (!newDoc) throw new Error('No se pudo crear el documento')
 
       // 3. Subir archivo a Storage
@@ -158,11 +185,19 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
     }
   }
 
+  const onInvalid = (errors: any) => {
+    console.log('Validation errors:', errors)
+    const errorKeys = Object.keys(errors)
+    if (errorKeys.length > 0) {
+      toast.error(`Por favor revisa los campos: ${errorKeys.join(', ')}`)
+    }
+  }
+
   return (
     <Card>
       <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
@@ -344,7 +379,23 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
               )}
             />
 
-            <div className="flex justify-end gap-4">
+            {previewUrl && (
+              <div className="space-y-2 animate-in fade-in zoom-in duration-300">
+                <FormLabel>Vista Previa del Documento</FormLabel>
+                <div className="w-full h-[600px] border rounded-lg overflow-hidden bg-muted/20 relative">
+                  <iframe 
+                    src={previewUrl} 
+                    className="w-full h-full" 
+                    title="Vista previa del documento"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Esta es una vista previa local. El archivo se subirá cuando crees el documento.
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-4 pt-4">
               <Button 
                 type="button" 
                 variant="outline" 

@@ -4,6 +4,7 @@ export type OrderStatus = 'pending_payment' | 'paid' | 'cancelled' | 'refunded' 
 export type ProductType = 
   | 'credits' 
   | 'electronic_signature' 
+  | 'electronic_signature_resend'
   | 'notary_service' 
   | 'company_modification' 
   | 'advisory' 
@@ -199,7 +200,7 @@ export async function updateOrderStatus(
   // Obtener orden actual para comparar estados
   const { data: currentOrder } = await supabase
     .from('orders')
-    .select('status, order_number')
+    .select('status, order_number, amount')
     .eq('id', orderId)
     .single();
   
@@ -242,7 +243,8 @@ export async function updateOrderStatus(
   });
   
   // Si el nuevo estado es 'completed', procesar emisión de documentos
-  if (status === 'completed') {
+  // Solo si el monto es mayor a 0 (órdenes gratuitas no emiten factura)
+  if (status === 'completed' && (order?.amount || 0) > 0) {
     try {
       console.log('[updateOrderStatus] Orden completada, procesando emisión de documento...');
       

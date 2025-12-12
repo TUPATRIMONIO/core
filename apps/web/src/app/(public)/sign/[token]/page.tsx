@@ -23,7 +23,7 @@ export default async function PublicSigningPage({ params }: PageProps) {
   // 1. Validar token y obtener datos del documento usando la RPC segura
   // Esta RPC verifica el token y devuelve datos limitados del documento y del firmante
   const { data: signingData, error } = await supabase.rpc('get_document_for_signing', {
-    p_token: token
+    p_signing_token: token
   })
 
   if (error || !signingData) {

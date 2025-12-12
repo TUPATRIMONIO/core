@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 8, 2025\
+> **📅 Última actualización:** Diciembre 12, 2025\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -12,9 +12,9 @@
 > **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
 > INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
-> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅\
-> **🎯 Próximo milestone:** Pruebas de reembolsos con Stripe y Transbank +
-> Integración con flujos automáticos de pedidos 📋
+> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ +
+> **🆕 SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧\
+> **🎯 Próximo milestone:** Testing del flujo completo + Portal de firma + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
@@ -27,9 +27,9 @@ NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe,
 Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN
 INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C
 ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
-(Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **PRÓXIMO:
-Pruebas de reembolsos con Stripe y Transbank + Integración con flujos
-automáticos de pedidos** 📋
+(Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
+FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧 + **PRÓXIMO: Testing flujo
+completo, portal de firma /sign/[token], panel de notarías** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y
 optimizaciones están implementadas y funcionando. El sitio marketing está
@@ -376,6 +376,503 @@ READY:
 - CRM `max_contacts`: 1,000 → 100
 - CRM `max_users`: 5 → 1
 - CRM `api_access`: true → false
+
+---
+
+## 🆕 SISTEMA DE FIRMA ELECTRÓNICA 🚧 (Diciembre 2025)
+
+> **📅 Inicio:** Diciembre 11, 2025\
+> **📊 Estado:** EN DESARROLLO ACTIVO 🚧\
+> **🎯 Objetivo:** Sistema completo de firma electrónica con servicios notariales
+
+### ✅ COMPLETADO - Base de Datos (Schema `signing`)
+
+**Tablas Principales Creadas:**
+
+- ✅ `signing.documents` - Documento principal con estados, metadata, archivos
+- ✅ `signing.signers` - Firmantes con first_name/last_name separados, validación RUT
+- ✅ `signing.document_versions` - Historial de versiones (original, firmado, notariado)
+- ✅ `signing.reviewers` - Revisores internos del documento
+- ✅ `signing.ai_reviews` - Revisiones automáticas por IA (Claude)
+- ✅ `signing.notary_requests` - Solicitudes a notaría
+- ✅ `signing.notary_offices` - Oficinas notariales con pesos para distribución
+- ✅ `signing.notary_services` - Servicios ofrecidos por cada notaría
+- ✅ `signing.notary_assignments` - Asignaciones de documentos a notarías
+- ✅ `signing.products` - Catálogo de productos (FES, FEA, FESB, FES+ClaveÚnica, servicios notariales)
+- ✅ `signing.signer_history` - Historial de cambios en firmantes
+- ✅ `signing.providers` - Proveedores de firma (CDS, etc.)
+- ✅ `signing.provider_configs` - Configuración por organización
+
+**Enums Creados:**
+
+- ✅ `document_status` - 16 estados (draft → completed)
+- ✅ `signer_status` - 10 estados (pending → signed/rejected)
+- ✅ `notary_service_type` - none, legalized_copy, protocolization, notary_authorized (FAN®)
+- ✅ `signing_order_type` - simultaneous, sequential
+- ✅ `version_type` - original, pre_signature, fully_signed, notarized
+
+**RLS y Seguridad:**
+
+- ✅ Políticas RLS completas para multi-tenancy
+- ✅ Función `signing.user_belongs_to_org()` para validación
+- ✅ Vistas públicas con `security_invoker = true`
+- ✅ Grants para authenticated y service_role
+
+**RPCs Creados:**
+
+- ✅ `create_signing_document` - Crear documento inicial
+- ✅ `add_document_signer` / `remove_document_signer` - Gestión de firmantes
+- ✅ `submit_document_for_review` / `approve_document_review` - Flujo de aprobación
+- ✅ `send_document_to_sign` - Enviar a firma (con validación de pago)
+- ✅ `record_signature` / `reject_signature` - Registrar firma/rechazo
+- ✅ `begin_document_resend` - Iniciar modo re-envío (invalida firmas)
+- ✅ `calculate_resend_cost` - Calcular costo de firmas invalidadas
+- ✅ `assign_document_to_notary` - Asignación ponderada tipo "tómbola"
+
+**Triggers Automáticos:**
+
+- ✅ `sync_signer_counts` - Actualiza contadores de firmantes
+- ✅ `check_all_signed` - Cambia status cuando todos firman
+- ✅ `log_signer_changes` - Historial de cambios en firmantes
+- ✅ `trigger_resend_order_completed` - Limpia metadata al pagar re-envío
+
+### ✅ COMPLETADO - Frontend (Wizard de Solicitud)
+
+**Ubicación:** `/dashboard/signing/documents/new`
+
+**Pasos del Wizard:**
+
+1. ✅ **Paso 1 - País y Documento**
+   - Selector de país (Chile por defecto)
+   - Upload de PDF con drag & drop
+   - Revisión opcional por IA (consume créditos)
+   - Polling de estado de revisión IA
+
+2. ✅ **Paso 2 - Selección de Servicios**
+   - Primero: Servicio Notarial (Ninguno, Copia Legalizada, Protocolización, FAN®)
+   - Segundo: Tipo de Firma Electrónica (filtrado según servicio notarial)
+   - Orden de firmas: FES → FESB → FES+ClaveÚnica → FEA
+   - Precios dinámicos desde `signing.products`
+
+3. ✅ **Paso 3 - Firmantes**
+   - Campos separados: Nombres y Apellidos
+   - Validación dinámica de identificador según tipo de firma
+   - Auto-formateo de RUT chileno (12.345.678-9)
+   - Validación de dígito verificador en tiempo real
+   - Agregar/eliminar firmantes
+
+4. ✅ **Paso 4 - Checkout**
+   - Resumen del pedido
+   - Cálculo de costos
+   - Integración con `/api/checkout/create`
+   - Soporte para Stripe, Transbank y Créditos
+
+**Componentes Creados:**
+
+- ✅ `DocumentRequestWizard.tsx` - Orquestador principal
+- ✅ `WizardContext.tsx` - Estado global del wizard
+- ✅ `WizardProgress.tsx` - Indicador de progreso
+- ✅ `CountryAndUploadStep.tsx` - Paso 1
+- ✅ `ServiceSelectionStep.tsx` - Paso 2
+- ✅ `SignerManagementStep.tsx` - Paso 3
+- ✅ `CheckoutStep.tsx` - Paso 4
+
+**Utilidades:**
+
+- ✅ `lib/utils/rut.ts` - Validación y formateo de RUT chileno
+  - `formatRutOnInput()` - Auto-formateo mientras escribe
+  - `getRutError()` - Mensajes de error específicos
+  - `isValidRut()` - Validación completa con dígito verificador
+  - `cleanRut()` / `calculateDv()` - Utilidades internas
+
+### ✅ COMPLETADO - Migraciones
+
+```
+20251211000001_schema_signing.sql          - Schema base completo
+20251211000002_signing_rls.sql             - Políticas RLS
+20251211000003_signing_rpc_functions.sql   - Funciones RPC
+20251211000004_signing_storage.sql         - Buckets de storage
+20251211000005_signing_ai_review_trigger.sql - Trigger para IA
+20251211000006_signing_public_views.sql    - Vistas públicas
+20251212000004_signing_products.sql        - Catálogo de productos
+20251212000007_signing_signers_names.sql   - first_name/last_name
+20251212000008_docs_storage_buckets.sql    - Buckets docs-originals/signed/notarized
+20251212000009_signing_notary_system.sql   - Sistema de notarías
+20251212000010_notary_assignment_rpc.sql   - Asignación ponderada
+20251212000011_expose_notary_views.sql     - Vistas públicas notaría
+20251212000012_signing_resend_payment_flow.sql - Flujo de re-envío
+20251212000013_resend_order_callback.sql   - Callback post-pago
+20251212000014_add_fan_service.sql         - Enum FAN®
+20251212000015_insert_fan_product.sql      - Producto FAN®
+20251212000016_fix_signature_order.sql     - Orden de firmas
+20251212000017_refresh_signing_signers_view.sql - Refresh vistas
+20251212000019_fix_signing_notification_columns.sql - Fix s.name → s.full_name
+20251212000020_enable_pg_net.sql           - Habilita pg_net y corrige search_path
+20251212200000_signing_products_prices.sql - Precios de productos firma
+20251212200001_fix_fan_billing_unit.sql    - Corrige unidad de cobro FAN
+20251212200004_enable_pg_net.sql           - Versión actualizada pg_net
+```
+
+### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
+
+**Sistema de Checkout para Firma Electrónica:**
+
+- ✅ Integración con `/api/checkout/create` para productos de firma
+- ✅ Soporte para Stripe, Transbank WebPay Plus, Transbank OneClick y Créditos
+- ✅ **Órdenes gratuitas ($0):**
+  - ✅ Detección automática de monto $0
+  - ✅ Formulario simplificado "Datos de Registro" (sin mencionar facturas)
+  - ✅ Botón "Confirmar Pedido" en lugar de métodos de pago
+  - ✅ Procesamiento directo sin pasarelas de pago (`provider: 'free'`)
+  - ✅ Estado de orden: `paid` (permite continuar flujo normal)
+  - ✅ No se emiten facturas/boletas para $0
+- ✅ **Autenticación en checkout:**
+  - ✅ Login/Registro in-place si usuario no autenticado
+  - ✅ Redirección de vuelta al checkout post-autenticación
+  - ✅ Tabs con LoginForm y SignupForm reutilizados
+- ✅ **Página de éxito adaptada:**
+  - ✅ Detecta órdenes gratuitas y muestra "¡Pedido Confirmado!"
+  - ✅ Muestra monto $0 correctamente (no "N/A")
+  - ✅ Oculta botón de factura para órdenes $0
+  - ✅ Badge "Confirmado" para órdenes gratuitas
+
+**Correcciones de Base de Datos:**
+
+- ✅ `20251212000019_fix_signing_notification_columns.sql` - Corrige `s.name → s.full_name` en triggers
+- ✅ `20251212000020_enable_pg_net.sql` - Habilita extensión pg_net y corrige search_path en funciones
+- ✅ Trigger `invoicing.on_order_completed` - No emite facturas para monto $0
+
+**Archivos Modificados:**
+
+- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx` - Auth in-place + órdenes $0
+- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx` - Soporte $0
+- ✅ `apps/web/src/components/checkout/ZeroAmountCheckoutForm.tsx` - Nuevo componente
+- ✅ `apps/web/src/components/checkout/BillingDataForm.tsx` - Props para personalizar texto
+- ✅ `apps/web/src/app/api/payments/checkout/route.ts` - Manejo de `provider: 'free'`
+- ✅ `apps/web/src/lib/checkout/core.ts` - No llama facturación para $0
+- ✅ `apps/web/src/lib/auth/actions.ts` - Parámetro `redirectTo` en auth
+
+---
+
+### 🚧 PENDIENTE - Testing y Verificación del Flujo
+
+> **Estado actual:** El wizard de creación y checkout funcionan. Ahora hay que verificar que el flujo post-pago esté correctamente conectado.
+
+#### **TESTING PRIORITARIO** (Antes de continuar con nuevas features)
+
+**T.1 - Verificar flujo completo post-pago:**
+
+- [ ] Confirmar que al pagar, el documento cambia de estado correctamente
+- [ ] Verificar que los firmantes reciben notificación por email
+- [ ] Probar que el link `/sign/[token]` funciona para firmantes externos
+- [ ] Verificar que la revisión IA se ejecuta si está habilitada
+
+**T.2 - Revisar estado actual de Edge Functions:**
+
+```
+analyze-document-risks  → ¿Se invoca correctamente tras subir PDF?
+send-signing-notification → ¿Se envían emails a firmantes?
+pdf-merge-with-cover → ¿Se genera QR en el documento?
+```
+
+**T.3 - Verificar guardado de firmantes:**
+
+- [ ] Confirmar que first_name/last_name se guardan correctamente
+- [ ] Verificar validación de RUT chileno funciona en producción
+- [ ] Probar agregar/eliminar firmantes pre-envío
+
+---
+
+### 🚧 PENDIENTE - Plan Detallado de Próximos Pasos
+
+---
+
+#### **FASE A: Completar Edge Functions** (Prioridad Alta)
+
+Las Edge Functions ya existen pero necesitan ajustes y testing:
+
+**A.1 - `analyze-document-risks` (Ya existe - Ajustar)**
+
+```
+Ubicación: supabase/functions/analyze-document-risks/index.ts
+Estado: Código completo, necesita testing
+```
+
+Tareas:
+- [ ] Configurar variable de entorno `ANTHROPIC_API_KEY` en Supabase
+- [ ] Agregar entrada en `credit_prices` para `ai_document_review_full` si no existe
+- [ ] Probar invocación manual con documento PDF real
+- [ ] Verificar que el resultado se guarde en `signing.ai_reviews`
+- [ ] Ajustar prompts según tipo de servicio (notarial vs simple)
+
+**A.2 - `pdf-merge-with-cover` (Ya existe - Ajustar)**
+
+```
+Ubicación: supabase/functions/pdf-merge-with-cover/index.ts
+Estado: Código base, necesita ajustar rutas de storage
+```
+
+Tareas:
+- [ ] Cambiar bucket de `signing-documents` a `docs-originals`
+- [ ] Generar QR con URL `https://tupatrimonio.app/repository/{document_id}`
+- [ ] Agregar el ID único del documento en la primera página
+- [ ] Subir resultado a `docs-originals` como nueva versión
+- [ ] Crear registro en `signing.document_versions` con `version_type = 'pre_signature'`
+- [ ] Actualizar `signing.documents.qr_file_path` y `qr_identifier`
+
+**A.3 - `send-signing-notification` (Ya existe - Completar)**
+
+```
+Ubicación: supabase/functions/send-signing-notification/index.ts
+Estado: Código completo, listo para testing
+```
+
+Tareas:
+- [ ] Verificar que `sendgrid_accounts` tenga datos de prueba
+- [ ] Crear templates de email para cada tipo:
+  - `REVIEW_REQUEST` - Solicitud de revisión interna
+  - `SIGNING_REQUEST` - Invitación a firmar (con link `/sign/{token}`)
+  - `SIGNING_COMPLETED` - Notificación de documento completado
+- [ ] Probar envío real de emails
+
+**A.4 - `signature-webhook` (Ya existe - Completar)**
+
+```
+Ubicación: supabase/functions/signature-webhook/index.ts
+Estado: Estructura base, necesita integración real con proveedor
+```
+
+Tareas:
+- [ ] Obtener documentación real de API de CDS (Certificadora del Sur)
+- [ ] Ajustar parsing del payload según formato real
+- [ ] Implementar descarga de documento firmado desde URL del proveedor
+- [ ] Subir documento firmado a `docs-signed`
+- [ ] Llamar RPC `record_signature` para actualizar estado
+- [ ] Crear registro en `signing.document_versions`
+
+---
+
+#### **FASE B: Portal Público de Firma** (Prioridad Alta)
+
+**B.1 - Página `/sign/[token]`**
+
+```
+Crear: apps/web/src/app/sign/[token]/page.tsx
+```
+
+Tareas:
+- [ ] Crear layout público (sin sidebar, sin autenticación)
+- [ ] Validar token contra `signing.signers.signing_token`
+- [ ] Verificar que `token_expires_at` no haya pasado
+- [ ] Mostrar información del documento (título, descripción)
+- [ ] Renderizar PDF con visor (react-pdf o pdf.js)
+- [ ] Checkbox de aceptación de términos y condiciones
+- [ ] Botón "Firmar" que llame RPC `record_signature`
+- [ ] Botón "Rechazar" que llame RPC `reject_signature`
+- [ ] Pantalla de confirmación post-firma
+- [ ] Manejo de errores (token inválido, expirado, ya firmado)
+
+**B.2 - Verificar turno en firma secuencial**
+
+```
+Si document.signing_order = 'sequential':
+  - Verificar que signer.signing_order coincida con el turno actual
+  - Mostrar mensaje "Esperando que otros firmen primero" si no es su turno
+```
+
+---
+
+#### **FASE C: Verificación Pública de Documentos** (Prioridad Media)
+
+**C.1 - Página `/repository/[documentId]`**
+
+```
+Crear: apps/web/src/app/repository/[documentId]/page.tsx
+```
+
+Tareas:
+- [ ] Crear página pública (sin autenticación)
+- [ ] Buscar documento por UUID en `signing.documents`
+- [ ] Mostrar estado actual del documento
+- [ ] Si está firmado/notarizado: generar URL temporal firmada
+- [ ] Botón para descargar última versión válida
+- [ ] Mostrar información básica (título, fecha, firmantes)
+- [ ] No exponer datos sensibles (emails completos, RUTs)
+
+**C.2 - Generar URLs firmadas**
+
+```typescript
+// Usar supabase.storage.from('bucket').createSignedUrl()
+// Duración: 5-10 minutos
+// Buckets: docs-signed, docs-notarized
+```
+
+---
+
+#### **FASE D: Panel de Notarías** (Prioridad Media)
+
+**D.1 - Crear organización tipo "notary"**
+
+```sql
+-- En core.organizations agregar org_type = 'notary'
+-- Crear notaría de prueba con peso = 5
+```
+
+**D.2 - Dashboard de notaría `/notary/dashboard`**
+
+```
+Crear: apps/web/src/app/notary/dashboard/page.tsx
+```
+
+Tareas:
+- [ ] Verificar que usuario pertenezca a organización tipo `notary`
+- [ ] Listar documentos asignados desde `signing.notary_assignments`
+- [ ] Filtros por estado: pending, in_progress, completed, rejected
+- [ ] Vista de detalle de cada asignación
+- [ ] Descarga del documento a firmar
+
+**D.3 - Subida de documento notarizado**
+
+```
+Crear: apps/web/src/app/api/notary/upload-notarized/route.ts
+```
+
+Tareas:
+- [ ] Recibir PDF notarizado
+- [ ] Leer QR del PDF para extraer `document_id`
+- [ ] Validar que coincida con la asignación
+- [ ] Subir a bucket `docs-notarized`
+- [ ] Actualizar `signing.notary_assignments.status = 'completed'`
+- [ ] Actualizar `signing.documents.status = 'notarized'`
+- [ ] Crear registro en `signing.document_versions`
+
+**D.4 - Sistema de comunicación**
+
+```
+Usar: signing.notary_observations
+```
+
+Tareas:
+- [ ] UI para agregar observaciones/rechazos
+- [ ] Notificación al equipo TuPatrimonio
+- [ ] Respuestas y resolución de observaciones
+
+---
+
+#### **FASE E: Modificación Post-Envío** ✅ COMPLETADO (Dic 12, 2025)
+
+**E.1 - Panel de edición de documento** ✅
+
+```
+✅ Creado: apps/web/src/components/signing/edit/DocumentEditPanel.tsx
+✅ Creado: apps/web/src/components/signing/edit/SignerEditPanel.tsx
+```
+
+Tareas:
+- [x] Permitir agregar/editar/eliminar firmantes si no ha firmado
+- [x] Permitir reemplazar PDF si nadie ha firmado
+- [x] Si hay firmas existentes → modo "re-envío"
+
+**E.2 - Flujo de re-envío con pago** ✅
+
+```
+RPCs disponibles y funcionando:
+- begin_document_resend() → Invalida firmas, pone documento en draft
+- calculate_resend_cost() → Calcula costo de firmas invalidadas
+```
+
+Tareas:
+- [x] UI que muestre advertencia de firmas a invalidar
+- [x] Llamar `begin_document_resend`
+- [x] Calcular costo con `calculate_resend_cost`
+- [x] Crear orden vía `/api/checkout/create` con `productType: 'electronic_signature_resend'`
+- [x] Redirigir a checkout (Stripe/Transbank/Créditos)
+- [x] Post-pago: documento vuelve a estado editable
+
+---
+
+#### **FASE F: Integración con Proveedor de Firma** (Prioridad Baja - Requiere Contrato)
+
+**F.1 - Configurar proveedor CDS**
+
+```sql
+-- Insertar en signing.providers
+INSERT INTO signing.providers (name, slug, provider_type, base_url, endpoints)
+VALUES ('Certificadora del Sur', 'cds', 'both', 'https://api.cds.cl/v1', '{...}');
+
+-- Configurar credenciales por organización en signing.provider_configs
+```
+
+**F.2 - Implementar llamadas a API CDS**
+
+Tareas:
+- [ ] Crear `lib/signing/providers/cds.ts`
+- [ ] Método `initiateSigningProcess()` → Obtener código de transacción
+- [ ] Método `checkSignerStatus()` → Verificar estado de firma
+- [ ] Método `downloadSignedDocument()` → Obtener PDF firmado
+- [ ] Manejo de enrolamiento FEA
+
+---
+
+#### **FASE G: Testing y QA** (Prioridad Alta - Continuo)
+
+**G.1 - Testing manual del wizard**
+
+- [ ] Crear documento nuevo (todos los pasos)
+- [ ] Verificar que se guarde en BD correctamente
+- [ ] Verificar precios y cálculos
+- [ ] Probar checkout completo
+
+**G.2 - Testing de firma**
+
+- [ ] Abrir link de firma como firmante externo
+- [ ] Firmar documento (mock sin proveedor real)
+- [ ] Verificar actualización de estados
+- [ ] Verificar notificaciones
+
+**G.3 - Testing de notaría**
+
+- [ ] Asignar documento a notaría (usando RPC)
+- [ ] Ver documento en panel de notaría
+- [ ] Subir documento notarizado
+- [ ] Verificar cierre de ciclo
+
+---
+
+### 📋 Orden Recomendado de Implementación (Actualizado Dic 12)
+
+```
+✅ COMPLETADO:
+- Wizard de creación de documento (4 pasos)
+- Checkout con todos los métodos de pago
+- Soporte para órdenes $0 (gratuitas)
+- FASE E → Modificación post-envío (paneles de edición)
+
+🚧 SIGUIENTE (Prioridad):
+1. TESTING     → Verificar flujo completo post-pago (firmantes, emails, estados)
+2. FASE A.1-A.3 → Edge Functions (verificar que se ejecutan correctamente)
+3. FASE B       → Portal de firma /sign/[token] (crítico para el flujo)
+4. FASE C       → Verificación pública /repository/[id]
+
+📋 POSTERIOR:
+5. FASE D       → Panel de notarías
+6. FASE F       → Integración con proveedor CDS (cuando haya contrato)
+```
+
+---
+
+### 🔧 Variables de Entorno Requeridas
+
+```bash
+# Supabase Edge Functions
+ANTHROPIC_API_KEY=sk-ant-...           # Para análisis IA
+SENDGRID_API_KEY=SG....                 # Fallback si org no tiene cuenta
+SIGNING_PROVIDER_API_KEY=...            # CDS u otro
+SIGNING_PROVIDER_API_SECRET=...
+APP_URL=https://tupatrimonio.app        # Para generar links
+```
+
+---
 
 **✅ COMPLETADO:** **SISTEMA DE FACTURACIÓN INDEPENDIENTE** 🎉 (Diciembre 2025)
 

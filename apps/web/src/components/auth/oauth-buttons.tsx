@@ -8,15 +8,16 @@ type OAuthProvider = 'google' | 'facebook' | 'github' | 'apple'
 
 interface OAuthButtonsProps {
   mode?: 'signup' | 'login'
+  redirectTo?: string
 }
 
-export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
+export function OAuthButtons({ mode = 'login', redirectTo }: OAuthButtonsProps) {
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null)
 
   const handleOAuthSignIn = async (provider: OAuthProvider) => {
     setLoadingProvider(provider)
     try {
-      await signInWithOAuth(provider)
+      await signInWithOAuth(provider, redirectTo)
     } catch (error) {
       console.error('Error OAuth:', error)
       setLoadingProvider(null)

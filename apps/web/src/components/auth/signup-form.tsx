@@ -8,7 +8,11 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { signUp } from '@/lib/auth/actions'
 import { OAuthButtons } from './oauth-buttons'
 
-export function SignupForm() {
+interface SignupFormProps {
+  redirectTo?: string
+}
+
+export function SignupForm({ redirectTo }: SignupFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -160,7 +164,7 @@ export function SignupForm() {
       </div>
 
       {/* OAuth Buttons */}
-      <OAuthButtons mode="signup" />
+      <OAuthButtons mode="signup" redirectTo={redirectTo} />
 
       {/* Link a Login */}
       <p className="text-center text-sm text-muted-foreground">

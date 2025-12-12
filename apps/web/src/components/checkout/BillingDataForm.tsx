@@ -17,6 +17,9 @@ interface BillingDataFormProps {
   countryCode?: string;
   defaultData?: BasicBillingData;
   onDataChange: (data: BasicBillingData | null) => void;
+  title?: string;
+  description?: string;
+  hideAlert?: boolean;
 }
 
 function validateChileanRUT(rut: string): boolean {
@@ -32,6 +35,9 @@ export default function BillingDataForm({
   countryCode = 'CL',
   defaultData,
   onDataChange,
+  title = 'Datos de Facturación',
+  description = 'Necesitamos tus datos para generar el documento tributario',
+  hideAlert = false,
 }: BillingDataFormProps) {
   const [taxId, setTaxId] = useState(defaultData?.tax_id || '');
   const [name, setName] = useState(defaultData?.name || '');
@@ -131,18 +137,20 @@ export default function BillingDataForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Datos de Facturación</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <CardDescription>
-          Necesitamos tus datos para generar el documento tributario
+          {description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Estos datos se guardarán para futuras compras. Con Stripe se genera automáticamente un Invoice.
-          </AlertDescription>
-        </Alert>
+        {!hideAlert && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Estos datos se guardarán para futuras compras. Con Stripe se genera automáticamente un Invoice.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="tax-id">{taxIdLabel} *</Label>

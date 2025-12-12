@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getOrder, canPayOrder } from '@/lib/checkout/core';
+import { getOrder, canPayOrder, updateOrderStatus } from '@/lib/checkout/core';
 import { getPaymentProvider } from '@/lib/payments/provider-factory';
 
 /**
@@ -136,6 +136,43 @@ export async function POST(request: NextRequest) {
         console.error('[Checkout] Error guardando datos de facturación predeterminados:', settingsError);
         // No fallar el flujo
       }
+    }
+    
+    // Manejo especial para pedidos gratuitos
+    if (provider === 'free') {
+      if (order.amount > 0) {
+        return NextResponse.json(
+          { error: 'El proveedor "free" solo es válido para pedidos de monto 0' },
+          { status: 400 }
+        );
+      }
+
+      console.log('🎉 [Unified Checkout] Procesando pedido gratuito:', orderId);
+
+      // Actualizar orden a pagada (paid) en lugar de completada (completed)
+      // para permitir que el flujo del servicio continúe (ej: revisión, firma)
+      await updateOrderStatus(
+        orderId,
+        'paid',
+        { userId: user.id }
+      );
+      
+      // Construir returnUrl si no se proporciona
+      let finalReturnUrl = returnUrl;
+      if (!finalReturnUrl) {
+        const host = request.headers.get('host');
+        const protocol = request.headers.get('x-forwarded-proto') || 'https';
+        const baseUrl = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        finalReturnUrl = `${baseUrl}/checkout/${orderId}/success`;
+      }
+      
+      return NextResponse.json({
+        url: finalReturnUrl,
+        sessionId: 'free_session',
+        provider: 'free',
+        orderId: order.id,
+        orderNumber: order.order_number,
+      });
     }
     
     // Obtener proveedor de pago

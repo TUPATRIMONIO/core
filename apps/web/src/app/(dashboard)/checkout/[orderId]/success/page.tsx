@@ -516,12 +516,18 @@ async function OrderSuccessContent({
   // Obtener datos del producto
   const productData = order.product_data as any;
 
+  // Detectar si es una orden gratuita (monto $0)
+  const isZeroAmountOrder = order.amount === 0;
+  
+  // Si es orden gratuita y ya está pagada, mostrar éxito directamente
+  const isFreeOrderPaid = isZeroAmountOrder && (order.status === 'paid' || order.status === 'completed');
+
   // Si el pago fue exitoso, verificar créditos y mostrar mensaje de éxito
-  const isPaymentSuccess = payment && payment.status === 'succeeded';
+  const isPaymentSuccess = (payment && payment.status === 'succeeded') || isFreeOrderPaid;
   
   if (isPaymentSuccess) {
-    // Si es compra de créditos, verificar que los créditos se hayan cargado
-    if (order.product_type === 'credits') {
+    // Si es compra de créditos (y no es gratuita), verificar que los créditos se hayan cargado
+    if (order.product_type === 'credits' && payment) {
       console.log('[OrderSuccess] Pago succeeded, verificando si los créditos se cargaron...');
       
       // Verificar si los créditos ya se cargaron buscando transacciones de créditos
@@ -671,9 +677,13 @@ async function OrderSuccessContent({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
             <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
-          <CardTitle className="text-2xl">¡Pago Exitoso!</CardTitle>
+          <CardTitle className="text-2xl">
+            {isZeroAmountOrder ? '¡Pedido Confirmado!' : '¡Pago Exitoso!'}
+          </CardTitle>
           <CardDescription>
-            Tu orden ha sido pagada correctamente
+            {isZeroAmountOrder 
+              ? 'Tu pedido ha sido registrado correctamente' 
+              : 'Tu orden ha sido pagada correctamente'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -685,9 +695,9 @@ async function OrderSuccessContent({
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Monto pagado</span>
+              <span className="text-sm text-muted-foreground">{isZeroAmountOrder ? 'Monto' : 'Monto pagado'}</span>
               <span className="font-semibold">
-                {order.currency && order.amount
+                {order.currency && order.amount !== null && order.amount !== undefined
                   ? new Intl.NumberFormat('es-CL', {
                       style: 'currency',
                       currency: order.currency,
@@ -698,19 +708,21 @@ async function OrderSuccessContent({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Estado</span>
               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                Completado
+                {isZeroAmountOrder ? 'Confirmado' : 'Pagado'}
               </span>
             </div>
           </div>
           
-          {/* Botón de documento con polling automático */}
-          <div className="flex flex-col gap-3">
-            <InvoiceButton 
-              orderId={orderId}
-              initialPdfUrl={invoiceDocument?.pdf_url}
-              initialDocumentType={invoiceDocument?.document_type}
-            />
-          </div>
+          {/* Botón de documento con polling automático - solo para órdenes con pago */}
+          {!isZeroAmountOrder && (
+            <div className="flex flex-col gap-3">
+              <InvoiceButton 
+                orderId={orderId}
+                initialPdfUrl={invoiceDocument?.pdf_url}
+                initialDocumentType={invoiceDocument?.document_type}
+              />
+            </div>
+          )}
           
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -764,7 +776,7 @@ async function OrderSuccessContent({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Monto</span>
               <span className="font-semibold">
-                {order.currency && order.amount
+                {order.currency && order.amount !== null && order.amount !== undefined
                   ? new Intl.NumberFormat('es-CL', {
                       style: 'currency',
                       currency: order.currency,
@@ -822,7 +834,7 @@ async function OrderSuccessContent({
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Monto</span>
             <span className="font-semibold">
-              {order.currency && order.amount
+              {order.currency && order.amount !== null && order.amount !== undefined
                 ? new Intl.NumberFormat('es-CL', {
                     style: 'currency',
                     currency: order.currency,

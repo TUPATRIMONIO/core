@@ -7,7 +7,7 @@ import { Loader2, Download, ExternalLink, FileText } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface PDFViewerProps {
-  bucket: string
+  bucket: string | string[]
   filePath: string | null | undefined
   documentTitle?: string
   className?: string

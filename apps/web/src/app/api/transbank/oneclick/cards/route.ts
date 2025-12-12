@@ -18,11 +18,15 @@ async function getOrCreateOrganization(userId: string, userEmail: string) {
   }
   
   // Crear nueva organización si no existe
+  const slug = `org-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  
   const { data: newOrg, error: orgError } = await supabase
     .from('organizations')
     .insert({
       name: 'Mi Organización',
+      slug: slug,
       email: userEmail,
+      org_type: 'personal'
     })
     .select('id')
     .single();

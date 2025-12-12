@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 interface NotarialServiceData {
   name: string;
   price: number;
+  priceLabel: string;
   remote: boolean;
   purpose: string;
   docs: string;
@@ -14,21 +15,24 @@ interface NotarialServiceData {
 const notarialServices: NotarialServiceData[] = [
   { 
     name: 'Copia Certificada', 
-    price: 8990, 
+    price: 8990,
+    priceLabel: 'por documento',
     remote: true, 
     purpose: 'Asegurar que una copia sea fiel al original', 
     docs: 'Documento que se firmará' 
   },
   { 
     name: 'Protocolización', 
-    price: 15990, 
+    price: 15990,
+    priceLabel: 'por documento',
     remote: true, 
     purpose: 'Dar formalidad legal a documentos privados', 
     docs: 'Documento que se firmará' 
   },
   { 
     name: 'FAN', 
-    price: 9990, 
+    price: 9990,
+    priceLabel: 'por firma',
     remote: true, 
     purpose: 'Certificar que la firma es auténtica y corresponde al firmante', 
     docs: 'Documento que se firmará y eventualmente adicionales' 
@@ -82,7 +86,7 @@ export default function NotarialServicesTable() {
                   <span className="text-xl font-bold text-[var(--tp-brand)]">
                     {formatPrice(service.price)}
                   </span>
-                  <p className="text-xs text-muted-foreground mt-1">por documento</p>
+                  <p className="text-xs text-muted-foreground mt-1">{service.priceLabel}</p>
                 </TableCell>
               ))}
             </TableRow>

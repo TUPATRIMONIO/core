@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     const validProductTypes: ProductType[] = [
       'credits',
       'electronic_signature',
+      'electronic_signature_resend',
       'notary_service',
       'company_modification',
       'advisory',
@@ -115,7 +116,8 @@ export async function POST(request: NextRequest) {
       };
     } else {
       // Para otros tipos de productos, se espera que vengan en metadata
-      if (!metadata?.amount) {
+      // Permitimos amount=0 para servicios gratuitos
+      if (metadata?.amount === undefined || metadata?.amount === null) {
         return NextResponse.json(
           { error: 'amount es requerido en metadata para este tipo de producto' },
           { status: 400 }

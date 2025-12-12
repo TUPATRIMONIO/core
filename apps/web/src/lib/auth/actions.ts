@@ -129,16 +129,22 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
     }
   }
 
-  // Revalidar cache antes de redirigir al dashboard
+  // Verificar si hay redirectTo en formData
+  const redirectTo = formData.get('redirectTo') as string
+
+  // Revalidar cache antes de redirigir
   try {
     revalidatePath('/', 'layout')
   } catch (revalidateError) {
-    // revalidatePath puede fallar en algunos casos, pero no es crítico
     console.warn('Error al revalidar path (no crítico, login exitoso):', revalidateError)
   }
 
+  if (redirectTo && redirectTo.startsWith('/')) {
+    redirect(redirectTo)
+  }
+
   redirect('/dashboard')
-  return { success: true } // Return para satisfacer TypeScript, aunque redirect nunca retorna
+  return { success: true }
 }
 
 /**
@@ -355,16 +361,20 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
       }
     }
 
-    // Revalidar cache antes de redirigir al dashboard
+    // Revalidar cache antes de redirigir
     try {
       revalidatePath('/', 'layout')
     } catch (revalidateError) {
-      // revalidatePath puede fallar en algunos casos, pero no es crítico
       console.warn('Error al revalidar path (no crítico, OTP verificado):', revalidateError)
     }
 
+    const redirectTo = formData.get('redirectTo') as string
+    if (redirectTo && redirectTo.startsWith('/')) {
+      redirect(redirectTo)
+    }
+
     redirect('/dashboard')
-    return { success: true } // Nunca se ejecutará por el redirect, pero TypeScript lo requiere
+    return { success: true }
   } catch (error: any) {
     // Si el error es un NEXT_REDIRECT, dejarlo pasar (es esperado y normal)
     // Next.js usa este mecanismo interno para manejar redirects
@@ -395,14 +405,22 @@ export async function verifyOTP(formData: FormData): Promise<ActionResult> {
  * - GitHub: https://supabase.com/docs/guides/auth/social-login/auth-github
  * - Apple: https://supabase.com/docs/guides/auth/social-login/auth-apple
  */
-export async function signInWithOAuth(provider: 'google' | 'facebook' | 'github' | 'apple') {
+export async function signInWithOAuth(
+  provider: 'google' | 'facebook' | 'github' | 'apple',
+  redirectTo?: string
+) {
   const supabase = await createClient()
   const origin = await getURL()
+
+  const callbackUrl = new URL(`${origin}/auth/callback`)
+  if (redirectTo) {
+    callbackUrl.searchParams.set('next', redirectTo)
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: callbackUrl.toString(),
     },
   })
 

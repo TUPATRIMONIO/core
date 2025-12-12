@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 // Configuración CORS
 const corsHeaders = {
@@ -8,282 +9,453 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface AIRiskAnalysis {
-  risks: Array<{
-    level: "high" | "medium" | "low";
+type ClaudeRiskLevel = "high" | "medium" | "low";
+
+interface ClaudeAnalysisResult {
+  passed: boolean;
+  confidence_score?: number;
+  summary?: string;
+  risks?: Array<{
+    level: ClaudeRiskLevel;
     text: string;
     explanation: string;
     clause?: string;
   }>;
-  summary?: string;
+  suggestions?: string[];
+}
+
+function jsonResponse(status: number, body: unknown) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function getBearerToken(req: Request) {
+  const auth = req.headers.get("authorization") || "";
+  const [type, token] = auth.split(" ");
+  if (type?.toLowerCase() !== "bearer" || !token) return null;
+  return token;
+}
+
+function extractJson(text: string): unknown {
+  // Intentar parse directo primero
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Fallback: extraer primer bloque JSON
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+async function getCreditCost(supabase: ReturnType<typeof createClient>) {
+  // Usamos la tabla/VIEW de precios de créditos ya existente
+  const { data, error } = await supabase
+    .from("credit_prices")
+    .select("credit_cost")
+    .eq("service_code", "ai_document_review_full")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`No se pudo obtener costo de créditos: ${error.message}`);
+  }
+
+  const creditCost = Number(data?.credit_cost ?? 0);
+  if (!creditCost || Number.isNaN(creditCost) || creditCost <= 0) {
+    // fallback seguro
+    return 10;
+  }
+
+  return creditCost;
+}
+
+async function reserveCredits(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string,
+  amount: number,
+  documentId: string
+) {
+  const { data, error } = await supabase.rpc("reserve_credits", {
+    org_id_param: organizationId,
+    amount_param: amount,
+    service_code_param: "ai_document_review_full",
+    reference_id_param: documentId,
+    description_param: "Revisión IA de documento (firma electrónica)",
+  });
+
+  if (error || !data) {
+    throw new Error(`Créditos insuficientes o error reservando créditos: ${error?.message}`);
+  }
+
+  return data as string; // transaction_id
+}
+
+async function confirmCredits(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string,
+  transactionId: string
+) {
+  const { error } = await supabase.rpc("confirm_credits", {
+    org_id_param: organizationId,
+    transaction_id_param: transactionId,
+  });
+
+  if (error) {
+    throw new Error(`Error confirmando créditos: ${error.message}`);
+  }
+}
+
+async function releaseCredits(
+  supabase: ReturnType<typeof createClient>,
+  organizationId: string,
+  transactionId: string
+) {
+  const { error } = await supabase.rpc("release_credits", {
+    org_id_param: organizationId,
+    transaction_id_param: transactionId,
+  });
+
+  if (error) {
+    // No bloquear por release fallido, pero loguear
+    console.warn("[releaseCredits] Error:", error.message);
+  }
+}
+
+async function downloadPdf(
+  supabase: ReturnType<typeof createClient>,
+  filePath: string,
+  fallbacks: Array<{ bucket: string; path: string }>
+) {
+  // Intento principal en docs-originals
+  const primary = await supabase.storage.from("docs-originals").download(filePath);
+  if (!primary.error && primary.data) {
+    return {
+      bucket: "docs-originals",
+      bytes: new Uint8Array(await primary.data.arrayBuffer()),
+    };
+  }
+
+  // Fallbacks
+  for (const fb of fallbacks) {
+    const res = await supabase.storage.from(fb.bucket).download(fb.path);
+    if (!res.error && res.data) {
+      return {
+        bucket: fb.bucket,
+        bytes: new Uint8Array(await res.data.arrayBuffer()),
+      };
+    }
+  }
+
+  throw new Error(
+    `No se pudo descargar PDF. docs-originals error: ${primary.error?.message || "unknown"}`
+  );
+}
+
+async function callClaude(
+  anthropicApiKey: string,
+  countryCode: string,
+  pdfBase64: string
+) {
+  const system =
+    "Eres un analista legal experto. Tu tarea es revisar documentos para detectar riesgos y cláusulas problemáticas. " +
+    "Responde SIEMPRE en JSON válido, sin texto adicional.";
+
+  const countryContext =
+    countryCode === "CL"
+      ? "Contexto país: Chile. Considera Ley 19.799 de Firma Electrónica, Código Civil y buenas prácticas contractuales." 
+      : `Contexto país: ${countryCode}. Considera normas y buenas prácticas contractuales de ese país.`;
+
+  const userPrompt =
+    `${countryContext}\n\n` +
+    "Analiza el PDF adjunto y entrega un JSON con esta estructura exacta:\n" +
+    "{\n" +
+    "  \"passed\": boolean,\n" +
+    "  \"confidence_score\": number (0 a 1),\n" +
+    "  \"summary\": string,\n" +
+    "  \"risks\": [\n" +
+    "    { \"level\": \"high\"|\"medium\"|\"low\", \"text\": string, \"explanation\": string, \"clause\": string? }\n" +
+    "  ],\n" +
+    "  \"suggestions\": [string]\n" +
+    "}\n\n" +
+    "Criterio: passed=false si hay riesgos altos que impiden avanzar sin correcciones.\n" +
+    "Recuerda: responde SOLO JSON.";
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": anthropicApiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 2000,
+      temperature: 0.2,
+      system,
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPrompt },
+            {
+              type: "document",
+              source: {
+                type: "base64",
+                media_type: "application/pdf",
+                data: pdfBase64,
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  });
+
+  const rawText = await resp.text();
+  if (!resp.ok) {
+    throw new Error(`Claude error ${resp.status}: ${rawText}`);
+  }
+
+  const data = JSON.parse(rawText);
+  const content = Array.isArray(data?.content) ? data.content : [];
+  const textParts = content
+    .filter((c: any) => c?.type === "text" && typeof c?.text === "string")
+    .map((c: any) => c.text);
+
+  const combined = textParts.join("\n").trim();
+  const parsed = extractJson(combined);
+
+  return {
+    raw: data,
+    extractedText: combined,
+    parsed,
+    usage: data?.usage ?? null,
+    model: data?.model ?? "claude-3-5-sonnet-20241022",
+  };
 }
 
 serve(async (req) => {
-  // Manejo de preflight request
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const bearer = getBearerToken(req);
+  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+  if (!bearer || !expected || bearer !== expected) {
+    return jsonResponse(401, { success: false, error: "Unauthorized" });
+  }
+
+  let documentId: string | null = null;
+  let reviewId: string | null = null;
+  let creditTxId: string | null = null;
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  );
+
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const payload = await req.json().catch(() => ({}));
+    documentId = payload?.document_id ?? null;
 
-    const { document_id } = await req.json();
-
-    if (!document_id) {
-      throw new Error("document_id es requerido");
+    if (!documentId) {
+      return jsonResponse(400, { success: false, error: "document_id es requerido" });
     }
 
-    // 1. Obtener documento de la base de datos
-    const { data: document, error: docError } = await supabaseClient
-      .from("documents")
-      .select("*")
-      .eq("id", document_id)
+    // 1) Obtener documento
+    const { data: document, error: docError } = await supabase
+      .from("signing_documents")
+      .select("id, organization_id, requires_ai_review, original_file_path, original_file_name, metadata, notary_service, signing_order")
+      .eq("id", documentId)
       .single();
 
     if (docError || !document) {
-      throw new Error(`Error al obtener documento: ${docError?.message}`);
+      throw new Error(`Error al obtener documento: ${docError?.message || "not found"}`);
     }
 
-    // Verificar que requiere revisión por IA
     if (!document.requires_ai_review) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: "Documento no requiere revisión por IA",
-          skipped: true,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return jsonResponse(200, {
+        success: true,
+        message: "Documento no requiere revisión por IA",
+        skipped: true,
+      });
     }
 
-    // 2. Descargar PDF desde Storage
-    const filePath = document.original_file_path;
-    if (!filePath) {
-      throw new Error("Documento no tiene archivo asociado");
-    }
+    const organizationId = document.organization_id as string;
 
-    // Construir path completo si es necesario
-    const storagePath = filePath.includes("/")
-      ? filePath
-      : `${document.organization_id}/${document.id}/${filePath}`;
+    // 2) Reservar créditos
+    const creditCost = await getCreditCost(supabase);
+    creditTxId = await reserveCredits(supabase, organizationId, creditCost, documentId);
 
-    const { data: fileData, error: downloadError } = await supabaseClient
-      .storage
-      .from("signing-documents")
-      .download(storagePath);
+    // 3) Crear registro ai_reviews (pending)
+    const countryCode =
+      (document?.metadata as any)?.country_code?.toString()?.toUpperCase?.() || "CL";
 
-    if (downloadError) {
-      // Intentar path alternativo
-      const altPath = `${document.organization_id}/${document.id}/${document.original_file_name}`;
-      const { data: altFileData, error: altError } = await supabaseClient
-        .storage
-        .from("signing-documents")
-        .download(altPath);
-
-      if (altError) {
-        throw new Error(
-          `Error al descargar PDF: ${downloadError.message} o ${altError.message}`
-        );
-      }
-
-      var pdfBytes = await altFileData.arrayBuffer();
-    } else {
-      var pdfBytes = await fileData.arrayBuffer();
-    }
-
-    // 3. Extraer texto del PDF
-    // Usar una librería ligera o servicio externo
-    // Opción 1: Usar pdf-parse desde esm.sh (puede ser pesado)
-    // Opción 2: Enviar a un servicio externo de extracción
-    // Por ahora, intentaremos usar pdf-parse desde esm.sh
-    let extractedText: string;
-
-    try {
-      // Intentar usar pdf-parse si está disponible
-      const pdfParse = await import("https://esm.sh/pdf-parse@1.1.1");
-      const pdfData = await pdfParse.default(Buffer.from(pdfBytes));
-      extractedText = pdfData.text;
-    } catch (parseError) {
-      // Fallback: Si pdf-parse no funciona, usar un servicio externo o marcar como error
-      console.warn("Error al extraer texto con pdf-parse:", parseError);
-      
-      // Alternativa: Usar un servicio de extracción de texto
-      // Por ahora, lanzamos error para que se maneje manualmente
-      throw new Error(
-        "No se pudo extraer texto del PDF. Se requiere configuración adicional de librerías."
-      );
-    }
-
-    if (!extractedText || extractedText.trim().length === 0) {
-      throw new Error("No se pudo extraer texto del PDF o el documento está vacío");
-    }
-
-    // Limitar longitud del texto para evitar tokens excesivos (máximo ~100k caracteres)
-    const maxLength = 100000;
-    if (extractedText.length > maxLength) {
-      extractedText = extractedText.substring(0, maxLength) + "\n\n[... texto truncado ...]";
-    }
-
-    // 4. Llamar a OpenAI para análisis
-    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiApiKey) {
-      throw new Error("OPENAI_API_KEY no está configurada");
-    }
-
-    const prompt = `Analiza el siguiente contrato legal y identifica cláusulas de riesgo. 
-Responde SOLO en formato JSON válido con esta estructura exacta:
-{
-  "risks": [
-    {
-      "level": "high" | "medium" | "low",
-      "text": "Texto de la cláusula problemática",
-      "explanation": "Explicación del riesgo",
-      "clause": "Número o referencia de la cláusula (opcional)"
-    }
-  ],
-  "summary": "Resumen general del análisis (opcional)"
-}
-
-Contrato a analizar:
-${extractedText}
-
-IMPORTANTE: Responde SOLO con JSON válido, sin texto adicional antes o después.`;
-
-    const openaiResponse = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${openaiApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini", // Modelo más económico y rápido
-          messages: [
-            {
-              role: "system",
-              content:
-                "Eres un experto en análisis de contratos legales. Identifica riesgos y cláusulas problemáticas. Responde siempre en JSON válido.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.3, // Más determinista para análisis legal
-          max_tokens: 2000,
-          response_format: { type: "json_object" }, // Forzar JSON
-        }),
-      }
-    );
-
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text();
-      throw new Error(
-        `Error al llamar a OpenAI: ${openaiResponse.status} - ${errorText}`
-      );
-    }
-
-    const openaiData = await openaiResponse.json();
-    const aiAnalysisText = openaiData.choices[0]?.message?.content;
-
-    if (!aiAnalysisText) {
-      throw new Error("OpenAI no devolvió una respuesta válida");
-    }
-
-    // Parsear respuesta JSON
-    let analysis: AIRiskAnalysis;
-    try {
-      analysis = JSON.parse(aiAnalysisText);
-    } catch (parseError) {
-      // Intentar extraer JSON si hay texto adicional
-      const jsonMatch = aiAnalysisText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No se pudo parsear la respuesta de OpenAI como JSON");
-      }
-    }
-
-    // Validar estructura
-    if (!analysis.risks || !Array.isArray(analysis.risks)) {
-      throw new Error("Respuesta de OpenAI no tiene la estructura esperada");
-    }
-
-    // 5. Guardar resultado en la base de datos
-    const { data: reviewData, error: insertError } = await supabaseClient
-      .from("ai_reviews")
+    const { data: createdReview, error: createReviewError } = await supabase
+      .from("signing_ai_reviews")
       .insert({
-        document_id: document_id,
-        analysis_result: analysis,
-        raw_text_preview: extractedText.substring(0, 1000), // Guardar preview del texto
-        status: "completed",
-        created_at: new Date().toISOString(),
+        document_id: documentId,
+        review_type: "ai_document_review_full",
+        prompt_template: "claude_multimodal_v1",
+        prompt_used: null,
+        status: "pending",
+        ai_model: "claude-3-5-sonnet-20241022",
+        metadata: {
+          country_code: countryCode,
+          credit_cost: creditCost,
+          credit_transaction_id: creditTxId,
+        },
       })
-      .select()
+      .select("id")
       .single();
 
-    if (insertError) {
-      throw new Error(`Error al guardar análisis: ${insertError.message}`);
+    if (createReviewError || !createdReview) {
+      throw new Error(`Error creando ai_review: ${createReviewError?.message || "unknown"}`);
     }
 
-    // 6. Opcional: Actualizar estado del documento si hay riesgos altos
-    const highRisks = analysis.risks.filter((r) => r.level === "high");
-    if (highRisks.length > 0) {
-      // Podríamos marcar el documento con una flag o cambiar su estado
-      // Por ahora solo lo registramos en el análisis
+    reviewId = createdReview.id;
+
+    // 4) Descargar PDF
+    const filePath = document.original_file_path as string | null;
+    if (!filePath) {
+      throw new Error("Documento no tiene original_file_path");
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Análisis completado exitosamente",
-        analysis: analysis,
-        review_id: reviewData.id,
-        high_risks_count: highRisks.length,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const orgId = organizationId;
+    const altPath1 = `${orgId}/${documentId}/${document.original_file_name || "original.pdf"}`;
+    const altPath2 = `${orgId}/${documentId}/${documentId}_original.pdf`;
+
+    const { bytes, bucket } = await downloadPdf(supabase, filePath, [
+      { bucket: "docs-originals", path: altPath1 },
+      { bucket: "docs-originals", path: altPath2 },
+      { bucket: "signing-documents", path: filePath },
+      { bucket: "signing-documents", path: altPath1 },
+      { bucket: "signing-documents", path: altPath2 },
+    ]);
+
+    const pdfBase64 = encodeBase64(bytes);
+
+    // 5) Llamar a Claude
+    const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!anthropicApiKey) {
+      throw new Error("ANTHROPIC_API_KEY no está configurada");
+    }
+
+    const claude = await callClaude(anthropicApiKey, countryCode, pdfBase64);
+
+    const parsed = claude.parsed as ClaudeAnalysisResult | null;
+    if (!parsed || typeof parsed !== "object") {
+      throw new Error("Claude no devolvió JSON válido");
+    }
+
+    const passed = !!parsed.passed;
+    const confidence =
+      typeof parsed.confidence_score === "number" ? parsed.confidence_score : null;
+
+    const risks = Array.isArray(parsed.risks) ? parsed.risks : [];
+    const reasons = risks.map((r) => ({
+      level: r.level,
+      text: r.text,
+      explanation: r.explanation,
+      clause: r.clause ?? null,
+    }));
+
+    const suggestions = Array.isArray(parsed.suggestions)
+      ? parsed.suggestions
+      : (typeof (parsed as any).suggestions === "string" ? [(parsed as any).suggestions] : []);
+
+    // 6) Actualizar ai_reviews
+    const { error: updateReviewError } = await supabase
+      .from("signing_ai_reviews")
+      .update({
+        status: passed ? "approved" : "rejected",
+        passed,
+        confidence_score: confidence,
+        reasons,
+        suggestions,
+        raw_response: claude.raw,
+        tokens_used: claude.usage?.output_tokens ?? null,
+        completed_at: new Date().toISOString(),
+        prompt_used: claude.extractedText || null,
+        metadata: {
+          country_code: countryCode,
+          bucket,
+          file_path: filePath,
+          credit_cost: creditCost,
+          credit_transaction_id: creditTxId,
+          summary: parsed.summary ?? null,
+        },
+      })
+      .eq("id", reviewId);
+
+    if (updateReviewError) {
+      throw new Error(`Error actualizando ai_review: ${updateReviewError.message}`);
+    }
+
+    // 7) Confirmar créditos (consumir)
+    await confirmCredits(supabase, organizationId, creditTxId);
+
+    return jsonResponse(200, {
+      success: true,
+      document_id: documentId,
+      review_id: reviewId,
+      status: passed ? "approved" : "rejected",
+      passed,
+      confidence_score: confidence,
+      summary: parsed.summary ?? null,
+      risks_count: reasons.length,
+      credit_cost: creditCost,
+    });
   } catch (error: any) {
-    console.error("Error en analyze-document-risks:", error);
+    console.error("[analyze-document-risks] Error:", error);
 
-    // Intentar guardar error en la base de datos si tenemos document_id
+    // Release credits if we reserved them
     try {
-      const supabaseClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-      );
+      if (creditTxId && documentId) {
+        // obtener organization_id para liberar
+        const { data: doc } = await supabase
+          .from("signing_documents")
+          .select("organization_id")
+          .eq("id", documentId)
+          .maybeSingle();
 
-      const { document_id } = await req.json().catch(() => ({}));
-      if (document_id) {
-        await supabaseClient.from("ai_reviews").insert({
-          document_id: document_id,
-          status: "failed",
-          error_message: error.message,
-          created_at: new Date().toISOString(),
-        });
+        if (doc?.organization_id) {
+          await releaseCredits(supabase, doc.organization_id, creditTxId);
+        }
       }
-    } catch (dbError) {
-      console.error("Error al guardar error en BD:", dbError);
+    } catch (releaseErr) {
+      console.warn("[analyze-document-risks] Release credits failed:", releaseErr);
     }
 
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || "Error desconocido al analizar documento",
-      }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Update ai_review if it was created
+    try {
+      if (reviewId) {
+        await supabase
+          .from("signing_ai_reviews")
+          .update({
+            status: "rejected",
+            passed: false,
+            completed_at: new Date().toISOString(),
+            metadata: {
+              error: error?.message || "Error desconocido",
+            },
+          })
+          .eq("id", reviewId);
       }
-    );
+    } catch (dbErr) {
+      console.warn("[analyze-document-risks] Update ai_review failed:", dbErr);
+    }
+
+    return jsonResponse(400, {
+      success: false,
+      error: error?.message || "Error desconocido al analizar documento",
+    });
   }
 });
-

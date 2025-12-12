@@ -11,6 +11,10 @@ import OrderTimeline from '@/components/checkout/OrderTimeline';
 import { isTransbankAvailable } from '@/lib/payments/availability';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ClientRefundModal } from '@/components/checkout/ClientRefundModal';
+import { LoginForm } from '@/components/auth/login-form';
+import { SignupForm } from '@/components/auth/signup-form';
+
+import ZeroAmountCheckoutForm from '@/components/checkout/ZeroAmountCheckoutForm';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -128,8 +132,31 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   
   // Verificar autenticación
   const { data: { user } } = await supabase.auth.getUser();
+  
   if (!user) {
-    redirect('/auth/login');
+    return (
+      <div className="container mx-auto py-8 px-4 flex items-center justify-center min-h-[60vh]">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-center">Inicia sesión para continuar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login">Ingresar</TabsTrigger>
+                <TabsTrigger value="register">Registrarse</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <LoginForm redirectTo={`/checkout/${orderId}`} />
+              </TabsContent>
+              <TabsContent value="register">
+                <SignupForm redirectTo={`/checkout/${orderId}`} />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
   
   // Obtener orden con pago
@@ -178,6 +205,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   const canPay = canPayOrder(order);
   // Solo considerar expirada si está pendiente de pago y la fecha pasó
   const expired = order.status === 'pending_payment' && isOrderExpired(order);
+  const isZeroAmount = order.amount === 0;
   
   // Verificar disponibilidad de Transbank (B2B Chile CLP)
   const transbankAvailable = await isTransbankAvailable(order.organization_id);
@@ -480,8 +508,15 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         {/* Columna derecha: Pago o Historial */}
         <div className="lg:col-span-3 space-y-4">
           {canPay ? (
-            // Formulario de pago
-            transbankAvailable ? (
+            // Formulario de pago o confirmación gratuita
+            isZeroAmount ? (
+              <ZeroAmountCheckoutForm
+                orderId={orderId}
+                orderAmount={order.amount}
+                orderCurrency={order.currency}
+                countryCode={countryCode}
+              />
+            ) : transbankAvailable ? (
               <Tabs defaultValue="transbank" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="transbank">Transbank</TabsTrigger>

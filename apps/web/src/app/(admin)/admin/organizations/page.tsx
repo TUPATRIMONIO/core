@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Eye, Ticket } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { EmptyState } from '@/components/admin/empty-state'
 import { Building2 } from 'lucide-react'
 import { CreateOrganizationButton } from '@/components/admin/create-organization-button'
@@ -96,12 +96,6 @@ export default async function OrganizationsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Link href={`/admin/communications/tickets/new?organizationId=${org.id}`}>
-                            <Button variant="ghost" size="sm" title="Crear Ticket">
-                              <Ticket className="h-4 w-4" />
-                              <span className="sr-only">Crear Ticket</span>
-                            </Button>
-                          </Link>
                           <Link href={`/admin/organizations/${org.id}`}>
                             <Button variant="ghost" size="sm" title="Ver Detalles">
                               <Eye className="h-4 w-4" />

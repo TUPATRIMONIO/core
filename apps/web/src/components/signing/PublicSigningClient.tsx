@@ -73,10 +73,9 @@ export function PublicSigningClient({ signingData, token }: PublicSigningClientP
       // pero pasaremos metadatos básicos que el cliente tiene.
       
       const { data, error } = await supabase.rpc('record_signature', {
-        p_token: token,
-        p_ip_address: '0.0.0.0', // Placeholder, idealmente obtener en Edge Function
-        p_user_agent: userAgent,
-        p_location: null // Opcional: pedir geolocalización
+        p_signing_token: token,
+        p_signature_ip: '0.0.0.0', // Placeholder, idealmente obtener en Edge Function
+        p_signature_user_agent: userAgent
       })
 
       if (error) throw new Error(error.message)
@@ -103,10 +102,8 @@ export function PublicSigningClient({ signingData, token }: PublicSigningClientP
       setIsRejecting(true)
       
       const { data, error } = await supabase.rpc('reject_signature', {
-        p_token: token,
-        p_reason: rejectReason,
-        p_ip_address: '0.0.0.0', 
-        p_user_agent: window.navigator.userAgent
+        p_signing_token: token,
+        p_reason: rejectReason
       })
 
       if (error) throw new Error(error.message)
@@ -222,7 +219,7 @@ export function PublicSigningClient({ signingData, token }: PublicSigningClientP
             </CardHeader>
             <CardContent className="flex-1 bg-gray-100 p-0 overflow-hidden relative">
               <PDFViewer
-                bucket="signing-documents"
+                bucket={['docs-originals', 'docs-signed']}
                 filePath={signingData.current_file_path || signingData.original_file_path}
                 documentTitle={signingData.document_title}
                 className="h-full"

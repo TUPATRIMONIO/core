@@ -23,7 +23,8 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { SignerManager } from './SignerManager'
+import { SignerEditPanel } from './edit/SignerEditPanel'
+import { DocumentEditPanel } from './edit/DocumentEditPanel'
 import { ReviewerManager } from './ReviewerManager'
 import { ApprovalInterface } from './ApprovalInterface'
 import { PDFViewer } from './PDFViewer'
@@ -140,7 +141,7 @@ export function DocumentDetailClient({
       
       // Como insertamos manualmente, solo actualizamos el estado del documento
       const { error: updateError } = await supabase
-        .from('documents')
+        .from('signing_documents')
         .update({ status: 'pending_review' })
         .eq('id', document.id)
 
@@ -154,6 +155,8 @@ export function DocumentDetailClient({
       setIsSubmittingReview(false)
     }
   }
+
+  const canEdit = !['signed', 'notarized', 'completed', 'cancelled', 'rejected'].includes(document.status)
 
   return (
     <div className="space-y-6">
@@ -291,9 +294,9 @@ export function DocumentDetailClient({
         </TabsList>
         
         <TabsContent value="signers" className="space-y-4">
-          <SignerManager 
-            document={document} 
-            signers={signers} 
+          <SignerEditPanel 
+            documentId={document.id}
+            canEdit={canEdit}
             onUpdate={handleRefresh}
           />
         </TabsContent>
@@ -306,9 +309,10 @@ export function DocumentDetailClient({
           />
         </TabsContent>
         
-        <TabsContent value="preview">
+        <TabsContent value="preview" className="space-y-4">
+          <DocumentEditPanel document={document} onUpdate={handleRefresh} />
           <PDFViewer
-            bucket="signing-documents"
+            bucket={['docs-originals', 'docs-signed']}
             filePath={document.current_signed_file_path || document.original_file_path}
             documentTitle={document.title}
           />

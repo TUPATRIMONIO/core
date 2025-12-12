@@ -53,7 +53,7 @@ serve(async (req) => {
         // 2. Descargar el archivo original desde Storage
         const { data: fileData, error: downloadError } = await supabaseClient
             .storage
-            .from("signing-documents")
+            .from("docs-originals")
             .download(
                 document.original_file_path.split("/").pop()?.includes("/")
                     ? document.original_file_path
@@ -70,7 +70,7 @@ serve(async (req) => {
             const { data: fileData2, error: downloadError2 } =
                 await supabaseClient
                     .storage
-                    .from("signing-documents")
+                    .from("docs-originals")
                     .download(fallbackPath);
 
             if (downloadError2) {

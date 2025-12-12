@@ -10,7 +10,11 @@ import { signIn } from '@/lib/auth/actions'
 import { OAuthButtons } from './oauth-buttons'
 import { EmailOTPForm } from './email-otp-form'
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string
+}
+
+export function LoginForm({ redirectTo }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -25,6 +29,9 @@ export function LoginForm() {
     const formData = new FormData()
     formData.append('email', email)
     formData.append('password', password)
+    if (redirectTo) {
+      formData.append('redirectTo', redirectTo)
+    }
 
     try {
       const result = await signIn(formData)
@@ -156,7 +163,7 @@ export function LoginForm() {
       </div>
 
       {/* OAuth Buttons */}
-      <OAuthButtons mode="login" />
+      <OAuthButtons mode="login" redirectTo={redirectTo} />
 
       {/* Link a Register */}
       <p className="text-center text-sm text-muted-foreground">
