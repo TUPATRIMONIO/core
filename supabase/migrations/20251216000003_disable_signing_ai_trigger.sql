@@ -14,3 +14,5 @@ BEGIN
   RAISE NOTICE '✅ trigger_ai_review desactivado (IA se invoca desde API)';
 END $$;
 
+
+

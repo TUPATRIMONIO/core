@@ -28,3 +28,5 @@ BEGIN
   RAISE NOTICE '✅ Precio ai_document_review_full asegurado (10 créditos)';
 END $$;
 
+
+

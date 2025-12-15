@@ -14,3 +14,5 @@ DO $$
 BEGIN
   RAISE NOTICE '✅ FAN actualizado a per_signer';
 END $$;
+
+

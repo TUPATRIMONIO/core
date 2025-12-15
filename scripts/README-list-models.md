@@ -112,3 +112,5 @@ La API devuelve un objeto JSON con esta estructura:
 
 - `x-api-key`: Tu API key de Anthropic
 - `anthropic-version`: Versión de la API (ej: "2023-06-01")
+
+

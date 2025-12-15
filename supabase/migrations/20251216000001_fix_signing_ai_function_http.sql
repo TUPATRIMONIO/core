@@ -86,3 +86,5 @@ BEGIN
   RAISE NOTICE '✅ Fixed signing.invoke_ai_analysis_function to use http extension';
 END $$;
 
+
+

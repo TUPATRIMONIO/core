@@ -15,3 +15,5 @@ INSERT INTO credits.credit_prices (
   operation = EXCLUDED.operation,
   description = EXCLUDED.description,
   credit_cost = EXCLUDED.credit_cost;
+
+

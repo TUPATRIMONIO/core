@@ -97,3 +97,5 @@ BEGIN
   RAISE NOTICE '   - Protocolización: $15.990';
   RAISE NOTICE '   - FAN: $9.990';
 END $$;
+
+
