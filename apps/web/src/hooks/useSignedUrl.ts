@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 /**
- * Hook para generar URLs firmadas de Supabase Storage
+ * Hook para generar URLs firmadas de Supabase Storage via backend
  * @param bucket - Nombre del bucket de Storage (o lista de buckets para fallback)
  * @param path - Ruta del archivo en el bucket
  * @param expiresIn - Tiempo de expiración en segundos (default: 3600 = 1 hora)
@@ -31,36 +30,35 @@ export function useSignedUrl(
         setIsLoading(true)
         setError(null)
         
-        const supabase = createClient()
         const buckets = Array.isArray(bucket) ? bucket : [bucket]
 
-        // Fallbacks comunes (para transición de buckets)
-        const fallbackBuckets =
-          Array.isArray(bucket)
-            ? []
-            : bucket === 'signing-documents'
-              ? ['docs-originals', 'docs-signed', 'docs-notarized']
-              : bucket === 'docs-originals'
-                ? ['signing-documents']
-                : []
+        // Llamar al endpoint backend que usa service_role
+        const response = await fetch('/api/storage/signed-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bucket: buckets,
+            path,
+            expiresIn
+          })
+        })
 
-        const candidates = [...buckets, ...fallbackBuckets].filter((b, idx, arr) => arr.indexOf(b) === idx)
-
-        let lastErr: any = null
-        for (const b of candidates) {
-          const { data, error: urlError } = await supabase.storage.from(b).createSignedUrl(path, expiresIn)
-          if (urlError || !data?.signedUrl) {
-            lastErr = urlError || new Error('No se pudo generar la URL firmada')
-            continue
-          }
-
-          if (cancelled) return
-          setSignedUrl(data.signedUrl)
-          setBucketUsed(b)
-          return
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Error ${response.status}`)
         }
 
-        throw lastErr || new Error('No se pudo generar la URL firmada')
+        const data = await response.json()
+
+        if (cancelled) return
+
+        if (data.signedUrl) {
+          setSignedUrl(data.signedUrl)
+          setBucketUsed(data.bucket || null)
+        } else {
+          throw new Error('No se recibió URL firmada')
+        }
+
       } catch (err) {
         console.error('Error generating signed URL:', err)
         if (!cancelled) {
@@ -81,4 +79,3 @@ export function useSignedUrl(
 
   return { signedUrl, bucketUsed, isLoading, error }
 }
-
