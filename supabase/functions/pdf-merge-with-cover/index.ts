@@ -3,7 +3,7 @@ import {
     PDFDocument,
     rgb,
     StandardFonts,
-} from "https://cdn.skypack.dev/pdf-lib";
+} from "https://esm.sh/pdf-lib@1.17.1";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // Configuración CORS

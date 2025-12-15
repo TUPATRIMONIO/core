@@ -1,6 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { encodeBase64 } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.47.10";
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 // Configuración CORS
 const corsHeaders = {
@@ -39,18 +38,49 @@ function getBearerToken(req: Request) {
 }
 
 function extractJson(text: string): unknown {
+  if (!text || typeof text !== "string") {
+    return null;
+  }
+
+  // Limpiar texto: remover markdown code blocks si existen
+  let cleaned = text.trim();
+  
+  // Remover ```json y ``` al inicio/final
+  cleaned = cleaned.replace(/^```json\s*/i, "").replace(/^```\s*/, "");
+  cleaned = cleaned.replace(/\s*```\s*$/, "");
+  cleaned = cleaned.trim();
+
   // Intentar parse directo primero
   try {
-    return JSON.parse(text);
-  } catch {
-    // Fallback: extraer primer bloque JSON
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-    try {
-      return JSON.parse(match[0]);
-    } catch {
-      return null;
+    return JSON.parse(cleaned);
+  } catch (e1) {
+    // Fallback 1: buscar primer bloque JSON válido
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (e2) {
+        // Fallback 2: buscar cualquier JSON válido en el texto
+        const allMatches = cleaned.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
+        if (allMatches) {
+          for (const match of allMatches) {
+            try {
+              const parsed = JSON.parse(match);
+              // Verificar que tenga la estructura esperada
+              if (parsed && typeof parsed === "object" && ("passed" in parsed || "risks" in parsed)) {
+                return parsed;
+              }
+            } catch {
+              continue;
+            }
+          }
+        }
+      }
     }
+    
+    // Si todo falla, loguear para debugging
+    console.warn("[extractJson] No se pudo extraer JSON válido. Texto recibido:", cleaned.substring(0, 500));
+    return null;
   }
 }
 
@@ -164,7 +194,7 @@ async function callClaude(
 ) {
   const system =
     "Eres un analista legal experto. Tu tarea es revisar documentos para detectar riesgos y cláusulas problemáticas. " +
-    "Responde SIEMPRE en JSON válido, sin texto adicional.";
+    "Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown, sin explicaciones.";
 
   const countryContext =
     countryCode === "CL"
@@ -173,18 +203,18 @@ async function callClaude(
 
   const userPrompt =
     `${countryContext}\n\n` +
-    "Analiza el PDF adjunto y entrega un JSON con esta estructura exacta:\n" +
+    "Analiza el PDF adjunto y responde ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:\n" +
     "{\n" +
     "  \"passed\": boolean,\n" +
-    "  \"confidence_score\": number (0 a 1),\n" +
-    "  \"summary\": string,\n" +
+    "  \"confidence_score\": number (debe ser un valor entre 0 y 1),\n" +
+    "  \"summary\": string (resumen del análisis),\n" +
     "  \"risks\": [\n" +
-    "    { \"level\": \"high\"|\"medium\"|\"low\", \"text\": string, \"explanation\": string, \"clause\": string? }\n" +
+    "    { \"level\": \"high\"|\"medium\"|\"low\", \"text\": string, \"explanation\": string, \"clause\": string? (opcional) }\n" +
     "  ],\n" +
-    "  \"suggestions\": [string]\n" +
+    "  \"suggestions\": [string] (array de sugerencias de mejora)\n" +
     "}\n\n" +
     "Criterio: passed=false si hay riesgos altos que impiden avanzar sin correcciones.\n" +
-    "Recuerda: responde SOLO JSON.";
+    "IMPORTANTE: Responde SOLO con el JSON, sin markdown, sin ```json, sin texto adicional antes o después.";
 
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -192,12 +222,44 @@ async function callClaude(
       "Content-Type": "application/json",
       "x-api-key": anthropicApiKey,
       "anthropic-version": "2023-06-01",
+      "anthropic-beta": "structured-outputs-2025-11-13",
     },
     body: JSON.stringify({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-sonnet-4-5-20250929",
       max_tokens: 2000,
       temperature: 0.2,
       system,
+      output_format: {
+        type: "json_schema",
+        schema: {
+          type: "object",
+          properties: {
+            passed: { type: "boolean" },
+            confidence_score: { type: "number" },
+            summary: { type: "string" },
+            risks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  level: { type: "string", enum: ["high", "medium", "low"] },
+                  text: { type: "string" },
+                  explanation: { type: "string" },
+                  clause: { type: "string" },
+                },
+                required: ["level", "text", "explanation"],
+                additionalProperties: false,
+              },
+            },
+            suggestions: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+          required: ["passed", "confidence_score", "summary", "risks", "suggestions"],
+          additionalProperties: false,
+        },
+      },
       messages: [
         {
           role: "user",
@@ -223,24 +285,57 @@ async function callClaude(
   }
 
   const data = JSON.parse(rawText);
+  
+  // Con structured outputs, la respuesta viene en data.content[0].text como JSON válido
   const content = Array.isArray(data?.content) ? data.content : [];
   const textParts = content
-    .filter((c: any) => c?.type === "text" && typeof c?.text === "string")
-    .map((c: any) => c.text);
+    .map((c: any) => {
+      if (typeof c?.text === "string") return c.text;
+      if (typeof c?.output_text === "string") return c.output_text;
+      if (Array.isArray(c?.text)) {
+        return c.text
+          .filter((t: any) => typeof t === "string")
+          .join("\n");
+      }
+      return null;
+    })
+    .filter((text): text is string => Boolean(text));
 
   const combined = textParts.join("\n").trim();
-  const parsed = extractJson(combined);
+  
+  // Con structured outputs, el JSON viene directamente válido
+  // Intentar parse directo primero (structured outputs garantiza JSON válido)
+  let parsed: unknown = null;
+  
+  if (combined) {
+    try {
+      // Intentar parse directo primero
+      parsed = JSON.parse(combined);
+    } catch (e1) {
+      // Si falla, intentar con extractJson como fallback
+      console.warn("[callClaude] Parse directo falló, intentando extractJson:", e1);
+      parsed = extractJson(combined);
+      
+      if (!parsed) {
+        console.error("[callClaude] No se pudo extraer JSON. Texto recibido:", combined.substring(0, 1000));
+        console.error("[callClaude] Respuesta raw de Claude:", JSON.stringify(data, null, 2).substring(0, 2000));
+      }
+    }
+  } else {
+    console.error("[callClaude] No se recibió contenido de Claude");
+    console.error("[callClaude] Respuesta raw:", JSON.stringify(data, null, 2).substring(0, 2000));
+  }
 
   return {
     raw: data,
     extractedText: combined,
     parsed,
     usage: data?.usage ?? null,
-    model: data?.model ?? "claude-3-5-sonnet-20241022",
+    model: data?.model ?? "claude-sonnet-4-5-20250929",
   };
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -306,7 +401,7 @@ serve(async (req) => {
         prompt_template: "claude_multimodal_v1",
         prompt_used: null,
         status: "pending",
-        ai_model: "claude-3-5-sonnet-20241022",
+        ai_model: "claude-sonnet-4-5-20250929",
         metadata: {
           country_code: countryCode,
           credit_cost: creditCost,
@@ -351,8 +446,21 @@ serve(async (req) => {
     const claude = await callClaude(anthropicApiKey, countryCode, pdfBase64);
 
     const parsed = claude.parsed as ClaudeAnalysisResult | null;
-    if (!parsed || typeof parsed !== "object") {
-      throw new Error("Claude no devolvió JSON válido");
+    
+    // Validar que parsed sea un objeto válido con las propiedades esperadas
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      console.error("[analyze-document-risks] Claude no devolvió JSON válido");
+      console.error("[analyze-document-risks] Parsed value:", parsed);
+      console.error("[analyze-document-risks] Tipo de parsed:", typeof parsed);
+      console.error("[analyze-document-risks] Texto recibido:", claude.extractedText?.substring(0, 1000));
+      console.error("[analyze-document-risks] Respuesta raw:", JSON.stringify(claude.raw, null, 2).substring(0, 2000));
+      throw new Error(`Claude no devolvió JSON válido. Respuesta recibida: ${claude.extractedText?.substring(0, 200) || "vacía"}`);
+    }
+    
+    // Validar estructura básica del objeto
+    if (!("passed" in parsed) || typeof parsed.passed !== "boolean") {
+      console.error("[analyze-document-risks] JSON no tiene estructura válida. Parsed:", JSON.stringify(parsed, null, 2).substring(0, 1000));
+      throw new Error(`Claude devolvió JSON con estructura inválida. Falta campo 'passed' o no es boolean.`);
     }
 
     const passed = !!parsed.passed;
@@ -410,6 +518,8 @@ serve(async (req) => {
       passed,
       confidence_score: confidence,
       summary: parsed.summary ?? null,
+    reasons,
+    suggestions,
       risks_count: reasons.length,
       credit_cost: creditCost,
     });
