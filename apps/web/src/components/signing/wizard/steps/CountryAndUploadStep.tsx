@@ -45,6 +45,7 @@ export function CountryAndUploadStep() {
   const [countrySettings, setCountrySettings] = useState<
     Record<string, { ai_analysis_available: boolean; ai_analysis_message: string | null }>
   >({})
+  const [promptAvailable, setPromptAvailable] = useState<Record<string, boolean>>({})
 
   const countries = useMemo(
     () => [
@@ -67,7 +68,7 @@ export function CountryAndUploadStep() {
     return countrySettings[key] || null
   }, [countrySettings, state.countryCode])
 
-  const aiAvailable = Boolean(aiConfig?.ai_analysis_available)
+  const aiAvailable = Boolean(aiConfig?.ai_analysis_available) && Boolean(promptAvailable[state.countryCode] || promptAvailable['ALL'])
 
   const canUseAi = useMemo(() => {
     if (!creditCost || creditBalance === null) return true
@@ -132,6 +133,22 @@ export function CountryAndUploadStep() {
           }
         }
         setCountrySettings(next)
+      }
+
+      // Check for active prompts per country
+      const { data: prompts, error: promptsError } = await supabase
+        .from('ai_prompts')
+        .select('country_code')
+        .eq('feature_type', 'document_review')
+        .eq('is_active', true)
+
+      if (!promptsError && Array.isArray(prompts)) {
+        const promptMap: Record<string, boolean> = {}
+        for (const p of prompts) {
+          const code = (p as any)?.country_code?.toString?.()?.toUpperCase?.()
+          if (code) promptMap[code] = true
+        }
+        setPromptAvailable(promptMap)
       }
 
       // Credit cost (ai_document_review_full)

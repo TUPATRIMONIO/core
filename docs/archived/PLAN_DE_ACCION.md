@@ -12,9 +12,10 @@
 > **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
 > INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
-> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ +
-> **🆕 SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧\
-> **🎯 Próximo milestone:** Testing del flujo completo + Portal de firma + Panel de Notarías 📋
+> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
+> SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧\
+> **🎯 Próximo milestone:** Testing del flujo completo + Portal de firma + Panel
+> de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
@@ -383,22 +384,26 @@ READY:
 
 > **📅 Inicio:** Diciembre 11, 2025\
 > **📊 Estado:** EN DESARROLLO ACTIVO 🚧\
-> **🎯 Objetivo:** Sistema completo de firma electrónica con servicios notariales
+> **🎯 Objetivo:** Sistema completo de firma electrónica con servicios
+> notariales
 
 ### ✅ COMPLETADO - Base de Datos (Schema `signing`)
 
 **Tablas Principales Creadas:**
 
 - ✅ `signing.documents` - Documento principal con estados, metadata, archivos
-- ✅ `signing.signers` - Firmantes con first_name/last_name separados, validación RUT
-- ✅ `signing.document_versions` - Historial de versiones (original, firmado, notariado)
+- ✅ `signing.signers` - Firmantes con first_name/last_name separados,
+  validación RUT
+- ✅ `signing.document_versions` - Historial de versiones (original, firmado,
+  notariado)
 - ✅ `signing.reviewers` - Revisores internos del documento
 - ✅ `signing.ai_reviews` - Revisiones automáticas por IA (Claude)
 - ✅ `signing.notary_requests` - Solicitudes a notaría
 - ✅ `signing.notary_offices` - Oficinas notariales con pesos para distribución
 - ✅ `signing.notary_services` - Servicios ofrecidos por cada notaría
 - ✅ `signing.notary_assignments` - Asignaciones de documentos a notarías
-- ✅ `signing.products` - Catálogo de productos (FES, FEA, FESB, FES+ClaveÚnica, servicios notariales)
+- ✅ `signing.products` - Catálogo de productos (FES, FEA, FESB, FES+ClaveÚnica,
+  servicios notariales)
 - ✅ `signing.signer_history` - Historial de cambios en firmantes
 - ✅ `signing.providers` - Proveedores de firma (CDS, etc.)
 - ✅ `signing.provider_configs` - Configuración por organización
@@ -407,7 +412,8 @@ READY:
 
 - ✅ `document_status` - 16 estados (draft → completed)
 - ✅ `signer_status` - 10 estados (pending → signed/rejected)
-- ✅ `notary_service_type` - none, legalized_copy, protocolization, notary_authorized (FAN®)
+- ✅ `notary_service_type` - none, legalized_copy, protocolization,
+  notary_authorized (FAN®)
 - ✅ `signing_order_type` - simultaneous, sequential
 - ✅ `version_type` - original, pre_signature, fully_signed, notarized
 
@@ -422,7 +428,8 @@ READY:
 
 - ✅ `create_signing_document` - Crear documento inicial
 - ✅ `add_document_signer` / `remove_document_signer` - Gestión de firmantes
-- ✅ `submit_document_for_review` / `approve_document_review` - Flujo de aprobación
+- ✅ `submit_document_for_review` / `approve_document_review` - Flujo de
+  aprobación
 - ✅ `send_document_to_sign` - Enviar a firma (con validación de pago)
 - ✅ `record_signature` / `reject_signature` - Registrar firma/rechazo
 - ✅ `begin_document_resend` - Iniciar modo re-envío (invalida firmas)
@@ -449,7 +456,8 @@ READY:
    - Polling de estado de revisión IA
 
 2. ✅ **Paso 2 - Selección de Servicios**
-   - Primero: Servicio Notarial (Ninguno, Copia Legalizada, Protocolización, FAN®)
+   - Primero: Servicio Notarial (Ninguno, Copia Legalizada, Protocolización,
+     FAN®)
    - Segundo: Tipo de Firma Electrónica (filtrado según servicio notarial)
    - Orden de firmas: FES → FESB → FES+ClaveÚnica → FEA
    - Precios dinámicos desde `signing.products`
@@ -538,17 +546,24 @@ READY:
 
 **Correcciones de Base de Datos:**
 
-- ✅ `20251212000019_fix_signing_notification_columns.sql` - Corrige `s.name → s.full_name` en triggers
-- ✅ `20251212000020_enable_pg_net.sql` - Habilita extensión pg_net y corrige search_path en funciones
+- ✅ `20251212000019_fix_signing_notification_columns.sql` - Corrige
+  `s.name → s.full_name` en triggers
+- ✅ `20251212000020_enable_pg_net.sql` - Habilita extensión pg_net y corrige
+  search_path en funciones
 - ✅ Trigger `invoicing.on_order_completed` - No emite facturas para monto $0
 
 **Archivos Modificados:**
 
-- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx` - Auth in-place + órdenes $0
-- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx` - Soporte $0
-- ✅ `apps/web/src/components/checkout/ZeroAmountCheckoutForm.tsx` - Nuevo componente
-- ✅ `apps/web/src/components/checkout/BillingDataForm.tsx` - Props para personalizar texto
-- ✅ `apps/web/src/app/api/payments/checkout/route.ts` - Manejo de `provider: 'free'`
+- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx` - Auth
+  in-place + órdenes $0
+- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx` -
+  Soporte $0
+- ✅ `apps/web/src/components/checkout/ZeroAmountCheckoutForm.tsx` - Nuevo
+  componente
+- ✅ `apps/web/src/components/checkout/BillingDataForm.tsx` - Props para
+  personalizar texto
+- ✅ `apps/web/src/app/api/payments/checkout/route.ts` - Manejo de
+  `provider: 'free'`
 - ✅ `apps/web/src/lib/checkout/core.ts` - No llama facturación para $0
 - ✅ `apps/web/src/lib/auth/actions.ts` - Parámetro `redirectTo` en auth
 
@@ -556,7 +571,8 @@ READY:
 
 ### 🚧 PENDIENTE - Testing y Verificación del Flujo
 
-> **Estado actual:** El wizard de creación y checkout funcionan. Ahora hay que verificar que el flujo post-pago esté correctamente conectado.
+> **Estado actual:** El wizard de creación y checkout funcionan. Ahora hay que
+> verificar que el flujo post-pago esté correctamente conectado.
 
 #### **TESTING PRIORITARIO** (Antes de continuar con nuevas features)
 
@@ -591,19 +607,97 @@ pdf-merge-with-cover → ¿Se genera QR en el documento?
 
 Las Edge Functions ya existen pero necesitan ajustes y testing:
 
-**A.1 - `analyze-document-risks` (Ya existe - Ajustar)**
+**A.1 - `analyze-document-risks` ✅ COMPLETADO (Dic 15, 2025)**
 
 ```
 Ubicación: supabase/functions/analyze-document-risks/index.ts
-Estado: Código completo, necesita testing
+Estado: ✅ FUNCIONANDO CON SISTEMA DE PROMPTS DINÁMICOS
 ```
 
-Tareas:
-- [ ] Configurar variable de entorno `ANTHROPIC_API_KEY` en Supabase
-- [ ] Agregar entrada en `credit_prices` para `ai_document_review_full` si no existe
-- [ ] Probar invocación manual con documento PDF real
-- [ ] Verificar que el resultado se guarde en `signing.ai_reviews`
-- [ ] Ajustar prompts según tipo de servicio (notarial vs simple)
+Tareas Completadas:
+
+- [x] Configurar variable de entorno `ANTHROPIC_API_KEY` en Supabase
+- [x] Agregar entrada en `credit_prices` para `ai_document_review_full`
+- [x] Probar invocación manual con documento PDF real
+- [x] Verificar que el resultado se guarde en `signing.ai_reviews`
+- [x] Sistema de prompts dinámicos desde base de datos
+- [x] Output schema configurable por prompt
+- [x] Fallback para schema cache de Edge Functions
+
+### ✅ COMPLETADO - Sistema de Gestión de Prompts IA (Dic 15, 2025)
+
+**Base de Datos:**
+
+- ✅ Tabla `public.ai_prompts` - Configuración de prompts por país y feature
+- ✅ Columnas: `feature_type`, `country_code`, `version`, `name`,
+  `system_prompt`, `user_prompt_template`, `ai_model`, `temperature`,
+  `max_tokens`, `output_schema`, `is_active`
+- ✅ Versionado de prompts con historial
+- ✅ Activación/desactivación por prompt
+
+**Edge Function `analyze-document-risks`:**
+
+- ✅ Fetch dinámico de prompt activo por país (`getActivePrompt`)
+- ✅ Fallback a prompt global (`country_code = 'ALL'`) si no hay específico
+- ✅ Procesamiento de variables dinámicas (`{{current_date}}`,
+  `{{country_code}}`, etc.)
+- ✅ Output schema opcional - si el prompt no define schema, Claude responde
+  libremente
+- ✅ Fallback para errores de schema cache en Edge Functions
+
+**Frontend Admin `/admin/ai-prompts`:**
+
+- ✅ Lista de prompts con filtros por país y estado
+- ✅ Editor de prompts con:
+  - Configuración básica (nombre, funcionalidad, país, modelo IA)
+  - System Prompt con variables disponibles
+  - User Prompt Template
+  - **Output Schema JSON** con botón para cargar ejemplo
+  - Switch de activación en producción
+- ✅ Versionado: "Guardar como nueva versión"
+- ✅ Instrucciones de campos requeridos para UI de revisión
+
+**Archivos Creados/Modificados:**
+
+```
+Migraciones:
+  - 20251216000005_add_observed_status.sql
+  - 20251216000006_ai_prompts_system.sql
+
+Frontend:
+  - apps/web/src/app/(admin)/admin/ai-prompts/page.tsx
+  - apps/web/src/app/(admin)/admin/ai-prompts/[id]/page.tsx
+  - apps/web/src/app/(admin)/admin/ai-prompts/[id]/prompt-editor.tsx
+
+Edge Function:
+  - supabase/functions/analyze-document-risks/index.ts (actualizado)
+  - supabase/functions/_shared/prompt-variables.ts (nuevo)
+
+Wizard:
+  - apps/web/src/components/signing/wizard/steps/CountryAndUploadStep.tsx
+    (sección IA solo visible si hay prompt activo para el país)
+```
+
+---
+
+### 🔜 PRÓXIMOS PASOS INMEDIATOS
+
+**1. Testing del Prompt de Chile:**
+
+- [ ] Crear prompt de producción para Chile (`country_code = 'CL'`)
+- [ ] Configurar system prompt con instrucciones de análisis legal chileno
+- [ ] Configurar user prompt template con variables dinámicas
+- [ ] Cargar output schema para revisión documental
+- [ ] Probar análisis con documentos reales de Chile
+- [ ] Ajustar prompts según resultados
+
+**2. Continuar con Flujo de Firmas (FASE B):**
+
+- [ ] Portal público de firma `/sign/[token]`
+- [ ] Verificación pública `/repository/[documentId]`
+- [ ] Panel de notarías
+
+---
 
 **A.2 - `pdf-merge-with-cover` (Ya existe - Ajustar)**
 
@@ -613,11 +707,13 @@ Estado: Código base, necesita ajustar rutas de storage
 ```
 
 Tareas:
+
 - [ ] Cambiar bucket de `signing-documents` a `docs-originals`
 - [ ] Generar QR con URL `https://tupatrimonio.app/repository/{document_id}`
 - [ ] Agregar el ID único del documento en la primera página
 - [ ] Subir resultado a `docs-originals` como nueva versión
-- [ ] Crear registro en `signing.document_versions` con `version_type = 'pre_signature'`
+- [ ] Crear registro en `signing.document_versions` con
+      `version_type = 'pre_signature'`
 - [ ] Actualizar `signing.documents.qr_file_path` y `qr_identifier`
 
 **A.3 - `send-signing-notification` (Ya existe - Completar)**
@@ -628,6 +724,7 @@ Estado: Código completo, listo para testing
 ```
 
 Tareas:
+
 - [ ] Verificar que `sendgrid_accounts` tenga datos de prueba
 - [ ] Crear templates de email para cada tipo:
   - `REVIEW_REQUEST` - Solicitud de revisión interna
@@ -643,6 +740,7 @@ Estado: Estructura base, necesita integración real con proveedor
 ```
 
 Tareas:
+
 - [ ] Obtener documentación real de API de CDS (Certificadora del Sur)
 - [ ] Ajustar parsing del payload según formato real
 - [ ] Implementar descarga de documento firmado desde URL del proveedor
@@ -661,6 +759,7 @@ Crear: apps/web/src/app/sign/[token]/page.tsx
 ```
 
 Tareas:
+
 - [ ] Crear layout público (sin sidebar, sin autenticación)
 - [ ] Validar token contra `signing.signers.signing_token`
 - [ ] Verificar que `token_expires_at` no haya pasado
@@ -691,6 +790,7 @@ Crear: apps/web/src/app/repository/[documentId]/page.tsx
 ```
 
 Tareas:
+
 - [ ] Crear página pública (sin autenticación)
 - [ ] Buscar documento por UUID en `signing.documents`
 - [ ] Mostrar estado actual del documento
@@ -725,6 +825,7 @@ Crear: apps/web/src/app/notary/dashboard/page.tsx
 ```
 
 Tareas:
+
 - [ ] Verificar que usuario pertenezca a organización tipo `notary`
 - [ ] Listar documentos asignados desde `signing.notary_assignments`
 - [ ] Filtros por estado: pending, in_progress, completed, rejected
@@ -738,6 +839,7 @@ Crear: apps/web/src/app/api/notary/upload-notarized/route.ts
 ```
 
 Tareas:
+
 - [ ] Recibir PDF notarizado
 - [ ] Leer QR del PDF para extraer `document_id`
 - [ ] Validar que coincida con la asignación
@@ -753,6 +855,7 @@ Usar: signing.notary_observations
 ```
 
 Tareas:
+
 - [ ] UI para agregar observaciones/rechazos
 - [ ] Notificación al equipo TuPatrimonio
 - [ ] Respuestas y resolución de observaciones
@@ -769,6 +872,7 @@ Tareas:
 ```
 
 Tareas:
+
 - [x] Permitir agregar/editar/eliminar firmantes si no ha firmado
 - [x] Permitir reemplazar PDF si nadie ha firmado
 - [x] Si hay firmas existentes → modo "re-envío"
@@ -782,10 +886,12 @@ RPCs disponibles y funcionando:
 ```
 
 Tareas:
+
 - [x] UI que muestre advertencia de firmas a invalidar
 - [x] Llamar `begin_document_resend`
 - [x] Calcular costo con `calculate_resend_cost`
-- [x] Crear orden vía `/api/checkout/create` con `productType: 'electronic_signature_resend'`
+- [x] Crear orden vía `/api/checkout/create` con
+      `productType: 'electronic_signature_resend'`
 - [x] Redirigir a checkout (Stripe/Transbank/Créditos)
 - [x] Post-pago: documento vuelve a estado editable
 
@@ -806,6 +912,7 @@ VALUES ('Certificadora del Sur', 'cds', 'both', 'https://api.cds.cl/v1', '{...}'
 **F.2 - Implementar llamadas a API CDS**
 
 Tareas:
+
 - [ ] Crear `lib/signing/providers/cds.ts`
 - [ ] Método `initiateSigningProcess()` → Obtener código de transacción
 - [ ] Método `checkSignerStatus()` → Verificar estado de firma
