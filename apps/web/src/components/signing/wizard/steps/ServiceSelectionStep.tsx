@@ -217,12 +217,14 @@ export function ServiceSelectionStep() {
       name: string
       description: string
       price: string | null
+      billingUnit: string | null
     }> = [
       {
         slug: 'none',
         name: 'Ninguno',
         description: 'Solo firma electrónica, sin intervención notarial.',
         price: null,
+        billingUnit: null,
       },
     ]
 
@@ -234,6 +236,7 @@ export function ServiceSelectionStep() {
           name: p.name,
           description: p.description || '',
           price: p.base_price > 0 ? formatMoney(p.base_price, p.currency) : null,
+          billingUnit: p.billing_unit === 'per_signer' ? 'firmante' : 'documento',
         })
       }
     })
@@ -267,7 +270,7 @@ export function ServiceSelectionStep() {
                 Selecciona si necesitas que una notaría intervenga en el proceso.
               </p>
 
-              <RadioGroup value={notarySlug} onValueChange={setNotarySlug} className="grid gap-3 sm:grid-cols-2">
+              <RadioGroup value={notarySlug} onValueChange={setNotarySlug} className="space-y-3">
                 {notaryOptions.map((opt) => (
                   <div
                     key={opt.slug}
@@ -291,7 +294,12 @@ export function ServiceSelectionStep() {
                         <div className="text-xs text-muted-foreground">{opt.description}</div>
                       )}
                       {opt.price && (
-                        <div className="text-xs font-semibold text-[var(--tp-buttons)]">{opt.price}</div>
+                        <div className="text-xs font-semibold text-[var(--tp-buttons)]">
+                          {opt.price}
+                          {opt.billingUnit && (
+                            <span className="text-muted-foreground font-normal"> / {opt.billingUnit}</span>
+                          )}
+                        </div>
                       )}
                     </Label>
                   </div>
@@ -353,26 +361,7 @@ export function ServiceSelectionStep() {
               )}
             </div>
 
-            {/* Resumen de selección */}
-            {(notarySlug !== 'none' || signatureSelected) && (
-              <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
-                <div className="text-sm font-semibold">Resumen</div>
-                <div className="text-xs space-y-1">
-                  {notarySlug !== 'none' && notarySelected && (
-                    <div className="flex justify-between">
-                      <span>Servicio notarial:</span>
-                      <span className="font-semibold">{notarySelected.name}</span>
-                    </div>
-                  )}
-                  {signatureSelected && (
-                    <div className="flex justify-between">
-                      <span>Tipo de firma:</span>
-                      <span className="font-semibold">{signatureSelected.name}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button variant="outline" onClick={handleBack} disabled={isSaving}>
