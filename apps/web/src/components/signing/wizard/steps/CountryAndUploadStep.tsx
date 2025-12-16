@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSigningWizard } from '../WizardContext'
+import { useGlobalCountryOptional } from '@/providers/GlobalCountryProvider'
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ import {
 export function CountryAndUploadStep() {
   const supabase = useMemo(() => createClient(), [])
   const { state, actions } = useSigningWizard()
+  const globalCountry = useGlobalCountryOptional()
 
   const [title, setTitle] = useState('')
   const [isBootstrapping, setIsBootstrapping] = useState(true)
@@ -107,17 +109,23 @@ export function CountryAndUploadStep() {
 
       actions.setOrgId(orgUser.organization_id)
 
-      // Default country: organization.country if exists
-      const { data: org, error: orgCountryError } = await supabase
-        .from('organizations')
-        .select('country')
-        .eq('id', orgUser.organization_id)
-        .maybeSingle()
+      // Default country priority: 1) global context, 2) organization.country
+      // Check if we already have a country set from global context
+      if (globalCountry?.country && !globalCountry.isLoading) {
+        actions.setCountryCode(globalCountry.country.toUpperCase())
+      } else {
+        // Fallback to organization country
+        const { data: org, error: orgCountryError } = await supabase
+          .from('organizations')
+          .select('country')
+          .eq('id', orgUser.organization_id)
+          .maybeSingle()
 
-      if (!orgCountryError) {
-        const orgCountry = (org?.country || '').toString().toUpperCase()
-        if (orgCountry && orgCountry.length === 2) {
-          actions.setCountryCode(orgCountry)
+        if (!orgCountryError) {
+          const orgCountry = (org?.country || '').toString().toUpperCase()
+          if (orgCountry && orgCountry.length === 2) {
+            actions.setCountryCode(orgCountry)
+          }
         }
       }
 
@@ -181,7 +189,7 @@ export function CountryAndUploadStep() {
     } finally {
       setIsBootstrapping(false)
     }
-  }, [actions, supabase])
+  }, [actions, supabase, globalCountry])
 
   useEffect(() => {
     loadOrgAndCredits()

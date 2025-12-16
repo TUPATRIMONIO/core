@@ -1,9 +1,20 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 12, 2025\
+> **📅 Última actualización:** Diciembre 16, 2025\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
+> **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3:
+> COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
+> Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
+> **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
+> FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ +
+> **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
+> INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
+> B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
+> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
+> SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧 + **🆕
+> SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅\
 > **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3:
 > COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
 > Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
@@ -450,8 +461,10 @@ READY:
 **Pasos del Wizard:**
 
 1. ✅ **Paso 1 - País y Documento**
-   - Selector de país (Chile por defecto)
+   - Selector de país (Chile por defecto, usa país global si está disponible)
    - Upload de PDF con drag & drop
+   - **✅ Previsualización del documento PDF** (visor embebido con opciones de
+     abrir en nueva pestaña, descargar y ocultar)
    - Revisión opcional por IA (consume créditos)
    - Polling de estado de revisión IA
 
@@ -677,6 +690,46 @@ Wizard:
   - apps/web/src/components/signing/wizard/steps/CountryAndUploadStep.tsx
     (sección IA solo visible si hay prompt activo para el país)
 ```
+
+---
+
+### ✅ COMPLETADO - Selector Global de País (Dic 16, 2025)
+
+**Objetivo:** Sistema de selección de país global que filtra servicios y precios
+según el país seleccionado. Los usuarios pueden acceder desde cualquier
+ubicación del mundo, el país determina qué servicios ver.
+
+**Componentes Creados:**
+
+- ✅ `providers/GlobalCountryProvider.tsx` - Contexto React para país global
+  - Auto-detección usando `@tupatrimonio/location`
+  - Prioridad: localStorage → país de organización → auto-detección → Chile
+  - Persistencia en localStorage
+  - Hook `useGlobalCountry()` para consumir estado
+
+- ✅ `components/shared/CountrySelectorDropdown.tsx` - Selector dropdown
+  - Muestra bandera + código de país
+  - Lista todos los países soportados
+  - Badge "Próximamente" para países no disponibles
+  - Opción "Detectar automáticamente"
+  - Mensaje: "El país determina servicios, puedes acceder desde cualquier
+    ubicación"
+
+**Integración:**
+
+- ✅ Header del dashboard: Selector visible junto a órdenes pendientes
+- ✅ Wizard de firma: Pre-selecciona país del contexto global
+- ✅ Layout dashboard envuelto con `GlobalCountryProvider`
+
+**Países Soportados:**
+
+| País      | Código | Estado                    |
+| --------- | ------ | ------------------------- |
+| Chile     | CL     | ✅ Disponible             |
+| México    | MX     | 🚀 Próximamente (Q2 2025) |
+| Colombia  | CO     | 🚀 Próximamente (Q2 2025) |
+| Perú      | PE     | 🚀 Próximamente (Q3 2025) |
+| Argentina | AR     | 🚀 Próximamente (Q3 2025) |
 
 ---
 
