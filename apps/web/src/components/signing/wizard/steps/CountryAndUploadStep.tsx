@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
+import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSigningWizard } from '../WizardContext'
 import {
@@ -46,6 +46,10 @@ export function CountryAndUploadStep() {
     Record<string, { ai_analysis_available: boolean; ai_analysis_message: string | null }>
   >({})
   const [promptAvailable, setPromptAvailable] = useState<Record<string, boolean>>({})
+  
+  // Estado para previsualización del PDF
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
 
   const countries = useMemo(
     () => [
@@ -182,6 +186,23 @@ export function CountryAndUploadStep() {
   useEffect(() => {
     loadOrgAndCredits()
   }, [loadOrgAndCredits])
+
+  // Efecto para generar URL de previsualización del PDF
+  useEffect(() => {
+    if (state.file) {
+      const url = URL.createObjectURL(state.file)
+      setPreviewUrl(url)
+      setShowPreview(true)
+      
+      // Cleanup: revocar URL cuando cambie el archivo o se desmonte
+      return () => {
+        URL.revokeObjectURL(url)
+      }
+    } else {
+      setPreviewUrl(null)
+      setShowPreview(false)
+    }
+  }, [state.file])
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -537,6 +558,81 @@ export function CountryAndUploadStep() {
                 <p className="text-xs text-destructive">{rejectionMessage}</p>
               )}
             </div>
+
+            {/* Previsualización del PDF */}
+            {state.file && previewUrl && (
+              <div className="rounded-lg border overflow-hidden">
+                <div className="flex items-center justify-between bg-muted/50 px-4 py-2 border-b">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate max-w-[200px] sm:max-w-none">{state.file.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({(state.file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(previewUrl, '_blank')}
+                      className="h-8 px-2"
+                      title="Abrir en nueva pestaña"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = previewUrl
+                        link.download = state.file?.name || 'document.pdf'
+                        link.click()
+                      }}
+                      className="h-8 px-2"
+                      title="Descargar"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="h-8 px-2"
+                      title={showPreview ? 'Ocultar vista previa' : 'Mostrar vista previa'}
+                    >
+                      {showPreview ? 'Ocultar' : 'Mostrar'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        actions.setFile(null)
+                        actions.setUploadedFilePath(null)
+                        actions.setDocumentId(null)
+                        actions.setRequiresAiReview(false)
+                        actions.setAiReview({ id: null, status: null })
+                        setAiReviewData(null)
+                      }}
+                      className="h-8 px-2 text-destructive hover:text-destructive"
+                      title="Eliminar archivo"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                {showPreview && (
+                  <div className="relative bg-gray-100 dark:bg-gray-900">
+                    <iframe
+                      src={previewUrl}
+                      className="w-full h-[500px] border-0"
+                      title={`Vista previa: ${state.file.name}`}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {aiAvailable && state.file && (
               <div className="rounded-lg border p-4">
