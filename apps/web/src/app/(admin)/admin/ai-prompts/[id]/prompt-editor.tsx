@@ -275,29 +275,61 @@ export function PromptEditor({ initialData, isNew }: PromptEditorProps) {
               onClick={() => {
                 const exampleSchema = {
                   type: "object",
+                  additionalProperties: false,
                   properties: {
-                    passed: { type: "boolean" },
-                    confidence_score: { type: "number" },
-                    summary: { type: "string" },
-                    risks: {
+                    resultado_revision: { 
+                      type: "string", 
+                      enum: ["aprobado", "observado", "rechazado"],
+                      description: "Resultado final de la revisión"
+                    },
+                    tipo_documento: { 
+                      type: "string",
+                      description: "Tipo de documento identificado" 
+                    },
+                    resumen: { 
+                      type: "string",
+                      description: "Resumen del documento en máximo 50 palabras" 
+                    },
+                    puntos_importantes: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "Lista de los puntos más importantes"
+                    },
+                    cantidad_firmantes: { 
+                      type: "integer",
+                      description: "Número de personas que deben firmar" 
+                    },
+                    observaciones: {
                       type: "array",
                       items: {
                         type: "object",
+                        additionalProperties: false,
                         properties: {
-                          level: { type: "string", enum: ["high", "medium", "low"] },
-                          text: { type: "string" },
-                          explanation: { type: "string" },
-                          clause: { type: "string" }
+                          tipo: { type: "string", enum: ["error", "advertencia", "sugerencia"] },
+                          descripcion: { type: "string" },
+                          fragmento: { type: "string" }
                         },
-                        required: ["level", "text", "explanation"]
+                        required: ["tipo", "descripcion"]
                       }
                     },
-                    suggestions: {
+                    sugerencias_modificacion: {
                       type: "array",
                       items: { type: "string" }
+                    },
+                    razones_rechazo: {
+                      type: "array",
+                      items: { type: "string" }
+                    },
+                    servicio_notarial_sugerido: {
+                      type: "string",
+                      enum: ["ninguno", "protocolizacion", "firma_autorizada_notario", "copia_legalizada"]
+                    },
+                    confianza: { 
+                      type: "number",
+                      description: "Nivel de confianza del análisis (0 a 1)" 
                     }
                   },
-                  required: ["passed", "confidence_score", "summary", "risks", "suggestions"]
+                  required: ["resultado_revision", "tipo_documento", "resumen", "puntos_importantes", "cantidad_firmantes", "confianza"]
                 }
                 handleChange('output_schema', exampleSchema)
               }}
@@ -305,7 +337,7 @@ export function PromptEditor({ initialData, isNew }: PromptEditorProps) {
               📋 Cargar ejemplo para Revisión Documental
             </Button>
             <p className="text-xs text-muted-foreground">
-              <strong>Importante:</strong> Para que el UI de revisión IA funcione, el schema debe incluir: <code>passed</code>, <code>risks</code>, <code>suggestions</code>
+              <strong>Importante:</strong> Para que el UI funcione, el schema debe incluir: <code>resultado_revision</code>, <code>tipo_documento</code>, <code>resumen</code>, <code>confianza</code>. Además, todos los objetos requieren <code>additionalProperties: false</code>.
             </p>
           </CardContent>
         </Card>

@@ -28,6 +28,7 @@ import {
   Mails,
   PenTool,
   FileSignature,
+  Bot,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -173,6 +174,11 @@ const systemMenuItems = [
     title: 'API Keys',
     url: '/admin/api-keys',
     icon: Key,
+  },
+  {
+    title: 'AI Prompts',
+    url: '/admin/ai-prompts',
+    icon: Bot,
   },
   {
     title: 'System Events',

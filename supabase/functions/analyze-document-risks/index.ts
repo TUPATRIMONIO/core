@@ -11,7 +11,8 @@ const corsHeaders = {
 
 type ClaudeRiskLevel = "high" | "medium" | "low";
 
-interface ClaudeAnalysisResult {
+// Old schema format (generic)
+interface ClaudeAnalysisResultLegacy {
   passed: boolean;
   confidence_score?: number;
   summary?: string;
@@ -22,6 +23,42 @@ interface ClaudeAnalysisResult {
     clause?: string;
   }>;
   suggestions?: string[];
+}
+
+// New Chile schema format
+interface ChileAnalysisResult {
+  resultado_revision: "aprobado" | "observado" | "rechazado";
+  tipo_documento: string;
+  titulo_documento?: string;
+  resumen: string;
+  puntos_importantes: string[];
+  cantidad_firmantes: number;
+  observaciones?: Array<{
+    tipo: "error" | "advertencia" | "sugerencia";
+    descripcion: string;
+    fragmento?: string;
+  }>;
+  razones_rechazo?: string[];
+  sugerencias_modificacion?: string[];
+  servicio_notarial_sugerido?:
+    | "ninguno"
+    | "protocolizacion"
+    | "firma_autorizada_notario"
+    | "copia_legalizada";
+  confianza: number;
+}
+
+// Union type to handle both formats
+type ClaudeAnalysisResult = ClaudeAnalysisResultLegacy | ChileAnalysisResult;
+
+// Type guard to check if it's the new Chile format
+function isChileFormat(parsed: unknown): parsed is ChileAnalysisResult {
+  return (
+    typeof parsed === "object" &&
+    parsed !== null &&
+    "resultado_revision" in parsed &&
+    typeof (parsed as ChileAnalysisResult).resultado_revision === "string"
+  );
 }
 
 function jsonResponse(status: number, body: unknown) {
@@ -589,41 +626,121 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validar estructura básica del objeto
-    if (!("passed" in parsed) || typeof parsed.passed !== "boolean") {
-      console.error(
-        "[analyze-document-risks] JSON no tiene estructura válida. Parsed:",
-        JSON.stringify(parsed, null, 2).substring(0, 1000),
-      );
-      throw new Error(
-        `Claude devolvió JSON con estructura inválida. Falta campo 'passed' o no es boolean.`,
-      );
+    // Determine format and extract values
+    let passed: boolean;
+    let status: "approved" | "rejected" | "needs_changes";
+    let confidence: number | null;
+    let summary: string | null;
+    let reasons: Array<
+      {
+        level: string;
+        text: string;
+        explanation: string;
+        clause?: string | null;
+      }
+    >;
+    let suggestions: string[];
+    let chileMetadata: Record<string, unknown> = {};
+
+    if (isChileFormat(parsed)) {
+      // New Chile format
+      console.log("[analyze-document-risks] Using Chile format");
+
+      // Map resultado_revision to status
+      const resultadoMap: Record<
+        string,
+        { passed: boolean; status: "approved" | "rejected" | "needs_changes" }
+      > = {
+        "aprobado": { passed: true, status: "approved" },
+        "observado": { passed: false, status: "needs_changes" },
+        "rechazado": { passed: false, status: "rejected" },
+      };
+
+      const mapping = resultadoMap[parsed.resultado_revision] ||
+        { passed: false, status: "rejected" };
+      passed = mapping.passed;
+      status = mapping.status;
+
+      confidence = typeof parsed.confianza === "number"
+        ? parsed.confianza
+        : null;
+      summary = parsed.resumen || null;
+
+      // Map observaciones to reasons format
+      reasons = (parsed.observaciones || []).map((obs) => ({
+        level: obs.tipo === "error"
+          ? "high"
+          : obs.tipo === "advertencia"
+          ? "medium"
+          : "low",
+        text: obs.descripcion,
+        explanation: obs.fragmento || obs.descripcion,
+        clause: null,
+      }));
+
+      // Combine sugerencias_modificacion and razones_rechazo
+      suggestions = [
+        ...(parsed.sugerencias_modificacion || []),
+        ...(parsed.razones_rechazo || []),
+      ];
+
+      // Store Chile-specific fields in metadata
+      chileMetadata = {
+        resultado_revision: parsed.resultado_revision,
+        tipo_documento: parsed.tipo_documento,
+        titulo_documento: parsed.titulo_documento || null,
+        puntos_importantes: parsed.puntos_importantes || [],
+        cantidad_firmantes: parsed.cantidad_firmantes || 0,
+        observaciones: parsed.observaciones || [],
+        razones_rechazo: parsed.razones_rechazo || [],
+        sugerencias_modificacion: parsed.sugerencias_modificacion || [],
+        servicio_notarial_sugerido: parsed.servicio_notarial_sugerido ||
+          "ninguno",
+      };
+    } else {
+      // Legacy format with 'passed' field
+      console.log("[analyze-document-risks] Using legacy format");
+
+      const legacyParsed = parsed as ClaudeAnalysisResultLegacy;
+
+      // Validar estructura básica del objeto
+      if (
+        !("passed" in legacyParsed) || typeof legacyParsed.passed !== "boolean"
+      ) {
+        console.error(
+          "[analyze-document-risks] JSON no tiene estructura válida. Parsed:",
+          JSON.stringify(parsed, null, 2).substring(0, 1000),
+        );
+        throw new Error(
+          `Claude devolvió JSON con estructura inválida. Falta campo 'passed' o 'resultado_revision'.`,
+        );
+      }
+
+      passed = !!legacyParsed.passed;
+      status = passed ? "approved" : "rejected";
+      confidence = typeof legacyParsed.confidence_score === "number"
+        ? legacyParsed.confidence_score
+        : null;
+      summary = legacyParsed.summary || null;
+
+      const risks = Array.isArray(legacyParsed.risks) ? legacyParsed.risks : [];
+      reasons = risks.map((r) => ({
+        level: r.level,
+        text: r.text,
+        explanation: r.explanation,
+        clause: r.clause ?? null,
+      }));
+
+      suggestions = Array.isArray(legacyParsed.suggestions)
+        ? legacyParsed.suggestions
+        : [];
     }
-
-    const passed = !!parsed.passed;
-    const confidence = typeof parsed.confidence_score === "number"
-      ? parsed.confidence_score
-      : null;
-
-    const risks = Array.isArray(parsed.risks) ? parsed.risks : [];
-    const reasons = risks.map((r) => ({
-      level: r.level,
-      text: r.text,
-      explanation: r.explanation,
-      clause: r.clause ?? null,
-    }));
-
-    const suggestions = Array.isArray(parsed.suggestions)
-      ? parsed.suggestions
-      : (typeof (parsed as any).suggestions === "string"
-        ? [(parsed as any).suggestions]
-        : []);
 
     // 6) Actualizar ai_reviews
     const { error: updateReviewError } = await supabase
       .from("signing_ai_reviews")
       .update({
-        status: passed ? "approved" : "rejected",
+        status,
         passed,
         confidence_score: confidence,
         reasons,
@@ -631,19 +748,21 @@ Deno.serve(async (req) => {
         raw_response: claude.raw,
         tokens_used: claude.usage?.output_tokens ?? null,
         completed_at: new Date().toISOString(),
-        prompt_used: claude.processed_user_prompt || null, // Guardamos el prompt procesado
+        prompt_used: claude.processed_user_prompt || null,
         metadata: {
           country_code: countryCode,
           bucket,
           file_path: filePath,
           credit_cost: creditCost,
           credit_transaction_id: creditTxId,
-          summary: parsed.summary ?? null,
+          summary,
           prompt_config: {
             id: promptConfig.id,
             version: promptConfig.version,
             processed_system: claude.processed_system_prompt,
           },
+          // Chile-specific metadata
+          ...chileMetadata,
         },
       })
       .eq("id", reviewId);
@@ -661,14 +780,18 @@ Deno.serve(async (req) => {
       success: true,
       document_id: documentId,
       review_id: reviewId,
-      status: passed ? "approved" : "rejected",
+      status,
       passed,
       confidence_score: confidence,
-      summary: parsed.summary ?? null,
+      summary,
       reasons,
       suggestions,
       risks_count: reasons.length,
       credit_cost: creditCost,
+      // Include Chile-specific fields for frontend
+      ...(Object.keys(chileMetadata).length > 0
+        ? { chile_data: chileMetadata }
+        : {}),
     });
   } catch (error: any) {
     console.error("[analyze-document-risks] Error:", error);

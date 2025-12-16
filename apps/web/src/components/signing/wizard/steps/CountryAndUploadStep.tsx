@@ -7,19 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X } from 'lucide-react'
+import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X, Info } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSigningWizard } from '../WizardContext'
 import { useGlobalCountryOptional } from '@/providers/GlobalCountryProvider'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 
 export function CountryAndUploadStep() {
   const supabase = useMemo(() => createClient(), [])
@@ -37,11 +31,14 @@ export function CountryAndUploadStep() {
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
 
   const [aiReviewData, setAiReviewData] = useState<any | null>(null)
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false)
   const [countrySettings, setCountrySettings] = useState<
     Record<string, { ai_analysis_available: boolean; ai_analysis_message: string | null }>
   >({})
   const [promptAvailable, setPromptAvailable] = useState<Record<string, boolean>>({})
+  
+  // Estado para aceptación de riesgos (documentos observados)
+  const [riskAccepted, setRiskAccepted] = useState(false)
+  const [isAcceptingRisk, setIsAcceptingRisk] = useState(false)
   
   // Estado para previsualización del PDF
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -697,56 +694,97 @@ export function CountryAndUploadStep() {
             {aiReviewData && (
               <div
                 className={[
-                  'rounded-lg border p-4 space-y-3 transition-colors',
+                  'rounded-lg border p-4 space-y-4 transition-colors',
                   aiReviewData.status === 'approved'
-                    ? 'border-emerald-500/40 bg-emerald-100/70 text-emerald-900 dark:bg-emerald-500/10 dark:border-emerald-400/40 dark:text-emerald-50'
+                    ? 'border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-400/40'
                     : '',
                   aiReviewData.status === 'rejected'
-                    ? 'border-red-500/40 bg-red-100/70 text-red-900 dark:bg-red-500/10 dark:border-red-400/40 dark:text-red-50'
+                    ? 'border-red-500/40 bg-red-50 dark:bg-red-500/10 dark:border-red-400/40'
                     : '',
                   aiReviewData.status === 'needs_changes'
-                    ? 'border-amber-500/40 bg-amber-100/70 text-amber-900 dark:bg-amber-500/10 dark:border-amber-400/40 dark:text-amber-50'
+                    ? 'border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-400/40'
                     : '',
                   !['approved', 'rejected', 'needs_changes'].includes(aiReviewData.status)
-                    ? 'border-[var(--tp-lines-30,#7a7a7a50)] bg-[var(--tp-bg-light-10,#f7f7f7)] dark:bg-white/5 dark:border-white/10 text-foreground'
+                    ? 'border-[var(--tp-lines-30,#7a7a7a50)] bg-[var(--tp-bg-light-10,#f7f7f7)] dark:bg-white/5 dark:border-white/10'
                     : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
+                {/* Header con resultado */}
                 <div className="flex items-center gap-2">
                   {aiReviewData.status === 'approved' && (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   )}
                   {aiReviewData.status === 'rejected' && (
-                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-300" />
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                   )}
                   {aiReviewData.status === 'needs_changes' && (
-                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-300" />
+                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   )}
                   {!['approved', 'rejected', 'needs_changes'].includes(aiReviewData.status) && (
                     <Sparkles className="h-5 w-5 text-[var(--tp-buttons)]" />
                   )}
-                  <div className="text-sm font-semibold">
-                    {aiReviewData.status === 'approved' && 'Documento aprobado'}
-                    {aiReviewData.status === 'rejected' && 'Documento rechazado'}
-                    {aiReviewData.status === 'needs_changes' && 'Documento con observaciones'}
+                  <div className="font-semibold">
+                    {aiReviewData.status === 'approved' && 'Documento Aprobado'}
+                    {aiReviewData.status === 'rejected' && 'Documento Rechazado'}
+                    {aiReviewData.status === 'needs_changes' && 'Documento Observado'}
                     {!['approved', 'rejected', 'needs_changes'].includes(aiReviewData.status) &&
                       'Resultado del análisis'}
                   </div>
                 </div>
 
-                {aiReviewData.metadata?.summary && (
-                  <div className="text-sm text-foreground/80 dark:text-white/80">
-                    {aiReviewData.metadata.summary}
+                {/* Tipo de documento y cantidad de firmantes */}
+                {(aiReviewData.metadata?.tipo_documento || aiReviewData.metadata?.cantidad_firmantes) && (
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {aiReviewData.metadata?.tipo_documento && (
+                      <div className="flex items-center gap-1.5">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Tipo:</span>
+                        <span>{aiReviewData.metadata.tipo_documento}</span>
+                      </div>
+                    )}
+                    {aiReviewData.metadata?.cantidad_firmantes !== undefined && (
+                      <div className="flex items-center gap-1.5">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">Firmantes requeridos:</span>
+                        <span>{aiReviewData.metadata.cantidad_firmantes}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
+                {/* Resumen */}
+                {aiReviewData.metadata?.summary && (
+                  <div className="text-sm">
+                    <div className="font-semibold mb-1">Resumen</div>
+                    <p className="text-muted-foreground">{aiReviewData.metadata.summary}</p>
+                  </div>
+                )}
+
+                {/* Puntos importantes */}
+                {Array.isArray(aiReviewData.metadata?.puntos_importantes) && aiReviewData.metadata.puntos_importantes.length > 0 && (
+                  <div className="text-sm">
+                    <div className="font-semibold mb-2">Puntos importantes</div>
+                    <ul className="space-y-1.5">
+                      {aiReviewData.metadata.puntos_importantes.map((punto: string, idx: number) => (
+                        <li key={idx} className="flex gap-2">
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--tp-buttons)] shrink-0" />
+                          <span className="text-muted-foreground">{punto}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Observaciones/Riesgos detectados */}
                 {Array.isArray(aiReviewData.reasons) && aiReviewData.reasons.length > 0 && (
-                  <div className="text-xs space-y-2">
-                    <div className="font-semibold text-foreground dark:text-white">Riesgos detectados:</div>
-                    <div className="space-y-1.5">
-                      {aiReviewData.reasons.slice(0, 5).map(
+                  <div className="text-sm space-y-2">
+                    <div className="font-semibold">
+                      {aiReviewData.status === 'needs_changes' ? 'Observaciones' : 'Riesgos detectados'}
+                    </div>
+                    <div className="space-y-2">
+                      {aiReviewData.reasons.map(
                         (
                           r: { level?: 'high' | 'medium' | 'low'; text?: string; explanation?: string },
                           idx: number
@@ -754,195 +792,169 @@ export function CountryAndUploadStep() {
                           <div
                             key={idx}
                             className={[
-                              'rounded-md p-2 text-xs border-l-2',
+                              'rounded-md p-3 text-sm border-l-4',
                               r.level === 'high'
-                                ? 'bg-red-100/80 border-red-500 text-red-900 dark:bg-red-500/10 dark:text-red-50'
+                                ? 'bg-red-50 border-red-500 dark:bg-red-500/10'
                                 : '',
                               r.level === 'medium'
-                                ? 'bg-amber-100/80 border-amber-500 text-amber-900 dark:bg-amber-500/10 dark:text-amber-50'
+                                ? 'bg-amber-50 border-amber-500 dark:bg-amber-500/10'
                                 : '',
                               r.level === 'low'
-                                ? 'bg-sky-100/80 border-sky-500 text-sky-900 dark:bg-sky-500/10 dark:text-sky-50'
+                                ? 'bg-sky-50 border-sky-500 dark:bg-sky-500/10'
                                 : '',
-                              !r.level ? 'bg-white/70 dark:bg-white/5 border-[var(--tp-lines-30,#7a7a7a50)]' : '',
+                              !r.level ? 'bg-gray-50 dark:bg-white/5 border-gray-300' : '',
                             ]
                               .filter(Boolean)
                               .join(' ')}
                           >
-                            <span className="font-semibold capitalize">{r.level || 'info'}:</span>{' '}
-                            {(r.explanation || r.text || '').trim()}
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={[
+                                'text-xs font-semibold uppercase',
+                                r.level === 'high' ? 'text-red-700 dark:text-red-400' : '',
+                                r.level === 'medium' ? 'text-amber-700 dark:text-amber-400' : '',
+                                r.level === 'low' ? 'text-sky-700 dark:text-sky-400' : '',
+                                !r.level ? 'text-gray-600 dark:text-gray-400' : '',
+                              ].filter(Boolean).join(' ')}>
+                                {r.level === 'high' && 'Error'}
+                                {r.level === 'medium' && 'Advertencia'}
+                                {r.level === 'low' && 'Sugerencia'}
+                                {!r.level && 'Info'}
+                              </span>
+                            </div>
+                            <p className="text-muted-foreground">
+                              {r.explanation || r.text || ''}
+                            </p>
                           </div>
                         )
                       )}
                     </div>
-                    {aiReviewData.reasons.length > 5 && (
-                      <div className="flex items-center justify-between text-muted-foreground dark:text-white/70">
-                        <span>+ {aiReviewData.reasons.length - 5} riesgos más</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs text-[var(--tp-buttons)] hover:text-[var(--tp-buttons-hover)]"
-                          onClick={() => setIsReviewDialogOpen(true)}
-                        >
-                          Ver todo
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 )}
 
-                {Array.isArray(aiReviewData.suggestions) && aiReviewData.suggestions.length > 0 && (
-                  <div className="text-xs space-y-1">
-                    <div className="font-semibold text-foreground dark:text-white">Sugerencias:</div>
-                    <ul className="list-disc pl-5 space-y-0.5 text-foreground/80 dark:text-white/80">
-                      {aiReviewData.suggestions.slice(0, 3).map((s: string, idx: number) => (
-                        <li key={idx}>{s}</li>
+                {/* Sugerencias de modificación (solo para observados) */}
+                {Array.isArray(aiReviewData.suggestions) && aiReviewData.suggestions.length > 0 && aiReviewData.status === 'needs_changes' && (
+                  <div className="text-sm space-y-2">
+                    <div className="font-semibold">Sugerencias de modificación</div>
+                    <ul className="space-y-1.5">
+                      {aiReviewData.suggestions.map((s: string, idx: number) => (
+                        <li key={idx} className="flex gap-2">
+                          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                          <span className="text-muted-foreground">{s}</span>
+                        </li>
                       ))}
                     </ul>
-                    {aiReviewData.suggestions.length > 3 && (
-                      <div className="flex items-center justify-between text-muted-foreground dark:text-white/70">
-                        <span>+ {aiReviewData.suggestions.length - 3} recomendaciones más</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs text-[var(--tp-buttons)] hover:text-[var(--tp-buttons-hover)]"
-                          onClick={() => setIsReviewDialogOpen(true)}
-                        >
-                          Ver todo
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 )}
 
-                {aiReviewData.status === 'rejected' && (
-                  <div className="text-xs font-medium mt-2 text-red-700 dark:text-red-200">
-                    Te recomendamos revisar el documento y subir una nueva versión antes de continuar.
+                {/* Razones de rechazo (solo para rechazados) */}
+                {Array.isArray(aiReviewData.metadata?.razones_rechazo) && aiReviewData.metadata.razones_rechazo.length > 0 && aiReviewData.status === 'rejected' && (
+                  <div className="text-sm space-y-2">
+                    <div className="font-semibold text-red-700 dark:text-red-400">Razones del rechazo</div>
+                    <ul className="space-y-1.5">
+                      {aiReviewData.metadata.razones_rechazo.map((r: string, idx: number) => (
+                        <li key={idx} className="flex gap-2">
+                          <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                          <span className="text-muted-foreground">{r}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Alert variant="destructive" className="mt-3">
+                      <AlertDescription>
+                        Este documento debe ser tramitado de forma presencial en una notaría. No es posible continuar con la firma electrónica.
+                      </AlertDescription>
+                    </Alert>
                   </div>
                 )}
-                <div className="flex justify-end pt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs text-[var(--tp-buttons)] hover:text-[var(--tp-buttons-hover)] border-[var(--tp-buttons-20,#80003930)]"
-                    onClick={() => setIsReviewDialogOpen(true)}
-                  >
-                    Ver revisión completa
-                  </Button>
-                </div>
+
+                {/* Servicio notarial sugerido */}
+                {aiReviewData.metadata?.servicio_notarial_sugerido && aiReviewData.metadata.servicio_notarial_sugerido !== 'ninguno' && (
+                  <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-500/10 dark:border-blue-400/40">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertDescription className="text-blue-800 dark:text-blue-200">
+                      <span className="font-medium">Servicio notarial sugerido: </span>
+                      {aiReviewData.metadata.servicio_notarial_sugerido === 'protocolizacion' && 'Protocolización'}
+                      {aiReviewData.metadata.servicio_notarial_sugerido === 'firma_autorizada_notario' && 'Firma Autorizada por Notario'}
+                      {aiReviewData.metadata.servicio_notarial_sugerido === 'copia_legalizada' && 'Copia Legalizada'}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Confianza del modelo */}
+                {typeof aiReviewData.confidence_score === 'number' && (
+                  <div className="text-xs text-muted-foreground pt-2 border-t">
+                    Confianza del análisis: {(aiReviewData.confidence_score * 100).toFixed(0)}%
+                  </div>
+                )}
+
+                {/* Advertencia y checkbox para documentos observados */}
+                {aiReviewData.status === 'needs_changes' && (
+                  <div className="mt-4 space-y-3">
+                    <Alert className="bg-amber-50 border-amber-300 dark:bg-amber-500/10 dark:border-amber-400/40">
+                      <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      <AlertDescription className="text-amber-800 dark:text-amber-200">
+                        <span className="font-medium">Atención:</span> Este documento tiene observaciones que podrían generar problemas a futuro. 
+                        Si decides continuar sin corregirlas, aceptas los riesgos asociados. Esta decisión quedará registrada para auditoría.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-white/5 border">
+                      <Checkbox
+                        id="accept-risks"
+                        checked={riskAccepted}
+                        onCheckedChange={(checked) => setRiskAccepted(checked === true)}
+                        disabled={isAcceptingRisk}
+                      />
+                      <Label 
+                        htmlFor="accept-risks" 
+                        className="text-sm leading-relaxed cursor-pointer"
+                      >
+                        Acepto continuar con las observaciones indicadas y asumo los riesgos asociados. 
+                        Entiendo que esta decisión será registrada para efectos de auditoría.
+                      </Label>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Detalle de la revisión IA</DialogTitle>
-                  <DialogDescription>
-                    Revisión automatizada del documento. Usa esta información como guía para corregir el archivo.
-                  </DialogDescription>
-                </DialogHeader>
-
-                {aiReviewData && (
-                  <div className="space-y-4">
-                    <div className="rounded-md border border-[var(--tp-lines-30,#7a7a7a30)] bg-[var(--tp-bg-light-10,#f7f7f7)] p-4 dark:bg-white/5 dark:border-white/10">
-                      <div className="flex items-center gap-2 text-sm font-semibold">
-                        {aiReviewData.status === 'approved' && (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        )}
-                        {aiReviewData.status === 'rejected' && (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
-                        {aiReviewData.status === 'needs_changes' && (
-                          <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        )}
-                        <span>
-                          {aiReviewData.status === 'approved' && 'Documento aprobado'}
-                          {aiReviewData.status === 'rejected' && 'Documento rechazado'}
-                          {aiReviewData.status === 'needs_changes' && 'Documento con observaciones'}
-                          {!['approved', 'rejected', 'needs_changes'].includes(aiReviewData.status) &&
-                            'Resultado del análisis'}
-                        </span>
-                      </div>
-                      {aiReviewData.metadata?.summary && (
-                        <p className="mt-2 text-sm text-foreground/80 dark:text-white/80">
-                          {aiReviewData.metadata.summary}
-                        </p>
-                      )}
-                      {typeof aiReviewData.confidence_score === 'number' && (
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Confianza del modelo: {(aiReviewData.confidence_score * 100).toFixed(0)}%
-                        </p>
-                      )}
-                    </div>
-
-                    {Array.isArray(aiReviewData.reasons) && aiReviewData.reasons.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">Riesgos detectados</h4>
-                        <div className="space-y-2">
-                          {aiReviewData.reasons.map(
-                            (
-                              r: { level?: 'high' | 'medium' | 'low'; text?: string; explanation?: string; clause?: string },
-                              idx: number
-                            ) => (
-                              <div
-                                key={`dialog-risk-${idx}`}
-                                className={[
-                                  'rounded-md border p-3 text-sm',
-                                  r.level === 'high'
-                                    ? 'border-red-500/40 bg-red-500/5'
-                                    : r.level === 'medium'
-                                      ? 'border-amber-500/40 bg-amber-500/5'
-                                      : r.level === 'low'
-                                        ? 'border-sky-500/40 bg-sky-500/5'
-                                        : 'border-[var(--tp-lines-30,#7a7a7a30)]',
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ')}
-                              >
-                                <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wide">
-                                  <span>
-                                    Riesgo {r.level ? r.level : 'info'}
-                                  </span>
-                                  {r.clause && <span className="text-muted-foreground">Cláusula {r.clause}</span>}
-                                </div>
-                                <p className="mt-1 text-xs font-medium text-foreground dark:text-white">
-                                  {r.text}
-                                </p>
-                                <p className="mt-1 text-xs text-foreground/80 dark:text-white/80">
-                                  {r.explanation}
-                                </p>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {Array.isArray(aiReviewData.suggestions) && aiReviewData.suggestions.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold">Recomendaciones</h4>
-                        <ul className="space-y-2 text-sm text-foreground/80 dark:text-white/80">
-                          {aiReviewData.suggestions.map((s: string, idx: number) => (
-                            <li key={`dialog-suggestion-${idx}`} className="flex gap-2">
-                              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[var(--tp-buttons)]" />
-                              <span>{s}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
-
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
-                onClick={handleContinue}
-                disabled={isSubmitting || isBootstrapping || isAnalyzingAi}
+                onClick={async () => {
+                  // Si es observado y no ha aceptado, no dejar continuar
+                  if (aiReviewData?.status === 'needs_changes' && !riskAccepted) {
+                    toast.error('Debes aceptar los riesgos para continuar con un documento observado.')
+                    return
+                  }
+
+                  // Si es observado y aceptó, registrar la aceptación
+                  if (aiReviewData?.status === 'needs_changes' && riskAccepted && aiReviewData.id) {
+                    setIsAcceptingRisk(true)
+                    try {
+                      const resp = await fetch('/api/signing/accept-risk', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ review_id: aiReviewData.id }),
+                      })
+                      if (!resp.ok) {
+                        const data = await resp.json().catch(() => ({}))
+                        throw new Error(data.error || 'Error al registrar la aceptación')
+                      }
+                      toast.success('Aceptación de riesgos registrada.')
+                    } catch (e: any) {
+                      console.error('[CountryAndUploadStep] Error accepting risk:', e)
+                      toast.error(e?.message || 'Error al registrar la aceptación de riesgos')
+                      setIsAcceptingRisk(false)
+                      return
+                    } finally {
+                      setIsAcceptingRisk(false)
+                    }
+                  }
+
+                  handleContinue()
+                }}
+                disabled={isSubmitting || isBootstrapping || isAnalyzingAi || isAcceptingRisk || (aiReviewData?.status === 'needs_changes' && !riskAccepted)}
                 className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
               >
-                {isSubmitting ? (
+                {isSubmitting || isAcceptingRisk ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Procesando...

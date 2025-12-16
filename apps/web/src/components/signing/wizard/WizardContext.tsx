@@ -197,7 +197,7 @@ export function useSigningWizard() {
 }
 
 export const SIGNING_WIZARD_STEPS = [
-  { key: 'upload', title: 'Documento', description: 'País y PDF' },
+  { key: 'upload', title: 'Documento', description: 'PDF y Pre-revisión IA' },
   { key: 'services', title: 'Servicios', description: 'Tipo de firma y notaría' },
   { key: 'signers', title: 'Firmantes', description: 'Datos y validación' },
   { key: 'checkout', title: 'Pago', description: 'Resumen y checkout' },

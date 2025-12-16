@@ -742,22 +742,76 @@ ubicación del mundo, el país determina qué servicios ver.
 
 ---
 
+### ✅ COMPLETADO - Sistema de Revisión IA Chile (Dic 16, 2025)
+
+**Prompt de Chile Configurado y Funcionando:**
+
+- ✅ Prompt de producción para Chile (`country_code = 'CL'`)
+- ✅ System prompt con instrucciones de análisis legal chileno según Ley 19.799
+- ✅ User prompt template con variables dinámicas (`{{current_date}}`,
+  `{{has_blank_pages}}`)
+- ✅ Output schema específico de Chile con campos:
+  - `resultado_revision` (aprobado/observado/rechazado)
+  - `tipo_documento` (identificación automática del tipo)
+  - `resumen` (máximo 50 palabras)
+  - `puntos_importantes` (lista de puntos clave)
+  - `cantidad_firmantes` (número requerido)
+  - `observaciones` (con tipo: error/advertencia/sugerencia)
+  - `razones_rechazo` (solo para rechazados)
+  - `sugerencias_modificacion` (solo para observados)
+  - `servicio_notarial_sugerido`
+    (ninguno/protocolizacion/firma_autorizada_notario/copia_legalizada)
+  - `confianza` (nivel de confianza 0-1)
+- ✅ Soporte para `additionalProperties: false` requerido por Claude API
+
+**UI de Revisión Inline (sin Modal):**
+
+- ✅ Visualización completa de resultados directamente en el formulario
+- ✅ Eliminado modal "Ver revisión completa" - todo visible inline
+- ✅ Campos Chile mostrados: tipo documento, firmantes, puntos importantes
+- ✅ Observaciones con indicadores de color por severidad
+- ✅ Servicio notarial sugerido con alerta informativa
+
+**Sistema de Aceptación de Riesgos (Auditoría):**
+
+- ✅ Columnas `risk_accepted_at`, `risk_accepted_by`, `risk_acceptance_note` en
+  `signing.ai_reviews`
+- ✅ API endpoint `/api/signing/accept-risk` para registrar aceptación
+- ✅ Checkbox de aceptación para documentos "observados"
+- ✅ Advertencia clara: "Esta decisión quedará registrada para auditoría"
+- ✅ Botón Continuar deshabilitado hasta aceptar riesgos
+- ✅ Registro completo para trazabilidad legal
+
+**Admin Panel:**
+
+- ✅ Acceso a AI Prompts agregado en sidebar de admin (Sección Sistema)
+- ✅ Editor de prompts actualizado con ejemplo de schema Chile
+- ✅ Mensaje informativo actualizado sobre campos requeridos
+
+**Migraciones:**
+
+```
+20251216000010_ai_review_risk_acceptance.sql   - Columnas de aceptación de riesgos
+20251216000011_chile_legal_review_prompt.sql   - Prompt completo de Chile
+20251216000012_fix_chile_prompt_schema.sql     - Fix additionalProperties
+20251216000013_fix_ai_reviews_view.sql         - Fix vista con raw_response
+```
+
+---
+
 ### 🔜 PRÓXIMOS PASOS INMEDIATOS
 
-**1. Testing del Prompt de Chile:**
-
-- [ ] Crear prompt de producción para Chile (`country_code = 'CL'`)
-- [ ] Configurar system prompt con instrucciones de análisis legal chileno
-- [ ] Configurar user prompt template con variables dinámicas
-- [ ] Cargar output schema para revisión documental
-- [ ] Probar análisis con documentos reales de Chile
-- [ ] Ajustar prompts según resultados
-
-**2. Continuar con Flujo de Firmas (FASE B):**
+**1. Continuar con Flujo de Firmas (FASE B):**
 
 - [ ] Portal público de firma `/sign/[token]`
 - [ ] Verificación pública `/repository/[documentId]`
 - [ ] Panel de notarías
+
+**2. Testing Adicional:**
+
+- [ ] Probar flujo completo con documento observado y aceptación de riesgos
+- [ ] Verificar emails de notificación a firmantes
+- [ ] Testing de Edge Functions post-pago
 
 ---
 
