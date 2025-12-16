@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Trash2, AlertCircle, CheckCircle2, UserPlus } from 'lucide-react'
+import { Loader2, Trash2, AlertCircle, CheckCircle2, UserPlus, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Select,
@@ -58,6 +58,7 @@ export function SignerManagementStep() {
   const [identifierType, setIdentifierType] = useState<SignerIdentifierType>('rut')
   const [identifierValue, setIdentifierValue] = useState('')
   const [rutError, setRutError] = useState<string | null>(null)
+  const [role, setRole] = useState<'signer' | 'approver' | 'reviewer'>('signer')
 
   const signatureProduct = state.signatureProduct
   const requiresRutOnly = signatureProduct?.identifier_type === 'rut_only'
@@ -140,6 +141,41 @@ export function SignerManagementStep() {
     loadSigners()
   }, [loadSigners])
 
+  // Sync mode from DB
+  useEffect(() => {
+    if (!state.documentId) return
+    supabase
+      .from('signing_documents')
+      .select('signing_order')
+      .eq('id', state.documentId)
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          actions.setSigningOrder(data.signing_order)
+        }
+      })
+  }, [state.documentId, supabase, actions])
+
+  const handleModeChange = useCallback(
+    async (mode: 'simultaneous' | 'sequential') => {
+      actions.setSigningOrder(mode)
+      if (!state.documentId) return
+
+      try {
+        const { error: updateError } = await supabase
+          .from('signing_documents')
+          .update({ signing_order: mode })
+          .eq('id', state.documentId)
+
+        if (updateError) throw updateError
+      } catch (e: any) {
+        console.error('[SignerManagementStep] mode update error', e)
+        toast.error('Error al actualizar el modo de firma')
+      }
+    },
+    [actions, state.documentId, supabase]
+  )
+
   const resetForm = useCallback(() => {
     setFirstName('')
     setLastName('')
@@ -147,6 +183,7 @@ export function SignerManagementStep() {
     setPhone('')
     setIdentifierType(requiresRutOnly ? 'rut' : 'rut')
     setIdentifierValue('')
+    setRole('signer')
   }, [requiresRutOnly])
 
   const validateForm = useCallback(() => {
@@ -223,6 +260,7 @@ export function SignerManagementStep() {
             identifier_type: isRutType ? 'rut' : identifierType,
             identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
             country_code: state.countryCode,
+            role: role,
           },
         })
         .eq('id', signerId)
@@ -279,6 +317,55 @@ export function SignerManagementStep() {
     [loadSigners, supabase]
   )
 
+  const handleMoveSigner = useCallback(
+    async (index: number, direction: 'up' | 'down') => {
+      if (direction === 'up' && index === 0) return
+      if (direction === 'down' && index === signers.length - 1) return
+
+      const currentSigner = signers[index]
+      const neighborIndex = direction === 'up' ? index - 1 : index + 1
+      const neighborSigner = signers[neighborIndex]
+
+      if (!currentSigner || !neighborSigner) return
+
+      try {
+        setIsSaving(true)
+        
+        // Swap orders. Assuming signers are ordered by signing_order in the array.
+        // We use the values from the array to respect the current visible order.
+        const currentOrder = currentSigner.signing_order
+        const neighborOrder = neighborSigner.signing_order
+
+        // If for some reason they have the same order or invalid, we might need a robust reorder.
+        // But assuming sequential integers 1..N based on previous logic (length + 1):
+        
+        // Update current signer to neighbor's order
+        const { error: e1 } = await supabase
+          .from('signing_signers')
+          .update({ signing_order: neighborOrder })
+          .eq('id', currentSigner.id)
+        
+        if (e1) throw e1
+
+        // Update neighbor to current's order
+        const { error: e2 } = await supabase
+          .from('signing_signers')
+          .update({ signing_order: currentOrder })
+          .eq('id', neighborSigner.id)
+        
+        if (e2) throw e2
+
+        await loadSigners()
+      } catch (e: any) {
+        console.error('[SignerManagementStep] move error', e)
+        toast.error('Error al reordenar firmantes')
+      } finally {
+        setIsSaving(false)
+      }
+    },
+    [signers, supabase, loadSigners]
+  )
+
   const handleBack = useCallback(() => {
     actions.prevStep()
   }, [actions])
@@ -321,19 +408,51 @@ export function SignerManagementStep() {
             </AlertDescription>
           </Alert>
         ) : (
-          <>
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                Agrega a las personas que deben firmar el documento.
-              </p>
+            <>
+            <div className="space-y-6">
+              <div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Agrega a las personas que deben firmar el documento.
+                </p>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div
+                    className={`relative flex cursor-pointer flex-col gap-1 rounded-lg border p-4 hover:bg-muted/50 ${
+                      state.signingOrder === 'simultaneous' ? 'border-[var(--tp-buttons)] bg-muted/50' : ''
+                    }`}
+                    onClick={() => handleModeChange('simultaneous')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Firma Simultánea</span>
+                      {state.signingOrder === 'simultaneous' && (
+                        <CheckCircle2 className="h-4 w-4 text-[var(--tp-buttons)]" />
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Todos pueden firmar en cualquier momento y orden.
+                    </p>
+                  </div>
+
+                  <div
+                    className={`relative flex cursor-pointer flex-col gap-1 rounded-lg border p-4 hover:bg-muted/50 ${
+                      state.signingOrder === 'sequential' ? 'border-[var(--tp-buttons)] bg-muted/50' : ''
+                    }`}
+                    onClick={() => handleModeChange('sequential')}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Firma Secuencial</span>
+                      {state.signingOrder === 'sequential' && (
+                        <CheckCircle2 className="h-4 w-4 text-[var(--tp-buttons)]" />
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Orden específico. Permite roles adicionales (aprobadores).
+                    </p>
+                  </div>
+                </div>
+              </div>
               
               <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Nuevo firmante
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="sm:max-w-xl">
                   <DialogHeader>
                     <DialogTitle>Nuevo firmante</DialogTitle>
@@ -363,6 +482,20 @@ export function SignerManagementStep() {
                         <Label>Teléfono (opcional)</Label>
                         <Input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={isSaving} placeholder="+56 9 1234 5678" />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Rol del participante</Label>
+                      <Select value={role} onValueChange={(v) => setRole(v as 'signer' | 'approver' | 'reviewer')} disabled={isSaving}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="signer">Firmante - Debe firmar el documento</SelectItem>
+                          <SelectItem value="approver">Aprobador - Aprueba antes de enviar a firma</SelectItem>
+                          <SelectItem value="reviewer">Revisor - Solo revisa, no firma</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -441,43 +574,100 @@ export function SignerManagementStep() {
               </Dialog>
             </div>
 
-            <div className="space-y-3">
-              <div className="text-sm font-semibold">Firmantes agregados</div>
+              <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-semibold">Participantes del proceso</div>
+                {state.signingOrder === 'sequential' && signers.length > 0 && (
+                  <p className="text-xs text-muted-foreground">Usa las flechas para definir el orden</p>
+                )}
+              </div>
 
               {isLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Cargando firmantes...
+                  Cargando participantes...
                 </div>
               ) : signers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aún no has agregado firmantes.</p>
+                <p className="text-sm text-muted-foreground">Aún no has agregado participantes.</p>
               ) : (
-                <div className="space-y-2">
-                  {signers.map((s) => (
-                    <div key={s.id} className="flex items-start justify-between gap-3 rounded-lg border p-4">
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate">
-                          {(s.first_name || '') + (s.last_name ? ` ${s.last_name}` : '') || s.full_name}
-                        </div>
-                        <div className="text-xs text-muted-foreground truncate">{s.email}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {s.rut ? `RUT: ${s.rut}` : `ID: ${s.metadata?.identifier_value || '-'}`}
+                <div className="space-y-3">
+                  {signers.map((s, index) => {
+                    const roleName = s.metadata?.role || 'signer'
+                    const roleLabel = roleName === 'signer' ? 'Firmante' : roleName === 'approver' ? 'Aprobador' : 'Revisor'
+                    const roleColor = roleName === 'signer' ? 'bg-blue-100 text-blue-700' : roleName === 'approver' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'
+                    
+                    return (
+                      <div key={s.id} className="group relative flex items-center gap-4 rounded-lg border bg-card p-4 hover:border-[var(--tp-buttons)] transition-colors">
+                        {state.signingOrder === 'sequential' && (
+                          <div className="flex flex-col items-center gap-1 pr-3 border-r">
+                            <span className="text-2xl font-bold text-muted-foreground/30">{index + 1}</span>
+                            <div className="flex flex-col gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 opacity-50 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleMoveSigner(index, 'up')}
+                                disabled={isSaving || index === 0}
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 opacity-50 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleMoveSigner(index, 'down')}
+                                disabled={isSaving || index === signers.length - 1}
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold truncate">
+                                  {(s.first_name || '') + (s.last_name ? ` ${s.last_name}` : '') || s.full_name}
+                                </span>
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${roleColor}`}>
+                                  {roleLabel}
+                                </span>
+                              </div>
+                              <div className="text-xs text-muted-foreground truncate mt-1">{s.email}</div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                              onClick={() => handleRemoveSigner(s.id)}
+                              disabled={isSaving}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {s.rut ? `RUT: ${s.rut}` : `ID: ${s.metadata?.identifier_value || '-'}`}
+                          </div>
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleRemoveSigner(s.id)}
-                        disabled={isSaving}
-                        className="shrink-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
-            </div>
+              
+              <div className="flex justify-center">
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      Nuevo participante
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </div>
+              </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button variant="outline" onClick={handleBack} disabled={isSaving}>

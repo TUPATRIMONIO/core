@@ -64,6 +64,7 @@ export interface SigningWizardState {
   notaryProduct: SigningProduct | null
 
   signers: SignerDraft[]
+  signingOrder: 'simultaneous' | 'sequential'
 
   orderId: string | null
 }
@@ -89,6 +90,7 @@ export interface SigningWizardActions {
   setNotaryProduct: (product: SigningProduct | null) => void
 
   setSigners: (signers: SignerDraft[]) => void
+  setSigningOrder: (order: 'simultaneous' | 'sequential') => void
 
   setOrderId: (orderId: string | null) => void
   reset: () => void
@@ -116,6 +118,7 @@ const defaultState: SigningWizardState = {
   notaryProduct: null,
 
   signers: [],
+  signingOrder: 'simultaneous',
 
   orderId: null,
 }
@@ -175,6 +178,7 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
       setNotaryProduct: (notaryProduct) => setState((s) => ({ ...s, notaryProduct })),
 
       setSigners: (signers) => setState((s) => ({ ...s, signers })),
+      setSigningOrder: (signingOrder) => setState((s) => ({ ...s, signingOrder })),
 
       setOrderId: (orderId) => setState((s) => ({ ...s, orderId })),
 
