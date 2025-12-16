@@ -460,12 +460,12 @@ READY:
 
 **Pasos del Wizard:**
 
-1. ✅ **Paso 1 - País y Documento**
-   - Selector de país (Chile por defecto, usa país global si está disponible)
+1. ✅ **Paso 1 - Documento** (antes "País y Documento")
+   - **✅ Selector de país eliminado** - ahora usa el selector global del header
    - Upload de PDF con drag & drop
    - **✅ Previsualización del documento PDF** (visor embebido con opciones de
      abrir en nueva pestaña, descargar y ocultar)
-   - Revisión opcional por IA (consume créditos)
+   - Revisión opcional por IA (consume créditos, disponible según país global)
    - Polling de estado de revisión IA
 
 2. ✅ **Paso 2 - Selección de Servicios**
@@ -730,6 +730,15 @@ ubicación del mundo, el país determina qué servicios ver.
 | Colombia  | CO     | 🚀 Próximamente (Q2 2025) |
 | Perú      | PE     | 🚀 Próximamente (Q3 2025) |
 | Argentina | AR     | 🚀 Próximamente (Q3 2025) |
+
+**Mejoras adicionales:**
+
+- ✅ **Eliminado selector de país del Paso 1 del Wizard** (Dic 16, 2025)
+  - El selector local de país fue removido de `CountryAndUploadStep.tsx`
+  - El país ahora se toma del contexto global (`GlobalCountryProvider`)
+  - Título del paso actualizado de "País y Documento" a "Documento"
+  - La funcionalidad de IA sigue condicionada al país global seleccionado
+  - Simplifica el flujo eliminando redundancia con el header
 
 ---
 

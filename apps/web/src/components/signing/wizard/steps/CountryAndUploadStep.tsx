@@ -7,13 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X } from 'lucide-react'
 import { toast } from 'sonner'
@@ -445,6 +439,20 @@ export function CountryAndUploadStep() {
       } else {
         toast.message('Análisis completado.')
       }
+
+      // Refrescar el balance de créditos después de consumirlos
+      if (state.orgId) {
+        try {
+          const { data: newBalance } = await supabase.rpc('get_balance', {
+            org_id_param: state.orgId,
+          })
+          if (typeof newBalance === 'number') {
+            setCreditBalance(newBalance)
+          }
+        } catch (balanceErr) {
+          console.warn('[CountryAndUploadStep] Error refrescando balance:', balanceErr)
+        }
+      }
     } catch (e: unknown) {
       const err = e as Error
       console.error('[CountryAndUploadStep] analyze error', err)
@@ -453,7 +461,7 @@ export function CountryAndUploadStep() {
     } finally {
       setIsAnalyzingAi(false)
     }
-  }, [actions, aiAvailable, canUseAi, ensureDocumentAndUpload, fetchAiReviewById, state.file])
+  }, [actions, aiAvailable, canUseAi, ensureDocumentAndUpload, fetchAiReviewById, state.file, state.orgId, supabase])
 
   const handleContinue = useCallback(async () => {
     setError(null)
@@ -483,7 +491,7 @@ export function CountryAndUploadStep() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Paso 1 · País y Documento</CardTitle>
+        <CardTitle>Paso 1 · Documento</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {error && (
@@ -499,36 +507,14 @@ export function CountryAndUploadStep() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>País</Label>
-                <Select
-                  value={state.countryCode}
-                  onValueChange={(v) => actions.setCountryCode(v)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un país" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countries.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {c.name} ({c.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Título (opcional)</Label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ej: Contrato de Arrendamiento"
-                  disabled={isSubmitting}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Título (opcional)</Label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ej: Contrato de Arrendamiento"
+                disabled={isSubmitting}
+              />
             </div>
 
             <div className="space-y-2">
