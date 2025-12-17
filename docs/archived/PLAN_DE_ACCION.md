@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 16, 2025\
+> **📅 Última actualización:** Diciembre 17, 2025\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -796,6 +796,61 @@ ubicación del mundo, el país determina qué servicios ver.
 20251216000011_chile_legal_review_prompt.sql   - Prompt completo de Chile
 20251216000012_fix_chile_prompt_schema.sql     - Fix additionalProperties
 20251216000013_fix_ai_reviews_view.sql         - Fix vista con raw_response
+```
+
+### ✅ COMPLETADO - Sistema Multi-Remitente SendGrid (Dic 17, 2025)
+
+**Objetivo:** Permitir a cada organización configurar múltiples identidades de
+remitente (transaccional y marketing) para personalizar sus comunicaciones por
+email.
+
+**Base de Datos (`communications` schema):**
+
+- ✅ Tabla `sender_identities` - Remitentes por organización y propósito
+  - Columnas: `organization_id`, `sendgrid_account_id`, `purpose` (enum),
+    `from_email`, `from_name`, `reply_to_email`, `is_default`, `is_active`
+  - Enum `sender_purpose`: `transactional` | `marketing`
+  - Constraint UNIQUE por organización y propósito
+- ✅ Vistas públicas con INSTEAD OF triggers para acceso via API
+- ✅ RLS policies para multi-tenancy
+- ✅ Migración de datos legacy (from_email → sender_identities)
+
+**Backend (`src/lib/sendgrid/`):**
+
+- ✅ `types.ts` - Tipos `SenderPurpose`, `SenderIdentity`, `SenderIdentityInput`
+- ✅ `accounts.ts` - CRUD: `getSenderIdentities()`, `getSenderByPurpose()`,
+  `upsertSenderIdentity()`, `deleteSenderIdentity()`
+- ✅ `client.ts` - `sendEmail()` y `sendBatchEmails()` aceptan parámetro
+  `purpose`
+
+**API Routes (`/api/communications/sendgrid/`):**
+
+- ✅ `/senders` - GET, POST, DELETE para gestión de sender identities
+- ✅ `/test` - POST para enviar email de prueba con propósito seleccionado
+
+**Frontend (`/dashboard/crm/settings/sendgrid`):**
+
+- ✅ Formulario simplificado de Cuenta (solo API Key)
+- ✅ Tabla de Identidades de Remitente con CRUD
+- ✅ Selector de propósito (Transaccional/Marketing)
+- ✅ Sección "Probar Remitentes" con envío de email de prueba
+
+**Uso en Código:**
+
+```typescript
+// Notificaciones, pedidos, alertas del sistema
+await sendEmail(orgId, message, { purpose: "transactional" });
+
+// Campañas, newsletters, promociones
+await sendEmail(orgId, message, { purpose: "marketing" });
+```
+
+**Migraciones:**
+
+```
+20251217000004_add_sender_identities.sql         - Schema, tabla, RLS, helpers
+20251217000005_create_public_views_sendgrid.sql  - Vistas públicas (RULES)
+20251217000006_fix_sendgrid_views_triggers.sql   - INSTEAD OF triggers
 ```
 
 ---

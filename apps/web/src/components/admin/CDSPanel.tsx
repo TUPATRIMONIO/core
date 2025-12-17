@@ -2,8 +2,29 @@
 
 import { useState } from "react";
 import { invokeCDSOperation } from "@/app/actions/cds";
+import { 
+  Search, 
+  UserPlus, 
+  ShieldCheck, 
+  Zap, 
+  FileText, 
+  Unlock,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Radio
+} from "lucide-react";
 
 type Tab = "vigencia" | "enroll" | "2fa" | "documents" | "unlock" | "simple";
+
+const tabConfig: Record<Tab, { label: string; icon: typeof Search }> = {
+  vigencia: { label: "Vigencia", icon: Search },
+  enroll: { label: "Enrolar", icon: UserPlus },
+  "2fa": { label: "2FA / OTP", icon: ShieldCheck },
+  simple: { label: "Flujo Simple", icon: Zap },
+  documents: { label: "Documentos", icon: FileText },
+  unlock: { label: "Desbloqueo", icon: Unlock },
+};
 
 export default function CDSPanel() {
   const [activeTab, setActiveTab] = useState<Tab>("vigencia");
@@ -39,50 +60,67 @@ export default function CDSPanel() {
     }
   };
 
+  const inputClasses = "mt-1 w-full px-3 py-2.5 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-[var(--tp-brand-20)] focus:border-[var(--tp-brand)] transition-all duration-200";
+  
+  const labelClasses = "block text-sm font-medium text-foreground";
+
+  const buttonClasses = "w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white py-2.5 px-4 rounded-lg font-medium shadow-[var(--tp-shadow-md)] hover:shadow-[var(--tp-shadow-lg)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+  
+  const brandButtonClasses = "w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white py-2.5 px-4 rounded-lg font-medium shadow-[var(--tp-shadow-md)] hover:shadow-[var(--tp-shadow-lg)] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-card border border-border shadow-[var(--tp-shadow-lg)] rounded-xl p-6">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-2 px-2">
         {(["vigencia", "enroll", "2fa", "simple", "documents", "unlock"] as Tab[]).map(
-          (tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 border-b-2 font-medium capitalize whitespace-nowrap ${
-                activeTab === tab
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {tab === "2fa" ? "2FA / OTP" : tab}
-            </button>
-          )
+          (tab) => {
+            const TabIcon = tabConfig[tab].icon;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium whitespace-nowrap transition-all duration-200 ${
+                  activeTab === tab
+                    ? "bg-[var(--tp-brand)] text-white shadow-[var(--tp-shadow-md)]"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <TabIcon className="w-4 h-4" />
+                <span>{tabConfig[tab].label}</span>
+              </button>
+            );
+          }
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Area */}
         <div className="space-y-6">
           {activeTab === "vigencia" && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Consultar Vigencia FEA</h3>
-              <p className="text-sm text-gray-600">
-                Verifica si un RUT tiene certificado vigente en CDS.
-              </p>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <Search className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Consultar Vigencia FEA</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Verifica si un RUT tiene certificado vigente en CDS.
+                </p>
+              </div>
               <div>
-                <label className="block text-sm font-medium">RUT</label>
+                <label className={labelClasses}>RUT</label>
                 <input
                   name="rut"
                   value={formData.rut}
                   onChange={handleChange}
                   placeholder="11.111.111-1"
-                  className="mt-1 w-full px-3 py-2 border rounded"
+                  className={inputClasses}
                 />
               </div>
               <button
                 onClick={() => handleAction("check-vigencia", { rut: formData.rut })}
                 disabled={loading}
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                className={buttonClasses}
               >
                 {loading ? "Consultando..." : "Consultar Vigencia"}
               </button>
@@ -90,72 +128,77 @@ export default function CDSPanel() {
           )}
 
           {activeTab === "enroll" && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Enrolar Firmante</h3>
-              <p className="text-sm text-gray-600">
-                Crea un nuevo usuario en CDS. Requiere datos reales para validación ClaveÚnica.
-              </p>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Enrolar Firmante</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Crea un nuevo usuario en CDS. Requiere datos reales para validación ClaveÚnica.
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium">RUT</label>
+                  <label className={labelClasses}>RUT</label>
                   <input
                     name="rut"
                     value={formData.rut}
                     onChange={handleChange}
-                    className="mt-1 w-full px-3 py-2 border rounded"
+                    className={inputClasses}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium">Nro. Documento</label>
+                  <label className={labelClasses}>Nro. Documento</label>
                   <input
                     name="numeroDocumento"
                     value={formData.numeroDocumento}
                     onChange={handleChange}
-                    className="mt-1 w-full px-3 py-2 border rounded"
+                    className={inputClasses}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium">Email</label>
+                <label className={labelClasses}>Email</label>
                 <input
                   name="correo"
                   value={formData.correo}
                   onChange={handleChange}
-                  className="mt-1 w-full px-3 py-2 border rounded"
+                  className={inputClasses}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium">Nombres</label>
-                    <input
-                        name="nombres"
-                        value={formData.nombres}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                    />
+                  <label className={labelClasses}>Nombres</label>
+                  <input
+                    name="nombres"
+                    value={formData.nombres}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium">Apellidos</label>
-                    <input
-                        name="apellidoPaterno"
-                        value={formData.apellidoPaterno}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                        placeholder="Paterno"
-                    />
+                  <label className={labelClasses}>Apellido Paterno</label>
+                  <input
+                    name="apellidoPaterno"
+                    value={formData.apellidoPaterno}
+                    onChange={handleChange}
+                    placeholder="Paterno"
+                    className={inputClasses}
+                  />
                 </div>
               </div>
               <button
                 onClick={() => handleAction("enroll", {
-                    rut: formData.rut,
-                    nombres: formData.nombres,
-                    apellidoPaterno: formData.apellidoPaterno,
-                    apellidoMaterno: formData.apellidoMaterno,
-                    correo: formData.correo,
-                    numeroDocumento: formData.numeroDocumento
+                  rut: formData.rut,
+                  nombres: formData.nombres,
+                  apellidoPaterno: formData.apellidoPaterno,
+                  apellidoMaterno: formData.apellidoMaterno,
+                  correo: formData.correo,
+                  numeroDocumento: formData.numeroDocumento
                 })}
                 disabled={loading}
-                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                className={brandButtonClasses}
               >
                 {loading ? "Enrolando..." : "Enrolar Firmante"}
               </button>
@@ -163,155 +206,230 @@ export default function CDSPanel() {
           )}
 
           {activeTab === "2fa" && (
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Solicitar Código 2FA</h3>
-                <div>
-                    <label className="block text-sm font-medium">RUT</label>
-                    <input
-                        name="rut"
-                        value={formData.rut}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium">Email</label>
-                    <input
-                        name="correo"
-                        value={formData.correo}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                    />
-                </div>
-                <button
-                    onClick={() => handleAction("request-second-factor", { rut: formData.rut, correo: formData.correo })}
-                    disabled={loading}
-                    className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-                >
-                    {loading ? "Solicitando..." : "Solicitar Código"}
-                </button>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Solicitar Código 2FA</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Envía un código de verificación al correo del firmante.
+                </p>
+              </div>
+              <div>
+                <label className={labelClasses}>RUT</label>
+                <input
+                  name="rut"
+                  value={formData.rut}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <div>
+                <label className={labelClasses}>Email</label>
+                <input
+                  name="correo"
+                  value={formData.correo}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <button
+                onClick={() => handleAction("request-second-factor", { rut: formData.rut, correo: formData.correo })}
+                disabled={loading}
+                className={buttonClasses}
+              >
+                {loading ? "Solicitando..." : "Solicitar Código"}
+              </button>
             </div>
           )}
 
           {activeTab === "documents" && (
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Obtener Documento</h3>
-                <p className="text-sm text-gray-600">Descargar documento firmado por código de transacción.</p>
-                <div>
-                    <label className="block text-sm font-medium">Código Transacción</label>
-                    <input
-                        name="codigoTransaccion"
-                        value={formData.codigoTransaccion}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                    />
-                </div>
-                <button
-                    onClick={() => handleAction("get-document", { codigoTransaccion: formData.codigoTransaccion })}
-                    disabled={loading}
-                    className="w-full bg-orange-600 text-white py-2 rounded hover:bg-orange-700 disabled:opacity-50"
-                >
-                    {loading ? "Buscando..." : "Buscar Documento"}
-                </button>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Obtener Documento</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Descargar documento firmado por código de transacción.
+                </p>
+              </div>
+              <div>
+                <label className={labelClasses}>Código Transacción</label>
+                <input
+                  name="codigoTransaccion"
+                  value={formData.codigoTransaccion}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <button
+                onClick={() => handleAction("get-document", { codigoTransaccion: formData.codigoTransaccion })}
+                disabled={loading}
+                className={buttonClasses}
+              >
+                {loading ? "Buscando..." : "Buscar Documento"}
+              </button>
             </div>
           )}
 
           {activeTab === "simple" && (
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Flujo Simple FEA</h3>
-                <p className="text-sm text-gray-600">Envía un documento para firmar vía link (con OTP WhatsApp).</p>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Flujo Simple FEA</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Envía un documento para firmar vía link (con OTP WhatsApp).
+                </p>
+              </div>
+              <div>
+                <label className={labelClasses}>Nombre Documento</label>
+                <input
+                  name="nombreDocumento"
+                  value={formData.nombreDocumento || "Documento Prueba"}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium">Nombre Documento</label>
-                    <input
-                        name="nombreDocumento"
-                        value={formData.nombreDocumento || "Documento Prueba"}
-                        onChange={handleChange}
-                        className="mt-1 w-full px-3 py-2 border rounded"
-                    />
-                </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium">RUT Firmante</label>
-                        <input
-                            name="rut"
-                            value={formData.rut}
-                            onChange={handleChange}
-                            className="mt-1 w-full px-3 py-2 border rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Email Firmante</label>
-                        <input
-                            name="correo"
-                            value={formData.correo}
-                            onChange={handleChange}
-                            className="mt-1 w-full px-3 py-2 border rounded"
-                        />
-                    </div>
+                  <label className={labelClasses}>RUT Firmante</label>
+                  <input
+                    name="rut"
+                    value={formData.rut}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
                 </div>
                 <div>
-                     <label className="block text-sm font-medium">Documento (Base64 PDF)</label>
-                     <textarea
-                        name="documento"
-                        value={formData.documento}
-                        onChange={(e) => setFormData({...formData, documento: e.target.value})}
-                        placeholder="Pegar Base64 aquí..."
-                        className="mt-1 w-full px-3 py-2 border rounded h-24 text-xs font-mono"
-                     />
+                  <label className={labelClasses}>Email Firmante</label>
+                  <input
+                    name="correo"
+                    value={formData.correo}
+                    onChange={handleChange}
+                    className={inputClasses}
+                  />
                 </div>
-                <button
-                    onClick={() => handleAction("simple-flow", {
-                        nombreDocumento: formData.nombreDocumento || "Documento Prueba",
-                        documento: formData.documento,
-                        firmantes: [{ rut: formData.rut, correo: formData.correo }]
-                    })}
-                    disabled={loading}
-                    className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                >
-                    {loading ? "Enviando..." : "Iniciar Flujo Simple"}
-                </button>
+              </div>
+              <div>
+                <label className={labelClasses}>Documento (Base64 PDF)</label>
+                <textarea
+                  name="documento"
+                  value={formData.documento}
+                  onChange={(e) => setFormData({...formData, documento: e.target.value})}
+                  placeholder="Pegar Base64 aquí..."
+                  className={`${inputClasses} h-24 text-xs font-mono resize-none`}
+                />
+              </div>
+              <button
+                onClick={() => handleAction("simple-flow", {
+                  nombreDocumento: formData.nombreDocumento || "Documento Prueba",
+                  documento: formData.documento,
+                  firmantes: [{ rut: formData.rut, correo: formData.correo }]
+                })}
+                disabled={loading}
+                className={brandButtonClasses}
+              >
+                {loading ? "Enviando..." : "Iniciar Flujo Simple"}
+              </button>
             </div>
           )}
 
           {activeTab === "unlock" && (
-            <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Desbloqueo</h3>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => handleAction("unblock-certificate", { rut: formData.rut })}
-                        disabled={loading}
-                        className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 disabled:opacity-50"
-                    >
-                        Desbloquear Certificado
-                    </button>
-                    <button
-                        onClick={() => handleAction("unblock-second-factor", { rut: formData.rut, correo: formData.correo })}
-                        disabled={loading}
-                        className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 disabled:opacity-50"
-                    >
-                        Desbloquear 2FA
-                    </button>
-                </div>
-                 <p className="text-xs text-gray-500 mt-2">Requiere RUT (y Correo para 2FA)</p>
+            <div className="space-y-5">
+              <div className="space-y-1">
+                <h3 className="flex items-center gap-2">
+                  <Unlock className="w-5 h-5 text-[var(--tp-brand)]" />
+                  <span>Desbloqueo</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Desbloquea certificados o segundo factor bloqueados.
+                </p>
+              </div>
+              <div>
+                <label className={labelClasses}>RUT</label>
+                <input
+                  name="rut"
+                  value={formData.rut}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <div>
+                <label className={labelClasses}>Email (requerido para 2FA)</label>
+                <input
+                  name="correo"
+                  value={formData.correo}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleAction("unblock-certificate", { rut: formData.rut })}
+                  disabled={loading}
+                  className={`flex-1 bg-destructive hover:bg-destructive/90 text-white py-2.5 px-4 rounded-lg font-medium transition-all duration-200 disabled:opacity-50`}
+                >
+                  {loading ? "..." : "Desbloquear Certificado"}
+                </button>
+                <button
+                  onClick={() => handleAction("unblock-second-factor", { rut: formData.rut, correo: formData.correo })}
+                  disabled={loading}
+                  className={`flex-1 ${buttonClasses}`}
+                >
+                  {loading ? "..." : "Desbloquear 2FA"}
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         {/* Results Area */}
-        <div className="bg-gray-900 rounded-lg p-4 text-gray-100 font-mono text-sm overflow-auto max-h-[500px]">
-          <h4 className="text-gray-400 mb-2 border-b border-gray-700 pb-1">Respuesta API</h4>
+        <div className="bg-[var(--tp-background-dark)] rounded-xl p-5 text-[var(--tp-gray-100)] font-mono text-sm overflow-auto max-h-[500px] border border-[var(--tp-lines-20)] shadow-inner">
+          <div className="flex items-center justify-between mb-3 border-b border-[var(--tp-lines-30)] pb-3">
+            <h4 className="text-[var(--tp-gray-200)] font-semibold flex items-center gap-2">
+              <Radio className="w-3 h-3 text-[var(--tp-success)] animate-pulse" />
+              Respuesta API
+            </h4>
+            {result && (
+              <span className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                result.success 
+                  ? "bg-[var(--tp-success-light)] text-[var(--tp-success)]" 
+                  : "bg-[var(--tp-error-light)] text-[var(--tp-error)]"
+              }`}>
+                {result.success ? (
+                  <><CheckCircle2 className="w-3 h-3" /> Success</>
+                ) : (
+                  <><XCircle className="w-3 h-3" /> Error</>
+                )}
+              </span>
+            )}
+          </div>
           {loading ? (
-             <div className="animate-pulse flex space-x-4">
-                 <div className="flex-1 space-y-4 py-1">
-                     <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                     <div className="h-4 bg-gray-700 rounded"></div>
-                     <div className="h-4 bg-gray-700 rounded w-5/6"></div>
-                 </div>
-             </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-4 h-4 text-[var(--tp-info)] animate-spin" />
+                <span className="text-[var(--tp-info)]">Procesando solicitud...</span>
+              </div>
+              <div className="animate-pulse space-y-3 mt-4">
+                <div className="h-3 bg-[var(--tp-lines-20)] rounded w-3/4"></div>
+                <div className="h-3 bg-[var(--tp-lines-20)] rounded"></div>
+                <div className="h-3 bg-[var(--tp-lines-20)] rounded w-5/6"></div>
+                <div className="h-3 bg-[var(--tp-lines-20)] rounded w-2/3"></div>
+              </div>
+            </div>
           ) : result ? (
-            <pre>{JSON.stringify(result, null, 2)}</pre>
+            <pre className="text-[var(--tp-success)] leading-relaxed whitespace-pre-wrap break-words">
+              {JSON.stringify(result, null, 2)}
+            </pre>
           ) : (
-            <p className="text-gray-500 italic">Esperando solicitud...</p>
+            <div className="flex flex-col items-center justify-center py-12 text-[var(--tp-lines)]">
+              <Radio className="w-10 h-10 mb-3 opacity-50" />
+              <p className="italic">Esperando solicitud...</p>
+            </div>
           )}
         </div>
       </div>
