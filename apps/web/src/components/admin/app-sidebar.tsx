@@ -186,6 +186,11 @@ const systemMenuItems = [
     icon: FileText,
   },
   {
+    title: 'Panel CDS',
+    url: '/admin/cds',
+    icon: FileSignature,
+  },
+  {
     title: 'Configuración',
     url: '/admin/settings',
     icon: Settings,

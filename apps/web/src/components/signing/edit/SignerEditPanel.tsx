@@ -29,6 +29,7 @@ interface Signer {
   phone: string | null
   status: string
   signing_order: number
+  signing_token: string
   metadata: any
 }
 
@@ -41,8 +42,24 @@ interface SignerEditPanelProps {
 function normalizeRutToDb(input: string) {
   const clean = cleanRut(input)
   if (!clean) return ''
-  if (clean.length < 2) return clean
   return `${clean.slice(0, -1)}-${clean.slice(-1)}`
+}
+
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'signed':
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Firmado</span>
+    case 'enrolled':
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Listo para firmar</span>
+    case 'needs_enrollment':
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">Requiere Enrolamiento</span>
+    case 'pending':
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Pendiente</span>
+    case 'rejected':
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Rechazado</span>
+    default:
+      return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{status}</span>
+  }
 }
 
 export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPanelProps) {
@@ -206,23 +223,48 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
               <div className="text-xs text-muted-foreground mt-1">
                 {signer.rut ? `RUT: ${signer.rut}` : `ID: ${signer.metadata?.identifier_value || 'N/A'}`}
                 {' • '}
-                <span className={signer.status === 'signed' ? 'text-green-600' : 'text-orange-600'}>
-                  {signer.status === 'signed' ? 'Firmado' : 'Pendiente'}
-                </span>
+                {getStatusBadge(signer.status)}
               </div>
             </div>
             
-            {canEdit && signer.status !== 'signed' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoveSigner(signer.id)}
-                disabled={saving}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {['pending', 'enrolled', 'needs_enrollment'].includes(signer.status) && signer.signing_token && (
+                 <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        const url = `${window.location.origin}/sign/${signer.signing_token}`
+                        navigator.clipboard.writeText(url)
+                        toast.success('Enlace copiado al portapapeles')
+                      }}
+                    >
+                      Copiar
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => window.open(`/sign/${signer.signing_token}`, '_blank')}
+                    >
+                      {signer.status === 'needs_enrollment' ? 'Enrolar' : 'Firmar'}
+                    </Button>
+                 </div>
+              )}
+
+              {canEdit && signer.status !== 'signed' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveSigner(signer.id)}
+                  disabled={saving}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
         

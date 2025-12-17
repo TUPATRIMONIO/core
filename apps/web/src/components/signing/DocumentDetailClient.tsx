@@ -104,15 +104,35 @@ export function DocumentDetailClient({
   const handleSendToSign = async () => {
     try {
       setIsSending(true)
-      const { data, error } = await supabase.rpc('send_document_to_sign', {
-        p_document_id: document.id
+      
+      // Usar la nueva API de firma que integra CDS
+      const response = await fetch('/api/signing/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          document_id: document.id
+        })
       })
 
-      if (error) throw new Error(error.message)
+      const result = await response.json()
 
-      toast.success('Documento enviado a firma exitosamente')
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.message || 'Error al iniciar proceso de firma')
+      }
+
+      toast.success(result.message || 'Proceso de firma iniciado exitosamente')
+      
+      // Si hay advertencias (ej: firmantes sin enrolar), mostrarlas
+      if (result.signers_status) {
+        const needsEnrollment = result.signers_status.filter((s: any) => !s.enrolled && !s.is_foreigner).length
+        if (needsEnrollment > 0) {
+          toast.info(`${needsEnrollment} firmante(s) necesitan enrolamiento FEA`)
+        }
+      }
+
       handleRefresh()
     } catch (error: any) {
+      console.error('Error sending to sign:', error)
       toast.error(error.message || 'Error al enviar documento')
     } finally {
       setIsSending(false)
