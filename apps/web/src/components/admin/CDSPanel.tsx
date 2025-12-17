@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { invokeCDSOperation } from "@/app/actions/cds";
+import { formatRutOnInput, getRutError } from "@/lib/utils/rut";
 import { 
   Search, 
   UserPlus, 
@@ -12,7 +13,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Radio
+  Radio,
+  AlertCircle
 } from "lucide-react";
 
 type Tab = "vigencia" | "enroll" | "2fa" | "documents" | "unlock" | "simple";
@@ -30,6 +32,7 @@ export default function CDSPanel() {
   const [activeTab, setActiveTab] = useState<Tab>("vigencia");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [rutError, setRutError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     rut: "",
@@ -44,7 +47,23 @@ export default function CDSPanel() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Auto-formatear el RUT mientras se escribe
+    if (name === "rut") {
+      const formattedRut = formatRutOnInput(value);
+      setFormData({ ...formData, rut: formattedRut });
+      
+      // Validar en tiempo real (solo si tiene suficiente longitud)
+      if (formattedRut.length >= 3) {
+        const error = getRutError(formattedRut);
+        setRutError(error);
+      } else {
+        setRutError(null);
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleAction = async (operation: string, payload: any) => {
@@ -114,12 +133,18 @@ export default function CDSPanel() {
                   value={formData.rut}
                   onChange={handleChange}
                   placeholder="11.111.111-1"
-                  className={inputClasses}
+                  className={`${inputClasses} ${rutError ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : ''}`}
                 />
+                {rutError && (
+                  <p className="mt-1.5 text-sm text-destructive flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4" />
+                    {rutError}
+                  </p>
+                )}
               </div>
               <button
                 onClick={() => handleAction("check-vigencia", { rut: formData.rut })}
-                disabled={loading}
+                disabled={loading || !!rutError}
                 className={buttonClasses}
               >
                 {loading ? "Consultando..." : "Consultar Vigencia"}
