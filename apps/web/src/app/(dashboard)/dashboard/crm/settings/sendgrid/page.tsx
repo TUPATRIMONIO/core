@@ -357,38 +357,9 @@ export default function SendGridSettingsPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="from_email">Email Remitente (por defecto)</Label>
-                <Input
-                  id="from_email"
-                  type="email"
-                  placeholder="noreply@tudominio.com"
-                  value={accountFormData.from_email}
-                  onChange={(e) =>
-                    setAccountFormData({ ...accountFormData, from_email: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="from_name">Nombre Remitente (por defecto)</Label>
-                <Input
-                  id="from_name"
-                  type="text"
-                  placeholder="Tu Empresa"
-                  value={accountFormData.from_name}
-                  onChange={(e) =>
-                    setAccountFormData({ ...accountFormData, from_name: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
-
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || (!accountFormData.api_key && !account?.has_api_key)}
               className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
             >
               {saving ? (
@@ -593,6 +564,11 @@ export default function SendGridSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Test Email Card */}
+      {account?.has_api_key && senders.length > 0 && (
+        <TestEmailCard senders={senders} />
+      )}
+
       {/* Info Card */}
       <Card>
         <CardHeader>
@@ -624,5 +600,119 @@ export default function SendGridSettingsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Component for testing email sending
+function TestEmailCard({ senders }: { senders: SenderIdentity[] }) {
+  const [testEmail, setTestEmail] = useState('');
+  const [testPurpose, setTestPurpose] = useState<'transactional' | 'marketing'>('transactional');
+  const [sending, setSending] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleSendTest = async () => {
+    if (!testEmail) return;
+
+    setSending(true);
+    setTestResult(null);
+
+    try {
+      const response = await fetch('/api/communications/sendgrid/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to_email: testEmail,
+          purpose: testPurpose,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        setTestResult({ success: false, message: data.error });
+      } else {
+        setTestResult({ success: true, message: 'Email de prueba enviado exitosamente' });
+      }
+    } catch (err: any) {
+      setTestResult({ success: false, message: err.message || 'Error al enviar' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const selectedSender = senders.find(s => s.purpose === testPurpose);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Probar Remitentes
+        </CardTitle>
+        <CardDescription>
+          Envía un email de prueba para verificar que los remitentes funcionan correctamente
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {testResult && (
+          <Alert className={testResult.success ? 'bg-green-50 border-green-200' : ''} variant={testResult.success ? 'default' : 'destructive'}>
+            {testResult.success ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4" />}
+            <AlertDescription className={testResult.success ? 'text-green-800' : ''}>
+              {testResult.message}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Propósito (Remitente)</Label>
+            <Select
+              value={testPurpose}
+              onValueChange={(v: 'transactional' | 'marketing') => setTestPurpose(v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="transactional">Transaccional</SelectItem>
+                <SelectItem value="marketing">Marketing</SelectItem>
+              </SelectContent>
+            </Select>
+            {selectedSender && (
+              <p className="text-xs text-muted-foreground">
+                Desde: {selectedSender.from_name} &lt;{selectedSender.from_email}&gt;
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label>Email Destinatario</Label>
+            <Input
+              type="email"
+              placeholder="test@ejemplo.com"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <Button
+          onClick={handleSendTest}
+          disabled={sending || !testEmail || !selectedSender}
+          className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+        >
+          {sending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <Mail className="mr-2 h-4 w-4" />
+              Enviar Email de Prueba
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

@@ -5,7 +5,7 @@ import {
     sendEmailWithSharedAccount,
 } from "@/lib/gmail/client";
 import { sendEmail as sendSendGridEmailMultiOrg } from "@/lib/sendgrid/client";
-import { EMAIL_CONFIG } from "@/lib/config/email";
+import type { SenderPurpose } from "@/lib/sendgrid/types";
 
 interface RouteBody {
     orderId?: string;
@@ -17,6 +17,7 @@ interface RouteBody {
     provider: "gmail" | "sendgrid";
     gmailAccessToken?: string; // Deprecated: ya no se usa, se obtiene de la cuenta compartida
     includeSignature?: boolean; // Si incluir firma personal (default: true)
+    purpose?: SenderPurpose; // transactional o marketing (default: transactional)
 }
 
 export async function POST(request: NextRequest) {
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
             bodyText,
             provider,
             includeSignature = true,
+            purpose = "transactional", // Por defecto transaccional para emails desde admin
         } = body;
 
         if (!toEmail || !subject || !bodyHtml || !provider) {
@@ -116,16 +118,17 @@ export async function POST(request: NextRequest) {
                 );
                 messageId = result.messageId;
             } else if (provider === "sendgrid") {
+                // Usar SendGrid con sender identity según propósito
                 const result = await sendSendGridEmailMultiOrg(
                     organizationId,
                     {
                         to: toEmail,
-                        from: EMAIL_CONFIG.transactional.email,
-                        fromName: EMAIL_CONFIG.transactional.name,
+                        from: "", // Se obtiene automáticamente del sender identity
                         subject,
                         html: bodyHtml,
                         text: bodyText,
                     },
+                    { purpose },
                 );
                 // SendGrid devuelve el messageId en los headers
                 messageId = result.headers?.["x-message-id"] || undefined;

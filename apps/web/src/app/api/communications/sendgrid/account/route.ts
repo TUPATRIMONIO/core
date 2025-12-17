@@ -109,24 +109,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { api_key, from_email, from_name } = body as SendGridAccountInput;
 
-    // Validaciones
-    if (!api_key || !from_email || !from_name) {
+    // Validaciones - solo API key es requerida
+    if (!api_key) {
       return NextResponse.json(
-        { error: "api_key, from_email y from_name son campos requeridos" },
+        { error: "api_key es requerido" },
         { status: 400 },
       );
     }
 
-    if (!from_email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
-      return NextResponse.json({ error: "from_email no es válido" }, {
-        status: 400,
-      });
-    }
+    // from_email y from_name son opcionales ahora (legacy, se usan sender_identities)
+    const emailToSave = from_email || "noreply@placeholder.com";
+    const nameToSave = from_name || "SendGrid";
 
     // Crear o actualizar cuenta
     const result = await upsertSendGridAccount(
       organization.id,
-      { api_key, from_email, from_name },
+      { api_key, from_email: emailToSave, from_name: nameToSave },
       user.id,
     );
 
