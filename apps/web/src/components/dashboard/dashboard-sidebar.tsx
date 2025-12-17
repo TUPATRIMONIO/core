@@ -50,6 +50,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { getApplicationSlugFromRoute } from '@/config/application-routes'
+import { OrganizationSwitcher } from '@/components/organization/OrganizationSwitcher'
+import { useOrganization } from '@/hooks/useOrganization'
 
 const mainMenuItems = [
   {
@@ -183,6 +185,7 @@ export function DashboardSidebar() {
   const [user, setUser] = useState<any>(null)
   const [enabledAppSlugs, setEnabledAppSlugs] = useState<Set<string>>(new Set())
   const [isLoadingApps, setIsLoadingApps] = useState(true)
+  const { activeOrganization, isLoading: isLoadingOrg } = useOrganization()
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -209,6 +212,11 @@ export function DashboardSidebar() {
 
   useEffect(() => {
     const fetchEnabledApps = async () => {
+      // Wait for organization to load
+      if (isLoadingOrg || !activeOrganization) {
+        return
+      }
+
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
@@ -217,21 +225,9 @@ export function DashboardSidebar() {
         return
       }
 
-      // Obtener organización del usuario
-      const { data: orgUser } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      const organizationId = orgUser?.organization_id || null
-
-      // Obtener aplicaciones habilitadas
+      // Obtener aplicaciones habilitadas usando el ID de la organización activa
       const { data: enabledApps, error } = await supabase.rpc('get_enabled_applications', {
-        p_organization_id: organizationId,
+        p_organization_id: activeOrganization.id,
         p_user_id: user.id,
       })
 
@@ -250,7 +246,7 @@ export function DashboardSidebar() {
     }
 
     fetchEnabledApps()
-  }, [])
+  }, [activeOrganization, isLoadingOrg])
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -321,17 +317,7 @@ export function DashboardSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--tp-brand)] text-white font-bold text-sm">
-                  TP
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">TuPatrimonio</span>
-                  <span className="truncate text-xs">Dashboard</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <OrganizationSwitcher />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

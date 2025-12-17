@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { PendingOrdersBadge } from '@/components/checkout/PendingOrdersBadge'
 import { GlobalCountryProvider } from '@/providers/GlobalCountryProvider'
 import { CountrySelectorDropdown } from '@/components/shared/CountrySelectorDropdown'
+import { OrganizationProvider } from '@/providers/OrganizationProvider'
 
 export default async function DashboardLayout({
   children,
@@ -34,25 +35,27 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState?.value === 'true' ? true : sidebarState?.value === 'false' ? false : true
 
   return (
-    <GlobalCountryProvider>
-      <TooltipProvider>
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <DashboardSidebar />
-          <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
-              <SidebarTrigger className="-ml-1" />
-              <Separator orientation="vertical" className="mr-2 h-4" />
-              <div className="flex-1" />
-              <CountrySelectorDropdown variant="compact" showReset />
-              <PendingOrdersBadge />
-            </header>
-            <div className="flex-1 px-4 md:px-6">
-              {children}
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </TooltipProvider>
-    </GlobalCountryProvider>
+    <OrganizationProvider>
+      <GlobalCountryProvider>
+        <TooltipProvider>
+          <SidebarProvider defaultOpen={defaultOpen}>
+            <DashboardSidebar />
+            <SidebarInset>
+              <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-10 bg-background">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                <div className="flex-1" />
+                <CountrySelectorDropdown variant="compact" showReset />
+                <PendingOrdersBadge />
+              </header>
+              <div className="flex-1 px-4 md:px-6">
+                {children}
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </TooltipProvider>
+      </GlobalCountryProvider>
+    </OrganizationProvider>
   )
 }
 

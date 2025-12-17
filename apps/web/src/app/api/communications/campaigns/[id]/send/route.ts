@@ -1,8 +1,8 @@
 /**
  * API Route: Enviar Campaña
- * 
+ *
  * POST: Enviar una campaña usando SendGrid
- * 
+ *
  * Proceso:
  * 1. Validar que la campaña esté en estado draft o scheduled
  * 2. Obtener template y lista de contactos
@@ -12,20 +12,21 @@
  * 6. Actualizar estadísticas de la campaña
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
-import { sendBatchEmails } from '@/lib/sendgrid/client';
-import { renderTemplate } from '@/lib/communications/template-engine';
-import { hasSendGridAccount } from '@/lib/sendgrid/accounts';
-import type { SendGridMessage } from '@/lib/sendgrid/types';
-import { requireApplicationAccess } from '@/lib/access/api-access-guard';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { sendBatchEmails } from "@/lib/sendgrid/client";
+import { renderTemplate } from "@/lib/communications/template-engine";
+import { hasSendGridAccount } from "@/lib/sendgrid/accounts";
+import type { SendGridMessage } from "@/lib/sendgrid/types";
+import { requireApplicationAccess } from "@/lib/access/api-access-guard";
+import { EMAIL_CONFIG } from "@/lib/config/email";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   // Verificar acceso a Email Marketing
-  const denied = await requireApplicationAccess(request, 'email_marketing');
+  const denied = await requireApplicationAccess(request, "email_marketing");
   if (denied) return denied;
 
   try {
@@ -37,21 +38,21 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Obtener organización del usuario
     const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
+      .from("organization_users")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
       .single();
 
     if (!orgUser) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
-        { status: 400 }
+        { error: "Usuario no pertenece a ninguna organización" },
+        { status: 400 },
       );
     }
 
@@ -61,56 +62,61 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            'Debes configurar una cuenta SendGrid antes de enviar campañas. Ve a Configuración > SendGrid.',
+            "Debes configurar una cuenta SendGrid antes de enviar campañas. Ve a Configuración > SendGrid.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Obtener campaña con template y lista
     const { data: campaign, error: campaignError } = await supabase
-      .from('campaigns')
+      .from("campaigns")
       .select(`
         *,
         template:message_templates(*),
         contact_list:contact_lists(*)
       `)
-      .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq("id", id)
+      .eq("organization_id", orgUser.organization_id)
       .single();
 
     if (campaignError || !campaign) {
-      return NextResponse.json({ error: 'Campaña no encontrada' }, { status: 404 });
+      return NextResponse.json({ error: "Campaña no encontrada" }, {
+        status: 404,
+      });
     }
 
     // Validar estado
-    if (campaign.status !== 'draft' && campaign.status !== 'scheduled') {
+    if (campaign.status !== "draft" && campaign.status !== "scheduled") {
       return NextResponse.json(
-        { error: `No se puede enviar una campaña con estado "${campaign.status}"` },
-        { status: 400 }
+        {
+          error:
+            `No se puede enviar una campaña con estado "${campaign.status}"`,
+        },
+        { status: 400 },
       );
     }
 
     // Obtener contactos de la lista
     const { data: listMembers } = await serviceSupabase
-      .from('contact_list_members')
+      .from("contact_list_members")
       .select(`
         contact:crm.contacts(*)
       `)
-      .eq('contact_list_id', campaign.contact_list_id);
+      .eq("contact_list_id", campaign.contact_list_id);
 
     if (!listMembers || listMembers.length === 0) {
       return NextResponse.json(
-        { error: 'La lista de contactos está vacía' },
-        { status: 400 }
+        { error: "La lista de contactos está vacía" },
+        { status: 400 },
       );
     }
 
     // Actualizar estado de campaña a "sending"
     await serviceSupabase
-      .from('campaigns')
-      .update({ status: 'sending' })
-      .eq('id', id);
+      .from("campaigns")
+      .update({ status: "sending" })
+      .eq("id", id);
 
     // Preparar mensajes para enviar
     const messages: SendGridMessage[] = [];
@@ -131,13 +137,19 @@ export async function POST(
           phone: contact.phone,
         },
         organization: {
-          name: campaign.contact_list?.name || 'Tu Organización',
+          name: campaign.contact_list?.name || "Tu Organización",
         },
       };
 
       // Renderizar template
-      const renderedSubject = renderTemplate(campaign.template.subject, variables);
-      const renderedHtml = renderTemplate(campaign.template.body_html, variables);
+      const renderedSubject = renderTemplate(
+        campaign.template.subject,
+        variables,
+      );
+      const renderedHtml = renderTemplate(
+        campaign.template.body_html,
+        variables,
+      );
       const renderedText = campaign.template.body_text
         ? renderTemplate(campaign.template.body_text, variables)
         : undefined;
@@ -145,6 +157,8 @@ export async function POST(
       // Agregar mensaje
       messages.push({
         to: contact.email,
+        from: EMAIL_CONFIG.newsletter.email,
+        fromName: EMAIL_CONFIG.newsletter.name,
         subject: renderedSubject,
         html: renderedHtml,
         text: renderedText,
@@ -159,65 +173,74 @@ export async function POST(
         campaign_id: id,
         contact_id: contact.id,
         email_address: contact.email,
-        status: 'draft',
+        status: "draft",
       });
     }
 
     // Crear campaign_messages en BD antes de enviar
-    const { data: createdMessages, error: messagesError } = await serviceSupabase
-      .from('campaign_messages')
-      .insert(campaignMessages)
-      .select('id, email_address');
+    const { data: createdMessages, error: messagesError } =
+      await serviceSupabase
+        .from("campaign_messages")
+        .insert(campaignMessages)
+        .select("id, email_address");
 
     if (messagesError) {
-      console.error('Error al crear campaign_messages:', messagesError);
+      console.error("Error al crear campaign_messages:", messagesError);
       // Continuar de todas formas
     }
 
     // Enviar emails en batch
     try {
-      const responses = await sendBatchEmails(orgUser.organization_id, messages, {
-        campaign_id: id,
-      });
+      const responses = await sendBatchEmails(
+        orgUser.organization_id,
+        messages,
+        {
+          campaign_id: id,
+        },
+      );
 
       // Actualizar campaign_messages con sendgrid_message_id
       // Nota: SendGrid no retorna message_id individual en batch, así que actualizamos el status
       if (createdMessages) {
         for (let i = 0; i < createdMessages.length; i++) {
           const response = responses[i];
-          if (response && response.statusCode >= 200 && response.statusCode < 300) {
+          if (
+            response && response.statusCode >= 200 && response.statusCode < 300
+          ) {
             await serviceSupabase
-              .from('campaign_messages')
+              .from("campaign_messages")
               .update({
-                status: 'sent',
+                status: "sent",
                 sent_at: new Date().toISOString(),
               })
-              .eq('id', createdMessages[i].id);
+              .eq("id", createdMessages[i].id);
           } else {
             await serviceSupabase
-              .from('campaign_messages')
+              .from("campaign_messages")
               .update({
-                status: 'failed',
+                status: "failed",
                 failed_at: new Date().toISOString(),
               })
-              .eq('id', createdMessages[i].id);
+              .eq("id", createdMessages[i].id);
           }
         }
       }
 
       // Actualizar campaña
-      const emailsSent = responses.filter((r) => r.statusCode >= 200 && r.statusCode < 300).length;
+      const emailsSent = responses.filter((r) =>
+        r.statusCode >= 200 && r.statusCode < 300
+      ).length;
       const emailsFailed = responses.length - emailsSent;
 
       await serviceSupabase
-        .from('campaigns')
+        .from("campaigns")
         .update({
-          status: 'sent',
+          status: "sent",
           sent_at: new Date().toISOString(),
           emails_sent: emailsSent,
           emails_failed: emailsFailed,
         })
-        .eq('id', id);
+        .eq("id", id);
 
       return NextResponse.json({
         success: true,
@@ -230,20 +253,19 @@ export async function POST(
     } catch (sendError: any) {
       // Si falla el envío, actualizar campaña a error
       await serviceSupabase
-        .from('campaigns')
+        .from("campaigns")
         .update({
-          status: 'draft', // Volver a draft para poder reintentar
+          status: "draft", // Volver a draft para poder reintentar
         })
-        .eq('id', id);
+        .eq("id", id);
 
       throw sendError;
     }
   } catch (error: any) {
-    console.error('Error al enviar campaña:', error);
+    console.error("Error al enviar campaña:", error);
     return NextResponse.json(
-      { error: error.message || 'Error al enviar campaña' },
-      { status: 500 }
+      { error: error.message || "Error al enviar campaña" },
+      { status: 500 },
     );
   }
 }
-
