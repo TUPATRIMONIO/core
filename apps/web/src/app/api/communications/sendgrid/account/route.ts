@@ -1,14 +1,18 @@
 /**
  * API Route: Gestión de Cuenta SendGrid
- * 
+ *
  * GET: Obtener cuenta SendGrid de la organización del usuario
  * POST: Crear o actualizar cuenta SendGrid
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { getSendGridAccount, upsertSendGridAccount } from '@/lib/sendgrid/accounts';
-import type { SendGridAccountInput } from '@/lib/sendgrid/types';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import {
+  getSendGridAccount,
+  upsertSendGridAccount,
+} from "@/lib/sendgrid/accounts";
+import { getUserActiveOrganization } from "@/lib/organization/utils";
+import type { SendGridAccountInput } from "@/lib/sendgrid/types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,26 +22,23 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    // Obtener organización activa del usuario
+    const { organization, error: orgError } = await getUserActiveOrganization(
+      supabase,
+    );
 
-    if (!orgUser) {
+    if (!organization) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
-        { status: 400 }
+        { error: orgError || "Usuario no pertenece a ninguna organización" },
+        { status: 400 },
       );
     }
 
     // Obtener cuenta SendGrid (sin API key por seguridad)
-    const account = await getSendGridAccount(orgUser.organization_id);
+    const account = await getSendGridAccount(organization.id);
 
     if (!account) {
       return NextResponse.json({ data: null });
@@ -53,10 +54,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error al obtener cuenta SendGrid:', error);
+    console.error("Error al obtener cuenta SendGrid:", error);
     return NextResponse.json(
-      { error: error.message || 'Error al obtener cuenta SendGrid' },
-      { status: 500 }
+      { error: error.message || "Error al obtener cuenta SendGrid" },
+      { status: 500 },
     );
   }
 }
@@ -69,30 +70,39 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Verificar permisos (solo owners/admins pueden configurar SendGrid)
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id, role:roles(level)')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    // Obtener organización activa del usuario
+    const { organization, error: orgError } = await getUserActiveOrganization(
+      supabase,
+    );
 
-    if (!orgUser) {
+    if (!organization) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
-        { status: 400 }
+        { error: orgError || "Usuario no pertenece a ninguna organización" },
+        { status: 400 },
       );
     }
 
+    // Verificar permisos - obtener rol del usuario en la organización
+    const { data: orgUserRole } = await supabase
+      .from("organization_users")
+      .select("role:roles(level)")
+      .eq("user_id", user.id)
+      .eq("organization_id", organization.id)
+      .eq("status", "active")
+      .single();
+
     // Verificar que sea admin o superior (level >= 7)
-    const roleLevel = (orgUser.role as any)?.level || 0;
+    const roleLevel = (orgUserRole?.role as any)?.level || 0;
     if (roleLevel < 7) {
       return NextResponse.json(
-        { error: 'No tienes permisos para configurar SendGrid. Se requiere rol de administrador.' },
-        { status: 403 }
+        {
+          error:
+            "No tienes permisos para configurar SendGrid. Se requiere rol de administrador.",
+        },
+        { status: 403 },
       );
     }
 
@@ -102,20 +112,22 @@ export async function POST(request: NextRequest) {
     // Validaciones
     if (!api_key || !from_email || !from_name) {
       return NextResponse.json(
-        { error: 'api_key, from_email y from_name son campos requeridos' },
-        { status: 400 }
+        { error: "api_key, from_email y from_name son campos requeridos" },
+        { status: 400 },
       );
     }
 
     if (!from_email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
-      return NextResponse.json({ error: 'from_email no es válido' }, { status: 400 });
+      return NextResponse.json({ error: "from_email no es válido" }, {
+        status: 400,
+      });
     }
 
     // Crear o actualizar cuenta
     const result = await upsertSendGridAccount(
-      orgUser.organization_id,
+      organization.id,
       { api_key, from_email, from_name },
-      user.id
+      user.id,
     );
 
     if (!result.success) {
@@ -133,11 +145,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error al guardar cuenta SendGrid:', error);
+    console.error("Error al guardar cuenta SendGrid:", error);
     return NextResponse.json(
-      { error: error.message || 'Error al guardar cuenta SendGrid' },
-      { status: 500 }
+      { error: error.message || "Error al guardar cuenta SendGrid" },
+      { status: 500 },
     );
   }
 }
-

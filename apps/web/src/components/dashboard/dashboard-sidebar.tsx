@@ -148,6 +148,11 @@ const communicationsMenuItems = [
     url: '/dashboard/communications/analytics',
     icon: BarChart,
   },
+  {
+    title: 'Configuración SendGrid',
+    url: '/dashboard/crm/settings/sendgrid',
+    icon: Settings,
+  },
 ]
 
 const signingMenuItems = [

@@ -1,6 +1,6 @@
 /**
  * Cliente SendGrid Multi-Organización
- * 
+ *
  * Wrapper para @sendgrid/mail que:
  * - Obtiene API key de la organización desde BD
  * - Maneja retry logic con exponential backoff
@@ -8,9 +8,9 @@
  * - Tracking de eventos
  */
 
-import sgMail from '@sendgrid/mail';
-import { getSendGridAccount } from './accounts';
-import type { SendGridMessage, SendGridResponse } from './types';
+import sgMail from "@sendgrid/mail";
+import { getSenderByPurpose, getSendGridAccount } from "./accounts";
+import type { SenderPurpose, SendGridMessage, SendGridResponse } from "./types";
 
 // Rate limiting por organización (emails por segundo)
 const RATE_LIMITS = {
@@ -80,18 +80,17 @@ async function waitForRateLimit(organizationId: string): Promise<void> {
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   retries = MAX_RETRIES,
-  delay = INITIAL_RETRY_DELAY
+  delay = INITIAL_RETRY_DELAY,
 ): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
     // Si es error de rate limit (429) o server error (5xx), reintentar
-    const shouldRetry =
-      retries > 0 &&
+    const shouldRetry = retries > 0 &&
       (error?.response?.statusCode === 429 ||
         error?.response?.statusCode >= 500 ||
-        error?.code === 'ECONNRESET' ||
-        error?.code === 'ETIMEDOUT');
+        error?.code === "ECONNRESET" ||
+        error?.code === "ETIMEDOUT");
 
     if (!shouldRetry) {
       throw error;
@@ -106,28 +105,40 @@ async function retryWithBackoff<T>(
 
 /**
  * Envía un email usando SendGrid
- * 
+ *
  * @param organizationId - ID de la organización
  * @param message - Mensaje a enviar
- * @param customArgs - Argumentos personalizados para webhooks (incluye organization_id)
+ * @param options - Opciones adicionales (purpose, customArgs)
  * @returns Respuesta de SendGrid
  */
 export async function sendEmail(
   organizationId: string,
   message: SendGridMessage,
-  customArgs?: Record<string, string>
+  options?: {
+    purpose?: SenderPurpose;
+    customArgs?: Record<string, string>;
+  },
 ): Promise<SendGridResponse> {
+  const { purpose = "marketing", customArgs } = options || {};
+
   // Obtener cuenta SendGrid de la organización
   const account = await getSendGridAccount(organizationId);
 
   if (!account) {
     throw new Error(
-      `No se encontró cuenta SendGrid activa para la organización ${organizationId}. Por favor, configura una cuenta SendGrid primero.`
+      `No se encontró cuenta SendGrid activa para la organización ${organizationId}. Por favor, configura una cuenta SendGrid primero.`,
     );
   }
 
   // Configurar API key
   sgMail.setApiKey(account.api_key);
+
+  // Obtener sender identity por propósito
+  const sender = await getSenderByPurpose(organizationId, purpose);
+
+  // Determinar from email/name (prioridad: message > sender > account)
+  const fromEmail = message.from || sender?.from_email || account.from_email;
+  const fromName = message.fromName || sender?.from_name || account.from_name;
 
   // Esperar rate limiting
   await waitForRateLimit(organizationId);
@@ -136,9 +147,10 @@ export async function sendEmail(
   const msg = {
     to: message.to,
     from: {
-      email: message.from || account.from_email,
-      name: message.fromName || account.from_name,
+      email: fromEmail,
+      name: fromName,
     },
+    replyTo: sender?.reply_to_email || undefined,
     subject: message.subject,
     html: message.html,
     text: message.text,
@@ -146,6 +158,7 @@ export async function sendEmail(
     dynamicTemplateData: message.dynamicTemplateData,
     customArgs: {
       organization_id: organizationId,
+      purpose,
       ...customArgs,
     },
   };
@@ -164,34 +177,47 @@ export async function sendEmail(
 
 /**
  * Envía múltiples emails en batch
- * 
+ *
  * @param organizationId - ID de la organización
  * @param messages - Array de mensajes a enviar
- * @param customArgs - Argumentos personalizados para webhooks
+ * @param options - Opciones adicionales (purpose, customArgs)
  * @returns Array de respuestas de SendGrid
  */
 export async function sendBatchEmails(
   organizationId: string,
   messages: SendGridMessage[],
-  customArgs?: Record<string, string>
+  options?: {
+    purpose?: SenderPurpose;
+    customArgs?: Record<string, string>;
+  },
 ): Promise<SendGridResponse[]> {
+  const { purpose = "marketing", customArgs } = options || {};
+
   const account = await getSendGridAccount(organizationId);
 
   if (!account) {
     throw new Error(
-      `No se encontró cuenta SendGrid activa para la organización ${organizationId}`
+      `No se encontró cuenta SendGrid activa para la organización ${organizationId}`,
     );
   }
 
   sgMail.setApiKey(account.api_key);
 
+  // Obtener sender identity por propósito
+  const sender = await getSenderByPurpose(organizationId, purpose);
+
+  // Determinar from email/name
+  const fromEmail = sender?.from_email || account.from_email;
+  const fromName = sender?.from_name || account.from_name;
+
   // Preparar mensajes con custom args
   const preparedMessages = messages.map((message) => ({
     to: message.to,
     from: {
-      email: message.from || account.from_email,
-      name: message.fromName || account.from_name,
+      email: message.from || fromEmail,
+      name: message.fromName || fromName,
     },
+    replyTo: sender?.reply_to_email || undefined,
     subject: message.subject,
     html: message.html,
     text: message.text,
@@ -199,6 +225,7 @@ export async function sendBatchEmails(
     dynamicTemplateData: message.dynamicTemplateData,
     customArgs: {
       organization_id: organizationId,
+      purpose,
       ...customArgs,
     },
   }));
@@ -213,4 +240,3 @@ export async function sendBatchEmails(
     }));
   });
 }
-

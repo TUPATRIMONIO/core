@@ -45,7 +45,14 @@ export interface SendGridResponse {
 export interface SendGridWebhookEvent {
   email: string;
   timestamp: number;
-  event: 'delivered' | 'opened' | 'clicked' | 'bounced' | 'failed' | 'unsubscribed' | 'spamreport';
+  event:
+    | "delivered"
+    | "opened"
+    | "clicked"
+    | "bounced"
+    | "failed"
+    | "unsubscribed"
+    | "spamreport";
   sg_message_id?: string;
   sg_event_id?: string;
   reason?: string;
@@ -61,3 +68,31 @@ export interface SendGridWebhookPayload {
   _json: SendGridWebhookEvent[];
 }
 
+// ============================================================================
+// Sender Identities Types
+// ============================================================================
+
+export type SenderPurpose = "transactional" | "marketing";
+
+export interface SenderIdentity {
+  id: string;
+  organization_id: string;
+  sendgrid_account_id: string;
+  purpose: SenderPurpose;
+  from_email: string;
+  from_name: string;
+  reply_to_email: string | null;
+  is_default: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+}
+
+export interface SenderIdentityInput {
+  purpose: SenderPurpose;
+  from_email: string;
+  from_name: string;
+  reply_to_email?: string;
+  is_default?: boolean;
+}
