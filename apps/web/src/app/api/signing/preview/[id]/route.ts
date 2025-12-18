@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } },
+    { params }: { params: Promise<{ id: string }> },
 ) {
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const searchParams = request.nextUrl.searchParams;
     const token = searchParams.get("token");
 
@@ -65,7 +65,7 @@ export async function GET(
         // NOTE: Column is original_file_path, NOT file_path
         const { data: document, error: docError } = await adminClient
             .from("signing_documents")
-            .select("original_file_path, current_signed_file_path")
+            .select("original_file_path, current_signed_file_path, metadata")
             .eq("id", documentId)
             .single();
 
@@ -77,7 +77,6 @@ export async function GET(
         // Use current signed path if exists, otherwise original file path
         const filePath = document.current_signed_file_path ||
             document.original_file_path;
-        // console.log(`Preview API - Fetching file: ${filePath}`); // Comment out to avoid log spam, un-comment for debugging
 
         if (!filePath) {
             console.error("Preview API - File path missing in DB record");
@@ -85,12 +84,27 @@ export async function GET(
         }
 
         // 4. Download file from Storage
-        const { data: fileData, error: downloadError } = await adminClient
-            .storage
-            .from("signing-documents")
-            .download(filePath);
+        // Determine bucket from metadata or try both
+        const metadataBucket = document.metadata?.originals_bucket;
+        const bucketsToTry = metadataBucket
+            ? [metadataBucket]
+            : ["docs-originals", "docs-signed"];
 
-        if (downloadError || !fileData) {
+        let fileData: Blob | null = null;
+        let downloadError: Error | null = null;
+
+        for (const bucket of bucketsToTry) {
+            const result = await adminClient.storage.from(bucket).download(
+                filePath,
+            );
+            if (!result.error && result.data) {
+                fileData = result.data;
+                break;
+            }
+            downloadError = result.error;
+        }
+
+        if (!fileData) {
             console.error(
                 `Preview API - Download error for ${filePath}:`,
                 downloadError,

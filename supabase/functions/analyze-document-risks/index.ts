@@ -583,9 +583,9 @@ Deno.serve(async (req) => {
     const { bytes, bucket } = await downloadPdf(supabase, filePath, [
       { bucket: "docs-originals", path: altPath1 },
       { bucket: "docs-originals", path: altPath2 },
-      { bucket: "signing-documents", path: filePath },
-      { bucket: "signing-documents", path: altPath1 },
-      { bucket: "signing-documents", path: altPath2 },
+      { bucket: "docs-signed", path: filePath },
+      { bucket: "docs-signed", path: altPath1 },
+      { bucket: "docs-signed", path: altPath2 },
     ]);
 
     const pdfBase64 = encodeBase64(bytes);

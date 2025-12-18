@@ -37,10 +37,9 @@ export default function CDSPanel() {
   const [formData, setFormData] = useState({
     rut: "",
     correo: "",
-    nombres: "Juan",
-    apellidoPaterno: "Perez",
-    apellidoMaterno: "Gonzalez",
-    numeroDocumento: "111111111",
+    extranjero: false,
+    numDocumento: "",
+    urlRetorno: "https://app.tupatrimonio.cl",
     codigoTransaccion: "",
     nombreDocumento: "Documento Prueba",
     documento: "",
@@ -160,28 +159,24 @@ export default function CDSPanel() {
                   <span>Enrolar Firmante</span>
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Crea un nuevo usuario en CDS. Requiere datos reales para validación ClaveÚnica.
+                  Registra un nuevo firmante en CDS. Se validará con ClaveÚnica.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClasses}>RUT</label>
-                  <input
-                    name="rut"
-                    value={formData.rut}
-                    onChange={handleChange}
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className={labelClasses}>Nro. Documento</label>
-                  <input
-                    name="numeroDocumento"
-                    value={formData.numeroDocumento}
-                    onChange={handleChange}
-                    className={inputClasses}
-                  />
-                </div>
+              <div>
+                <label className={labelClasses}>RUT</label>
+                <input
+                  name="rut"
+                  value={formData.rut}
+                  onChange={handleChange}
+                  placeholder="11.111.111-1"
+                  className={`${inputClasses} ${rutError ? 'border-destructive focus:ring-destructive/20 focus:border-destructive' : ''}`}
+                />
+                {rutError && (
+                  <p className="mt-1.5 text-sm text-destructive flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4" />
+                    {rutError}
+                  </p>
+                )}
               </div>
               <div>
                 <label className={labelClasses}>Email</label>
@@ -189,40 +184,30 @@ export default function CDSPanel() {
                   name="correo"
                   value={formData.correo}
                   onChange={handleChange}
+                  placeholder="firmante@email.com"
                   className={inputClasses}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClasses}>Nombres</label>
-                  <input
-                    name="nombres"
-                    value={formData.nombres}
-                    onChange={handleChange}
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label className={labelClasses}>Apellido Paterno</label>
-                  <input
-                    name="apellidoPaterno"
-                    value={formData.apellidoPaterno}
-                    onChange={handleChange}
-                    placeholder="Paterno"
-                    className={inputClasses}
-                  />
-                </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="extranjero"
+                  name="extranjero"
+                  checked={formData.extranjero || false}
+                  onChange={(e) => setFormData({...formData, extranjero: e.target.checked})}
+                  className="w-4 h-4 rounded border-input text-[var(--tp-brand)] focus:ring-[var(--tp-brand)]"
+                />
+                <label htmlFor="extranjero" className="text-sm text-foreground cursor-pointer">
+                  Es extranjero (sin RUT chileno válido)
+                </label>
               </div>
               <button
                 onClick={() => handleAction("enroll", {
                   rut: formData.rut,
-                  nombres: formData.nombres,
-                  apellidoPaterno: formData.apellidoPaterno,
-                  apellidoMaterno: formData.apellidoMaterno,
                   correo: formData.correo,
-                  numeroDocumento: formData.numeroDocumento
+                  extranjero: formData.extranjero || false
                 })}
-                disabled={loading}
+                disabled={loading || !!rutError}
                 className={brandButtonClasses}
               >
                 {loading ? "Enrolando..." : "Enrolar Firmante"}
@@ -374,34 +359,57 @@ export default function CDSPanel() {
                   Desbloquea certificados o segundo factor bloqueados.
                 </p>
               </div>
-              <div>
-                <label className={labelClasses}>RUT</label>
-                <input
-                  name="rut"
-                  value={formData.rut}
-                  onChange={handleChange}
-                  className={inputClasses}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClasses}>RUT</label>
+                  <input
+                    name="rut"
+                    value={formData.rut}
+                    onChange={handleChange}
+                    placeholder="11.111.111-1"
+                    className={inputClasses}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses}>N° Documento (Cédula)</label>
+                  <input
+                    name="numDocumento"
+                    value={formData.numDocumento}
+                    onChange={handleChange}
+                    placeholder="Número de cédula"
+                    className={inputClasses}
+                  />
+                </div>
               </div>
               <div>
-                <label className={labelClasses}>Email (requerido para 2FA)</label>
+                <label className={labelClasses}>URL de Retorno</label>
                 <input
-                  name="correo"
-                  value={formData.correo}
+                  name="urlRetorno"
+                  value={formData.urlRetorno}
                   onChange={handleChange}
+                  placeholder="https://app.tupatrimonio.cl"
                   className={inputClasses}
                 />
+                <p className="mt-1 text-xs text-muted-foreground">URL donde se redirige al usuario después del desbloqueo</p>
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleAction("unblock-certificate", { rut: formData.rut })}
+                  onClick={() => handleAction("unblock-certificate", { 
+                    rut: formData.rut, 
+                    numDocumento: formData.numDocumento,
+                    urlRetorno: formData.urlRetorno 
+                  })}
                   disabled={loading}
                   className={`flex-1 bg-destructive hover:bg-destructive/90 text-white py-2.5 px-4 rounded-lg font-medium transition-all duration-200 disabled:opacity-50`}
                 >
                   {loading ? "..." : "Desbloquear Certificado"}
                 </button>
                 <button
-                  onClick={() => handleAction("unblock-second-factor", { rut: formData.rut, correo: formData.correo })}
+                  onClick={() => handleAction("unblock-second-factor", { 
+                    rut: formData.rut, 
+                    numDocumento: formData.numDocumento,
+                    urlRetorno: formData.urlRetorno 
+                  })}
                   disabled={loading}
                   className={`flex-1 ${buttonClasses}`}
                 >

@@ -297,43 +297,32 @@ export function CountryAndUploadStep() {
       const documentId = newDoc.id as string
       actions.setDocumentId(documentId)
 
-      // 2) Subir archivo (prioridad: docs-originals, fallback: signing-documents)
+      // 2) Subir archivo a docs-originals
       const v1Path = `${state.orgId}/${documentId}/v1/original.pdf`
-      const legacyPath = `${state.orgId}/${documentId}/${documentId}_original.pdf`
 
-      let chosenBucket = 'docs-originals'
-      let chosenPath = v1Path
+      const { error: uploadError } = await supabase.storage.from('docs-originals').upload(v1Path, state.file!, {
+        contentType: 'application/pdf',
+        upsert: false,
+      })
 
-      const uploadTo = async (bucket: string, path: string) => {
-        const { error: uploadError } = await supabase.storage.from(bucket).upload(path, state.file!, {
-          contentType: 'application/pdf',
-          upsert: false,
-        })
-        if (uploadError) throw uploadError
+      if (uploadError) {
+        throw new Error(`Error al subir archivo: ${uploadError.message}`)
       }
 
-      try {
-        await uploadTo('docs-originals', v1Path)
-      } catch (e) {
-        chosenBucket = 'signing-documents'
-        chosenPath = legacyPath
-        await uploadTo('signing-documents', legacyPath)
-      }
-
-      actions.setUploadedFilePath(chosenPath)
+      actions.setUploadedFilePath(v1Path)
 
       // 3) Actualizar documento con referencia al archivo + metadata país
       const { error: updateError } = await supabase
         .from('signing_documents')
         .update({
-          original_file_path: chosenPath,
+          original_file_path: v1Path,
           original_file_name: state.file.name,
           original_file_size: state.file.size,
           original_file_type: state.file.type || 'application/pdf',
           requires_ai_review: opts.requiresAiReview,
           metadata: {
             country_code: state.countryCode,
-            originals_bucket: chosenBucket,
+            originals_bucket: 'docs-originals',
             originals_version: 1,
           },
           status: 'draft',
@@ -347,11 +336,12 @@ export function CountryAndUploadStep() {
         document_id: documentId,
         version_number: 1,
         version_type: 'original',
-        file_path: chosenPath,
+        file_path: v1Path,
         file_name: state.file.name,
         file_size: state.file.size,
         created_by: auth.user.id,
       })
+
 
       return { documentId, userId: auth.user.id }
     },

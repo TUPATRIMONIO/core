@@ -92,16 +92,24 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 2. Obtener archivo PDF desde Storage
-        const { data: fileData, error: fileError } = await supabase
-            .storage
-            .from("signing-documents")
-            .download(
-                signer.document.qr_file_path ||
-                    signer.document.original_file_path,
-            );
+        // 2. Obtener archivo PDF desde Storage (docs-originals o docs-signed si ya tiene firmas)
+        const filePath = signer.document.current_signed_file_path ||
+            signer.document.qr_file_path ||
+            signer.document.original_file_path;
 
-        if (fileError || !fileData) {
+        // Intentar primero en docs-originals, luego en docs-signed
+        let fileData: Blob | null = null;
+        for (const bucket of ["docs-originals", "docs-signed"]) {
+            const result = await supabase.storage.from(bucket).download(
+                filePath,
+            );
+            if (!result.error && result.data) {
+                fileData = result.data;
+                break;
+            }
+        }
+
+        if (!fileData) {
             return NextResponse.json(
                 { error: "No se pudo obtener el archivo del documento" },
                 { status: 500 },
@@ -113,39 +121,30 @@ export async function POST(request: NextRequest) {
         const base64Document = Buffer.from(arrayBuffer).toString("base64");
 
         // 3. Llamar a Edge Function para firmar
-        const edgeFunctionUrl =
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cds-signature`;
-
-        // URL de webhook para recibir notificación de CDS
-        const webhookUrl =
-            `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/signature-webhook`;
-
-        const response = await fetch(edgeFunctionUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization":
-                    `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({
-                operation: "sign-multiple",
-                organization_id: signer.document.organization_id,
-                rut: signer.rut,
-                claveFEA: clave_fea,
-                codigoSegundoFactor: codigo_segundo_factor,
-                documentos: [
-                    {
-                        nombre: signer.document.original_file_name,
-                        base64: base64Document,
+        const { data: result, error: invokeError } = await supabase.functions
+            .invoke(
+                "cds-signature",
+                {
+                    body: {
+                        operation: "sign-multiple",
+                        organization_id: signer.document.organization_id,
+                        rut: signer.rut,
+                        claveCertificado: clave_fea, // Mapeamos clave_fea a claveCertificado
+                        segundoFactor: codigo_segundo_factor, // Mapeamos codigo_segundo_factor a segundoFactor
+                        documento: base64Document,
+                        nombreDocumento: signer.document.original_file_name,
+                        qr: !!signer.document.qr_file_path,
+                        traeCoordenadas: signer.use_custom_coordinates,
+                        pag: signer.signature_page,
+                        coordenadaXInferiorIzquierda: signer.coord_x_lower_left,
+                        coordenadaYInferiorIzquierda: signer.coord_y_lower_left,
+                        coordenadaXSuperiorDerecha: signer.coord_x_upper_right,
+                        coordenadaYSuperiorDerecha: signer.coord_y_upper_right,
                     },
-                ],
-                urlNotificacion: webhookUrl,
-            }),
-        });
+                },
+            );
 
-        const result = await response.json();
-
-        if (!result.success || !result.data.success) {
+        if (invokeError || !result.success || !result.data.success) {
             // Manejar errores específicos de CDS
             const errorCode = result.data?.codigo;
             let errorMessage = result.data?.mensaje || result.error ||
@@ -208,7 +207,7 @@ export async function POST(request: NextRequest) {
 
             const { error: uploadError } = await supabase
                 .storage
-                .from("signing-documents")
+                .from("docs-signed")
                 .upload(signedPath, signedBuffer, {
                     contentType: "application/pdf",
                     upsert: false,

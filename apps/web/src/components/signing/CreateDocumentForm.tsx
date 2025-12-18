@@ -131,14 +131,11 @@ export function CreateDocumentForm({ basePath = '/dashboard/signing/documents' }
       }
       if (!newDoc) throw new Error('No se pudo crear el documento')
 
-      // 3. Subir archivo a Storage
-      // Path format: {orgId}/{docId}/{filename}
-      const fileExt = values.file.name.split('.').pop()
-      const fileName = `${newDoc.id}_original.${fileExt}` // Nombre seguro
-      const filePath = `${orgUser.organization_id}/${newDoc.id}/${fileName}`
+      // 3. Subir archivo a Storage (docs-originals)
+      const filePath = `${orgUser.organization_id}/${newDoc.id}/v1/original.pdf`
 
       const { error: uploadError } = await supabase.storage
-        .from('signing-documents')
+        .from('docs-originals')
         .upload(filePath, values.file)
 
       if (uploadError) throw new Error(`Error al subir archivo: ${uploadError.message}`)

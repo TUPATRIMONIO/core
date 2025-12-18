@@ -85,7 +85,30 @@ serve(async (req) => {
             // Check for Enrolment Notification (RUT + Fecha only, no transaction)
             if (rut && payload.fecha && !estado) {
                 console.log("Enrolment notification received for:", rut);
-                // We could update user status here if we tracked it separately
+
+                // Actualizar todos los firmantes con este RUT que estaban esperando enrolamiento
+                const { data: updatedSigners, error: updateError } =
+                    await supabaseClient
+                        .from("signing_signers")
+                        .update({
+                            status: "enrolled",
+                            fea_vigente: true,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq("rut", rut)
+                        .in("status", ["needs_enrollment", "pending"]);
+
+                if (updateError) {
+                    console.error(
+                        "Error updating signers status on enrolment:",
+                        updateError,
+                    );
+                } else {
+                    console.log(
+                        `Updated signers for RUT ${rut} to enrolled status`,
+                    );
+                }
+
                 return new Response("OK", {
                     status: 200,
                     headers: { ...corsHeaders, "Content-Type": "text/plain" },
@@ -223,7 +246,7 @@ serve(async (req) => {
 
                     const { error: uploadError } = await supabaseClient
                         .storage
-                        .from("signing-documents")
+                        .from("docs-signed")
                         .upload(signedPath, binaryData, {
                             contentType: "application/pdf",
                             upsert: false,

@@ -16,7 +16,8 @@ type Operation =
     | "sign-multiple"
     | "get-document"
     | "unblock-certificate"
-    | "unblock-second-factor";
+    | "unblock-second-factor"
+    | "simple-flow";
 
 interface CDSRequest {
     operation: Operation;
@@ -251,29 +252,25 @@ async function checkVigenciaFEA(config: CDSConfig, payload: any) {
 
 /**
  * Enrola un nuevo firmante en CDS
+ * Según documentación oficial, solo requiere: rut, correo, extranjero
  */
 async function enrollFirmante(config: CDSConfig, payload: any) {
     const {
         rut,
-        nombres,
-        apellidoPaterno,
-        apellidoMaterno,
         correo,
-        numeroDocumento,
-        nacionalidad = "CL",
-        claveCertificado, // Opcional: CDS puede generar una automáticamente
+        extranjero = false, // Por defecto chileno
+        enviaCorreo = true, // Por defecto enviar correo
+        urlRetorno,
     } = payload;
 
-    if (!rut || !nombres || !apellidoPaterno || !correo || !numeroDocumento) {
-        throw new Error(
-            "Campos requeridos: rut, nombres, apellidoPaterno, correo, numeroDocumento",
-        );
+    if (!rut || !correo) {
+        throw new Error("Campos requeridos: rut, correo");
     }
 
     const endpoint = `${config.base_url}${config.endpoints.enrolarFirmanteFEA}`;
 
-    // Estructura correcta según documentación de CDS
-    const requestBody: any = {
+    // Estructura según documentación oficial de CDS
+    const requestBody = {
         request: {
             encabezado: {
                 usuario: config.usuario,
@@ -281,32 +278,22 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
             },
             parametro: {
                 urlNotificacion: config.webhook_url ||
-                    "https://app.tupatrimonio.cl/api/webhooks/cds", // Valor desde BD, o fallback seguro
-                authorization: config.webhook_secret || "SharedSecret123", // Requerido por CDS
-                urlRetorno: "https://app.tupatrimonio.cl",
-                enviaCorreo: true,
+                    "https://app.tupatrimonio.cl/api/webhooks/cds",
+                authorization: config.webhook_secret || "SharedSecret123",
+                urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
+                enviaCorreo: enviaCorreo,
                 firmantes: [
                     {
                         rut: rut,
                         correo: correo,
-                        extranjero: nacionalidad !== "CL",
-                        nombres: nombres,
-                        apellidoPaterno: apellidoPaterno,
-                        apellidoMaterno: apellidoMaterno,
-                        numeroDocumento: numeroDocumento,
+                        extranjero: extranjero,
                     },
                 ],
             },
         },
     };
 
-    if (claveCertificado) {
-        // Asumiendo que va dentro del objeto del firmante si se provee
-        requestBody.request.parametro.firmantes[0].claveCertificado =
-            claveCertificado;
-    }
-
-    console.log("Sending to CDS:", endpoint);
+    console.log("Sending to CDS Enroll:", endpoint);
     console.log("Request body:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(endpoint, {
@@ -365,6 +352,7 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
         success: true,
         mensaje: data.comentarios || data.mensaje || "Enrolamiento exitoso",
         enrolled: true,
+        url: data.url, // URL retornado por CDS si enviaCorreo es false
         debug_data: data,
     };
 }
@@ -565,69 +553,134 @@ async function getDocument(config: CDSConfig, payload: any) {
 
 /**
  * Desbloquea certificado bloqueado
+ * Estructura basada en patrón CDS con request anidado
  */
 async function unblockCertificate(config: CDSConfig, payload: any) {
-    const { rut } = payload;
+    const { rut, numDocumento, urlRetorno } = payload;
     if (!rut) throw new Error("RUT es requerido");
 
     const endpoint =
         `${config.base_url}${config.endpoints.desbloqueoCertificado}`;
 
+    // Estructura según patrón CDS
+    const requestBody = {
+        request: {
+            encabezado: {
+                usuario: config.usuario,
+                clave: config.clave,
+            },
+            parametro: {
+                solicitante: {
+                    rut: rut,
+                    numDocumento: numDocumento || "",
+                    urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
+                },
+            },
+        },
+    };
+
+    console.log("Sending unblockCertificate to CDS:", endpoint);
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            usuario: config.usuario,
-            clave: config.clave,
-            rut,
-        }),
+        body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
+
+    console.log(
+        "CDS unblockCertificate Response:",
+        JSON.stringify(data, null, 2),
+    );
 
     if (!response.ok) {
         throw new Error(`Error CDS: ${data.mensaje || response.statusText}`);
     }
 
+    // CDS retorna estado OK/FAIL
+    if (data.estado === "FAIL") {
+        return {
+            success: false,
+            codigo: data.errorCode,
+            mensaje: data.comentarios,
+            debug_data: data,
+        };
+    }
+
     return {
-        success: data.codigo === "0",
-        codigo: data.codigo,
-        mensaje: data.mensaje,
+        success: true,
+        url: data.url,
+        mensaje: data.comentarios,
         debug_data: data,
     };
 }
 
 /**
  * Desbloquea segundo factor bloqueado
+ * Según documentación: requiere rut, numDocumento, urlRetorno
  */
 async function unblockSecondFactor(config: CDSConfig, payload: any) {
-    const { rut, correo } = payload;
-    if (!rut || !correo) throw new Error("RUT y correo son requeridos");
+    const { rut, numDocumento, urlRetorno } = payload;
+    if (!rut || !numDocumento) {
+        throw new Error("Campos requeridos: rut, numDocumento");
+    }
 
     const endpoint =
         `${config.base_url}${config.endpoints.desbloqueoSegundoFactor}`;
 
+    // Estructura según documentación oficial de CDS
+    const requestBody = {
+        request: {
+            encabezado: {
+                usuario: config.usuario,
+                clave: config.clave,
+            },
+            parametro: {
+                solicitante: {
+                    rut: rut,
+                    numDocumento: numDocumento,
+                    urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
+                },
+            },
+        },
+    };
+
+    console.log("Sending unblockSecondFactor to CDS:", endpoint);
+    console.log("Request body:", JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            usuario: config.usuario,
-            clave: config.clave,
-            rut,
-            correo,
-        }),
+        body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
+
+    console.log(
+        "CDS unblockSecondFactor Response:",
+        JSON.stringify(data, null, 2),
+    );
 
     if (!response.ok) {
         throw new Error(`Error CDS: ${data.mensaje || response.statusText}`);
     }
 
+    // CDS retorna estado OK/FAIL y url para desbloqueo
+    if (data.estado === "FAIL") {
+        return {
+            success: false,
+            codigo: data.errorCode,
+            mensaje: data.comentarios,
+            debug_data: data,
+        };
+    }
+
     return {
-        success: data.codigo === "0",
-        codigo: data.codigo,
-        mensaje: data.mensaje,
+        success: true,
+        url: data.url, // URL donde el usuario debe ir para desbloquear
+        mensaje: data.comentarios,
         debug_data: data,
     };
 }
