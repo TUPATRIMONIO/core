@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import { Loader2, ExternalLink, RefreshCw, FileText } from "lucide-react";
 
+// #region agent log
+const debugLog = (location: string, message: string, data: any, hypothesisId: string) => {
+  fetch('http://127.0.0.1:7242/ingest/bdc2afec-cbea-4620-96e6-e667e032dc96',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location,message,data,timestamp:Date.now(),sessionId:'debug-session',hypothesisId})}).catch(()=>{});
+};
+// #endregion
+
 interface PDFViewerProps {
   url: string;
   className?: string;
@@ -17,18 +23,33 @@ export default function PDFViewer({ url, className = "" }: PDFViewerProps) {
   const [hasError, setHasError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
+  // #region agent log
+  useEffect(() => {
+    debugLog('PDFViewer:mount','PDFViewer mounted',{url:url.substring(0,50)+'...',isLoading,hasError},'A,B');
+  }, []);
+  // #endregion
+
   // Reset states when URL changes
   useEffect(() => {
     setIsLoading(true);
     setHasError(false);
+    // #region agent log
+    debugLog('PDFViewer:urlChange','URL changed, resetting states',{url:url.substring(0,50)+'...',retryCount},'A,B');
+    // #endregion
   }, [url, retryCount]);
 
   const handleLoad = () => {
+    // #region agent log
+    debugLog('PDFViewer:onLoad','Embed onLoad fired',{url:url.substring(0,50)+'...'},'B');
+    // #endregion
     setIsLoading(false);
     setHasError(false);
   };
 
   const handleError = () => {
+    // #region agent log
+    debugLog('PDFViewer:onError','Embed onError fired',{url:url.substring(0,50)+'...'},'B');
+    // #endregion
     setIsLoading(false);
     setHasError(true);
   };

@@ -1,6 +1,14 @@
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { type NextRequest, NextResponse } from "next/server";
 
+// #region agent log
+const debugLog = async (location: string, message: string, data: any, hypothesisId: string) => {
+  try {
+    await fetch('http://127.0.0.1:7242/ingest/bdc2afec-cbea-4620-96e6-e667e032dc96',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location,message,data,timestamp:Date.now(),sessionId:'debug-session',hypothesisId})});
+  } catch {}
+};
+// #endregion
+
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -8,6 +16,10 @@ export async function GET(
     const { id: documentId } = await params;
     const searchParams = request.nextUrl.searchParams;
     const token = searchParams.get("token");
+
+    // #region agent log
+    await debugLog('preview:entry','Preview API called',{documentId,hasToken:!!token,tokenPrefix:token?.substring(0,8)},'A,C');
+    // #endregion
 
     try {
         let hasAccess = false;
@@ -109,6 +121,10 @@ export async function GET(
             );
             return new NextResponse("Error downloading file", { status: 500 });
         }
+
+        // #region agent log
+        await debugLog('preview:success','PDF downloaded successfully',{documentId,fileSize:fileData.size,filePath},'A,C');
+        // #endregion
 
         // 5. Return File Blob
         const headers = new Headers();

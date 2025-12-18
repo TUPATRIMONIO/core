@@ -47,6 +47,8 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [vigenciaData, setVigenciaData] = useState<any>(null);
+  // Cache buster para evitar que el navegador sirva PDFs cacheados corruptos
+  const [cacheBuster] = useState(() => Date.now());
 
   // 1. Verificar vigencia al cargar
   useEffect(() => {
@@ -425,7 +427,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <PDFViewer
-                    url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}`}
+                    url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}&_t=${cacheBuster}`}
                     className="h-[550px]"
                   />
                 </div>
