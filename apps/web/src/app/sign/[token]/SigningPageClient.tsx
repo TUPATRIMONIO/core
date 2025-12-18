@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { 
   ShieldCheck, 
   AlertCircle, 
@@ -13,6 +14,16 @@ import {
   Unlock,
   AlertTriangle
 } from "lucide-react";
+
+// Dynamic import to avoid SSR issues with pdf.js
+const PDFViewer = dynamic(() => import("@/components/shared/PDFViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-[500px] bg-gray-100 rounded-lg">
+      <Loader2 className="w-8 h-8 text-[#800039] animate-spin" />
+    </div>
+  ),
+});
 
 interface SigningPageClientProps {
   signer: any;
@@ -297,6 +308,15 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#800039] focus:border-transparent text-gray-900 bg-white"
                   />
                   <p className="mt-1 text-xs text-gray-500">Es la clave que configuró al enrolarse en CDS.</p>
+                  <button
+                    type="button"
+                    onClick={() => handleUnblock("certificate")}
+                    disabled={isLoading}
+                    className="mt-2 text-sm text-[#800039] hover:text-[#a00048] hover:underline flex items-center"
+                  >
+                    <Unlock className="w-4 h-4 mr-1" />
+                    ¿Olvidó su contraseña?
+                  </button>
                 </div>
                 <button
                   onClick={handleRequest2FA}
@@ -404,10 +424,9 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                   <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">Modo Lectura</span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                  <iframe
-                    src={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}`}
-                    className="w-full h-[600px] bg-gray-100"
-                    title="Document Preview"
+                  <PDFViewer
+                    url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}`}
+                    className="h-[550px]"
                   />
                 </div>
               </div>

@@ -84,11 +84,9 @@ export async function GET(
         }
 
         // 4. Download file from Storage
-        // Determine bucket from metadata or try both
-        const metadataBucket = document.metadata?.originals_bucket;
-        const bucketsToTry = metadataBucket
-            ? [metadataBucket]
-            : ["docs-originals", "docs-signed"];
+        // Always try docs-signed first as it contains the current state of the document
+        // throughout the signing process (from initial submission to fully signed)
+        const bucketsToTry = ["docs-signed", "docs-originals"];
 
         let fileData: Blob | null = null;
         let downloadError: Error | null = null;
@@ -116,6 +114,11 @@ export async function GET(
         const headers = new Headers();
         headers.set("Content-Type", "application/pdf");
         headers.set("Content-Disposition", "inline"); // Display in browser/iframe
+        headers.set("Content-Length", fileData.size.toString());
+        headers.set("Accept-Ranges", "bytes");
+        headers.set("Cache-Control", "private, max-age=3600");
+        // Allow embedding in iframes from same origin
+        headers.set("X-Frame-Options", "SAMEORIGIN");
 
         return new NextResponse(fileData, {
             status: 200,

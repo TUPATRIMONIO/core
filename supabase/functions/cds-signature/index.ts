@@ -556,13 +556,13 @@ async function getDocument(config: CDSConfig, payload: any) {
  * Estructura basada en patrón CDS con request anidado
  */
 async function unblockCertificate(config: CDSConfig, payload: any) {
-    const { rut, numDocumento, urlRetorno } = payload;
+    const { rut, numDocumento, urlRetorno, enviarMail = true } = payload;
     if (!rut) throw new Error("RUT es requerido");
 
     const endpoint =
         `${config.base_url}${config.endpoints.desbloqueoCertificado}`;
 
-    // Estructura según patrón CDS
+    // Estructura según documentación oficial CDS para desbloqueoCertificado
     const requestBody = {
         request: {
             encabezado: {
@@ -574,6 +574,7 @@ async function unblockCertificate(config: CDSConfig, payload: any) {
                     rut: rut,
                     numDocumento: numDocumento || "",
                     urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
+                    enviarMail: enviarMail, // true = envía correo, false = retorna URL
                 },
             },
         },

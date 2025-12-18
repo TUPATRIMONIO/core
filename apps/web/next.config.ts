@@ -4,7 +4,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   // Transpilar packages del monorepo
-  transpilePackages: ['@tupatrimonio/assets'],
+  transpilePackages: ["@tupatrimonio/assets"],
   eslint: {
     ignoreDuringBuilds: true, // Temporal para deploy rápido
   },
@@ -16,9 +16,12 @@ const nextConfig: NextConfig = {
     // Permitir importar archivos desde el package assets
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@tupatrimonio/assets/public': path.resolve(__dirname, '../../packages/assets/public'),
+      "@tupatrimonio/assets/public": path.resolve(
+        __dirname,
+        "../../packages/assets/public",
+      ),
     };
-    
+
     // Suprimir warnings de handlebars sobre require.extensions
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
@@ -27,142 +30,156 @@ const nextConfig: NextConfig = {
         message: /require\.extensions/,
       },
     ];
-    
+
     // Configurar PDFKit para servidor (copiar archivos de fuentes)
     if (isServer) {
       config.externals = config.externals || [];
       // No externalizar pdfkit en el servidor para que funcione correctamente
     }
-    
+
     return config;
   },
   images: {
-    domains: ['localhost'], // Para imágenes locales
+    domains: ["localhost"], // Para imágenes locales
   },
   // Headers de seguridad y PWA
   async headers() {
     return [
-      // Headers de seguridad globales
+      // Headers for signing preview API - Allow embedding
       {
-        source: '/:path*',
+        source: "/api/signing/preview/:path*",
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
+      // Headers de seguridad globales
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
         ],
       },
       // Headers para dashboard (privado)
       {
-        source: '/dashboard/:path*',
+        source: "/dashboard/:path*",
         headers: [
           {
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow',
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow",
           },
           {
-            key: 'Cache-Control',
-            value: 'private, no-cache, no-store',
+            key: "Cache-Control",
+            value: "private, no-cache, no-store",
           },
         ],
       },
       // Headers para Service Worker (PWA)
       {
-        source: '/sw.js',
+        source: "/sw.js",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
           },
           {
-            key: 'Service-Worker-Allowed',
-            value: '/',
+            key: "Service-Worker-Allowed",
+            value: "/",
           },
           {
-            key: 'Content-Type',
-            value: 'application/javascript',
+            key: "Content-Type",
+            value: "application/javascript",
           },
         ],
       },
       {
-        source: '/sw-update.js',
+        source: "/sw-update.js",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate',
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
           },
           {
-            key: 'Content-Type',
-            value: 'application/javascript',
+            key: "Content-Type",
+            value: "application/javascript",
           },
         ],
       },
       // Headers para Manifest (PWA)
       {
-        source: '/manifest.json',
+        source: "/manifest.json",
         headers: [
           {
-            key: 'Content-Type',
-            value: 'application/manifest+json',
+            key: "Content-Type",
+            value: "application/manifest+json",
           },
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600',
+            key: "Cache-Control",
+            value: "public, max-age=3600",
           },
         ],
       },
       // Headers para Version (PWA - Update Notification)
       {
-        source: '/version.json',
+        source: "/version.json",
         headers: [
           {
-            key: 'Content-Type',
-            value: 'application/json',
+            key: "Content-Type",
+            value: "application/json",
           },
           {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
           },
         ],
       },
       // Headers para íconos PWA (cache largo)
       {
-        source: '/icons/:path*',
+        source: "/icons/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },
       // Headers para páginas de autenticación (no cache)
       {
-        source: '/login/:path*',
+        source: "/login/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
           },
         ],
       },
       {
-        source: '/auth/:path*',
+        source: "/auth/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
+            key: "Cache-Control",
+            value: "no-store, max-age=0",
           },
         ],
       },
@@ -172,13 +189,13 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: '/signin',
-        destination: '/login',
+        source: "/signin",
+        destination: "/login",
         permanent: true,
       },
       {
-        source: '/signup',
-        destination: '/login',
+        source: "/signup",
+        destination: "/login",
         permanent: true,
       },
     ];
@@ -186,14 +203,16 @@ const nextConfig: NextConfig = {
   generateBuildId: async () => {
     // Generar un ID único basado en timestamp
     const timestamp = Date.now();
-    const hash = createHash('sha256')
+    const hash = createHash("sha256")
       .update(timestamp.toString())
-      .digest('hex')
+      .digest("hex")
       .substring(0, 12);
-    
-    console.log('🔧 [Web App] Generando Build ID:', hash);
-    console.log('📅 [Web App] Timestamp:', timestamp);
-    console.log('✨ [Web App] Version info ahora se sirve via API Route /version.json');
+
+    console.log("🔧 [Web App] Generando Build ID:", hash);
+    console.log("📅 [Web App] Timestamp:", timestamp);
+    console.log(
+      "✨ [Web App] Version info ahora se sirve via API Route /version.json",
+    );
 
     return hash;
   },
