@@ -9,13 +9,24 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { signing_token, type } = body;
+        const { signing_token, type, numDocumento } = body;
 
         if (!signing_token || !type || !["certificate", "2fa"].includes(type)) {
             return NextResponse.json(
                 {
                     error:
                         "signing_token y type ('certificate' o '2fa') son requeridos",
+                },
+                { status: 400 },
+            );
+        }
+
+        // numDocumento es requerido por CDS para desbloqueo
+        if (!numDocumento || numDocumento.trim() === "") {
+            return NextResponse.json(
+                {
+                    error:
+                        "El número de serie de la cédula (numDocumento) es requerido para el desbloqueo",
                 },
                 { status: 400 },
             );
@@ -59,6 +70,7 @@ export async function POST(request: NextRequest) {
                         operation,
                         organization_id: signer.document.organization_id,
                         rut: signer.rut,
+                        numDocumento: numDocumento.trim(),
                         urlRetorno,
                     },
                 },
@@ -74,6 +86,22 @@ export async function POST(request: NextRequest) {
                     success: false,
                     error: result?.error || result?.data?.mensaje ||
                         `Error al solicitar desbloqueo de ${type}`,
+                },
+                { status: 400 },
+            );
+        }
+
+        // Verificar si la respuesta de CDS indica un error (success: false en data)
+        if (result.data && result.data.success === false) {
+            console.error(
+                `CDS retornó error para ${type}:`,
+                result.data.mensaje || result.data.codigo,
+            );
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: result.data.mensaje ||
+                        `Error de CDS al desbloquear ${type}`,
                 },
                 { status: 400 },
             );

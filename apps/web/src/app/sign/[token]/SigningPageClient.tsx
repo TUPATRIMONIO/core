@@ -49,6 +49,12 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const [vigenciaData, setVigenciaData] = useState<any>(null);
   // Cache buster para evitar que el navegador sirva PDFs cacheados corruptos
   const [cacheBuster] = useState(() => Date.now());
+  // Modal para solicitar numDocumento al desbloquear certificado
+  const [showUnblockModal, setShowUnblockModal] = useState(false);
+  const [numDocumento, setNumDocumento] = useState("");
+  const [unblockType, setUnblockType] = useState<"certificate" | "2fa">("certificate");
+  // Resultado del desbloqueo (éxito o error) - para mostrar en modal estilizado
+  const [unblockResult, setUnblockResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // 1. Verificar vigencia al cargar
   useEffect(() => {
@@ -134,25 +140,54 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     }
   };
 
-  const handleUnblock = async (type: "certificate" | "2fa") => {
+  // Abre el modal para solicitar numDocumento antes de desbloquear
+  const openUnblockModal = (type: "certificate" | "2fa") => {
+    setUnblockType(type);
+    setNumDocumento("");
+    setUnblockResult(null);
+    setShowUnblockModal(true);
+  };
+
+  const handleUnblock = async () => {
+    if (!numDocumento.trim()) {
+      setUnblockResult({ type: "error", message: "Debe ingresar el número de serie de su cédula de identidad" });
+      return;
+    }
+
     setIsLoading(true);
-    setError("");
+    setUnblockResult(null);
     try {
       const response = await fetch("/api/signing/unblock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signing_token: signer.signing_token, type })
+        body: JSON.stringify({ 
+          signing_token: signer.signing_token, 
+          type: unblockType,
+          numDocumento: numDocumento.trim()
+        })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al solicitar desbloqueo");
+      
+      if (!response.ok) {
+        setUnblockResult({ type: "error", message: data.error || "Error al solicitar desbloqueo" });
+        return;
+      }
 
       if (data.url) {
+        // Abrir URL de desbloqueo en nueva pestaña
         window.open(data.url, "_blank");
+        setUnblockResult({ 
+          type: "success", 
+          message: "Se ha abierto una nueva pestaña para completar el proceso de desbloqueo. Siga las instrucciones en esa página." 
+        });
       } else {
-        alert(data.message || "Proceso de desbloqueo iniciado. Revise su correo.");
+        setUnblockResult({ 
+          type: "success", 
+          message: data.message || "Se ha enviado un correo electrónico con instrucciones para desbloquear su certificado. Revise su bandeja de entrada." 
+        });
       }
     } catch (err: any) {
-      setError(err.message);
+      setUnblockResult({ type: "error", message: err.message || "Error inesperado al solicitar desbloqueo" });
     } finally {
       setIsLoading(false);
     }
@@ -202,8 +237,8 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   // --- Render Helpers ---
 
   const renderHeader = () => (
-    <div className="bg-gradient-to-r from-[#800039] to-[#a00048] p-8 text-white">
-      <h1 className="text-3xl font-bold mb-2">Firmar Documento</h1>
+    <div className="bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] p-8 text-white">
+      <h1 className="text-3xl font-bold mb-2 text-white">Firmar Documento</h1>
       <p className="text-white/90">{signer.document.title}</p>
     </div>
   );
@@ -213,31 +248,33 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       case "verifying":
         return (
           <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="w-12 h-12 text-[#800039] animate-spin mb-4" />
-            <p className="text-gray-600 font-medium">Verificando su estado de firma avanzada...</p>
+            <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
+            <p className="text-muted-foreground font-medium">Verificando su estado de firma avanzada...</p>
           </div>
         );
 
       case "needs_enrollment":
         return (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-            <div className="flex items-start">
-              <ShieldCheck className="w-6 h-6 text-blue-600 mr-4 mt-1" />
+          <div className="bg-[var(--tp-info)]/10 dark:bg-[var(--tp-info)]/20 border border-[var(--tp-info)]/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[var(--tp-info)]/20 flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[var(--tp-info)]" />
+              </div>
               <div>
-                <h3 className="text-lg font-bold text-blue-800 mb-2">Enrolamiento Requerido</h3>
-                <p className="text-blue-700 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-2">Enrolamiento Requerido</h3>
+                <p className="text-muted-foreground mb-4">
                   Usted no cuenta con una Firma Electrónica Avanzada (FEA) vigente en el sistema de CDS. 
                   Para firmar este documento, primero debe enrolarse.
                 </p>
                 <button
                   onClick={handleEnroll}
                   disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center transition-colors disabled:opacity-50"
+                  className="bg-[var(--tp-info)] hover:bg-[var(--tp-info)]/90 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center transition-colors disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />}
                   Iniciar Enrolamiento en CDS
                 </button>
-                <p className="mt-4 text-sm text-blue-600">
+                <p className="mt-4 text-sm text-muted-foreground">
                   * CDS le enviará un correo electrónico para completar el proceso. Una vez listo, regrese aquí para firmar.
                 </p>
               </div>
@@ -247,18 +284,20 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       case "certificate_blocked":
         return (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
-            <div className="flex items-start">
-              <AlertTriangle className="w-6 h-6 text-red-600 mr-4 mt-1" />
+          <div className="bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[var(--tp-error)]/20 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-[var(--tp-error)]" />
+              </div>
               <div>
-                <h3 className="text-lg font-bold text-red-800 mb-2">Certificado Bloqueado</h3>
-                <p className="text-red-700 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-2">Certificado Bloqueado</h3>
+                <p className="text-muted-foreground mb-4">
                   Su certificado ha sido bloqueado por demasiados intentos fallidos con su clave.
                 </p>
                 <button
-                  onClick={() => handleUnblock("certificate")}
+                  onClick={() => openUnblockModal("certificate")}
                   disabled={isLoading}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center transition-colors disabled:opacity-50"
+                  className="bg-[var(--tp-error)] hover:bg-[var(--tp-error)]/90 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center transition-colors disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Unlock className="w-4 h-4 mr-2" />}
                   Recuperar Contraseña de Certificado
@@ -270,18 +309,20 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       case "sf_blocked":
         return (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-8">
-            <div className="flex items-start">
-              <AlertCircle className="w-6 h-6 text-orange-600 mr-4 mt-1" />
+          <div className="bg-[var(--tp-warning)]/10 dark:bg-[var(--tp-warning)]/20 border border-[var(--tp-warning)]/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[var(--tp-warning)]/20 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-[var(--tp-warning)]" />
+              </div>
               <div>
-                <h3 className="text-lg font-bold text-orange-800 mb-2">Segundo Factor Bloqueado</h3>
-                <p className="text-orange-700 mb-4">
+                <h3 className="text-lg font-semibold text-foreground mb-2">Segundo Factor Bloqueado</h3>
+                <p className="text-muted-foreground mb-4">
                   Su sistema de segundo factor (SMS) ha sido bloqueado por intentos fallidos.
                 </p>
                 <button
-                  onClick={() => handleUnblock("2fa")}
+                  onClick={() => openUnblockModal("2fa")}
                   disabled={isLoading}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center transition-colors disabled:opacity-50"
+                  className="bg-[var(--tp-warning)] hover:bg-[var(--tp-warning)]/90 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center transition-colors disabled:opacity-50"
                 >
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Unlock className="w-4 h-4 mr-2" />}
                   Desbloquear Segundo Factor
@@ -294,27 +335,31 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       case "ready_for_2fa":
         return (
           <div className="space-y-6">
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <Key className="w-5 h-5 mr-2 text-[#800039]" />
-                Autentique su Certificado
-              </h3>
+            <div className="bg-secondary dark:bg-secondary/50 border border-border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-brand-10)] dark:bg-[var(--tp-brand)]/20 flex items-center justify-center">
+                  <Key className="w-5 h-5 text-[var(--tp-brand)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Autentique su Certificado
+                </h3>
+              </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Clave de su Certificado FEA</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Clave de su Certificado FEA</label>
                   <input
                     type="password"
                     value={claveCertificado}
                     onChange={(e) => setClaveCertificado(e.target.value)}
                     placeholder="Ingrese su clave"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#800039] focus:border-transparent text-gray-900 bg-white"
+                    className="w-full px-4 py-3 border border-input bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
                   />
-                  <p className="mt-1 text-xs text-gray-500">Es la clave que configuró al enrolarse en CDS.</p>
+                  <p className="mt-2 text-xs text-muted-foreground">Es la clave que configuró al enrolarse en CDS.</p>
                   <button
                     type="button"
-                    onClick={() => handleUnblock("certificate")}
+                    onClick={() => openUnblockModal("certificate")}
                     disabled={isLoading}
-                    className="mt-2 text-sm text-[#800039] hover:text-[#a00048] hover:underline flex items-center"
+                    className="mt-3 text-sm text-[var(--tp-brand)] hover:text-[var(--tp-brand-light)] hover:underline flex items-center transition-colors"
                   >
                     <Unlock className="w-4 h-4 mr-1" />
                     ¿Olvidó su contraseña?
@@ -323,7 +368,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                 <button
                   onClick={handleRequest2FA}
                   disabled={isLoading || !claveCertificado}
-                  className="w-full bg-[#800039] hover:bg-[#a00048] text-white font-bold py-3 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                  className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <MessageSquare className="w-5 h-5 mr-2" />}
                   Solicitar Código por SMS
@@ -336,34 +381,38 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       case "waiting_code":
         return (
           <div className="space-y-6">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-green-800 mb-4 flex items-center">
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Validar Segundo Factor
-              </h3>
+            <div className="bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-success)]/20 flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-[var(--tp-success)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Validar Segundo Factor
+                </h3>
+              </div>
               <div className="space-y-4">
-                <p className="text-green-700 text-sm">Se ha enviado un código a su celular registrado por SMS.</p>
+                <p className="text-[var(--tp-success)] text-sm">Se ha enviado un código a su celular registrado por SMS.</p>
                 <div>
-                  <label className="block text-sm font-medium text-green-800 mb-1">Código recibido por SMS</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Código recibido por SMS</label>
                   <input
                     type="text"
                     value={codigoSegundoFactor}
                     onChange={(e) => setCodigoSegundoFactor(e.target.value)}
                     placeholder="Ingrese el código de 6 dígitos"
-                    className="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 bg-white"
+                    className="w-full px-4 py-3 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-success)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
                   />
                 </div>
                 <button
                   onClick={handleSign}
                   disabled={isLoading || !codigoSegundoFactor}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                  className="w-full bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
                   Finalizar y Firmar Documento
                 </button>
                 <button 
                   onClick={() => setStep("ready_for_2fa")}
-                  className="w-full text-green-700 text-sm hover:underline"
+                  className="w-full text-muted-foreground text-sm hover:text-foreground hover:underline transition-colors"
                 >
                   Volver a ingresar clave
                 </button>
@@ -375,24 +424,26 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       case "success":
         return (
           <div className="text-center py-12">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-12 h-12 text-green-600" />
+            <div className="w-20 h-20 bg-[var(--tp-success)]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-12 h-12 text-[var(--tp-success)]" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Documento Firmado Exitosamente!</h2>
-            <p className="text-gray-600 italic">Su firma electrónica ha sido aplicada legalmente al documento.</p>
-            <p className="mt-8 text-sm text-gray-500 animate-pulse">Redirigiendo en unos segundos...</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">¡Documento Firmado Exitosamente!</h2>
+            <p className="text-muted-foreground italic">Su firma electrónica ha sido aplicada legalmente al documento.</p>
+            <p className="mt-8 text-sm text-muted-foreground animate-pulse">Redirigiendo en unos segundos...</p>
           </div>
         );
 
       case "error":
         return (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-red-800 mb-2">Error</h3>
-            <p className="text-red-700 mb-6">{error}</p>
+          <div className="bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30 rounded-xl p-6 text-center">
+            <div className="w-12 h-12 bg-[var(--tp-error)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-6 h-6 text-[var(--tp-error)]" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Error</h3>
+            <p className="text-muted-foreground mb-6">{error}</p>
             <button
               onClick={checkVigencia}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-6 py-2.5 bg-[var(--tp-error)] hover:bg-[var(--tp-error)]/90 text-white rounded-xl font-semibold transition-colors"
             >
               Reintentar verificación
             </button>
@@ -404,17 +455,146 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     }
   };
 
+  // Modal para solicitar Número de Serie de Cédula y mostrar resultados
+  const renderUnblockModal = () => (
+    showUnblockModal && (
+      <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-card dark:bg-card rounded-2xl max-w-md w-full p-6 shadow-[var(--tp-shadow-2xl)] border border-border">
+          {/* Resultado de éxito o error */}
+          {unblockResult ? (
+            <>
+              {/* Header con icono */}
+              <div className={`flex items-center gap-3 mb-4 ${
+                unblockResult.type === "success" 
+                  ? "text-[var(--tp-success)]" 
+                  : "text-[var(--tp-error)]"
+              }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  unblockResult.type === "success"
+                    ? "bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/20"
+                    : "bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/20"
+                }`}>
+                  {unblockResult.type === "success" ? (
+                    <CheckCircle2 className="w-5 h-5" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5" />
+                  )}
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {unblockResult.type === "success" ? "Proceso Iniciado" : "Error en el Proceso"}
+                </h3>
+              </div>
+              
+              {/* Mensaje */}
+              <div className={`p-4 rounded-xl mb-5 ${
+                unblockResult.type === "success" 
+                  ? "bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30" 
+                  : "bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30"
+              }`}>
+                <p className={`text-sm leading-relaxed ${
+                  unblockResult.type === "success" 
+                    ? "text-[var(--tp-success)] dark:text-[var(--tp-success)]" 
+                    : "text-[var(--tp-error)] dark:text-[var(--tp-error)]"
+                }`}>
+                  {unblockResult.message}
+                </p>
+              </div>
+              
+              {/* Acciones */}
+              <div className="flex gap-3">
+                {unblockResult.type === "error" && (
+                  <button
+                    onClick={() => setUnblockResult(null)}
+                    className="flex-1 px-4 py-2.5 bg-secondary hover:bg-secondary/80 rounded-xl text-secondary-foreground font-medium transition-colors"
+                  >
+                    Reintentar
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setShowUnblockModal(false);
+                    setUnblockResult(null);
+                  }}
+                  className={`flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors ${
+                    unblockResult.type === "success"
+                      ? "bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white"
+                      : "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
+                  }`}
+                >
+                  {unblockResult.type === "success" ? "Entendido" : "Cerrar"}
+                </button>
+              </div>
+            </>
+          ) : (
+            /* Formulario para ingresar número de serie */
+            <>
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-brand-10)] dark:bg-[var(--tp-brand)]/20 flex items-center justify-center">
+                  <Key className="w-5 h-5 text-[var(--tp-brand)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {unblockType === "certificate" ? "Recuperar Contraseña" : "Desbloquear Segundo Factor"}
+                </h3>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Para continuar, ingrese el <strong className="text-foreground">número de serie</strong> de su cédula de identidad.
+                Este número se encuentra en la parte frontal de su cédula.
+              </p>
+              
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Número de Serie de Cédula
+                </label>
+                <input
+                  type="text"
+                  value={numDocumento}
+                  onChange={(e) => setNumDocumento(e.target.value)}
+                  placeholder="Ej: 123456789"
+                  className="w-full px-4 py-3 border border-input bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
+                  autoFocus
+                />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  El número de serie aparece en su cédula junto a la foto.
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowUnblockModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-border rounded-xl text-foreground hover:bg-secondary transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleUnblock}
+                  disabled={!numDocumento.trim() || isLoading}
+                  className="flex-1 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white px-4 py-2.5 rounded-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Continuar"}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    )
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <>
+      {renderUnblockModal()}
+      <div className="min-h-screen bg-background py-12">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+        <div className="bg-card shadow-[var(--tp-shadow-xl)] rounded-2xl overflow-hidden border border-border">
           {renderHeader()}
 
           <div className="p-8">
             {error && step !== "error" && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+              <div className="mb-6 p-4 bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30 rounded-xl flex items-center text-[var(--tp-error)]">
                 <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-                <p>{error}</p>
+                <p className="text-sm">{error}</p>
               </div>
             )}
 
@@ -422,10 +602,10 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             {step !== "verifying" && step !== "success" && (
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Vista previa del documento</h2>
-                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">Modo Lectura</span>
+                  <h2 className="text-xl font-bold text-foreground">Vista previa del documento</h2>
+                  <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded-lg">Modo Lectura</span>
                 </div>
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="border border-border rounded-xl overflow-hidden shadow-[var(--tp-shadow-md)]">
                   <PDFViewer
                     url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}&_t=${cacheBuster}`}
                     className="h-[550px]"
@@ -435,14 +615,14 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             )}
 
             {/* Dynamic Status Section */}
-            <div className="mt-8 border-t border-gray-100 pt-8">
+            <div className="mt-8 border-t border-border pt-8">
               {renderStatus()}
             </div>
             
             {/* Legal Footer */}
             {step !== "success" && step !== "verifying" && (
-              <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-xl">
-                <p className="text-xs text-amber-800 flex items-start">
+              <div className="mt-8 p-4 bg-[var(--tp-warning)]/10 border border-[var(--tp-warning)]/20 rounded-xl">
+                <p className="text-xs text-[var(--tp-warning)] dark:text-amber-400 flex items-start">
                   <ShieldCheck className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                   <span>
                     <strong>Información Legal:</strong> Al proceder con la firma, usted acepta que este proceso cumple con la Ley 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación de dicha firma. La Firma Electrónica Avanzada tiene la misma validez legal que su firma manuscrita.
@@ -502,5 +682,6 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
         )}
       </div>
     </div>
+    </>
   );
 }
