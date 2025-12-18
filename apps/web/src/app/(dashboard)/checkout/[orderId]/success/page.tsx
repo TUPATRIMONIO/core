@@ -11,7 +11,7 @@ import { addCredits } from '@/lib/credits/core';
 import { handleTransbankWebhook } from '@/lib/transbank/webhooks';
 import { stripe } from '@/lib/stripe/client';
 import { verifyPaymentForOrder, getPaymentById } from '@/lib/payments/verification';
-import InvoiceButton from '@/components/checkout/InvoiceButton';
+
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -664,13 +664,6 @@ async function OrderSuccessContent({
       }
     }
 
-    // Obtener documento de facturación si existe
-    const { data: invoiceDocument } = await supabase
-      .from('invoicing_documents')
-      .select('id, document_number, document_type, pdf_url')
-      .eq('order_id', orderId)
-      .maybeSingle();
-    
     return (
       <Card>
         <CardHeader className="text-center">
@@ -712,17 +705,6 @@ async function OrderSuccessContent({
               </span>
             </div>
           </div>
-          
-          {/* Botón de documento con polling automático - solo para órdenes con pago */}
-          {!isZeroAmountOrder && (
-            <div className="flex flex-col gap-3">
-              <InvoiceButton 
-                orderId={orderId}
-                initialPdfUrl={invoiceDocument?.pdf_url}
-                initialDocumentType={invoiceDocument?.document_type}
-              />
-            </div>
-          )}
           
           <div className="flex flex-col sm:flex-row gap-3">
             <Button asChild className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
