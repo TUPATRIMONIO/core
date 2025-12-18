@@ -12,7 +12,9 @@ import {
   MessageSquare, 
   ExternalLink,
   Unlock,
-  AlertTriangle
+  AlertTriangle,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 // Dynamic import to avoid SSR issues with pdf.js
@@ -55,6 +57,12 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const [unblockType, setUnblockType] = useState<"certificate" | "2fa">("certificate");
   // Resultado del desbloqueo (éxito o error) - para mostrar en modal estilizado
   const [unblockResult, setUnblockResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  // Toggle para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
+  // Toggle para mostrar/ocultar código de segundo factor
+  const [showCode, setShowCode] = useState(false);
+  // Modal de error al firmar (segundo factor incorrecto)
+  const [signError, setSignError] = useState<string | null>(null);
 
   // 1. Verificar vigencia al cargar
   useEffect(() => {
@@ -195,12 +203,12 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
   const handleSign = async () => {
     if (!claveCertificado || !codigoSegundoFactor) {
-      setError("Clave de certificado y código SMS son requeridos");
+      setSignError("Clave de certificado y código SMS son requeridos");
       return;
     }
 
     setIsLoading(true);
-    setError("");
+    setSignError(null);
 
     try {
       const response = await fetch("/api/signing/execute", {
@@ -216,8 +224,14 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.errorCode === "134") setStep("sf_blocked");
-        throw new Error(data.error || "Error al firmar documento");
+        // Si el segundo factor está bloqueado, ir a ese estado
+        if (data.errorCode === "134") {
+          setStep("sf_blocked");
+          return;
+        }
+        // Mostrar error en el modal
+        setSignError(data.error || "Error al firmar documento");
+        return;
       }
 
       setStep("success");
@@ -228,7 +242,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
         }, 3000);
       }
     } catch (err: any) {
-      setError(err.message);
+      setSignError(err.message || "Error inesperado al firmar");
     } finally {
       setIsLoading(false);
     }
@@ -347,13 +361,23 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Clave de su Certificado FEA</label>
-                  <input
-                    type="password"
-                    value={claveCertificado}
-                    onChange={(e) => setClaveCertificado(e.target.value)}
-                    placeholder="Ingrese su clave"
-                    className="w-full px-4 py-3 border border-input bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={claveCertificado}
+                      onChange={(e) => setClaveCertificado(e.target.value)}
+                      placeholder="Ingrese su clave"
+                      className="w-full px-4 py-3 pr-12 border border-input bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                   <p className="mt-2 text-xs text-muted-foreground">Es la clave que configuró al enrolarse en CDS.</p>
                   <button
                     type="button"
@@ -392,15 +416,36 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               </div>
               <div className="space-y-4">
                 <p className="text-[var(--tp-success)] text-sm">Se ha enviado un código a su celular registrado por SMS.</p>
+                
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Código recibido por SMS</label>
-                  <input
-                    type="text"
-                    value={codigoSegundoFactor}
-                    onChange={(e) => setCodigoSegundoFactor(e.target.value)}
-                    placeholder="Ingrese el código de 6 dígitos"
-                    className="w-full px-4 py-3 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-success)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCode ? "text" : "password"}
+                      value={codigoSegundoFactor}
+                      onChange={(e) => setCodigoSegundoFactor(e.target.value)}
+                      placeholder="Ingrese el código de 6 dígitos"
+                      className="w-full px-4 py-3 pr-12 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-success)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCode(!showCode)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                      tabIndex={-1}
+                    >
+                      {showCode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  {/* Botón para desbloquear segundo factor */}
+                  <button
+                    type="button"
+                    onClick={() => openUnblockModal("2fa")}
+                    disabled={isLoading}
+                    className="mt-3 text-sm text-[var(--tp-success)] hover:text-[var(--tp-success)]/80 hover:underline flex items-center transition-colors"
+                  >
+                    <Unlock className="w-4 h-4 mr-1" />
+                    ¿Segundo factor bloqueado?
+                  </button>
                 </div>
                 <button
                   onClick={handleSign}
@@ -582,9 +627,55 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     )
   );
 
+  // Modal para mostrar errores al firmar (código incorrecto, etc.)
+  const renderSignErrorModal = () => (
+    signError && (
+      <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-card dark:bg-card rounded-2xl max-w-md w-full p-6 shadow-[var(--tp-shadow-2xl)] border border-border">
+          {/* Header con icono */}
+          <div className="flex items-center gap-3 mb-4 text-[var(--tp-error)]">
+            <div className="w-10 h-10 rounded-full bg-[var(--tp-error)]/20 flex items-center justify-center">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              Error en el Proceso
+            </h3>
+          </div>
+          
+          {/* Mensaje */}
+          <div className="p-4 rounded-xl mb-5 bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30">
+            <p className="text-sm leading-relaxed text-[var(--tp-error)]">
+              {signError}
+            </p>
+          </div>
+          
+          {/* Acciones */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setSignError(null)}
+              className="flex-1 px-4 py-2.5 bg-secondary hover:bg-secondary/80 rounded-xl text-secondary-foreground font-medium transition-colors"
+            >
+              Reintentar
+            </button>
+            <button
+              onClick={() => {
+                setSignError(null);
+                setStep("ready_for_2fa");
+              }}
+              className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  );
+
   return (
     <>
       {renderUnblockModal()}
+      {renderSignErrorModal()}
       <div className="min-h-screen bg-background py-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-card shadow-[var(--tp-shadow-xl)] rounded-2xl overflow-hidden border border-border">
