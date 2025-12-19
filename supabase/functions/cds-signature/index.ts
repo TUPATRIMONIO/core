@@ -273,9 +273,12 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
 
     const endpoint = `${config.base_url}${config.endpoints.enrolarFirmanteFEA}`;
 
+    // Obtener anon key de Supabase para que CDS pueda llamar al webhook
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+
     // Estructura según documentación oficial de CDS
-    // NOTA: Omitimos urlNotificacion y usamos enviaCorreo=false para que CDS
-    // retorne la URL de enrolamiento directamente en lugar de usar webhook
+    // urlNotificacion: URL donde CDS notificará el resultado
+    // authorization: Token que CDS usará en el header al llamar al webhook
     const requestBody = {
         request: {
             encabezado: {
@@ -283,8 +286,10 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
                 clave: config.clave,
             },
             parametro: {
+                urlNotificacion: config.webhook_url,
+                authorization: supabaseAnonKey,
                 urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
-                enviaCorreo: false, // false = CDS retorna URL directamente
+                enviaCorreo: enviaCorreo,
                 firmantes: [
                     {
                         rut: rut,

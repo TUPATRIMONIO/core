@@ -66,7 +66,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   // Modal de error al firmar (segundo factor incorrecto, bloqueo, etc.)
   const [signError, setSignError] = useState<{ message: string; errorCode?: string | number } | null>(null);
   // Modal de mensaje de enrolamiento (éxito o error)
-  const [enrollmentMessage, setEnrollmentMessage] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [enrollmentMessage, setEnrollmentMessage] = useState<{ type: "success" | "error"; message: string; url?: string } | null>(null);
 
   // 1. Verificar vigencia al cargar, o mostrar estado firmado si ya firmó
   useEffect(() => {
@@ -111,11 +111,11 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     setIsLoading(true);
     setError("");
     try {
-      // Intentamos enrolar (CDS enviará correo)
+      // Intentamos enrolar (CDS retorna URL directamente)
       const response = await fetch("/api/signing/enroll-cds", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signing_token: signer.signing_token, send_email: true })
+        body: JSON.stringify({ signing_token: signer.signing_token })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -126,9 +126,12 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
         return;
       }
 
+      // CDS retorna la URL de enrolamiento directamente
+      const enrollmentUrl = data.enrollment_url;
       setEnrollmentMessage({ 
         type: "success", 
-        message: data.message || "Se ha enviado un correo de CDS para que inicie su proceso de enrolamiento. Una vez completado, regrese a esta página." 
+        message: data.message || "Para completar su enrolamiento, haga clic en el botón de abajo.",
+        url: enrollmentUrl
       });
     } catch (err: any) {
       setEnrollmentMessage({ type: "error", message: err.message || "Error inesperado" });
@@ -879,17 +882,30 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             </p>
           </div>
           
+          {/* Botón para ir a enrolarse (solo si hay URL) */}
+          {enrollmentMessage.type === "success" && enrollmentMessage.url && (
+            <a
+              href={enrollmentMessage.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full mb-4 px-4 py-3 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white flex items-center justify-center gap-2"
+            >
+              <ExternalLink className="w-5 h-5" />
+              Ir a Enrolarme en CDS
+            </a>
+          )}
+          
           {/* Acciones */}
           <div className="flex gap-3">
             <button
               onClick={() => setEnrollmentMessage(null)}
               className={`flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors ${
                 enrollmentMessage.type === "success"
-                  ? "bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white"
+                  ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
                   : "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
               }`}
             >
-              Entendido
+              {enrollmentMessage.type === "success" && enrollmentMessage.url ? "Cerrar" : "Entendido"}
             </button>
           </div>
         </div>

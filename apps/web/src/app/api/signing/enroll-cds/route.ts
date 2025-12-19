@@ -43,23 +43,48 @@ export async function POST(request: NextRequest) {
         const url = new URL(request.url);
         const urlRetorno = `${url.origin}/sign/${signing_token}`;
 
+        const enrollPayload = {
+            operation: "enroll",
+            organization_id: signer.document.organization_id,
+            rut: signer.rut,
+            correo: signer.email,
+            enviaCorreo: false, // false = CDS retorna URL directamente
+            urlRetorno,
+            extranjero: false, // Por defecto ciudadano chileno
+        };
+
         const { data: result, error: invokeError } = await supabase.functions
             .invoke(
                 "cds-signature",
                 {
-                    body: {
-                        operation: "enroll",
-                        organization_id: signer.document.organization_id,
-                        rut: signer.rut,
-                        correo: signer.email,
-                        enviaCorreo: send_email,
-                        urlRetorno,
-                        extranjero: false, // Por defecto ciudadano chileno
-                    },
+                    body: enrollPayload,
                 },
             );
 
         console.log("CDS enroll response:", JSON.stringify(result, null, 2));
+
+        // #region agent log
+        fetch(
+            "http://127.0.0.1:7242/ingest/bdc2afec-cbea-4620-96e6-e667e032dc96",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    location: "enroll-cds/route.ts:response",
+                    message: "Full CDS response with debug",
+                    data: {
+                        fullResult: result,
+                        debugData: result?.data?.debug_data,
+                        hasInvokeError: !!invokeError,
+                        payloadSent: enrollPayload,
+                    },
+                    timestamp: Date.now(),
+                    sessionId: "debug-session",
+                    hypothesisId: "I,J,K",
+                }),
+            },
+        ).catch(() => {});
+        // #endregion
 
         // Verificar errores - incluir estado FAIL de CDS
         const cdsError = invokeError ||
