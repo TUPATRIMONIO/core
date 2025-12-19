@@ -23,6 +23,7 @@ import { CreateTicketButtonForOrganization } from '@/components/admin/create-tic
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
 import { AssociationsPanel } from '@/components/shared/AssociationsPanel'
 import { OrganizationAssociationsClient } from '@/components/admin/OrganizationAssociationsClient'
+import { OrganizationAppsManager } from '@/components/admin/OrganizationAppsManager'
 
 const ORDERS_PER_PAGE = 10
 
@@ -332,6 +333,17 @@ export default async function OrganizationDetailPage({
                     </div>
                     </div>
                 </CardContent>
+                </Card>
+
+                {/* Gestión de Aplicaciones */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Aplicaciones</CardTitle>
+                    <CardDescription>Habilitar o deshabilitar apps para esta organización</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <OrganizationAppsManager organizationId={org.id} />
+                  </CardContent>
                 </Card>
 
                 <OrganizationAssociationsClient

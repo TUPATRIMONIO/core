@@ -14,11 +14,13 @@ import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertT
 import { toast } from 'sonner'
 import { useSigningWizard } from '../WizardContext'
 import { useGlobalCountryOptional } from '@/providers/GlobalCountryProvider'
+import { useOrganization } from '@/hooks/useOrganization'
 
 export function CountryAndUploadStep() {
   const supabase = useMemo(() => createClient(), [])
   const { state, actions } = useSigningWizard()
   const globalCountry = useGlobalCountryOptional()
+  const { activeOrganization } = useOrganization()
 
   const [title, setTitle] = useState('')
   const [isBootstrapping, setIsBootstrapping] = useState(true)
@@ -83,22 +85,14 @@ export function CountryAndUploadStep() {
         return
       }
 
-      // Buscar la primera organización activa del usuario
-      const { data: orgUsers, error: orgError } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', auth.user.id)
-        .eq('status', 'active')
-        .limit(1)
-
-      if (orgError) throw orgError
-      const orgUser = orgUsers?.[0]
-      if (!orgUser?.organization_id) {
-        setError('No encontramos una organización activa asociada a tu usuario.')
+      // Usar la organización activa del contexto global
+      if (!activeOrganization?.id) {
+        setError('No encontramos una organización activa. Selecciona una organización primero.')
         return
       }
 
-      actions.setOrgId(orgUser.organization_id)
+      const organizationId = activeOrganization.id
+      actions.setOrgId(organizationId)
 
       // Default country priority: 1) global context, 2) organization.country
       // Check if we already have a country set from global context
@@ -109,7 +103,7 @@ export function CountryAndUploadStep() {
         const { data: org, error: orgCountryError } = await supabase
           .from('organizations')
           .select('country')
-          .eq('id', orgUser.organization_id)
+          .eq('id', organizationId)
           .maybeSingle()
 
         if (!orgCountryError) {
@@ -168,7 +162,7 @@ export function CountryAndUploadStep() {
 
       // Balance
       const { data: balance, error: balanceError } = await supabase.rpc('get_balance', {
-        org_id_param: orgUser.organization_id,
+        org_id_param: organizationId,
       })
 
       if (!balanceError) {

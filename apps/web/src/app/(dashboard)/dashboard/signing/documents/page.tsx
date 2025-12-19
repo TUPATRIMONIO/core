@@ -6,13 +6,20 @@ import Link from 'next/link'
 import { DocumentList } from '@/components/signing/DocumentList'
 import { Suspense } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { getUserActiveOrganization } from '@/lib/organization/utils'
 
 export default async function SigningDocumentsPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  
+  // Obtener organización activa del usuario
+  const { organization } = await getUserActiveOrganization(supabase)
 
-  if (!user) {
-    return <div>No autorizado</div>
+  if (!organization) {
+    return (
+      <div className="container mx-auto py-8">
+        <p>No se encontró organización</p>
+      </div>
+    )
   }
 
   return (
@@ -31,19 +38,20 @@ export default async function SigningDocumentsPage() {
       />
 
       <Suspense fallback={<Card><CardContent className="p-8 text-center text-muted-foreground">Cargando documentos...</CardContent></Card>}>
-        <DocumentListWrapper />
+        <DocumentListWrapper organizationId={organization.id} />
       </Suspense>
     </div>
   )
 }
 
-async function DocumentListWrapper() {
+async function DocumentListWrapper({ organizationId }: { organizationId: string }) {
   const supabase = await createClient()
   
-  // Obtener documentos del usuario/organización usando la vista pública
+  // Filtrar documentos por la organización activa
   const { data: documents, error } = await supabase
     .from('signing_documents_full')
     .select('*')
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -53,4 +61,5 @@ async function DocumentListWrapper() {
 
   return <DocumentList initialDocuments={documents || []} basePath="/dashboard/signing/documents" />
 }
+
 

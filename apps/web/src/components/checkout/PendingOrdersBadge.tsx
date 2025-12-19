@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface PendingOrder {
@@ -34,10 +35,10 @@ interface PendingOrder {
 export function PendingOrdersBadge() {
   const router = useRouter();
   const pathname = usePathname();
+  const { activeOrganization, isLoading: orgLoading } = useOrganization();
   const [orders, setOrders] = useState<PendingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
-  const [organizationIds, setOrganizationIds] = useState<string[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const supabase = createClient();
@@ -45,10 +46,16 @@ export function PendingOrdersBadge() {
   // Verificar si estamos en una página de admin
   const isAdminPage = pathname?.startsWith('/admin');
 
-  // Función para cargar órdenes pendientes
+  // Función para cargar órdenes pendientes (filtradas por org activa)
   const fetchPendingOrders = useCallback(async () => {
     // No hacer polling en páginas de admin
     if (isAdminPage) {
+      setLoading(false);
+      return;
+    }
+
+    // Esperar a que se cargue la organización activa
+    if (!activeOrganization) {
       setLoading(false);
       return;
     }
@@ -66,7 +73,8 @@ export function PendingOrdersBadge() {
         return;
       }
 
-      const response = await fetch('/api/checkout/pending');
+      // Filtrar por la organización activa
+      const response = await fetch(`/api/checkout/pending?organizationId=${activeOrganization.id}`);
       if (response.ok) {
         const data = await response.json();
         setOrders(data.orders || []);
@@ -84,38 +92,12 @@ export function PendingOrdersBadge() {
     } finally {
       setLoading(false);
     }
-  }, [isAdminPage, supabase]);
+  }, [isAdminPage, supabase, activeOrganization]);
 
-  // Obtener organizaciones del usuario
-  const fetchUserOrganizations = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+  // Ya no necesitamos fetchUserOrganizations, usamos activeOrganization del contexto
 
-      const { data: memberships, error } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active');
-
-      if (error) {
-        console.error('[PendingOrdersBadge] Error obteniendo organizaciones:', error);
-        return;
-      }
-
-      if (memberships && memberships.length > 0) {
-        const orgIds = memberships.map((m) => m.organization_id);
-        setOrganizationIds(orgIds);
-        return orgIds;
-      }
-    } catch (error) {
-      console.error('[PendingOrdersBadge] Error en fetchUserOrganizations:', error);
-    }
-    return [];
-  };
-
-  // Ref para mantener las organizaciones actuales en el callback de Realtime
-  const orgIdsRef = useRef<string[]>([]);
+  // Ref para mantener la org activa en el callback de Realtime
+  const activeOrgIdRef = useRef<string | null>(null);
 
   // Configurar suscripción Realtime
   useEffect(() => {
@@ -143,25 +125,13 @@ export function PendingOrdersBadge() {
         return;
       }
 
-      // Obtener organizaciones del usuario primero
-      const orgIds = await fetchUserOrganizations();
-      
-      if (!orgIds || orgIds.length === 0) {
-        // Cargar órdenes y configurar polling como fallback
-        await fetchPendingOrders();
-        if (isMounted && !isAdminPage && !intervalRef.current) {
-          intervalRef.current = setInterval(() => {
-            // Verificar nuevamente antes de cada ejecución
-            if (!isAdminPage) {
-              fetchPendingOrders();
-            }
-          }, 60000); // 60 segundos como fallback
-        }
+      // Esperar a que haya organización activa
+      if (!activeOrganization) {
         return;
       }
 
-      // Guardar organizaciones en el ref para uso en el callback
-      orgIdsRef.current = orgIds;
+      // Guardar org activa en el ref para uso en el callback de Realtime
+      activeOrgIdRef.current = activeOrganization.id;
 
       // Cargar órdenes iniciales
       await fetchPendingOrders();
@@ -184,8 +154,8 @@ export function PendingOrdersBadge() {
               const updatedOrder = payload.new as any;
               const oldOrder = payload.old as any;
 
-              // Verificar que la orden pertenece a una de las organizaciones del usuario
-              if (!orgIdsRef.current.includes(updatedOrder?.organization_id)) {
+              // Verificar que la orden pertenece a la organización activa
+              if (updatedOrder?.organization_id !== activeOrgIdRef.current) {
                 return;
               }
 
@@ -257,7 +227,7 @@ export function PendingOrdersBadge() {
       }
       window.removeEventListener('order:status-updated', handleOrderUpdate);
     };
-  }, [isAdminPage, fetchPendingOrders, supabase]);
+  }, [isAdminPage, fetchPendingOrders, supabase, activeOrganization]);
 
   const handleContinuePayment = (orderId: string) => {
     router.push(`/checkout/${orderId}`);
@@ -382,7 +352,8 @@ export function PendingOrdersBadge() {
     return null;
   }
 
-  if (loading) {
+  // Mostrar loading mientras carga la organización o las órdenes
+  if (loading || orgLoading) {
     return (
       <Button variant="ghost" size="icon" disabled>
         <Loader2 className="h-5 w-5 animate-spin" />

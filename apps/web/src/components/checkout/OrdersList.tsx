@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, CreditCard } from 'lucide-react';
 import Link from 'next/link';
+import { useOrganization } from '@/hooks/useOrganization';
 import type { Order, OrderStatus } from '@/lib/checkout/core';
 
 interface OrdersListProps {
@@ -82,17 +83,26 @@ const getEmptyStateMessage = (status: OrderStatus | 'all') => {
 };
 
 export default function OrdersList({ status = 'all' }: OrdersListProps) {
+  const { activeOrganization, isLoading: orgLoading } = useOrganization();
   const [orders, setOrders] = useState<OrderWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async (showLoading = true) => {
+    // Esperar a que se cargue la organización activa
+    if (!activeOrganization) {
+      setLoading(false);
+      return;
+    }
+
     try {
       if (showLoading) setLoading(true);
       
-      const url = status === 'all' 
-        ? '/api/checkout/orders'
-        : `/api/checkout/orders?status=${status}`;
+      // Construir URL con filtro de organización
+      let url = `/api/checkout/orders?organizationId=${activeOrganization.id}`;
+      if (status !== 'all') {
+        url += `&status=${status}`;
+      }
       
       const response = await fetch(url);
       const data = await response.json();
@@ -107,7 +117,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, [status, activeOrganization]);
 
   // Carga inicial
   useEffect(() => {
@@ -129,7 +139,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
     return () => clearInterval(interval);
   }, [orders, fetchOrders]);
 
-  if (loading) {
+  if (loading || orgLoading) {
     return (
       <Card>
         <CardContent className="pt-6">

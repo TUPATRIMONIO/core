@@ -61,16 +61,11 @@ async function OrderSuccessContent({
     notFound();
   }
 
-  // Verificar que el usuario pertenece a la organización de la orden
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('organization_id', order.organization_id)
-    .eq('status', 'active')
-    .single();
-
-  if (!orgUser) {
+  // Verificar que la orden pertenece a la organización activa del usuario
+  const { getUserActiveOrganization } = await import('@/lib/organization/utils');
+  const { organization: activeOrg } = await getUserActiveOrganization(supabase);
+  
+  if (!activeOrg || activeOrg.id !== order.organization_id) {
     notFound();
   }
 

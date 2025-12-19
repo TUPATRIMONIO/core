@@ -1,9 +1,10 @@
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/admin/page-header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ApplicationVisibilityForm } from '@/components/admin/applications/ApplicationVisibilityForm'
 import { ApplicationOverrideList } from '@/components/admin/applications/ApplicationOverrideList'
+import { ApplicationOrganizationsList } from '@/components/admin/ApplicationOrganizationsList'
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
@@ -266,6 +267,18 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 onUpdateOverride={handleUpdateOverride}
                 onDeleteOverride={handleDeleteOverride}
               />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="max-w-5xl">
+          <Card>
+            <CardHeader>
+              <CardTitle>Organizaciones con esta App</CardTitle>
+              <CardDescription>Lista de todas las organizaciones y su estado para esta aplicación</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ApplicationOrganizationsList applicationId={id} />
             </CardContent>
           </Card>
         </div>

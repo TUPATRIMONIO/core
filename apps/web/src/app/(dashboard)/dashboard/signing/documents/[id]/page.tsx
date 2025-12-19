@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { DocumentDetailClient } from '@/components/signing/DocumentDetailClient'
+import { getUserActiveOrganization } from '@/lib/organization/utils'
 
 interface PageProps {
   params: {
@@ -14,11 +15,23 @@ export default async function DocumentDetailPage({ params }: PageProps) {
   
   const supabase = await createClient()
   
-  // 1. Obtener documento con datos relacionados
+  // Obtener organización activa del usuario
+  const { organization } = await getUserActiveOrganization(supabase)
+
+  if (!organization) {
+    return (
+      <div className="container mx-auto py-8">
+        <p>No se encontró organización</p>
+      </div>
+    )
+  }
+  
+  // 1. Obtener documento con datos relacionados - filtrar por org activa
   const { data: document, error } = await supabase
     .from('signing_documents_full')
     .select('*')
     .eq('id', id)
+    .eq('organization_id', organization.id)
     .single()
 
   if (error || !document) {
@@ -53,4 +66,5 @@ export default async function DocumentDetailPage({ params }: PageProps) {
     </div>
   )
 }
+
 
