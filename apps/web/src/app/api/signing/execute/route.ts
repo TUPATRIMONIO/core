@@ -62,49 +62,22 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Estados válidos para firmar: enrolled, pending, signing (en proceso)
-        // También permitir certificate_blocked si acaba de desbloquear (CDS actualizará en la firma)
-        const validStatesForSigning = ["enrolled", "pending", "signing"];
-        if (!validStatesForSigning.includes(signer.status)) {
-            // Si está bloqueado, dar mensaje más específico
-            if (signer.status === "certificate_blocked") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "Su certificado está bloqueado. Por favor desbloquéelo y vuelva a cargar esta página.",
-                        errorCode: "CERTIFICATE_BLOCKED",
-                    },
-                    { status: 400 },
-                );
-            }
-            if (signer.status === "sf_blocked") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "Su segundo factor (SMS) está bloqueado. Por favor desbloquéelo y vuelva a cargar esta página.",
-                        errorCode: "SF_BLOCKED",
-                    },
-                    { status: 400 },
-                );
-            }
-            if (signer.status === "needs_enrollment") {
-                return NextResponse.json(
-                    {
-                        error:
-                            "Debe completar su proceso de enrolamiento antes de poder firmar.",
-                        errorCode: "NEEDS_ENROLLMENT",
-                    },
-                    { status: 400 },
-                );
-            }
+        // Estados que definitivamente NO pueden firmar (no cambian externamente)
+        if (signer.status === "needs_enrollment") {
             return NextResponse.json(
                 {
                     error:
-                        `No puede firmar en el estado actual. Por favor recargue la página para verificar su estado.`,
+                        "Debe completar su proceso de enrolamiento antes de poder firmar.",
+                    errorCode: "NEEDS_ENROLLMENT",
                 },
                 { status: 400 },
             );
         }
+
+        // Para certificate_blocked y sf_blocked, PERMITIR el intento de firma.
+        // CDS determinará si realmente están bloqueados o si el usuario ya los desbloqueó.
+        // Si CDS retorna error de bloqueo, el estado se actualizará apropiadamente.
+        // Esto evita el problema de estados desactualizados en la base de datos.
 
         // Si es firma secuencial, verificar que es su turno
         if (signer.document.signing_order === "sequential") {
@@ -263,11 +236,18 @@ export async function POST(request: NextRequest) {
         }
 
         // 5. Si CDS retorna el documento firmado inmediatamente, guardarlo
-        if (
-            result.data.documentosFirmados &&
-            result.data.documentosFirmados.length > 0
-        ) {
-            const signedBase64 = result.data.documentosFirmados[0].base64;
+        // CDS retorna "documentoFirmado" (singular) como string base64 según documentación
+        const signedBase64 = result.data.documentoFirmado;
+
+        console.log("CDS Sign Success:", {
+            estado: result.data?.estado,
+            transaccion: result.data?.transaccion,
+            codigoTransaccion: result.data?.codigoTransaccion,
+            hasDocumentoFirmado: !!signedBase64,
+            documentLength: signedBase64?.length,
+        });
+
+        if (signedBase64) {
             const signedBuffer = Buffer.from(signedBase64, "base64");
 
             // Guardar en storage
@@ -282,7 +262,9 @@ export async function POST(request: NextRequest) {
                     upsert: false,
                 });
 
-            if (!uploadError) {
+            if (uploadError) {
+                console.error("Error uploading signed document:", uploadError);
+            } else {
                 // Actualizar ruta del archivo firmado
                 await supabase
                     .from("signing_documents")
@@ -323,9 +305,11 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json({
                 success: true,
-                message: "Documento firmado exitosamente",
+                message: result.data?.comentarios ||
+                    "Documento firmado exitosamente",
                 signed: true,
-                codigo_transaccion: result.data.codigoTransaccion,
+                codigo_transaccion: result.data.transaccion ||
+                    result.data.codigoTransaccion,
             });
         }
 

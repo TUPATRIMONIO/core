@@ -40,6 +40,7 @@ type SigningStep =
   | "certificate_blocked" 
   | "sf_blocked"
   | "success"
+  | "signed"  // Cuando el firmante ya firmó (recarga de página)
   | "error";
 
 export default function SigningPageClient({ signer }: SigningPageClientProps) {
@@ -67,10 +68,15 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   // Modal de mensaje de enrolamiento (éxito o error)
   const [enrollmentMessage, setEnrollmentMessage] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // 1. Verificar vigencia al cargar
+  // 1. Verificar vigencia al cargar, o mostrar estado firmado si ya firmó
   useEffect(() => {
+    // Si el firmante ya firmó, saltar verificación y mostrar estado firmado
+    if (signer.status === "signed") {
+      setStep("signed");
+      return;
+    }
     checkVigencia();
-  }, [signer.signing_token]);
+  }, [signer.signing_token, signer.status]);
 
   const checkVigencia = async () => {
     setIsLoading(true);
@@ -280,7 +286,17 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const renderHeader = () => (
     <div className="bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] p-8 text-white">
       <h1 className="text-3xl font-bold mb-2 text-white">Firmar Documento</h1>
-      <p className="text-white/90">{signer.document.title}</p>
+      <p className="text-white/90 mb-3">{signer.document.title}</p>
+      <div className="flex flex-wrap gap-3 text-xs">
+        {signer.document.order_number && (
+          <span className="bg-white/20 px-3 py-1 rounded-full">
+            Pedido: #{signer.document.order_number}
+          </span>
+        )}
+        <span className="bg-white/20 px-3 py-1 rounded-full">
+          Doc: {signer.document.id}
+        </span>
+      </div>
     </div>
   );
 
@@ -495,13 +511,86 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       case "success":
         return (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-[var(--tp-success)]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-12 h-12 text-[var(--tp-success)]" />
+          <div className="bg-card dark:bg-card rounded-2xl shadow-[var(--tp-shadow-xl)] border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 bg-[var(--tp-success)]/20 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-[var(--tp-success)]" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">¡Documento Firmado Exitosamente!</h2>
+                <p className="text-sm text-muted-foreground mt-1">Su firma electrónica ha sido aplicada legalmente.</p>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">¡Documento Firmado Exitosamente!</h2>
-            <p className="text-muted-foreground italic">Su firma electrónica ha sido aplicada legalmente al documento.</p>
-            <p className="mt-8 text-sm text-muted-foreground animate-pulse">Redirigiendo en unos segundos...</p>
+            
+            <div className="bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-[var(--tp-success)]" />
+                <div>
+                  <p className="text-sm font-medium text-[var(--tp-success)]">Firma válida según Ley 19.799</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Firmado el {new Date().toLocaleDateString('es-CL', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-4">
+                El documento firmado ahora está disponible para visualización.
+              </p>
+              <button
+                onClick={() => router.refresh()}
+                className="bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors"
+              >
+                Ver Documento Firmado
+              </button>
+            </div>
+          </div>
+        );
+
+      case "signed":
+        // Estado cuando el usuario ya firmó (recarga de página después de firmar)
+        return (
+          <div className="bg-card dark:bg-card rounded-2xl shadow-[var(--tp-shadow-xl)] border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 bg-[var(--tp-success)]/20 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-[var(--tp-success)]" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">¡Documento Firmado!</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Usted ya firmó este documento.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-[var(--tp-success)]" />
+                <div>
+                  <p className="text-sm font-medium text-[var(--tp-success)]">Firma válida según Ley 19.799</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Firmado el {signer.signed_at ? new Date(signer.signed_at).toLocaleDateString('es-CL', { 
+                      day: 'numeric', 
+                      month: 'long', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'fecha no disponible'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground text-center">
+              Puede descargar el documento firmado desde el visor de arriba.
+            </p>
           </div>
         );
 
@@ -661,6 +750,11 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const isCertBlocked = signError?.errorCode === "122" || signError?.errorCode === 122 || 
                         signError?.errorCode === "125" || signError?.errorCode === 125 ||
                         signError?.errorCode === "CERTIFICATE_BLOCKED";
+  // Detecta si el código SMS ya fue usado o expiró (necesita solicitar nuevo)
+  const isCodeUsedOrExpired = signError?.errorCode === "129" || signError?.errorCode === 129 ||
+                              signError?.errorCode === "128" || signError?.errorCode === 128 ||
+                              signError?.message?.toLowerCase().includes("ya ha sido utilizado") ||
+                              signError?.message?.toLowerCase().includes("expirado");
   
   const renderSignErrorModal = () => (
     signError && (
@@ -673,7 +767,8 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             </div>
             <h3 className="text-lg font-semibold text-foreground">
               {isSFBlocked ? "Segundo Factor Bloqueado" : 
-               isCertBlocked ? "Certificado Bloqueado" : 
+               isCertBlocked ? "Certificado Bloqueado" :
+               isCodeUsedOrExpired ? "Código SMS Inválido" :
                "Error en el Proceso"}
             </h3>
           </div>
@@ -683,9 +778,14 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             <p className="text-sm leading-relaxed text-[var(--tp-error)]">
               {signError.message}
             </p>
+            {isCodeUsedOrExpired && (
+              <p className="text-sm leading-relaxed text-foreground/70 mt-2">
+                Debe solicitar un nuevo código SMS para continuar.
+              </p>
+            )}
           </div>
           
-          {/* Acciones - con botón de desbloqueo si corresponde */}
+          {/* Acciones - con botón de desbloqueo o solicitar nuevo código */}
           <div className="flex flex-col gap-3">
             {(isSFBlocked || isCertBlocked) && (
               <button
@@ -698,6 +798,19 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               >
                 <Lock className="w-4 h-4" />
                 Desbloquear {isSFBlocked ? "Segundo Factor" : "Certificado"}
+              </button>
+            )}
+            {isCodeUsedOrExpired && (
+              <button
+                onClick={() => {
+                  setSignError(null);
+                  setCodigoSegundoFactor("");
+                  setStep("ready_for_2fa"); // Volver a solicitar 2FA con la misma clave
+                }}
+                className="w-full px-4 py-2.5 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white flex items-center justify-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Solicitar Nuevo Código SMS
               </button>
             )}
             <div className="flex gap-3">
@@ -802,10 +915,10 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               </div>
             )}
 
-            {/* Document Preview - Always rendered but hidden during verifying/success */}
+            {/* Document Preview - Always rendered but hidden during verifying */}
             <div 
               className={`mb-8 ${
-                step === "verifying" || step === "success" ? "hidden" : ""
+                step === "verifying" ? "hidden" : ""
               }`}
             >
               <div className="flex items-center justify-between mb-4">

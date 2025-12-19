@@ -68,49 +68,29 @@ export default async function SigningPage({ params }: PageProps) {
      console.error('Error al buscar lista de firmantes:', signersError);
   }
 
+  // 5. Obtener order_number si hay order_id
+  let orderNumber: string | null = null;
+  if (document.order_id) {
+    const { data: order } = await supabase
+      .from("orders")
+      .select("order_number")
+      .eq("id", document.order_id)
+      .single();
+    orderNumber = order?.order_number || null;
+  }
+
   // Construir objeto completo para el cliente
   const signer = {
     ...signerRaw,
     document: {
       ...document,
+      order_number: orderNumber,
       all_signers: allSigners || []
     }
   };
 
-  // Si ya firmó, mostrar mensaje de éxito (o redirigir, pero el diseño actual muestra success)
-  if (signer.status === "signed") {
-     // OPCIONAL: Podemos mostrar el SigningPageClient igual, ya que él maneja el estado 'signed'
-     // pero para consistencia con el código anterior:
-     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              ¡Documento firmado!
-            </h1>
-            <p className="text-gray-600 mb-4">
-              Usted ya ha firmado este documento el{" "}
-              {new Date(signer.signed_at).toLocaleDateString("es-CL", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-            <p className="text-sm text-gray-500">
-              Documento: <strong>{signer.document.title}</strong>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Si ya firmó, el SigningPageClient manejará el estado "signed" y mostrará el documento
+  // Ya no renderizamos una vista estática separada para mantener consistencia y mostrar el preview
 
   // Renderizar componente cliente con datos del servidor
   return <SigningPageClient signer={signer} />;

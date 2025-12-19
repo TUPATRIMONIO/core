@@ -107,7 +107,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // En éxito, también mostrar el comentario de CDS
+        // En éxito, actualizar estado si estaba en un estado bloqueado
+        // Esto asegura que el estado se sincronice cuando el usuario desbloquea externamente
+        if (
+            signer.status === "certificate_blocked" ||
+            signer.status === "sf_blocked" || signer.status === "pending"
+        ) {
+            await supabase
+                .from("signing_signers")
+                .update({ status: "enrolled" })
+                .eq("id", signer.id);
+        }
+
+        // También mostrar el comentario de CDS
         return NextResponse.json({
             success: true,
             message: result.data?.comentarios || result.data?.mensaje ||

@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 17, 2025\
+> **📅 Última actualización:** Diciembre 19, 2025\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -13,20 +13,11 @@
 > INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
-> SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE &
-> MULTIPLE) COMPLETOS** ✅🚧 + **🆕 SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅\
-> **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3:
-> COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
-> Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
-> **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
-> FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ +
-> **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
-> INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
-> B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
-> COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
-> SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT COMPLETOS** ✅🚧\
-> **🎯 Próximo milestone:** Testing del flujo completo + Portal de firma + Panel
-> de Notarías 📋
+> SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
+> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SELECTOR GLOBAL DE
+> PAÍS EN DASHBOARD** ✅\
+> **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
+> pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
@@ -855,21 +846,129 @@ await sendEmail(orgId, message, { purpose: "marketing" });
 
 ---
 
-### 🔜 PRÓXIMOS PASOS INMEDIATOS
+### ✅ COMPLETADO - Integración CDS Firma Electrónica (Dic 17-19, 2025)
 
-**1. Continuar con Flujo de Firmas (FASE B):**
+**Objetivo:** Integración completa con CDS (Certificadora del Sur) para firma
+electrónica avanzada (FEA) según Ley 19.799 de Chile.
 
-- [ ] Portal público de firma `/sign/[token]`
-- [ ] Verificación pública `/repository/[documentId]`
-- [ ] Panel de notarías
+**Edge Function `cds-signature`:**
 
-**2. Testing Adicional:**
+Ubicación: `supabase/functions/cds-signature/index.ts`
 
-- [ ] Probar flujo completo con documento observado y aceptación de riesgos
-- [ ] Verificar emails de notificación a firmantes
-- [ ] Testing de Edge Functions post-pago
+Operaciones soportadas:
+
+- ✅ `check-vigencia` - Verificar estado de certificado FEA
+- ✅ `enroll` - Iniciar enrolamiento de firmante
+- ✅ `request-second-factor` - Solicitar código SMS
+- ✅ `sign-multiple` - Firmar documento(s)
+- ✅ `get-document` - Obtener documento firmado por código transacción
+- ✅ `unblock-certificate` - Desbloquear certificado bloqueado
+- ✅ `unblock-second-factor` - Desbloquear 2FA bloqueado
+- ✅ `simple-flow` - Flujo simple FEA (REST integration)
+
+**APIs de Firma (`/api/signing/`):**
+
+- ✅ `/check-fea` - Verifica vigencia del certificado del firmante
+  - Retorna: `vigente`, `certificadoBloqueado`, `vigencia`, `comentarios`
+  - Actualiza estado del firmante en BD (`enrolled`, `needs_enrollment`,
+    `certificate_blocked`)
+- ✅ `/request-2fa` - Solicita código SMS para segundo factor
+  - Actualiza estado a `enrolled` cuando tiene éxito (limpiar estado bloqueado)
+  - Retorna mensajes directos de CDS para transparencia
+- ✅ `/execute` - Ejecuta la firma electrónica
+  - Usa `documentoFirmado` (string base64) de respuesta CDS
+  - Guarda documento en `docs-signed` bucket
+  - Actualiza estado del firmante a `signed`
+  - Notifica siguiente firmante si es secuencial
+- ✅ `/enroll-cds` - Inicia proceso de enrolamiento
+- ✅ `/unblock` - Desbloquea certificado o 2FA
+- ✅ `/preview/[id]` - Sirve preview del documento para visor PDF
+
+**Página de Firma `/sign/[token]`:**
+
+- ✅ Layout público sin autenticación requerida
+- ✅ Visor PDF embebido siempre visible
+- ✅ Flujo de pasos:
+  1. `verifying` - Verificando vigencia certificado
+  2. `needs_enrollment` - Requiere enrolamiento (link externo)
+  3. `certificate_blocked` - Certificado bloqueado (link desbloqueo)
+  4. `ready_for_2fa` - Listo para ingresar clave certificado
+  5. `waiting_code` - Esperando código SMS
+  6. `success` - Firma exitosa (con preview)
+  7. `signed` - Ya firmó (recarga de página)
+  8. `error` - Error en el proceso
+
+**UI/UX Implementado:**
+
+- ✅ Modales estilizados para errores con botones contextuales:
+  - Certificado bloqueado → Botón "Desbloquear Certificado"
+  - 2FA bloqueado → Botón "Desbloquear Segundo Factor"
+  - Código SMS usado/expirado → Botón "Solicitar Nuevo Código SMS"
+- ✅ Toggle mostrar/ocultar contraseña y código SMS
+- ✅ Preview del documento visible en todos los estados (excepto verifying)
+- ✅ Estado `signed` con layout consistente mostrando:
+  - Fecha/hora de firma
+  - Ley 19.799 de referencia
+  - Documento firmado visible
+- ✅ Dark mode completo con CSS variables
+
+**Códigos de Error CDS Manejados:**
+
+| Código | Significado           | Acción                      |
+| ------ | --------------------- | --------------------------- |
+| 122    | Máximo intentos FEA   | `certificate_blocked`       |
+| 124    | Clave incorrecta      | Error modal                 |
+| 125    | Certificado bloqueado | `certificate_blocked`       |
+| 127    | SMS incorrecto        | Error modal                 |
+| 128    | SMS expirado          | Modal con "Solicitar nuevo" |
+| 129    | SMS ya utilizado      | Modal con "Solicitar nuevo" |
+| 133    | Debe solicitar SMS    | `ready_for_2fa`             |
+| 134    | 2FA bloqueado         | `sf_blocked`                |
+
+**Correcciones Críticas:**
+
+- ✅ Campo `documentoFirmado` (singular) vs `documentosFirmados` (array)
+- ✅ Estado bloqueado NO bloquea intento de firma (CDS determina estado real)
+- ✅ Request 2FA exitoso actualiza estado de `blocked` a `enrolled`
+- ✅ Transparencia de mensajes CDS (`comentarios`) en todas las respuestas
+
+**Archivos Principales:**
+
+```
+Frontend:
+  - apps/web/src/app/sign/[token]/page.tsx (server)
+  - apps/web/src/app/sign/[token]/SigningPageClient.tsx (client)
+
+API Routes:
+  - apps/web/src/app/api/signing/check-fea/route.ts
+  - apps/web/src/app/api/signing/request-2fa/route.ts
+  - apps/web/src/app/api/signing/execute/route.ts
+  - apps/web/src/app/api/signing/enroll-cds/route.ts
+  - apps/web/src/app/api/signing/unblock/route.ts
+  - apps/web/src/app/api/signing/preview/[id]/route.ts
+
+Edge Function:
+  - supabase/functions/cds-signature/index.ts
+```
 
 ---
+
+### 🔜 PRÓXIMOS PASOS INMEDIATOS
+
+**1. Testing del Flujo Completo:**
+
+- [ ] Probar firma con múltiples firmantes secuenciales
+- [ ] Verificar notificación email al siguiente firmante
+- [ ] Probar rechazo de firma
+- [ ] Testing con documentos grandes
+
+**2. Completar Features Adicionales:**
+
+- [ ] Verificación pública `/repository/[documentId]`
+- [ ] Panel de notarías
+- [ ] Reportes de firmas
+
+**3. Testing Adicional:**
 
 **A.2 - `pdf-merge-with-cover` (Ya existe - Ajustar)**
 
