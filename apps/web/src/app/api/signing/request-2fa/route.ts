@@ -53,24 +53,43 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        if (invokeError || !result.success) {
+        console.log(
+            "CDS request-2fa response:",
+            JSON.stringify(result, null, 2),
+        );
+
+        // Verificar errores de invocación O si CDS retorna FAIL/success:false
+        const cdsError = invokeError ||
+            !result?.success ||
+            result?.data?.success === false ||
+            result?.data?.estado === "FAIL";
+
+        if (cdsError) {
             console.error(
                 "Error al solicitar 2FA CDS:",
-                invokeError || result.error,
+                invokeError || result?.error || result?.data,
             );
 
-            const errorCode = result?.data?.errorCode?.toString();
-            let errorMessage = result?.error || result?.data?.mensaje ||
+            // CDS puede retornar el código de error en diferentes lugares
+            const errorCode = (
+                result?.data?.errorCode ||
+                result?.data?.codigo ||
+                result?.errorCode
+            )?.toString();
+
+            // SIEMPRE usar el comentario de CDS si está disponible
+            const cdsComentarios = result?.data?.comentarios ||
+                result?.data?.mensaje;
+
+            // Si CDS da un mensaje, usarlo directamente para máxima transparencia
+            let errorMessage = cdsComentarios ||
                 "Error al solicitar segundo factor";
 
-            // Manejo de errores comunes de CDS
-            if (errorCode === "122") {
-                errorMessage =
-                    "Clave de certificado incorrecta. Si falla muchas veces el certificado será bloqueado.";
-            } else if (errorCode === "125") {
-                errorMessage =
-                    "El certificado se encuentra bloqueado por intentos fallidos.";
-                // Actualizar estado en BD
+            // Solo actualizar estado en BD para casos específicos
+            if (
+                errorCode === "122" || errorCode === "125" ||
+                errorCode === "123"
+            ) {
                 await supabase.from("signing_signers").update({
                     status: "certificate_blocked",
                 }).eq("id", signer.id);
@@ -80,16 +99,20 @@ export async function POST(request: NextRequest) {
                 {
                     success: false,
                     error: errorMessage,
+                    cdsComentarios: cdsComentarios, // Siempre incluir para debug
                     errorCode,
+                    estado: result?.data?.estado,
                 },
                 { status: 400 },
             );
         }
 
+        // En éxito, también mostrar el comentario de CDS
         return NextResponse.json({
             success: true,
-            message: result.data.mensaje ||
+            message: result.data?.comentarios || result.data?.mensaje ||
                 "Código de segundo factor enviado exitosamente por SMS.",
+            cdsComentarios: result.data?.comentarios,
         });
     } catch (error: any) {
         console.error("Error en /api/signing/request-2fa:", error);

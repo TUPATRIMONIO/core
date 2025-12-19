@@ -78,17 +78,19 @@ export async function GET(request: NextRequest) {
         const cdsData = result.data;
 
         // 3. Actualizar estado del firmante en la base de datos
-        // Mapeamos los estados de CDS a nuestros estados internos
+        // IMPORTANTE: Verificar bloqueo ANTES de verificar vigencia
+        // Un certificado bloqueado puede tener vigente=false, pero no necesita enrolamiento
         let status = signer.status;
 
-        if (!cdsData.vigente) {
-            status = "needs_enrollment";
-        } else if (cdsData.certificadoBloqueado) {
+        if (cdsData.certificadoBloqueado) {
             status = "certificate_blocked";
+        } else if (!cdsData.vigente) {
+            // Solo si NO está bloqueado Y no es vigente, necesita enrolamiento
+            status = "needs_enrollment";
         } else if (
             signer.status === "needs_enrollment" || signer.status === "pending"
         ) {
-            // Si antes necesitaba enrolamiento y ahora es vigente, pasar a enrolled o pending
+            // Si antes necesitaba enrolamiento y ahora es vigente, pasar a enrolled
             status = "enrolled";
         }
 
@@ -116,6 +118,10 @@ export async function GET(request: NextRequest) {
             fechaVencimiento: cdsData.fechaVencimiento,
             certificadoBloqueado: cdsData.certificadoBloqueado,
             status,
+            // Transparencia: incluir respuesta de CDS
+            cdsComentarios: cdsData.mensaje || cdsData.comentarios,
+            cdsEstado: cdsData.estado,
+            vigencia: cdsData.vigencia, // Mensaje descriptivo de CDS (e.g. "Certificado bloqueado")
         });
     } catch (error: any) {
         console.error("Error en /api/signing/check-fea:", error);

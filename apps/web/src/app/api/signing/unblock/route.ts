@@ -76,42 +76,51 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        if (invokeError || !result.success) {
+        console.log(
+            `CDS unblock ${type} response:`,
+            JSON.stringify(result, null, 2),
+        );
+
+        // Verificar errores - incluir estado FAIL de CDS
+        const cdsError = invokeError ||
+            !result?.success ||
+            result?.data?.success === false ||
+            result?.data?.estado === "FAIL";
+
+        if (cdsError) {
             console.error(
                 `Error al desbloquear ${type} CDS:`,
-                invokeError || result.error,
+                invokeError || result?.error || result?.data,
             );
+
+            // SIEMPRE usar comentarios de CDS para transparencia
+            const cdsComentarios = result?.data?.comentarios ||
+                result?.data?.mensaje;
+            const errorMessage = cdsComentarios || result?.error ||
+                `Error al solicitar desbloqueo de ${type}`;
+
             return NextResponse.json(
                 {
                     success: false,
-                    error: result?.error || result?.data?.mensaje ||
-                        `Error al solicitar desbloqueo de ${type}`,
+                    error: errorMessage,
+                    cdsComentarios: cdsComentarios,
+                    errorCode: result?.data?.errorCode || result?.data?.codigo,
+                    estado: result?.data?.estado,
                 },
                 { status: 400 },
             );
         }
 
-        // Verificar si la respuesta de CDS indica un error (success: false en data)
-        if (result.data && result.data.success === false) {
-            console.error(
-                `CDS retornó error para ${type}:`,
-                result.data.mensaje || result.data.codigo,
-            );
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: result.data.mensaje ||
-                        `Error de CDS al desbloquear ${type}`,
-                },
-                { status: 400 },
-            );
-        }
+        // Obtener mensaje de CDS
+        const cdsComentarios = result.data?.comentarios || result.data?.mensaje;
 
         return NextResponse.json({
             success: true,
-            url: result.data.url,
-            message: result.data.mensaje ||
+            url: result.data?.url,
+            message: cdsComentarios ||
                 `URL de desbloqueo de ${type} generada exitosamente.`,
+            cdsComentarios: cdsComentarios,
+            estado: result.data?.estado,
         });
     } catch (error: any) {
         console.error("Error en /api/signing/unblock:", error);

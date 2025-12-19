@@ -12,6 +12,7 @@ import {
   MessageSquare, 
   ExternalLink,
   Unlock,
+  Lock,
   AlertTriangle,
   Eye,
   EyeOff
@@ -61,8 +62,10 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const [showPassword, setShowPassword] = useState(false);
   // Toggle para mostrar/ocultar código de segundo factor
   const [showCode, setShowCode] = useState(false);
-  // Modal de error al firmar (segundo factor incorrecto)
-  const [signError, setSignError] = useState<string | null>(null);
+  // Modal de error al firmar (segundo factor incorrecto, bloqueo, etc.)
+  const [signError, setSignError] = useState<{ message: string; errorCode?: string | number } | null>(null);
+  // Modal de mensaje de enrolamiento (éxito o error)
+  const [enrollmentMessage, setEnrollmentMessage] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // 1. Verificar vigencia al cargar
   useEffect(() => {
@@ -80,10 +83,13 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       setVigenciaData(data);
       
-      if (!data.vigente) {
-        setStep("needs_enrollment");
-      } else if (data.certificadoBloqueado) {
+      // IMPORTANTE: Verificar bloqueo ANTES de verificar vigencia
+      // Un certificado bloqueado puede tener vigente=false, pero no necesita enrolamiento
+      if (data.certificadoBloqueado) {
         setStep("certificate_blocked");
+      } else if (!data.vigente) {
+        // Solo si NO está bloqueado Y no es vigente, necesita enrolamiento
+        setStep("needs_enrollment");
       } else {
         setStep("ready_for_2fa");
       }
@@ -106,11 +112,20 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
         body: JSON.stringify({ signing_token: signer.signing_token, send_email: true })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error al iniciar enrolamiento");
+      if (!response.ok) {
+        setEnrollmentMessage({ 
+          type: "error", 
+          message: data.error || "Error al iniciar enrolamiento" 
+        });
+        return;
+      }
 
-      alert("Se ha enviado un correo de CDS para que inicie su proceso de enrolamiento. Una vez completado, regrese a esta página.");
+      setEnrollmentMessage({ 
+        type: "success", 
+        message: data.message || "Se ha enviado un correo de CDS para que inicie su proceso de enrolamiento. Una vez completado, regrese a esta página." 
+      });
     } catch (err: any) {
-      setError(err.message);
+      setEnrollmentMessage({ type: "error", message: err.message || "Error inesperado" });
     } finally {
       setIsLoading(false);
     }
@@ -136,13 +151,20 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.errorCode === "125") setStep("certificate_blocked");
-        throw new Error(data.error || "Error al solicitar segundo factor");
+        // Si el certificado está bloqueado, ir a ese estado
+        if (data.errorCode === "125" || data.errorCode === 125 || 
+            data.errorCode === "122" || data.errorCode === 122) {
+          setStep("certificate_blocked");
+          return;
+        }
+        // Mostrar error en el modal con código de error para detectar bloqueos
+        setSignError({ message: data.error || "Error al solicitar segundo factor", errorCode: data.errorCode });
+        return;
       }
 
       setStep("waiting_code");
     } catch (err: any) {
-      setError(err.message);
+      setSignError(err.message || "Error inesperado al solicitar SMS");
     } finally {
       setIsLoading(false);
     }
@@ -203,7 +225,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
   const handleSign = async () => {
     if (!claveCertificado || !codigoSegundoFactor) {
-      setSignError("Clave de certificado y código SMS son requeridos");
+      setSignError({ message: "Clave de certificado y código SMS son requeridos" });
       return;
     }
 
@@ -225,12 +247,17 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       if (!response.ok) {
         // Si el segundo factor está bloqueado, ir a ese estado
-        if (data.errorCode === "134") {
+        if (data.errorCode === "134" || data.errorCode === 134) {
           setStep("sf_blocked");
           return;
         }
-        // Mostrar error en el modal
-        setSignError(data.error || "Error al firmar documento");
+        // Si el certificado está bloqueado
+        if (data.errorCode === "122" || data.errorCode === 122) {
+          setStep("certificate_blocked");
+          return;
+        }
+        // Mostrar error en el modal con código para detectar bloqueos
+        setSignError({ message: data.error || "Error al firmar documento", errorCode: data.errorCode });
         return;
       }
 
@@ -242,7 +269,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
         }, 3000);
       }
     } catch (err: any) {
-      setSignError(err.message || "Error inesperado al firmar");
+      setSignError({ message: err.message || "Error inesperado al firmar" });
     } finally {
       setIsLoading(false);
     }
@@ -424,7 +451,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                       type={showCode ? "text" : "password"}
                       value={codigoSegundoFactor}
                       onChange={(e) => setCodigoSegundoFactor(e.target.value)}
-                      placeholder="Ingrese el código de 6 dígitos"
+                      placeholder="Ingrese el código de 8 dígitos"
                       className="w-full px-4 py-3 pr-12 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 bg-background rounded-xl focus:ring-2 focus:ring-[var(--tp-success)] focus:border-transparent text-foreground placeholder:text-muted-foreground transition-all"
                     />
                     <button
@@ -627,7 +654,14 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     )
   );
 
-  // Modal para mostrar errores al firmar (código incorrecto, etc.)
+  // Modal para mostrar errores al firmar (código incorrecto, bloqueo, etc.)
+  // Detecta si es un error de bloqueo para mostrar botón de desbloqueo
+  const isSFBlocked = signError?.errorCode === "134" || signError?.errorCode === 134 || 
+                      signError?.errorCode === "SF_BLOCKED";
+  const isCertBlocked = signError?.errorCode === "122" || signError?.errorCode === 122 || 
+                        signError?.errorCode === "125" || signError?.errorCode === 125 ||
+                        signError?.errorCode === "CERTIFICATE_BLOCKED";
+  
   const renderSignErrorModal = () => (
     signError && (
       <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -638,33 +672,111 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               <AlertCircle className="w-5 h-5" />
             </div>
             <h3 className="text-lg font-semibold text-foreground">
-              Error en el Proceso
+              {isSFBlocked ? "Segundo Factor Bloqueado" : 
+               isCertBlocked ? "Certificado Bloqueado" : 
+               "Error en el Proceso"}
             </h3>
           </div>
           
           {/* Mensaje */}
           <div className="p-4 rounded-xl mb-5 bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30">
             <p className="text-sm leading-relaxed text-[var(--tp-error)]">
-              {signError}
+              {signError.message}
+            </p>
+          </div>
+          
+          {/* Acciones - con botón de desbloqueo si corresponde */}
+          <div className="flex flex-col gap-3">
+            {(isSFBlocked || isCertBlocked) && (
+              <button
+                onClick={() => {
+                  setSignError(null);
+                  setUnblockType(isSFBlocked ? "2fa" : "certificate");
+                  setShowUnblockModal(true);
+                }}
+                className="w-full px-4 py-2.5 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white flex items-center justify-center gap-2"
+              >
+                <Lock className="w-4 h-4" />
+                Desbloquear {isSFBlocked ? "Segundo Factor" : "Certificado"}
+              </button>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSignError(null)}
+                className="flex-1 px-4 py-2.5 bg-secondary hover:bg-secondary/80 rounded-xl text-secondary-foreground font-medium transition-colors"
+              >
+                Reintentar
+              </button>
+              <button
+                onClick={() => {
+                  setSignError(null);
+                  // Re-verificar vigencia para actualizar el estado desde CDS
+                  checkVigencia();
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  );
+
+  // Modal para mostrar resultado del enrolamiento
+  const renderEnrollmentModal = () => (
+    enrollmentMessage && (
+      <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-card dark:bg-card rounded-2xl max-w-md w-full p-6 shadow-[var(--tp-shadow-2xl)] border border-border">
+          {/* Header con icono */}
+          <div className={`flex items-center gap-3 mb-4 ${
+            enrollmentMessage.type === "success" 
+              ? "text-[var(--tp-success)]" 
+              : "text-[var(--tp-error)]"
+          }`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+              enrollmentMessage.type === "success"
+                ? "bg-[var(--tp-success)]/20"
+                : "bg-[var(--tp-error)]/20"
+            }`}>
+              {enrollmentMessage.type === "success" ? (
+                <CheckCircle2 className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              {enrollmentMessage.type === "success" ? "Enrolamiento Iniciado" : "Error de Enrolamiento"}
+            </h3>
+          </div>
+          
+          {/* Mensaje */}
+          <div className={`p-4 rounded-xl mb-5 ${
+            enrollmentMessage.type === "success" 
+              ? "bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30" 
+              : "bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30"
+          }`}>
+            <p className={`text-sm leading-relaxed ${
+              enrollmentMessage.type === "success" 
+                ? "text-[var(--tp-success)]" 
+                : "text-[var(--tp-error)]"
+            }`}>
+              {enrollmentMessage.message}
             </p>
           </div>
           
           {/* Acciones */}
           <div className="flex gap-3">
             <button
-              onClick={() => setSignError(null)}
-              className="flex-1 px-4 py-2.5 bg-secondary hover:bg-secondary/80 rounded-xl text-secondary-foreground font-medium transition-colors"
+              onClick={() => setEnrollmentMessage(null)}
+              className={`flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors ${
+                enrollmentMessage.type === "success"
+                  ? "bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white"
+                  : "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
+              }`}
             >
-              Reintentar
-            </button>
-            <button
-              onClick={() => {
-                setSignError(null);
-                setStep("ready_for_2fa");
-              }}
-              className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
-            >
-              Cerrar
+              Entendido
             </button>
           </div>
         </div>
@@ -676,6 +788,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     <>
       {renderUnblockModal()}
       {renderSignErrorModal()}
+      {renderEnrollmentModal()}
       <div className="min-h-screen bg-background py-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-card shadow-[var(--tp-shadow-xl)] rounded-2xl overflow-hidden border border-border">
@@ -689,21 +802,23 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               </div>
             )}
 
-            {/* Document Preview - Always visible after initial load */}
-            {step !== "verifying" && step !== "success" && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-foreground">Vista previa del documento</h2>
-                  <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded-lg">Modo Lectura</span>
-                </div>
-                <div className="border border-border rounded-xl overflow-hidden shadow-[var(--tp-shadow-md)]">
-                  <PDFViewer
-                    url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}&_t=${cacheBuster}`}
-                    className="h-[550px]"
-                  />
-                </div>
+            {/* Document Preview - Always rendered but hidden during verifying/success */}
+            <div 
+              className={`mb-8 ${
+                step === "verifying" || step === "success" ? "hidden" : ""
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-foreground">Vista previa del documento</h2>
+                <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded-lg">Modo Lectura</span>
               </div>
-            )}
+              <div className="border border-border rounded-xl overflow-hidden shadow-[var(--tp-shadow-md)]">
+                <PDFViewer
+                  url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}&_t=${cacheBuster}`}
+                  className="h-[550px]"
+                />
+              </div>
+            </div>
 
             {/* Dynamic Status Section */}
             <div className="mt-8 border-t border-border pt-8">

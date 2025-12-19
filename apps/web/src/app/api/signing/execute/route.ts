@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 /**
  * API Route: POST /api/signing/execute
@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient();
+        const adminClient = createServiceRoleClient(); // Para operaciones que requieren bypass de RLS
         const body = await request.json();
         const {
             signing_token,
@@ -61,11 +62,45 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (signer.status !== "enrolled" && signer.status !== "pending") {
+        // Estados válidos para firmar: enrolled, pending, signing (en proceso)
+        // También permitir certificate_blocked si acaba de desbloquear (CDS actualizará en la firma)
+        const validStatesForSigning = ["enrolled", "pending", "signing"];
+        if (!validStatesForSigning.includes(signer.status)) {
+            // Si está bloqueado, dar mensaje más específico
+            if (signer.status === "certificate_blocked") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Su certificado está bloqueado. Por favor desbloquéelo y vuelva a cargar esta página.",
+                        errorCode: "CERTIFICATE_BLOCKED",
+                    },
+                    { status: 400 },
+                );
+            }
+            if (signer.status === "sf_blocked") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Su segundo factor (SMS) está bloqueado. Por favor desbloquéelo y vuelva a cargar esta página.",
+                        errorCode: "SF_BLOCKED",
+                    },
+                    { status: 400 },
+                );
+            }
+            if (signer.status === "needs_enrollment") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Debe completar su proceso de enrolamiento antes de poder firmar.",
+                        errorCode: "NEEDS_ENROLLMENT",
+                    },
+                    { status: 400 },
+                );
+            }
             return NextResponse.json(
                 {
                     error:
-                        `No puede firmar en el estado actual: ${signer.status}. Debe estar 'enrolled' o 'pending'`,
+                        `No puede firmar en el estado actual. Por favor recargue la página para verificar su estado.`,
                 },
                 { status: 400 },
             );
@@ -97,21 +132,46 @@ export async function POST(request: NextRequest) {
             signer.document.qr_file_path ||
             signer.document.original_file_path;
 
+        console.log("=== DEBUG: Intentando descargar documento ===");
+        console.log("File path:", filePath);
+        console.log(
+            "current_signed_file_path:",
+            signer.document.current_signed_file_path,
+        );
+        console.log("qr_file_path:", signer.document.qr_file_path);
+        console.log("original_file_path:", signer.document.original_file_path);
+
         // Intentar primero en docs-originals, luego en docs-signed
         let fileData: Blob | null = null;
+        let downloadErrors: string[] = [];
+
         for (const bucket of ["docs-originals", "docs-signed"]) {
-            const result = await supabase.storage.from(bucket).download(
+            console.log(`Intentando descargar de bucket: ${bucket}`);
+            // Usar adminClient para bypass de RLS (firmantes externos sin autenticación)
+            const result = await adminClient.storage.from(bucket).download(
                 filePath,
             );
             if (!result.error && result.data) {
+                console.log(`✓ Archivo encontrado en ${bucket}`);
                 fileData = result.data;
                 break;
+            } else {
+                console.log(`✗ Error en ${bucket}:`, result.error?.message);
+                downloadErrors.push(`${bucket}: ${result.error?.message}`);
             }
         }
 
         if (!fileData) {
+            console.error(
+                "No se pudo descargar el archivo de ningún bucket:",
+                downloadErrors,
+            );
             return NextResponse.json(
-                { error: "No se pudo obtener el archivo del documento" },
+                {
+                    error:
+                        `No se pudo obtener el archivo del documento. Ruta: ${filePath}`,
+                    details: downloadErrors.join("; "),
+                },
                 { status: 500 },
             );
         }
@@ -146,25 +206,32 @@ export async function POST(request: NextRequest) {
 
         if (invokeError || !result.success || !result.data.success) {
             // Manejar errores específicos de CDS
-            const errorCode = result.data?.codigo;
-            let errorMessage = result.data?.mensaje || result.error ||
+            const errorCode = result?.data?.codigo || result?.data?.errorCode;
+
+            // SIEMPRE usar comentarios de CDS para máxima transparencia
+            const cdsComentarios = result?.data?.comentarios ||
+                result?.data?.mensaje;
+            let errorMessage = cdsComentarios || result?.error ||
                 "Error al firmar documento";
 
-            // Errores comunes
-            if (errorCode === "122") {
-                errorMessage =
-                    "Máximo de intentos de clave FEA alcanzado. El certificado ha sido bloqueado.";
+            console.log("CDS Error:", {
+                errorCode,
+                comentarios: cdsComentarios,
+                estado: result?.data?.estado,
+                fullResult: result,
+            });
+
+            // Actualizar estado en BD según código de error
+            if (
+                errorCode === "122" || errorCode === 122 ||
+                errorCode === "123" || errorCode === 123 ||
+                errorCode === "125" || errorCode === 125
+            ) {
                 await supabase
                     .from("signing_signers")
                     .update({ status: "certificate_blocked" })
                     .eq("id", signer.id);
-            } else if (errorCode === "124") {
-                errorMessage = "La clave FEA ingresada es incorrecta.";
-            } else if (errorCode === "127") {
-                errorMessage = "El código de segundo factor es incorrecto.";
-            } else if (errorCode === "134") {
-                errorMessage =
-                    "El segundo factor está bloqueado. Contacte a soporte.";
+            } else if (errorCode === "134" || errorCode === 134) {
                 await supabase
                     .from("signing_signers")
                     .update({ status: "sf_blocked" })
@@ -175,7 +242,9 @@ export async function POST(request: NextRequest) {
                 {
                     success: false,
                     error: errorMessage,
-                    codigo: errorCode,
+                    cdsComentarios: cdsComentarios, // Incluir para debug
+                    errorCode: errorCode,
+                    estado: result?.data?.estado,
                 },
                 { status: 400 },
             );
@@ -205,7 +274,7 @@ export async function POST(request: NextRequest) {
             const signedPath =
                 `${signer.document.organization_id}/${signer.document.id}/signed_${Date.now()}.pdf`;
 
-            const { error: uploadError } = await supabase
+            const { error: uploadError } = await adminClient
                 .storage
                 .from("docs-signed")
                 .upload(signedPath, signedBuffer, {

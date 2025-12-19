@@ -245,6 +245,10 @@ async function checkVigenciaFEA(config: CDSConfig, payload: any) {
         fechaVencimiento: solicitante.fechaVencimiento,
         certificadoBloqueado: solicitante.certificadoBloqueado === true ||
             solicitante.certificadoBloqueado === "true",
+        // Transparencia: incluir mensajes originales de CDS
+        vigencia: solicitante.vigencia, // Mensaje descriptivo (e.g. "Vigente", "Certificado bloqueado", "No Vigente")
+        estado: data.estado, // "OK" o "FAIL"
+        comentarios: data.comentarios,
         mensaje: data.comentarios,
         debug_data: data,
     };
@@ -325,7 +329,9 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
         );
         return {
             success: false,
-            codigo: data.errorCode?.toString(),
+            estado: data.estado,
+            errorCode: data.errorCode,
+            comentarios: data.comentarios,
             mensaje: data.comentarios || data.mensaje ||
                 "Error desconocido de CDS",
             debug_data: data,
@@ -342,7 +348,9 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
         );
         return {
             success: false,
-            codigo: data.codigo,
+            estado: "FAIL",
+            errorCode: data.codigo,
+            comentarios: data.mensaje,
             mensaje: data.mensaje || "Error desconocido de CDS",
             debug_data: data,
         };
@@ -350,9 +358,11 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
 
     return {
         success: true,
+        estado: data.estado || "OK",
+        comentarios: data.comentarios,
         mensaje: data.comentarios || data.mensaje || "Enrolamiento exitoso",
         enrolled: true,
-        url: data.url, // URL retornado por CDS si enviaCorreo es false
+        url: data.estadoEnrolado?.[0]?.url || data.url, // URL retornado por CDS si enviaCorreo es false
         debug_data: data,
     };
 }
@@ -402,7 +412,9 @@ async function requestSecondFactor(config: CDSConfig, payload: any) {
     if (data.errorCode !== 0 && data.errorCode !== "0") {
         return {
             success: false,
-            codigo: data.errorCode,
+            estado: data.estado || "FAIL",
+            errorCode: data.errorCode,
+            comentarios: data.comentarios,
             mensaje: data.comentarios,
             debug_data: data,
         };
@@ -410,6 +422,8 @@ async function requestSecondFactor(config: CDSConfig, payload: any) {
 
     return {
         success: true,
+        estado: data.estado || "OK",
+        comentarios: data.comentarios,
         mensaje: data.comentarios,
         debug_data: data,
     };
@@ -493,7 +507,9 @@ async function signMultiple(config: CDSConfig, payload: any) {
     if (data.estado === "FAIL" || (data.errorCode && data.errorCode !== 0)) {
         return {
             success: false,
-            codigo: data.errorCode,
+            estado: data.estado || "FAIL",
+            errorCode: data.errorCode,
+            comentarios: data.comentarios,
             mensaje: data.comentarios,
             debug_data: data,
         };
@@ -501,6 +517,8 @@ async function signMultiple(config: CDSConfig, payload: any) {
 
     return {
         success: true,
+        estado: data.estado || "OK",
+        comentarios: data.comentarios,
         transaccion: data.transaccion,
         documentoFirmado: data.documentoFirmado,
         mensaje: data.comentarios,
@@ -604,7 +622,9 @@ async function unblockCertificate(config: CDSConfig, payload: any) {
     if (data.estado === "FAIL") {
         return {
             success: false,
-            codigo: data.errorCode,
+            estado: data.estado,
+            errorCode: data.errorCode,
+            comentarios: data.comentarios,
             mensaje: data.comentarios,
             debug_data: data,
         };
@@ -612,6 +632,8 @@ async function unblockCertificate(config: CDSConfig, payload: any) {
 
     return {
         success: true,
+        estado: data.estado || "OK",
+        comentarios: data.comentarios,
         url: data.url,
         mensaje: data.comentarios,
         debug_data: data,
@@ -672,7 +694,9 @@ async function unblockSecondFactor(config: CDSConfig, payload: any) {
     if (data.estado === "FAIL") {
         return {
             success: false,
-            codigo: data.errorCode,
+            estado: data.estado,
+            errorCode: data.errorCode,
+            comentarios: data.comentarios,
             mensaje: data.comentarios,
             debug_data: data,
         };
@@ -680,6 +704,8 @@ async function unblockSecondFactor(config: CDSConfig, payload: any) {
 
     return {
         success: true,
+        estado: data.estado || "OK",
+        comentarios: data.comentarios,
         url: data.url, // URL donde el usuario debe ir para desbloquear
         mensaje: data.comentarios,
         debug_data: data,

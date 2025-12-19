@@ -58,13 +58,33 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        if (invokeError || !result.success) {
-            console.error("Error al enrolar CDS:", invokeError || result.error);
+        console.log("CDS enroll response:", JSON.stringify(result, null, 2));
+
+        // Verificar errores - incluir estado FAIL de CDS
+        const cdsError = invokeError ||
+            !result?.success ||
+            result?.data?.success === false ||
+            result?.data?.estado === "FAIL";
+
+        if (cdsError) {
+            console.error(
+                "Error al enrolar CDS:",
+                invokeError || result?.error || result?.data,
+            );
+
+            // SIEMPRE usar comentarios de CDS para transparencia
+            const cdsComentarios = result?.data?.comentarios ||
+                result?.data?.mensaje;
+            const errorMessage = cdsComentarios || result?.error ||
+                "Error al iniciar enrolamiento";
+
             return NextResponse.json(
                 {
                     success: false,
-                    error: result?.error || result?.data?.mensaje ||
-                        "Error al iniciar enrolamiento",
+                    error: errorMessage,
+                    cdsComentarios: cdsComentarios,
+                    errorCode: result?.data?.errorCode,
+                    estado: result?.data?.estado,
                 },
                 { status: 400 },
             );
@@ -78,11 +98,17 @@ export async function POST(request: NextRequest) {
                 .eq("id", signer.id);
         }
 
+        // Obtener mensaje de CDS o construir uno descriptivo
+        const cdsComentarios = result.data?.comentarios || result.data?.mensaje;
+
         return NextResponse.json({
             success: true,
-            message: result.data.mensaje ||
+            message: cdsComentarios ||
                 "Proceso de enrolamiento iniciado exitosamente.",
-            enrollment_url: result.data.debug_data?.url, // Depende de enviaCorreo = false en CDS
+            cdsComentarios: cdsComentarios,
+            estado: result.data?.estado,
+            enrollment_url: result.data?.url ||
+                result.data?.debug_data?.estadoEnrolado?.[0]?.url,
         });
     } catch (error: any) {
         console.error("Error en /api/signing/enroll-cds:", error);
