@@ -37,7 +37,6 @@ export default function CDSPanel() {
   const [formData, setFormData] = useState({
     rut: "",
     correo: "",
-    extranjero: false,
     numDocumento: "",
     urlRetorno: "https://app.tupatrimonio.cl",
     codigoTransaccion: "",
@@ -188,24 +187,10 @@ export default function CDSPanel() {
                   className={inputClasses}
                 />
               </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="extranjero"
-                  name="extranjero"
-                  checked={formData.extranjero || false}
-                  onChange={(e) => setFormData({...formData, extranjero: e.target.checked})}
-                  className="w-4 h-4 rounded border-input text-[var(--tp-brand)] focus:ring-[var(--tp-brand)]"
-                />
-                <label htmlFor="extranjero" className="text-sm text-foreground cursor-pointer">
-                  Es extranjero (sin RUT chileno válido)
-                </label>
-              </div>
               <button
                 onClick={() => handleAction("enroll", {
                   rut: formData.rut,
                   correo: formData.correo,
-                  extranjero: formData.extranjero || false
                 })}
                 disabled={loading || !!rutError}
                 className={brandButtonClasses}

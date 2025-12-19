@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
                         correo: signer.email,
                         enviaCorreo: send_email,
                         urlRetorno,
+                        extranjero: false, // Por defecto ciudadano chileno
                     },
                 },
             );

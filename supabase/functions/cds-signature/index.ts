@@ -256,15 +256,15 @@ async function checkVigenciaFEA(config: CDSConfig, payload: any) {
 
 /**
  * Enrola un nuevo firmante en CDS
- * Según documentación oficial, solo requiere: rut, correo, extranjero
+ * Según documentación oficial, solo requiere: rut, correo
  */
 async function enrollFirmante(config: CDSConfig, payload: any) {
     const {
         rut,
         correo,
-        extranjero = false, // Por defecto chileno
         enviaCorreo = true, // Por defecto enviar correo
         urlRetorno,
+        extranjero = false, // Por defecto ciudadano chileno
     } = payload;
 
     if (!rut || !correo) {
@@ -274,6 +274,8 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
     const endpoint = `${config.base_url}${config.endpoints.enrolarFirmanteFEA}`;
 
     // Estructura según documentación oficial de CDS
+    // NOTA: Omitimos urlNotificacion y usamos enviaCorreo=false para que CDS
+    // retorne la URL de enrolamiento directamente en lugar de usar webhook
     const requestBody = {
         request: {
             encabezado: {
@@ -281,11 +283,8 @@ async function enrollFirmante(config: CDSConfig, payload: any) {
                 clave: config.clave,
             },
             parametro: {
-                urlNotificacion: config.webhook_url ||
-                    "https://app.tupatrimonio.cl/api/webhooks/cds",
-                authorization: config.webhook_secret || "SharedSecret123",
                 urlRetorno: urlRetorno || "https://app.tupatrimonio.cl",
-                enviaCorreo: enviaCorreo,
+                enviaCorreo: false, // false = CDS retorna URL directamente
                 firmantes: [
                     {
                         rut: rut,
@@ -742,7 +741,6 @@ async function simpleFlowFEA(config: CDSConfig, payload: any) {
         const firmante: any = {
             rut: f.rut,
             correo: f.correo,
-            extranjero: f.extranjero || false,
         };
 
         if (posicionarFirma) {

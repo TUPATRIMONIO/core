@@ -250,6 +250,20 @@ export default function OrderCheckoutForm({
   };
 
   const handleWebpayPlus = async () => {
+    // Guardar datos de facturación Transbank antes de pagar
+    if (billingData) {
+      try {
+        console.log('[Checkout] Guardando datos de facturación Transbank:', billingData);
+        await fetch('/api/billing/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ billing_data: billingData }),
+        });
+      } catch (err) {
+        console.warn('Error guardando datos de facturación:', err);
+        // No bloquear el pago si falla guardar
+      }
+    }
     await handleCheckout('transbank');
   };
 
@@ -308,6 +322,19 @@ export default function OrderCheckoutForm({
     if (!billingData) {
       setError('Por favor completa los datos de facturación antes de continuar');
       return;
+    }
+
+    // Guardar datos de facturación antes de pagar
+    try {
+      console.log('[Checkout] Guardando datos de facturación Oneclick:', billingData);
+      await fetch('/api/billing/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing_data: billingData }),
+      });
+    } catch (err) {
+      console.warn('Error guardando datos de facturación:', err);
+      // No bloquear el pago si falla guardar
     }
 
     // Obtener tbkUser de la tarjeta seleccionada o del estado actual

@@ -58,7 +58,7 @@ export function SignerManagementStep() {
   const [identifierValue, setIdentifierValue] = useState('')
   const [rutError, setRutError] = useState<string | null>(null)
   const [role, setRole] = useState<'signer' | 'approver' | 'reviewer'>('signer')
-  const [isForeigner, setIsForeigner] = useState(false)
+
 
   const signatureProduct = state.signatureProduct
   const requiresRutOnly = signatureProduct?.identifier_type === 'rut_only'
@@ -184,7 +184,6 @@ export function SignerManagementStep() {
     setIdentifierType(requiresRutOnly ? 'rut' : 'rut')
     setIdentifierValue('')
     setRole('signer')
-    setIsForeigner(false)
   }, [requiresRutOnly])
 
   const validateForm = useCallback(() => {
@@ -241,7 +240,7 @@ export function SignerManagementStep() {
         p_full_name: fullName,
         p_rut: rutDb,
         p_phone: phone.trim() || null,
-        p_is_foreigner: isForeigner,
+        p_is_foreigner: false,
         p_signing_order: signers.length + 1,
         p_user_id: null,
       })
@@ -256,13 +255,12 @@ export function SignerManagementStep() {
         .update({
           first_name: firstName.trim(),
           last_name: lastName.trim(),
-          is_foreigner: isForeigner,
+          is_foreigner: false,
           metadata: {
             identifier_type: isRutType ? 'rut' : identifierType,
             identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
             country_code: state.countryCode,
             role: role,
-            is_foreigner: isForeigner,
           },
         })
         .eq('id', signerId)
@@ -284,7 +282,6 @@ export function SignerManagementStep() {
     firstName,
     identifierType,
     identifierValue,
-    isForeigner,
     isRutType,
     lastName,
     loadSigners,
@@ -553,25 +550,6 @@ export function SignerManagementStep() {
                         )}
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 rounded-lg border p-4 bg-muted/30">
-                      <input
-                        type="checkbox"
-                        id="isForeigner"
-                        checked={isForeigner}
-                        onChange={(e) => setIsForeigner(e.target.checked)}
-                        disabled={isSaving}
-                        className="h-4 w-4 rounded border-input text-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]"
-                      />
-                      <div className="flex-1">
-                        <label htmlFor="isForeigner" className="text-sm font-medium cursor-pointer">
-                          Es extranjero
-                        </label>
-                        <p className="text-xs text-muted-foreground">
-                          Marca esta opción si el firmante no tiene RUT chileno válido
-                        </p>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="flex justify-end gap-2">
@@ -670,13 +648,8 @@ export function SignerManagementStep() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-2">
+                          <div className="text-xs text-muted-foreground">
                             <span>{s.rut ? `RUT: ${s.rut}` : `ID: ${s.metadata?.identifier_value || '-'}`}</span>
-                            {(s.is_foreigner || s.metadata?.is_foreigner) && (
-                              <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700">
-                                Extranjero
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
