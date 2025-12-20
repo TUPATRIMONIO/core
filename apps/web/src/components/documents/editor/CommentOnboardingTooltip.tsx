@@ -38,7 +38,7 @@ export function CommentOnboardingTooltip({ className }: CommentOnboardingTooltip
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-50 max-w-sm animate-in slide-in-from-bottom-5 fade-in-0 duration-300",
+        "fixed bottom-4 left-4 md:bottom-8 md:right-24 z-50 max-w-sm animate-in slide-in-from-bottom-5 fade-in-0 duration-300",
         className
       )}
     >
