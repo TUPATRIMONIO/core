@@ -15,7 +15,7 @@
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
 > PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SELECTOR GLOBAL DE
-> PAÍS EN DASHBOARD** ✅\
+> PAÍS EN DASHBOARD** ✅ + **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -950,6 +950,46 @@ API Routes:
 Edge Function:
   - supabase/functions/cds-signature/index.ts
 ```
+
+---
+
+### ✅ COMPLETADO - Visibilidad por Organización Activa (Dic 19, 2025)
+
+**Problema Resuelto:** Los usuarios con múltiples organizaciones podían ver
+documentos de firma electrónica y pedidos de todas sus organizaciones, en lugar
+de solo los de la organización actualmente seleccionada.
+
+**Solución Implementada:**
+
+Todas las páginas ahora filtran datos por la **organización activa** del usuario
+usando `getUserActiveOrganization()` o `useOrganization()`.
+
+**Archivos Modificados - Documentos de Firma:**
+
+| Archivo                                                    | Cambio                                   |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `dashboard/signing/documents/page.tsx`                     | Agregado filtro `.eq('organization_id')` |
+| `dashboard/signing/documents/[id]/page.tsx`                | Verificación contra org activa           |
+| `components/signing/wizard/steps/CountryAndUploadStep.tsx` | Usa `useOrganization()` del contexto     |
+
+**Archivos Modificados - Pedidos:**
+
+| Archivo                               | Cambio                                            |
+| ------------------------------------- | ------------------------------------------------- |
+| `checkout/[orderId]/page.tsx`         | Usa `getUserActiveOrganization()` en verificación |
+| `checkout/[orderId]/success/page.tsx` | Usa `getUserActiveOrganization()` en verificación |
+
+**Componentes Ya Correctos (sin cambios necesarios):**
+
+- ✅ `components/checkout/OrdersList.tsx` - Ya usaba `useOrganization()`
+- ✅ `components/checkout/PendingOrdersBadge.tsx` - Ya usaba `useOrganization()`
+
+**Comportamiento:**
+
+- Un usuario que pertenece a múltiples organizaciones solo ve datos de la
+  organización activa (la seleccionada en el Organization Switcher)
+- Si intenta acceder por URL a un documento/pedido de otra organización → 404
+- Para ver datos de otra organización, debe cambiar la org activa en el switcher
 
 ---
 

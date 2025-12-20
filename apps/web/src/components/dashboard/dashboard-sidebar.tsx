@@ -25,6 +25,8 @@ import {
   ShoppingCart,
   FileSignature,
   FilePlus,
+  FileEdit,
+  FolderOpen,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -165,6 +167,19 @@ const signingMenuItems = [
     title: 'Nuevo Documento',
     url: '/dashboard/signing/documents/new',
     icon: FilePlus,
+  },
+]
+
+const documentsMenuItems = [
+  {
+    title: 'Mis Documentos',
+    url: '/dashboard/documents',
+    icon: FolderOpen,
+  },
+  {
+    title: 'Nuevo Documento',
+    url: '/dashboard/documents/new',
+    icon: FileEdit,
   },
 ]
 
@@ -386,6 +401,29 @@ export function DashboardSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     isActive={isActive(item.url, signingMenuItems)}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Editor de Documentos */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Editor</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {documentsMenuItems.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.url, documentsMenuItems)}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
