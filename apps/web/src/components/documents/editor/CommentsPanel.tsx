@@ -33,9 +33,10 @@ interface CommentsPanelProps {
   isOpen: boolean;
   onToggle: () => void;
   canComment: boolean;
+  onHighlightText?: (quotedText: string) => void;
 }
 
-export function CommentsPanel({ documentId, isOpen, onToggle, canComment }: CommentsPanelProps) {
+export function CommentsPanel({ documentId, isOpen, onToggle, canComment, onHighlightText }: CommentsPanelProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -221,9 +222,13 @@ export function CommentsPanel({ documentId, isOpen, onToggle, canComment }: Comm
                         </span>
                       </div>
                       
-                      {/* Texto citado */}
+                      {/* Texto citado - clickeable para resaltar */}
                       {comment.quoted_text && (
-                        <div className="mt-1 pl-2 border-l-2 border-muted text-xs text-muted-foreground italic">
+                        <div 
+                          className={`mt-1 pl-2 border-l-2 border-primary/50 text-xs text-muted-foreground italic ${onHighlightText ? 'cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors rounded-r py-1 pr-1' : ''}`}
+                          onClick={() => onHighlightText?.(comment.quoted_text!)}
+                          title={onHighlightText ? 'Clic para ver en el documento' : undefined}
+                        >
                           "{comment.quoted_text}"
                         </div>
                       )}

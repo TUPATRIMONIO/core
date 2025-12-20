@@ -7,12 +7,17 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useDocumentLock } from '@/hooks/useDocumentLock';
+import { useTextSelection } from '@/hooks/useTextSelection';
 import { EditorToolbar } from './EditorToolbar';
 import { DocumentLockedBanner } from './DocumentLockedBanner';
 import { CommentsPanel } from './CommentsPanel';
+import { TextSelectionPopup } from './TextSelectionPopup';
+import { CommentDialog } from './CommentDialog';
+import { CommentOnboardingTooltip } from './CommentOnboardingTooltip';
 import { toast } from 'sonner';
+import { createClient } from '@/lib/supabase/client';
 
 interface DocumentEditorProps {
   documentId: string;
@@ -35,6 +40,14 @@ export function DocumentEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [pendingQuotedText, setPendingQuotedText] = useState<{ text: string; from: number; to: number } | null>(null);
+  const [highlightedText, setHighlightedText] = useState<string | null>(null);
+  
+  // Refs
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  
+  const supabase = createClient();
 
   // Sistema de bloqueo
   const { isLocked, lockedBy, canEdit, isConnected } = useDocumentLock({
@@ -120,6 +133,155 @@ export function DocumentEditor({
     }
   }, [editor, canEdit]);
 
+  // Text selection hook for commenting on selected text
+  const { selection, hasSelection, clearSelection } = useTextSelection({
+    containerRef: editorContainerRef,
+    enabled: true,
+  });
+
+  // Handle click on "Comentar" button when text is selected
+  function handleAddSelectionComment() {
+    if (!selection) return;
+    
+    setPendingQuotedText({
+      text: selection.text,
+      from: selection.from,
+      to: selection.to,
+    });
+    setShowCommentDialog(true);
+    clearSelection();
+  }
+
+  // Submit comment with quoted text (for authenticated users)
+  async function handleQuotedCommentSubmit(content: string) {
+    if (!pendingQuotedText) return;
+
+    try {
+      const { data, error } = await supabase.rpc('add_document_comment', {
+        p_document_id: documentId,
+        p_content: content,
+        p_quoted_text: pendingQuotedText.text,
+        p_selection_from: pendingQuotedText.from,
+        p_selection_to: pendingQuotedText.to,
+      });
+
+      if (error) {
+        console.error('Error adding comment:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          fullError: JSON.stringify(error),
+        });
+        toast.error(error.message || 'Error al agregar comentario');
+        throw error;
+      }
+
+      setPendingQuotedText(null);
+      setShowComments(true); // Open comments panel to see the new comment
+      toast.success('Comentario agregado');
+    } catch (error: any) {
+      console.error('Catch error:', error);
+      toast.error(error?.message || 'Error al agregar comentario');
+      throw error;
+    }
+  }
+
+  // Highlight quoted text in the document when clicking on a comment
+  function handleHighlightText(quotedText: string) {
+    if (!editorContainerRef.current || !quotedText) {
+      console.log('handleHighlightText: missing ref or text', { hasRef: !!editorContainerRef.current, quotedText });
+      return;
+    }
+
+    console.log('handleHighlightText: searching for', quotedText);
+
+    // Add animation keyframes if not already present
+    if (!document.getElementById('comment-highlight-styles')) {
+      const style = document.createElement('style');
+      style.id = 'comment-highlight-styles';
+      style.textContent = `
+        @keyframes pulse-highlight {
+          0%, 100% { background-color: hsl(var(--primary) / 0.4); }
+          50% { background-color: hsl(var(--primary) / 0.2); }
+        }
+        .comment-highlight-active {
+          background-color: hsl(var(--primary) / 0.4);
+          animation: pulse-highlight 0.5s ease-in-out 3;
+          border-radius: 2px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Method 1: Use window.find() to locate and select the text
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
+
+    // Focus on the editor container first
+    editorContainerRef.current.focus();
+
+    // Try to find the text using window.find (works in most browsers)
+    // @ts-ignore - window.find is not in TypeScript types but exists in browsers
+    const found = window.find(quotedText, false, false, true, false, true, false);
+
+    if (found && selection && selection.rangeCount > 0) {
+      console.log('handleHighlightText: found text with window.find');
+      const range = selection.getRangeAt(0);
+      
+      // Scroll the selection into view
+      const rect = range.getBoundingClientRect();
+      const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
+      if (scrollContainer) {
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const scrollTop = scrollContainer.scrollTop + rect.top - containerRect.top - 150;
+        scrollContainer.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+      }
+
+      // Create highlight span
+      try {
+        const highlightSpan = document.createElement('span');
+        highlightSpan.className = 'comment-highlight-active';
+        range.surroundContents(highlightSpan);
+
+        // Remove highlight after animation
+        setTimeout(() => {
+          if (highlightSpan.parentNode) {
+            const parent = highlightSpan.parentNode;
+            while (highlightSpan.firstChild) {
+              parent.insertBefore(highlightSpan.firstChild, highlightSpan);
+            }
+            parent.removeChild(highlightSpan);
+          }
+        }, 2000);
+      } catch (e) {
+        console.log('Could not wrap text, using selection highlight');
+        // Keep selection visible for a moment
+        setTimeout(() => {
+          selection?.removeAllRanges();
+        }, 2000);
+      }
+    } else {
+      console.log('handleHighlightText: text not found with window.find, trying manual search');
+      
+      // Fallback: Manual search in text content
+      const editorText = editorContainerRef.current.textContent || '';
+      if (editorText.includes(quotedText)) {
+        toast.info('Texto encontrado - revisa el documento');
+        // Simple scroll to top of editor as fallback
+        const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
+        if (scrollContainer) {
+          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        toast.info('El texto citado ya no existe en el documento');
+      }
+    }
+  }
+
+
   return (
     <div className="flex h-full bg-background">
       {/* Contenido principal */}
@@ -163,7 +325,7 @@ export function DocumentEditor({
 
         {/* Editor de contenido */}
         <div className="flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto px-6 py-8">
+          <div ref={editorContainerRef} className="max-w-4xl mx-auto px-6 py-8">
             <EditorContent
               editor={editor}
               className={`
@@ -179,6 +341,25 @@ export function DocumentEditor({
         </div>
       </div>
 
+      {/* Text Selection Popup */}
+      {hasSelection && selection?.rect && (
+        <TextSelectionPopup
+          position={{ top: selection.rect.top, left: selection.rect.left + selection.rect.width / 2 }}
+          onAddComment={handleAddSelectionComment}
+        />
+      )}
+
+      {/* Comment Dialog */}
+      <CommentDialog
+        open={showCommentDialog}
+        onOpenChange={setShowCommentDialog}
+        quotedText={pendingQuotedText?.text || ''}
+        onSubmit={handleQuotedCommentSubmit}
+      />
+
+      {/* Onboarding Tooltip */}
+      <CommentOnboardingTooltip />
+
       {/* Panel de comentarios */}
       {showComments && (
         <CommentsPanel
@@ -186,6 +367,7 @@ export function DocumentEditor({
           isOpen={showComments}
           onToggle={() => setShowComments(false)}
           canComment={true}
+          onHighlightText={handleHighlightText}
         />
       )}
     </div>

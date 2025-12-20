@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,10 @@ import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useTextSelection } from '@/hooks/useTextSelection';
+import { TextSelectionPopup } from '@/components/documents/editor/TextSelectionPopup';
+import { CommentDialog } from '@/components/documents/editor/CommentDialog';
+import { CommentOnboardingTooltip } from '@/components/documents/editor/CommentOnboardingTooltip';
 
 interface PublicDocumentViewerProps {
   token: string;
@@ -30,6 +34,7 @@ interface DocumentData {
 interface Comment {
   id: string;
   content: string;
+  quoted_text?: string;
   author_name: string;
   author_email: string;
   created_at: string;
@@ -41,27 +46,32 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [document, setDocument] = useState<DocumentData | null>(null);
+  const [docData, setDocData] = useState<DocumentData | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [pendingQuotedText, setPendingQuotedText] = useState<{ text: string; from: number; to: number } | null>(null);
+  
+  // Ref for text selection
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   
   const supabase = createClient();
 
   // Editor en modo solo lectura
   const editor = useEditor({
     extensions: [StarterKit],
-    content: document?.content || '',
+    content: docData?.content || '',
     editable: false,
     immediatelyRender: false,
   });
 
   // Actualizar contenido del editor cuando cambie el documento
   useEffect(() => {
-    if (editor && document?.content) {
-      editor.commands.setContent(document.content);
+    if (editor && docData?.content) {
+      editor.commands.setContent(docData.content);
     }
-  }, [editor, document?.content]);
+  }, [editor, docData?.content]);
 
   // Verificar si ya hay un token guardado en localStorage
   useEffect(() => {
@@ -93,7 +103,7 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
       // Guardar access token
       localStorage.setItem(`doc_access_${token}`, data.access_token);
       setAccessToken(data.access_token);
-      setDocument(data.document);
+      setDocData(data.document);
       setStep('document');
     } catch (error) {
       toast.error('Documento no encontrado o no es público');
@@ -118,7 +128,7 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
         return;
       }
 
-      setDocument(data.document);
+      setDocData(data.document);
       setStep('document');
     } catch (error) {
       localStorage.removeItem(`doc_access_${token}`);
@@ -127,6 +137,53 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
       setIsLoading(false);
     }
   }
+
+  // Text selection hook for commenting on selected text
+  const { selection, hasSelection, clearSelection } = useTextSelection({
+    containerRef: editorContainerRef,
+    enabled: docData?.allow_comments && step === 'document',
+  });
+
+  // Handle click on "Comentar" button when text is selected
+  function handleAddSelectionComment() {
+    if (!selection) return;
+    
+    setPendingQuotedText({
+      text: selection.text,
+      from: selection.from,
+      to: selection.to,
+    });
+    setShowCommentDialog(true);
+    clearSelection();
+  }
+
+  // Submit comment with quoted text
+  async function handleQuotedCommentSubmit(content: string) {
+    if (!accessToken || !pendingQuotedText) return;
+
+    try {
+      const { data, error } = await supabase.rpc('add_public_comment', {
+        p_access_token: accessToken,
+        p_content: content,
+        p_quoted_text: pendingQuotedText.text,
+      });
+
+      if (error) {
+        toast.error('Error al agregar comentario');
+        console.error(error);
+        return;
+      }
+
+      setComments([...comments, data]);
+      setPendingQuotedText(null);
+      setShowComments(true); // Abrir panel de comentarios para ver el nuevo
+      toast.success('Comentario agregado');
+    } catch (error) {
+      toast.error('Error al agregar comentario');
+      throw error;
+    }
+  }
+
 
   async function handleSubmitComment() {
     if (!newComment.trim() || !accessToken) return;
@@ -153,6 +210,74 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
       setIsLoading(false);
     }
   }
+
+  // Highlight quoted text in the document when clicking on a comment
+  function handleHighlightText(quotedText: string) {
+    if (!editorContainerRef.current || !quotedText) return;
+
+    // Add animation keyframes if not already present
+    if (!window.document.getElementById('comment-highlight-styles')) {
+      const style = window.document.createElement('style');
+      style.id = 'comment-highlight-styles';
+      style.textContent = `
+        @keyframes pulse-highlight {
+          0%, 100% { background-color: hsl(var(--primary) / 0.4); }
+          50% { background-color: hsl(var(--primary) / 0.2); }
+        }
+        .comment-highlight-active {
+          background-color: hsl(var(--primary) / 0.4);
+          animation: pulse-highlight 0.5s ease-in-out 3;
+          border-radius: 2px;
+        }
+      `;
+      window.document.head.appendChild(style);
+    }
+
+    const selection = window.getSelection();
+    if (selection) selection.removeAllRanges();
+
+    editorContainerRef.current.focus();
+
+    // @ts-ignore - window.find is not in TypeScript types but exists in browsers
+    const found = window.find(quotedText, false, false, true, false, true, false);
+
+    if (found && selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      
+      // Scroll into view
+      const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
+      if (scrollContainer) {
+        const rect = range.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const scrollTop = scrollContainer.scrollTop + rect.top - containerRect.top - 150;
+        scrollContainer.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+      }
+
+      try {
+        const highlightSpan = window.document.createElement('span');
+        highlightSpan.className = 'comment-highlight-active';
+        range.surroundContents(highlightSpan);
+
+        setTimeout(() => {
+          if (highlightSpan.parentNode) {
+            const parent = highlightSpan.parentNode;
+            while (highlightSpan.firstChild) {
+              parent.insertBefore(highlightSpan.firstChild, highlightSpan);
+            }
+            parent.removeChild(highlightSpan);
+          }
+        }, 2000);
+      } catch (e) {
+        setTimeout(() => selection?.removeAllRanges(), 2000);
+      }
+    } else {
+      const editorText = editorContainerRef.current.textContent || '';
+      if (!editorText.includes(quotedText)) {
+        toast.info('El texto citado ya no existe en el documento');
+      }
+    }
+  }
+
 
   // Pantalla de solicitud de email
   if (step === 'email') {
@@ -229,10 +354,10 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               <Eye className="h-3 w-3" />
               Modo solo lectura
-              {document?.allow_comments && ' • Puedes comentar'}
+              {docData?.allow_comments && ' • Puedes comentar'}
             </p>
           </div>
-          {document?.allow_comments && (
+          {docData?.allow_comments && (
             <Button 
               variant="outline" 
               onClick={() => setShowComments(!showComments)}
@@ -245,7 +370,7 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
 
         {/* Editor (solo lectura) */}
         <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-4xl mx-auto">
+          <div ref={editorContainerRef} className="max-w-4xl mx-auto">
             <EditorContent
               editor={editor}
               className="prose prose-lg dark:prose-invert max-w-none min-h-[500px]"
@@ -254,8 +379,27 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
         </div>
       </div>
 
+      {/* Text Selection Popup */}
+      {hasSelection && selection?.rect && document?.allow_comments && (
+        <TextSelectionPopup
+          position={{ top: selection.rect.top, left: selection.rect.left + selection.rect.width / 2 }}
+          onAddComment={handleAddSelectionComment}
+        />
+      )}
+
+      {/* Comment Dialog */}
+      <CommentDialog
+        open={showCommentDialog}
+        onOpenChange={setShowCommentDialog}
+        quotedText={pendingQuotedText?.text || ''}
+        onSubmit={handleQuotedCommentSubmit}
+      />
+
+      {/* Onboarding Tooltip */}
+      {docData?.allow_comments && <CommentOnboardingTooltip />}
+
       {/* Panel de comentarios */}
-      {showComments && document?.allow_comments && (
+      {showComments && docData?.allow_comments && (
         <div className="w-80 border-l bg-card flex flex-col">
           <div className="p-4 border-b">
             <h3 className="font-semibold">Comentarios</h3>
@@ -288,6 +432,16 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
                           })}
                         </span>
                       </div>
+                      {/* Quoted text - clickable to highlight */}
+                      {comment.quoted_text && (
+                        <div 
+                          className="mt-1 pl-2 border-l-2 border-primary/50 text-xs text-muted-foreground italic cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors rounded-r py-1 pr-1"
+                          onClick={() => handleHighlightText(comment.quoted_text!)}
+                          title="Clic para ver en el documento"
+                        >
+                          "{comment.quoted_text.length > 100 ? comment.quoted_text.slice(0, 100) + '...' : comment.quoted_text}"
+                        </div>
+                      )}
                       <p className="text-sm mt-1">{comment.content}</p>
                     </div>
                   </div>
