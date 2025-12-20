@@ -8,7 +8,7 @@
 DO $$
 DECLARE
     v_provider_id UUID;
-    v_correct_org_id UUID := '00c5b16f-8fea-436f-a23e-0550504ce608'::UUID;
+    v_correct_org_id UUID := 'e19c3aa5-654e-4d83-8e79-151e13925588'::UUID;
     v_project_ref TEXT := 'tsefchkedlkwhiexqbrs';
 BEGIN
     -- Obtener ID del proveedor CDS

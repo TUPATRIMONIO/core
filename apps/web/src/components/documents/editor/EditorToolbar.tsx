@@ -45,206 +45,212 @@ export function EditorToolbar({
 
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-1 p-2 border-b bg-card flex-wrap">
-        {/* Undo/Redo */}
-        <ToolbarButton
-          icon={Undo}
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!canEdit || !editor.can().undo()}
-          tooltip="Deshacer"
-        />
-        <ToolbarButton
-          icon={Redo}
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!canEdit || !editor.can().redo()}
-          tooltip="Rehacer"
-        />
+      <div className="border-b bg-card">
+        {/* Fila superior: Botones de acción */}
+        <div className="flex items-center gap-2 p-2 border-b border-border/50">
+          {/* Importar Word */}
+          {canEdit && (
+            <WordImporter onImport={onImportContent} />
+          )}
 
-        <Separator orientation="vertical" className="h-6 mx-1" />
+          {/* Compartir */}
+          {canEdit && (
+            <ShareDocumentDialog documentId={documentId} />
+          )}
 
-        {/* Headings */}
-        <ToolbarButton
-          icon={Heading1}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          isActive={editor.isActive('heading', { level: 1 })}
-          disabled={!canEdit}
-          tooltip="Título 1"
-        />
-        <ToolbarButton
-          icon={Heading2}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          isActive={editor.isActive('heading', { level: 2 })}
-          disabled={!canEdit}
-          tooltip="Título 2"
-        />
-        <ToolbarButton
-          icon={Heading3}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          isActive={editor.isActive('heading', { level: 3 })}
-          disabled={!canEdit}
-          tooltip="Título 3"
-        />
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* Formato de texto */}
-        <ToolbarButton
-          icon={Bold}
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          isActive={editor.isActive('bold')}
-          disabled={!canEdit}
-          tooltip="Negrita (Ctrl+B)"
-        />
-        <ToolbarButton
-          icon={Italic}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          isActive={editor.isActive('italic')}
-          disabled={!canEdit}
-          tooltip="Cursiva (Ctrl+I)"
-        />
-        <ToolbarButton
-          icon={Underline}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          isActive={editor.isActive('underline')}
-          disabled={!canEdit}
-          tooltip="Subrayado (Ctrl+U)"
-        />
-        <ToolbarButton
-          icon={Strikethrough}
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          isActive={editor.isActive('strike')}
-          disabled={!canEdit}
-          tooltip="Tachado"
-        />
-        <ToolbarButton
-          icon={Highlighter}
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
-          isActive={editor.isActive('highlight')}
-          disabled={!canEdit}
-          tooltip="Resaltar"
-        />
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* Alineación */}
-        <ToolbarButton
-          icon={AlignLeft}
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          isActive={editor.isActive({ textAlign: 'left' })}
-          disabled={!canEdit}
-          tooltip="Alinear izquierda"
-        />
-        <ToolbarButton
-          icon={AlignCenter}
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          isActive={editor.isActive({ textAlign: 'center' })}
-          disabled={!canEdit}
-          tooltip="Centrar"
-        />
-        <ToolbarButton
-          icon={AlignRight}
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          isActive={editor.isActive({ textAlign: 'right' })}
-          disabled={!canEdit}
-          tooltip="Alinear derecha"
-        />
-        <ToolbarButton
-          icon={AlignJustify}
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-          isActive={editor.isActive({ textAlign: 'justify' })}
-          disabled={!canEdit}
-          tooltip="Justificar"
-        />
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* Listas */}
-        <ToolbarButton
-          icon={List}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          isActive={editor.isActive('bulletList')}
-          disabled={!canEdit}
-          tooltip="Lista con viñetas"
-        />
-        <ToolbarButton
-          icon={ListOrdered}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          isActive={editor.isActive('orderedList')}
-          disabled={!canEdit}
-          tooltip="Lista numerada"
-        />
-
-        <Separator orientation="vertical" className="h-6 mx-1" />
-
-        {/* Bloques */}
-        <ToolbarButton
-          icon={Quote}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive('blockquote')}
-          disabled={!canEdit}
-          tooltip="Cita"
-        />
-        <ToolbarButton
-          icon={Code}
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          isActive={editor.isActive('codeBlock')}
-          disabled={!canEdit}
-          tooltip="Bloque de código"
-        />
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Importar Word */}
-        {canEdit && (
-          <WordImporter onImport={onImportContent} />
-        )}
-
-        {/* Compartir */}
-        {canEdit && (
-          <ShareDocumentDialog documentId={documentId} />
-        )}
-
-        {/* Comentarios */}
-        <Button
-          variant={showComments ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={onToggleComments}
-          className="gap-2"
-        >
-          <MessageSquare className="h-4 w-4" />
-          Comentarios
-        </Button>
-
-        {/* Guardar */}
-        {canEdit && (
+          {/* Comentarios */}
           <Button
-            variant="outline"
+            variant={showComments ? 'secondary' : 'outline'}
             size="sm"
-            onClick={onSave}
-            disabled={isSaving || !hasChanges}
+            onClick={onToggleComments}
             className="gap-2"
           >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {hasChanges ? 'Guardar' : 'Guardado'}
+            <MessageSquare className="h-4 w-4" />
+            Comentarios
           </Button>
-        )}
 
-        {/* Estado de conexión */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className={`p-2 rounded ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
-              {isConnected ? <Cloud className="h-4 w-4" /> : <CloudOff className="h-4 w-4" />}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            {isConnected ? 'Conectado' : 'Sin conexión'}
-          </TooltipContent>
-        </Tooltip>
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Guardar */}
+          {canEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onSave}
+              disabled={isSaving || !hasChanges}
+              className="gap-2"
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {hasChanges ? 'Guardar' : 'Guardado'}
+            </Button>
+          )}
+
+          {/* Estado de conexión */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className={`p-2 rounded ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+                {isConnected ? <Cloud className="h-4 w-4" /> : <CloudOff className="h-4 w-4" />}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isConnected ? 'Conectado' : 'Sin conexión'}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        {/* Fila inferior: Herramientas de formato de texto */}
+        <div className="flex items-center gap-1 p-2 flex-wrap">
+          {/* Undo/Redo */}
+          <ToolbarButton
+            icon={Undo}
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!canEdit || !editor.can().undo()}
+            tooltip="Deshacer"
+          />
+          <ToolbarButton
+            icon={Redo}
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!canEdit || !editor.can().redo()}
+            tooltip="Rehacer"
+          />
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Headings */}
+          <ToolbarButton
+            icon={Heading1}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            isActive={editor.isActive('heading', { level: 1 })}
+            disabled={!canEdit}
+            tooltip="Título 1"
+          />
+          <ToolbarButton
+            icon={Heading2}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            isActive={editor.isActive('heading', { level: 2 })}
+            disabled={!canEdit}
+            tooltip="Título 2"
+          />
+          <ToolbarButton
+            icon={Heading3}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            isActive={editor.isActive('heading', { level: 3 })}
+            disabled={!canEdit}
+            tooltip="Título 3"
+          />
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Formato de texto */}
+          <ToolbarButton
+            icon={Bold}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            isActive={editor.isActive('bold')}
+            disabled={!canEdit}
+            tooltip="Negrita (Ctrl+B)"
+          />
+          <ToolbarButton
+            icon={Italic}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            isActive={editor.isActive('italic')}
+            disabled={!canEdit}
+            tooltip="Cursiva (Ctrl+I)"
+          />
+          <ToolbarButton
+            icon={Underline}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            isActive={editor.isActive('underline')}
+            disabled={!canEdit}
+            tooltip="Subrayado (Ctrl+U)"
+          />
+          <ToolbarButton
+            icon={Strikethrough}
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            isActive={editor.isActive('strike')}
+            disabled={!canEdit}
+            tooltip="Tachado"
+          />
+          <ToolbarButton
+            icon={Highlighter}
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            isActive={editor.isActive('highlight')}
+            disabled={!canEdit}
+            tooltip="Resaltar"
+          />
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Alineación */}
+          <ToolbarButton
+            icon={AlignLeft}
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            isActive={editor.isActive({ textAlign: 'left' })}
+            disabled={!canEdit}
+            tooltip="Alinear izquierda"
+          />
+          <ToolbarButton
+            icon={AlignCenter}
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            isActive={editor.isActive({ textAlign: 'center' })}
+            disabled={!canEdit}
+            tooltip="Centrar"
+          />
+          <ToolbarButton
+            icon={AlignRight}
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            isActive={editor.isActive({ textAlign: 'right' })}
+            disabled={!canEdit}
+            tooltip="Alinear derecha"
+          />
+          <ToolbarButton
+            icon={AlignJustify}
+            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+            isActive={editor.isActive({ textAlign: 'justify' })}
+            disabled={!canEdit}
+            tooltip="Justificar"
+          />
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Listas */}
+          <ToolbarButton
+            icon={List}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            isActive={editor.isActive('bulletList')}
+            disabled={!canEdit}
+            tooltip="Lista con viñetas"
+          />
+          <ToolbarButton
+            icon={ListOrdered}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            isActive={editor.isActive('orderedList')}
+            disabled={!canEdit}
+            tooltip="Lista numerada"
+          />
+
+          <Separator orientation="vertical" className="h-6 mx-1" />
+
+          {/* Bloques */}
+          <ToolbarButton
+            icon={Quote}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            isActive={editor.isActive('blockquote')}
+            disabled={!canEdit}
+            tooltip="Cita"
+          />
+          <ToolbarButton
+            icon={Code}
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            isActive={editor.isActive('codeBlock')}
+            disabled={!canEdit}
+            tooltip="Bloque de código"
+          />
+        </div>
       </div>
     </TooltipProvider>
   );

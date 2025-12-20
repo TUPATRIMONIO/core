@@ -13,7 +13,7 @@ SET search_path TO crm, core, public, extensions;
 CREATE TABLE IF NOT EXISTS crm.contact_orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     contact_id UUID NOT NULL REFERENCES crm.contacts(id) ON DELETE CASCADE,
-    order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id UUID NOT NULL REFERENCES billing.orders(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
     CONSTRAINT unique_contact_order UNIQUE (contact_id, order_id)
@@ -58,7 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_contact_organizations_org ON crm.contact_organiza
 
 CREATE TABLE IF NOT EXISTS crm.order_organizations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    order_id UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id UUID NOT NULL REFERENCES billing.orders(id) ON DELETE CASCADE,
     organization_id UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
