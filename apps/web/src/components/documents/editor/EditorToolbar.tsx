@@ -8,7 +8,7 @@ import {
   Heading1, Heading2, Heading3,
   Link as LinkIcon, Highlighter,
   Undo, Redo,
-  Save, Cloud, CloudOff, Upload, Loader2, MessageSquare
+  Save, Cloud, CloudOff, Upload, Loader2, MessageSquare, PenTool
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -26,6 +26,7 @@ interface EditorToolbarProps {
   onSave: () => void;
   onImportContent: (html: string) => void;
   onToggleComments: () => void;
+  onSendToSignature: () => void;
   showComments: boolean;
 }
 
@@ -39,6 +40,7 @@ export function EditorToolbar({
   onSave,
   onImportContent,
   onToggleComments,
+  onSendToSignature,
   showComments,
 }: EditorToolbarProps) {
   if (!editor) return null;
@@ -67,6 +69,17 @@ export function EditorToolbar({
           >
             <MessageSquare className="h-4 w-4" />
             Comentarios
+          </Button>
+          
+          {/* Firma Electrónica */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onSendToSignature}
+            className="gap-2 text-primary hover:text-primary hover:bg-primary/10 border-primary/20"
+          >
+            <PenTool className="h-4 w-4" />
+            Firma Electrónica
           </Button>
 
           {/* Spacer */}

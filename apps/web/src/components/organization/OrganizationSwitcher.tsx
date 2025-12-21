@@ -16,13 +16,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useSidebar } from '@/components/ui/sidebar';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export function OrganizationSwitcher() {
   const { activeOrganization, organizations, isLoading, setActiveOrganization } = useOrganization();
+  const { state } = useSidebar();
   const [open, setOpen] = useState(false);
+
+  const isCollapsed = state === 'collapsed';
 
   if (isLoading) {
     return (
@@ -58,7 +62,10 @@ export function OrganizationSwitcher() {
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-auto px-2 py-1.5 hover:bg-accent"
+          className={cn(
+            "w-full justify-between h-auto px-2 py-1.5 hover:bg-accent",
+            isCollapsed && "justify-center px-0"
+          )}
         >
           <div className="flex items-center gap-2 min-w-0">
             <Avatar className="h-8 w-8 rounded-lg">
@@ -66,16 +73,18 @@ export function OrganizationSwitcher() {
                 {getOrgInitials(activeOrganization.name)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col items-start min-w-0 flex-1">
-              <span className="text-sm font-semibold truncate w-full">
-                {activeOrganization.name}
-              </span>
-              <span className="text-xs text-muted-foreground capitalize">
-                {activeOrganization.org_type}
-              </span>
-            </div>
+            {!isCollapsed && (
+              <div className="flex flex-col items-start min-w-0 flex-1">
+                <span className="text-sm font-semibold truncate w-full">
+                  {activeOrganization.name}
+                </span>
+                <span className="text-xs text-muted-foreground capitalize">
+                  {activeOrganization.org_type}
+                </span>
+              </div>
+            )}
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {!isCollapsed && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0" align="start">

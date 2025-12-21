@@ -8,6 +8,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import { useCallback, useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDocumentLock } from '@/hooks/useDocumentLock';
 import { useTextSelection } from '@/hooks/useTextSelection';
 import { EditorToolbar } from './EditorToolbar';
@@ -47,6 +48,7 @@ export function DocumentEditor({
   // Refs
   const editorContainerRef = useRef<HTMLDivElement>(null);
   
+  const router = useRouter();
   const supabase = createClient();
 
   // Sistema de bloqueo
@@ -128,10 +130,20 @@ export function DocumentEditor({
   const handleImportContent = useCallback((html: string) => {
     if (editor && canEdit) {
       editor.commands.setContent(html);
-      setHasUnsavedChanges(true);
       toast.success('Contenido importado');
     }
   }, [editor, canEdit]);
+
+  // Manejar envío a firma
+  const handleSendToSignature = useCallback(async () => {
+    // Si hay cambios, guardamos primero
+    if (hasUnsavedChanges) {
+      await handleSave();
+    }
+    
+    // Redirigir al wizard de firma con el ID del documento
+    router.push(`/dashboard/signing/documents/new?fromDocument=${documentId}`);
+  }, [documentId, hasUnsavedChanges, handleSave, router]);
 
   // Text selection hook for commenting on selected text
   const { selection, hasSelection, clearSelection } = useTextSelection({
@@ -305,6 +317,7 @@ export function DocumentEditor({
           onSave={handleSave}
           onImportContent={handleImportContent}
           onToggleComments={() => setShowComments(!showComments)}
+          onSendToSignature={handleSendToSignature}
           showComments={showComments}
         />
 

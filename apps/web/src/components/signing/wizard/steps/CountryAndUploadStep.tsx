@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
+import { jsPDF } from 'jspdf'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,6 +23,8 @@ export function CountryAndUploadStep() {
   const { state, actions } = useSigningWizard()
   const globalCountry = useGlobalCountryOptional()
   const { activeOrganization } = useOrganization()
+  const searchParams = useSearchParams()
+  const fromDocumentId = searchParams.get('fromDocument')
 
   const [title, setTitle] = useState('')
   const [isBootstrapping, setIsBootstrapping] = useState(true)
@@ -179,6 +183,124 @@ export function CountryAndUploadStep() {
   useEffect(() => {
     loadOrgAndCredits()
   }, [loadOrgAndCredits])
+
+  // Efecto para auto-cargar documento desde el editor si viene por query param
+  useEffect(() => {
+    if (fromDocumentId && !state.file && !isBootstrapping) {
+      const loadFromDocument = async () => {
+        try {
+          // 1. Obtener el documento desde la API (puedes usar Supabase directamente si prefieres)
+          const { data, error } = await supabase
+            .from('documents_documents')
+            .select('*')
+            .eq('id', fromDocumentId)
+            .single()
+
+          if (error) throw error
+          if (!data) throw new Error('Documento no encontrado')
+
+          // 2. Generar PDF usando jsPDF
+          const doc = new jsPDF()
+          
+          // Configuración básica para generar algo legible desde el contenido
+          // TipTap guarda en JSON, pero aquí podemos intentar obtener el HTML si lo guardáramos o procesar el JSON.
+          // Por el plan, asumiré que podemos renderizar el contenido básico.
+          
+          doc.setFontSize(12)
+          
+          let y = 20
+          const margin = 20
+          const pageWidth = doc.internal.pageSize.getWidth()
+          const maxLineWidth = pageWidth - margin * 2
+
+          // Función auxiliar para agregar texto con wrap
+          const addWrappedText = (text: string) => {
+            const lines = doc.splitTextToSize(text, maxLineWidth)
+            doc.text(lines, margin, y)
+            y += lines.length * 7
+          }
+
+
+          if (data.content && typeof data.content === 'object') {
+            const content = data.content.content || []
+            content.forEach((node: any) => {
+              // 1. Determinar estilo según tipo de nodo
+              let fontSize = 12
+              let isBold = false
+              let marginBottom = 7
+
+              if (node.type === 'heading') {
+                isBold = true
+                if (node.attrs?.level === 1) fontSize = 24
+                else if (node.attrs?.level === 2) fontSize = 20
+                else if (node.attrs?.level === 3) fontSize = 16
+                marginBottom = 10
+              }
+
+              doc.setFontSize(fontSize)
+              doc.setFont('helvetica', isBold ? 'bold' : 'normal')
+
+              // 2. Extraer texto plano y alineación
+              const nodeText = (node.content || [])
+                .map((child: any) => child.text || '')
+                .join('')
+              
+              const align = node.attrs?.textAlign || 'left'
+
+              if (nodeText.trim()) {
+                // Verificar salto de página
+                const lines = doc.splitTextToSize(nodeText, maxLineWidth)
+                const blockHeight = lines.length * (fontSize * 0.5) // Estimación de altura
+                
+                if (y + blockHeight > 280) {
+                  doc.addPage()
+                  y = 20
+                }
+
+                // Calcular X según alineación
+                let x = margin
+                if (align === 'center') x = pageWidth / 2
+                else if (align === 'right') x = pageWidth - margin
+                
+                // Dibujar texto
+                doc.text(lines, x, y, { 
+                  align: align as any,
+                  maxWidth: maxLineWidth 
+                })
+                
+                y += blockHeight + marginBottom
+              } else if (node.type === 'paragraph' || node.type === 'heading') {
+                // Párrafo vacío como espacio
+                y += marginBottom
+              }
+            })
+          } else if (typeof data.content === 'string') {
+            doc.setFontSize(12)
+            doc.setFont('helvetica', 'normal')
+            const lines = doc.splitTextToSize(data.content, maxLineWidth)
+            doc.text(lines, margin, y)
+            y += lines.length * 7
+          }
+
+          // 3. Convertir a Blob y luego a File
+          const pdfBlob = doc.output('blob')
+          const fileName = `${(data.title || 'documento').replace(/\s+/g, '_')}.pdf`
+          const file = new File([pdfBlob], fileName, { type: 'application/pdf' })
+
+          // 4. Establecer en el wizard
+          actions.setFile(file)
+          setTitle(data.title || '')
+          
+          toast.success('Documento cargado desde el editor')
+        } catch (err: any) {
+          console.error('Error auto-loading document:', err)
+          toast.error('No se pudo cargar el documento para firmar')
+        }
+      }
+
+      loadFromDocument()
+    }
+  }, [fromDocumentId, state.file, isBootstrapping, supabase, actions])
 
   // Efecto para generar URL de previsualización del PDF
   useEffect(() => {
