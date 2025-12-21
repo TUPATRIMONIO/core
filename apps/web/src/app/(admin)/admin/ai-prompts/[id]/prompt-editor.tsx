@@ -162,6 +162,7 @@ export function PromptEditor({ initialData, isNew }: PromptEditorProps) {
                   <SelectItem value="document_review">Revisión Documental</SelectItem>
                   <SelectItem value="classification">Clasificación</SelectItem>
                   <SelectItem value="extraction">Extracción</SelectItem>
+                  <SelectItem value="editor_assistance">Asistente de Editor (AI)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -186,6 +187,8 @@ export function PromptEditor({ initialData, isNew }: PromptEditorProps) {
               <Select value={formData.ai_model} onValueChange={(v) => handleChange('ai_model', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</SelectItem>
+                  <SelectItem value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</SelectItem>
                   <SelectItem value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</SelectItem>
                   <SelectItem value="claude-3-opus-20240229">Claude 3 Opus</SelectItem>
                 </SelectContent>
@@ -241,7 +244,16 @@ export function PromptEditor({ initialData, isNew }: PromptEditorProps) {
             <p><code className="bg-muted px-1 rounded">{'{{current_date}}'}</code> - Fecha actual</p>
             <p><code className="bg-muted px-1 rounded">{'{{country_code}}'}</code> - Código de país</p>
             <p><code className="bg-muted px-1 rounded">{'{{document_id}}'}</code> - ID del documento</p>
-            <p><code className="bg-muted px-1 rounded">{'{{has_blank_pages}}'}</code> - Tiene páginas en blanco</p>
+            {formData.feature_type === 'editor_assistance' && (
+              <>
+                <p><code className="bg-muted px-1 rounded">{'{{document_content}}'}</code> - Contenido total del doc</p>
+                <p><code className="bg-muted px-1 rounded">{'{{selected_text}}'}</code> - Texto seleccionado por el usuario</p>
+                <p><code className="bg-muted px-1 rounded">{'{{user_instruction}}'}</code> - Lo que el usuario pidió a la IA</p>
+              </>
+            )}
+            {formData.feature_type === 'document_review' && (
+              <p><code className="bg-muted px-1 rounded">{'{{has_blank_pages}}'}</code> - Tiene páginas en blanco</p>
+            )}
           </CardContent>
         </Card>
 

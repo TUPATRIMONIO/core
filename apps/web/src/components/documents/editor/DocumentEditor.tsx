@@ -16,6 +16,7 @@ import { DocumentLockedBanner } from './DocumentLockedBanner';
 import { CommentsPanel } from './CommentsPanel';
 import { TextSelectionPopup } from './TextSelectionPopup';
 import { CommentDialog } from './CommentDialog';
+import { AIAssistantOverlay } from './AIAssistantOverlay';
 import { CommentOnboardingTooltip } from './CommentOnboardingTooltip';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
@@ -43,6 +44,8 @@ export function DocumentEditor({
   const [showComments, setShowComments] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [pendingQuotedText, setPendingQuotedText] = useState<{ text: string; from: number; to: number } | null>(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [aiSelection, setAISelection] = useState<{ text: string; from: number; to: number } | null>(null);
   const [highlightedText, setHighlightedText] = useState<string | null>(null);
   
   // Refs
@@ -109,6 +112,30 @@ export function DocumentEditor({
     return () => clearTimeout(timer);
   }, [hasUnsavedChanges, editor, canEdit]);
 
+  // Keyboard shortcuts for AI Assistant
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd+K or Ctrl+Space
+      if ((e.metaKey && e.key === 'k') || (e.ctrlKey && e.code === 'Space')) {
+        e.preventDefault();
+        
+        // If there's a selection, use it
+        if (editor && !editor.state.selection.empty) {
+          const { from, to } = editor.state.selection;
+          const text = editor.state.doc.textBetween(from, to, ' ');
+          setAISelection({ text, from, to });
+        } else {
+          setAISelection(null);
+        }
+        
+        setShowAIAssistant(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor]);
+
   // Guardar documento
   const handleSave = useCallback(async () => {
     if (!editor || !onSave || isSaving) return;
@@ -162,6 +189,33 @@ export function DocumentEditor({
     });
     setShowCommentDialog(true);
     clearSelection();
+  }
+
+  // Handle AI button from selection
+  function handleAddSelectionAI() {
+    if (!selection) return;
+    
+    setAISelection({
+      text: selection.text,
+      from: selection.from,
+      to: selection.to,
+    });
+    setShowAIAssistant(true);
+    clearSelection();
+  }
+
+  // Handle AI from toolbar or shortcut
+  function handleToggleAI() {
+    // If there is an editor selection but we haven't set aiSelection yet, sync it
+    if (editor && !editor.state.selection.empty) {
+      const { from, to } = editor.state.selection;
+      const text = editor.state.doc.textBetween(from, to, ' ');
+      setAISelection({ text, from, to });
+    } else {
+      setAISelection(null);
+    }
+    
+    setShowAIAssistant(prev => !prev);
   }
 
   // Submit comment with quoted text (for authenticated users)
@@ -317,8 +371,10 @@ export function DocumentEditor({
           onSave={handleSave}
           onImportContent={handleImportContent}
           onToggleComments={() => setShowComments(!showComments)}
+          onToggleAI={handleToggleAI}
           onSendToSignature={handleSendToSignature}
           showComments={showComments}
+          showAI={showAIAssistant}
         />
 
         {/* Título editable */}
@@ -359,6 +415,7 @@ export function DocumentEditor({
         <TextSelectionPopup
           position={{ top: selection.rect.top, left: selection.rect.left + selection.rect.width / 2 }}
           onAddComment={handleAddSelectionComment}
+          onAIDevelop={handleAddSelectionAI}
         />
       )}
 
@@ -372,6 +429,15 @@ export function DocumentEditor({
 
       {/* Onboarding Tooltip */}
       <CommentOnboardingTooltip />
+
+      {/* AI Assistant Overlay */}
+      <AIAssistantOverlay
+        editor={editor}
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+        selection={aiSelection}
+        documentId={documentId}
+      />
 
       {/* Panel de comentarios */}
       {showComments && (

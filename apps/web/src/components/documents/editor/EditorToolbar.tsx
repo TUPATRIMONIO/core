@@ -8,13 +8,14 @@ import {
   Heading1, Heading2, Heading3,
   Link as LinkIcon, Highlighter,
   Undo, Redo,
-  Save, Cloud, CloudOff, Upload, Loader2, MessageSquare, PenTool
+  Save, Cloud, CloudOff, Upload, Loader2, MessageSquare, PenTool, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { WordImporter } from './WordImporter';
 import { ShareDocumentDialog } from '@/components/documents/ShareDocumentDialog';
+import { cn } from '@/lib/utils';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -26,8 +27,10 @@ interface EditorToolbarProps {
   onSave: () => void;
   onImportContent: (html: string) => void;
   onToggleComments: () => void;
+  onToggleAI: () => void;
   onSendToSignature: () => void;
   showComments: boolean;
+  showAI?: boolean;
 }
 
 export function EditorToolbar({
@@ -40,8 +43,10 @@ export function EditorToolbar({
   onSave,
   onImportContent,
   onToggleComments,
+  onToggleAI,
   onSendToSignature,
   showComments,
+  showAI,
 }: EditorToolbarProps) {
   if (!editor) return null;
 
@@ -69,6 +74,17 @@ export function EditorToolbar({
           >
             <MessageSquare className="h-4 w-4" />
             Comentarios
+          </Button>
+          
+          {/* Asistente IA */}
+          <Button
+            variant={showAI ? 'secondary' : 'outline'}
+            size="sm"
+            onClick={onToggleAI}
+            className="gap-2 border-primary/20 hover:bg-primary/5 group"
+          >
+            <Sparkles className={cn("h-4 w-4 text-primary", showAI && "animate-pulse")} />
+            Asistente IA
           </Button>
           
           {/* Firma Electrónica */}

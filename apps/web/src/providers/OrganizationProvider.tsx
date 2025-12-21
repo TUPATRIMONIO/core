@@ -119,11 +119,22 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
   }, []);
 
   // Set active organization
-  const setActiveOrganization = (orgId: string) => {
+  const setActiveOrganization = async (orgId: string) => {
     const org = organizations.find((o) => o.id === orgId);
     if (org) {
       setActiveOrganizationState(org);
       localStorage.setItem(STORAGE_KEY, orgId);
+      
+      // Update last_active_organization_id in database
+      try {
+        await fetch('/api/organizations/set-active', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organization_id: orgId }),
+        });
+      } catch (error) {
+        console.error('[OrganizationProvider] Error updating active org in DB:', error);
+      }
       
       // Trigger a page reload to refresh all data with new organization context
       window.location.reload();
