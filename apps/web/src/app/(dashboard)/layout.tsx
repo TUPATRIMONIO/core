@@ -9,6 +9,7 @@ import { PendingOrdersBadge } from '@/components/checkout/PendingOrdersBadge'
 import { GlobalCountryProvider } from '@/providers/GlobalCountryProvider'
 import { CountrySelectorDropdown } from '@/components/shared/CountrySelectorDropdown'
 import { OrganizationProvider } from '@/providers/OrganizationProvider'
+import { CreditBadge } from '@/components/billing/CreditBadge'
 
 export default async function DashboardLayout({
   children,
@@ -45,6 +46,7 @@ export default async function DashboardLayout({
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <div className="flex-1" />
+                <CreditBadge className="mr-2" />
                 <CountrySelectorDropdown variant="compact" showReset />
                 <PendingOrdersBadge />
               </header>

@@ -27,6 +27,7 @@ import {
   FilePlus,
   FileEdit,
   FolderOpen,
+  Coins,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -106,6 +107,11 @@ const billingMenuItems = [
     title: 'Comprar Créditos',
     url: '/billing/purchase-credits',
     icon: Wallet,
+  },
+  {
+    title: 'Movimientos de Créditos',
+    url: '/billing/credits',
+    icon: Coins,
   },
   {
     title: 'Pedidos',
