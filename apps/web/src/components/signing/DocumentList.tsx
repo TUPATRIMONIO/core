@@ -16,9 +16,10 @@ import {
   FileSignature, 
   MoreHorizontal, 
   Eye, 
-  Download, 
+  Download,
   History,
-  Trash2
+  Trash2,
+  Stamp
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -90,6 +91,8 @@ export function DocumentList({ initialDocuments, basePath = '/dashboard/signing/
           <TableRow>
             <TableHead>Documento</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Servicios</TableHead>
+            <TableHead>Pedido</TableHead>
             <TableHead>Firmantes</TableHead>
             <TableHead>Creado</TableHead>
             <TableHead className="w-[70px]"></TableHead>
@@ -120,7 +123,52 @@ export function DocumentList({ initialDocuments, basePath = '/dashboard/signing/
               <TableCell>
                 {getStatusBadge(doc.status)}
               </TableCell>
+
+              <TableCell>
+                <div className="flex flex-col gap-1">
+                  {doc.metadata?.signature_product && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <FileSignature className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="font-medium text-xs">
+                        {doc.metadata.signature_product.name}
+                      </span>
+                    </div>
+                  )}
+                  {doc.metadata?.notary_product ? (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <Stamp className="h-3.5 w-3.5 text-orange-600/80" />
+                      <span className="font-medium text-xs text-muted-foreground">
+                        {doc.metadata.notary_product.name}
+                      </span>
+                    </div>
+                  ) : (
+                   doc.metadata?.signature_product && (
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Stamp className="h-3.5 w-3.5 text-muted-foreground/40" />
+                        <span className="font-medium text-xs text-muted-foreground/60">
+                          Sin notaría
+                        </span>
+                      </div>
+                    )
+                  )}
+                  {!doc.metadata?.signature_product && !doc.metadata?.notary_product && (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
+              </TableCell>
               
+              <TableCell>
+                <div className="text-sm">
+                  {doc.order_number ? (
+                    <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                      {doc.order_number}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </div>
+              </TableCell>
+
               <TableCell>
                 <div className="text-sm">
                   <span className={cn(
