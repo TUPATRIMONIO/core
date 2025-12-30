@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, CreditCard } from 'lucide-react';
+import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, CreditCard, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useOrganization } from '@/hooks/useOrganization';
 import type { Order, OrderStatus } from '@/lib/checkout/core';
@@ -127,7 +127,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
   // Polling: verificar cada 5 segundos si hay órdenes completadas sin documento
   useEffect(() => {
     const hasOrdersWaitingForDocument = orders.some(
-      order => order.status === 'completed' && !order.document?.pdf_url
+      order => order.status === 'completed' && (order.amount || 0) > 0 && !order.document?.pdf_url
     );
 
     if (!hasOrdersWaitingForDocument) return;
@@ -179,9 +179,16 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
       {orders.map((order) => {
         const productData = order.product_data as any;
         const expiresAt = order.expires_at ? new Date(order.expires_at) : null;
-        const isExpiringSoon = expiresAt && expiresAt.getTime() - Date.now() < 3600000; // Menos de 1 hora
-        const canPay = order.status === 'pending_payment' && !isExpiringSoon && expiresAt && expiresAt > new Date();
-        const isWaitingForDocument = order.status === 'completed' && !order.document?.pdf_url;
+        const isExpired = expiresAt && expiresAt < new Date();
+        const isExpiringSoon = expiresAt && !isExpired && expiresAt.getTime() - Date.now() < 3600000; // Menos de 1 hora
+        const canPay = order.status === 'pending_payment' && !isExpired && !isExpiringSoon;
+        
+        // Un documento solo se genera si el monto es > 0
+        const isWaitingForDocument = order.status === 'completed' && (order.amount || 0) > 0 && !order.document?.pdf_url;
+        
+        // Si ha pasado más de 3 minutos desde que se completó y no hay documento, es probable que haya fallado
+        const completedAt = order.completed_at ? new Date(order.completed_at) : null;
+        const documentFailed = isWaitingForDocument && completedAt && (Date.now() - completedAt.getTime() > 180000); // 3 minutos
 
         return (
           <Card key={order.id}>
@@ -235,10 +242,10 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                 </div>
 
                 {expiresAt && order.status === 'pending_payment' && (
-                  <div className={`flex items-center gap-2 text-sm ${isExpiringSoon ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}>
+                  <div className={`flex items-center gap-2 text-sm ${isExpiringSoon || isExpired ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}>
                     <Clock className="h-4 w-4" />
                     <span>
-                      {isExpiringSoon ? 'Expira pronto: ' : 'Expira: '}
+                      {isExpired ? 'Expiró el: ' : isExpiringSoon ? 'Expira pronto: ' : 'Expira: '}
                       {expiresAt.toLocaleString('es-CL')}
                     </span>
                   </div>
@@ -272,10 +279,17 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                 )}
 
                 {/* Indicador de generación de invoice */}
-                {isWaitingForDocument && (
+                {isWaitingForDocument && !documentFailed && (
                   <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Generando invoice...</span>
+                  </div>
+                )}
+
+                {documentFailed && (
+                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Documento en proceso o requiere revisión manual</span>
                   </div>
                 )}
 
@@ -312,7 +326,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                                 : 'Ver Invoice'}
                           </a>
                         </Button>
-                      ) : isWaitingForDocument ? (
+                      ) : isWaitingForDocument && !documentFailed ? (
                         <Button variant="outline" disabled className="flex-1">
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Generando documento...

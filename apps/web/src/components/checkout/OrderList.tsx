@@ -79,7 +79,8 @@ export default function OrderList({ orgId }: OrderListProps) {
       {orders.map((order) => {
         const productData = order.product_data as any;
         const expiresAt = order.expires_at ? new Date(order.expires_at) : null;
-        const isExpiringSoon = expiresAt && expiresAt.getTime() - Date.now() < 3600000; // Menos de 1 hora
+        const isExpired = expiresAt && expiresAt < new Date();
+        const isExpiringSoon = expiresAt && !isExpired && expiresAt.getTime() - Date.now() < 3600000; // Menos de 1 hora
 
         return (
           <Card key={order.id}>
@@ -93,8 +94,8 @@ export default function OrderList({ orgId }: OrderListProps) {
                     Orden #{order.order_number}
                   </CardDescription>
                 </div>
-                <Badge variant={isExpiringSoon ? 'destructive' : 'secondary'}>
-                  {order.status === 'pending_payment' ? 'Pendiente' : order.status}
+                <Badge variant={isExpired || isExpiringSoon ? 'destructive' : 'secondary'}>
+                  {isExpired ? 'Expirada' : order.status === 'pending_payment' ? 'Pendiente' : order.status}
                 </Badge>
               </div>
             </CardHeader>
@@ -120,10 +121,11 @@ export default function OrderList({ orgId }: OrderListProps) {
                 </div>
 
                 {expiresAt && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className={`flex items-center gap-2 text-sm ${isExpired || isExpiringSoon ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}>
                     <Clock className="h-4 w-4" />
                     <span>
-                      Expira: {expiresAt.toLocaleString('es-CL')}
+                      {isExpired ? 'Expiró: ' : isExpiringSoon ? 'Expira pronto: ' : 'Expira: '}
+                      {expiresAt.toLocaleString('es-CL')}
                     </span>
                   </div>
                 )}

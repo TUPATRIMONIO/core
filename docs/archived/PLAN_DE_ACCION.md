@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 19, 2025\
+> **📅 Última actualización:** Diciembre 30, 2025 (Fijada lógica checkout)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -15,7 +15,9 @@
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
 > PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SELECTOR GLOBAL DE
-> PAÍS EN DASHBOARD** ✅ + **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅\
+> PAÍS EN DASHBOARD** ✅ + **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕
+> MEJORAS GESTIÓN DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕
+> CORRECCIONES CRÍTICAS CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -51,10 +53,16 @@ manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversi�
 bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
 pueden convertir su organización entre tipos personal y empresarial desde la
 interfaz, con advertencias automáticas y actualización de límites del CRM.
-**NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de
-facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar
-colisiones entre múltiples organizaciones creando facturas simultáneamente.
-Sistema ahora escalable y sin errores de duplicados.
+
+- **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes -
+  Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas
+  en lugar de "Expira pronto") y solucionado el bucle infinito del spinner
+  "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes
+  gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección
+  crítica del sistema de numeración de facturas - Cambio a formato por
+  organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples
+  organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin
+  errores de duplicados.
 
 **✅ COMPLETADO en Fase 0:**
 
@@ -498,6 +506,16 @@ READY:
   - `isValidRut()` - Validación completa con dígito verificador
   - `cleanRut()` / `calculateDv()` - Utilidades internas
 
+### ✅ COMPLETADO - Gestión y Listado de Documentos (Dic 2025)
+
+- ✅ **Mejoras en tabla `/dashboard/signing/documents`**:
+  - Columna **Servicios**: Muestra el tipo de firma (FES/FEA) y servicio
+    notarial de forma compacta.
+  - Estado **Sin notaría**: Visualización explícita cuando el documento no
+    requiere intervención notarial.
+  - Columna **Pedido**: Integración con el sistema de billing para mostrar el
+    número de pedido (`order_number`) asociado.
+
 ### ✅ COMPLETADO - Migraciones
 
 ```
@@ -524,6 +542,7 @@ READY:
 20251212200000_signing_products_prices.sql - Precios de productos firma
 20251212200001_fix_fan_billing_unit.sql    - Corrige unidad de cobro FAN
 20251212200004_enable_pg_net.sql           - Versión actualizada pg_net
+20251229000001_add_order_number_to_view.sql - Vista documents_full con pedido
 ```
 
 ### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
@@ -548,6 +567,17 @@ READY:
   - ✅ Muestra monto $0 correctamente (no "N/A")
   - ✅ Oculta botón de factura para órdenes $0
   - ✅ Badge "Confirmado" para órdenes gratuitas
+- ✅ **Mejoras y Correcciones Críticas (Dic 30, 2025):**
+  - ✅ **Lógica de expiración corregida:** Diferenciación entre "Expira pronto"
+    (< 1h) y "Expiró el" (fecha pasada). Se bloquea el botón de pago si la fecha
+    ya pasó.
+  - ✅ **Solución spinner infinito "Generando invoice":**
+    - Exclusión de órdenes gratuitas ($0) del proceso de espera de factura.
+    - Implementación de timeout de 3 minutos para el spinner de carga.
+    - Mensaje de fallback: "Documento en proceso o requiere revisión manual" si
+      el documento no aparece tras el tiempo límite.
+    - Optimización del polling en el cliente para detenerse cuando no hay
+      documentos pendientes válidos.
 
 **Correcciones de Base de Datos:**
 
