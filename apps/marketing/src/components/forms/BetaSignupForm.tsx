@@ -109,7 +109,7 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
 
       <div className="space-y-3">
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-sm font-medium">
+          <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Email <span className="text-red-500">*</span>
           </Label>
           <Input
@@ -120,13 +120,13 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
             disabled={loading}
-            className="w-full"
+            className="w-full bg-white dark:bg-transparent dark:border-[var(--border)]"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="first_name" className="text-sm font-medium">
+            <Label htmlFor="first_name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Nombre
             </Label>
             <Input
@@ -137,11 +137,12 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
               disabled={loading}
               maxLength={50}
+              className="bg-white dark:bg-transparent dark:border-[var(--border)]"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="last_name" className="text-sm font-medium">
+            <Label htmlFor="last_name" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Apellido
             </Label>
             <Input
@@ -152,12 +153,13 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
               disabled={loading}
               maxLength={50}
+              className="bg-white dark:bg-transparent dark:border-[var(--border)]"
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="company" className="text-sm font-medium">
+          <Label htmlFor="company" className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Empresa (opcional)
           </Label>
           <Input
@@ -168,13 +170,14 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
             disabled={loading}
             maxLength={100}
+            className="bg-white dark:bg-transparent dark:border-[var(--border)]"
           />
         </div>
       </div>
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
         disabled={loading || !formData.email}
       >
         {loading ? (
