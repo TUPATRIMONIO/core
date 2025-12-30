@@ -81,6 +81,22 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // EXCEPCIÓN: Permitir iframe para Beta Signup solo en tupatrimon.io
+      // Definido DESPUÉS de las reglas globales para asegurar override
+      {
+        source: "/beta-signup",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "frame-ancestors 'self' https://tupatrimon.io https://www.tupatrimon.io http://localhost:*",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "ALLOWALL",
+          },
+        ],
+      },
       // Headers para dashboard (privado)
       {
         source: "/dashboard/:path*",

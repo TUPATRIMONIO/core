@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
               .maybeSingle();
 
             if (anyDocument) {
-              console.log(
+              console.debug(
                 `[API Orders] Documento encontrado para orden ${order.id} con estado:`,
                 anyDocument.status,
               );
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
                 enriched.document = anyDocument;
               }
             } else {
-              console.log(
+              console.debug(
                 `[API Orders] No se encontró documento para la orden ${order.id}`,
               );
             }

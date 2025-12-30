@@ -14,10 +14,11 @@
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
-> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SELECTOR GLOBAL DE
-> PAÍS EN DASHBOARD** ✅ + **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕
-> MEJORAS GESTIÓN DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕
-> CORRECCIONES CRÍTICAS CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅\
+> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SISTEMA DE BETA SIGNUP
+> & WAITLIST COMPLETADO** ✅ + **🆕 SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅ +
+> **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕 MEJORAS GESTIÓN
+> DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
+> CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -9497,3 +9498,54 @@ completo. Permitirá:
 - Verificar credenciales.
 - Desbloquear usuarios (casos de soporte comunes).
 - Descargar documentos manualmente por código de transacción.
+---
+
+## 🆕 SISTEMA DE BETA SIGNUP & WAITLIST 🚀 (Diciembre 2025)
+
+> **📅 Fecha:** Diciembre 30, 2025\
+> **📊 Estado:** COMPLETADO ✅\
+> **🎯 Objetivo:** Captura de leads para beta y futuras campañas con soporte
+> para embedding.
+
+### ✅ COMPLETADO - Backend & Base de Datos Multi-Campaña
+
+**Schema `marketing` Actualizado:**
+
+- ✅ Modificación de `marketing.waitlist_subscribers`:
+  - Eliminada restricción de email único global.
+  - Nueva columna `campaign` (default: 'beta').
+  - Nueva restricción compuesta: `UNIQUE(email, campaign)`.
+  - Permite que un mismo usuario se suscriba a múltiples listas (ej: Beta, País
+    X, Newsletter).
+- ✅ **RPC `public.subscribe_to_waitlist`:**
+  - Función segura (`SECURITY DEFINER`) para insertar en schema `marketing`
+    desde API pública.
+  - Lógica automática para `use_case`: Detecta si es 'business' (si hay empresa)
+    o 'personal'.
+  - Manejo de duplicados específico por campaña.
+
+**Migraciones:**
+
+- `20251230000002_enable_multi_campaign_waitlist.sql` - Habilita multi-campaña.
+- `20251230000001_fix_waitlist_rpc.sql` - RPC corregida para constraint
+  `use_case`.
+
+### ✅ COMPLETADO - Frontend & Embed
+
+**Componentes:**
+
+- ✅ `BetaSignupForm.tsx` - Formulario reactivo optimizado para iframe.
+- ✅ Página pública: `/beta-signup` (sin layout de dashboard, limpia).
+
+**Seguridad & Embed:**
+
+- ✅ Configuración de `next.config.ts` para Headers de seguridad.
+- ✅ **CSP Restrictivo:** Iframe permitido SOLO en dominios autorizados:
+  - `tupatrimon.io`
+  - `www.tupatrimon.io`
+  - `localhost`
+- ✅ Protección contra Clickjacking en otros sitios.
+
+**Integración:**
+
+- ✅ API Route `/api/beta/signup` actualizada para enviar `campaign`.

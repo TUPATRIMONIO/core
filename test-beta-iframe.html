@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Test Beta Signup - Iframe</title>
+        <style>
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    "Helvetica Neue", Arial, sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 40px 20px;
+                background: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                color: white;
+            }
+            .container {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            }
+            h1 {
+                color: #333;
+                margin-bottom: 10px;
+            }
+            p {
+                color: #666;
+                line-height: 1.6;
+                margin-bottom: 30px;
+            }
+            .iframe-container {
+                margin: 30px auto;
+                max-width: 500px;
+            }
+            iframe {
+                width: 100%;
+                border: none;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+            .instructions {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin-top: 30px;
+            }
+            .instructions h2 {
+                color: #333;
+                font-size: 18px;
+                margin-top: 0;
+            }
+            .instructions code {
+                background: #e9ecef;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 14px;
+                color: #d63384;
+            }
+            .instructions pre {
+                background: #2d3748;
+                color: #f7fafc;
+                padding: 15px;
+                border-radius: 6px;
+                overflow-x: auto;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Próximamente: Nueva Plataforma TuPatrimonio</h1>
+            <p>
+                Estamos trabajando en una nueva y mejorada plataforma que
+                revolucionará la forma en que gestionas firmas electrónicas,
+                verificaciones de identidad y servicios notariales digitales.
+            </p>
+            <p>
+                <strong>Sé parte del beta</strong> y accede primero a todas las
+                nuevas funcionalidades. Regístrate abajo y te contactaremos
+                pronto:
+            </p>
+
+            <div class="iframe-container">
+                <!-- CAMBIAR localhost:3000 por tu URL de producción -->
+                <iframe
+                    src="http://localhost:3000/beta-signup"
+                    height="550"
+                    title="Formulario de registro beta"
+                >
+                </iframe>
+            </div>
+
+            <div class="instructions">
+                <h2>📋 Instrucciones para integrar en tu sitio</h2>
+                <p>
+                    Para integrar este formulario en el sitio web actual, copia
+                    y pega el siguiente código HTML:
+                </p>
+
+                <h3 style="color: #333; font-size: 16px; margin-top: 20px">
+                    Opción 1: Iframe simple (recomendado)
+                </h3>
+                <pre>
+&lt;iframe 
+  src="https://tu-dominio.com/beta-signup" 
+  width="100%" 
+  height="550"
+  frameborder="0"
+  style="max-width: 500px; border: none; border-radius: 8px;"
+  title="Formulario de registro beta"&gt;
+&lt;/iframe&gt;</pre>
+
+                <h3 style="color: #333; font-size: 16px; margin-top: 20px">
+                    Opción 2: Iframe centrado con contenedor
+                </h3>
+                <pre>
+&lt;div style="max-width: 500px; margin: 40px auto;"&gt;
+  &lt;iframe 
+    src="https://tu-dominio.com/beta-signup" 
+    width="100%" 
+    height="550"
+    frameborder="0"
+    style="border: none; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+    title="Formulario de registro beta"&gt;
+  &lt;/iframe&gt;
+&lt;/div&gt;</pre>
+
+                <h3 style="color: #333; font-size: 16px; margin-top: 20px">
+                    Notas importantes:
+                </h3>
+                <ul style="color: #666; line-height: 1.8">
+                    <li>
+                        Reemplaza <code>https://tu-dominio.com</code> con tu URL
+                        real de producción
+                    </li>
+                    <li>
+                        El alto recomendado es <code>550px</code> para mostrar
+                        todo el formulario sin scroll
+                    </li>
+                    <li>
+                        El formulario es responsive y funciona bien en móviles
+                    </li>
+                    <li>
+                        Los datos se guardan automáticamente en la base de datos
+                        de la nueva plataforma
+                    </li>
+                    <li>
+                        El formulario detecta emails duplicados y muestra
+                        mensajes apropiados
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
