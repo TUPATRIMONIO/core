@@ -67,7 +67,7 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
 
   if (success) {
     return (
-      <div className={`flex flex-col items-center justify-center ${embedded ? 'p-6' : 'p-8'} text-center`}>
+      <div className={`flex flex-col items-center justify-center ${embedded ? 'p-6' : 'p-8'} text-center w-full`}>
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
           <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
@@ -90,7 +90,7 @@ export function BetaSignupForm({ onSuccess, embedded = false }: BetaSignupFormPr
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`space-y-4 ${embedded ? 'p-6' : 'p-8'}`}>
+    <form onSubmit={handleSubmit} className={`space-y-4 ${embedded ? 'p-6' : 'p-8'} w-full`}>
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Únete al Beta

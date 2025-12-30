@@ -9,9 +9,10 @@ export const metadata: Metadata = {
 
 export default function BetaSignupPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full max-w-md">
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex min-h-screen items-center justify-center bg-transparent">
+      <div className="w-full max-w-md mx-auto p-4">
+         {/* Removed background and container styling to be purely transparent for iframe */}
+         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <BetaSignupForm embedded={true} />
         </div>
       </div>

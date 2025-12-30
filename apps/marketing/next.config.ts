@@ -4,7 +4,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   // Transpilar packages del monorepo
-  transpilePackages: ['@tupatrimonio/assets'],
+  transpilePackages: ["@tupatrimonio/assets"],
   eslint: {
     ignoreDuringBuilds: true, // Temporal para deploy rápido
   },
@@ -16,28 +16,31 @@ const nextConfig: NextConfig = {
     // Permitir importar archivos desde el package assets
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@tupatrimonio/assets/public': path.resolve(__dirname, '../../packages/assets/public'),
+      "@tupatrimonio/assets/public": path.resolve(
+        __dirname,
+        "../../packages/assets/public",
+      ),
     };
     return config;
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '54321',
-        pathname: '/storage/v1/object/public/**',
+        protocol: "http",
+        hostname: "localhost",
+        port: "54321",
+        pathname: "/storage/v1/object/public/**",
       },
       {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-        port: '54321',
-        pathname: '/storage/v1/object/public/**',
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "54321",
+        pathname: "/storage/v1/object/public/**",
       },
       {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },
@@ -104,16 +107,36 @@ const nextConfig: NextConfig = {
   generateBuildId: async () => {
     // Generar un ID único basado en timestamp
     const timestamp = Date.now();
-    const hash = createHash('sha256')
+    const hash = createHash("sha256")
       .update(timestamp.toString())
-      .digest('hex')
+      .digest("hex")
       .substring(0, 12);
-    
-    console.log('🔧 [Marketing App] Generando Build ID:', hash);
-    console.log('📅 [Marketing App] Timestamp:', timestamp);
-    console.log('✨ [Marketing App] Version info ahora se sirve via API Route /version.json');
+
+    console.log("🔧 [Marketing App] Generando Build ID:", hash);
+    console.log("📅 [Marketing App] Timestamp:", timestamp);
+    console.log(
+      "✨ [Marketing App] Version info ahora se sirve via API Route /version.json",
+    );
 
     return hash;
+  },
+  async headers() {
+    return [
+      {
+        source: "/beta-signup",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "frame-ancestors 'self' https://tupatrimon.io https://www.tupatrimon.io http://localhost:*",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "ALLOW-FROM https://tupatrimon.io",
+          },
+        ],
+      },
+    ];
   },
 };
 
