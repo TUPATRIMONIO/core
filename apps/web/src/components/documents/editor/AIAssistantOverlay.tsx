@@ -237,7 +237,7 @@ export function AIAssistantOverlay({
 
         <CardContent className="p-0 flex-1 overflow-hidden flex flex-col min-h-0">
           {!result ? (
-            <ScrollArea className="flex-1">
+            <div className="flex-1 overflow-y-auto">
               <div className="p-6 space-y-6">
                 {/* Credit Cost Info */}
                 {creditCost !== null && (
@@ -332,9 +332,9 @@ export function AIAssistantOverlay({
                   </div>
                 )}
               </div>
-            </ScrollArea>
+            </div>
           ) : (
-            <div className="flex flex-col h-full animate-in slide-in-from-bottom-5 duration-300">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               <div className="p-3 bg-primary/5 border-b flex items-center justify-between shrink-0">
                 <span className="text-xs font-medium text-primary flex items-center gap-1">
                   <Sparkles className="h-3 w-3" /> Sugerencia generada
@@ -349,7 +349,7 @@ export function AIAssistantOverlay({
                   <Badge variant="outline" className="text-[10px] uppercase">Borrador</Badge>
                 </div>
               </div>
-              <ScrollArea className="flex-1">
+              <div className="flex-1 overflow-y-auto min-h-0">
                 <div className="p-6">
                   {/* Renderizado como HTML para mostrar negritas, etc */}
                   <div 
@@ -357,7 +357,7 @@ export function AIAssistantOverlay({
                     dangerouslySetInnerHTML={{ __html: markdownToHtml(result) }}
                   />
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           )}
         </CardContent>
