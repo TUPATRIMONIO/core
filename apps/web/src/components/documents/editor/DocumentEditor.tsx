@@ -13,7 +13,7 @@ import { useDocumentLock } from '@/hooks/useDocumentLock';
 import { useTextSelection } from '@/hooks/useTextSelection';
 import { EditorToolbar } from './EditorToolbar';
 import { DocumentLockedBanner } from './DocumentLockedBanner';
-import { CommentsPanel } from './CommentsPanel';
+import { CommentsPanel, type Comment } from './CommentsPanel';
 import { TextSelectionPopup } from './TextSelectionPopup';
 import { CommentDialog } from './CommentDialog';
 import { AIAssistantOverlay } from './AIAssistantOverlay';
@@ -254,93 +254,66 @@ export function DocumentEditor({
   }
 
   // Highlight quoted text in the document when clicking on a comment
-  function handleHighlightText(quotedText: string) {
-    if (!editorContainerRef.current || !quotedText) {
-      console.log('handleHighlightText: missing ref or text', { hasRef: !!editorContainerRef.current, quotedText });
-      return;
-    }
+  function handleHighlightText(quotedText: string, comment: Comment) {
+    if (!editor || !quotedText) return;
 
-    console.log('handleHighlightText: searching for', quotedText);
-
-    // Add animation keyframes if not already present
-    if (!document.getElementById('comment-highlight-styles')) {
-      const style = document.createElement('style');
-      style.id = 'comment-highlight-styles';
-      style.textContent = `
-        @keyframes pulse-highlight {
-          0%, 100% { background-color: hsl(var(--primary) / 0.4); }
-          50% { background-color: hsl(var(--primary) / 0.2); }
-        }
-        .comment-highlight-active {
-          background-color: hsl(var(--primary) / 0.4);
-          animation: pulse-highlight 0.5s ease-in-out 3;
-          border-radius: 2px;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Method 1: Use window.find() to locate and select the text
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-    }
-
-    // Focus on the editor container first
-    editorContainerRef.current.focus();
-
-    // Try to find the text using window.find (works in most browsers)
-    // @ts-ignore - window.find is not in TypeScript types but exists in browsers
-    const found = window.find(quotedText, false, false, true, false, true, false);
-
-    if (found && selection && selection.rangeCount > 0) {
-      console.log('handleHighlightText: found text with window.find');
-      const range = selection.getRangeAt(0);
-      
-      // Scroll the selection into view
-      const rect = range.getBoundingClientRect();
-      const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
-      if (scrollContainer) {
-        const containerRect = scrollContainer.getBoundingClientRect();
-        const scrollTop = scrollContainer.scrollTop + rect.top - containerRect.top - 150;
-        scrollContainer.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-      }
-
-      // Create highlight span
+    // Method 1: Use stored selection indices if available (Most Robust)
+    if (typeof comment.selection_from === 'number' && typeof comment.selection_to === 'number') {
       try {
-        const highlightSpan = document.createElement('span');
-        highlightSpan.className = 'comment-highlight-active';
-        range.surroundContents(highlightSpan);
-
-        // Remove highlight after animation
+        // Set the selection in the editor
+        editor.chain()
+          .focus()
+          .setTextSelection({ from: comment.selection_from, to: comment.selection_to })
+          .run();
+          
         setTimeout(() => {
-          if (highlightSpan.parentNode) {
-            const parent = highlightSpan.parentNode;
-            while (highlightSpan.firstChild) {
-              parent.insertBefore(highlightSpan.firstChild, highlightSpan);
-            }
-            parent.removeChild(highlightSpan);
+          const { view } = editor;
+          if (!view) return;
+          
+          const coords = view.coordsAtPos(comment.selection_from!);
+          const scrollContainer = editorContainerRef.current?.closest('.overflow-auto');
+          
+          if (scrollContainer && coords) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const relativeTop = coords.top - containerRect.top + scrollContainer.scrollTop;
+            const targetScroll = relativeTop - 150;
+            
+            scrollContainer.scrollTo({ 
+              top: Math.max(0, targetScroll), 
+              behavior: 'smooth' 
+            });
           }
-        }, 2000);
+          
+          // Visual pulse effect using Highlights
+          setTimeout(() => {
+            editor.chain()
+              .setTextSelection({ from: comment.selection_from!, to: comment.selection_to! })
+              .setHighlight({ color: 'rgba(128, 0, 57, 0.3)' }) 
+              .run();
+            
+            setTimeout(() => {
+              editor.chain()
+                .setTextSelection({ from: comment.selection_from!, to: comment.selection_to! })
+                .unsetHighlight()
+                .run();
+              editor.commands.setTextSelection(comment.selection_to!);
+            }, 2000);
+          }, 600);
+        }, 50);
+        
+        return;
       } catch (e) {
-        console.log('Could not wrap text, using selection highlight');
-        // Keep selection visible for a moment
-        setTimeout(() => {
-          selection?.removeAllRanges();
-        }, 2000);
+        console.warn('Could not set selection by index, falling back to search', e);
       }
-    } else {
-      console.log('handleHighlightText: text not found with window.find, trying manual search');
-      
-      // Fallback: Manual search in text content
-      const editorText = editorContainerRef.current.textContent || '';
-      if (editorText.includes(quotedText)) {
-        toast.info('Texto encontrado - revisa el documento');
-        // Simple scroll to top of editor as fallback
-        const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
-        if (scrollContainer) {
-          scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    }
+
+    // Fallback Method 2: Manual search using window.find (less reliable)
+    if (editorContainerRef.current) {
+      editorContainerRef.current.focus();
+      // @ts-ignore
+      const found = window.find(quotedText, false, false, true, false, true, false);
+      if (found) {
+        toast.info('Texto encontrado - revisa la selección');
       } else {
         toast.info('El texto citado ya no existe en el documento');
       }

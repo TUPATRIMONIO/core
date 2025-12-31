@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Mail, FileText, MessageSquare, Send, Loader2, Eye, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,6 +23,7 @@ import { useTextSelection } from '@/hooks/useTextSelection';
 import { TextSelectionPopup } from '@/components/documents/editor/TextSelectionPopup';
 import { CommentDialog } from '@/components/documents/editor/CommentDialog';
 import { CommentOnboardingTooltip } from '@/components/documents/editor/CommentOnboardingTooltip';
+import { CommentsPanel, type Comment } from '@/components/documents/editor/CommentsPanel';
 
 interface PublicDocumentViewerProps {
   token: string;
@@ -35,16 +37,7 @@ interface DocumentData {
   allow_comments: boolean;
 }
 
-interface Comment {
-  id: string;
-  content: string;
-  quoted_text?: string;
-  selection_from?: number;
-  selection_to?: number;
-  author_name: string;
-  author_email: string;
-  created_at: string;
-}
+// Comment interface handled by import
 
 export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
   const [step, setStep] = useState<'email' | 'document'>('email');
@@ -57,6 +50,8 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
   const [newComment, setNewComment] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
   const [pendingQuotedText, setPendingQuotedText] = useState<{ text: string; from: number; to: number } | null>(null);
   
   // Ref for text selection
@@ -103,6 +98,8 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
       loadDocument(savedToken);
     }
   }, [token]);
+
+  // Comments are now handled by CommentsPanel component
 
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -160,6 +157,15 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
     }
   }
 
+  // Handle comments update with stability
+  const handleCommentsChange = useCallback((newComments: Comment[]) => {
+    setComments(newComments);
+    if (!hasAutoOpened && newComments.length > 0) {
+      setShowComments(true);
+      setHasAutoOpened(true);
+    }
+  }, [hasAutoOpened]);
+
   // Text selection hook for commenting on selected text
   const { selection, hasSelection, clearSelection } = useTextSelection({
     containerRef: editorContainerRef,
@@ -209,48 +215,11 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
   }
 
 
-  async function handleSubmitComment() {
-    if (!newComment.trim() || !accessToken) return;
-
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.rpc('add_public_comment', {
-        p_access_token: accessToken,
-        p_content: newComment.trim(),
-      });
-
-      if (error) {
-        toast.error('Error al agregar comentario');
-        console.error(error);
-        return;
-      }
-
-      setComments([...comments, data]);
-      setNewComment('');
-      toast.success('Comentario agregado');
-    } catch (error) {
-      toast.error('Error al agregar comentario');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-interface Comment {
-  id: string;
-  content: string;
-  quoted_text?: string;
-  selection_from?: number;
-  selection_to?: number;
-  author_name: string;
-  author_email: string;
-  created_at: string;
-}
-
 // ... inside component ...
 
   // Highlight quoted text using TipTap selection
-  function handleHighlightText(comment: Comment) {
-    if (!editor || !comment.quoted_text) return;
+  function handleHighlightText(quotedText: string, comment: Comment) {
+    if (!editor || !quotedText) return;
 
     // Method 1: Use stored selection indices if available (Most Robust)
     if (typeof comment.selection_from === 'number' && typeof comment.selection_to === 'number') {
@@ -290,7 +259,7 @@ interface Comment {
             // Apply brand color highlight temporarily (wine/burgundy brand color)
             editor.chain()
               .setTextSelection({ from: comment.selection_from!, to: comment.selection_to! })
-              .setHighlight({ color: 'rgba(128, 0, 57, 0.3)' }) // Brand color (#800039) with 30% opacity
+              .setHighlight({ color: 'rgba(128, 0, 57, 0.3)' }) 
               .run();
             
             // Remove highlight after 2 seconds
@@ -381,33 +350,45 @@ interface Comment {
     );
   }
 
+
   // Vista del documento
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="border-b px-6 py-3 flex items-center justify-between bg-card">
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            <Eye className="h-3 w-3" />
-            Modo solo lectura
-            {docData?.allow_comments && ' • Puedes comentar'}
+        <header className="border-b px-6 py-3 flex items-center justify-between bg-card z-10 shrink-0">
+          <p className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
+            <Eye className="h-4 w-4 text-primary" />
+            <span className="hidden sm:inline">Modo solo lectura</span>
+            {docData?.allow_comments && (
+              <>
+                <span className="text-muted-foreground/30">•</span>
+                <span className="text-primary/80">Puedes comentar</span>
+              </>
+            )}
           </p>
           {docData?.allow_comments && (
             <Button 
-              variant="outline" 
+              variant={showComments ? "secondary" : "outline"}
               size="sm"
               onClick={() => setShowComments(!showComments)}
+              className="relative shadow-sm hover:shadow-md transition-all"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Comentarios
+              {comments.length > 0 && (
+                <Badge className="ml-2 bg-primary text-primary-foreground pointer-events-none">
+                  {comments.length}
+                </Badge>
+              )}
             </Button>
           )}
         </header>
 
         {/* Editor (solo lectura) */}
-        <div className="flex-1 overflow-auto document-background">
-          <div ref={editorContainerRef} className="document-paper">
+        <div className="flex-1 overflow-auto bg-muted/30 scrollbar-hide">
+          <div ref={editorContainerRef} className="document-paper my-8 transition-transform duration-300">
             <EditorContent
               editor={editor}
               className={`
@@ -444,80 +425,18 @@ interface Comment {
       {docData?.allow_comments && <CommentOnboardingTooltip />}
 
       {/* Panel de comentarios */}
-      {showComments && docData?.allow_comments && (
-        <div className="w-80 border-l bg-card flex flex-col">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold">Comentarios</h3>
-          </div>
-
-          {/* Lista de comentarios */}
-          <div className="flex-1 overflow-auto p-4 space-y-4">
-            {comments.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No hay comentarios aún
-              </p>
-            ) : (
-              comments.map((comment) => (
-                <div key={comment.id} className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>
-                        {comment.author_name?.[0]?.toUpperCase() || comment.author_email[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">
-                          {comment.author_name || comment.author_email.split('@')[0]}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(comment.created_at), {
-                            addSuffix: true,
-                            locale: es,
-                          })}
-                        </span>
-                      </div>
-                      {/* Quoted text - clickable to highlight */}
-                      {comment.quoted_text && (
-                        <div 
-                          className="mt-1 pl-2 border-l-2 border-primary/50 text-xs text-muted-foreground italic cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors rounded-r py-1 pr-1"
-                          onClick={() => handleHighlightText(comment)}
-                          title="Clic para ver en el documento"
-                        >
-                          "{comment.quoted_text.length > 100 ? comment.quoted_text.slice(0, 100) + '...' : comment.quoted_text}"
-                        </div>
-                      )}
-                      <p className="text-sm mt-1">{comment.content}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Nuevo comentario */}
-          <div className="p-4 border-t">
-            <Textarea
-              placeholder="Escribe un comentario..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="mb-2 resize-none"
-              rows={3}
-            />
-            <Button 
-              onClick={handleSubmitComment} 
-              disabled={!newComment.trim() || isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Send className="h-4 w-4 mr-2" />
-              )}
-              Enviar
-            </Button>
-          </div>
-        </div>
+      {docData?.allow_comments && (
+        <CommentsPanel
+          documentId={docData.id}
+          isOpen={showComments}
+          onToggle={() => setShowComments(!showComments)}
+          canComment={docData.access_level === 'comment'}
+          onHighlightText={handleHighlightText}
+          isPublic={true}
+          publicAccessToken={accessToken || undefined}
+          onCommentsChange={handleCommentsChange}
+          showTrigger={false}
+        />
       )}
     </div>
   );

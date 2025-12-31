@@ -38,7 +38,7 @@ export default async function DocumentPage({ params }: DocumentPageProps) {
     : 'Usuario';
 
   return (
-    <div className="h-[calc(100vh-4rem)]">
+    <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
       <DocumentEditorWrapper
         documentId={document.id}
         userId={user.id}
