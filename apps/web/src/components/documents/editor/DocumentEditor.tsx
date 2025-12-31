@@ -377,8 +377,8 @@ export function DocumentEditor({
           showAI={showAIAssistant}
         />
 
-        {/* Título editable */}
-        <div className="border-b px-6 py-4">
+        {/* Título para identificar el documento (fuera del papel) */}
+        <div className="border-b px-6 py-3 bg-card">
           <input
             type="text"
             value={title}
@@ -387,14 +387,14 @@ export function DocumentEditor({
               setHasUnsavedChanges(true);
             }}
             disabled={!canEdit}
-            placeholder="Título del documento"
-            className="w-full text-3xl font-bold bg-transparent border-none outline-none placeholder:text-muted-foreground/50 disabled:cursor-not-allowed disabled:opacity-60"
+            placeholder="Título del documento (solo para identificación)"
+            className="w-full text-lg font-medium bg-transparent border-none outline-none placeholder:text-muted-foreground/50 disabled:cursor-not-allowed disabled:opacity-60"
           />
         </div>
 
         {/* Editor de contenido */}
-        <div className="flex-1 overflow-auto">
-          <div ref={editorContainerRef} className="max-w-4xl mx-auto px-6 py-8">
+        <div className="flex-1 overflow-auto document-background">
+          <div ref={editorContainerRef} className="document-paper">
             <EditorContent
               editor={editor}
               className={`

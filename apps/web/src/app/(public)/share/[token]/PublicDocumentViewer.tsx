@@ -387,18 +387,16 @@ interface Comment {
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="border-b px-6 py-4 flex items-center justify-between bg-card">
-          <div>
-            <h1 className="text-2xl font-bold">{document?.title || 'Documento'}</h1>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              Modo solo lectura
-              {docData?.allow_comments && ' • Puedes comentar'}
-            </p>
-          </div>
+        <header className="border-b px-6 py-3 flex items-center justify-between bg-card">
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Eye className="h-3 w-3" />
+            Modo solo lectura
+            {docData?.allow_comments && ' • Puedes comentar'}
+          </p>
           {docData?.allow_comments && (
             <Button 
               variant="outline" 
+              size="sm"
               onClick={() => setShowComments(!showComments)}
             >
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -408,8 +406,8 @@ interface Comment {
         </header>
 
         {/* Editor (solo lectura) */}
-        <div className="flex-1 overflow-auto p-6">
-          <div ref={editorContainerRef} className="max-w-4xl mx-auto">
+        <div className="flex-1 overflow-auto document-background">
+          <div ref={editorContainerRef} className="document-paper">
             <EditorContent
               editor={editor}
               className={`
