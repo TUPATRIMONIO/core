@@ -223,57 +223,164 @@ export function CountryAndUploadStep() {
 
           if (data.content && typeof data.content === 'object') {
             const content = data.content.content || []
-            content.forEach((node: any) => {
-              // 1. Determinar estilo según tipo de nodo
-              let fontSize = 12
-              let isBold = false
-              let marginBottom = 7
-
-              if (node.type === 'heading') {
-                isBold = true
-                if (node.attrs?.level === 1) fontSize = 24
-                else if (node.attrs?.level === 2) fontSize = 20
-                else if (node.attrs?.level === 3) fontSize = 16
-                marginBottom = 10
+            
+            // State for rendering
+            let currentY = 20
+            const margin = 20
+            const pageWidth = doc.internal.pageSize.getWidth()
+            const maxLineWidth = pageWidth - margin * 2
+            const lineHeight = 7
+            
+            // Helper to check page break
+            const checkPageBreak = (heightIfNeeded: number = lineHeight) => {
+              if (currentY + heightIfNeeded > 280) {
+                doc.addPage()
+                currentY = 20
+                return true
               }
+              return false
+            }
 
-              doc.setFontSize(fontSize)
-              doc.setFont('helvetica', isBold ? 'bold' : 'normal')
+            // Recursive render function
+            const renderNodes = (nodes: any[], indent: number = 0, listType: 'bullet' | 'ordered' | null = null, listIndex: number = 0) => {
+              nodes.forEach((node, index) => {
+                const nodeIndent = indent * 10
+                const availableWidth = maxLineWidth - nodeIndent
+                const startX = margin + nodeIndent
 
-              // 2. Extraer texto plano y alineación
-              const nodeText = (node.content || [])
-                .map((child: any) => child.text || '')
-                .join('')
-              
-              const align = node.attrs?.textAlign || 'left'
-
-              if (nodeText.trim()) {
-                // Verificar salto de página
-                const lines = doc.splitTextToSize(nodeText, maxLineWidth)
-                const blockHeight = lines.length * (fontSize * 0.5) // Estimación de altura
-                
-                if (y + blockHeight > 280) {
-                  doc.addPage()
-                  y = 20
+                if (node.type === 'heading') {
+                  const level = node.attrs?.level || 1
+                  const fontSize = level === 1 ? 24 : level === 2 ? 20 : 16
+                  const isBold = true
+                  
+                  checkPageBreak(fontSize * 0.5 + 5)
+                  
+                  doc.setFontSize(fontSize)
+                  doc.setFont('helvetica', 'bold') // Headings always bold
+                  
+                  const text = (node.content || []).map((c: any) => c.text).join('')
+                  const lines = doc.splitTextToSize(text, availableWidth)
+                  
+                  const align = node.attrs?.textAlign || 'left'
+                  let x = startX
+                  if (align === 'center') x = pageWidth / 2
+                  else if (align === 'right') x = pageWidth - margin
+                  
+                  doc.text(lines, x, currentY, { align: align as any })
+                  currentY += lines.length * (fontSize * 0.5) + 5 // Margin bottom
+                  
+                } else if (node.type === 'paragraph') {
+                  // If empty paragraph, just add space
+                  if (!node.content) {
+                    currentY += lineHeight
+                    return
+                  }
+                  
+                  checkPageBreak()
+                  
+                  doc.setFontSize(12)
+                  const align = node.attrs?.textAlign || 'left'
+                  
+                  // For simple paragraphs without complex marks, we could use splitTextToSize
+                  // But to support inline styles, we need to flow word by word
+                  
+                  let cursorX = startX
+                  // Adjustment for alignment (simplified: only works for block, tricky for inline flow)
+                  // For now, inline flow + alignment is hard. Defaulting to left for rich text.
+                  
+                  const paragraphNodes = node.content || []
+                  
+                  paragraphNodes.forEach((child: any) => {
+                    if (child.type === 'text') {
+                      const text = child.text || ''
+                      const marks = child.marks || []
+                      
+                      // Set Font Style
+                      const isBold = marks.some((m: any) => m.type === 'bold')
+                      const isItalic = marks.some((m: any) => m.type === 'italic')
+                      const isUnderline = marks.some((m: any) => m.type === 'underline')
+                      const isHighlight = marks.some((m: any) => m.type === 'highlight')
+                      const linkMark = marks.find((m: any) => m.type === 'link')
+                      
+                      let fontStyle = 'normal'
+                      if (isBold && isItalic) fontStyle = 'bolditalic'
+                      else if (isBold) fontStyle = 'bold'
+                      else if (isItalic) fontStyle = 'italic'
+                      
+                      doc.setFont('helvetica', fontStyle)
+                      
+                      // Split by words to handle wrapping
+                      // We keep spaces attached to previous word or as separate chunks? 
+                      // Simplest: split by space, but preserve space width
+                      const words = text.split(/(\s+)/)
+                      
+                      words.forEach((word: string) => {
+                        if (!word) return
+                        
+                        const wordWidth = doc.getTextWidth(word)
+                        
+                        if (cursorX + wordWidth > pageWidth - margin) {
+                          currentY += lineHeight
+                          cursorX = startX
+                          checkPageBreak()
+                        }
+                        
+                        // Draw Background (Highlight)
+                        if (isHighlight) {
+                          doc.setFillColor(255, 255, 0)
+                          doc.rect(cursorX, currentY - 5, wordWidth, 7, 'F')
+                          doc.setFillColor(0)
+                        }
+                        
+                        // Draw Text
+                        if (linkMark) {
+                          doc.setTextColor(0, 0, 255)
+                          doc.textWithLink(word, cursorX, currentY, { url: linkMark.attrs.href })
+                          doc.setTextColor(0)
+                        } else {
+                           doc.text(word, cursorX, currentY)
+                        }
+                        
+                        // Draw Underline
+                        if (isUnderline) {
+                          doc.setLineWidth(0.5)
+                          doc.line(cursorX, currentY + 1, cursorX + wordWidth, currentY + 1)
+                        }
+                        
+                        cursorX += wordWidth
+                      })
+                    }
+                  })
+                  
+                  currentY += lineHeight // End of paragraph
+                  
+                } else if (node.type === 'bulletList') {
+                  renderNodes(node.content || [], indent + 1, 'bullet')
+                } else if (node.type === 'orderedList') {
+                  renderNodes(node.content || [], indent + 1, 'ordered')
+                } else if (node.type === 'listItem') {
+                   // Draw bullet/number
+                   const itemX = startX - 5
+                   if (listType === 'bullet') {
+                     doc.setFontSize(14)
+                     doc.text('•', itemX, currentY)
+                     doc.setFontSize(12)
+                   } else if (listType === 'ordered') {
+                     doc.setFontSize(12)
+                     doc.text(String(listIndex + 1) + '.', itemX, currentY)
+                   }
+                   
+                   // Render children (usually paragraphs)
+                   // Note: listItem content usually starts with a paragraph.
+                   // We need to ensure that paragraph doesn't add extra newline at start
+                   // For simplicity: render children normally, but maybe adjust Y?
+                   renderNodes(node.content || [], indent, null, 0)
                 }
+              })
+            }
 
-                // Calcular X según alineación
-                let x = margin
-                if (align === 'center') x = pageWidth / 2
-                else if (align === 'right') x = pageWidth - margin
-                
-                // Dibujar texto
-                doc.text(lines, x, y, { 
-                  align: align as any,
-                  maxWidth: maxLineWidth 
-                })
-                
-                y += blockHeight + marginBottom
-              } else if (node.type === 'paragraph' || node.type === 'heading') {
-                // Párrafo vacío como espacio
-                y += marginBottom
-              }
-            })
+            renderNodes(content)
+
           } else if (typeof data.content === 'string') {
             doc.setFontSize(12)
             doc.setFont('helvetica', 'normal')

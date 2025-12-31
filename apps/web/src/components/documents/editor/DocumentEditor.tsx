@@ -403,6 +403,8 @@ export function DocumentEditor({
                 prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
                 prose-p:leading-relaxed
                 prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                prose-ul:list-disc prose-ul:pl-5
+                prose-ol:list-decimal prose-ol:pl-5
                 ${!canEdit ? 'opacity-75 cursor-not-allowed' : ''}
               `}
             />

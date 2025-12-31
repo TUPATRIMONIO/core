@@ -171,15 +171,37 @@ export function AIAssistantOverlay({
     }
   };
 
+  /**
+   * Helper simple para convertir Markdown básico a HTML
+   * Maneja: **negritas**, *cursivas*, y saltos de línea
+   */
+  const markdownToHtml = (markdown: string) => {
+    return markdown
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      // Split by double newline for paragraphs
+      .split('\n\n')
+      .map(p => {
+        // Replace single newline with break within paragraph
+        const content = p.replace(/\n/g, '<br />');
+        return `<p>${content}</p>`;
+      })
+      .join('');
+  };
+
   const handleApply = () => {
     if (!editor || !result) return;
+    
+    // Convert markdown to HTML before inserting
+    const htmlContent = markdownToHtml(result);
 
     if (selection) {
       // Reemplazar selección
-      editor.chain().focus().insertContentAt({ from: selection.from, to: selection.to }, result).run();
+      editor.chain().focus().insertContentAt({ from: selection.from, to: selection.to }, htmlContent).run();
     } else {
       // Insertar al final o en cursor
-      editor.chain().focus().insertContent(result).run();
+      editor.chain().focus().insertContent(htmlContent).run();
     }
     
     toast.success('Cambios aplicados');
@@ -193,7 +215,7 @@ export function AIAssistantOverlay({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <Card ref={containerRef} className="w-full max-w-2xl shadow-2xl border-primary/20 bg-background/95 backdrop-blur-md overflow-hidden flex flex-col max-h-[80vh]">
-        <CardHeader className="flex flex-row items-center justify-between border-b py-3 px-4">
+        <CardHeader className="flex flex-row items-center justify-between border-b py-3 px-4 shrink-0">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
             Asistente con IA
@@ -213,105 +235,107 @@ export function AIAssistantOverlay({
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 flex-1 overflow-hidden flex flex-col">
+        <CardContent className="p-0 flex-1 overflow-hidden flex flex-col min-h-0">
           {!result ? (
-            <div className="p-6 space-y-6">
-              {/* Credit Cost Info */}
-              {creditCost !== null && (
-                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Coins className="h-4 w-4 text-primary" />
-                    <span>Costo por solicitud:</span>
-                    <span className="font-semibold text-primary">{creditCost}</span>
-                    <span className="text-muted-foreground">créditos</span>
-                  </div>
-                  {creditBalance !== null && (
-                    <div className="text-xs text-muted-foreground">
-                      Saldo: <span className="font-medium">{creditBalance.toFixed(1)}</span>
+            <ScrollArea className="flex-1">
+              <div className="p-6 space-y-6">
+                {/* Credit Cost Info */}
+                {creditCost !== null && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Coins className="h-4 w-4 text-primary" />
+                      <span>Costo por solicitud:</span>
+                      <span className="font-semibold text-primary">{creditCost}</span>
+                      <span className="text-muted-foreground">créditos</span>
                     </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Insufficient credits warning */}
-              {!canUseAi && creditBalance !== null && creditCost !== null && (
-                <InsufficientCreditsAlert
-                  currentBalance={creditBalance}
-                  requiredCredits={creditCost}
-                  variant="inline"
-                  onCreditsAdded={fetchCreditInfo}
-                />
-              )}
-              
-              {/* Input Area */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground italic">
-                  {selection ? '¿Qué quieres hacer con el texto seleccionado?' : '¿En qué puedo ayudarte con este documento?'}
-                </label>
-                <div className="relative group">
-                  <Input
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Escribe una instrucción (ej: 'redacta una clausula de confidencialidad', 'hazlo más formal'...)"
-                    className="pr-12 h-12 text-base border-primary/20 focus-visible:ring-primary shadow-inner"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleGenerate();
-                      }
-                    }}
-                    autoFocus
-                    disabled={!canUseAi}
+                    {creditBalance !== null && (
+                      <div className="text-xs text-muted-foreground">
+                        Saldo: <span className="font-medium">{creditBalance.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Insufficient credits warning */}
+                {!canUseAi && creditBalance !== null && creditCost !== null && (
+                  <InsufficientCreditsAlert
+                    currentBalance={creditBalance}
+                    requiredCredits={creditCost}
+                    variant="inline"
+                    onCreditsAdded={fetchCreditInfo}
                   />
-                  <Button 
-                    size="icon" 
-                    className="absolute right-1.5 top-1.5 h-9 w-9"
-                    onClick={() => handleGenerate()}
-                    disabled={isLoading || !prompt.trim() || !canUseAi}
-                  >
-                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acciones rápidas</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {QUICK_ACTIONS.map((action) => (
-                    <Button
-                      key={action.id}
-                      variant="outline"
-                      className="justify-start gap-4 h-auto py-3 px-4 text-left hover:border-primary/50 hover:bg-primary/5 group"
-                      onClick={() => {
-                        setPrompt(action.prompt);
-                        handleGenerate(action.prompt);
+                )}
+                
+                {/* Input Area */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground italic">
+                    {selection ? '¿Qué quieres hacer con el texto seleccionado?' : '¿En qué puedo ayudarte con este documento?'}
+                  </label>
+                  <div className="relative group">
+                    <Input
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Escribe una instrucción (ej: 'redacta una clausula de confidencialidad', 'hazlo más formal'...)"
+                      className="pr-12 h-12 text-base border-primary/20 focus-visible:ring-primary shadow-inner"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleGenerate();
+                        }
                       }}
-                      disabled={isLoading || !canUseAi}
+                      autoFocus
+                      disabled={!canUseAi}
+                    />
+                    <Button 
+                      size="icon" 
+                      className="absolute right-1.5 top-1.5 h-9 w-9"
+                      onClick={() => handleGenerate()}
+                      disabled={isLoading || !prompt.trim() || !canUseAi}
                     >
-                      <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                        <action.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">{action.label}</div>
-                        <div className="text-[10px] text-muted-foreground line-clamp-1 opacity-70">Basado en tu selección</div>
-                      </div>
+                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     </Button>
-                  ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Context Info */}
-              {selection && (
-                <div className="p-3 rounded-lg bg-muted/30 border text-xs text-muted-foreground">
-                  <span className="font-semibold block mb-1">Contexto seleccionado:</span>
-                  <p className="line-clamp-2 italic">"{selection.text}"</p>
+                {/* Quick Actions */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Acciones rápidas</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {QUICK_ACTIONS.map((action) => (
+                      <Button
+                        key={action.id}
+                        variant="outline"
+                        className="justify-start gap-4 h-auto py-3 px-4 text-left hover:border-primary/50 hover:bg-primary/5 group"
+                        onClick={() => {
+                          setPrompt(action.prompt);
+                          handleGenerate(action.prompt);
+                        }}
+                        disabled={isLoading || !canUseAi}
+                      >
+                        <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <action.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm">{action.label}</div>
+                          <div className="text-[10px] text-muted-foreground line-clamp-1 opacity-70">Basado en tu selección</div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* Context Info */}
+                {selection && (
+                  <div className="p-3 rounded-lg bg-muted/30 border text-xs text-muted-foreground">
+                    <span className="font-semibold block mb-1">Contexto seleccionado:</span>
+                    <p className="line-clamp-2 italic">"{selection.text}"</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           ) : (
             <div className="flex flex-col h-full animate-in slide-in-from-bottom-5 duration-300">
-              <div className="p-3 bg-primary/5 border-b flex items-center justify-between">
+              <div className="p-3 bg-primary/5 border-b flex items-center justify-between shrink-0">
                 <span className="text-xs font-medium text-primary flex items-center gap-1">
                   <Sparkles className="h-3 w-3" /> Sugerencia generada
                 </span>
@@ -325,16 +349,20 @@ export function AIAssistantOverlay({
                   <Badge variant="outline" className="text-[10px] uppercase">Borrador</Badge>
                 </div>
               </div>
-              <ScrollArea className="flex-1 p-6">
-                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
-                  {result}
+              <ScrollArea className="flex-1">
+                <div className="p-6">
+                  {/* Renderizado como HTML para mostrar negritas, etc */}
+                  <div 
+                    className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: markdownToHtml(result) }}
+                  />
                 </div>
               </ScrollArea>
             </div>
           )}
         </CardContent>
 
-        <CardFooter className="border-t bg-muted/20 py-3 flex justify-between gap-3">
+        <CardFooter className="border-t bg-muted/20 py-3 flex justify-between gap-3 shrink-0">
           {!result ? (
             <div className="text-[11px] text-muted-foreground italic flex items-center gap-1.5 opacity-70">
               <Sparkles className="h-3 w-3" /> 
@@ -364,3 +392,4 @@ export function AIAssistantOverlay({
     </div>
   );
 }
+

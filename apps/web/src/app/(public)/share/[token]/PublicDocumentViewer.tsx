@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
+import Link from '@tiptap/extension-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +39,8 @@ interface Comment {
   id: string;
   content: string;
   quoted_text?: string;
+  selection_from?: number;
+  selection_to?: number;
   author_name: string;
   author_email: string;
   created_at: string;
@@ -60,7 +66,23 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
 
   // Editor en modo solo lectura
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Underline,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Link.configure({
+        openOnClick: false, // Prevent navigation inside editor
+        HTMLAttributes: {
+          class: 'text-primary underline',
+          target: '_blank',
+        },
+      }),
+    ],
     content: docData?.content || '',
     editable: false,
     immediatelyRender: false,
@@ -166,11 +188,13 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
         p_access_token: accessToken,
         p_content: content,
         p_quoted_text: pendingQuotedText.text,
+        p_selection_from: pendingQuotedText.from,
+        p_selection_to: pendingQuotedText.to,
       });
 
       if (error) {
         toast.error('Error al agregar comentario');
-        console.error(error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return;
       }
 
@@ -211,71 +235,86 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
     }
   }
 
-  // Highlight quoted text in the document when clicking on a comment
-  function handleHighlightText(quotedText: string) {
-    if (!editorContainerRef.current || !quotedText) return;
+interface Comment {
+  id: string;
+  content: string;
+  quoted_text?: string;
+  selection_from?: number;
+  selection_to?: number;
+  author_name: string;
+  author_email: string;
+  created_at: string;
+}
 
-    // Add animation keyframes if not already present
-    if (!window.document.getElementById('comment-highlight-styles')) {
-      const style = window.document.createElement('style');
-      style.id = 'comment-highlight-styles';
-      style.textContent = `
-        @keyframes pulse-highlight {
-          0%, 100% { background-color: hsl(var(--primary) / 0.4); }
-          50% { background-color: hsl(var(--primary) / 0.2); }
-        }
-        .comment-highlight-active {
-          background-color: hsl(var(--primary) / 0.4);
-          animation: pulse-highlight 0.5s ease-in-out 3;
-          border-radius: 2px;
-        }
-      `;
-      window.document.head.appendChild(style);
-    }
+// ... inside component ...
 
-    const selection = window.getSelection();
-    if (selection) selection.removeAllRanges();
+  // Highlight quoted text using TipTap selection
+  function handleHighlightText(comment: Comment) {
+    if (!editor || !comment.quoted_text) return;
 
-    editorContainerRef.current.focus();
-
-    // @ts-ignore - window.find is not in TypeScript types but exists in browsers
-    const found = window.find(quotedText, false, false, true, false, true, false);
-
-    if (found && selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      
-      // Scroll into view
-      const scrollContainer = editorContainerRef.current.closest('.overflow-auto');
-      if (scrollContainer) {
-        const rect = range.getBoundingClientRect();
-        const containerRect = scrollContainer.getBoundingClientRect();
-        const scrollTop = scrollContainer.scrollTop + rect.top - containerRect.top - 150;
-        scrollContainer.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
-      }
-
+    // Method 1: Use stored selection indices if available (Most Robust)
+    if (typeof comment.selection_from === 'number' && typeof comment.selection_to === 'number') {
       try {
-        const highlightSpan = window.document.createElement('span');
-        highlightSpan.className = 'comment-highlight-active';
-        range.surroundContents(highlightSpan);
-
+        // Set the selection in the editor
+        editor.chain()
+          .focus()
+          .setTextSelection({ from: comment.selection_from, to: comment.selection_to })
+          .run();
+          
+        // Use a small timeout to allow TipTap to update the DOM
         setTimeout(() => {
-          if (highlightSpan.parentNode) {
-            const parent = highlightSpan.parentNode;
-            while (highlightSpan.firstChild) {
-              parent.insertBefore(highlightSpan.firstChild, highlightSpan);
-            }
-            parent.removeChild(highlightSpan);
+          // Get the editor view from TipTap
+          const { view } = editor;
+          if (!view) return;
+          
+          // Get the coordinates of the selection start
+          const coords = view.coordsAtPos(comment.selection_from!);
+          
+          // Find the scroll container
+          const scrollContainer = editorContainerRef.current?.closest('.overflow-auto');
+          
+          if (scrollContainer && coords) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+            // coords.top is relative to viewport, we need to calculate relative to container
+            const relativeTop = coords.top - containerRect.top + scrollContainer.scrollTop;
+            const targetScroll = relativeTop - 150; // 150px from top for breathing room
+            
+            scrollContainer.scrollTo({ 
+              top: Math.max(0, targetScroll), 
+              behavior: 'smooth' 
+            });
           }
-        }, 2000);
+          
+          // Add visual pulse effect using TipTap's Highlight extension
+          setTimeout(() => {
+            // Apply brand color highlight temporarily (wine/burgundy brand color)
+            editor.chain()
+              .setTextSelection({ from: comment.selection_from!, to: comment.selection_to! })
+              .setHighlight({ color: 'rgba(128, 0, 57, 0.3)' }) // Brand color (#800039) with 30% opacity
+              .run();
+            
+            // Remove highlight after 2 seconds
+            setTimeout(() => {
+              editor.chain()
+                .setTextSelection({ from: comment.selection_from!, to: comment.selection_to! })
+                .unsetHighlight()
+                .run();
+              
+              // Clear selection
+              editor.commands.setTextSelection(comment.selection_to!);
+            }, 2000);
+          }, 600); // Wait for scroll to mostly finish
+          
+        }, 50);
+        
+        return;
       } catch (e) {
-        setTimeout(() => selection?.removeAllRanges(), 2000);
-      }
-    } else {
-      const editorText = editorContainerRef.current.textContent || '';
-      if (!editorText.includes(quotedText)) {
-        toast.info('El texto citado ya no existe en el documento');
+        console.warn('Could not set selection by index, falling back to search', e);
       }
     }
+
+    // Fallback
+    toast.info('No se pudo ubicar el texto exacto (versión antigua de comentario)');
   }
 
 
@@ -373,14 +412,22 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
           <div ref={editorContainerRef} className="max-w-4xl mx-auto">
             <EditorContent
               editor={editor}
-              className="prose prose-lg dark:prose-invert max-w-none min-h-[500px]"
+              className={`
+                prose prose-lg dark:prose-invert max-w-none min-h-[500px]
+                prose-headings:font-bold
+                prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                prose-p:leading-relaxed
+                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                prose-ul:list-disc prose-ul:pl-5
+                prose-ol:list-decimal prose-ol:pl-5
+              `}
             />
           </div>
         </div>
       </div>
 
       {/* Text Selection Popup */}
-      {hasSelection && selection?.rect && document?.allow_comments && (
+      {hasSelection && selection?.rect && docData?.allow_comments && (
         <TextSelectionPopup
           position={{ top: selection.rect.top, left: selection.rect.left + selection.rect.width / 2 }}
           onAddComment={handleAddSelectionComment}
@@ -436,7 +483,7 @@ export function PublicDocumentViewer({ token }: PublicDocumentViewerProps) {
                       {comment.quoted_text && (
                         <div 
                           className="mt-1 pl-2 border-l-2 border-primary/50 text-xs text-muted-foreground italic cursor-pointer hover:bg-primary/10 hover:border-primary transition-colors rounded-r py-1 pr-1"
-                          onClick={() => handleHighlightText(comment.quoted_text!)}
+                          onClick={() => handleHighlightText(comment)}
                           title="Clic para ver en el documento"
                         >
                           "{comment.quoted_text.length > 100 ? comment.quoted_text.slice(0, 100) + '...' : comment.quoted_text}"
