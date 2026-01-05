@@ -407,6 +407,22 @@ async function OrderSuccessContent({
             // Si hay error, usar el pago como está
             payment = sessionPayment;
           }
+        } else if (sessionPayment.status === 'succeeded') {
+          // El pago ya está succeeded (probablemente procesado por webhook)
+          // Verificar si la orden necesita actualizarse
+          payment = sessionPayment;
+          
+          if (order.status === 'pending_payment') {
+            console.log('[OrderSuccess] Pago ya succeeded pero orden pendiente, actualizando orden a paid...');
+            try {
+              await updateOrderStatus(orderId, 'paid', {
+                paymentId: payment.id,
+              });
+              console.log('[OrderSuccess] Orden actualizada a paid exitosamente');
+            } catch (updateError: any) {
+              console.error('[OrderSuccess] Error actualizando orden a paid:', updateError);
+            }
+          }
         } else {
           payment = sessionPayment;
         }
@@ -480,6 +496,21 @@ async function OrderSuccessContent({
               console.error('[OrderSuccess] Error verificando checkout session:', stripeError);
               payment = data;
             }
+          } else if (data.status === 'succeeded') {
+            // El pago ya está succeeded, verificar si la orden necesita actualizarse
+            payment = data;
+            
+            if (order.status === 'pending_payment') {
+              console.log('[OrderSuccess] Pago ya succeeded pero orden pendiente (por orderId), actualizando...');
+              try {
+                await updateOrderStatus(orderId, 'paid', {
+                  paymentId: payment.id,
+                });
+                console.log('[OrderSuccess] Orden actualizada a paid exitosamente');
+              } catch (updateError: any) {
+                console.error('[OrderSuccess] Error actualizando orden a paid:', updateError);
+              }
+            }
           } else {
             payment = data;
           }
@@ -504,6 +535,19 @@ async function OrderSuccessContent({
       } else if (orderPayments) {
         console.log('[OrderSuccess] Pago Stripe encontrado por orderId:', orderPayments.id);
         payment = orderPayments;
+        
+        // Verificar si la orden necesita actualizarse
+        if (orderPayments.status === 'succeeded' && order.status === 'pending_payment') {
+          console.log('[OrderSuccess] Pago succeeded pero orden pendiente, actualizando...');
+          try {
+            await updateOrderStatus(orderId, 'paid', {
+              paymentId: payment.id,
+            });
+            console.log('[OrderSuccess] Orden actualizada a paid exitosamente');
+          } catch (updateError: any) {
+            console.error('[OrderSuccess] Error actualizando orden a paid:', updateError);
+          }
+        }
       }
     }
   }
