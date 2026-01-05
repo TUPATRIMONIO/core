@@ -320,6 +320,35 @@ export function DocumentEditor({
     }
   }
 
+  // Handler para hacer clic en cualquier parte del papel y activar el editor
+  const handlePaperClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Solo procesar si el editor existe y se puede editar
+    if (!editor || !canEdit) return;
+
+    const target = e.target as HTMLElement;
+    
+    // No hacer nada si el clic fue en un elemento interactivo (enlaces, botones, etc.)
+    if (target.closest('a, button, [role="button"]')) {
+      return;
+    }
+
+    // Si el clic fue directamente en el contenedor del papel o en el área del editor
+    // hacer focus al editor para permitir escribir
+    if (target === editorContainerRef.current || target.closest('.ProseMirror')) {
+      // Pequeño delay para asegurar que TipTap procese el evento primero
+      setTimeout(() => {
+        if (editor && !editor.isDestroyed) {
+          // Si el editor está vacío, colocar cursor al inicio
+          // Si tiene contenido, colocar al final
+          if (editor.isEmpty) {
+            editor.commands.focus('start');
+          } else {
+            editor.commands.focus('end');
+          }
+        }
+      }, 10);
+    }
+  };
 
   return (
     <div className="flex h-full bg-background">
@@ -367,7 +396,11 @@ export function DocumentEditor({
 
         {/* Editor de contenido */}
         <div className="flex-1 overflow-auto document-background">
-          <div ref={editorContainerRef} className="document-paper">
+          <div 
+            ref={editorContainerRef} 
+            className="document-paper"
+            onClick={handlePaperClick}
+          >
             <EditorContent
               editor={editor}
               className={`

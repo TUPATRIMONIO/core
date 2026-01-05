@@ -552,6 +552,16 @@
     margin: 2rem auto;
     max-width: 65em;
     width: 100%;
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* Indicador visual sutil al pasar el mouse sobre el papel */
+  .document-paper:hover {
+    box-shadow: 
+      0 1px 3px 0 rgb(0 0 0 / 0.12),
+      0 1px 2px -1px rgb(0 0 0 / 0.12),
+      0 4px 6px -1px rgb(0 0 0 / 0.12),
+      0 2px 4px -2px rgb(0 0 0 / 0.12);
   }
   
   .dark .document-paper {
@@ -570,6 +580,11 @@
       min-height: auto;
       border-radius: 4px;
     }
+
+    /* Ajustar altura mínima del editor en mobile */
+    .document-paper .ProseMirror {
+      min-height: calc(100vh - 300px); /* Altura de pantalla menos toolbar y otros elementos */
+    }
   }
   
   .document-background {
@@ -578,6 +593,38 @@
   
   .dark .document-background {
     background: #1a1a1a;
+  }
+
+  /* Estilos para expandir el área clickeable del editor */
+  .document-paper .ProseMirror {
+    min-height: calc(11in - 2in); /* Altura del papel menos padding (1in arriba + 1in abajo) */
+    cursor: text;
+    outline: none;
+  }
+
+  /* Cuando el editor no tiene foco, mostrar indicador sutil */
+  .document-paper .ProseMirror:not(:focus) {
+    cursor: text;
+  }
+
+  /* Placeholder más visible cuando el editor está vacío */
+  .document-paper .ProseMirror p.is-editor-empty:first-child::before {
+    color: #9ca3af;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .dark .document-paper .ProseMirror p.is-editor-empty:first-child::before {
+    color: #6b7280;
+  }
+
+  /* Asegurar que el área vacía sea clickeable */
+  .document-paper .ProseMirror:empty::before {
+    content: '';
+    display: block;
+    min-height: 1.5em;
   }
 
   /* ============================================================================
