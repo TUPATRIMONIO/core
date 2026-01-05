@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getSendGridConfig, sendEmail } from "../_shared/sendgrid-config.ts";
 
 // Configuración CORS
 const corsHeaders = {
@@ -46,111 +47,60 @@ serve(async (req) => {
       );
     }
 
-    // 1. Obtener cuenta SendGrid de la organización
-    const { data: sendgridAccount, error: accountError } =
-      await supabaseClient
-        .from("sendgrid_accounts")
-        .select("api_key, from_email, from_name")
-        .eq("organization_id", payload.org_id)
-        .eq("is_active", true)
-        .single();
+    // Usar configuración transaccional centralizada
+    const config = getSendGridConfig("transactional");
+    console.log(`[send-signing-notification] Enviando desde: ${config.fromEmail} (${config.fromName}) → ${payload.recipient_email}`);
 
-    if (accountError || !sendgridAccount) {
-      throw new Error(
-        `No se encontró cuenta SendGrid activa para la organización ${payload.org_id}. Error: ${accountError?.message}`
-      );
-    }
-
-    // Desencriptar API key (si está encriptada)
-    // Nota: En producción, las API keys deberían estar encriptadas
-    // Por ahora asumimos que están en texto plano o necesitamos desencriptarlas
-    const apiKey = sendgridAccount.api_key;
-
-    // 2. Buscar sender identity transaccional de la organización
-    const { data: senderIdentity } = await supabaseClient
-      .from("sender_identities")
-      .select("from_email, from_name, reply_to_email")
-      .eq("organization_id", payload.org_id)
-      .eq("purpose", "transactional")
-      .eq("is_active", true)
-      .single();
-
-    // Usar sender identity si existe, sino fallback a cuenta SendGrid
-    const fromEmail = senderIdentity?.from_email || sendgridAccount.from_email || "noreply@tupatrimonio.cl";
-    const fromName = senderIdentity?.from_name || sendgridAccount.from_name || "TuPatrimonio";
-    const replyToEmail = senderIdentity?.reply_to_email || undefined;
-
-    // 3. Generar contenido del email según tipo
+    // Generar contenido del email según tipo
     const emailContent = generateEmailContent(payload);
 
-    // 4. Enviar email usando SendGrid API v3
-    const sendgridResponse = await fetch(
-      "https://api.sendgrid.com/v3/mail/send",
+    // Enviar email usando helper
+    await sendEmail(
+      config,
+      payload.recipient_email,
+      payload.recipient_name || payload.recipient_email,
+      emailContent.subject,
+      emailContent.html,
+      emailContent.text,
       {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          personalizations: [
-            {
-              to: [
-                {
-                  email: payload.recipient_email,
-                  name: payload.recipient_name || payload.recipient_email,
-                },
-              ],
-              dynamic_template_data: {
-                document_title: payload.document_title,
-                action_url: payload.action_url,
-                recipient_name: payload.recipient_name || "Usuario",
-                organization_name: "TuPatrimonio", // TODO: Obtener de BD si es necesario
-              },
-            },
-          ],
-          from: {
-            email: fromEmail,
-            name: fromName,
-          },
-          reply_to: replyToEmail ? {
-            email: replyToEmail,
-          } : undefined,
-          subject: emailContent.subject,
-          content: [
-            {
-              type: "text/html",
-              value: emailContent.html,
-            },
-            {
-              type: "text/plain",
-              value: emailContent.text,
-            },
-          ],
-          custom_args: {
-            organization_id: payload.org_id,
-            document_id: payload.document_id || "",
-            signer_id: payload.signer_id || "",
-            notification_type: payload.type,
-          },
-        }),
+        organization_id: payload.org_id,
+        document_id: payload.document_id || "",
+        signer_id: payload.signer_id || "",
+        notification_type: payload.type,
       }
     );
 
-    if (!sendgridResponse.ok) {
-      const errorText = await sendgridResponse.text();
-      throw new Error(
-        `Error al enviar email con SendGrid: ${sendgridResponse.status} - ${errorText}`
-      );
+    // Registrar en email_history para auditoría
+    try {
+      await supabaseClient
+        .from("email_history")
+        .insert({
+          organization_id: payload.org_id,
+          to_email: payload.recipient_email,
+          from_email: config.fromEmail,
+          subject: emailContent.subject,
+          body_html: emailContent.html,
+          body_text: emailContent.text,
+          provider: "sendgrid",
+          status: "sent",
+          sent_at: new Date().toISOString(),
+          metadata: {
+            document_id: payload.document_id,
+            signer_id: payload.signer_id,
+            notification_type: payload.type,
+            purpose: "transactional",
+          },
+        });
+      console.log(`[send-signing-notification] Email registrado en historial`);
+    } catch (logError) {
+      // No fallar si el logging falla
+      console.error("[send-signing-notification] Error registrando en email_history:", logError);
     }
-
-    const responseData = await sendgridResponse.json();
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Email enviado exitosamente",
-        sendgrid_response: responseData,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -179,10 +129,15 @@ function generateEmailContent(payload: NotificationPayload): {
   html: string;
   text: string;
 } {
-  const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://tupatrimonio.cl";
-  const actionUrl = payload.action_url.startsWith("http")
-    ? payload.action_url
-    : `${baseUrl}${payload.action_url}`;
+  const baseUrl = Deno.env.get("PUBLIC_APP_URL") || "https://app.tupatrimonio.app";
+  
+  // Asegurar que action_url existe y construir URL correctamente
+  let actionUrl = payload.action_url || "";
+  if (actionUrl && !actionUrl.startsWith("http")) {
+    // Asegurar que hay un / entre baseUrl y action_url
+    const separator = actionUrl.startsWith("/") ? "" : "/";
+    actionUrl = `${baseUrl}${separator}${actionUrl}`;
+  }
 
   switch (payload.type) {
     case "REVIEW_REQUEST":

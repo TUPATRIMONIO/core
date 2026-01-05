@@ -177,20 +177,34 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        if (invokeError || !result.success || !result.data.success) {
+        if (invokeError || !result?.success || !result?.data?.success) {
+            let errorDetails = invokeError?.message || result?.error || "Error desconocido";
+            
+            // Si es un FunctionsHttpError, intentar extraer el body del error
+            if (invokeError && 'context' in invokeError && (invokeError as any).context instanceof Response) {
+                try {
+                    const response = (invokeError as any).context as Response;
+                    const errorBody = await response.clone().json();
+                    errorDetails = errorBody.error || errorBody.details || JSON.stringify(errorBody);
+                } catch (e) {
+                    console.error("Error al parsear body de error de Edge Function:", e);
+                }
+            }
+
             // Manejar errores específicos de CDS
             const errorCode = result?.data?.codigo || result?.data?.errorCode;
 
             // SIEMPRE usar comentarios de CDS para máxima transparencia
             const cdsComentarios = result?.data?.comentarios ||
                 result?.data?.mensaje;
-            let errorMessage = cdsComentarios || result?.error ||
+            let errorMessage = cdsComentarios || errorDetails ||
                 "Error al firmar documento";
 
             console.log("CDS Error:", {
                 errorCode,
                 comentarios: cdsComentarios,
                 estado: result?.data?.estado,
+                errorDetails,
                 fullResult: result,
             });
 

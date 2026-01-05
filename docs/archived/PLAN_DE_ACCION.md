@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Detalles del pedido y enlace a flujo de firmas)\
+> **📅 Última actualización:** Enero 2026 (Corrección error net.http_post en webhooks Stripe)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -18,7 +18,8 @@
 > & WAITLIST COMPLETADO** ✅ + **🆕 SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅ +
 > **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕 MEJORAS GESTIÓN
 > DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
-> CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅\
+> CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
+> WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -55,15 +56,7 @@ bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
 pueden convertir su organización entre tipos personal y empresarial desde la
 interfaz, con advertencias automáticas y actualización de límites del CRM.
 
-- **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes -
-  Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas
-  en lugar de "Expira pronto") y solucionado el bucle infinito del spinner
-  "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes
-  gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección
-  crítica del sistema de numeración de facturas - Cambio a formato por
-  organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples
-  organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin
-  errores de duplicados.
+- **NUEVO (Ene 6, 2026):** Corrección crítica del error `function net.http_post(...) does not exist` en webhooks de Stripe - La función `signing.invoke_internal_review_function()` ahora usa la extensión `http` (síncrona) en lugar de `pg_net`, siguiendo el patrón establecido. Esto resuelve el problema donde las órdenes quedaban en estado `pending_payment` después de un pago exitoso con Stripe. Migración: `20260106000001_fix_internal_review_http.sql`. **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes - Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas en lugar de "Expira pronto") y solucionado el bucle infinito del spinner "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
 **✅ COMPLETADO en Fase 0:**
 
@@ -102,6 +95,11 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
   - Schemas credits y billing completos
   - Integraciones Stripe y dLocal funcionando
   - Webhooks configurados y operativos
+  - ✅ **Corrección crítica webhooks Stripe** (Ene 6, 2026)
+    - Error `function net.http_post(...) does not exist` resuelto
+    - Función `signing.invoke_internal_review_function()` migrada a extensión `http`
+    - Las órdenes ahora se actualizan correctamente de `pending_payment` a `paid` automáticamente
+    - Migración: `20260106000001_fix_internal_review_http.sql`
   - UI completa de facturación
   - Auto-recarga con verificación automática
   - Sistema de notificaciones integrado
@@ -544,6 +542,7 @@ READY:
 20251212200001_fix_fan_billing_unit.sql    - Corrige unidad de cobro FAN
 20251212200004_enable_pg_net.sql           - Versión actualizada pg_net
 20251229000001_add_order_number_to_view.sql - Vista documents_full con pedido
+20260106000001_fix_internal_review_http.sql - Fix error net.http_post en webhooks Stripe
 ```
 
 ### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
@@ -587,6 +586,12 @@ READY:
 - ✅ `20251212000020_enable_pg_net.sql` - Habilita extensión pg_net y corrige
   search_path en funciones
 - ✅ Trigger `invoicing.on_order_completed` - No emite facturas para monto $0
+- ✅ `20260106000001_fix_internal_review_http.sql` - Corrección crítica error
+  `net.http_post()` en webhooks Stripe
+  - Problema: Las órdenes quedaban en `pending_payment` después de pago exitoso
+  - Causa: Función `signing.invoke_internal_review_function()` usaba `pg_net` no disponible
+  - Solución: Migrada a extensión `http` (síncrona) siguiendo patrón establecido
+  - Impacto: Webhooks de Stripe ahora procesan correctamente y actualizan órdenes automáticamente
 
 **Archivos Modificados:**
 

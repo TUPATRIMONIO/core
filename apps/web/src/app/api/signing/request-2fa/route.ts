@@ -53,21 +53,23 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        console.log(
-            "CDS request-2fa response:",
-            JSON.stringify(result, null, 2),
-        );
+        if (invokeError || !result?.success || !result?.data?.success || result?.data?.estado === "FAIL") {
+            let errorDetails = invokeError?.message || result?.error || "Error desconocido";
+            
+            // Si es un FunctionsHttpError, intentar extraer el body del error
+            if (invokeError && 'context' in invokeError && (invokeError as any).context instanceof Response) {
+                try {
+                    const response = (invokeError as any).context as Response;
+                    const errorBody = await response.clone().json();
+                    errorDetails = errorBody.error || errorBody.details || JSON.stringify(errorBody);
+                } catch (e) {
+                    console.error("Error al parsear body de error de Edge Function:", e);
+                }
+            }
 
-        // Verificar errores de invocación O si CDS retorna FAIL/success:false
-        const cdsError = invokeError ||
-            !result?.success ||
-            result?.data?.success === false ||
-            result?.data?.estado === "FAIL";
-
-        if (cdsError) {
             console.error(
                 "Error al solicitar 2FA CDS:",
-                invokeError || result?.error || result?.data,
+                errorDetails,
             );
 
             // CDS puede retornar el código de error en diferentes lugares
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
                 result?.data?.mensaje;
 
             // Si CDS da un mensaje, usarlo directamente para máxima transparencia
-            let errorMessage = cdsComentarios ||
+            let errorMessage = cdsComentarios || errorDetails ||
                 "Error al solicitar segundo factor";
 
             // Solo actualizar estado en BD para casos específicos
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
                     cdsComentarios: cdsComentarios, // Siempre incluir para debug
                     errorCode,
                     estado: result?.data?.estado,
+                    details: errorDetails,
                 },
                 { status: 400 },
             );

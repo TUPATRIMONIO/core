@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Construir URL de firma
-        const signUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sign/${signer.signing_token}`;
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.tupatrimonio.app";
+        const signUrl = `${appUrl}/sign/${signer.signing_token}`;
 
         // 3. Llamar a Edge Function para enviar notificación
         const notificationUrl =

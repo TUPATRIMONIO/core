@@ -60,16 +60,28 @@ export async function GET(request: NextRequest) {
                 },
             );
 
-        if (invokeError || !result.success) {
+        if (invokeError || !result?.success) {
+            let errorDetails = invokeError?.message || result?.error || "Error desconocido";
+            
+            // Si es un FunctionsHttpError, intentar extraer el body del error
+            if (invokeError && 'context' in invokeError && (invokeError as any).context instanceof Response) {
+                try {
+                    const response = (invokeError as any).context as Response;
+                    const errorBody = await response.clone().json();
+                    errorDetails = errorBody.error || errorBody.details || JSON.stringify(errorBody);
+                } catch (e) {
+                    console.error("Error al parsear body de error de Edge Function:", e);
+                }
+            }
+
             console.error(
                 "Error al verificar vigencia CDS:",
-                invokeError || result.error,
+                errorDetails,
             );
             return NextResponse.json(
                 {
                     error: "No se pudo verificar la vigencia con el proveedor",
-                    details: invokeError?.message || result?.error ||
-                        "Error desconocido",
+                    details: errorDetails,
                 },
                 { status: 500 },
             );

@@ -61,47 +61,29 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        console.log("CDS enroll response:", JSON.stringify(result, null, 2));
+        if (invokeError || !result?.success || !result?.data?.success || result?.data?.estado === "FAIL") {
+            let errorDetails = invokeError?.message || result?.error || "Error desconocido";
+            
+            // Si es un FunctionsHttpError, intentar extraer el body del error
+            if (invokeError && 'context' in invokeError && (invokeError as any).context instanceof Response) {
+                try {
+                    const response = (invokeError as any).context as Response;
+                    const errorBody = await response.clone().json();
+                    errorDetails = errorBody.error || errorBody.details || JSON.stringify(errorBody);
+                } catch (e) {
+                    console.error("Error al parsear body de error de Edge Function:", e);
+                }
+            }
 
-        // #region agent log
-        fetch(
-            "http://127.0.0.1:7242/ingest/bdc2afec-cbea-4620-96e6-e667e032dc96",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    location: "enroll-cds/route.ts:response",
-                    message: "Full CDS response with debug",
-                    data: {
-                        fullResult: result,
-                        debugData: result?.data?.debug_data,
-                        hasInvokeError: !!invokeError,
-                        payloadSent: enrollPayload,
-                    },
-                    timestamp: Date.now(),
-                    sessionId: "debug-session",
-                    hypothesisId: "I,J,K",
-                }),
-            },
-        ).catch(() => {});
-        // #endregion
-
-        // Verificar errores - incluir estado FAIL de CDS
-        const cdsError = invokeError ||
-            !result?.success ||
-            result?.data?.success === false ||
-            result?.data?.estado === "FAIL";
-
-        if (cdsError) {
             console.error(
                 "Error al enrolar CDS:",
-                invokeError || result?.error || result?.data,
+                errorDetails,
             );
 
             // SIEMPRE usar comentarios de CDS para transparencia
             const cdsComentarios = result?.data?.comentarios ||
                 result?.data?.mensaje;
-            const errorMessage = cdsComentarios || result?.error ||
+            const errorMessage = cdsComentarios || errorDetails ||
                 "Error al iniciar enrolamiento";
 
             return NextResponse.json(
@@ -111,6 +93,7 @@ export async function POST(request: NextRequest) {
                     cdsComentarios: cdsComentarios,
                     errorCode: result?.data?.errorCode,
                     estado: result?.data?.estado,
+                    details: errorDetails,
                 },
                 { status: 400 },
             );

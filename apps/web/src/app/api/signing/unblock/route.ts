@@ -76,27 +76,29 @@ export async function POST(request: NextRequest) {
                 },
             );
 
-        console.log(
-            `CDS unblock ${type} response:`,
-            JSON.stringify(result, null, 2),
-        );
+        if (invokeError || !result?.success || !result?.data?.success || result?.data?.estado === "FAIL") {
+            let errorDetails = invokeError?.message || result?.error || "Error desconocido";
+            
+            // Si es un FunctionsHttpError, intentar extraer el body del error
+            if (invokeError && 'context' in invokeError && (invokeError as any).context instanceof Response) {
+                try {
+                    const response = (invokeError as any).context as Response;
+                    const errorBody = await response.clone().json();
+                    errorDetails = errorBody.error || errorBody.details || JSON.stringify(errorBody);
+                } catch (e) {
+                    console.error("Error al parsear body de error de Edge Function:", e);
+                }
+            }
 
-        // Verificar errores - incluir estado FAIL de CDS
-        const cdsError = invokeError ||
-            !result?.success ||
-            result?.data?.success === false ||
-            result?.data?.estado === "FAIL";
-
-        if (cdsError) {
             console.error(
                 `Error al desbloquear ${type} CDS:`,
-                invokeError || result?.error || result?.data,
+                errorDetails,
             );
 
             // SIEMPRE usar comentarios de CDS para transparencia
             const cdsComentarios = result?.data?.comentarios ||
                 result?.data?.mensaje;
-            const errorMessage = cdsComentarios || result?.error ||
+            const errorMessage = cdsComentarios || errorDetails ||
                 `Error al solicitar desbloqueo de ${type}`;
 
             return NextResponse.json(
@@ -106,6 +108,7 @@ export async function POST(request: NextRequest) {
                     cdsComentarios: cdsComentarios,
                     errorCode: result?.data?.errorCode || result?.data?.codigo,
                     estado: result?.data?.estado,
+                    details: errorDetails,
                 },
                 { status: 400 },
             );
