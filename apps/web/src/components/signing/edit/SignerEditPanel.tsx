@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Loader2, Trash2, Plus, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Loader2, Trash2, Plus, AlertCircle, CheckCircle2, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   formatRutOnInput,
@@ -68,6 +68,7 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
   const [signers, setSigners] = useState<Signer[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [sendingNotification, setSendingNotification] = useState<string | null>(null)
   
   // Formulario nuevo firmante
   const [firstName, setFirstName] = useState('')
@@ -183,6 +184,31 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
     }
   }
 
+  const handleResendNotification = async (signerId: string) => {
+    try {
+      setSendingNotification(signerId)
+      
+      const response = await fetch('/api/signing/resend-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signer_id: signerId }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al enviar notificación')
+      }
+
+      toast.success(result.message || 'Notificación enviada exitosamente')
+    } catch (e: any) {
+      console.error('Error resending notification:', e)
+      toast.error(e.message || 'Error al enviar notificación')
+    } finally {
+      setSendingNotification(null)
+    }
+  }
+
   const handleRemoveSigner = async (signerId: string) => {
     if (!confirm('¿Estás seguro de quitar a este firmante?')) return
 
@@ -241,6 +267,23 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
                       }}
                     >
                       Copiar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => handleResendNotification(signer.id)}
+                      disabled={sendingNotification === signer.id}
+                      title="Enviar enlace por correo"
+                    >
+                      {sendingNotification === signer.id ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Send className="h-3 w-3 mr-1" />
+                          Enviar enlace
+                        </>
+                      )}
                     </Button>
                     <Button
                       variant="default"

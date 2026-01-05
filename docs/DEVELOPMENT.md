@@ -1044,4 +1044,79 @@ INSERT INTO marketing.google_reviews (
 
 ---
 
+## ⚙️ Configuración de Variables PostgreSQL para Triggers
+
+### Contexto
+
+Los triggers de base de datos que envían notificaciones por email y ejecutan revisiones IA necesitan acceso a URLs y secretos. Estos valores se configuran como variables de PostgreSQL usando `ALTER DATABASE`.
+
+**⚠️ IMPORTANTE:** Estas variables NO deben ir en migraciones SQL porque contienen secretos que quedarían expuestos en el repositorio.
+
+### Variables Requeridas
+
+Los triggers dependen de estas tres variables:
+
+1. `app.settings.supabase_url` - URL de tu proyecto Supabase
+2. `app.settings.supabase_service_role_key` - Service Role Key (secreto)
+3. `app.settings.public_app_url` - URL pública de la aplicación
+
+### Configuración Manual (Una Sola Vez)
+
+Ejecutar en el **SQL Editor de Supabase Dashboard** (Project Settings > Database):
+
+```sql
+-- Reemplazar con tus valores reales
+ALTER DATABASE postgres SET app.settings.supabase_url = 'https://TU_PROJECT_REF.supabase.co';
+ALTER DATABASE postgres SET app.settings.supabase_service_role_key = 'TU_SERVICE_ROLE_KEY_AQUI';
+ALTER DATABASE postgres SET app.settings.public_app_url = 'https://app.tupatrimonio.app';
+```
+
+**Dónde encontrar los valores:**
+
+- `supabase_url`: En Supabase Dashboard > Settings > API > Project URL
+- `supabase_service_role_key`: En Supabase Dashboard > Settings > API > service_role key (⚠️ secreto)
+- `public_app_url`: URL de producción de tu aplicación (ej: `https://app.tupatrimonio.app`)
+
+### Verificar Configuración
+
+Para verificar que las variables están configuradas correctamente:
+
+```sql
+SELECT 
+  current_setting('app.settings.supabase_url', true) as supabase_url,
+  current_setting('app.settings.public_app_url', true) as public_app_url,
+  current_setting('app.settings.supabase_service_role_key', true) IS NOT NULL as has_service_key;
+```
+
+### Por Qué Este Formato
+
+PostgreSQL permite crear variables personalizadas usando la sintaxis `prefijo.nombre`. El prefijo `app.settings` es una convención para agrupar configuraciones de la aplicación. Dentro de los triggers, se accede con:
+
+```sql
+current_setting('app.settings.supabase_url', true)
+```
+
+El segundo parámetro `true` indica que si la variable no existe, retorna `NULL` en lugar de lanzar error.
+
+### Triggers que Usan Estas Variables
+
+- `signing.invoke_notification_function()` - Envía emails de notificación a firmantes
+- `signing.invoke_ai_analysis_function()` - Invoca revisión IA de documentos
+- `signing.on_ai_review_completed()` - Procesa resultados de revisión IA
+
+### Troubleshooting
+
+**Problema:** Los triggers no envían notificaciones ni ejecutan revisiones IA.
+
+**Solución:**
+1. Verificar que las variables estén configuradas (usar consulta de verificación arriba)
+2. Revisar logs de PostgreSQL en Supabase Dashboard para ver warnings
+3. Si las variables no existen, los triggers fallan silenciosamente (capturan excepciones)
+
+**Problema:** Error "permission denied" al configurar variables.
+
+**Solución:** Asegúrate de estar usando el SQL Editor con permisos de administrador (service_role).
+
+---
+
 **Para más detalles**: Ver `docs/DEPLOYMENT.md` para deploy o `docs/ARCHITECTURE.md` para decisiones técnicas.

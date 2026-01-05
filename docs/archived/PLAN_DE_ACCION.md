@@ -9615,3 +9615,64 @@ completo. Permitirá:
 **Integración:**
 
 - ✅ API Route `/api/beta/signup` actualizada para enviar `campaign`.
+
+---
+
+## 📋 HISTORIAL DE REVISIONES EN ADMIN (Enero 2025)
+
+> **📅 Fecha:** Enero 5, 2026\
+> **📊 Estado:** COMPLETADO ✅\
+> **🎯 Objetivo:** Mejorar trazabilidad mostrando todas las revisiones (IA y manuales) en panel admin.
+
+### ✅ COMPLETADO - Vista SQL Consolidada
+
+**Nueva Migración:**
+
+- ✅ `20251231000012_review_history_view.sql` - Vista `signing.review_history` que consolida:
+  - Información de documentos con su estado actual
+  - Revisión IA más reciente (con score de confianza)
+  - Conteo de mensajes cliente-equipo
+  - Indicador de revisión manual
+  - Ordenado por fecha de última revisión
+
+### ✅ COMPLETADO - Interfaz con Pestañas
+
+**Página Admin Actualizada:** `/admin/document-review`
+
+- ✅ **Pestaña "Pendientes":**
+  - Cola de trabajo para el equipo de revisión
+  - Estados: `manual_review`, `needs_correction`
+  - Filtro por estado (Todos, Revisión Manual, Necesita Corrección)
+  
+- ✅ **Pestaña "Historial":**
+  - Todos los documentos que pasaron por revisión
+  - Estados expandidos: pending_ai_review, ai_rejected, approved, pending_signature, signed, completed, rejected
+  - Columna "Tipo de Revisión": muestra si fue IA, Manual o Ambas
+  - Columna "Mensajes": conteo de interacciones con ícono
+  - Revisión IA con score de confianza (ej: "IA Aprobó (95%)")
+
+**Componentes Actualizados:**
+
+- ✅ `DocumentReviewClient.tsx`:
+  - Integración de componente `Tabs` de shadcn
+  - Badges expandidos para todos los estados del documento
+  - Funciones para calcular tipo de revisión y conteo de mensajes
+  - Navegación entre pestañas manteniendo paginación
+
+- ✅ `apps/web/src/app/(admin)/admin/document-review/page.tsx`:
+  - Manejo de parámetro `tab` en searchParams
+  - Queries diferenciadas para pendientes vs historial
+  - Inclusión de conteo de mensajes (`signing_document_messages`)
+
+**Trazabilidad Mejorada:**
+
+- ✅ Historial completo de todas las revisiones realizadas
+- ✅ Identificación clara de qué documentos pasaron por IA vs revisión manual
+- ✅ Visibilidad del número de interacciones con el cliente
+- ✅ Score de confianza de la IA en cada revisión
+- ✅ Fecha de última revisión para ordenamiento cronológico
+
+**Impacto:**
+
+- **Antes**: Solo se veían documentos en cola de revisión manual (2 estados)
+- **Después**: Vista completa de 9+ estados diferentes con historial trazable de todas las revisiones

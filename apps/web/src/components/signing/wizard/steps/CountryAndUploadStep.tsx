@@ -703,8 +703,9 @@ export function CountryAndUploadStep() {
     try {
       setIsSubmitting(true)
 
-      // Si el usuario no analizó, creamos igual el documento (sin IA)
-      await ensureDocumentAndUpload({ requiresAiReview: Boolean(state.aiReviewId) })
+      // SIEMPRE requerir revisión IA post-compra (obligatorio para el backend)
+      // La revisión IA del frontend es opcional para el usuario
+      await ensureDocumentAndUpload({ requiresAiReview: true })
 
       toast.success('Documento cargado. ¡Vamos al siguiente paso!')
       actions.nextStep()
@@ -714,7 +715,7 @@ export function CountryAndUploadStep() {
     } finally {
       setIsSubmitting(false)
     }
-  }, [actions, ensureDocumentAndUpload, state.aiReviewId, state.aiReviewStatus])
+  }, [actions, ensureDocumentAndUpload])
 
   return (
     <Card>
