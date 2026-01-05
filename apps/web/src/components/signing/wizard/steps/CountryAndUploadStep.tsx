@@ -435,6 +435,7 @@ export function CountryAndUploadStep() {
       actions.setRequiresAiReview(false)
       actions.setAiReview({ id: null, status: null })
       setAiReviewData(null)
+      setRiskAccepted(false)
       setError(null)
 
       if (file && !title) {
@@ -645,7 +646,7 @@ export function CountryAndUploadStep() {
       } else if (status === 'needs_changes') {
         toast.message('IA: Observado. Puedes corregir o continuar igual.')
       } else if (status === 'rejected') {
-        toast.error('IA: Rechazado. Te recomendamos subir un nuevo documento.')
+        toast.message('IA: Rechazado. Puedes revisar las sugerencias y continuar si lo deseas.')
       } else {
         toast.message('Análisis completado.')
       }
@@ -675,12 +676,6 @@ export function CountryAndUploadStep() {
 
   const handleContinue = useCallback(async () => {
     setError(null)
-
-    // Si IA rechazó, no dejamos avanzar (para evitar frustración más adelante)
-    if (state.aiReviewStatus === 'rejected') {
-      setError('La IA rechazó este documento. Sube un nuevo PDF para continuar.')
-      return
-    }
 
     try {
       setIsSubmitting(true)
@@ -817,6 +812,7 @@ export function CountryAndUploadStep() {
                         actions.setRequiresAiReview(false)
                         actions.setAiReview({ id: null, status: null })
                         setAiReviewData(null)
+                        setRiskAccepted(false)
                       }}
                       className="h-8 px-2 text-destructive hover:text-destructive"
                       title="Eliminar archivo"
@@ -1071,11 +1067,6 @@ export function CountryAndUploadStep() {
                         </li>
                       ))}
                     </ul>
-                    <Alert variant="destructive" className="mt-3">
-                      <AlertDescription>
-                        Este documento debe ser tramitado de forma presencial en una notaría. No es posible continuar con la firma electrónica.
-                      </AlertDescription>
-                    </Alert>
                   </div>
                 )}
 
@@ -1099,14 +1090,21 @@ export function CountryAndUploadStep() {
                   </div>
                 )}
 
-                {/* Advertencia y checkbox para documentos observados */}
-                {aiReviewData.status === 'needs_changes' && (
+                {/* Advertencia y checkbox para documentos observados o rechazados */}
+                {(aiReviewData.status === 'needs_changes' || aiReviewData.status === 'rejected') && (
                   <div className="mt-4 space-y-3">
-                    <Alert className="bg-amber-50 border-amber-300 dark:bg-amber-500/10 dark:border-amber-400/40">
-                      <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      <AlertDescription className="text-amber-800 dark:text-amber-200">
-                        <span className="font-medium">Atención:</span> Este documento tiene observaciones que podrían generar problemas a futuro. 
-                        Si decides continuar sin corregirlas, aceptas los riesgos asociados. Esta decisión quedará registrada para auditoría.
+                    <Alert className={aiReviewData.status === 'rejected' 
+                      ? 'bg-red-50 border-red-300 dark:bg-red-500/10 dark:border-red-400/40'
+                      : 'bg-amber-50 border-amber-300 dark:bg-amber-500/10 dark:border-amber-400/40'}>
+                      <AlertTriangle className={`h-4 w-4 ${aiReviewData.status === 'rejected' 
+                        ? 'text-red-600 dark:text-red-400' 
+                        : 'text-amber-600 dark:text-amber-400'}`} />
+                      <AlertDescription className={aiReviewData.status === 'rejected'
+                        ? 'text-red-800 dark:text-red-200'
+                        : 'text-amber-800 dark:text-amber-200'}>
+                        <span className="font-medium">Atención:</span> {aiReviewData.status === 'rejected' 
+                          ? 'Este documento fue rechazado por la IA debido a problemas detectados. Si decides continuar de todas formas, aceptas los riesgos asociados. Esta decisión quedará registrada para auditoría.'
+                          : 'Este documento tiene observaciones que podrían generar problemas a futuro. Si decides continuar sin corregirlas, aceptas los riesgos asociados. Esta decisión quedará registrada para auditoría.'}
                       </AlertDescription>
                     </Alert>
                     <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-white/5 border">
@@ -1120,8 +1118,9 @@ export function CountryAndUploadStep() {
                         htmlFor="accept-risks" 
                         className="text-sm leading-relaxed cursor-pointer"
                       >
-                        Acepto continuar con las observaciones indicadas y asumo los riesgos asociados. 
-                        Entiendo que esta decisión será registrada para efectos de auditoría.
+                        {aiReviewData.status === 'rejected'
+                          ? 'Acepto continuar con el documento rechazado y asumo los riesgos asociados. Entiendo que esta decisión será registrada para efectos de auditoría.'
+                          : 'Acepto continuar con las observaciones indicadas y asumo los riesgos asociados. Entiendo que esta decisión será registrada para efectos de auditoría.'}
                       </Label>
                     </div>
                   </div>
@@ -1132,14 +1131,16 @@ export function CountryAndUploadStep() {
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 onClick={async () => {
-                  // Si es observado y no ha aceptado, no dejar continuar
-                  if (aiReviewData?.status === 'needs_changes' && !riskAccepted) {
-                    toast.error('Debes aceptar los riesgos para continuar con un documento observado.')
+                  // Si es observado o rechazado y no ha aceptado, no dejar continuar
+                  if ((aiReviewData?.status === 'needs_changes' || aiReviewData?.status === 'rejected') && !riskAccepted) {
+                    toast.error(aiReviewData?.status === 'rejected' 
+                      ? 'Debes aceptar los riesgos para continuar con un documento rechazado.'
+                      : 'Debes aceptar los riesgos para continuar con un documento observado.')
                     return
                   }
 
-                  // Si es observado y aceptó, registrar la aceptación
-                  if (aiReviewData?.status === 'needs_changes' && riskAccepted && aiReviewData.id) {
+                  // Si es observado o rechazado y aceptó, registrar la aceptación
+                  if ((aiReviewData?.status === 'needs_changes' || aiReviewData?.status === 'rejected') && riskAccepted && aiReviewData.id) {
                     setIsAcceptingRisk(true)
                     try {
                       const resp = await fetch('/api/signing/accept-risk', {
@@ -1164,7 +1165,7 @@ export function CountryAndUploadStep() {
 
                   handleContinue()
                 }}
-                disabled={isSubmitting || isBootstrapping || isAnalyzingAi || isAcceptingRisk || (aiReviewData?.status === 'needs_changes' && !riskAccepted)}
+                disabled={isSubmitting || isBootstrapping || isAnalyzingAi || isAcceptingRisk || ((aiReviewData?.status === 'needs_changes' || aiReviewData?.status === 'rejected') && !riskAccepted)}
                 className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
               >
                 {isSubmitting || isAcceptingRisk ? (

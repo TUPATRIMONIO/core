@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/signing/accept-risk
- * Records that a user has accepted the risks for an observed document
+ * Records that a user has accepted the risks for an observed or rejected document
  * This is saved for audit purposes
  */
 export async function POST(request: NextRequest) {
@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Only allow accepting risks for 'needs_changes' (observed) status
-        if (review.status !== "needs_changes") {
+        // Only allow accepting risks for 'needs_changes' (observed) or 'rejected' status
+        if (review.status !== "needs_changes" && review.status !== "rejected") {
             return NextResponse.json(
                 {
                     error:
-                        'Solo se pueden aceptar riesgos en documentos con estado "observado"',
+                        'Solo se pueden aceptar riesgos en documentos con estado "observado" o "rechazado"',
                 },
                 { status: 400 },
             );
@@ -86,13 +86,16 @@ export async function POST(request: NextRequest) {
         }
 
         // Update the review with risk acceptance info
+        const defaultNote = review.status === "rejected"
+            ? "Usuario aceptó continuar con el documento rechazado"
+            : "Usuario aceptó continuar con las observaciones indicadas";
+            
         const { error: updateError } = await supabase
             .from("signing_ai_reviews")
             .update({
                 risk_accepted_at: new Date().toISOString(),
                 risk_accepted_by: user.id,
-                risk_acceptance_note: note ||
-                    "Usuario aceptó continuar con las observaciones indicadas",
+                risk_acceptance_note: note || defaultNote,
             })
             .eq("id", review_id);
 

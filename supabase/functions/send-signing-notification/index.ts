@@ -66,10 +66,24 @@ serve(async (req) => {
     // Por ahora asumimos que están en texto plano o necesitamos desencriptarlas
     const apiKey = sendgridAccount.api_key;
 
-    // 2. Generar contenido del email según tipo
+    // 2. Buscar sender identity transaccional de la organización
+    const { data: senderIdentity } = await supabaseClient
+      .from("sender_identities")
+      .select("from_email, from_name, reply_to_email")
+      .eq("organization_id", payload.org_id)
+      .eq("purpose", "transactional")
+      .eq("is_active", true)
+      .single();
+
+    // Usar sender identity si existe, sino fallback a cuenta SendGrid
+    const fromEmail = senderIdentity?.from_email || sendgridAccount.from_email || "noreply@tupatrimonio.cl";
+    const fromName = senderIdentity?.from_name || sendgridAccount.from_name || "TuPatrimonio";
+    const replyToEmail = senderIdentity?.reply_to_email || undefined;
+
+    // 3. Generar contenido del email según tipo
     const emailContent = generateEmailContent(payload);
 
-    // 3. Enviar email usando SendGrid API v3
+    // 4. Enviar email usando SendGrid API v3
     const sendgridResponse = await fetch(
       "https://api.sendgrid.com/v3/mail/send",
       {
@@ -96,9 +110,12 @@ serve(async (req) => {
             },
           ],
           from: {
-            email: sendgridAccount.from_email || "noreply@tupatrimonio.cl",
-            name: sendgridAccount.from_name || "TuPatrimonio",
+            email: fromEmail,
+            name: fromName,
           },
+          reply_to: replyToEmail ? {
+            email: replyToEmail,
+          } : undefined,
           subject: emailContent.subject,
           content: [
             {
