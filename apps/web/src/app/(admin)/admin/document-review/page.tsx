@@ -8,6 +8,7 @@ interface PageProps {
   searchParams: Promise<{
     status?: string
     page?: string
+    tab?: string
   }>
 }
 
@@ -42,45 +43,107 @@ export default async function DocumentReviewPage({ searchParams }: PageProps) {
   await checkAccess()
 
   const params = await searchParams
+  const tab = params.tab || 'pendientes'
   const status = params.status || 'manual_review'
   const page = parseInt(params.page || '1', 10)
 
   const supabase = createServiceRoleClient()
 
-  // Obtener documentos en revisión
   const offset = (page - 1) * 20
-  const statusFilter = status === 'all' 
-    ? ['manual_review', 'needs_correction'] 
-    : [status]
 
-  const { data: documents, error } = await supabase
-    .from('signing_documents')
-    .select(`
-      id,
-      title,
-      status,
-      created_at,
-      updated_at,
-      organization:organizations(id, name, slug),
-      created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
-      ai_review:signing_ai_reviews(
+  let documents: any[] = []
+  let count = 0
+  let error: any = null
+
+  if (tab === 'historial') {
+    // Historial: Todos los documentos que pasaron por revisión (estados post-revisión)
+    const statusFilter = [
+      'manual_review', 
+      'needs_correction', 
+      'rejected', 
+      'approved', 
+      'pending_signature', 
+      'signed', 
+      'completed', 
+      'pending_ai_review', 
+      'ai_rejected'
+    ]
+
+    const { data, error: histError } = await supabase
+      .from('signing_documents')
+      .select(`
         id,
+        title,
         status,
-        passed,
-        confidence_score,
-        reasons,
-        suggestions,
-        completed_at
-      )
-    `)
-    .in('status', statusFilter)
-    .order('updated_at', { ascending: false })
-    .range(offset, offset + 19)
+        created_at,
+        updated_at,
+        organization:organizations(id, name, slug),
+        created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
+        ai_review:signing_ai_reviews(
+          id,
+          status,
+          passed,
+          confidence_score,
+          reasons,
+          suggestions,
+          completed_at,
+          review_type
+        ),
+        document_messages:signing_document_messages(count)
+      `)
+      .in('status', statusFilter)
+      .order('updated_at', { ascending: false })
+      .range(offset, offset + 19)
 
-  const { count } = await supabase
-    .from('signing_documents')
-    .select('*', { count: 'exact', head: true })
-    .in('status', statusFilter)
+    const { count: histCount } = await supabase
+      .from('signing_documents')
+      .select('*', { count: 'exact', head: true })
+      .in('status', statusFilter)
+
+    documents = data || []
+    count = histCount || 0
+    error = histError
+  } else {
+    // Pendientes: Solo documentos en cola de trabajo
+    const statusFilter = status === 'all' 
+      ? ['manual_review', 'needs_correction'] 
+      : [status]
+
+    const { data, error: pendError } = await supabase
+      .from('signing_documents')
+      .select(`
+        id,
+        title,
+        status,
+        created_at,
+        updated_at,
+        organization:organizations(id, name, slug),
+        created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
+        ai_review:signing_ai_reviews(
+          id,
+          status,
+          passed,
+          confidence_score,
+          reasons,
+          suggestions,
+          completed_at,
+          review_type
+        ),
+        document_messages:signing_document_messages(count)
+      `)
+      .in('status', statusFilter)
+      .order('updated_at', { ascending: false })
+      .range(offset, offset + 19)
+
+    const { count: pendCount } = await supabase
+      .from('signing_documents')
+      .select('*', { count: 'exact', head: true })
+      .in('status', statusFilter)
+
+    documents = data || []
+    count = pendCount || 0
+    error = pendError
+  }
 
   if (error) {
     console.error('Error fetching documents:', error)
@@ -97,6 +160,7 @@ export default async function DocumentReviewPage({ searchParams }: PageProps) {
         initialTotal={count || 0}
         initialStatus={status}
         initialPage={page}
+        initialTab={tab}
       />
     </div>
   )
