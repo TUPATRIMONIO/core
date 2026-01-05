@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package, Clock, CheckCircle2, XCircle, AlertCircle, FileText, Download, RefreshCcw, Ban, CreditCard } from 'lucide-react';
+import { ArrowLeft, Package, Clock, CheckCircle2, XCircle, AlertCircle, FileText, Download, RefreshCcw, Ban, CreditCard, PenTool, ChevronDown, ChevronUp, User, MapPin, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
@@ -15,6 +15,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { SignupForm } from '@/components/auth/signup-form';
 
 import ZeroAmountCheckoutForm from '@/components/checkout/ZeroAmountCheckoutForm';
+import { OrderDetailsCollapsible } from '@/components/checkout/OrderDetailsCollapsible';
 
 interface PageProps {
   params: Promise<{ orderId: string }>;
@@ -266,6 +267,30 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
     
     refunds = refundsData || [];
   }
+
+  // Obtener documento de firma asociado al pedido
+  let signingDocument = null;
+  const { data: signingDocData } = await supabase
+    .from('signing_documents')
+    .select('id, title, send_to_signers_on_complete')
+    .eq('order_id', orderId)
+    .maybeSingle();
+  
+  if (signingDocData?.id) {
+    signingDocument = signingDocData;
+  }
+
+  // Obtener firmantes del documento de firma
+  let signers: any[] = [];
+  if (signingDocument?.id) {
+    const { data: signersData } = await supabase
+      .from('signing_signers')
+      .select('email, full_name, rut, signing_order')
+      .eq('document_id', signingDocument.id)
+      .order('signing_order', { ascending: true });
+    
+    signers = signersData || [];
+  }
   
   const isCompleted = order.status === 'completed' || order.status === 'paid';
   const isCancelled = order.status === 'cancelled';
@@ -432,6 +457,16 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Detalles del pedido - Colapsable */}
+          <OrderDetailsCollapsible
+            productData={productData}
+            productType={order.product_type}
+            signers={signers}
+            signingDocument={signingDocument}
+            billingData={order.metadata?.billing_data || null}
+            currency={order.currency}
+          />
           
           {/* Acciones del pedido - Escalable para futuros botones */}
           {(isCompleted || isCancelled || isRefunded) && (
@@ -478,6 +513,16 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
                       orderStatus={order.status}
                       hasPayment={!!payment}
                     />
+                  )}
+                  
+                  {/* Administración del flujo de firmas */}
+                  {signingDocument?.id && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/signing/documents/${signingDocument.id}`}>
+                        <PenTool className="mr-2 h-4 w-4" />
+                        Gestionar Firmas
+                      </Link>
+                    </Button>
                   )}
                   
                   {/* Placeholder: Anular (futuro) - solo visible para admin */}

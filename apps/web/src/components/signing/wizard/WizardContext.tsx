@@ -55,6 +55,7 @@ export interface SigningWizardState {
   uploadedFilePath: string | null
 
   documentId: string | null
+  documentType: string | null
 
   requiresAiReview: boolean
   aiReviewId: string | null
@@ -82,6 +83,7 @@ export interface SigningWizardActions {
   setUploadedFilePath: (path: string | null) => void
 
   setDocumentId: (documentId: string | null) => void
+  setDocumentType: (documentType: string | null) => void
 
   setRequiresAiReview: (enabled: boolean) => void
   setAiReview: (params: { id: string | null; status: SigningWizardState['aiReviewStatus'] }) => void
@@ -109,6 +111,7 @@ const defaultState: SigningWizardState = {
   uploadedFilePath: null,
 
   documentId: null,
+  documentType: null,
 
   requiresAiReview: false,
   aiReviewId: null,
@@ -163,6 +166,8 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
       setUploadedFilePath: (uploadedFilePath) => setState((s) => ({ ...s, uploadedFilePath })),
 
       setDocumentId: (documentId) => setState((s) => ({ ...s, documentId })),
+
+      setDocumentType: (documentType) => setState((s) => ({ ...s, documentType })),
 
       setRequiresAiReview: (requiresAiReview) =>
         setState((s) => ({

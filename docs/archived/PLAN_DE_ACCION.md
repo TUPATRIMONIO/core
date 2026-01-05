@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Diciembre 30, 2025 (Fijada lógica checkout)\
+> **📅 Última actualización:** Enero 2026 (Detalles del pedido y enlace a flujo de firmas)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -8105,6 +8105,72 @@ claros y relevantes**:
 - ✅ Eliminación de ruido técnico innecesario
 - ✅ Historial limpio y profesional
 - ✅ Mejor comprensión del estado del pedido por parte del cliente
+
+---
+
+## 🔧 **MEJORAS RECIENTES - Detalles del Pedido y Enlace a Flujo de Firmas (Enero 2026)**
+
+### ✅ **Mejoras en Página de Detalle del Pedido:**
+
+**Objetivo:** Mejorar la visibilidad de información del pedido y facilitar el acceso a la administración del flujo de firmas desde la página de checkout.
+
+**Cambios implementados:**
+
+**1. Enlace a Administración del Flujo de Firmas:**
+
+- ✅ **Consulta de documento de firma asociado:**
+  - Consulta a `signing_documents` filtrando por `order_id` para obtener el documento asociado al pedido
+  - Solo se obtiene el `id` necesario para construir el enlace
+- ✅ **Botón en sección "Acciones":**
+  - Nuevo botón "Gestionar Firmas" con ícono `PenTool` de lucide-react
+  - Enlace a `/dashboard/signing/documents/{document_id}`
+  - Solo se muestra cuando existe un documento de firma asociado al pedido
+  - Ubicado junto a otros botones de acciones (Ver Boleta, XML, etc.)
+
+**2. Sección Colapsable de Detalles del Pedido:**
+
+- ✅ **Componente `OrderDetailsCollapsible.tsx` creado:**
+  - Componente cliente (`'use client'`) con estado para controlar expansión/colapso
+  - Colapsado por defecto para no ocupar espacio innecesario
+  - Solo se muestra para pedidos de tipo `electronic_signature` o cuando existe documento de firma asociado
+
+- ✅ **Información mostrada:**
+  - **Firma Electrónica Avanzada:** Nombre del producto, cantidad, precio unitario y subtotal
+  - **Servicio Notarial:** Si aplica, muestra nombre, cantidad, precio y subtotal
+  - **Información del documento:** Identificador interno (primeros 8 caracteres del UUID) y título del documento
+  - **Cantidad de firmantes:** Número total de firmantes configurados
+  - **Lista de firmantes:** Email y RUT de cada firmante, ordenados por `signing_order`
+  - **Configuración:** Indica si se enviará el documento finalizado a los firmantes (Sí/No)
+  - **Datos de facturación:** Nombre completo, RUT, email, teléfono, dirección completa (calle, ciudad, región) y tipo DTE (Boleta/Factura)
+
+- ✅ **Consultas de datos ampliadas:**
+  - Consulta de `signing_documents` ampliada para incluir `title` y `send_to_signers_on_complete`
+  - Nueva consulta de `signing_signers` para obtener lista completa de firmantes con email, nombre completo, RUT y orden de firma
+  - Datos de facturación obtenidos desde `order.metadata.billing_data`
+
+**Archivos modificados:**
+
+- ✅ `apps/web/src/app/(dashboard)/checkout/[orderId]/page.tsx`
+  - Importado ícono `PenTool` de lucide-react
+  - Ampliada consulta de `signing_documents` para incluir título y configuración
+  - Agregada consulta de firmantes desde `signing_signers`
+  - Agregado botón "Gestionar Firmas" en sección de Acciones
+  - Integrado componente `OrderDetailsCollapsible` después del Card de Resumen
+
+- ✅ `apps/web/src/components/checkout/OrderDetailsCollapsible.tsx` (nuevo)
+  - Componente cliente con estado para controlar expansión/colapso
+  - Formateo de moneda usando `Intl.NumberFormat` con formato chileno
+  - Diseño responsive y mobile-first
+  - Uso de componentes Shadcn UI (Card, Button, Separator)
+  - Íconos de lucide-react para mejor UX
+
+**Beneficios:**
+
+- ✅ Acceso directo a la administración del flujo de firmas desde el detalle del pedido
+- ✅ Visibilidad completa de todos los detalles del pedido en un formato organizado
+- ✅ Información colapsable que no ocupa espacio cuando no se necesita
+- ✅ Mejor experiencia de usuario con información detallada del producto, firmantes y facturación
+- ✅ Consistencia con el sistema de diseño de TuPatrimonio
 
 ---
 

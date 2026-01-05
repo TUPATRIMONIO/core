@@ -52,18 +52,20 @@ BEGIN
       CONTINUE;
     END IF;
 
-    -- Si requiere IA, verificar si ya hay revisión aprobada
+    -- Si requiere IA, verificar si ya hay revisión interna aprobada
     IF v_doc.requires_ai_review THEN
       SELECT EXISTS (
         SELECT 1
         FROM signing.ai_reviews ar
         WHERE ar.document_id = v_doc.id
+          AND ar.review_type = 'internal_document_review'
           AND ar.status = 'approved'
           AND ar.completed_at IS NOT NULL
         LIMIT 1
       ) INTO v_ai_approved;
 
       IF NOT v_ai_approved THEN
+        -- Poner en pending_ai_review - el trigger trigger_internal_review_on_paid invocará la revisión interna
         UPDATE signing.documents
         SET status = 'pending_ai_review',
             updated_at = NOW()

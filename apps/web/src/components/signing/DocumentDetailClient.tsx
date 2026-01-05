@@ -28,6 +28,7 @@ import { DocumentEditPanel } from './edit/DocumentEditPanel'
 import { ReviewerManager } from './ReviewerManager'
 import { ApprovalInterface } from './ApprovalInterface'
 import { PDFViewer } from './PDFViewer'
+import { CorrectionView } from './CorrectionView'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -180,6 +181,14 @@ export function DocumentDetailClient({
 
   return (
     <div className="space-y-6">
+      {/* Vista de corrección si el documento necesita correcciones */}
+      {document.status === 'needs_correction' && (
+        <CorrectionView 
+          documentId={document.id}
+          onCorrectionUploaded={handleRefresh}
+        />
+      )}
+
       {/* Interface de Aprobación para Revisores */}
       <ApprovalInterface 
         document={document} 

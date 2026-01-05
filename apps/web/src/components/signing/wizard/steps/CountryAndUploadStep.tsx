@@ -10,6 +10,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, UploadCloud, FileText, Sparkles, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Download, X, Info } from 'lucide-react'
@@ -27,6 +34,8 @@ export function CountryAndUploadStep() {
   const fromDocumentId = searchParams.get('fromDocument')
 
   const [title, setTitle] = useState('')
+  const [documentType, setDocumentType] = useState<string>('')
+  const [documentTypes, setDocumentTypes] = useState<any[]>([])
   const [isBootstrapping, setIsBootstrapping] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnalyzingAi, setIsAnalyzingAi] = useState(false)
@@ -171,6 +180,19 @@ export function CountryAndUploadStep() {
 
       if (!balanceError) {
         setCreditBalance(Number(balance ?? 0))
+      }
+
+      // Load document types for the selected country
+      const currentCountry = state.countryCode || (org?.country?.toString().toUpperCase() || 'CL')
+      const { data: docTypes, error: docTypesError } = await supabase
+        .from('signing_document_types')
+        .select('*')
+        .eq('country_code', currentCountry)
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+
+      if (!docTypesError && docTypes) {
+        setDocumentTypes(docTypes)
       }
     } catch (e: any) {
       console.error('[CountryAndUploadStep] bootstrap error', e)
@@ -546,6 +568,7 @@ export function CountryAndUploadStep() {
           requires_ai_review: opts.requiresAiReview,
           metadata: {
             country_code: state.countryCode,
+            document_type: state.documentType,
             originals_bucket: 'docs-originals',
             originals_version: 1,
           },
@@ -721,6 +744,36 @@ export function CountryAndUploadStep() {
                 disabled={isSubmitting}
               />
             </div>
+
+            {documentTypes.length > 0 && (
+              <div className="space-y-2">
+                <Label>Tipo de Documento</Label>
+                <Select
+                  value={documentType}
+                  onValueChange={(value) => {
+                    setDocumentType(value)
+                    actions.setDocumentType(value)
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un tipo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {documentTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.slug}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {documentType && (
+                  <p className="text-xs text-muted-foreground">
+                    {documentTypes.find((t) => t.slug === documentType)?.description || ''}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Documento (PDF)</Label>
