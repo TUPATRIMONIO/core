@@ -52,7 +52,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
   const [error, setError] = useState("");
   const [vigenciaData, setVigenciaData] = useState<any>(null);
   // Cache buster para evitar que el navegador sirva PDFs cacheados corruptos
-  const [cacheBuster] = useState(() => Date.now());
+  const [cacheBuster, setCacheBuster] = useState(() => Date.now());
   // Modal para solicitar numDocumento al desbloquear certificado
   const [showUnblockModal, setShowUnblockModal] = useState(false);
   const [numDocumento, setNumDocumento] = useState("");
@@ -548,7 +548,10 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                 El documento firmado ahora está disponible para visualización.
               </p>
               <button
-                onClick={() => router.refresh()}
+                onClick={() => {
+                  setCacheBuster(Date.now());
+                  router.refresh();
+                }}
                 className="bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors"
               >
                 Ver Documento Firmado

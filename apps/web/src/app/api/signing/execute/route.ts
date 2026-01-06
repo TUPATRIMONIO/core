@@ -214,15 +214,23 @@ export async function POST(request: NextRequest) {
                 errorCode === "123" || errorCode === 123 ||
                 errorCode === "125" || errorCode === 125
             ) {
-                await supabase
+                const { error: updateError } = await adminClient
                     .from("signing_signers")
                     .update({ status: "certificate_blocked" })
                     .eq("id", signer.id);
+                
+                if (updateError) {
+                    console.error("Error actualizando estado a certificate_blocked:", updateError);
+                }
             } else if (errorCode === "134" || errorCode === 134) {
-                await supabase
+                const { error: updateError } = await adminClient
                     .from("signing_signers")
                     .update({ status: "sf_blocked" })
                     .eq("id", signer.id);
+                
+                if (updateError) {
+                    console.error("Error actualizando estado a sf_blocked:", updateError);
+                }
             }
 
             return NextResponse.json(
@@ -238,7 +246,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Guardar código de transacción y actualizar estado
-        const { error: updateDocError } = await supabase
+        const { error: updateDocError } = await adminClient
             .from("signing_documents")
             .update({
                 provider_transaction_code: result.data.codigoTransaccion,
@@ -246,7 +254,7 @@ export async function POST(request: NextRequest) {
             .eq("id", signer.document.id);
 
         if (updateDocError) {
-            console.error("Error actualizando documento:", updateDocError);
+            console.error("Error actualizando provider_transaction_code:", updateDocError);
         }
 
         // 5. Si CDS retorna el documento firmado inmediatamente, guardarlo
@@ -280,16 +288,20 @@ export async function POST(request: NextRequest) {
                 console.error("Error uploading signed document:", uploadError);
             } else {
                 // Actualizar ruta del archivo firmado
-                await supabase
+                const { error: updatePathError } = await adminClient
                     .from("signing_documents")
                     .update({
                         current_signed_file_path: signedPath,
                     })
                     .eq("id", signer.document.id);
+                
+                if (updatePathError) {
+                    console.error("Error actualizando current_signed_file_path:", updatePathError);
+                }
             }
 
             // Actualizar estado del firmante
-            await supabase
+            const { error: updateSignerError } = await adminClient
                 .from("signing_signers")
                 .update({
                     status: "signed",
@@ -299,6 +311,19 @@ export async function POST(request: NextRequest) {
                     signature_user_agent: request.headers.get("user-agent"),
                 })
                 .eq("id", signer.id);
+            
+            if (updateSignerError) {
+                console.error("Error actualizando estado del firmante a signed:", updateSignerError);
+                // Si falla la actualización del firmante, retornar error para que el frontend lo maneje
+                return NextResponse.json(
+                    {
+                        success: false,
+                        error: "Error al actualizar el estado de la firma. Por favor, recarga la página.",
+                        details: updateSignerError.message,
+                    },
+                    { status: 500 },
+                );
+            }
 
             // Si es firma secuencial, notificar al siguiente firmante
             if (signer.document.signing_order === "sequential") {
@@ -328,12 +353,16 @@ export async function POST(request: NextRequest) {
         }
 
         // Si CDS no retorna el documento inmediatamente, marcar como "signing" y esperar webhook
-        await supabase
+        const { error: updateSigningError } = await adminClient
             .from("signing_signers")
             .update({
                 status: "signing",
             })
             .eq("id", signer.id);
+        
+        if (updateSigningError) {
+            console.error("Error actualizando estado del firmante a signing:", updateSigningError);
+        }
 
         return NextResponse.json({
             success: true,
