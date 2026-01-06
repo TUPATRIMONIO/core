@@ -21,7 +21,7 @@ type Operation =
 
 interface CDSRequest {
     operation: Operation;
-    organization_id: string;
+    organization_id?: string; // Opcional ahora, se mantiene por compatibilidad
     [key: string]: any;
 }
 
@@ -49,15 +49,12 @@ serve(async (req) => {
         const payload: CDSRequest = await req.json();
 
         // Validar payload requerido
-        if (!payload.operation || !payload.organization_id) {
-            throw new Error("Requiere: operation y organization_id");
+        if (!payload.operation) {
+            throw new Error("Requiere: operation");
         }
 
-        // Obtener configuración de CDS para la organización
-        const config = await getCDSConfig(
-            supabaseClient,
-            payload.organization_id,
-        );
+        // Obtener configuración de CDS desde variables de entorno
+        const config = await getCDSConfig(supabaseClient);
 
         // Ejecutar operación según el tipo
         let result;
@@ -117,21 +114,30 @@ serve(async (req) => {
 });
 
 /**
- * Obtiene la configuración de CDS (Credenciales Globales de TuPatrimonio)
+ * Obtiene la configuración de CDS desde variables de entorno
+ * Las credenciales ahora se leen de Deno.env en lugar de la base de datos
  */
-async function getCDSConfig(
-    supabase: any,
-    _organizationId: string, // Se mantiene el parámetro por compatibilidad pero se ignora
-): Promise<CDSConfig> {
-    // 1. Obtener proveedor CDS
-    const { data: providers, error: providerError } = await supabase
+async function getCDSConfig(supabase: any): Promise<CDSConfig> {
+    // 1. Leer credenciales desde variables de entorno
+    const usuario = Deno.env.get("CDS_USUARIO");
+    const clave = Deno.env.get("CDS_CLAVE");
+    const isTestMode = Deno.env.get("CDS_TEST_MODE") === "true";
+    const webhookSecret = Deno.env.get("CDS_WEBHOOK_SECRET") || "";
+
+    if (!usuario || !clave) {
+        throw new Error(
+            "Credenciales CDS no configuradas en variables de entorno. " +
+            "Configura CDS_USUARIO y CDS_CLAVE en Supabase Dashboard > Settings > Edge Functions > Environment Variables",
+        );
+    }
+
+    // 2. Obtener proveedor CDS solo para endpoints (no son sensibles)
+    const { data: provider, error: providerError } = await supabase
         .from("signing_providers")
-        .select("*")
+        .select("base_url, test_url, endpoints")
         .eq("slug", "cds")
         .eq("is_active", true)
-        .limit(1);
-
-    const provider = providers?.[0];
+        .single();
 
     if (providerError || !provider) {
         throw new Error(
@@ -141,35 +147,22 @@ async function getCDSConfig(
         );
     }
 
-    // 2. Obtener la configuración global (la primera activa de TuPatrimonio)
-    const { data: configs, error: configError } = await supabase
-        .from("signing_provider_configs")
-        .select("*")
-        .eq("provider_id", provider.id)
-        .eq("is_active", true)
-        .order("created_at", { ascending: true })
-        .limit(1);
+    // 3. Determinar URL base según modo de prueba
+    const baseUrl = isTestMode ? provider.test_url : provider.base_url;
 
-    const config = configs?.[0];
-
-    if (configError || !config) {
-        throw new Error(
-            `Configuración global de CDS no encontrada o inactiva: ${
-                configError?.message || "No results"
-            }`,
-        );
-    }
-
-    // Determinar URL base según modo de prueba
-    const baseUrl = config.is_test_mode ? provider.test_url : provider.base_url;
+    // 4. Construir webhook URL desde SUPABASE_URL
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const webhookUrl = supabaseUrl
+        ? `${supabaseUrl}/functions/v1/signature-webhook`
+        : undefined;
 
     return {
-        usuario: config.credentials.usuario,
-        clave: config.credentials.clave,
+        usuario,
+        clave,
         base_url: baseUrl,
         endpoints: provider.endpoints,
-        webhook_url: config.webhook_url,
-        webhook_secret: config.webhook_secret,
+        webhook_url: webhookUrl,
+        webhook_secret: webhookSecret,
     };
 }
 

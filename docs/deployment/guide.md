@@ -298,6 +298,57 @@ git push
 # Web: ../../../../packages/ui/globals.css
 ```
 
+## 🔐 Variables de Entorno - Supabase Edge Functions
+
+Las Edge Functions de Supabase requieren variables de entorno específicas que se configuran en el Dashboard de Supabase.
+
+### Configuración en Supabase Dashboard
+
+1. Ir a **Settings** → **Edge Functions** → **Environment Variables**
+2. Agregar las siguientes variables:
+
+#### Variables Requeridas para CDS (Certificadora del Sur)
+
+```bash
+# Credenciales de API CDS
+CDS_USUARIO=tu_usuario_cds
+CDS_CLAVE=tu_clave_cds
+
+# Secret para validar webhooks de CDS
+CDS_WEBHOOK_SECRET=tu_secret_webhook
+
+# Modo de prueba (true = usar URLs de test, false = producción)
+CDS_TEST_MODE=false
+```
+
+**Nota:** Las credenciales de CDS ahora se almacenan como variables de entorno en lugar de la base de datos por seguridad. La Edge Function `cds-signature` lee estas variables automáticamente.
+
+#### Variables Automáticas de Supabase
+
+Estas variables ya están configuradas automáticamente por Supabase:
+- `SUPABASE_URL` - URL del proyecto
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key para acceso completo
+- `SUPABASE_ANON_KEY` - Anon key para acceso público
+
+### Verificación
+
+Después de configurar las variables, verifica que la Edge Function funcione:
+
+```bash
+# Desde la app web, prueba consultar vigencia de un RUT
+# La función debería usar las credenciales desde variables de entorno
+```
+
+### Migración desde Base de Datos
+
+Si anteriormente tenías las credenciales en la tabla `signing_provider_configs`, ejecuta la migración:
+
+```bash
+supabase migration up
+```
+
+Esto limpiará las credenciales de la base de datos (ya no son necesarias ahí).
+
 ---
 
 **Ambos sites están listos para deploy independiente** 🚀
@@ -306,3 +357,4 @@ git push
 1. ✅ **Marketing site ya funcionando** en `tupatrimonio.app`
 2. 🚧 **Web site**: Usar `netlify-web.toml` en configuración
 3. ✅ **Dominios**: Configurar app.tupatrimonio.app → Site 2
+4. ✅ **Supabase Edge Functions**: Configurar variables de entorno para CDS
