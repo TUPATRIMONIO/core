@@ -117,13 +117,13 @@ serve(async (req) => {
 });
 
 /**
- * Obtiene la configuración de CDS para una organización
+ * Obtiene la configuración de CDS (Credenciales Globales de TuPatrimonio)
  */
 async function getCDSConfig(
     supabase: any,
-    organizationId: string,
+    _organizationId: string, // Se mantiene el parámetro por compatibilidad pero se ignora
 ): Promise<CDSConfig> {
-    // Obtener proveedor CDS
+    // 1. Obtener proveedor CDS
     const { data: providers, error: providerError } = await supabase
         .from("signing_providers")
         .select("*")
@@ -141,20 +141,20 @@ async function getCDSConfig(
         );
     }
 
-    // Obtener configuración de la organización
+    // 2. Obtener la configuración global (la primera activa de TuPatrimonio)
     const { data: configs, error: configError } = await supabase
         .from("signing_provider_configs")
         .select("*")
-        .eq("organization_id", organizationId)
         .eq("provider_id", provider.id)
         .eq("is_active", true)
+        .order("created_at", { ascending: true })
         .limit(1);
 
     const config = configs?.[0];
 
     if (configError || !config) {
         throw new Error(
-            `Configuración de CDS no encontrada para la organización ${organizationId}: ${
+            `Configuración global de CDS no encontrada o inactiva: ${
                 configError?.message || "No results"
             }`,
         );
