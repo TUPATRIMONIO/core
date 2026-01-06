@@ -2,15 +2,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Configuración CORS
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers":
         "authorization, x-client-info, apikey, content-type",
 };
 
+// URL base de la app (para generar URL del repositorio)
+const APP_URL = Deno.env.get("PUBLIC_APP_URL") || "https://tupatrimonio.app";
+
 serve(async (req) => {
-    // Manejo de preflight request
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders });
     }
@@ -21,150 +22,191 @@ serve(async (req) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
         );
 
-        const { document_id } = await req.json();
+        const { document_id, cover_path, force_regenerate = false } = await req.json();
 
         if (!document_id) {
-            throw new Error("document_id is required");
+            throw new Error("document_id es requerido");
         }
 
-        // 1. Obtener datos del documento
+        // 1. Obtener datos del documento desde signing.documents (usando vista signing_documents)
         const { data: document, error: docError } = await supabaseClient
-            .from("documents")
+            .from("signing_documents")
             .select("*")
             .eq("id", document_id)
             .single();
 
         if (docError || !document) {
-            throw new Error(`Error fetching document: ${docError?.message}`);
+            throw new Error(`Error obteniendo documento: ${docError?.message}`);
         }
 
-        // Si ya tiene QR, no hacer nada (o forzar regeneración si se solicita)
-        // if (document.qr_file_path) {
-        //   return new Response(
-        //     JSON.stringify({ message: 'Document already has QR', file_path: document.qr_file_path }),
-        //     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        //   )
-        // }
+        // Si ya tiene qr_file_path y no se fuerza regeneracion, salir
+        if (document.qr_file_path && !force_regenerate) {
+            return new Response(
+                JSON.stringify({
+                    success: true,
+                    message: "Documento ya tiene portada con QR",
+                    path: document.qr_file_path,
+                    skipped: true,
+                }),
+                { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+        }
 
-        // 2. Descargar el archivo original desde Storage
-        const { data: fileData, error: downloadError } = await supabaseClient
+        // 2. Determinar path de la portada
+        // Prioridad: cover_path del request > custom_cover_path del documento > portada default de la org
+        let coverTemplatePath = cover_path || 
+            document.custom_cover_path || 
+            `${document.organization_id}/default-cover.pdf`;
+
+        // 3. Descargar portada desde cover-templates
+        let coverPdfBytes: ArrayBuffer;
+        const { data: coverData, error: coverError } = await supabaseClient
+            .storage
+            .from("cover-templates")
+            .download(coverTemplatePath);
+
+        if (coverError) {
+            // Si no hay portada personalizada, usar una portada minima generada
+            console.log("No se encontro portada, generando una minima...");
+            const minimalCover = await PDFDocument.create();
+            const page = minimalCover.addPage([612, 792]); // Tamano carta
+            coverPdfBytes = await minimalCover.save();
+        } else {
+            coverPdfBytes = await coverData.arrayBuffer();
+        }
+
+        // 4. Descargar documento original
+        const originalPath = document.original_file_path;
+        if (!originalPath) {
+            throw new Error("El documento no tiene archivo original");
+        }
+
+        const { data: originalData, error: originalError } = await supabaseClient
             .storage
             .from("docs-originals")
-            .download(
-                document.original_file_path.split("/").pop()?.includes("/")
-                    ? document.original_file_path
-                    : `${document.organization_id}/${document.id}/${document.original_file_path}`,
-            );
-        // Nota: Asumimos que original_file_path puede ser relativo o incluir folders.
-        // El bucket structure es {org_id}/{doc_id}/file.pdf o solo file.pdf. Ajustaremos según convención.
-        // Mejor intentar bajar lo que está en original_file_path
+            .download(originalPath);
 
-        if (downloadError) {
-            // Intento fallback: construir path
-            const fallbackPath =
-                `${document.organization_id}/${document.id}/${document.original_file_name}`;
-            const { data: fileData2, error: downloadError2 } =
-                await supabaseClient
-                    .storage
-                    .from("docs-originals")
-                    .download(fallbackPath);
-
-            if (downloadError2) {
-                throw new Error(
-                    `Error downloading file: ${downloadError?.message} || ${downloadError2?.message}`,
-                );
-            }
-            var pdfBytes = await fileData2.arrayBuffer();
-        } else {
-            var pdfBytes = await fileData.arrayBuffer();
+        if (originalError) {
+            throw new Error(`Error descargando documento original: ${originalError.message}`);
         }
 
-        // 3. Cargar documento original
-        const pdfDoc = await PDFDocument.load(pdfBytes);
-        const pages = pdfDoc.getPages();
-        const firstPage = pages[0];
+        const originalPdfBytes = await originalData.arrayBuffer();
+
+        // 5. Cargar ambos PDFs
+        const coverPdf = await PDFDocument.load(coverPdfBytes);
+        const originalPdf = await PDFDocument.load(originalPdfBytes);
+
+        // 6. Crear nuevo documento combinado
+        const mergedPdf = await PDFDocument.create();
+
+        // 7. Copiar pagina de portada
+        const [coverPage] = await mergedPdf.copyPages(coverPdf, [0]);
+        mergedPdf.addPage(coverPage);
+
+        // 8. Generar QR con URL del repositorio
+        const qrIdentifier = document.qr_identifier || `DOC-${document_id.substring(0, 8).toUpperCase()}`;
+        const repositoryUrl = `${APP_URL}/repository/${document_id}`;
+        
+        // Generar QR usando api.qrserver.com
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(repositoryUrl)}`;
+        const qrImageBytes = await fetch(qrApiUrl).then((res) => res.arrayBuffer());
+        const qrImage = await mergedPdf.embedPng(qrImageBytes);
+
+        // 9. Estampar QR en la pagina de portada (primera pagina del merged)
+        const firstPage = mergedPdf.getPages()[0];
         const { width, height } = firstPage.getSize();
-
-        // 4. Generar QR Code
-        // Usamos api.qrserver.com como solicitado inicialmente para simplicidad en Deno
-        const qrIdentifier = document.qr_identifier || "DOC-GEN-" + document_id;
-        const qrUrl =
-            `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${
-                encodeURIComponent(qrIdentifier)
-            }`;
-
-        const qrImageBytes = await fetch(qrUrl).then((res) =>
-            res.arrayBuffer()
-        );
-        const qrImage = await pdfDoc.embedPng(qrImageBytes);
-
-        // 5. Estampar QR en la primera página (Esquina superior derecha)
-        const qrDims = qrImage.scale(0.5); // Ajustar tamaño
+        
+        // Posicion del QR: centrado horizontalmente, en la mitad inferior
+        const qrSize = 120;
+        const qrX = (width - qrSize) / 2;
+        const qrY = height * 0.25; // 25% desde abajo
 
         firstPage.drawImage(qrImage, {
-            x: width - qrDims.width - 20,
-            y: height - qrDims.height - 20,
-            width: qrDims.width,
-            height: qrDims.height,
+            x: qrX,
+            y: qrY,
+            width: qrSize,
+            height: qrSize,
         });
 
-        // Agregar texto identificador debajo del QR
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        // 10. Agregar texto del identificador debajo del QR
+        const font = await mergedPdf.embedFont(StandardFonts.Helvetica);
+        const fontSize = 10;
+        const textWidth = font.widthOfTextAtSize(qrIdentifier, fontSize);
+        
         firstPage.drawText(qrIdentifier, {
-            x: width - qrDims.width - 20,
-            y: height - qrDims.height - 30,
-            size: 8,
+            x: (width - textWidth) / 2,
+            y: qrY - 15,
+            size: fontSize,
             font: font,
-            color: rgb(0, 0, 0),
+            color: rgb(0.3, 0.3, 0.3),
         });
 
-        // 6. Guardar nuevo PDF
-        const modifiedPdfBytes = await pdfDoc.save();
+        // Agregar URL debajo del identificador
+        const urlFontSize = 8;
+        const urlText = repositoryUrl;
+        const urlTextWidth = font.widthOfTextAtSize(urlText, urlFontSize);
+        
+        firstPage.drawText(urlText, {
+            x: (width - urlTextWidth) / 2,
+            y: qrY - 28,
+            size: urlFontSize,
+            font: font,
+            color: rgb(0.5, 0.5, 0.5),
+        });
 
-        // 7. Subir a Storage (mismo directorio, prefijo qr_)
+        // 11. Copiar todas las paginas del documento original
+        const originalPageIndices = originalPdf.getPageIndices();
+        const copiedOriginalPages = await mergedPdf.copyPages(originalPdf, originalPageIndices);
+        copiedOriginalPages.forEach((page) => {
+            mergedPdf.addPage(page);
+        });
+
+        // 12. Guardar PDF combinado
+        const mergedPdfBytes = await mergedPdf.save();
+
+        // 13. Subir a Storage (Bucket docs-signed para documentos listos para firma)
         const fileName = document.original_file_name || "document.pdf";
-        const newFileName = `qr_${fileName}`;
-        const storagePath =
-            `${document.organization_id}/${document.id}/${newFileName}`;
+        const storagePath = `${document.organization_id}/${document.id}/${fileName}`;
 
         const { data: uploadData, error: uploadError } = await supabaseClient
             .storage
-            .from("docs-originals")
-            .upload(storagePath, modifiedPdfBytes, {
+            .from("docs-signed")
+            .upload(storagePath, mergedPdfBytes, {
                 contentType: "application/pdf",
                 upsert: true,
             });
 
         if (uploadError) {
-            throw new Error(
-                `Error uploading modified file: ${uploadError.message}`,
-            );
+            throw new Error(`Error subiendo archivo: ${uploadError.message}`);
         }
 
-        // 8. Actualizar referencia en base de datos
+        // 14. Actualizar base de datos
         const { error: updateError } = await supabaseClient
-            .from("documents")
+            .from("signing_documents")
             .update({
                 qr_file_path: uploadData.path,
+                current_signed_file_path: uploadData.path,
                 updated_at: new Date().toISOString(),
             })
             .eq("id", document_id);
 
         if (updateError) {
-            throw new Error(
-                `Error updating document record: ${updateError.message}`,
-            );
+            throw new Error(`Error actualizando documento: ${updateError.message}`);
         }
 
         return new Response(
             JSON.stringify({
                 success: true,
-                message: "QR added successfully",
+                message: "Portada con QR agregada exitosamente",
                 path: uploadData.path,
+                qr_identifier: qrIdentifier,
+                repository_url: repositoryUrl,
             }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
+
     } catch (error) {
+        console.error("Error en pdf-merge-with-cover:", error);
         return new Response(
             JSON.stringify({
                 success: false,

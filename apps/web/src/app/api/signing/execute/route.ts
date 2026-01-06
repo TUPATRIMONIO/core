@@ -114,11 +114,11 @@ export async function POST(request: NextRequest) {
         console.log("qr_file_path:", signer.document.qr_file_path);
         console.log("original_file_path:", signer.document.original_file_path);
 
-        // Intentar primero en docs-originals, luego en docs-signed
+        // Intentar primero en docs-signed, luego en docs-originals
         let fileData: Blob | null = null;
         let downloadErrors: string[] = [];
 
-        for (const bucket of ["docs-originals", "docs-signed"]) {
+        for (const bucket of ["docs-signed", "docs-originals"]) {
             console.log(`Intentando descargar de bucket: ${bucket}`);
             // Usar adminClient para bypass de RLS (firmantes externos sin autenticación)
             const result = await adminClient.storage.from(bucket).download(

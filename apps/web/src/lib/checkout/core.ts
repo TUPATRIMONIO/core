@@ -242,6 +242,21 @@ export async function updateOrderStatus(
     newStatus: status,
   });
   
+  // Si el nuevo estado es 'paid', disparar revisión IA si es necesario
+  if (status === 'paid' && (order.product_type === 'electronic_signature' || order.product_type === 'electronic_signature_resend')) {
+    try {
+      console.log('[updateOrderStatus] Orden pagada de tipo firma, disparando revisión IA...');
+      // Importación dinámica para evitar problemas con bundles del cliente
+      const { triggerAIReviewForOrder } = await import('@/lib/signing/trigger-ai-review');
+      // No esperamos a que termine para no bloquear el flujo principal de respuesta
+      triggerAIReviewForOrder(orderId).catch(err => {
+        console.error('[updateOrderStatus] Error asíncrono en triggerAIReviewForOrder:', err);
+      });
+    } catch (error: any) {
+      console.error('[updateOrderStatus] Error disparando revisión IA:', error.message);
+    }
+  }
+  
   // Si el nuevo estado es 'completed', procesar emisión de documentos
   // Solo si el monto es mayor a 0 (órdenes gratuitas no emiten factura)
   if (status === 'completed' && (order?.amount || 0) > 0) {

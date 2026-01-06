@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Corrección flujo firma CDS + error net.http_post)\
+> **📅 Última actualización:** Enero 2026 (Corrección flujo AI Review + Visibilidad Admin Panel + CDS)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -20,7 +20,8 @@
 > DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
-> FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅\
+> FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -37,7 +38,7 @@ INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2
 ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
 (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
 FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE & MULTIPLE)
-COMPLETOS** ✅ + **PRÓXIMO: Testing flujo completo, portal de firma
+COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **PRÓXIMO: Testing flujo completo, portal de firma
 /sign/[token], panel de notarías** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y
@@ -56,6 +57,22 @@ manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversi�
 bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
 pueden convertir su organización entre tipos personal y empresarial desde la
 interfaz, con advertencias automáticas y actualización de límites del CRM.
+
+- **NUEVO (Ene 6, 2026):** Reorganización técnica de Storage Buckets. **Objetivo:** Eliminar redundancia y asegurar un flujo de archivos limpio. **Cambios:** Consolidación de buckets (`documents` y `signing-covers` eliminados/consolidados). Flujo establecido: `docs-originals` (subida usuario) → `docs-signed` (portada+QR y firmas) → `docs-notarized` (final). Actualización de la Edge Function `pdf-merge-with-cover` para gestionar estos cambios automáticamente.
+
+- **NUEVO (Ene 6, 2026):** Robustez en el flujo de Revisión IA. **Problema:** Fallos silenciosos en la invocación de la IA. **Solución:** Migración del disparador de base de datos a la extensión `http` (síncrona) en lugar de `pg_net`. Implementación de logs de error detallados y actualización de estados en `signing.ai_reviews` para evitar documentos estancados.
+
+- **NUEVO (Ene 6, 2026):** Automatización del flujo de firmas post-aprobación. **Problema:** Tras aprobar un documento (manual o IA), el usuario debía presionar "Enviar a Firma" manualmente. **Solución:** Refactorización del inicio de firma en una librería compartida (`apps/web/src/lib/signing/initiate-signing.ts`) y activación automática en los endpoints de acción administrativa y triggers de IA.
+
+- **NUEVO (Ene 6, 2026):** Vista previa de documentos integrada. **Funcionalidad:** Implementación de visor PDF (`PDFViewer`) en el listado de documentos (vía modal) y en el detalle del documento (vía pestaña), facilitando la revisión sin descargas manuales.
+
+- **NUEVO (Ene 6, 2026):** Optimización lógica de aprobación IA. **Cambio:** Si la IA aprueba el documento, este pasa directamente a proceso de firmas, ignorando el flag `requires_approval`, agilizando el flujo B2B.
+
+- **NUEVO (Ene 6, 2026):** Mejora en el Panel de Revisión. **Funcionalidad:** Implementación de pestañas "Pendientes" e "Historial", con trazabilidad mejorada de mensajes y tipos de revisión realizados.
+
+- **NUEVO (Ene 6, 2026):** Corrección del flujo de revisión automática por IA (Revisión Interna). **Problema:** El documento quedaba atascado en "Pending AI review". **Causa:** Faltaba el prompt `internal_document_review` en la base de datos para Chile. **Solución:** Creación del prompt específico con esquema de salida compatible con Claude 3.5 Sonnet y corrección de la migración para asegurar idempotencia y manejo de restricciones de llave foránea. **Archivos:** `supabase/migrations/20260106000010_internal_review_prompt_chile.sql`.
+
+- **NUEVO (Ene 6, 2026):** Corrección de visibilidad en el Panel de Revisión de Documentos. **Problema:** Los documentos en `manual_review` no eran visibles para los administradores. **Causa:** Políticas RLS restrictivas en `signing.documents` y fallos en joins complejos con agregaciones. **Solución:** Actualización de políticas RLS para permitir acceso a `document_reviewer` y `platform_admin` a todos los documentos, y migración de la consulta a la vista `signing_documents_full` para mayor robustez. **Archivos:** `supabase/migrations/20260106000011_fix_document_review_rls.sql`, `apps/web/src/app/(admin)/admin/document-review/page.tsx`.
 
 - **NUEVO (Ene 6, 2026):** Corrección crítica del flujo de firma CDS donde el estado del firmante no se actualizaba después de firmar. **Problema:** El firmante completaba su firma exitosamente pero el sistema mostraba "listo para firmar" y contaba 0/1 firmantes. **Causa:** Las operaciones UPDATE en `/api/signing/execute` usaban el cliente Supabase normal (anon key) que no tenía permisos RLS para actualizar tablas de firmantes externos. **Solución:** Cambio a `adminClient` (service_role) para todas las operaciones de escritura, con verificación de errores. **Archivos:** `apps/web/src/app/api/signing/execute/route.ts`, `apps/web/src/app/sign/[token]/SigningPageClient.tsx`. **Migración adicional:** `20260106000004_fix_all_http_post_functions.sql` para corregir error `net.http_post` en múltiples funciones de signing (`send_completed_document_notification`, `invoke_signing_notification`, `invoke_ai_review_function`, `invoke_internal_review_after_ai`).
 

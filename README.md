@@ -97,9 +97,9 @@ Cada servicio tiene su propio schema para mejor organización:
 | `core` | Foundation multi-tenant (orgs, users, roles, suscripciones) - 13 tablas | ✅ Completo |
 | `marketing` | Blog, KB, leads, reviews, testimonios - 11 tablas | ✅ Completo |
 | `crm` | CRM completo estilo HubSpot: contacts, companies, deals, tickets, products, quotes, email multi-cuenta, pipelines configurables - 16+ tablas | ✅ Sistema Universal |
-| `signatures` | Firma electrónica | 📋 Fase 7 |
+| `signatures` | Firma electrónica y procesos notariales | ✅ Completo |
 | `ai_customer_service` | Chatbot IA con RAG | 📋 Fase 9 |
-| `ai_document_review` | Análisis de docs IA | 📋 Fase 10 |
+| `ai_document_review` | Análisis de docs IA (Interno y Público) | ✅ Operativo |
 
 📖 **Arquitectura completa**: [`docs/schemas/ARCHITECTURE-SCHEMAS.md`](docs/schemas/ARCHITECTURE-SCHEMAS.md)
 

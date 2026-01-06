@@ -56,21 +56,25 @@ export function DocumentMessageThread({
     setIsSubmitting(true)
 
     try {
-      const { data, error } = await supabase
-        .from('signing_document_messages')
-        .insert({
+      const response = await fetch('/api/admin/document-review/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           document_id: documentId,
           message: newMessage.trim(),
           is_internal: isInternal,
-        })
-        .select(`
-          *,
-          user:users(id, email, full_name)
-        `)
-        .single()
+        }),
+      })
 
-      if (error) throw error
+      const result = await response.json()
 
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al enviar el mensaje')
+      }
+
+      const data = result.message
       setMessages([...messages, data])
       setNewMessage('')
       setIsInternal(false)

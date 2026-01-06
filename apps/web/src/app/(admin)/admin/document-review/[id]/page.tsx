@@ -40,29 +40,27 @@ export default async function DocumentReviewDetailPage({ params }: PageProps) {
   const { id } = await params
   const supabase = createServiceRoleClient()
 
-  // Obtener documento completo
+  // Obtener documento completo usando la vista que es más robusta
   const { data: document, error: docError } = await supabase
-    .from('signing_documents')
-    .select(`
-      *,
-      organization:organizations(id, name, slug),
-      created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
-      ai_review:signing_ai_reviews(
-        id,
-        status,
-        passed,
-        confidence_score,
-        reasons,
-        suggestions,
-        completed_at,
-        metadata
-      )
-    `)
+    .from('signing_documents_full')
+    .select('*')
     .eq('id', id)
     .single()
 
   if (docError || !document) {
+    console.error('Error fetching document detail:', docError)
     redirect('/admin/document-review')
+  }
+
+  // Enriquecer con ai_review detallada si no está en la vista completa
+  const { data: aiReview } = await supabase
+    .from('signing_ai_reviews')
+    .select('*')
+    .eq('document_id', id)
+    .maybeSingle()
+
+  if (aiReview) {
+    document.ai_review = [aiReview]
   }
 
   // Obtener mensajes

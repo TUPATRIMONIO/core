@@ -70,33 +70,14 @@ export default async function DocumentReviewPage({ searchParams }: PageProps) {
     ]
 
     const { data, error: histError } = await supabase
-      .from('signing_documents')
-      .select(`
-        id,
-        title,
-        status,
-        created_at,
-        updated_at,
-        organization:organizations(id, name, slug),
-        created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
-        ai_review:signing_ai_reviews(
-          id,
-          status,
-          passed,
-          confidence_score,
-          reasons,
-          suggestions,
-          completed_at,
-          review_type
-        ),
-        document_messages:signing_document_messages(count)
-      `)
+      .from('signing_documents_full')
+      .select('*')
       .in('status', statusFilter)
       .order('updated_at', { ascending: false })
       .range(offset, offset + 19)
 
     const { count: histCount } = await supabase
-      .from('signing_documents')
+      .from('signing_documents_full')
       .select('*', { count: 'exact', head: true })
       .in('status', statusFilter)
 
@@ -110,33 +91,14 @@ export default async function DocumentReviewPage({ searchParams }: PageProps) {
       : [status]
 
     const { data, error: pendError } = await supabase
-      .from('signing_documents')
-      .select(`
-        id,
-        title,
-        status,
-        created_at,
-        updated_at,
-        organization:organizations(id, name, slug),
-        created_by_user:users!signing_documents_created_by_fkey(id, email, full_name),
-        ai_review:signing_ai_reviews(
-          id,
-          status,
-          passed,
-          confidence_score,
-          reasons,
-          suggestions,
-          completed_at,
-          review_type
-        ),
-        document_messages:signing_document_messages(count)
-      `)
+      .from('signing_documents_full')
+      .select('*')
       .in('status', statusFilter)
       .order('updated_at', { ascending: false })
       .range(offset, offset + 19)
 
     const { count: pendCount } = await supabase
-      .from('signing_documents')
+      .from('signing_documents_full')
       .select('*', { count: 'exact', head: true })
       .in('status', statusFilter)
 

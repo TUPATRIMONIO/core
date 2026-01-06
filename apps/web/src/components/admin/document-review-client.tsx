@@ -22,10 +22,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Eye, CheckCircle, XCircle, MessageSquare, AlertCircle } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, MessageSquare, AlertCircle, FileSearch } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/admin/empty-state'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { PDFViewer } from '@/components/signing/PDFViewer'
 
 interface Document {
   id: string
@@ -33,6 +41,8 @@ interface Document {
   status: string
   created_at: string
   updated_at: string
+  original_file_path?: string
+  current_signed_file_path?: string
   organization?: {
     id: string
     name: string
@@ -72,24 +82,28 @@ export function DocumentReviewClient({
   initialTab = 'pendientes',
 }: DocumentReviewClientProps) {
   const router = useRouter()
-  const supabase = createClient()
-  const [documents, setDocuments] = useState(initialDocuments)
-  const [status, setStatus] = useState(initialStatus)
-  const [page, setPage] = useState(initialPage)
-  const [tab, setTab] = useState(initialTab)
+  const documents = initialDocuments
+  const status = initialStatus
+  const page = initialPage
+  const tab = initialTab
   const [isLoading, setIsLoading] = useState(false)
+  const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [initialDocuments, initialTab, initialStatus, initialPage])
 
   const totalPages = Math.ceil(initialTotal / 20)
 
   const handleTabChange = (newTab: string) => {
-    setTab(newTab)
-    setPage(1)
+    if (newTab === tab) return
+    setIsLoading(true)
     router.push(`/admin/document-review?tab=${newTab}&status=${status}&page=1`)
   }
 
   const handleStatusChange = (newStatus: string) => {
-    setStatus(newStatus)
-    setPage(1)
+    if (newStatus === status) return
+    setIsLoading(true)
     router.push(`/admin/document-review?tab=${tab}&status=${newStatus}&page=1`)
   }
 
@@ -173,7 +187,12 @@ export function DocumentReviewClient({
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-background/50 z-10 flex items-center justify-center backdrop-blur-sm">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="pendientes">
@@ -232,12 +251,22 @@ export function DocumentReviewClient({
                           })}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Link href={`/admin/document-review/${doc.id}`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Revisar
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => setPreviewDoc(doc)}
+                            >
+                              <FileSearch className="h-4 w-4 mr-2" />
+                              Ver
                             </Button>
-                          </Link>
+                            <Link href={`/admin/document-review/${doc.id}`}>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Revisar
+                              </Button>
+                            </Link>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -335,12 +364,22 @@ export function DocumentReviewClient({
                             })}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Link href={`/admin/document-review/${doc.id}`}>
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Detalle
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setPreviewDoc(doc)}
+                              >
+                                <FileSearch className="h-4 w-4 mr-2" />
+                                Ver
                               </Button>
-                            </Link>
+                              <Link href={`/admin/document-review/${doc.id}`}>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Ver Detalle
+                                </Button>
+                              </Link>
+                            </div>
                           </TableCell>
                         </TableRow>
                       )
@@ -385,6 +424,24 @@ export function DocumentReviewClient({
           </TabsContent>
         </Tabs>
       </CardContent>
+
+      <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Previsualización: {previewDoc?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden mt-4">
+            {previewDoc && (
+              <PDFViewer
+                bucket={['docs-signed', 'docs-originals']}
+                filePath={previewDoc.current_signed_file_path || previewDoc.original_file_path || ''}
+                documentTitle={previewDoc.title}
+                className="h-full border-0"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }
