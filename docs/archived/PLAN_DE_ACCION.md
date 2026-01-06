@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Corrección error net.http_post en webhooks Stripe)\
+> **📅 Última actualización:** Enero 2026 (Corrección flujo firma CDS + error net.http_post)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -19,7 +19,8 @@
 > **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕 MEJORAS GESTIÓN
 > DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
-> WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅\
+> WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
+> FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
 > pública + Panel de Notarías 📋
 
@@ -55,6 +56,8 @@ manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversi�
 bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
 pueden convertir su organización entre tipos personal y empresarial desde la
 interfaz, con advertencias automáticas y actualización de límites del CRM.
+
+- **NUEVO (Ene 6, 2026):** Corrección crítica del flujo de firma CDS donde el estado del firmante no se actualizaba después de firmar. **Problema:** El firmante completaba su firma exitosamente pero el sistema mostraba "listo para firmar" y contaba 0/1 firmantes. **Causa:** Las operaciones UPDATE en `/api/signing/execute` usaban el cliente Supabase normal (anon key) que no tenía permisos RLS para actualizar tablas de firmantes externos. **Solución:** Cambio a `adminClient` (service_role) para todas las operaciones de escritura, con verificación de errores. **Archivos:** `apps/web/src/app/api/signing/execute/route.ts`, `apps/web/src/app/sign/[token]/SigningPageClient.tsx`. **Migración adicional:** `20260106000004_fix_all_http_post_functions.sql` para corregir error `net.http_post` en múltiples funciones de signing (`send_completed_document_notification`, `invoke_signing_notification`, `invoke_ai_review_function`, `invoke_internal_review_after_ai`).
 
 - **NUEVO (Ene 6, 2026):** Corrección crítica del error `function net.http_post(...) does not exist` en webhooks de Stripe - La función `signing.invoke_internal_review_function()` ahora usa la extensión `http` (síncrona) en lugar de `pg_net`, siguiendo el patrón establecido. Esto resuelve el problema donde las órdenes quedaban en estado `pending_payment` después de un pago exitoso con Stripe. Migración: `20260106000001_fix_internal_review_http.sql`. **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes - Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas en lugar de "Expira pronto") y solucionado el bucle infinito del spinner "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
 
@@ -543,6 +546,7 @@ READY:
 20251212200004_enable_pg_net.sql           - Versión actualizada pg_net
 20251229000001_add_order_number_to_view.sql - Vista documents_full con pedido
 20260106000001_fix_internal_review_http.sql - Fix error net.http_post en webhooks Stripe
+20260106000004_fix_all_http_post_functions.sql - Fix net.http_post en todas las funciones signing
 ```
 
 ### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
@@ -592,6 +596,26 @@ READY:
   - Causa: Función `signing.invoke_internal_review_function()` usaba `pg_net` no disponible
   - Solución: Migrada a extensión `http` (síncrona) siguiendo patrón establecido
   - Impacto: Webhooks de Stripe ahora procesan correctamente y actualizan órdenes automáticamente
+- ✅ `20260106000004_fix_all_http_post_functions.sql` - Corrección error `net.http_post()` en
+  múltiples funciones de signing
+  - Problema: Estado del firmante no se actualizaba después de firma CDS exitosa
+  - Causa: Triggers en cascada (`check_all_signed` → `on_document_completed`) usaban funciones
+    con `net.http_post` de sintaxis incorrecta
+  - Funciones corregidas: `send_completed_document_notification`, `invoke_signing_notification`,
+    `invoke_ai_review_function`, `invoke_internal_review_after_ai`
+  - Solución: Todas migradas a extensión `http` (síncrona) con manejo de excepciones
+
+**Corrección Flujo de Firma CDS (Ene 6, 2026):**
+
+- ✅ `apps/web/src/app/api/signing/execute/route.ts` - Cambio a `adminClient` para operaciones UPDATE
+  - Problema: Firmante completaba firma pero estado seguía en "listo para firmar" (0/1 firmantes)
+  - Causa: Cliente Supabase normal (anon key) sin permisos RLS para firmantes externos
+  - Solución: Usar `adminClient` (service_role) para bypass de RLS en todas las escrituras
+  - Operaciones corregidas: actualización de `provider_transaction_code`, `current_signed_file_path`,
+    estado del firmante a `signed`/`signing`, y estados de error (`certificate_blocked`, `sf_blocked`)
+  - Agregada verificación de errores en cada operación con logging apropiado
+- ✅ `apps/web/src/app/sign/[token]/SigningPageClient.tsx` - Mejora botón "Ver Documento Firmado"
+  - Ahora actualiza `cacheBuster` antes de recargar para mostrar documento firmado actualizado
 
 **Archivos Modificados:**
 
