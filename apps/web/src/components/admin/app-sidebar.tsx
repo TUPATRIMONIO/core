@@ -28,6 +28,7 @@ import {
   Mails,
   PenTool,
   FileSignature,
+  FileSearch,
   Bot,
 } from 'lucide-react'
 import {
@@ -118,6 +119,11 @@ const appsMenuItems = [
     title: 'Firma Electrónica',
     url: '/admin/signing/documents',
     icon: FileSignature,
+  },
+  {
+    title: 'Revisión Documentos',
+    url: '/admin/document-review',
+    icon: FileSearch,
   },
 ]
 

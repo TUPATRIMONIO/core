@@ -53,6 +53,7 @@ serve(async (req) => {
         }
 
         // 2. Determinar tipo de servicio y país para la portada
+        const hasElectronicSignature = Boolean(document.metadata?.signature_product);
         const hasSignature = true; // Todos los documentos de este módulo requieren firma
         const hasNotary = document.notary_service !== "none";
         const countryCode = document.metadata?.country_code || "chile";
@@ -96,6 +97,22 @@ serve(async (req) => {
         }
 
         const coverPdfBytes = await coverData.arrayBuffer();
+
+        // 3.5. Descargar template de página de firmas (si tiene firma electrónica)
+        let signaturePagePdfBytes: ArrayBuffer | null = null;
+        if (hasElectronicSignature) {
+            const signaturePagePath = "signature-page-default.pdf";
+            const { data: signaturePageData, error: signaturePageError } = await supabaseClient
+                .storage
+                .from("signature-page-templates")
+                .download(signaturePagePath);
+
+            if (signaturePageError) {
+                console.warn(`No se encontró template de página de firmas: ${signaturePageError.message}. Se usará una página en blanco.`);
+            } else if (signaturePageData) {
+                signaturePagePdfBytes = await signaturePageData.arrayBuffer();
+            }
+        }
 
         // 4. Descargar documento original
         const originalPath = document.original_file_path;
@@ -182,6 +199,66 @@ serve(async (req) => {
         copiedOriginalPages.forEach((page) => {
             mergedPdf.addPage(page);
         });
+
+        // 11.5. Agregar página de firmas (si aplica)
+        if (hasElectronicSignature) {
+            let signaturePage;
+            if (signaturePagePdfBytes) {
+                const signaturePdf = await PDFDocument.load(signaturePagePdfBytes);
+                const [copiedPage] = await mergedPdf.copyPages(signaturePdf, [0]);
+                signaturePage = mergedPdf.addPage(copiedPage);
+            } else {
+                // Crear página en blanco si no hay template
+                signaturePage = mergedPdf.addPage([595.276, 841.89]); // A4 estándar
+            }
+
+            const { width: pageWidth, height: pageHeight } = signaturePage.getSize();
+            const totalPages = mergedPdf.getPageCount();
+
+            // Obtener firmantes
+            const { data: signers, error: signersError } = await supabaseClient
+                .from("signing_signers")
+                .select("id, signing_order")
+                .eq("document_id", document_id)
+                .neq("status", "removed")
+                .order("signing_order", { ascending: true });
+
+            if (!signersError && signers) {
+                const STAMP_WIDTH = 250;
+                const STAMP_HEIGHT = 80;
+                const MARGIN = 30;
+                const V_SPACING = 20;
+                const COLUMNS = 2;
+
+                for (let i = 0; i < signers.length; i++) {
+                    const col = i % COLUMNS;
+                    const row = Math.floor(i / COLUMNS);
+
+                    // Calcular posiciones (esquina inferior izquierda)
+                    const colWidth = (pageWidth - MARGIN * 2 - MARGIN) / COLUMNS;
+                    const x_lower_left = MARGIN + col * (colWidth + MARGIN);
+                    const y_upper = pageHeight - MARGIN - row * (STAMP_HEIGHT + V_SPACING);
+                    const y_lower_left = y_upper - STAMP_HEIGHT;
+                    
+                    const x_upper_right = x_lower_left + STAMP_WIDTH;
+                    const y_upper_right = y_upper;
+
+                    // Actualizar coordenadas en BD
+                    await supabaseClient
+                        .from("signing_signers")
+                        .update({
+                            use_custom_coordinates: true,
+                            signature_page: totalPages,
+                            coord_x_lower_left: x_lower_left,
+                            coord_y_lower_left: y_lower_left,
+                            coord_x_upper_right: x_upper_right,
+                            coord_y_upper_right: y_upper_right,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq("id", signers[i].id);
+                }
+            }
+        }
 
         // 12. Guardar PDF combinado
         const mergedPdfBytes = await mergedPdf.save();

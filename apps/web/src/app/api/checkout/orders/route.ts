@@ -155,6 +155,17 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // Obtener información del proceso de firma si aplica
+        const { data: signingDoc } = await supabase
+          .from("signing_documents")
+          .select("id, status, signers_count, signed_count, title")
+          .eq("order_id", order.id)
+          .maybeSingle();
+
+        if (signingDoc) {
+          enriched.signing_document = signingDoc;
+        }
+
         return enriched;
       }),
     );

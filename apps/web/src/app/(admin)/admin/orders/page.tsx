@@ -15,6 +15,7 @@ import { Eye, ShoppingCart, ChevronLeft, ChevronRight, Filter } from 'lucide-rea
 import { EmptyState } from '@/components/admin/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { OrdersDateFilter } from '@/components/admin/orders-date-filter'
+import { OrderRestartAdminAction } from '@/components/admin/OrderRestartAdminAction'
 
 interface Order {
     id: string
@@ -29,6 +30,12 @@ interface Order {
         name: string
         slug: string
     }
+    signing_documents?: {
+        id: string
+        status: string
+        signers_count: number
+        signed_count: number
+    }[]
 }
 
 interface PageProps {
@@ -66,7 +73,7 @@ async function getOrders(params: {
     // Build query
     let query = supabase
         .from('orders')
-        .select('*', { count: 'exact' })
+        .select('*, signing_documents!order_id(id, status, signers_count, signed_count)', { count: 'exact' })
 
     // Apply filters
     if (params.status) {
@@ -348,6 +355,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex items-center justify-end gap-2">
+                                                    <OrderRestartAdminAction order={{
+                                                        ...order,
+                                                        signing_document: order.signing_documents?.[0] || null
+                                                    }} />
                                                     <Link href={`/admin/orders/${order.id}`}>
                                                         <Button variant="ghost" size="sm" title="Ver Detalles">
                                                             <Eye className="h-4 w-4" />

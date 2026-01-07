@@ -65,3 +65,4 @@ BEGIN
   RAISE NOTICE '✅ RLS policies actualizadas para document_reviewer y platform_admin';
 END $$;
 
+

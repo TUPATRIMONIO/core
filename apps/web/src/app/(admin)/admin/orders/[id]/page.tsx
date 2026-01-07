@@ -16,6 +16,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { OrderStatusSelector } from '@/components/admin/order-status-selector'
 import { RefundModal } from '@/components/admin/refund-modal'
+import { OrderRestartAdminAction } from '@/components/admin/OrderRestartAdminAction'
 import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-buttons'
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
 import { OrderTicketsPanel } from '@/components/admin/OrderTicketsPanel'
@@ -92,6 +93,13 @@ async function getOrderDetails(orderId: string) {
     // Get associations for this order
     const { data: associations } = await supabase.rpc('get_order_associations', { p_order_id: orderId })
 
+    // Get signing document
+    const { data: signingDoc } = await supabase
+        .from('signing_documents')
+        .select('*')
+        .eq('order_id', orderId)
+        .maybeSingle()
+
     // Get creator user if exists (using created_by_user_id)
     let creatorUser = null;
     if (order.created_by_user_id) {
@@ -121,6 +129,7 @@ async function getOrderDetails(orderId: string) {
         totalRefunded,
         associations: associations || { contacts: [], tickets: [], organizations: [] },
         creatorUser,
+        signing_document: signingDoc,
     }
 }
 
@@ -191,6 +200,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                 hasPayment={!!order.payment}
                             />
                         )}
+                        <OrderRestartAdminAction order={order} />
                         <CreateTicketButtonForOrder
                             orderId={order.id}
                             orderNumber={order.order_number}

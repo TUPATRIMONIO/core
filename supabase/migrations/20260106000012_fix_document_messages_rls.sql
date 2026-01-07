@@ -45,3 +45,4 @@ BEGIN
   RAISE NOTICE '✅ RLS policies actualizadas para document_messages';
 END $$;
 
+

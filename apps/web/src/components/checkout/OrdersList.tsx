@@ -9,6 +9,7 @@ import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, C
 import Link from 'next/link';
 import { useOrganization } from '@/hooks/useOrganization';
 import type { Order, OrderStatus } from '@/lib/checkout/core';
+import { RestartOrderModal } from './RestartOrderModal';
 
 interface OrdersListProps {
   status?: OrderStatus | 'all';
@@ -29,6 +30,17 @@ interface OrderWithRelations extends Order {
     provider: string;
     amount: number;
     currency: string;
+  } | null;
+  signing_document?: {
+    id: string;
+    status: string;
+    signers_count: number;
+    signed_count: number;
+    title: string;
+  } | null;
+  restart_metadata?: {
+    pending_amount: number;
+    charged_amount: number;
   } | null;
 }
 
@@ -87,6 +99,7 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
   const [orders, setOrders] = useState<OrderWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [restartingOrder, setRestartingOrder] = useState<OrderWithRelations | null>(null);
 
   const fetchOrders = useCallback(async (showLoading = true) => {
     // Esperar a que se cargue la organización activa
@@ -293,6 +306,16 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                   </div>
                 )}
 
+                {order.restart_metadata && (order.restart_metadata as any).pending_amount > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 font-bold p-2 bg-red-50 dark:bg-red-900/10 rounded-md">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Saldo pendiente: {new Intl.NumberFormat('es-CL', {
+                      style: 'currency',
+                      currency: order.currency,
+                    }).format((order.restart_metadata as any).pending_amount)}</span>
+                  </div>
+                )}
+
                 <div className="pt-4 border-t">
                   {order.status === 'pending_payment' && canPay && (
                     <Button asChild className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -338,6 +361,19 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                           Ver Detalles
                         </Link>
                       </Button>
+                      
+                      {order.signing_document && 
+                       order.signing_document.signed_count < order.signing_document.signers_count &&
+                       ['pending_signature', 'partially_signed'].includes(order.signing_document.status) && (
+                        <Button 
+                          variant="ghost" 
+                          className="flex-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                          onClick={() => setRestartingOrder(order)}
+                        >
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Reiniciar Proceso
+                        </Button>
+                      )}
                     </div>
                   )}
 
@@ -361,6 +397,15 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
           </Card>
         );
       })}
+
+      {restartingOrder && (
+        <RestartOrderModal 
+          open={!!restartingOrder}
+          onOpenChange={(open) => !open && setRestartingOrder(null)}
+          order={restartingOrder}
+          onSuccess={() => fetchOrders(true)}
+        />
+      )}
     </div>
   );
 }
