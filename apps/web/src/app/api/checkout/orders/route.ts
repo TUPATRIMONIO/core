@@ -147,18 +147,10 @@ export async function GET(request: NextRequest) {
               .maybeSingle();
 
             if (anyDocument) {
-              console.debug(
-                `[API Orders] Documento encontrado para orden ${order.id} con estado:`,
-                anyDocument.status,
-              );
               // Si el documento existe pero no está 'issued', aún así lo mostramos si tiene pdf_url
               if (anyDocument.pdf_url) {
                 enriched.document = anyDocument;
               }
-            } else {
-              console.debug(
-                `[API Orders] No se encontró documento para la orden ${order.id}`,
-              );
             }
           }
         }

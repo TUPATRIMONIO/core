@@ -52,28 +52,50 @@ serve(async (req) => {
             );
         }
 
-        // 2. Determinar path de la portada
-        // Prioridad: cover_path del request > custom_cover_path del documento > portada default de la org
-        let coverTemplatePath = cover_path || 
-            document.custom_cover_path || 
-            `${document.organization_id}/default-cover.pdf`;
+        // 2. Determinar tipo de servicio y país para la portada
+        const hasSignature = true; // Todos los documentos de este módulo requieren firma
+        const hasNotary = document.notary_service !== "none";
+        const countryCode = document.metadata?.country_code || "chile";
+
+        // Construir nombre de portada según combinación
+        let coverFileName: string;
+        if (hasSignature && hasNotary) {
+            coverFileName = `firma-notaria-${countryCode}.pdf`;
+        } else if (hasNotary) {
+            coverFileName = `notaria-${countryCode}.pdf`;
+        } else {
+            coverFileName = `firma-${countryCode}.pdf`;
+        }
+
+        const coverTemplatePath = cover_path || document.custom_cover_path || coverFileName;
 
         // 3. Descargar portada desde cover-templates
-        let coverPdfBytes: ArrayBuffer;
-        const { data: coverData, error: coverError } = await supabaseClient
+        let coverData: Blob | null = null;
+        const { data: initialData, error: initialError } = await supabaseClient
             .storage
             .from("cover-templates")
             .download(coverTemplatePath);
 
-        if (coverError) {
-            // Si no hay portada personalizada, usar una portada minima generada
-            console.log("No se encontro portada, generando una minima...");
-            const minimalCover = await PDFDocument.create();
-            const page = minimalCover.addPage([612, 792]); // Tamano carta
-            coverPdfBytes = await minimalCover.save();
+        if (initialError) {
+            console.log(`Portada ${coverTemplatePath} no encontrada, buscando default.pdf...`);
+            const { data: fallbackData, error: fallbackError } = await supabaseClient
+                .storage
+                .from("cover-templates")
+                .download("default.pdf");
+
+            if (fallbackError || !fallbackData) {
+                throw new Error(`No se encontró portada: ${coverTemplatePath} ni default.pdf`);
+            }
+            coverData = fallbackData;
         } else {
-            coverPdfBytes = await coverData.arrayBuffer();
+            coverData = initialData;
         }
+
+        if (!coverData) {
+            throw new Error("Error inesperado: no se pudo obtener los datos de la portada");
+        }
+
+        const coverPdfBytes = await coverData.arrayBuffer();
 
         // 4. Descargar documento original
         const originalPath = document.original_file_path;
@@ -116,10 +138,10 @@ serve(async (req) => {
         const firstPage = mergedPdf.getPages()[0];
         const { width, height } = firstPage.getSize();
         
-        // Posicion del QR: centrado horizontalmente, en la mitad inferior
+        // Posicion del QR: centrado horizontalmente, en el tercio superior
         const qrSize = 120;
         const qrX = (width - qrSize) / 2;
-        const qrY = height * 0.25; // 25% desde abajo
+        const qrY = height * 0.6; // 60% desde abajo (tercio superior)
 
         firstPage.drawImage(qrImage, {
             x: qrX,
@@ -206,11 +228,12 @@ serve(async (req) => {
         );
 
     } catch (error) {
-        console.error("Error en pdf-merge-with-cover:", error);
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+        console.error("Error en pdf-merge-with-cover:", errorMessage);
         return new Response(
             JSON.stringify({
                 success: false,
-                error: error.message,
+                error: errorMessage,
             }),
             {
                 status: 400,
