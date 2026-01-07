@@ -138,10 +138,10 @@ serve(async (req) => {
         const firstPage = mergedPdf.getPages()[0];
         const { width, height } = firstPage.getSize();
         
-        // Posicion del QR: centrado horizontalmente, en el tercio superior
+        // Posicion del QR: centrado horizontalmente, en la mitad superior
         const qrSize = 120;
         const qrX = (width - qrSize) / 2;
-        const qrY = height * 0.6; // 60% desde abajo (tercio superior)
+        const qrY = height * 0.6; // 60% desde abajo (mitad superior)
 
         firstPage.drawImage(qrImage, {
             x: qrX,
