@@ -84,6 +84,13 @@ export function ServiceSelectionStep() {
   }, [notarySlug, signatureId, signatureProducts])
 
   const loadProducts = useCallback(async () => {
+    // No intentar cargar si no hay un código de país definido
+    if (!state.countryCode) {
+      console.warn('[ServiceSelectionStep] No hay countryCode definido, esperando...')
+      setIsLoading(false)
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -95,7 +102,10 @@ export function ServiceSelectionStep() {
         .eq('is_active', true)
         .order('display_order', { ascending: true })
 
-      if (fetchError) throw fetchError
+      if (fetchError) {
+        console.error('[ServiceSelectionStep] Supabase error:', fetchError)
+        throw fetchError
+      }
 
       const normalized = (data || []).map((p: any) => ({
         ...p,
@@ -106,7 +116,8 @@ export function ServiceSelectionStep() {
       setProducts(normalized)
     } catch (e: any) {
       console.error('[ServiceSelectionStep] load error', e)
-      setError(e?.message || 'No se pudieron cargar los servicios.')
+      const errorMsg = e?.message || e?.error_description || 'No se pudieron cargar los servicios.'
+      setError(errorMsg)
     } finally {
       setIsLoading(false)
     }
@@ -133,11 +144,6 @@ export function ServiceSelectionStep() {
   const handleContinue = useCallback(async () => {
     setError(null)
 
-    if (!state.documentId) {
-      setError('No encontramos el documento. Vuelve al paso anterior.')
-      return
-    }
-
     if (!signatureSelected) {
       setError('Debes seleccionar un tipo de firma para continuar.')
       return
@@ -150,7 +156,14 @@ export function ServiceSelectionStep() {
       actions.setSignatureProduct(signatureSelected)
       actions.setNotaryProduct(notarySelected)
 
-      // Leer metadata actual y mergear
+      // Si no hay documentId (flujo público), solo avanzamos de paso.
+      // Los datos ya están en el contexto global del wizard.
+      if (!state.documentId) {
+        actions.nextStep()
+        return
+      }
+
+      // Si hay documentId, persistimos en la base de datos
       const { data: doc, error: docError } = await supabase
         .from('signing_documents')
         .select('metadata')

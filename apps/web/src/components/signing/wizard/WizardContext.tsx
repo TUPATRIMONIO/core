@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -99,6 +100,7 @@ export interface SigningWizardActions {
 }
 
 const TOTAL_STEPS = 4
+const STORAGE_KEY = 'tp_signing_wizard_state'
 
 const defaultState: SigningWizardState = {
   step: 0,
@@ -132,6 +134,31 @@ const SigningWizardContext = createContext<
 
 export function SigningWizardProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SigningWizardState>(defaultState)
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Cargar estado desde sessionStorage al montar
+  useEffect(() => {
+    const saved = sessionStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        // El objeto File no se puede serializar, se perderá en recargas de página
+        // pero se mantiene mientras navegamos en la SPA.
+        setState((s) => ({ ...s, ...parsed, file: null }))
+      } catch (e) {
+        console.error('[WizardContext] Error cargando estado desde sessionStorage', e)
+      }
+    }
+    setIsInitialized(true)
+  }, [])
+
+  // Guardar estado en sessionStorage cuando cambie
+  useEffect(() => {
+    if (!isInitialized) return
+    // No serializamos el archivo ni objetos complejos que no sean JSON
+    const { file, ...serializableState } = state
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(serializableState))
+  }, [state, isInitialized])
 
   const setStep = useCallback((step: number) => {
     setState((s) => ({ ...s, step: Math.max(0, Math.min(TOTAL_STEPS - 1, step)) }))
@@ -187,7 +214,10 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
 
       setOrderId: (orderId) => setState((s) => ({ ...s, orderId })),
 
-      reset: () => setState(defaultState),
+      reset: () => {
+        setState(defaultState)
+        sessionStorage.removeItem(STORAGE_KEY)
+      },
     }),
     [nextStep, prevStep, setStep]
   )

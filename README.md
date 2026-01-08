@@ -3,7 +3,7 @@
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
 > **📊 Estado:** Fase 0 COMPLETA ✅ | **Sistema CRM Universal Implementado** 🎉  
-> **📅 Actualización:** 20 Noviembre 2024  
+> **📅 Actualización:** 8 Enero 2026  
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -13,7 +13,8 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🌍 Multi-País**: Detección automática y contenido localizado (Chile, México, Colombia)
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
-- **✍️ Servicios Core**: Firmas electrónicas, verificación de identidad, notaría digital
+- **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad, notaría digital
+- **🔓 Flujo Público**: Ruta `/firmar` accesible sin autenticación con persistencia de progreso
 - **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares
 - **📧 Email-to-Ticket**: Creación automática de tickets desde emails entrantes
 - **🎨 Design System**: Colores dual, dark mode, componentes Shadcn/UI

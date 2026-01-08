@@ -31,3 +31,4 @@ BEGIN
   RAISE NOTICE '✅ Permisos de restart_order configurados';
 END $$;
 
+

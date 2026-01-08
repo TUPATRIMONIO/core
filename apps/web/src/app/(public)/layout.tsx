@@ -1,4 +1,6 @@
 import { Toaster } from 'sonner';
+import { OrganizationProvider } from '@/providers/OrganizationProvider';
+import { GlobalCountryProvider } from '@/providers/GlobalCountryProvider';
 
 export default function PublicLayout({
   children,
@@ -6,9 +8,11 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      {children}
-      <Toaster />
-    </>
+    <OrganizationProvider>
+      <GlobalCountryProvider>
+        {children}
+        <Toaster />
+      </GlobalCountryProvider>
+    </OrganizationProvider>
   );
 }

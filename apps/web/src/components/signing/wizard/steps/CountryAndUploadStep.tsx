@@ -29,7 +29,7 @@ export function CountryAndUploadStep() {
   const supabase = useMemo(() => createClient(), [])
   const { state, actions } = useSigningWizard()
   const globalCountry = useGlobalCountryOptional()
-  const { activeOrganization } = useOrganization()
+  const { activeOrganization, isLoading: orgLoading } = useOrganization()
   const searchParams = useSearchParams()
   const fromDocumentId = searchParams.get('fromDocument')
 
@@ -88,45 +88,17 @@ export function CountryAndUploadStep() {
   }, [creditBalance, creditCost])
 
   const loadOrgAndCredits = useCallback(async () => {
+    // Si estamos cargando organizaciones, esperamos
+    if (orgLoading) return
+
     setIsBootstrapping(true)
     setError(null)
 
     try {
       const { data: auth } = await supabase.auth.getUser()
-      if (!auth?.user) {
-        setError('Necesitas iniciar sesión para crear un documento.')
-        return
-      }
+      const user = auth?.user
 
-      // Usar la organización activa del contexto global
-      if (!activeOrganization?.id) {
-        setError('No encontramos una organización activa. Selecciona una organización primero.')
-        return
-      }
-
-      const organizationId = activeOrganization.id
-      actions.setOrgId(organizationId)
-
-      // Default country priority: 1) global context, 2) organization.country
-      // Check if we already have a country set from global context
-      if (globalCountry?.country && !globalCountry.isLoading) {
-        actions.setCountryCode(globalCountry.country.toUpperCase())
-      } else {
-        // Fallback to organization country
-        const { data: org, error: orgCountryError } = await supabase
-          .from('organizations')
-          .select('country')
-          .eq('id', organizationId)
-          .maybeSingle()
-
-        if (!orgCountryError) {
-          const orgCountry = (org?.country || '').toString().toUpperCase()
-          if (orgCountry && orgCountry.length === 2) {
-            actions.setCountryCode(orgCountry)
-          }
-        }
-      }
-
+      // 1. Carga básica de configuraciones (países, prompts, precios) que no dependen de la org
       // Country settings (AI availability)
       const { data: settings, error: settingsError } = await supabase
         .from('signing_country_settings')
@@ -173,25 +145,68 @@ export function CountryAndUploadStep() {
         setCreditCost(cost > 0 ? cost : null)
       }
 
-      // Balance
-      const { data: balance, error: balanceError } = await supabase.rpc('get_balance', {
-        org_id_param: organizationId,
-      })
+      // 2. Si no hay usuario, permitimos continuar sin errores de org
+      if (!user) {
+        // Cargar tipos de documentos para el país actual
+        const currentCountry = state.countryCode || 'CL'
+        const { data: docTypes } = await supabase
+          .from('signing_document_types')
+          .select('*')
+          .eq('country_code', currentCountry)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
 
-      if (!balanceError) {
-        setCreditBalance(Number(balance ?? 0))
+        if (docTypes) setDocumentTypes(docTypes)
+        return
+      }
+
+      // 3. Si hay usuario, validar organización
+      if (!activeOrganization?.id) {
+        // Si no hay organización activa, permitimos continuar.
+        // El CheckoutStep se encargará de crear una organización personal automáticamente.
+        console.log('[CountryAndUploadStep] Usuario logueado sin organización activa. Se creará en el checkout.')
+      } else {
+        const organizationId = activeOrganization.id
+        actions.setOrgId(organizationId)
+
+        // Balance
+        const { data: balance, error: balanceError } = await supabase.rpc('get_balance', {
+          org_id_param: organizationId,
+        })
+
+        if (!balanceError) {
+          setCreditBalance(Number(balance ?? 0))
+        }
+
+        // Default country priority: 1) global context, 2) organization.country
+        if (globalCountry?.country && !globalCountry.isLoading) {
+          actions.setCountryCode(globalCountry.country.toUpperCase())
+        } else {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('country')
+            .eq('id', organizationId)
+            .maybeSingle()
+
+          if (org?.country) {
+            const orgCountry = org.country.toString().toUpperCase()
+            if (orgCountry && orgCountry.length === 2) {
+              actions.setCountryCode(orgCountry)
+            }
+          }
+        }
       }
 
       // Load document types for the selected country
-      const currentCountry = state.countryCode || (org?.country?.toString().toUpperCase() || 'CL')
-      const { data: docTypes, error: docTypesError } = await supabase
+      const currentCountry = state.countryCode || 'CL'
+      const { data: docTypes } = await supabase
         .from('signing_document_types')
         .select('*')
         .eq('country_code', currentCountry)
         .eq('is_active', true)
         .order('display_order', { ascending: true })
 
-      if (!docTypesError && docTypes) {
+      if (docTypes) {
         setDocumentTypes(docTypes)
       }
     } catch (e: any) {
@@ -200,7 +215,7 @@ export function CountryAndUploadStep() {
     } finally {
       setIsBootstrapping(false)
     }
-  }, [actions, supabase, globalCountry])
+  }, [actions, supabase, globalCountry, activeOrganization, orgLoading, state.countryCode])
 
   useEffect(() => {
     loadOrgAndCredits()
@@ -500,16 +515,22 @@ export function CountryAndUploadStep() {
 
   const ensureDocumentAndUpload = useCallback(
     async (opts: { requiresAiReview: boolean }) => {
-      if (!state.orgId) {
-        throw new Error('No pudimos determinar tu organización. Intenta recargar.')
-      }
       if (!state.file) {
         throw new Error('Debes subir un PDF para continuar.')
       }
 
       const { data: auth } = await supabase.auth.getUser()
-      if (!auth?.user) {
-        throw new Error('Necesitas iniciar sesión para continuar.')
+      const user = auth?.user
+
+      // Si no hay usuario logueado, no podemos crear el documento en la DB todavía.
+      // Guardamos la configuración en el estado local del wizard y continuamos.
+      if (!user) {
+        actions.setRequiresAiReview(opts.requiresAiReview)
+        return { documentId: null, userId: null }
+      }
+
+      if (!state.orgId) {
+        throw new Error('No pudimos determinar tu organización. Intenta recargar.')
       }
 
       // Si ya existe doc + path, no re-subimos (el usuario no cambió el archivo)

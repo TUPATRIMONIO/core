@@ -101,7 +101,23 @@ export function SignerManagementStep() {
   }, [requiresRutOnly])
 
   const loadSigners = useCallback(async () => {
-    if (!state.documentId) return
+    // Si no hay documentId (flujo público), usamos los firmantes del estado del wizard
+    if (!state.documentId) {
+      setSigners(state.signers.map((s, idx) => ({
+        id: `local-${idx}`,
+        first_name: s.first_name,
+        last_name: s.last_name,
+        email: s.email,
+        phone: s.phone,
+        signing_order: idx + 1,
+        metadata: {
+          identifier_type: s.identifier_type,
+          identifier_value: s.identifier_value,
+        }
+      })))
+      setIsLoading(false)
+      return
+    }
 
     setIsLoading(true)
     setError(null)
@@ -213,10 +229,6 @@ export function SignerManagementStep() {
   const handleAddSigner = useCallback(async () => {
     setError(null)
 
-    if (!state.documentId) {
-      setError('No encontramos el documento. Vuelve al paso anterior.')
-      return
-    }
     if (!signatureProduct) {
       setError('Primero debes seleccionar el tipo de firma.')
       return
@@ -234,6 +246,28 @@ export function SignerManagementStep() {
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
       const rutDb = isRutType ? normalizeRutToDb(identifierValue) : null
 
+      // MODO PÚBLICO: No persistimos en DB todavía
+      if (!state.documentId) {
+        const newSigner: any = {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+          identifier_type: isRutType ? 'rut' : identifierType,
+          identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
+        }
+        
+        const updatedSigners = [...state.signers, newSigner]
+        actions.setSigners(updatedSigners)
+        
+        toast.success('Firmante agregado')
+        resetForm()
+        setIsModalOpen(false)
+        await loadSigners()
+        return
+      }
+
+      // MODO LOGUEADO: Flujo original con DB
       const { data, error: rpcError } = await supabase.rpc('add_document_signer', {
         p_document_id: state.documentId,
         p_email: email.trim(),
@@ -301,6 +335,19 @@ export function SignerManagementStep() {
       if (!confirm('¿Quitar a este firmante?')) return
       try {
         setIsSaving(true)
+
+        if (!state.documentId) {
+          const index = parseInt(signerId.replace('local-', ''))
+          if (!isNaN(index)) {
+            const updated = [...state.signers]
+            updated.splice(index, 1)
+            actions.setSigners(updated)
+            toast.success('Firmante removido')
+            await loadSigners()
+          }
+          return
+        }
+
         const { error: rpcError } = await supabase.rpc('remove_document_signer', {
           p_signer_id: signerId,
           p_reason: 'Removido en wizard',
@@ -323,16 +370,21 @@ export function SignerManagementStep() {
       if (direction === 'up' && index === 0) return
       if (direction === 'down' && index === signers.length - 1) return
 
-      const currentSigner = signers[index]
-      const neighborIndex = direction === 'up' ? index - 1 : index + 1
-      const neighborSigner = signers[neighborIndex]
-
-      if (!currentSigner || !neighborSigner) return
-
       try {
         setIsSaving(true)
-        
-        // Swap orders. Assuming signers are ordered by signing_order in the array.
+
+        if (!state.documentId) {
+          const updated = [...state.signers]
+          const neighborIndex = direction === 'up' ? index - 1 : index + 1
+          const temp = updated[index]
+          updated[index] = updated[neighborIndex]
+          updated[neighborIndex] = temp
+          actions.setSigners(updated)
+          await loadSigners()
+          return
+        }
+
+        const currentSigner = signers[index]
         // We use the values from the array to respect the current visible order.
         const currentOrder = currentSigner.signing_order
         const neighborOrder = neighborSigner.signing_order
@@ -373,16 +425,13 @@ export function SignerManagementStep() {
 
   const handleContinue = useCallback(() => {
     setError(null)
-    if (!state.documentId) {
-      setError('No encontramos el documento. Vuelve al paso anterior.')
-      return
-    }
+    
     if (signers.length === 0) {
       setError('Debes agregar al menos 1 firmante para continuar.')
       return
     }
     actions.nextStep()
-  }, [actions, signers.length, state.documentId])
+  }, [actions, signers.length])
 
   return (
     <Card>

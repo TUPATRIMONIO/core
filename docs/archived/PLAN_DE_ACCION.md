@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Corrección flujo AI Review + Visibilidad Admin Panel + CDS)\
+> **📅 Última actualización:** Enero 2026 (Flujo Firma Pública + Recuperación IA + Cronjobs + CDS)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -14,16 +14,15 @@
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
-> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 SISTEMA DE BETA SIGNUP
+> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN `/firmar` CON PERSISTENCIA** ✅ + **🆕 SISTEMA DE BETA SIGNUP
 > & WAITLIST COMPLETADO** ✅ + **🆕 SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅ +
 > **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕 MEJORAS GESTIÓN
 > DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅\
-> **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación
-> pública + Panel de Notarías 📋
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅\
+> **🎯 Próximo milestone:** Políticas RLS públicas para configuración + Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
@@ -38,7 +37,7 @@ INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2
 ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
 (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
 FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE & MULTIPLE)
-COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **PRÓXIMO: Testing flujo completo, portal de firma
+COMPLETOS** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN CON PERSISTENCIA** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **PRÓXIMO: Políticas RLS públicas + Testing flujo completo, portal de firma
 /sign/[token], panel de notarías** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y
@@ -77,6 +76,10 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
 - **NUEVO (Ene 6, 2026):** Corrección crítica del flujo de firma CDS donde el estado del firmante no se actualizaba después de firmar. **Problema:** El firmante completaba su firma exitosamente pero el sistema mostraba "listo para firmar" y contaba 0/1 firmantes. **Causa:** Las operaciones UPDATE en `/api/signing/execute` usaban el cliente Supabase normal (anon key) que no tenía permisos RLS para actualizar tablas de firmantes externos. **Solución:** Cambio a `adminClient` (service_role) para todas las operaciones de escritura, con verificación de errores. **Archivos:** `apps/web/src/app/api/signing/execute/route.ts`, `apps/web/src/app/sign/[token]/SigningPageClient.tsx`. **Migración adicional:** `20260106000004_fix_all_http_post_functions.sql` para corregir error `net.http_post` en múltiples funciones de signing (`send_completed_document_notification`, `invoke_signing_notification`, `invoke_ai_review_function`, `invoke_internal_review_after_ai`).
 
 - **NUEVO (Ene 6, 2026):** Corrección crítica del error `function net.http_post(...) does not exist` en webhooks de Stripe - La función `signing.invoke_internal_review_function()` ahora usa la extensión `http` (síncrona) en lugar de `pg_net`, siguiendo el patrón establecido. Esto resuelve el problema donde las órdenes quedaban en estado `pending_payment` después de un pago exitoso con Stripe. Migración: `20260106000001_fix_internal_review_http.sql`. **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes - Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas en lugar de "Expira pronto") y solucionado el bucle infinito del spinner "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
+
+- **NUEVO (Ene 7, 2026):** Sistema de recuperación automática para Revisión IA. **Problema:** Documentos quedaban "pegados" en `pending_ai_review` si la API fallaba post-pago o la Edge Function no respondía. **Solución:** Implementación de cronjob `/api/cron/retry-ai-reviews` (Vercel Cron cada 10 min) que detecta documentos estancados por más de 15 minutos y reintenta la revisión automáticamente hasta 3 veces.
+
+- **NUEVO (Ene 8, 2026):** Flujo de Firma Electrónica Accesible Sin Login. **Problema:** El wizard de firma requería login desde el inicio, generando fricción para nuevos usuarios y mostrando error de organización incluso con usuarios logueados. **Solución:** Implementación de flujo público en `/firmar` que permite completar pasos 1-3 sin autenticación, requiriendo login/registro solo en el checkout (paso 4), con preservación del progreso mediante sessionStorage. **Beneficios:** Reduce fricción inicial, captura más leads, convierte visitantes en usuarios al final del embudo. **Archivos Modificados:** `CountryAndUploadStep.tsx` (espera a que `OrganizationProvider` termine de cargar, funciona sin org), `ServiceSelectionStep.tsx` y `SignerManagementStep.tsx` (modo dual: con/sin documentId en BD), `CheckoutStep.tsx` (login/registro inline para no autenticados, creación automática de org/documento post-auth), `WizardContext.tsx` (persistencia en sessionStorage). **Archivos Nuevos:** `app/(public)/firmar/page.tsx` (ruta pública con wizard accesible), `app/(public)/layout.tsx` (actualizado con providers necesarios). **Compatibilidad:** Ruta privada `/dashboard/signing/documents/new` sigue funcionando para usuarios logueados.
 
 **✅ COMPLETADO en Fase 0:**
 
@@ -120,7 +123,17 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
     - Función `signing.invoke_internal_review_function()` migrada a extensión `http`
     - Las órdenes ahora se actualizan correctamente de `pending_payment` a `paid` automáticamente
     - Migración: `20260106000001_fix_internal_review_http.sql`
-  - UI completa de facturación
+  - ✅ **Recuperación Automática de Revisión IA** (Ene 7, 2026)
+    - Implementación de cronjob para reintentar revisiones estancadas (>15 min)
+    - Lógica de reintento inteligente con límite de 3 intentos
+    - Nueva columna `ai_review_retry_count` e índice optimizado
+    - Migración: `20260107100000_add_ai_review_retry_count.sql`
+  - ✅ **Flujo de Firma Electrónica Sin Login** (Ene 8, 2026)
+    - Acceso público al wizard en `/firmar` (pasos 1-3)
+    - Persistencia del progreso en `sessionStorage`
+    - Login/Registro obligatorio solo al final (paso 4 Checkout)
+    - Creación automática de organización personal y documento post-auth
+  - ✅ UI completa de facturación
   - Auto-recarga con verificación automática
   - Sistema de notificaciones integrado
   - Generación de PDFs funcionando
@@ -564,6 +577,7 @@ READY:
 20251229000001_add_order_number_to_view.sql - Vista documents_full con pedido
 20260106000001_fix_internal_review_http.sql - Fix error net.http_post en webhooks Stripe
 20260106000004_fix_all_http_post_functions.sql - Fix net.http_post en todas las funciones signing
+20260107100000_add_ai_review_retry_count.sql   - Contador de reintentos IA y optimización de búsqueda
 ```
 
 ### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
@@ -1070,9 +1084,155 @@ usando `getUserActiveOrganization()` o `useOrganization()`.
 
 ---
 
+### ✅ COMPLETADO - Recuperación Automática de Revisión IA (Ene 7, 2026)
+
+**Problema Identificado:**
+Documentos quedaban estancados en estado `pending_ai_review` indefinidamente si la API de disparo fallaba post-pago o si la Edge Function no respondía por timeout/error de red. No existía un mecanismo de auto-curación.
+
+**Solución Implementada:**
+Un sistema de monitoreo y reintento automático basado en un cronjob programado que garantiza que ningún documento quede sin procesar.
+
+**Componentes Desarrollados:**
+
+1.  **Base de Datos**:
+    - ✅ Nueva columna `ai_review_retry_count` en `signing.documents`.
+    - ✅ Índice parcial `idx_documents_ai_retry` para optimizar la búsqueda de documentos estancados.
+    - ✅ Migración: `20260107100000_add_ai_review_retry_count.sql`.
+
+2.  **Cronjob API (`/api/cron/retry-ai-reviews`)**:
+    - ✅ Implementado con validación de seguridad `CRON_SECRET`.
+    - ✅ Busca documentos en `pending_ai_review` con más de 15 minutos de inactividad.
+    - ✅ Lógica de reintento inteligente: verifica si ya existe una revisión completada en `signing_ai_reviews` antes de disparar una nueva.
+    - ✅ Límite de 3 reintentos automáticos para evitar bucles infinitos en documentos corruptos.
+    - ✅ Procesamiento por lotes (max 10 por ejecución) para control de costos y recursos.
+
+3.  **Configuración de Infraestructura**:
+    - ✅ Registrado en `vercel.json` con frecuencia de 10 minutos (`*/10 * * * *`).
+
+**Ventajas:**
+- ✅ **Resiliencia**: El sistema se recupera solo de fallos temporales de API o red.
+- ✅ **Tranquilidad del Usuario**: Se garantiza que el proceso de firma comenzará incluso si hay un fallo técnico inicial.
+- ✅ **Monitoreo**: Los reintentos quedan registrados para auditoría en el panel administrativo.
+
+---
+
+### ✅ COMPLETADO - Flujo Público de Firma Sin Login (Ene 8, 2026)
+
+**Problema Identificado:** 
+
+1. **Bug de Carga:** El wizard mostraba "No encontramos una organización activa" incluso con usuarios logueados porque `CountryAndUploadStep` ejecutaba `loadOrgAndCredits` antes de que `OrganizationProvider` terminara de cargar (`isLoading: true`).
+2. **Fricción de Entrada:** Requerir login desde el inicio del flujo generaba abandono de usuarios nuevos que querían "probar" el servicio.
+
+**Solución Implementada:**
+
+Sistema de flujo dual que permite a usuarios no autenticados completar los pasos de configuración (1-3) del wizard, requiriendo autenticación solo en el checkout (paso 4), con preservación automática del progreso.
+
+**Arquitectura de Flujos:**
+
+```
+FLUJO PÚBLICO (/firmar):
+Usuario → Paso 1-3 (sin login) → Paso 4 Checkout → Login/Registro inline → 
+Creación automática de org → Creación de documento en BD → Checkout de pago
+
+FLUJO PRIVADO (/dashboard/signing/documents/new):
+Usuario logueado → Wizard completo (persiste en BD desde paso 1)
+```
+
+**Componentes Modificados:**
+
+1. **`CountryAndUploadStep.tsx`**:
+   - ✅ Agregado `isLoading` de `useOrganization()` para esperar carga completa
+   - ✅ Eliminada validación estricta de organización al inicio
+   - ✅ Carga de configuraciones (países, prompts, precios) sin requerir org
+   - ✅ Modo dual: Con usuario → intenta obtener org, Sin usuario → continúa sin error
+   - ✅ Función `ensureDocumentAndUpload()` adaptada para retornar sin crear documento si no hay usuario
+   - ✅ Análisis IA opcional solo para usuarios logueados con créditos
+
+2. **`ServiceSelectionStep.tsx`**:
+   - ✅ Validación de `countryCode` antes de cargar productos
+   - ✅ Modo dual: Con `documentId` → persiste en BD, Sin `documentId` → solo actualiza contexto
+
+3. **`SignerManagementStep.tsx`**:
+   - ✅ Modo dual: Con `documentId` → usa DB, Sin `documentId` → usa estado local del wizard
+   - ✅ Operaciones de agregar/eliminar/reordenar firmantes funcionan en ambos modos
+   - ✅ Eliminada validación estricta de `documentId` para continuar
+
+4. **`CheckoutStep.tsx`**:
+   - ✅ Detección de autenticación con estado `isAuthenticated`
+   - ✅ UI inline de Login/Registro cuando no hay auth (usando `LoginForm` y `SignupForm`)
+   - ✅ Lógica post-autenticación:
+     - Creación automática de organización personal si no existe
+     - Creación de documento en BD con datos del wizard
+     - Subida del archivo PDF al Storage
+     - Creación de firmantes en BD
+     - Creación de orden de pago
+   - ✅ Limpieza automática de sessionStorage al completar el flujo
+
+5. **`WizardContext.tsx`**:
+   - ✅ Importado `useEffect` que faltaba
+   - ✅ Implementación de persistencia en `sessionStorage`
+   - ✅ Carga automática del estado al montar el componente
+   - ✅ Guardado automático en cada cambio de estado
+   - ✅ Limpieza automática en `reset()` del wizard
+   - ✅ Manejo especial: El objeto `File` no se serializa (se pierde en recargas, pero se mantiene en SPA)
+
+**Archivos Nuevos:**
+
+- ✅ `app/(public)/firmar/page.tsx` - Página pública con wizard accesible sin login
+- ✅ `app/(public)/layout.tsx` - Actualizado con `OrganizationProvider` y `GlobalCountryProvider`
+
+**Mejoras de Seguridad:**
+
+- ✅ Eliminada consulta directa a `organization_users` desde el cliente (causaba "permission denied")
+- ✅ Todas las consultas a BD validadas para usuarios no autenticados
+- ✅ Las tablas de configuración pública (`signing_products`, `signing_country_settings`, `ai_prompts`, `credit_prices`, `signing_document_types`) requieren políticas RLS de lectura pública
+
+**Flujo de Usuario No Autenticado:**
+
+1. Visita `/firmar`
+2. Sube documento PDF y selecciona país (Paso 1)
+3. Selecciona tipo de firma y servicio notarial (Paso 2)
+4. Agrega firmantes (Paso 3)
+5. Al llegar al Paso 4 (Checkout):
+   - Ve resumen del pedido
+   - Se le muestra tabs Login/Registro inline
+   - Inicia sesión o crea cuenta
+   - Se redirige de vuelta al checkout con progreso intacto
+6. Sistema automáticamente:
+   - Crea organización personal si no tiene
+   - Crea documento en BD con datos del wizard
+   - Sube archivo a Storage
+   - Crea firmantes en BD
+   - Genera orden de pago
+7. Usuario procede al pago normalmente
+
+**Ventajas del Nuevo Flujo:**
+
+- ✅ **Reducción de fricción**: Los usuarios pueden explorar el servicio sin crear cuenta
+- ✅ **Mayor conversión**: El usuario invierte tiempo configurando antes de registrarse (sunk cost)
+- ✅ **Mejor UX**: Login en el momento natural (antes del pago), no al inicio
+- ✅ **Preservación de progreso**: sessionStorage mantiene los datos durante la sesión
+- ✅ **Compatibilidad total**: Usuarios logueados siguen usando el dashboard sin cambios
+- ✅ **Patrón e-commerce**: Modelo probado (agregar al carrito → checkout → login → pago)
+
+**Compatibilidad con Flujo Existente:**
+
+- ✅ Usuarios logueados que acceden desde `/dashboard/signing/documents/new` funcionan igual que antes
+- ✅ El mismo componente `DocumentRequestWizard` funciona en ambas rutas
+- ✅ Detección automática del contexto (público vs privado) sin configuración adicional
+
 ### 🔜 PRÓXIMOS PASOS INMEDIATOS
 
-**1. Testing del Flujo Completo:**
+**1. Configuración de Base de Datos:**
+
+- [ ] Habilitar políticas RLS de lectura pública para tablas de configuración (requerido para flujo público):
+  - `signing_products`
+  - `signing_country_settings`
+  - `ai_prompts`
+  - `credit_prices`
+  - `signing_document_types`
+
+**2. Testing del Flujo Completo:**
 
 - [ ] Probar firma con múltiples firmantes secuenciales
 - [ ] Verificar notificación email al siguiente firmante

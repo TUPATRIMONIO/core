@@ -56,3 +56,4 @@ BEGIN
   RAISE NOTICE '✅ Bucket creado: signature-page-templates';
 END $$;
 
+
