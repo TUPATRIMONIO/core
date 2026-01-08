@@ -1,10 +1,10 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Flujo Firma Pública + Recuperación IA + Cronjobs + CDS)\
+> **📅 Última actualización:** Enero 2026 (Checkout Unificado + Persistencia IndexedDB + RLS Públicas)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
-> **PLATFORM ADMINS: ACCESO COMPLETO AL DASHBOARD** ✅ + **FASE 3:
+> **PLATFORM ADMINS: ACCESO COMPLETADO AL DASHBOARD** ✅ + **FASE 3:
 > COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
 > Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
 > **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
@@ -14,7 +14,7 @@
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
-> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN `/firmar` CON PERSISTENCIA** ✅ + **🆕 SISTEMA DE BETA SIGNUP
+> PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN `/signing/new` CON PERSISTENCIA INDEXEDDB** ✅ + **🆕 SISTEMA DE BETA SIGNUP
 > & WAITLIST COMPLETADO** ✅ + **🆕 SELECTOR GLOBAL DE PAÍS EN DASHBOARD** ✅ +
 > **🆕 VISIBILIDAD POR ORGANIZACIÓN ACTIVA** ✅ + **🆕 MEJORAS GESTIÓN
 > DOCUMENTOS: SERVICIOS Y PEDIDOS EN LISTADO** ✅ + **🆕 CORRECCIONES CRÍTICAS
@@ -22,7 +22,7 @@
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
 > Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅\
-> **🎯 Próximo milestone:** Políticas RLS públicas para configuración + Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
+> **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
 
@@ -80,6 +80,8 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
 - **NUEVO (Ene 7, 2026):** Sistema de recuperación automática para Revisión IA. **Problema:** Documentos quedaban "pegados" en `pending_ai_review` si la API fallaba post-pago o la Edge Function no respondía. **Solución:** Implementación de cronjob `/api/cron/retry-ai-reviews` (Vercel Cron cada 10 min) que detecta documentos estancados por más de 15 minutos y reintenta la revisión automáticamente hasta 3 veces.
 
 - **NUEVO (Ene 8, 2026):** Flujo de Firma Electrónica Accesible Sin Login. **Problema:** El wizard de firma requería login desde el inicio, generando fricción para nuevos usuarios y mostrando error de organización incluso con usuarios logueados. **Solución:** Implementación de flujo público en `/firmar` que permite completar pasos 1-3 sin autenticación, requiriendo login/registro solo en el checkout (paso 4), con preservación del progreso mediante sessionStorage. **Beneficios:** Reduce fricción inicial, captura más leads, convierte visitantes en usuarios al final del embudo. **Archivos Modificados:** `CountryAndUploadStep.tsx` (espera a que `OrganizationProvider` termine de cargar, funciona sin org), `ServiceSelectionStep.tsx` y `SignerManagementStep.tsx` (modo dual: con/sin documentId en BD), `CheckoutStep.tsx` (login/registro inline para no autenticados, creación automática de org/documento post-auth), `WizardContext.tsx` (persistencia en sessionStorage). **Archivos Nuevos:** `app/(public)/firmar/page.tsx` (ruta pública con wizard accesible), `app/(public)/layout.tsx` (actualizado con providers necesarios). **Compatibilidad:** Ruta privada `/dashboard/signing/documents/new` sigue funcionando para usuarios logueados.
+
+- **NUEVO (Ene 8, 2026):** Optimización Flujo Checkout Invitado. **Objetivo:** Mejorar la conversión permitiendo completar el wizard sin login y unificar el proceso de pago. **Cambios:** Eliminación del Paso 4 del wizard. Redirección directa desde el Paso 3 a `/checkout/signing`. Implementación de persistencia de archivos PDF en **IndexedDB** para evitar pérdida de datos tras login/recarga. Rediseño completo de la página de checkout con resumen detallado e integración con el flujo de órdenes existente (`/checkout/[orderId]`). Corrección de sincronización de organizaciones post-auth.
 
 **✅ COMPLETADO en Fase 0:**
 

@@ -68,6 +68,15 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
     try {
       console.log('[OrganizationProvider] Fetching organizations...');
       const response = await fetch('/api/organizations/user');
+      
+      if (response.status === 401) {
+        console.log('[OrganizationProvider] Usuario no autenticado, operando en modo invitado.');
+        setOrganizations([]);
+        setActiveOrganizationState(null);
+        setIsLoading(false);
+        return;
+      }
+
       const data = await response.json();
 
       console.log('[OrganizationProvider] API Response:', data);
@@ -101,9 +110,9 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
           console.log('[OrganizationProvider] Membership:', orgToActivate.membership);
           console.log('[OrganizationProvider] Enabled apps:', orgToActivate.enabled_apps);
         } else {
-          console.warn('[OrganizationProvider] No organization to activate');
+          console.log('[OrganizationProvider] No hay organización para activar (modo invitado o nuevo usuario).');
         }
-      } else {
+      } else if (response.status !== 401) {
         console.error('[OrganizationProvider] API returned no data or error:', data);
       }
     } catch (error) {

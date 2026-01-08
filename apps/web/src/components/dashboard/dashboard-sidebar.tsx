@@ -171,7 +171,7 @@ const signingMenuItems = [
   },
   {
     title: 'Nuevo Documento',
-    url: '/dashboard/signing/documents/new',
+    url: '/signing/new',
     icon: FilePlus,
   },
 ]

@@ -118,6 +118,21 @@ index.js           # Future: componentes UI compartidos
 
 ## 🎯 Performance Considerations
 
+### Gestión de Persistencia y Flujo de Invitados (NUEVO)
+Para mejorar la conversión, se implementó un flujo que permite a los usuarios completar el wizard de firma sin estar autenticados.
+
+**Estrategia de Persistencia Híbrida:**
+1. **Estado del Wizard (JSON)**: Se persiste en `localStorage` para sobrevivir a recargas de página y cierres de pestaña.
+2. **Archivos PDF**: Dado que los objetos `File/Blob` no se pueden serializar en `localStorage`, se implementó **IndexedDB** como almacenamiento en el navegador. 
+   - El archivo se guarda automáticamente al subirlo.
+   - Se recupera al recargar la página o después de un login exitoso.
+   - Se limpia automáticamente al resetear el wizard o completar la orden.
+
+**Flujo de Checkout Puente:**
+- La página `/checkout/signing` actúa como un orquestador que verifica la autenticación.
+- Si el usuario no está logeado, muestra el formulario de login/registro preservando el progreso.
+- Tras el login, recupera el archivo de IndexedDB, crea el documento y los firmantes en la base de datos, genera la orden y redirige al checkout unificado (`/checkout/[orderId]`).
+
 ### Code Splitting
 - **Marketing app**: Optimizada para SEO y conversión
 - **Web app**: Optimizada para interactividad y funcionalidad

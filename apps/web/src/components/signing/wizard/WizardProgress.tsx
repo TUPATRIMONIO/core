@@ -10,7 +10,7 @@ export function WizardProgress() {
 
   return (
     <div className="rounded-lg border bg-background p-4">
-      <ol className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {SIGNING_WIZARD_STEPS.map((s, idx) => {
           const isActive = idx === step
           const isDone = idx < step

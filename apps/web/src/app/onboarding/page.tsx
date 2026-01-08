@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Home, Building2, Link2, CheckCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,7 +12,21 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--tp-buttons)]" />
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
+  )
+}
+
+function OnboardingContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = searchParams.get('next')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedType, setSelectedType] = useState<'personal' | 'business' | 'invitation' | null>(null)
@@ -31,7 +45,7 @@ export default function OnboardingPage() {
         const data = await response.json()
 
         if (data.has_organization) {
-          router.replace('/dashboard')
+          router.replace(next || '/dashboard')
         }
       } catch (err) {
         console.error('Error verificando estado:', err)
@@ -39,7 +53,7 @@ export default function OnboardingPage() {
     }
 
     checkStatus()
-  }, [router])
+  }, [router, next])
 
   const handleCreatePersonal = async () => {
     setLoading(true)
@@ -58,8 +72,8 @@ export default function OnboardingPage() {
         return
       }
 
-      // Éxito - redirigir al dashboard
-      router.push('/dashboard')
+      // Éxito - redirigir
+      router.push(next || '/dashboard')
     } catch (err) {
       setError('Ocurrió un error al crear tu organización. Por favor intenta de nuevo.')
       setLoading(false)
@@ -96,9 +110,9 @@ export default function OnboardingPage() {
         return
       }
 
-      // Éxito - cerrar dialog y redirigir al dashboard
+      // Éxito - cerrar dialog y redirigir
       setShowBusinessDialog(false)
-      router.push('/dashboard')
+      router.push(next || '/dashboard')
     } catch (err) {
       setError('Ocurrió un error al crear tu organización. Por favor intenta de nuevo.')
       setLoading(false)

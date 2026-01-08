@@ -32,6 +32,7 @@ type ActionResult = {
 export async function signUp(formData: FormData): Promise<ActionResult> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const redirectTo = formData.get('redirectTo') as string
 
   if (!email || !password) {
     return { error: 'Por favor completa todos los campos' }
@@ -44,7 +45,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/callback${redirectTo ? `?next=${encodeURIComponent(redirectTo)}` : ''}`,
     },
   })
 
@@ -55,6 +56,10 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   }
 
   // Redirigir a onboarding (el usuario completará el onboarding antes de usar el sistema)
+  if (redirectTo && redirectTo.startsWith('/')) {
+    redirect(`/onboarding?next=${encodeURIComponent(redirectTo)}`)
+  }
+
   redirect('/onboarding')
 }
 

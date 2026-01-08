@@ -41,6 +41,9 @@ export function SignupForm({ redirectTo }: SignupFormProps) {
     const formData = new FormData()
     formData.append('email', email)
     formData.append('password', password)
+    if (redirectTo) {
+      formData.append('redirectTo', redirectTo)
+    }
 
     try {
       const result = await signUp(formData)

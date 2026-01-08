@@ -63,7 +63,7 @@ export function GlobalCountryProvider({ children }: { children: React.ReactNode 
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          const { data: orgUser } = await supabase
+          const { data: orgUser, error: orgUserError } = await supabase
             .from('organization_users')
             .select('organization_id')
             .eq('user_id', user.id)
@@ -71,7 +71,7 @@ export function GlobalCountryProvider({ children }: { children: React.ReactNode 
             .limit(1)
             .maybeSingle()
           
-          if (orgUser?.organization_id) {
+          if (!orgUserError && orgUser?.organization_id) {
             const { data: org } = await supabase
               .from('organizations')
               .select('country')

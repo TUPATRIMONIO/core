@@ -10,9 +10,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, Info } from 'lucide-react';
 
 interface BillingData {
-  document_type?: 'boleta_electronica' | 'factura_electronica';
+  document_type?: 'boleta_electronica' | 'factura_electronica' | 'stripe_invoice';
   tax_id?: string;
   name?: string;
+  email?: string;
   giro?: string;
   address?: string;
   city?: string;
@@ -21,6 +22,7 @@ interface BillingData {
 
 interface BillingDataSettingsProps {
   countryCode?: string;
+  orgType?: string;
 }
 
 /**
@@ -39,15 +41,16 @@ function validateChileanRUT(rut: string): boolean {
   return true;
 }
 
-export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataSettingsProps) {
+export default function BillingDataSettings({ countryCode = 'CL', orgType = 'personal' }: BillingDataSettingsProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [documentType, setDocumentType] = useState<'boleta_electronica' | 'factura_electronica'>('boleta_electronica');
+  const [documentType, setDocumentType] = useState<'boleta_electronica' | 'factura_electronica' | 'stripe_invoice'>('boleta_electronica');
   const [taxId, setTaxId] = useState('');
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [giro, setGiro] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -56,6 +59,8 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isChile = countryCode === 'CL';
+  const isBusiness = orgType === 'business';
+  const showChileanBusinessFields = isChile && isBusiness;
   const taxIdLabel = isChile ? 'RUT' : 'Tax ID';
 
   // Cargar configuración existente
@@ -66,9 +71,10 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
         if (response.ok) {
           const data = await response.json();
           if (data.billing_data) {
-            setDocumentType(data.billing_data.document_type || 'boleta_electronica');
+            setDocumentType(data.billing_data.document_type || (showChileanBusinessFields ? 'boleta_electronica' : 'stripe_invoice'));
             setTaxId(data.billing_data.tax_id || '');
             setName(data.billing_data.name || '');
+            setEmail(data.billing_data.email || '');
             setGiro(data.billing_data.giro || '');
             setAddress(data.billing_data.address || '');
             setCity(data.billing_data.city || '');
@@ -83,7 +89,7 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
     };
 
     loadSettings();
-  }, []);
+  }, [showChileanBusinessFields]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -92,9 +98,33 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
     
     const newErrors: Record<string, string> = {};
 
-    // Validar Tax ID/RUT
+    // Validar Tax ID/RUT si se proporciona
     if (taxId.trim() && isChile && !validateChileanRUT(taxId)) {
       newErrors.taxId = 'RUT inválido. Formato: XX.XXX.XXX-X';
+    }
+
+    // Validar nombre (siempre requerido)
+    if (!name.trim()) {
+      newErrors.name = 'Nombre o Razón Social es requerido';
+    }
+
+    // Validaciones adicionales para Chile Business
+    if (showChileanBusinessFields) {
+      if (!taxId.trim()) {
+        newErrors.taxId = 'RUT es requerido';
+      }
+      
+      if (documentType === 'factura_electronica') {
+        if (!giro.trim()) {
+          newErrors.giro = 'Giro es requerido para facturas electrónicas';
+        }
+        if (!address.trim()) {
+          newErrors.address = 'Dirección es requerida para facturas electrónicas';
+        }
+        if (!city.trim()) {
+          newErrors.city = 'Ciudad es requerida para facturas electrónicas';
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -106,13 +136,14 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
 
     try {
       const billingData: BillingData = {
-        document_type: documentType,
+        document_type: showChileanBusinessFields ? documentType : 'stripe_invoice',
+        name: name.trim(),
         ...(taxId.trim() && { tax_id: taxId.trim() }),
-        ...(name.trim() && { name: name.trim() }),
-        ...(giro.trim() && { giro: giro.trim() }),
-        ...(address.trim() && { address: address.trim() }),
-        ...(city.trim() && { city: city.trim() }),
-        ...(state.trim() && { state: state.trim() }),
+        ...(email.trim() && { email: email.trim() }),
+        ...(showChileanBusinessFields && giro.trim() && { giro: giro.trim() }),
+        ...(showChileanBusinessFields && address.trim() && { address: address.trim() }),
+        ...(showChileanBusinessFields && city.trim() && { city: city.trim() }),
+        ...(showChileanBusinessFields && state.trim() && { state: state.trim() }),
       };
 
       const response = await fetch('/api/billing/settings', {
@@ -152,7 +183,9 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
       <CardHeader>
         <CardTitle>Datos de Facturación</CardTitle>
         <CardDescription>
-          Configura tus datos por defecto para emisión de documentos tributarios
+          {showChileanBusinessFields 
+            ? 'Configura tus datos para emisión de documentos tributarios chilenos' 
+            : 'Configura tus datos para recibir invoices internacionales'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -172,28 +205,33 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Estos datos se usarán como valores por defecto al realizar pagos con Transbank.
-            Podrás editarlos en cada compra si es necesario.
+            {showChileanBusinessFields 
+              ? 'Estos datos se usarán como valores por defecto al realizar pagos con Transbank o Flow. Podrás editarlos en cada compra si es necesario.'
+              : 'Estos datos se usarán para generar invoices internacionales vía Stripe. El Tax ID es opcional pero recomendado para fines fiscales.'}
           </AlertDescription>
         </Alert>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="default-document-type">Tipo de Documento Preferido</Label>
-            <Select value={documentType} onValueChange={(value: 'boleta_electronica' | 'factura_electronica') => setDocumentType(value)}>
-              <SelectTrigger id="default-document-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="boleta_electronica">Boleta Electrónica</SelectItem>
-                <SelectItem value="factura_electronica">Factura Electrónica</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Selector de tipo de documento - Solo para Chile Business */}
+          {showChileanBusinessFields && (
+            <div className="space-y-2">
+              <Label htmlFor="default-document-type">Tipo de Documento Preferido</Label>
+              <Select value={documentType} onValueChange={(value: 'boleta_electronica' | 'factura_electronica') => setDocumentType(value)}>
+                <SelectTrigger id="default-document-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="boleta_electronica">Boleta Electrónica</SelectItem>
+                  <SelectItem value="factura_electronica">Factura Electrónica</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
+          {/* Tax ID / RUT - Siempre visible */}
           <div className="space-y-2">
             <Label htmlFor="settings-tax-id">
-              {taxIdLabel} {isChile && '(Formato: XX.XXX.XXX-X)'}
+              {taxIdLabel} {showChileanBusinessFields ? '' : '(Opcional)'} {isChile && '(Formato: XX.XXX.XXX-X)'}
             </Label>
             <Input
               id="settings-tax-id"
@@ -207,66 +245,105 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
             )}
           </div>
 
+          {/* Nombre o Razón Social - Siempre visible */}
           <div className="space-y-2">
-            <Label htmlFor="settings-name">Nombre o Razón Social</Label>
+            <Label htmlFor="settings-name">Nombre o Razón Social *</Label>
             <Input
               id="settings-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nombre completo o razón social"
+              className={errors.name ? 'border-red-500' : ''}
             />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="settings-giro">Giro o Actividad Económica</Label>
-            <Input
-              id="settings-giro"
-              value={giro}
-              onChange={(e) => setGiro(e.target.value)}
-              placeholder="Ej: Servicios Digitales"
-            />
-            <p className="text-xs text-muted-foreground">
-              Requerido para facturas electrónicas
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="settings-address">Dirección</Label>
-            <Input
-              id="settings-address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Calle y número"
-            />
-            <p className="text-xs text-muted-foreground">
-              Requerido para facturas electrónicas
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+          {/* Email - Solo para no-Chile o Personal */}
+          {!showChileanBusinessFields && (
             <div className="space-y-2">
-              <Label htmlFor="settings-city">Ciudad / Comuna</Label>
+              <Label htmlFor="settings-email">Email (Opcional)</Label>
               <Input
-                id="settings-city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Santiago"
+                id="settings-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@ejemplo.com"
               />
               <p className="text-xs text-muted-foreground">
-                Requerido para facturas electrónicas
+                Se enviará el invoice a este correo
               </p>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="settings-state">Región / Estado</Label>
-              <Input
-                id="settings-state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                placeholder="Región Metropolitana"
-              />
-            </div>
-          </div>
+          {/* Campos adicionales - Solo para Chile Business */}
+          {showChileanBusinessFields && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="settings-giro">Giro o Actividad Económica</Label>
+                <Input
+                  id="settings-giro"
+                  value={giro}
+                  onChange={(e) => setGiro(e.target.value)}
+                  placeholder="Ej: Servicios Digitales"
+                  className={errors.giro ? 'border-red-500' : ''}
+                />
+                {errors.giro && (
+                  <p className="text-sm text-red-500">{errors.giro}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Requerido para facturas electrónicas
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="settings-address">Dirección</Label>
+                <Input
+                  id="settings-address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Calle y número"
+                  className={errors.address ? 'border-red-500' : ''}
+                />
+                {errors.address && (
+                  <p className="text-sm text-red-500">{errors.address}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Requerido para facturas electrónicas
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="settings-city">Ciudad / Comuna</Label>
+                  <Input
+                    id="settings-city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Santiago"
+                    className={errors.city ? 'border-red-500' : ''}
+                  />
+                  {errors.city && (
+                    <p className="text-sm text-red-500">{errors.city}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Requerido para facturas electrónicas
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="settings-state">Región / Estado</Label>
+                  <Input
+                    id="settings-state"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="Región Metropolitana"
+                  />
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <Button
@@ -287,13 +364,3 @@ export default function BillingDataSettings({ countryCode = 'CL' }: BillingDataS
     </Card>
   );
 }
-
-
-
-
-
-
-
-
-
-

@@ -1,21 +1,21 @@
 import { createClient } from '@/lib/supabase/server';
 import { getCurrencyForCountry } from '@/lib/stripe/checkout';
 
+export interface PaymentConfig {
+  providers: string[];
+  documentTypes: ('boleta_electronica' | 'factura_electronica' | 'stripe_invoice')[];
+  country: string;
+  orgType: string;
+  currency: string;
+}
+
 /**
- * Verifica si Transbank está disponible para una organización
- * 
- * Restricciones (TODAS deben cumplirse):
- * - org_type === 'business' (B2B)
- * - country === 'CL' (Chile)
- * - currency === 'CLP' (determinado automáticamente por país)
- * 
- * @param organizationId - ID de la organización
- * @returns true si Transbank está disponible, false en caso contrario
+ * Obtiene la configuración de pagos disponible para una organización
+ * basada en su país y tipo.
  */
-export async function isTransbankAvailable(organizationId: string): Promise<boolean> {
+export async function getPaymentConfig(organizationId: string): Promise<PaymentConfig> {
   const supabase = await createClient();
   
-  // Obtener datos de la organización
   const { data: org, error } = await supabase
     .from('organizations')
     .select('org_type, country')
@@ -23,73 +23,84 @@ export async function isTransbankAvailable(organizationId: string): Promise<bool
     .single();
   
   if (error || !org) {
-    console.warn('[isTransbankAvailable] Error obteniendo organización:', error);
-    return false;
+    console.warn('[getPaymentConfig] Error obteniendo organización:', error);
+    return {
+      providers: ['stripe'],
+      documentTypes: ['stripe_invoice'],
+      country: 'US',
+      orgType: 'personal',
+      currency: 'USD'
+    };
   }
+
+  const country = org.country || 'CL';
+  const orgType = org.org_type || 'personal';
+  const currency = getCurrencyForCountry(country);
   
-  // Verificar restricciones
-  const isBusiness = org.org_type === 'business';
-  const isChile = org.country === 'CL';
-  const currency = getCurrencyForCountry(org.country || '');
-  const isCLP = currency === 'CLP';
-  
-  const available = isBusiness && isChile && isCLP;
-  
-  console.log('[isTransbankAvailable] Verificación:', {
-    organizationId,
-    org_type: org.org_type,
-    country: org.country,
-    currency,
-    isBusiness,
-    isChile,
-    isCLP,
-    available,
-  });
-  
-  return available;
+  const isChile = country === 'CL';
+  const isBusiness = orgType === 'business';
+
+  // Lógica de proveedores
+  let providers: string[] = [];
+  let documentTypes: ('boleta_electronica' | 'factura_electronica' | 'stripe_invoice')[] = [];
+
+  if (isChile) {
+    if (isBusiness) {
+      // Chile + Business: Transbank (Webpay/Oneclick), Flow
+      providers = ['transbank', 'flow'];
+      documentTypes = ['boleta_electronica', 'factura_electronica'];
+    } else {
+      // Chile + Personal: Stripe, DLocalGo
+      providers = ['stripe', 'dlocalgo'];
+      documentTypes = ['stripe_invoice'];
+    }
+  } else {
+    // Otros países: Stripe, DLocalGo
+    providers = ['stripe', 'dlocalgo'];
+    documentTypes = ['stripe_invoice'];
+  }
+
+  return {
+    providers,
+    documentTypes,
+    country,
+    orgType,
+    currency
+  };
+}
+
+/**
+ * Verifica si Transbank está disponible para una organización
+ * (Mantener por compatibilidad, pero preferir getPaymentConfig)
+ */
+export async function isTransbankAvailable(organizationId: string): Promise<boolean> {
+  const config = await getPaymentConfig(organizationId);
+  return config.providers.includes('transbank');
 }
 
 /**
  * Obtiene los métodos de pago disponibles para una organización
- * 
- * @param organizationId - ID de la organización
- * @returns Array con los métodos disponibles: ['stripe'] o ['stripe', 'transbank_webpay_plus', 'transbank_oneclick']
  */
 export async function getAvailablePaymentMethods(organizationId: string): Promise<string[]> {
-  const availableMethods: string[] = ['stripe']; // Stripe siempre está disponible
-  
-  // Verificar si Transbank está disponible
-  const transbankAvailable = await isTransbankAvailable(organizationId);
-  
-  if (transbankAvailable) {
-    availableMethods.push('transbank_webpay_plus', 'transbank_oneclick');
-  }
-  
-  return availableMethods;
+  const config = await getPaymentConfig(organizationId);
+  return config.providers;
 }
 
 /**
  * Verifica si un método de pago específico está disponible para una organización
- * 
- * @param organizationId - ID de la organización
- * @param method - Método a verificar: 'stripe', 'transbank_webpay_plus', 'transbank_oneclick'
- * @returns true si el método está disponible
  */
 export async function isPaymentMethodAvailable(
   organizationId: string,
   method: string
 ): Promise<boolean> {
-  // Stripe siempre está disponible
-  if (method === 'stripe') {
-    return true;
-  }
+  const config = await getPaymentConfig(organizationId);
   
-  // Transbank requiere verificación
-  if (method === 'transbank_webpay_plus' || method === 'transbank_oneclick') {
-    return await isTransbankAvailable(organizationId);
+  if (method === 'stripe') return config.providers.includes('stripe');
+  if (method === 'transbank' || method === 'transbank_webpay_plus' || method === 'transbank_oneclick') {
+    return config.providers.includes('transbank');
   }
+  if (method === 'flow') return config.providers.includes('flow');
+  if (method === 'dlocalgo') return config.providers.includes('dlocalgo');
   
-  // Método desconocido
   return false;
 }
-

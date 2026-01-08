@@ -169,7 +169,7 @@ export function DocumentEditor({
     }
     
     // Redirigir al wizard de firma con el ID del documento
-    router.push(`/dashboard/signing/documents/new?fromDocument=${documentId}`);
+    router.push(`/signing/new?fromDocument=${documentId}`);
   }, [documentId, hasUnsavedChanges, handleSave, router]);
 
   // Text selection hook for commenting on selected text

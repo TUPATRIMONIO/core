@@ -13,22 +13,33 @@ export default async function BillingSettingsPage() {
   const overview = await getBillingOverviewAction();
   const supabase = await createClient();
   
-  // Obtener organización para determinar país
+  // Obtener organización activa del usuario
   const { data: { user } } = await supabase.auth.getUser();
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user?.id)
-    .eq('status', 'active')
-    .single();
   
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+  
+  // Usar RPC para obtener la organización activa específica
+  const { data: activeOrgData } = await supabase.rpc('get_user_active_organization', {
+    user_id: user.id
+  });
+  
+  if (!activeOrgData || activeOrgData.length === 0) {
+    throw new Error('No active organization found');
+  }
+  
+  const organizationId = activeOrgData[0].organization_id;
+  
+  // Obtener datos de la organización
   const { data: org } = await supabase
     .from('organizations')
-    .select('country')
-    .eq('id', orgUser?.organization_id)
+    .select('country, org_type')
+    .eq('id', organizationId)
     .single();
   
   const countryCode = org?.country || 'US';
+  const orgType = org?.org_type || 'personal';
   const packages = await getAvailablePackages(countryCode);
   
   return (
@@ -60,7 +71,7 @@ export default async function BillingSettingsPage() {
       </div>
 
       <div className="mt-6">
-        <BillingDataSettings countryCode={countryCode} />
+        <BillingDataSettings countryCode={countryCode} orgType={orgType} />
       </div>
     </div>
   );

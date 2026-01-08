@@ -99,7 +99,7 @@ export interface SigningWizardActions {
   reset: () => void
 }
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 3
 const STORAGE_KEY = 'tp_signing_wizard_state'
 
 const defaultState: SigningWizardState = {
@@ -136,28 +136,52 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SigningWizardState>(defaultState)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // Cargar estado desde sessionStorage al montar
+  // Cargar estado desde localStorage al montar
   useEffect(() => {
-    const saved = sessionStorage.getItem(STORAGE_KEY)
+    const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
         // El objeto File no se puede serializar, se perderá en recargas de página
         // pero se mantiene mientras navegamos en la SPA.
+        
+        // Asegurar que el paso guardado sea válido después de cambios en el wizard
+        if (parsed.step !== undefined && parsed.step >= SIGNING_WIZARD_STEPS.length) {
+          parsed.step = SIGNING_WIZARD_STEPS.length - 1
+        }
+
         setState((s) => ({ ...s, ...parsed, file: null }))
+
+        // Intentar recuperar el archivo de IndexedDB
+        import('@/lib/utils/indexeddb').then(({ getFileFromIndexedDB }) => {
+          getFileFromIndexedDB().then((file) => {
+            if (file) {
+              setState((s) => ({ ...s, file }))
+            }
+          })
+        }).catch(err => console.error('[WizardContext] Error cargando IndexedDB:', err))
       } catch (e) {
-        console.error('[WizardContext] Error cargando estado desde sessionStorage', e)
+        console.error('[WizardContext] Error cargando estado desde localStorage', e)
       }
     }
     setIsInitialized(true)
   }, [])
 
-  // Guardar estado en sessionStorage cuando cambie
+  // Guardar estado en localStorage cuando cambie
   useEffect(() => {
     if (!isInitialized) return
     // No serializamos el archivo ni objetos complejos que no sean JSON
     const { file, ...serializableState } = state
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(serializableState))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializableState))
+
+    // Persistir el archivo en IndexedDB si existe
+    if (file) {
+      import('@/lib/utils/indexeddb').then(({ saveFileToIndexedDB }) => {
+        saveFileToIndexedDB(file).catch(err => 
+          console.error('[WizardContext] Error persistiendo archivo en IndexedDB:', err)
+        )
+      })
+    }
   }, [state, isInitialized])
 
   const setStep = useCallback((step: number) => {
@@ -216,7 +240,10 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
 
       reset: () => {
         setState(defaultState)
-        sessionStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(STORAGE_KEY)
+        import('@/lib/utils/indexeddb').then(({ clearFileFromIndexedDB }) => {
+          clearFileFromIndexedDB().catch(err => console.error('[WizardContext] Error limpiando IndexedDB:', err))
+        })
       },
     }),
     [nextStep, prevStep, setStep]
@@ -239,6 +266,5 @@ export const SIGNING_WIZARD_STEPS = [
   { key: 'upload', title: 'Documento', description: 'PDF y Pre-revisión IA' },
   { key: 'services', title: 'Servicios', description: 'Tipo de firma y notaría' },
   { key: 'signers', title: 'Firmantes', description: 'Datos y validación' },
-  { key: 'checkout', title: 'Pago', description: 'Resumen y checkout' },
 ] as const
 

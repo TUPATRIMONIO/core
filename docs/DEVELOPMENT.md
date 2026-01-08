@@ -26,6 +26,17 @@ npm run dev             # Puerto 3000 (web app)
 
 ## 📦 Packages y Dependencies
 
+### Persistencia Client-side (NUEVO)
+Para el manejo de archivos grandes (PDFs) que deben persistir entre recargas de página o procesos de login, disponemos de utilidades para **IndexedDB**:
+
+- **Ubicación**: `apps/web/src/lib/utils/indexeddb.ts`
+- **Funciones**:
+  - `saveFileToIndexedDB(file: File)`: Guarda el archivo actual.
+  - `getFileFromIndexedDB()`: Recupera el archivo guardado.
+  - `clearFileFromIndexedDB()`: Limpia el almacenamiento.
+
+**Uso recomendado**: Siempre que un flujo requiera que un archivo subido por un invitado sobreviva al proceso de autenticación.
+
 ### Packages Compartidos Disponibles
 
 #### 1. @tupatrimonio/assets
@@ -538,7 +549,7 @@ import { useLocation } from 'packages/location/src/hooks/useLocation';
 export default function NuevoServicioLanding() {
   const { country, countryInfo } = useLocation();
   
-  // Auto-redirect logic similar a firmas-electronicas
+  // Auto-redirect logic similar a /signing/new
   return <div>{/* Landing con selector */}</div>;
 }
 ```

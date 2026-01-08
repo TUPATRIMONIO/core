@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
 import OrderTimeline from '@/components/checkout/OrderTimeline';
-import { isTransbankAvailable } from '@/lib/payments/availability';
+import { getPaymentConfig } from '@/lib/payments/availability';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ClientRefundModal } from '@/components/checkout/ClientRefundModal';
 import { LoginForm } from '@/components/auth/login-form';
@@ -199,12 +199,16 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   
   const countryCode = org.country || 'US';
   const canPay = canPayOrder(order);
+  
+  // Obtener configuración de pagos disponible
+  const paymentConfig = await getPaymentConfig(order.organization_id);
+  
+  // Obtener datos de facturación de la organización (para cargar por defecto)
+  const billingData = (org.settings as any)?.billing_data || null;
+  
   // Solo considerar expirada si está pendiente de pago y la fecha pasó
   const expired = order.status === 'pending_payment' && isOrderExpired(order);
   const isZeroAmount = order.amount === 0;
-  
-  // Verificar disponibilidad de Transbank (B2B Chile CLP)
-  const transbankAvailable = await isTransbankAvailable(order.organization_id);
   
   // Obtener datos del producto
   const productData = order.product_data as any;
@@ -547,47 +551,24 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         
         {/* Columna derecha: Pago o Historial */}
         <div className="lg:col-span-3 space-y-4">
-          {canPay ? (
-            // Formulario de pago o confirmación gratuita
-            isZeroAmount ? (
-              <ZeroAmountCheckoutForm
-                orderId={orderId}
-                orderAmount={order.amount}
-                orderCurrency={order.currency}
-                countryCode={countryCode}
-              />
-            ) : transbankAvailable ? (
-              <Tabs defaultValue="transbank" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="transbank">Transbank</TabsTrigger>
-                  <TabsTrigger value="stripe">Stripe</TabsTrigger>
-                </TabsList>
-                <TabsContent value="transbank" className="mt-3">
-                  <OrderCheckoutForm
-                    orderId={orderId}
-                    order={order}
-                    provider="transbank"
-                    countryCode={countryCode}
-                  />
-                </TabsContent>
-                <TabsContent value="stripe" className="mt-3">
-                  <OrderCheckoutForm
-                    orderId={orderId}
-                    order={order}
-                    provider="stripe"
-                    countryCode={countryCode}
-                  />
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <OrderCheckoutForm
-                orderId={orderId}
-                order={order}
-                provider="stripe"
-                countryCode={countryCode}
-              />
-            )
+        {canPay ? (
+          // Formulario de pago o confirmación gratuita
+          isZeroAmount ? (
+            <ZeroAmountCheckoutForm
+              orderId={orderId}
+              orderAmount={order.amount}
+              orderCurrency={order.currency}
+              countryCode={countryCode}
+            />
           ) : (
+            <OrderCheckoutForm
+              orderId={orderId}
+              order={order}
+              paymentConfig={paymentConfig}
+              defaultBillingData={billingData}
+            />
+          )
+        ) : (
             // Historial (cuando no hay formulario de pago)
             <Card>
               <CardHeader className="pb-2 pt-4 px-4">

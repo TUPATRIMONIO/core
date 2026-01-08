@@ -28,7 +28,7 @@ export default async function SigningDocumentsPage() {
         title="Documentos"
         description="Gestiona tus documentos para firma electrónica y notarización"
         actions={
-          <Link href="/dashboard/signing/documents/new">
+          <Link href="/signing/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Documento

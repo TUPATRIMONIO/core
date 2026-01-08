@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ function normalizeRutToDb(input: string) {
 
 export function SignerManagementStep() {
   const supabase = useMemo(() => createClient(), [])
+  const router = useRouter()
   const { state, actions } = useSigningWizard()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -260,10 +262,23 @@ export function SignerManagementStep() {
         const updatedSigners = [...state.signers, newSigner]
         actions.setSigners(updatedSigners)
         
+        // Actualizar estado local directamente para invitados
+        setSigners(updatedSigners.map((s, idx) => ({
+          id: `local-${idx}`,
+          first_name: s.first_name,
+          last_name: s.last_name,
+          email: s.email,
+          phone: s.phone,
+          signing_order: idx + 1,
+          metadata: {
+            identifier_type: s.identifier_type,
+            identifier_value: s.identifier_value,
+          }
+        })))
+
         toast.success('Firmante agregado')
         resetForm()
         setIsModalOpen(false)
-        await loadSigners()
         return
       }
 
@@ -326,6 +341,8 @@ export function SignerManagementStep() {
     signers.length,
     state.countryCode,
     state.documentId,
+    state.signers,
+    actions,
     supabase,
     validateForm,
   ])
@@ -342,8 +359,22 @@ export function SignerManagementStep() {
             const updated = [...state.signers]
             updated.splice(index, 1)
             actions.setSigners(updated)
+            
+            // Actualizar estado local directamente para invitados
+            setSigners(updated.map((s, idx) => ({
+              id: `local-${idx}`,
+              first_name: s.first_name,
+              last_name: s.last_name,
+              email: s.email,
+              phone: s.phone,
+              signing_order: idx + 1,
+              metadata: {
+                identifier_type: s.identifier_type,
+                identifier_value: s.identifier_value,
+              }
+            })))
+
             toast.success('Firmante removido')
-            await loadSigners()
           }
           return
         }
@@ -362,7 +393,7 @@ export function SignerManagementStep() {
         setIsSaving(false)
       }
     },
-    [loadSigners, supabase]
+    [loadSigners, supabase, state.documentId, state.signers, actions]
   )
 
   const handleMoveSigner = useCallback(
@@ -372,19 +403,34 @@ export function SignerManagementStep() {
 
       try {
         setIsSaving(true)
+        const neighborIndex = direction === 'up' ? index - 1 : index + 1
 
         if (!state.documentId) {
           const updated = [...state.signers]
-          const neighborIndex = direction === 'up' ? index - 1 : index + 1
           const temp = updated[index]
           updated[index] = updated[neighborIndex]
           updated[neighborIndex] = temp
           actions.setSigners(updated)
-          await loadSigners()
+          
+          // Actualizar estado local directamente para invitados
+          setSigners(updated.map((s, idx) => ({
+            id: `local-${idx}`,
+            first_name: s.first_name,
+            last_name: s.last_name,
+            email: s.email,
+            phone: s.phone,
+            signing_order: idx + 1,
+            metadata: {
+              identifier_type: s.identifier_type,
+              identifier_value: s.identifier_value,
+            }
+          })))
           return
         }
 
         const currentSigner = signers[index]
+        const neighborSigner = signers[neighborIndex]
+        
         // We use the values from the array to respect the current visible order.
         const currentOrder = currentSigner.signing_order
         const neighborOrder = neighborSigner.signing_order
@@ -416,7 +462,7 @@ export function SignerManagementStep() {
         setIsSaving(false)
       }
     },
-    [signers, supabase, loadSigners]
+    [signers, supabase, loadSigners, state.documentId, state.signers, actions]
   )
 
   const handleBack = useCallback(() => {
@@ -430,8 +476,8 @@ export function SignerManagementStep() {
       setError('Debes agregar al menos 1 firmante para continuar.')
       return
     }
-    actions.nextStep()
-  }, [actions, signers.length])
+    router.push('/checkout/signing')
+  }, [router, signers.length])
 
   return (
     <Card>
@@ -445,7 +491,7 @@ export function SignerManagementStep() {
           </Alert>
         )}
 
-        {!state.documentId ? (
+        {!state.file ? (
           <Alert>
             <AlertDescription>
               No hay documento cargado. Vuelve al paso anterior y sube un PDF.

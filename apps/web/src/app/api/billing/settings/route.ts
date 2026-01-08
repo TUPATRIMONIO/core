@@ -17,20 +17,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    // Obtener organización activa del usuario usando RPC
+    const { data: activeOrgData, error: activeOrgError } = await supabase.rpc('get_user_active_organization', {
+      user_id: user.id
+    });
 
-    if (!orgUser) {
+    if (activeOrgError || !activeOrgData || activeOrgData.length === 0) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
       );
     }
+
+    const organizationId = activeOrgData[0].organization_id;
 
     // Obtener configuración desde organizations.settings
     const serviceSupabase = createServiceRoleClient();
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
     const { data: org } = await serviceSupabase
       .from('organizations')
       .select('settings')
-      .eq('id', orgUser.organization_id)
+      .eq('id', organizationId)
       .single();
 
     const billingData = (org?.settings as any)?.billing_data || null;
@@ -71,20 +70,19 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    // Obtener organización activa del usuario usando RPC
+    const { data: activeOrgData, error: activeOrgError } = await supabase.rpc('get_user_active_organization', {
+      user_id: user.id
+    });
 
-    if (!orgUser) {
+    if (activeOrgError || !activeOrgData || activeOrgData.length === 0) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
       );
     }
+
+    const organizationId = activeOrgData[0].organization_id;
 
     const body = await request.json();
     const { billing_data } = body;
@@ -102,7 +100,7 @@ export async function PUT(request: NextRequest) {
     const { data: org } = await serviceSupabase
       .from('organizations')
       .select('settings')
-      .eq('id', orgUser.organization_id)
+      .eq('id', organizationId)
       .single();
 
     const currentSettings = (org?.settings as any) || {};
@@ -114,7 +112,7 @@ export async function PUT(request: NextRequest) {
     const { error: updateError } = await serviceSupabase
       .from('organizations')
       .update({ settings: updatedSettings })
-      .eq('id', orgUser.organization_id);
+      .eq('id', organizationId);
 
     if (updateError) {
       throw updateError;

@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, CreditCard, XCircle, Plus } from 'lucide-react';
+import { Loader2, CreditCard, XCircle, Plus, Info } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
+import type { PaymentConfig } from '@/lib/payments/availability';
 import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
 import TransbankDocumentForm, { type BillingData } from './TransbankDocumentForm';
 import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
@@ -15,670 +16,420 @@ import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
 interface OrderCheckoutFormProps {
   orderId: string;
   order: Order;
-  provider: 'transbank' | 'stripe';
-  countryCode?: string;
+  paymentConfig: PaymentConfig;
+  defaultBillingData?: any;
 }
 
 export default function OrderCheckoutForm({
   orderId,
   order,
-  provider,
-  countryCode = 'CL',
+  paymentConfig,
+  defaultBillingData,
 }: OrderCheckoutFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'webpay' | 'oneclick'>('webpay');
+  
+  // Tab activa inicial basada en proveedores disponibles
+  const initialProvider = paymentConfig.providers[0];
+  const [activeTab, setActiveTab] = useState<string>(initialProvider);
+  
+  // Estados específicos de Transbank Oneclick
   const [oneclickTbkUser, setOneclickTbkUser] = useState<string | null>(null);
   const [savedCards, setSavedCards] = useState<OneclickCard[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [showAddCardForm, setShowAddCardForm] = useState(false);
-  const [loadingCards, setLoadingCards] = useState(true);
-  const [billingData, setBillingData] = useState<BillingData | null>(null);
-  const [stripeBillingData, setStripeBillingData] = useState<BasicBillingData | null>(null);
-  const [loadingBillingSettings, setLoadingBillingSettings] = useState(true);
+  const [loadingCards, setLoadingCards] = useState(activeTab === 'transbank');
 
-  // Cargar tarjetas guardadas y datos de facturación
+  // Datos de facturación unificados
+  const [billingData, setBillingData] = useState<BillingData | null>(null);
+  const [basicBillingData, setBasicBillingData] = useState<BasicBillingData | null>(null);
+  
+  const [loadingInitialData, setLoadingInitialData] = useState(true);
+
+  // Inicializar datos desde props o API
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cargar tarjetas guardadas
-        const cardsResponse = await fetch('/api/transbank/oneclick/cards');
-        if (cardsResponse.ok) {
-          const cardsData = await cardsResponse.json();
-          setSavedCards(cardsData.cards || []);
-          
-          // Seleccionar tarjeta predeterminada si existe
-          const defaultCard = cardsData.cards?.find((c: OneclickCard) => c.is_default);
-          if (defaultCard) {
-            setSelectedCardId(defaultCard.id);
-            setOneclickTbkUser(defaultCard.provider_payment_method_id);
-          }
-        }
-
-        // Cargar datos de facturación guardados
-        const billingResponse = await fetch('/api/billing/settings');
-        if (billingResponse.ok) {
-          const billingData = await billingResponse.json();
-          if (billingData.billing_data) {
-            // Para Stripe, solo necesitamos datos básicos
-            if (billingData.billing_data.tax_id && billingData.billing_data.name) {
-              setStripeBillingData({
-                tax_id: billingData.billing_data.tax_id,
-                name: billingData.billing_data.name,
-                email: billingData.billing_data.email,
-              });
+        if (paymentConfig.providers.includes('transbank')) {
+          setLoadingCards(true);
+          const cardsResponse = await fetch('/api/transbank/oneclick/cards');
+          if (cardsResponse.ok) {
+            const cardsData = await cardsResponse.json();
+            setSavedCards(cardsData.cards || []);
+            const defaultCard = cardsData.cards?.find((c: OneclickCard) => c.is_default);
+            if (defaultCard) {
+              setSelectedCardId(defaultCard.id);
+              setOneclickTbkUser(defaultCard.provider_payment_method_id);
             }
           }
+          setLoadingCards(false);
+        }
+
+        if (defaultBillingData) {
+          setBillingData(defaultBillingData);
+          setBasicBillingData({
+            tax_id: defaultBillingData.tax_id || '',
+            name: defaultBillingData.name || '',
+            email: defaultBillingData.email || '',
+          });
         }
       } catch (err) {
-        console.error('Error cargando datos:', err);
+        console.error('Error cargando datos iniciales:', err);
       } finally {
-        setLoadingCards(false);
-        setLoadingBillingSettings(false);
+        setLoadingInitialData(false);
       }
     };
 
     loadData();
-  }, []);
+  }, [paymentConfig.providers, defaultBillingData]);
 
-  // Detectar si el usuario regresó de una inscripción Oneclick exitosa
+  // Detectar inscripciones Oneclick exitosas
   useEffect(() => {
     const tbkToken = searchParams.get('TBK_TOKEN');
     const type = searchParams.get('type');
     
     if (tbkToken && type === 'oneclick_inscription') {
-      // Obtener datos de la inscripción desde la API
+      setLoading(true);
       fetch(`/api/transbank/oneclick/inscription/finish?token=${tbkToken}`, {
         method: 'POST',
       })
         .then(res => res.json())
         .then(data => {
           if (data.success && data.tbkUser) {
-            // Mostrar error si hubo problema guardando
-            if (data.saveError) {
-              console.error('⚠️ Error guardando tarjeta:', data.saveError);
-              setError(`Inscripción exitosa pero hubo un problema guardando la tarjeta: ${data.saveError}`);
-            }
-            
             setOneclickTbkUser(data.tbkUser);
-            setActiveTab('oneclick');
+            setActiveTab('transbank');
             setShowAddCardForm(false);
-            // Recargar tarjetas
             fetch('/api/transbank/oneclick/cards')
               .then(res => res.json())
               .then(cardsData => {
                 setSavedCards(cardsData.cards || []);
-                // Seleccionar la tarjeta recién creada si existe
                 const newCard = cardsData.cards?.find(
                   (c: OneclickCard) => c.provider_payment_method_id === data.tbkUser
                 );
-                if (newCard) {
-                  setSelectedCardId(newCard.id);
-                }
+                if (newCard) setSelectedCardId(newCard.id);
               });
-            // Limpiar URL
             router.replace(window.location.pathname, { scroll: false });
           }
         })
         .catch(err => {
-          console.error('Error obteniendo datos de inscripción:', err);
+          console.error('Error finalizando inscripción:', err);
           setError(`Error procesando inscripción: ${err.message}`);
-        });
+        })
+        .finally(() => setLoading(false));
     }
   }, [searchParams, router]);
 
-  /**
-   * Función unificada para manejar checkout con cualquier proveedor
-   */
-  const handleCheckout = async (provider: 'stripe' | 'transbank') => {
+  const handleCheckout = async (provider: string, subMethod?: string) => {
     setLoading(true);
     setError(null);
 
-    // Validar datos de facturación para ambos proveedores
-    if (provider === 'transbank' && !billingData) {
-      setError('Por favor completa los datos de facturación antes de continuar');
+    // Determinar qué datos de facturación usar
+    const currentBilling = (paymentConfig.country === 'CL' && paymentConfig.orgType === 'business') 
+      ? billingData 
+      : basicBillingData;
+
+    if (!currentBilling) {
+      setError('Por favor completa los datos de facturación');
       setLoading(false);
       return;
-    }
-
-    if (provider === 'stripe' && !stripeBillingData) {
-      setError('Por favor completa los datos de facturación antes de continuar');
-      setLoading(false);
-      return;
-    }
-
-    // Guardar datos de facturación antes de pagar (si no están guardados)
-    if (provider === 'stripe' && stripeBillingData) {
-      try {
-        const billingToSave = {
-          tax_id: stripeBillingData.tax_id,
-          name: stripeBillingData.name,
-          email: stripeBillingData.email || '', // Guardar email explícitamente
-          document_type: 'stripe_invoice', // Stripe siempre genera invoice
-        };
-        console.log('[Checkout] Guardando datos de facturación Stripe:', billingToSave);
-        
-        await fetch('/api/billing/settings', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ billing_data: billingToSave }),
-        });
-      } catch (err) {
-        console.warn('Error guardando datos de facturación:', err);
-        // No bloquear el pago si falla guardar
-      }
     }
 
     try {
-      const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=${provider}`;
+      // 1. Guardar/Sincronizar datos de facturación
+      await fetch('/api/billing/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billing_data: currentBilling }),
+      });
+
+      // 2. Crear sesión de pago
+      const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=${provider}${subMethod ? `&method=${subMethod}` : ''}`;
       
+      const checkoutBody: any = {
+        orderId,
+        provider,
+        returnUrl,
+        billing_data: currentBilling,
+      };
+
+      // Manejo especial Oneclick
+      if (provider === 'transbank' && subMethod === 'oneclick') {
+        let tbkUserToUse = oneclickTbkUser;
+        if (selectedCardId) {
+          const card = savedCards.find(c => c.id === selectedCardId);
+          if (card) tbkUserToUse = card.provider_payment_method_id;
+        }
+
+        if (!tbkUserToUse) {
+          setError('Selecciona una tarjeta para pagar con Oneclick');
+          setLoading(false);
+          return;
+        }
+
+        const userRes = await fetch('/api/auth/user');
+        const userData = await userRes.json();
+        
+        const response = await fetch('/api/transbank/oneclick/payment/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            orderId,
+            tbkUser: tbkUserToUse,
+            username: userData.id,
+            billing_data: currentBilling,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Error en pago Oneclick');
+
+        if (data.success) {
+          router.push(`${returnUrl}&token_ws=${encodeURIComponent(data.token || '')}`);
+          return;
+        } else {
+          throw new Error('El pago fue rechazado por el banco.');
+        }
+      }
+
+      // Checkout normal para otros proveedores
       const response = await fetch('/api/payments/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          orderId,
-          provider,
-          returnUrl,
-          ...(provider === 'transbank' && billingData && {
-            document_type: billingData.document_type,
-            billing_data: billingData,
-          }),
-          ...(provider === 'stripe' && stripeBillingData && {
-            document_type: 'stripe_invoice',
-            billing_data: {
-              tax_id: stripeBillingData.tax_id,
-              name: stripeBillingData.name,
-              email: stripeBillingData.email || '',
-              document_type: 'stripe_invoice',
-            },
-          }),
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutBody),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error creando pago');
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error creando pago');
-      }
-
-      // Transbank requiere formulario POST con token_ws
+      // Redirección según proveedor
       if (provider === 'transbank' && data.url && data.sessionId) {
-        // Normalizar URL: remover puerto :443 explícito si está presente
-        let normalizedUrl = data.url;
-        try {
-          const urlObj = new URL(data.url);
-          if (urlObj.port === '443') {
-            urlObj.port = '';
-            normalizedUrl = urlObj.toString();
-          }
-        } catch (e) {
-          console.error('[OrderCheckoutForm] Error normalizando URL:', e);
-        }
-        
-        // Crear formulario POST oculto según documentación de Transbank
+        // Formulario POST para Transbank Webpay
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = normalizedUrl;
-        form.style.display = 'none';
-        form.setAttribute('accept-charset', 'UTF-8');
-        
-        // Agregar campo token_ws requerido por Transbank
+        form.action = data.url;
         const tokenInput = document.createElement('input');
         tokenInput.type = 'hidden';
         tokenInput.name = 'token_ws';
-        tokenInput.value = data.sessionId; // sessionId es el token en Transbank
+        tokenInput.value = data.sessionId;
         form.appendChild(tokenInput);
-        
-        // Agregar formulario al DOM y auto-enviarlo
         document.body.appendChild(form);
-        setTimeout(() => {
-          form.submit();
-        }, 100);
+        form.submit();
       } else {
-        // Stripe y otros proveedores: redirección simple
         window.location.href = data.url;
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Error al procesar el pago';
-      setError(errorMessage);
+      setError(err.message || 'Error al procesar el pago');
       setLoading(false);
     }
-  };
-
-  const handleWebpayPlus = async () => {
-    // Guardar datos de facturación Transbank antes de pagar
-    if (billingData) {
-      try {
-        console.log('[Checkout] Guardando datos de facturación Transbank:', billingData);
-        await fetch('/api/billing/settings', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ billing_data: billingData }),
-        });
-      } catch (err) {
-        console.warn('Error guardando datos de facturación:', err);
-        // No bloquear el pago si falla guardar
-      }
-    }
-    await handleCheckout('transbank');
   };
 
   const handleOneclickInscription = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const returnUrl = `${window.location.origin}/checkout/${orderId}?type=oneclick_inscription`;
-      
       const response = await fetch('/api/transbank/oneclick/inscription', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          returnUrl, // username se maneja automáticamente en el servidor con user.id
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Error iniciando inscripción');
-      }
-
-      // Redirigir a Transbank usando formulario POST con token
-      if (data.url && data.token) {
-        // Crear formulario POST oculto según documentación de Transbank
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = data.url;
-        
-        // Agregar campo TBK_TOKEN requerido por Transbank Oneclick
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'TBK_TOKEN';
-        tokenInput.value = data.token;
-        form.appendChild(tokenInput);
-        
-        // Agregar formulario al DOM y auto-enviarlo
-        document.body.appendChild(form);
-        form.submit();
-      } else {
-        throw new Error('No se recibió URL o token de redirección');
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Error al iniciar inscripción';
-      setError(errorMessage);
-      setLoading(false);
-    }
-  };
-
-  const handleOneclickPayment = async () => {
-    // Validar datos de facturación
-    if (!billingData) {
-      setError('Por favor completa los datos de facturación antes de continuar');
-      return;
-    }
-
-    // Guardar datos de facturación antes de pagar
-    try {
-      console.log('[Checkout] Guardando datos de facturación Oneclick:', billingData);
-      await fetch('/api/billing/settings', {
-        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ billing_data: billingData }),
+        body: JSON.stringify({ returnUrl }),
       });
-    } catch (err) {
-      console.warn('Error guardando datos de facturación:', err);
-      // No bloquear el pago si falla guardar
-    }
-
-    // Obtener tbkUser de la tarjeta seleccionada o del estado actual
-    let tbkUserToUse = oneclickTbkUser;
-
-    if (selectedCardId) {
-      const selectedCard = savedCards.find(c => c.id === selectedCardId);
-      if (selectedCard) {
-        tbkUserToUse = selectedCard.provider_payment_method_id;
-      }
-    }
-
-    if (!tbkUserToUse) {
-      setError('Primero debes seleccionar o inscribir una tarjeta');
-      return;
-    }
-
-    // Obtener user.id para el username
-    const userResponse = await fetch('/api/auth/user');
-    if (!userResponse.ok) {
-      setError('Error obteniendo información del usuario');
-      return;
-    }
-    const userData = await userResponse.json();
-    const usernameToUse = userData.id;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/transbank/oneclick/payment/order', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          orderId,
-          tbkUser: tbkUserToUse,
-          username: usernameToUse,
-          document_type: billingData.document_type,
-          billing_data: billingData,
-        }),
-      });
-
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error en inscripción');
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error creando pago');
-      }
-
-      // El pago Oneclick se autoriza directamente, no hay redirección
-      if (data.success) {
-        // Pago autorizado exitosamente - pasar el token (buy_order) en la URL
-        const token = data.token || '';
-        router.push(`/checkout/${orderId}/success?provider=transbank&method=oneclick&token_ws=${encodeURIComponent(token)}`);
-      } else {
-        // Pago rechazado o error
-        const errorMsg = data.paymentStatus === 'rejected' 
-          ? 'El pago fue rechazado. Por favor intenta con otra tarjeta o método de pago.'
-          : 'Error procesando el pago con Oneclick';
-        throw new Error(errorMsg);
-      }
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.url;
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'TBK_TOKEN';
+      input.value = data.token;
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
     } catch (err: any) {
-      const errorMessage = err.message || 'Error al procesar el pago';
-      setError(errorMessage);
+      setError(err.message);
       setLoading(false);
     }
   };
 
-  const handleCardSelect = (cardId: string) => {
-    setSelectedCardId(cardId);
-    const selectedCard = savedCards.find(c => c.id === cardId);
-    if (selectedCard) {
-      setOneclickTbkUser(selectedCard.provider_payment_method_id);
-    }
-  };
-
-  const handleCardDeleted = async () => {
-    // Recargar tarjetas
-    const cardsResponse = await fetch('/api/transbank/oneclick/cards');
-    if (cardsResponse.ok) {
-      const cardsData = await cardsResponse.json();
-      setSavedCards(cardsData.cards || []);
-      
-      // Si se eliminó la tarjeta seleccionada, limpiar selección
-      if (!cardsData.cards?.find((c: OneclickCard) => c.id === selectedCardId)) {
-        setSelectedCardId(null);
-        setOneclickTbkUser(null);
-      }
-    }
-  };
-
-  const handleStripePayment = async () => {
-    await handleCheckout('stripe');
-  };
-
-  // Si es Stripe, mostrar componente con datos de facturación
-  if (provider === 'stripe') {
+  if (loadingInitialData) {
     return (
-      <div className="space-y-6">
-        <BillingDataForm
-          countryCode={countryCode}
-          defaultData={stripeBillingData || undefined}
-          onDataChange={setStripeBillingData}
-        />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pago con Stripe</CardTitle>
-            <CardDescription>
-              Completa el pago con tu tarjeta de crédito o débito
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <XCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="rounded-lg border p-4 bg-muted/50">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total a pagar</span>
-                <span className="text-2xl font-bold">
-                  {new Intl.NumberFormat('es-CL', {
-                    style: 'currency',
-                    currency: order.currency,
-                  }).format(order.amount)}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleStripePayment}
-              disabled={loading || !stripeBillingData || loadingBillingSettings}
-              className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Procesando...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Pagar con Stripe
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--tp-buttons)]" />
       </div>
     );
   }
 
-  // Para Transbank, mostrar tabs con Webpay Plus y Oneclick
   return (
     <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'webpay' | 'oneclick')}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="webpay">Webpay Plus</TabsTrigger>
-          <TabsTrigger value="oneclick">Oneclick</TabsTrigger>
+      {/* Formulario de Facturación Apropiado */}
+      {paymentConfig.country === 'CL' && paymentConfig.orgType === 'business' ? (
+        <TransbankDocumentForm
+          countryCode={paymentConfig.country}
+          defaultData={billingData || undefined}
+          onDataChange={setBillingData}
+        />
+      ) : (
+        <BillingDataForm
+          countryCode={paymentConfig.country}
+          defaultData={basicBillingData || undefined}
+          onDataChange={setBasicBillingData}
+          title="Datos de Facturación (Invoice)"
+          description={paymentConfig.country === 'CL' ? 'Para clientes personales se emite Invoice vía Stripe.' : 'Necesitamos tus datos para el Invoice internacional.'}
+        />
+      )}
+
+      {/* Tabs de Proveedores */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className={`grid w-full grid-cols-${paymentConfig.providers.length}`}>
+          {paymentConfig.providers.map(p => (
+            <TabsTrigger key={p} value={p} className="capitalize">
+              {p === 'transbank' ? 'Webpay / Oneclick' : p}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        {/* Tab Webpay Plus */}
-        <TabsContent value="webpay" className="space-y-4">
-          <TransbankDocumentForm
-            countryCode={countryCode}
-            onDataChange={setBillingData}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Pago con Webpay Plus</CardTitle>
-              <CardDescription>
-                Serás redirigido a Transbank para completar el pago de forma segura
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="rounded-lg border p-4 bg-muted/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total a pagar</span>
-                  <span className="text-2xl font-bold">
-                    {new Intl.NumberFormat('es-CL', {
-                      style: 'currency',
-                      currency: order.currency,
-                    }).format(order.amount)}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleWebpayPlus}
-                disabled={loading || !billingData}
-                className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Pagar con Webpay Plus
-                  </>
-                )}
-              </Button>
-
-              <p className="text-xs text-muted-foreground text-center">
-                Al hacer clic, serás redirigido a Transbank para completar el pago de forma segura
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab Oneclick */}
-        <TabsContent value="oneclick" className="space-y-4">
-          <TransbankDocumentForm
-            countryCode={countryCode}
-            onDataChange={setBillingData}
-          />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Pago con Oneclick</CardTitle>
-              <CardDescription>
-                Guarda tu tarjeta para pagos rápidos y seguros
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {loadingCards ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : savedCards.length > 0 && !showAddCardForm ? (
-                <>
-                  <div className="space-y-3">
-                    <OneclickCardsList
-                      cards={savedCards}
-                      selectedCardId={selectedCardId || undefined}
-                      onCardSelect={handleCardSelect}
-                      onCardDeleted={handleCardDeleted}
-                      showActions={true}
-                    />
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddCardForm(true)}
-                    className="w-full"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agregar otra tarjeta
-                  </Button>
-
-                  <div className="rounded-lg border p-4 bg-muted/50">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Total a pagar</span>
-                      <span className="text-2xl font-bold">
-                        {new Intl.NumberFormat('es-CL', {
-                          style: 'currency',
-                          currency: order.currency,
-                        }).format(order.amount)}
-                      </span>
+        {/* Contenido Transbank */}
+        {paymentConfig.providers.includes('transbank') && (
+          <TabsContent value="transbank" className="mt-4 space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Transbank</CardTitle>
+                <CardDescription>Paga con Webpay Plus o usa tus tarjetas guardadas</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Tabs defaultValue="webpay_plus">
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="webpay_plus">Webpay Plus</TabsTrigger>
+                    <TabsTrigger value="oneclick">Oneclick</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="webpay_plus" className="space-y-4">
+                    <div className="rounded-lg border p-4 bg-muted/50">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Total</span>
+                        <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <Button
-                    onClick={handleOneclickPayment}
-                    disabled={loading || !selectedCardId || !billingData}
-                    className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Procesando...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Pagar con Oneclick
-                      </>
-                    )}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Alert>
-                    <AlertDescription>
-                      Serás redirigido a Transbank para inscribir tu tarjeta de forma segura.
-                      Podrás usarla para pagos rápidos en el futuro.
-                    </AlertDescription>
-                  </Alert>
-
-                  {savedCards.length > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowAddCardForm(false)}
-                      className="w-full"
-                    >
-                      Cancelar
+                    <Button onClick={() => handleCheckout('transbank')} disabled={loading || !billingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                      Pagar con Webpay Plus
                     </Button>
-                  )}
+                  </TabsContent>
 
-                  <Button
-                    onClick={handleOneclickInscription}
-                    disabled={loading}
-                    className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
-                  >
-                    {loading ? (
+                  <TabsContent value="oneclick" className="space-y-4">
+                    {loadingCards ? (
+                      <div className="flex justify-center py-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                    ) : savedCards.length > 0 && !showAddCardForm ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Procesando...
+                        <OneclickCardsList
+                          cards={savedCards}
+                          selectedCardId={selectedCardId || undefined}
+                          onCardSelect={(id) => { setSelectedCardId(id); }}
+                          onCardDeleted={() => { /* recargar tarjetas */ }}
+                          showActions={true}
+                        />
+                        <Button variant="outline" onClick={() => setShowAddCardForm(true)} className="w-full"><Plus className="mr-2 h-4 w-4" /> Agregar otra</Button>
+                        <Button onClick={() => handleCheckout('transbank', 'oneclick')} disabled={loading || !selectedCardId || !billingData} className="w-full bg-[var(--tp-buttons)]">
+                          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                          Pagar con Oneclick
+                        </Button>
                       </>
                     ) : (
-                      <>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Guardar Tarjeta
-                      </>
+                      <div className="space-y-4">
+                        <Alert><Info className="h-4 w-4" /><AlertDescription>Serás redirigido para inscribir tu tarjeta.</AlertDescription></Alert>
+                        <Button onClick={handleOneclickInscription} disabled={loading} className="w-full bg-[var(--tp-buttons)]">Inscribir Tarjeta</Button>
+                        {savedCards.length > 0 && <Button variant="ghost" onClick={() => setShowAddCardForm(false)} className="w-full">Cancelar</Button>}
+                      </div>
                     )}
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Contenido Flow */}
+        {paymentConfig.providers.includes('flow') && (
+          <TabsContent value="flow" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Flow</CardTitle>
+                <CardDescription>Paga con Servipag, Webpay, Multicaja y más.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                  </div>
+                </div>
+                <Button onClick={() => handleCheckout('flow')} disabled={loading || !billingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                  Pagar con Flow
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Contenido Stripe */}
+        {paymentConfig.providers.includes('stripe') && (
+          <TabsContent value="stripe" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Stripe</CardTitle>
+                <CardDescription>Paga de forma segura con tu tarjeta internacional.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                  </div>
+                </div>
+                <Button onClick={() => handleCheckout('stripe')} disabled={loading || !basicBillingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                  Pagar con Stripe
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Contenido DLocalGo */}
+        {paymentConfig.providers.includes('dlocalgo') && (
+          <TabsContent value="dlocalgo" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>DLocal Go</CardTitle>
+                <CardDescription>Usa métodos de pago locales de tu país.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border p-4 bg-muted/50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Total</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                  </div>
+                </div>
+                <Button onClick={() => handleCheckout('dlocalgo')} disabled={loading || !basicBillingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                  Pagar con DLocal Go
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
+
+      {error && (
+        <Alert variant="destructive">
+          <XCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }
-

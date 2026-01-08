@@ -103,8 +103,15 @@ export function ServiceSelectionStep() {
         .order('display_order', { ascending: true })
 
       if (fetchError) {
-        console.error('[ServiceSelectionStep] Supabase error:', fetchError)
-        throw fetchError
+        console.error('[ServiceSelectionStep] Supabase error fetching products:', fetchError)
+        // Si el error es de permisos, es probable que falte RLS público.
+        // En modo invitado, esto es crítico pero no queremos un crash.
+        if (fetchError.code === '42501') {
+          setError('No tienes permisos para ver los productos. Por favor contacta a soporte.')
+        } else {
+          throw fetchError
+        }
+        return
       }
 
       const normalized = (data || []).map((p: any) => ({

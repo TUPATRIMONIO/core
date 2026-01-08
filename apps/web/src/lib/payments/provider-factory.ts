@@ -1,6 +1,8 @@
 import { PaymentProvider } from './adapters/base';
 import { StripeAdapter } from './adapters/stripe';
 import { TransbankAdapter } from './adapters/transbank';
+import { FlowAdapter } from './adapters/flow';
+import { DLocalAdapter } from './adapters/dlocal';
 
 /**
  * Factory para obtener proveedores de pago
@@ -11,6 +13,8 @@ import { TransbankAdapter } from './adapters/transbank';
 const providers = new Map<string, PaymentProvider>([
   ['stripe', new StripeAdapter()],
   ['transbank', new TransbankAdapter()],
+  ['flow', new FlowAdapter()],
+  ['dlocalgo', new DLocalAdapter()],
 ]);
 
 /**

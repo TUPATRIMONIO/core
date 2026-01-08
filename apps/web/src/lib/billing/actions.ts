@@ -209,24 +209,28 @@ export async function updateAutoRechargeSettingsAction(
  * Actualiza el país de la organización del usuario
  */
 export async function updateOrganizationCountryAction(countryCode: string) {
-  const supabase = await createClient();
+  const authSupabase = await createClient();
   
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await authSupabase.auth.getUser();
   if (!user) {
     throw new Error('Unauthorized');
   }
   
-  // Obtener organización del usuario
-  const { data: orgUser } = await supabase
-    .from('organization_users')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .single();
+  // Usar service role client para todas las operaciones (bypass RLS)
+  const { createServiceRoleClient } = await import('@/lib/supabase/server');
+  const supabase = createServiceRoleClient();
   
-  if (!orgUser) {
-    throw new Error('No organization found');
+  // Obtener organización activa del usuario usando la función RPC
+  const { data: activeOrgData, error: activeOrgError } = await supabase.rpc('get_user_active_organization', {
+    user_id: user.id
+  });
+  
+  if (activeOrgError || !activeOrgData || activeOrgData.length === 0) {
+    console.error('[updateOrganizationCountryAction] Error obteniendo org activa:', activeOrgError);
+    throw new Error('No active organization found');
   }
+  
+  const organizationId = activeOrgData[0].organization_id;
   
   // Validar código de país (ISO 3166-1 alpha-2)
   const validCountryCodes = ['US', 'CL', 'AR', 'CO', 'MX', 'PE', 'BR'];
@@ -241,11 +245,16 @@ export async function updateOrganizationCountryAction(countryCode: string) {
       country: countryCode.toUpperCase(),
       updated_at: new Date().toISOString(),
     })
-    .eq('id', orgUser.organization_id);
+    .eq('id', organizationId);
   
   if (error) {
+    console.error('[updateOrganizationCountryAction] Error actualizando país:', error);
     throw new Error(`Error actualizando país: ${error.message}`);
   }
+  
+  // Revalidar la página de configuración de facturación para que se actualice
+  const { revalidatePath } = await import('next/cache');
+  revalidatePath('/billing/settings');
   
   return { success: true };
 }
