@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { jsPDF } from 'jspdf'
@@ -26,6 +26,26 @@ import { useGlobalCountryOptional } from '@/providers/GlobalCountryProvider'
 import { useOrganization } from '@/hooks/useOrganization'
 
 export function CountryAndUploadStep() {
+  return (
+    <Suspense fallback={
+      <Card>
+        <CardHeader>
+          <CardTitle>Paso 1 · Documento</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Cargando...
+          </div>
+        </CardContent>
+      </Card>
+    }>
+      <CountryAndUploadStepContent />
+    </Suspense>
+  )
+}
+
+function CountryAndUploadStepContent() {
   const supabase = useMemo(() => createClient(), [])
   const { state, actions } = useSigningWizard()
   const globalCountry = useGlobalCountryOptional()
