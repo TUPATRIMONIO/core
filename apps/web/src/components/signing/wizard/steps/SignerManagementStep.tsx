@@ -26,6 +26,8 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { useSigningWizard, type SignerIdentifierType } from '../WizardContext'
+import { SavedSignersSelector, type SavedSigner } from '../SavedSignersSelector'
+import { SaveSignerCheckbox } from '../SaveSignerCheckbox'
 import {
   formatRutOnInput,
   isValidRut,
@@ -61,6 +63,17 @@ export function SignerManagementStep() {
   const [rutError, setRutError] = useState<string | null>(null)
   const [role, setRole] = useState<'signer' | 'approver' | 'reviewer'>('signer')
 
+  // Estados para firmantes guardados
+  const [saveEnabled, setSaveEnabled] = useState(false)
+  const [saveType, setSaveType] = useState<'personal' | 'organization'>('personal')
+  const [selectedSavedSignerId, setSelectedSavedSignerId] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthenticated(!!data.user)
+    })
+  }, [supabase])
 
   const signatureProduct = state.signatureProduct
   const requiresRutOnly = signatureProduct?.identifier_type === 'rut_only'
@@ -202,7 +215,20 @@ export function SignerManagementStep() {
     setIdentifierType(requiresRutOnly ? 'rut' : 'rut')
     setIdentifierValue('')
     setRole('signer')
+    setSaveEnabled(false)
+    setSelectedSavedSignerId(null)
   }, [requiresRutOnly])
+
+  const handleSelectSavedSigner = useCallback((signer: SavedSigner) => {
+    setFirstName(signer.first_name)
+    setLastName(signer.last_name)
+    setEmail(signer.email)
+    setPhone(signer.phone || '')
+    setIdentifierType(signer.identifier_type as SignerIdentifierType)
+    setIdentifierValue(signer.identifier_value)
+    setSelectedSavedSignerId(signer.id)
+    setSaveEnabled(false) // Ya está guardado
+  }, [])
 
   const validateForm = useCallback(() => {
     const errs: string[] = []
@@ -276,6 +302,38 @@ export function SignerManagementStep() {
           }
         })))
 
+        // Intentar guardar en saved_signers si está habilitado
+        console.log('[SavedSigner] Check conditions:', { isAuthenticated, saveEnabled, saveType })
+        if (isAuthenticated && saveEnabled) {
+          try {
+            const { data: userData } = await supabase.auth.getUser()
+            console.log('[SavedSigner] User data:', userData.user?.id)
+            const insertPayload = {
+              user_id: saveType === 'personal' ? userData.user?.id : null,
+              organization_id: saveType === 'organization' ? state.orgId : null,
+              type: saveType,
+              email: email.trim(),
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              phone: phone.trim() || null,
+              identifier_type: isRutType ? 'rut' : identifierType,
+              identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
+              usage_count: 0,
+              last_used_at: null
+            }
+            console.log('[SavedSigner] Insert payload:', insertPayload)
+            const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
+            
+            if (insertError) {
+              console.error('[SavedSigner] Error saving (guest mode):', insertError)
+            } else {
+              console.log('[SavedSigner] Saved successfully in guest mode')
+            }
+          } catch (err) {
+            console.error('[SavedSigner] Unexpected error (guest mode):', err)
+          }
+        }
+
         toast.success('Firmante agregado')
         resetForm()
         setIsModalOpen(false)
@@ -316,6 +374,56 @@ export function SignerManagementStep() {
 
       if (updateError) throw updateError
 
+      // Manejar guardado de firmante si está autenticado
+      console.log('[SavedSigner] Check conditions (logged mode):', { isAuthenticated, saveEnabled, selectedSavedSignerId, saveType })
+      if (isAuthenticated) {
+        try {
+          if (selectedSavedSignerId) {
+            // Incrementar uso si se seleccionó de la lista
+            console.log('[SavedSigner] Incrementing usage for:', selectedSavedSignerId)
+            const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
+              p_signer_id: selectedSavedSignerId
+            })
+            if (usageError) {
+              console.error('[SavedSigner] Error incrementing usage:', usageError)
+            }
+          } else if (saveEnabled) {
+            // Guardar como nuevo si se marcó el checkbox
+            const { data: userData } = await supabase.auth.getUser()
+            console.log('[SavedSigner] User ID:', userData.user?.id)
+            const insertPayload = {
+              user_id: saveType === 'personal' ? userData.user?.id : null,
+              organization_id: saveType === 'organization' ? state.orgId : null,
+              type: saveType,
+              email: email.trim(),
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              phone: phone.trim() || null,
+              identifier_type: isRutType ? 'rut' : identifierType,
+              identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
+              usage_count: 1,
+              last_used_at: new Date().toISOString()
+            }
+            console.log('[SavedSigner] Insert payload (logged mode):', insertPayload)
+            const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
+            
+            if (insertError) {
+              console.error('[SavedSigner] Error saving:', insertError)
+              toast.error('Error al guardar firmante: ' + insertError.message)
+            } else {
+              console.log('[SavedSigner] Saved successfully!')
+              toast.success('Firmante guardado para uso futuro')
+            }
+          } else {
+            console.log('[SavedSigner] Not saving - saveEnabled is false')
+          }
+        } catch (err: any) {
+          console.error('[SavedSigner] Unexpected error:', err)
+        }
+      } else {
+        console.log('[SavedSigner] Not saving - not authenticated')
+      }
+
       toast.success('Firmante agregado')
       resetForm()
       setIsModalOpen(false)
@@ -341,10 +449,16 @@ export function SignerManagementStep() {
     signers.length,
     state.countryCode,
     state.documentId,
+    state.orgId,
     state.signers,
     actions,
     supabase,
     validateForm,
+    // Dependencias para guardado de firmantes frecuentes
+    saveEnabled,
+    saveType,
+    isAuthenticated,
+    selectedSavedSignerId,
   ])
 
   const handleRemoveSigner = useCallback(
@@ -552,13 +666,25 @@ export function SignerManagementStep() {
                 <DialogContent className="sm:max-w-xl">
                   <DialogHeader>
                     <DialogTitle>Nuevo firmante</DialogTitle>
-                    <DialogDescription>
-                      Ingresa los datos del firmante. Todos los campos son obligatorios salvo que se indique lo contrario.
-                    </DialogDescription>
-                  </DialogHeader>
+                  <DialogDescription>
+                    Ingresa los datos del firmante. Todos los campos son obligatorios salvo que se indique lo contrario.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-4 py-4">
+                  {isAuthenticated && (
+                    <div className="space-y-2 pb-4 border-b">
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                        Reutilizar firmante guardado
+                      </Label>
+                      <SavedSignersSelector 
+                        onSelect={handleSelectSavedSigner} 
+                        organizationId={state.orgId || undefined} 
+                      />
+                    </div>
+                  )}
                   
-                  <div className="space-y-4 py-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label>Nombres</Label>
                         <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled={isSaving} placeholder="Ej: Juan Andrés" />
@@ -645,6 +771,16 @@ export function SignerManagementStep() {
                         )}
                       </div>
                     </div>
+
+                    {isAuthenticated && !selectedSavedSignerId && (
+                      <SaveSignerCheckbox
+                        enabled={saveEnabled}
+                        onEnabledChange={setSaveEnabled}
+                        type={saveType}
+                        onTypeChange={setSaveType}
+                        hasOrganization={!!state.orgId}
+                      />
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-2">

@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select'
 import { Loader2, Trash2, Plus, AlertCircle, CheckCircle2, Send } from 'lucide-react'
 import { toast } from 'sonner'
+import { SavedSignersSelector, type SavedSigner } from '../wizard/SavedSignersSelector'
+import { SaveSignerCheckbox } from '../wizard/SaveSignerCheckbox'
 import {
   formatRutOnInput,
   getRutError,
@@ -79,6 +81,32 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
   const [identifierValue, setIdentifierValue] = useState('')
   const [rutError, setRutError] = useState<string | null>(null)
   
+  // Estados para firmantes guardados
+  const [saveEnabled, setSaveEnabled] = useState(false)
+  const [saveType, setSaveType] = useState<'personal' | 'organization'>('personal')
+  const [selectedSavedSignerId, setSelectedSavedSignerId] = useState<string | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [orgId, setOrgId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const init = async () => {
+      const { data: userData } = await supabase.auth.getUser()
+      setIsAuthenticated(!!userData.user)
+
+      // Cargar organización del documento
+      const { data: docData } = await supabase
+        .from('signing_documents')
+        .select('organization_id')
+        .eq('id', documentId)
+        .single()
+      
+      if (docData?.organization_id) {
+        setOrgId(docData.organization_id)
+      }
+    }
+    init()
+  }, [supabase, documentId])
+
   const isRutType = identifierType === 'rut'
 
   const loadSigners = useCallback(async () => {
@@ -119,6 +147,17 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
       setIdentifierValue(value)
       setRutError(null)
     }
+  }
+
+  const handleSelectSavedSigner = (signer: SavedSigner) => {
+    setFirstName(signer.first_name)
+    setLastName(signer.last_name)
+    setEmail(signer.email)
+    setPhone(signer.phone || '')
+    setIdentifierType(signer.identifier_type)
+    setIdentifierValue(signer.identifier_value)
+    setSelectedSavedSignerId(signer.id)
+    setSaveEnabled(false)
   }
 
   const handleAddSigner = async () => {
@@ -165,6 +204,46 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
 
       if (updateError) throw updateError
 
+      // Manejar guardado de firmante si está autenticado
+      if (isAuthenticated) {
+        try {
+          if (selectedSavedSignerId) {
+            // Incrementar uso si se seleccionó de la lista
+            const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
+              p_signer_id: selectedSavedSignerId
+            })
+            if (usageError) {
+              console.error('[SavedSigner] Error incrementing usage:', usageError)
+            }
+          } else if (saveEnabled) {
+            // Guardar como nuevo si se marcó el checkbox
+            const { data: userData } = await supabase.auth.getUser()
+            const { error: insertError } = await supabase.from('saved_signers').insert({
+              user_id: saveType === 'personal' ? userData.user?.id : null,
+              organization_id: saveType === 'organization' ? orgId : null,
+              type: saveType,
+              email: email.trim(),
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              phone: phone.trim() || null,
+              identifier_type: identifierType,
+              identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
+              usage_count: 1,
+              last_used_at: new Date().toISOString()
+            })
+            
+            if (insertError) {
+              console.error('[SavedSigner] Error saving:', insertError)
+              toast.error('Error al guardar firmante: ' + insertError.message)
+            } else {
+              toast.success('Firmante guardado para uso futuro')
+            }
+          }
+        } catch (err: any) {
+          console.error('[SavedSigner] Unexpected error:', err)
+        }
+      }
+
       toast.success('Firmante agregado')
       
       // Reset form
@@ -173,6 +252,8 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
       setEmail('')
       setPhone('')
       setIdentifierValue('')
+      setSaveEnabled(false)
+      setSelectedSavedSignerId(null)
       
       loadSigners()
       onUpdate()
@@ -323,6 +404,18 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
           <h4 className="font-medium text-sm flex items-center gap-2">
             <Plus className="h-4 w-4" /> Agregar Firmante
           </h4>
+
+          {isAuthenticated && (
+            <div className="space-y-2 pb-2">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                Reutilizar firmante guardado
+              </Label>
+              <SavedSignersSelector 
+                onSelect={handleSelectSavedSigner} 
+                organizationId={orgId || undefined} 
+              />
+            </div>
+          )}
           
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -393,6 +486,16 @@ export function SignerEditPanel({ documentId, canEdit, onUpdate }: SignerEditPan
               {rutError && <span className="text-[10px] text-red-500">{rutError}</span>}
             </div>
           </div>
+
+          {isAuthenticated && !selectedSavedSignerId && (
+            <SaveSignerCheckbox
+              enabled={saveEnabled}
+              onEnabledChange={setSaveEnabled}
+              type={saveType}
+              onTypeChange={setSaveType}
+              hasOrganization={!!orgId}
+            />
+          )}
 
           <Button 
             onClick={handleAddSigner} 

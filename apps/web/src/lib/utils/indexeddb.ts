@@ -9,7 +9,7 @@ const FILE_KEY = 'current_pdf'
 
 export async function saveFileToIndexedDB(file: File): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
+    const request = indexedDB.open(DB_NAME, 2) // Incrementar versión para forzar upgrade
 
     request.onupgradeneeded = () => {
       const db = request.result
@@ -20,12 +20,23 @@ export async function saveFileToIndexedDB(file: File): Promise<void> {
 
     request.onsuccess = () => {
       const db = request.result
-      const transaction = db.transaction(STORE_NAME, 'readwrite')
-      const store = transaction.objectStore(STORE_NAME)
-      const putRequest = store.put(file, FILE_KEY)
+      // Verificar que el store existe antes de crear la transacción
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        console.warn('[IndexedDB] Object store not found, skipping save')
+        resolve()
+        return
+      }
+      try {
+        const transaction = db.transaction(STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const putRequest = store.put(file, FILE_KEY)
 
-      putRequest.onsuccess = () => resolve()
-      putRequest.onerror = () => reject(putRequest.error)
+        putRequest.onsuccess = () => resolve()
+        putRequest.onerror = () => reject(putRequest.error)
+      } catch (err) {
+        console.warn('[IndexedDB] Error creating transaction:', err)
+        resolve() // No bloquear el flujo
+      }
     }
 
     request.onerror = () => reject(request.error)
@@ -34,7 +45,7 @@ export async function saveFileToIndexedDB(file: File): Promise<void> {
 
 export async function getFileFromIndexedDB(): Promise<File | null> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
+    const request = indexedDB.open(DB_NAME, 2)
 
     request.onsuccess = () => {
       const db = request.result
@@ -56,7 +67,7 @@ export async function getFileFromIndexedDB(): Promise<File | null> {
 
 export async function clearFileFromIndexedDB(): Promise<void> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
+    const request = indexedDB.open(DB_NAME, 2)
 
     request.onsuccess = () => {
       const db = request.result
