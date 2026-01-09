@@ -28,3 +28,4 @@ BEGIN
   RAISE NOTICE '✅ Acceso de invitado a catálogos corregido mediante desactivación de security_invoker en vistas.';
 END $$;
 
+

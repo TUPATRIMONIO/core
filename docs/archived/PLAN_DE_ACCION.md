@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Checkout Unificado + Persistencia IndexedDB + RLS Públicas)\
+> **📅 Última actualización:** Enero 2026 (Checkout Unificado v2 + Flow + DLocal Go + Fixes Billing)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -8,7 +8,7 @@
 > COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN COMPLETA (Correo, OTP, Google,
 > Facebook, GitHub)** ✅ + **MEJORAS dLocal Go: CHECKOUT Y URLS ROBUSTAS** ✅ +
 > **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
-> FUNCIONANDO (Stripe, Transbank Webpay Plus, Transbank OneClick)** ✅ +
+> FUNCIONANDO (Stripe, Transbank, Flow, dLocal Go)** ✅ +
 > **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
 > INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
 > B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
@@ -21,7 +21,7 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -76,6 +76,10 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
 - **NUEVO (Ene 6, 2026):** Corrección crítica del flujo de firma CDS donde el estado del firmante no se actualizaba después de firmar. **Problema:** El firmante completaba su firma exitosamente pero el sistema mostraba "listo para firmar" y contaba 0/1 firmantes. **Causa:** Las operaciones UPDATE en `/api/signing/execute` usaban el cliente Supabase normal (anon key) que no tenía permisos RLS para actualizar tablas de firmantes externos. **Solución:** Cambio a `adminClient` (service_role) para todas las operaciones de escritura, con verificación de errores. **Archivos:** `apps/web/src/app/api/signing/execute/route.ts`, `apps/web/src/app/sign/[token]/SigningPageClient.tsx`. **Migración adicional:** `20260106000004_fix_all_http_post_functions.sql` para corregir error `net.http_post` en múltiples funciones de signing (`send_completed_document_notification`, `invoke_signing_notification`, `invoke_ai_review_function`, `invoke_internal_review_after_ai`).
 
 - **NUEVO (Ene 6, 2026):** Corrección crítica del error `function net.http_post(...) does not exist` en webhooks de Stripe - La función `signing.invoke_internal_review_function()` ahora usa la extensión `http` (síncrona) en lugar de `pg_net`, siguiendo el patrón establecido. Esto resuelve el problema donde las órdenes quedaban en estado `pending_payment` después de un pago exitoso con Stripe. Migración: `20260106000001_fix_internal_review_http.sql`. **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes - Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas en lugar de "Expira pronto") y solucionado el bucle infinito del spinner "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
+
+- **NUEVO (Ene 9, 2026):** Refactorización del Checkout Unificado v2. **Objetivo:** Optimizar performance y expandir medios de pago globales. **Cambios:** Migración de carga de datos de facturación al servidor (eliminación de parpadeos y fetch duplicados). Implementación de **Flow.cl** (para Chile Business) y **DLocal Go** (para LATAM y Chile Personal). Nueva lógica de disponibilidad dinámica basada en el par `(País, Tipo de Organización)`.
+
+- **NUEVO (Ene 9, 2026):** Corrección crítica y mejoras en Billing Settings. **Problema:** Errores "No organization found" por bloqueos de RLS y fallos de `.single()` con múltiples organizaciones. **Solución:** Uso de RPC `get_user_active_organization` y `service_role` para actualizaciones seguras. El formulario de facturación ahora es 100% condicional: muestra DTE (Boleta/Factura) solo para empresas en Chile, e Invoice internacional para el resto.
 
 - **NUEVO (Ene 7, 2026):** Sistema de recuperación automática para Revisión IA. **Problema:** Documentos quedaban "pegados" en `pending_ai_review` si la API fallaba post-pago o la Edge Function no respondía. **Solución:** Implementación de cronjob `/api/cron/retry-ai-reviews` (Vercel Cron cada 10 min) que detecta documentos estancados por más de 15 minutos y reintenta la revisión automáticamente hasta 3 veces.
 

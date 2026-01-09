@@ -20,3 +20,4 @@ GRANT SELECT ON public.signing_document_types TO anon, authenticated;
 GRANT SELECT ON public.signing_country_settings TO anon, authenticated;
 GRANT SELECT ON public.ai_prompts TO anon, authenticated;
 
+
