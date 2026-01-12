@@ -80,7 +80,8 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
           País de Facturación
         </CardTitle>
         <CardDescription>
-          Selecciona tu país para ver métodos de pago locales disponibles
+          El país determina el tipo de documento de facturación. 
+          Los pagos son independientes y se configuran por separado.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -97,7 +98,7 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
             <SelectContent>
               {COUNTRIES.map((country) => (
                 <SelectItem key={country.code} value={country.code}>
-                  {country.name} ({country.currency})
+                  {country.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -110,23 +111,24 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
               <strong>Cambio detectado:</strong> Estás cambiando de{' '}
               <strong>{currentCountryInfo?.name}</strong> a{' '}
               <strong>{selectedCountryInfo?.name}</strong>.
-              {isLATAM && (
-                <>
-                  {' '}Esto ajustará los precios y métodos de pago según tu país.
-                </>
-              )}
+            </p>
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+              Esto afectará el tipo de documento de facturación disponible. 
+              La moneda de pago se configura por separado.
             </p>
           </div>
         )}
 
-        {isLATAM && (
-          <div className="rounded-lg border-l-4 border-green-500 bg-green-50 p-4 dark:bg-green-900/20">
-            <p className="text-sm text-green-800 dark:text-green-200">
-              <strong>Métodos de pago disponibles:</strong> Podrás pagar con tarjetas de crédito o débito 
-              a través de Stripe, que acepta múltiples monedas y métodos de pago internacionales.
-            </p>
-          </div>
-        )}
+        <div className="rounded-lg border-l-4 border-purple-500 bg-purple-50 p-4 dark:bg-purple-900/20">
+          <p className="text-sm text-purple-800 dark:text-purple-200">
+            <strong>Reglas de facturación:</strong>
+          </p>
+          <ul className="text-xs text-purple-700 dark:text-purple-300 mt-2 space-y-1 list-disc list-inside">
+            <li>Para todas las organizaciones: Invoice con Stripe (por defecto)</li>
+            <li>Organizaciones business de Chile: Pueden seleccionar Boleta o Factura Electrónica</li>
+            <li>La moneda de pago es independiente y se configura por separado</li>
+          </ul>
+        </div>
 
         {error && (
           <Alert variant="destructive">

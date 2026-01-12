@@ -12,8 +12,14 @@ export interface PaymentConfig {
 /**
  * Obtiene la configuración de pagos disponible para una organización
  * basada en su país y tipo.
+ * 
+ * @param organizationId - ID de la organización
+ * @param preferredCurrency - Moneda preferida (opcional). Si se proporciona, se usará en lugar de derivarla del país.
  */
-export async function getPaymentConfig(organizationId: string): Promise<PaymentConfig> {
+export async function getPaymentConfig(
+  organizationId: string,
+  preferredCurrency?: string
+): Promise<PaymentConfig> {
   const supabase = await createClient();
   
   const { data: org, error } = await supabase
@@ -29,13 +35,14 @@ export async function getPaymentConfig(organizationId: string): Promise<PaymentC
       documentTypes: ['stripe_invoice'],
       country: 'US',
       orgType: 'personal',
-      currency: 'USD'
+      currency: preferredCurrency || 'USD'
     };
   }
 
   const country = org.country || 'CL';
   const orgType = org.org_type || 'personal';
-  const currency = getCurrencyForCountry(country);
+  // Usar moneda preferida si está disponible, sino derivarla del país
+  const currency = preferredCurrency || getCurrencyForCountry(country);
   
   const isChile = country === 'CL';
   const isBusiness = orgType === 'business';

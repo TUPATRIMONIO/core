@@ -26,7 +26,14 @@ export class StripeAdapter implements PaymentProvider {
     const url = new URL(params.returnUrl);
     const baseUrl = `${url.protocol}//${url.host}`;
     
-    const result = await createPaymentIntentForOrder(params.orderId, baseUrl);
+    // Construir cancelUrl si no se proporciona
+    let cancelUrl = params.cancelUrl;
+    if (!cancelUrl) {
+      const cancelUrlObj = params.cancelUrl ? new URL(params.cancelUrl) : url;
+      cancelUrl = `${cancelUrlObj.protocol}//${cancelUrlObj.host}/checkout/${params.orderId}`;
+    }
+    
+    const result = await createPaymentIntentForOrder(params.orderId, baseUrl, cancelUrl);
     
     if (!result.url) {
       throw new Error('No se pudo crear la sesión de checkout de Stripe');

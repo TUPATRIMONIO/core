@@ -9,6 +9,7 @@ import { Loader2, CreditCard, XCircle, Plus, Info } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
 import type { PaymentConfig } from '@/lib/payments/availability';
+import { useGlobalCurrencyOptional } from '@/providers/GlobalCurrencyProvider';
 import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
 import TransbankDocumentForm, { type BillingData } from './TransbankDocumentForm';
 import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
@@ -28,8 +29,12 @@ export default function OrderCheckoutForm({
 }: OrderCheckoutFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const currencyContext = useGlobalCurrencyOptional();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Usar moneda del contexto global si está disponible, sino usar la del paymentConfig
+  const selectedCurrency = currencyContext?.currency || paymentConfig.currency;
   
   // Tab activa inicial basada en proveedores disponibles
   const initialProvider = paymentConfig.providers[0];
@@ -146,12 +151,15 @@ export default function OrderCheckoutForm({
 
       // 2. Crear sesión de pago
       const returnUrl = `${window.location.origin}/checkout/${orderId}/success?provider=${provider}${subMethod ? `&method=${subMethod}` : ''}`;
+      const cancelUrl = `${window.location.origin}/checkout/${orderId}`;
       
       const checkoutBody: any = {
         orderId,
         provider,
         returnUrl,
+        cancelUrl,
         billing_data: currentBilling,
+        currency: selectedCurrency, // Usar moneda del contexto global
       };
 
       // Manejo especial Oneclick

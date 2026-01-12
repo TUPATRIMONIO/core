@@ -67,4 +67,3 @@ DO $$
 BEGIN
   RAISE NOTICE '✅ Bucket creado: cover-templates';
 END $$;
-

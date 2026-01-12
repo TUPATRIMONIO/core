@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { AutoRechargeSettings } from '@/components/billing/AutoRechargeSettings';
 import { CountrySelector } from '@/components/billing/CountrySelector';
+import { CurrencySelector } from '@/components/billing/CurrencySelector';
 import BillingDataSettings from '@/components/billing/BillingDataSettings';
 
 export default async function BillingSettingsPage() {
@@ -63,6 +64,10 @@ export default async function BillingSettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CountrySelector currentCountry={countryCode} />
         
+        <CurrencySelector />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AutoRechargeSettings 
           account={overview.account}
           paymentMethods={overview.paymentMethods}

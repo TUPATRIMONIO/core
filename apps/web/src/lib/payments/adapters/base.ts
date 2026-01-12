@@ -36,6 +36,8 @@ export interface CreatePaymentParams {
   orderId: string;
   /** URL a la que redirigir después del pago */
   returnUrl: string;
+  /** URL a la que redirigir cuando el usuario cancela el pago */
+  cancelUrl?: string;
   /** ID de la organización */
   organizationId: string;
   /** Monto a pagar */

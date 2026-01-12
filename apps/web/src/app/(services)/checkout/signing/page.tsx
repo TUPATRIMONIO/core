@@ -28,6 +28,7 @@ import { LoginForm } from '@/components/auth/login-form'
 import { SignupForm } from '@/components/auth/signup-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useOrganization } from '@/hooks/useOrganization'
+import { useSignedUrl } from '@/hooks/useSignedUrl'
 
 function formatMoney(amount: number, currency: string) {
   try {
@@ -49,17 +50,61 @@ export default function SigningCheckoutPage() {
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [user, setUser] = useState<any>(null)
+  const [documentFileSize, setDocumentFileSize] = useState<number | null>(null)
+  const [documentFileName, setDocumentFileName] = useState<string | null>(null)
+  const [documentFilePath, setDocumentFilePath] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  // Verificar autenticación
+  // Obtener URL firmada si hay documentId y filePath
+  const { signedUrl: storageSignedUrl } = useSignedUrl(
+    'docs-originals',
+    documentFilePath,
+    3600
+  )
+
+  // Verificar autenticación y cargar información del documento si existe
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndLoadDocument = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setIsAuthenticated(!!user)
       setUser(user)
+
+      // Si hay documentId, cargar información del documento desde la DB
+      if (state.documentId) {
+        const { data: doc, error: docError } = await supabase
+          .from('signing_documents')
+          .select('original_file_name, original_file_size, original_file_path')
+          .eq('id', state.documentId)
+          .single()
+
+        if (!docError && doc) {
+          setDocumentFileName(doc.original_file_name)
+          setDocumentFileSize(doc.original_file_size)
+          setDocumentFilePath(doc.original_file_path)
+        }
+      }
+
       setIsLoading(false)
     }
-    checkAuth()
-  }, [supabase])
+    checkAuthAndLoadDocument()
+  }, [supabase, state.documentId])
+
+  // Generar URL de previsualización: desde Storage si hay documentId, o desde File si está en memoria
+  useEffect(() => {
+    if (state.file) {
+      // Archivo en memoria: crear blob URL
+      const url = URL.createObjectURL(state.file)
+      setPreviewUrl(url)
+      return () => {
+        URL.revokeObjectURL(url)
+      }
+    } else if (storageSignedUrl) {
+      // Archivo en Storage: usar URL firmada
+      setPreviewUrl(storageSignedUrl)
+    } else {
+      setPreviewUrl(null)
+    }
+  }, [state.file, storageSignedUrl])
 
   const signature = state.signatureProduct
   const notary = state.notaryProduct
@@ -379,14 +424,34 @@ export default function SigningCheckoutPage() {
 
               <div className="space-y-2">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Documento Adjunto</h3>
-                <div className="flex items-center gap-3 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
-                  <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
-                    <FileText className="h-6 w-6" />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                    <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+                      <FileText className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{state.file?.name || documentFileName || 'Documento cargado'}</p>
+                      {(() => {
+                        const fileSize = state.file?.size || documentFileSize || 0
+                        const sizeText = fileSize / 1024 > 1024 
+                          ? `${(fileSize / 1024 / 1024).toFixed(1)} MB` 
+                          : `${(fileSize / 1024).toFixed(0)} KB`
+                        return <p className="text-xs text-muted-foreground">PDF • {sizeText}</p>
+                      })()}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{state.file?.name || 'Documento cargado'}</p>
-                    <p className="text-xs text-muted-foreground">PDF • {(state.file?.size || 0) / 1024 > 1024 ? `${((state.file?.size || 0) / 1024 / 1024).toFixed(1)} MB` : `${((state.file?.size || 0) / 1024).toFixed(0)} KB`}</p>
-                  </div>
+                  
+                  {/* Previsualización pequeña del PDF */}
+                  {previewUrl && (
+                    <div className="relative rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900/50 overflow-hidden">
+                      <iframe
+                        src={previewUrl}
+                        className="w-full h-64 border-0"
+                        title="Vista previa del documento"
+                      />
+                      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-zinc-50/80 dark:from-zinc-900/80 to-transparent" />
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

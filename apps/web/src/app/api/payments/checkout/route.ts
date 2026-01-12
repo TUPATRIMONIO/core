@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     
     // Parsear body
     const body = await request.json();
-    const { orderId, provider, returnUrl, document_type, billing_data } = body;
+    const { orderId, provider, returnUrl, cancelUrl, document_type, billing_data, currency } = body;
     
     if (!orderId) {
       return NextResponse.json(
@@ -202,13 +202,26 @@ export async function POST(request: NextRequest) {
       returnUrl: finalReturnUrl,
     });
     
+    // Construir cancelUrl si no se proporciona
+    let finalCancelUrl = cancelUrl;
+    if (!finalCancelUrl) {
+      const host = request.headers.get('host');
+      const protocol = request.headers.get('x-forwarded-proto') || 'https';
+      const baseUrl = host ? `${protocol}://${host}` : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      finalCancelUrl = `${baseUrl}/checkout/${orderId}`;
+    }
+    
+    // Usar moneda del body si está disponible, sino usar la de la orden
+    const paymentCurrency = currency || order.currency;
+    
     // Crear sesión de pago usando el proveedor
     const session = await paymentProvider.createPaymentSession({
       orderId,
       returnUrl: finalReturnUrl,
+      cancelUrl: finalCancelUrl,
       organizationId: order.organization_id,
       amount: order.amount,
-      currency: order.currency,
+      currency: paymentCurrency,
       metadata: {
         order_id: orderId,
         order_number: order.order_number,

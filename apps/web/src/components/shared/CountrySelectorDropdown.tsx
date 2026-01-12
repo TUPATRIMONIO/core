@@ -88,7 +88,7 @@ export function CountrySelectorDropdown({
       >
         <DropdownMenuLabel className="flex items-center gap-2 text-xs text-muted-foreground">
           <Globe className="h-3 w-3" />
-          País para servicios
+          Servicios disponibles en:
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
@@ -136,8 +136,8 @@ export function CountrySelectorDropdown({
         <DropdownMenuSeparator />
         <div className="px-2 py-1.5">
           <p className="text-[10px] text-muted-foreground leading-tight">
-            El país seleccionado determina los servicios y precios disponibles. 
-            Puedes acceder desde cualquier ubicación.
+            El país determina qué servicios están disponibles. 
+            La moneda de pago se selecciona por separado.
           </p>
         </div>
       </DropdownMenuContent>

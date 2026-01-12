@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Checkout Unificado v2 + Flow + DLocal Go + Fixes Billing)\
+> **📅 Última actualización:** Enero 2026 (Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -21,7 +21,7 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -32,12 +32,12 @@ PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL
 DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN
 COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA
 NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe,
-Transbank Webpay Plus, Transbank OneClick)** ✅ + **SISTEMA DE FACTURACIÓN
+Transbank Webpay Plus, Transbank OneClick, Flow, DLocal Go)** ✅ + **SISTEMA DE FACTURACIÓN
 INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C
 ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
 (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
 FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE & MULTIPLE)
-COMPLETOS** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN CON PERSISTENCIA** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **PRÓXIMO: Políticas RLS públicas + Testing flujo completo, portal de firma
+COMPLETOS** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN CON PERSISTENCIA** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl** ✅ + **PRÓXIMO: Políticas RLS públicas + Testing flujo completo, portal de firma
 /sign/[token], panel de notarías** 📋
 
 Toda la infraestructura técnica, páginas, sistemas de contenido, integraciones y
@@ -76,6 +76,10 @@ interfaz, con advertencias automáticas y actualización de límites del CRM.
 - **NUEVO (Ene 6, 2026):** Corrección crítica del flujo de firma CDS donde el estado del firmante no se actualizaba después de firmar. **Problema:** El firmante completaba su firma exitosamente pero el sistema mostraba "listo para firmar" y contaba 0/1 firmantes. **Causa:** Las operaciones UPDATE en `/api/signing/execute` usaban el cliente Supabase normal (anon key) que no tenía permisos RLS para actualizar tablas de firmantes externos. **Solución:** Cambio a `adminClient` (service_role) para todas las operaciones de escritura, con verificación de errores. **Archivos:** `apps/web/src/app/api/signing/execute/route.ts`, `apps/web/src/app/sign/[token]/SigningPageClient.tsx`. **Migración adicional:** `20260106000004_fix_all_http_post_functions.sql` para corregir error `net.http_post` en múltiples funciones de signing (`send_completed_document_notification`, `invoke_signing_notification`, `invoke_ai_review_function`, `invoke_internal_review_after_ai`).
 
 - **NUEVO (Ene 6, 2026):** Corrección crítica del error `function net.http_post(...) does not exist` en webhooks de Stripe - La función `signing.invoke_internal_review_function()` ahora usa la extensión `http` (síncrona) en lugar de `pg_net`, siguiendo el patrón establecido. Esto resuelve el problema donde las órdenes quedaban en estado `pending_payment` después de un pago exitoso con Stripe. Migración: `20260106000001_fix_internal_review_http.sql`. **NUEVO (Dic 30, 2025):** Correcciones críticas en el listado de órdenes - Lógica de expiración corregida (ahora muestra "Expiró el" para fechas pasadas en lugar de "Expira pronto") y solucionado el bucle infinito del spinner "Generando invoice" mediante un timeout de 3 minutos y la exclusión de órdenes gratuitas ($0), que no emiten facturas. **NUEVO (Nov 24, 2025):** Corrección crítica del sistema de numeración de facturas - Cambio a formato por organización `{ORG_SLUG}-{NÚMERO}` para evitar colisiones entre múltiples organizaciones creando facturas simultáneamente. Sistema ahora escalable y sin errores de duplicados.
+
+- **NUEVO (Ene 9, 2026):** Funcionalidad de Firmantes Frecuentes. **Objetivo:** Evitar la escritura repetitiva de datos de firmantes comunes. **Cambios:** Implementación de tabla `signing.saved_signers` con RLS para privacidad personal o compartida por organización. Integración de selector tipo combobox (`SavedSignersSelector`) en el wizard de firma y panel de edición. Opción de guardado automático al agregar nuevos firmantes. Seguimiento de frecuencia de uso para priorizar sugerencias.
+
+- **NUEVO (Ene 12, 2026):** Corrección del Flujo de Retorno de Pagos para Todos los Proveedores. **Problema:** Cuando el usuario presionaba "Volver" o cancelaba un pago en algunos proveedores (especialmente DLocal Go), era redirigido incorrectamente a la página de success en lugar de volver al checkout. Además, la página de success tenía código específico por proveedor que no era escalable. **Solución:** Implementación de sistema genérico con `cancelUrl` en la interfaz base de pagos. Refactorización completa de la página de success para usar el método unificado `verifyPayment()` en lugar de código específico por proveedor. Actualización de todos los adaptadores (DLocal, Stripe, Flow, Transbank) para usar `cancelUrl` cuando el usuario cancela. **Beneficios:** Escalable (cualquier proveedor nuevo funcionará automáticamente), mantenible (un solo lugar para la lógica de verificación), consistente (comportamiento uniforme), menos código (eliminada duplicación). **Archivos Modificados:** `apps/web/src/lib/payments/adapters/base.ts` (agregado `cancelUrl`), `apps/web/src/components/checkout/OrderCheckoutForm.tsx` (envío de `cancelUrl`), `apps/web/src/app/api/payments/checkout/route.ts` (construcción de `cancelUrl`), `apps/web/src/lib/payments/adapters/dlocal.ts` (uso de `cancelUrl` como `backUrl`), `apps/web/src/lib/payments/adapters/stripe.ts` y `apps/web/src/lib/stripe/checkout.ts` (integración de `cancelUrl`), `apps/web/src/app/(dashboard)/checkout/[orderId]/success/page.tsx` (refactorización completa a sistema unificado).
 
 - **NUEVO (Ene 9, 2026):** Refactorización del Checkout Unificado v2. **Objetivo:** Optimizar performance y expandir medios de pago globales. **Cambios:** Migración de carga de datos de facturación al servidor (eliminación de parpadeos y fetch duplicados). Implementación de **Flow.cl** (para Chile Business) y **DLocal Go** (para LATAM y Chile Personal). Nueva lógica de disponibilidad dinámica basada en el par `(País, Tipo de Organización)`.
 
@@ -584,6 +588,7 @@ READY:
 20260106000001_fix_internal_review_http.sql - Fix error net.http_post en webhooks Stripe
 20260106000004_fix_all_http_post_functions.sql - Fix net.http_post en todas las funciones signing
 20260107100000_add_ai_review_retry_count.sql   - Contador de reintentos IA y optimización de búsqueda
+20260109000001_signing_saved_signers.sql       - Sistema de firmantes frecuentes (personales y org)
 ```
 
 ### ✅ COMPLETADO - Checkout y Pagos (Dic 12, 2025)
@@ -693,11 +698,12 @@ send-signing-notification → ¿Se envían emails a firmantes?
 pdf-merge-with-cover → ¿Se genera QR en el documento?
 ```
 
-**T.3 - Verificar guardado de firmantes:**
+**T.3 - Verificar guardado de firmantes: ✅ COMPLETADO (Ene 9, 2026)**
 
-- [ ] Confirmar que first_name/last_name se guardan correctamente
-- [ ] Verificar validación de RUT chileno funciona en producción
-- [ ] Probar agregar/eliminar firmantes pre-envío
+- [x] Confirmar que first_name/last_name se guardan correctamente
+- [x] Verificar validación de RUT chileno funciona en producción
+- [x] Probar agregar/eliminar firmantes pre-envío
+- [x] Implementación de sistema de firmantes frecuentes (guardado/reutilización)
 
 ---
 

@@ -144,33 +144,87 @@ export function SignerManagementStep() {
         .neq('status', 'removed')
         .order('signing_order', { ascending: true })
 
-      if (fetchError) throw fetchError
-      
-      setSigners(data || [])
+    if (fetchError) throw fetchError
+
+    // Si la DB tiene firmantes, usarlos
+    if (data && data.length > 0) {
+      setSigners(data)
 
       // sincronizar estado para el checkout
-      actions.setSigners(
-        (data || []).map((s: any) => ({
-          first_name: s.first_name || '',
-          last_name: s.last_name || '',
-          email: s.email,
-          phone: s.phone || undefined,
-          identifier_type:
-            (s.metadata?.identifier_type as SignerIdentifierType) || (s.rut ? 'rut' : 'other'),
-          identifier_value: (s.metadata?.identifier_value as string) || s.rut || '',
-        }))
-      )
-    } catch (e: any) {
-      console.error('[SignerManagementStep] load error', e)
-      setError(e?.message || 'No se pudieron cargar los firmantes.')
-    } finally {
-      setIsLoading(false)
+      const mappedSigners = data.map((s: any) => ({
+        first_name: s.first_name || '',
+        last_name: s.last_name || '',
+        email: s.email,
+        phone: s.phone || undefined,
+        identifier_type:
+          (s.metadata?.identifier_type as SignerIdentifierType) || (s.rut ? 'rut' : 'other'),
+        identifier_value: (s.metadata?.identifier_value as string) || s.rut || '',
+      }))
+      
+      console.log('[SignerManagementStep] Syncing signers to wizard context:', mappedSigners.length, 'signers')
+      actions.setSigners(mappedSigners)
+    } else {
+      // Si la DB está vacía, usar firmantes locales si existen
+      if (state.signers.length > 0) {
+        setSigners(
+          state.signers.map((s, idx) => ({
+            id: `local-${idx}`,
+            first_name: s.first_name,
+            last_name: s.last_name,
+            email: s.email,
+            phone: s.phone,
+            signing_order: idx + 1,
+            metadata: {
+              identifier_type: s.identifier_type,
+              identifier_value: s.identifier_value,
+            },
+          }))
+        )
+        // Mantener sincronización con wizard context (ya están en state.signers)
+        // No necesitamos llamar actions.setSigners porque ya están ahí
+      } else {
+        setSigners([])
+        // Limpiar también el estado global para consistencia
+        actions.setSigners([])
+      }
     }
-  }, [actions, state.documentId, supabase])
+  } catch (e: any) {
+    console.error('[SignerManagementStep] load error', e)
+    setError(e?.message || 'No se pudieron cargar los firmantes.')
+  } finally {
+    setIsLoading(false)
+  }
+}, [actions, state.documentId, supabase])
 
   useEffect(() => {
     loadSigners()
   }, [loadSigners])
+
+  // Sincronizar automáticamente cuando cambian los signers locales (cuando hay documentId)
+  useEffect(() => {
+    if (!state.documentId) return
+    if (signers.length === 0) return
+    
+    // Solo sincronizar si los signers locales son diferentes a los del wizard context
+    // Comparar por cantidad y emails para evitar sincronizaciones innecesarias
+    const localEmails = signers.map((s: any) => s.email).sort().join(',')
+    const wizardEmails = state.signers.map((s: any) => s.email).sort().join(',')
+    
+    if (localEmails !== wizardEmails || signers.length !== state.signers.length) {
+      const mappedSigners = signers.map((s: any) => ({
+        first_name: s.first_name || '',
+        last_name: s.last_name || '',
+        email: s.email,
+        phone: s.phone || undefined,
+        identifier_type:
+          (s.metadata?.identifier_type as SignerIdentifierType) || (s.rut ? 'rut' : 'other'),
+        identifier_value: (s.metadata?.identifier_value as string) || s.rut || '',
+      }))
+      
+      console.log('[SignerManagementStep] Auto-syncing', mappedSigners.length, 'signers to wizard context')
+      actions.setSigners(mappedSigners)
+    }
+  }, [signers, state.documentId, state.signers, actions])
 
   // Sync mode from DB
   useEffect(() => {
@@ -381,11 +435,16 @@ export function SignerManagementStep() {
           if (selectedSavedSignerId) {
             // Incrementar uso si se seleccionó de la lista
             console.log('[SavedSigner] Incrementing usage for:', selectedSavedSignerId)
-            const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
-              p_signer_id: selectedSavedSignerId
-            })
-            if (usageError) {
-              console.error('[SavedSigner] Error incrementing usage:', usageError)
+            try {
+              const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
+                p_signer_id: selectedSavedSignerId
+              })
+              if (usageError) {
+                console.warn('[SavedSigner] Error incrementing usage (non-critical):', usageError.message || usageError)
+              }
+            } catch (err: any) {
+              // Si la función RPC no existe o hay un error, no es crítico para el flujo principal
+              console.warn('[SavedSigner] Could not increment usage (non-critical):', err?.message || err)
             }
           } else if (saveEnabled) {
             // Guardar como nuevo si se marcó el checkbox
@@ -590,8 +649,27 @@ export function SignerManagementStep() {
       setError('Debes agregar al menos 1 firmante para continuar.')
       return
     }
+    
+    // Asegurar sincronización con wizard context antes de continuar
+    // Si tenemos documentId (usuario logueado), los firmantes pueden estar en DB o locales
+    // Si NO tenemos documentId pero hay firmantes locales, necesitamos asegurar que estén sincronizados
+    const signersToSync = signers.map((s: any) => ({
+      first_name: s.first_name || '',
+      last_name: s.last_name || '',
+      email: s.email,
+      phone: s.phone || undefined,
+      identifier_type:
+        (s.metadata?.identifier_type as SignerIdentifierType) || (s.rut ? 'rut' : 'other'),
+      identifier_value: (s.metadata?.identifier_value as string) || s.rut || '',
+    }))
+    
+    console.log('[SignerManagementStep] handleContinue - Syncing', signersToSync.length, 'signers to wizard context')
+    console.log('[SignerManagementStep] handleContinue - Current wizard state.signers:', state.signers.length)
+    
+    actions.setSigners(signersToSync)
+    
     router.push('/checkout/signing')
-  }, [router, signers.length])
+  }, [router, signers, state.documentId, actions])
 
   return (
     <Card>

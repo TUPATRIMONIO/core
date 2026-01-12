@@ -34,7 +34,7 @@ export class DLocalAdapter implements PaymentProvider {
       currency: params.currency,
       country: org?.country || params.metadata?.country || 'CL',
       successUrl: params.returnUrl,
-      backUrl: params.returnUrl,
+      backUrl: params.cancelUrl || params.returnUrl.replace('/success', ''),
       notificationUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/dlocal/webhook`,
       customer: {
         name: billingData.name || org?.name || '',

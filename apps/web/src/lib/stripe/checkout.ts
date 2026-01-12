@@ -14,10 +14,12 @@ export interface CreateCheckoutSessionParams {
  * Crea un Payment Intent para una orden
  * @param orderId - ID de la orden (nuevo método)
  * @param baseUrl - URL base del sitio (opcional, se usa para construir URLs de redirect)
+ * @param cancelUrl - URL a la que redirigir cuando el usuario cancela (opcional)
  */
 export async function createPaymentIntentForOrder(
   orderId: string,
-  baseUrl?: string
+  baseUrl?: string,
+  cancelUrl?: string
 ) {
   const supabase = await createClient();
   
@@ -103,7 +105,7 @@ export async function createPaymentIntentForOrder(
   const finalBaseUrl = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
   const successUrl = `${finalBaseUrl}/checkout/${orderId}/success?provider=stripe&session_id={CHECKOUT_SESSION_ID}`;
-  const cancelUrl = `${finalBaseUrl}/checkout/${orderId}`;
+  const finalCancelUrl = cancelUrl || `${finalBaseUrl}/checkout/${orderId}`;
   
   console.log('💳 [Stripe Checkout] Creando Checkout Session:', {
     amount: total,
@@ -135,7 +137,7 @@ export async function createPaymentIntentForOrder(
     ],
     mode: 'payment',
     success_url: successUrl,
-    cancel_url: cancelUrl,
+    cancel_url: finalCancelUrl,
     metadata: {
       organization_id: order.organization_id,
       order_id: orderId,
