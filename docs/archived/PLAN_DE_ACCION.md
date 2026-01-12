@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 2026 (Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
+> **📅 Última actualización:** Enero 12, 2026 (Sistema de Precios Multi-Moneda Centralizado + Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -21,7 +21,7 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -56,6 +56,8 @@ manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversi�
 bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
 pueden convertir su organización entre tipos personal y empresarial desde la
 interfaz, con advertencias automáticas y actualización de límites del CRM.
+
+- **NUEVO (Ene 12, 2026):** Sistema de Precios Multi-Moneda Centralizado. **Problema:** Moneda mostrada (ARS) no correspondía al país del usuario (Chile). La organización se creaba sin país y existía un selector de moneda independiente del país. **Solución:** Implementación de tabla centralizada `core.supported_countries` que define la relación fija País → Moneda. Migración de `signing.products` a estructura multi-moneda (7 columnas: `price_usd`, `price_clp`, `price_ars`, `price_cop`, `price_mxn`, `price_pen`, `price_brl`). Creación de librería centralizada `lib/pricing/countries.ts` para funciones de país/moneda. **Cambios principales:** Eliminación de selectores de moneda independientes del país. CountrySelector ahora muestra la moneda asociada (readonly). Todos los servicios tienen precios definidos en todas las monedas, incluso si solo funcionan en un país específico. **Archivos:** `supabase/migrations/20260112000001_create_supported_countries.sql`, `supabase/migrations/20260112000002_migrate_signing_products_multi_currency.sql`, `supabase/migrations/20260112000003_seed_signing_products_all_currencies.sql`, `apps/web/src/lib/pricing/countries.ts`, `apps/web/src/lib/pricing/countries-sync.ts`. **Beneficios:** Escalable, consistente, elimina confusión usuario, facilita expansión a nuevos países.
 
 - **NUEVO (Ene 6, 2026):** Reorganización técnica de Storage Buckets. **Objetivo:** Eliminar redundancia y asegurar un flujo de archivos limpio. **Cambios:** Consolidación de buckets (`documents` y `signing-covers` eliminados/consolidados). Flujo establecido: `docs-originals` (subida usuario) → `docs-signed` (portada+QR y firmas) → `docs-notarized` (final). Actualización de la Edge Function `pdf-merge-with-cover` para gestionar estos cambios automáticamente.
 

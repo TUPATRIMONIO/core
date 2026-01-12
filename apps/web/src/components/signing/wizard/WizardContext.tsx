@@ -138,6 +138,39 @@ const SigningWizardContext = createContext<
   { state: SigningWizardState; actions: SigningWizardActions } | undefined
 >(undefined)
 
+/**
+ * Valida que el estado tenga los datos necesarios para el paso guardado.
+ * Si faltan datos críticos, retorna el paso más apropiado al que debe regresar.
+ */
+function validateStateForStep(state: Partial<SigningWizardState>): number {
+  const step = state.step ?? 0
+
+  // Paso 1 (ServiceSelection) requiere: archivo subido (uploadedFilePath O file)
+  if (step >= 1) {
+    if (!state.uploadedFilePath && !state.file) {
+      return 0 // Regresar al inicio
+    }
+  }
+
+  // Paso 2 (SignerManagement) requiere: producto de firma seleccionado
+  if (step >= 2) {
+    if (!state.signatureProduct) {
+      // Si hay archivo, regresar a selección de servicios
+      if (state.uploadedFilePath || state.file) {
+        return 1
+      }
+      // Si no hay archivo, regresar al inicio
+      return 0
+    }
+    // Verificar también que el archivo siga presente
+    if (!state.uploadedFilePath && !state.file) {
+      return 0 // Regresar al inicio si no hay archivo
+    }
+  }
+
+  return step // El paso es válido
+}
+
 export function SigningWizardProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SigningWizardState>(defaultState)
   const [isInitialized, setIsInitialized] = useState(false)
@@ -156,6 +189,21 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
           parsed.step = SIGNING_WIZARD_STEPS.length - 1
         }
 
+        // Si estamos en un paso avanzado pero no hay datos críticos, resetear
+        if (parsed.step > 0 && !parsed.uploadedFilePath) {
+          console.warn('[WizardContext] Estado inválido detectado - reseteando wizard')
+          localStorage.removeItem(STORAGE_KEY)
+          setIsInitialized(true)
+          return
+        }
+
+        // Validar que los datos necesarios para el paso existan
+        const validatedStep = validateStateForStep(parsed)
+        if (validatedStep !== parsed.step) {
+          console.warn('[WizardContext] Datos insuficientes para paso', parsed.step, '- regresando a paso', validatedStep)
+          parsed.step = validatedStep
+        }
+
         setState((s) => ({ ...s, ...parsed, file: null }))
 
         // Intentar recuperar el archivo de IndexedDB
@@ -163,6 +211,17 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
           getFileFromIndexedDB().then((file) => {
             if (file) {
               setState((s) => ({ ...s, file }))
+            } else {
+              // Si no se pudo recuperar el archivo y estamos en un paso avanzado,
+              // validar nuevamente y ajustar el paso si es necesario
+              setState((currentState) => {
+                const revalidatedStep = validateStateForStep(currentState)
+                if (revalidatedStep !== currentState.step) {
+                  console.warn('[WizardContext] Archivo no recuperado de IndexedDB - regresando a paso', revalidatedStep)
+                  return { ...currentState, step: revalidatedStep }
+                }
+                return currentState
+              })
             }
           })
         }).catch(err => console.error('[WizardContext] Error cargando IndexedDB:', err))

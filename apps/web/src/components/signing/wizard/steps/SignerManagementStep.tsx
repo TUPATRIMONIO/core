@@ -683,7 +683,7 @@ export function SignerManagementStep() {
           </Alert>
         )}
 
-        {!state.file ? (
+        {!state.file && !state.uploadedFilePath ? (
           <Alert>
             <AlertDescription>
               No hay documento cargado. Vuelve al paso anterior y sube un PDF.

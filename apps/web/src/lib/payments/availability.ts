@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { getCurrencyForCountry } from '@/lib/stripe/checkout';
+import { getCurrencyForCountry } from '@/lib/pricing/countries';
 
 export interface PaymentConfig {
   providers: string[];
