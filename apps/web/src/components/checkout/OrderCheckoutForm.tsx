@@ -9,7 +9,6 @@ import { Loader2, CreditCard, XCircle, Plus, Info } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
 import type { PaymentConfig } from '@/lib/payments/availability';
-import { useGlobalCurrencyOptional } from '@/providers/GlobalCurrencyProvider';
 import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
 import TransbankDocumentForm, { type BillingData } from './TransbankDocumentForm';
 import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
@@ -29,12 +28,11 @@ export default function OrderCheckoutForm({
 }: OrderCheckoutFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currencyContext = useGlobalCurrencyOptional();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Usar moneda del contexto global si está disponible, sino usar la del paymentConfig
-  const selectedCurrency = currencyContext?.currency || paymentConfig.currency;
+
+  // La moneda está asociada al país de la organización (order.currency)
+  const selectedCurrency = order.currency;
   
   // Tab activa inicial basada en proveedores disponibles
   const initialProvider = paymentConfig.providers[0];

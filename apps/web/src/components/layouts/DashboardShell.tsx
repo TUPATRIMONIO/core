@@ -5,9 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { PendingOrdersBadge } from '@/components/checkout/PendingOrdersBadge'
 import { GlobalCountryProvider } from '@/providers/GlobalCountryProvider'
-import { GlobalCurrencyProvider } from '@/providers/GlobalCurrencyProvider'
 import { CountrySelectorDropdown } from '@/components/shared/CountrySelectorDropdown'
-import { CurrencySelectorDropdown } from '@/components/shared/CurrencySelectorDropdown'
 import { OrganizationProvider } from '@/providers/OrganizationProvider'
 import { CreditBadge } from '@/components/billing/CreditBadge'
 import { Toaster } from 'sonner'
@@ -25,7 +23,6 @@ export async function DashboardShell({
   return (
     <OrganizationProvider>
       <GlobalCountryProvider>
-        <GlobalCurrencyProvider>
           <TooltipProvider>
             <SidebarProvider defaultOpen={defaultOpen}>
               <DashboardSidebar />
@@ -35,7 +32,6 @@ export async function DashboardShell({
                   <Separator orientation="vertical" className="mr-2 h-4" />
                   <div className="flex-1" />
                   <CreditBadge className="mr-2" />
-                  <CurrencySelectorDropdown variant="compact" className="mr-2" />
                   <CountrySelectorDropdown variant="compact" showReset />
                   <PendingOrdersBadge />
                 </header>
@@ -46,7 +42,6 @@ export async function DashboardShell({
             </SidebarProvider>
             <Toaster />
           </TooltipProvider>
-        </GlobalCurrencyProvider>
       </GlobalCountryProvider>
     </OrganizationProvider>
   )

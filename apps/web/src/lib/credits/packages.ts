@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getCurrencyForCountry, getLocalizedProductPrice, getCurrencyForCountrySync } from '../pricing/countries';
 
 /**
  * Obtiene paquetes de créditos disponibles con precios localizados
@@ -24,8 +25,8 @@ export async function getAvailablePackages(countryCode?: string) {
   if (countryCode) {
     return packages.map(pkg => ({
       ...pkg,
-      localized_price: getLocalizedPrice(pkg, countryCode),
-      currency: getCurrencyForCountry(countryCode),
+      localized_price: getLocalizedProductPrice(pkg, countryCode),
+      currency: getCurrencyForCountrySync(countryCode),
     }));
   }
   
@@ -62,8 +63,8 @@ export async function purchasePackage(
     .single();
   
   const countryCode = org?.country || 'US';
-  const currency = getCurrencyForCountry(countryCode);
-  const price = getLocalizedPrice(pkg, countryCode);
+  const currency = await getCurrencyForCountry(countryCode);
+  const price = getLocalizedProductPrice(pkg, countryCode);
   
   // Calcular impuesto
   const { data: taxRate } = await supabase.rpc('get_tax_rate', {
@@ -122,38 +123,7 @@ export async function purchasePackage(
   };
 }
 
-/**
- * Obtiene precio localizado según país
- */
-function getLocalizedPrice(pkg: any, countryCode: string): number {
-  const currencyMap: Record<string, keyof typeof pkg> = {
-    CL: 'price_clp',
-    AR: 'price_ars',
-    CO: 'price_cop',
-    MX: 'price_mxn',
-    PE: 'price_pen',
-    BR: 'price_brl',
-  };
-  
-  const priceKey = currencyMap[countryCode.toUpperCase()] || 'price_usd';
-  return pkg[priceKey] || pkg.price_usd || 0;
-}
-
-/**
- * Obtiene moneda para un país
- */
-function getCurrencyForCountry(countryCode: string): string {
-  const currencyMap: Record<string, string> = {
-    CL: 'CLP',
-    AR: 'ARS',
-    CO: 'COP',
-    MX: 'MXN',
-    PE: 'PEN',
-    BR: 'BRL',
-    US: 'USD',
-  };
-  
-  return currencyMap[countryCode.toUpperCase()] || 'USD';
-}
+// Funciones getCurrencyForCountry y getLocalizedPrice movidas a lib/pricing/countries.ts
+// Importadas arriba para mantener compatibilidad
 
 

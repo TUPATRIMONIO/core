@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, FileCheck, Stamp, Shield, PenTool } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSigningWizard, type SigningProduct } from '../WizardContext'
+import { getCurrencyForCountrySync, getLocalizedProductPrice } from '@/lib/pricing/countries-sync'
 
 function formatMoney(amount: number, currency: string) {
   try {
@@ -17,6 +18,11 @@ function formatMoney(amount: number, currency: string) {
   } catch {
     return `${amount} ${currency}`
   }
+}
+
+// Helper para obtener precio del producto según país
+function getProductPrice(product: SigningProduct, countryCode: string): number {
+  return getLocalizedProductPrice(product, countryCode)
 }
 
 // Mapeo de slugs de firma permitidos según servicio notarial
@@ -116,7 +122,13 @@ export function ServiceSelectionStep() {
 
       const normalized = (data || []).map((p: any) => ({
         ...p,
-        base_price: Number(p.base_price ?? 0),
+        price_usd: Number(p.price_usd ?? 0),
+        price_clp: Number(p.price_clp ?? 0),
+        price_ars: Number(p.price_ars ?? 0),
+        price_cop: Number(p.price_cop ?? 0),
+        price_mxn: Number(p.price_mxn ?? 0),
+        price_pen: Number(p.price_pen ?? 0),
+        price_brl: Number(p.price_brl ?? 0),
         display_order: Number(p.display_order ?? 0),
       })) as SigningProduct[]
 
@@ -180,6 +192,10 @@ export function ServiceSelectionStep() {
       if (docError) throw docError
 
       const currentMeta = (doc?.metadata || {}) as Record<string, any>
+      const currency = getCurrencyForCountrySync(state.countryCode);
+      const signaturePrice = getProductPrice(signatureSelected, state.countryCode);
+      const notaryPrice = notarySelected ? getProductPrice(notarySelected, state.countryCode) : 0;
+
       const nextMeta = {
         ...currentMeta,
         country_code: state.countryCode,
@@ -189,8 +205,8 @@ export function ServiceSelectionStep() {
           name: signatureSelected.name,
           identifier_type: signatureSelected.identifier_type,
           billing_unit: signatureSelected.billing_unit,
-          base_price: signatureSelected.base_price,
-          currency: signatureSelected.currency,
+          unit_price: signaturePrice,
+          currency: currency,
         },
         notary_product: notarySelected
           ? {
@@ -199,8 +215,8 @@ export function ServiceSelectionStep() {
               name: notarySelected.name,
               notary_service: notarySelected.notary_service,
               billing_unit: notarySelected.billing_unit,
-              base_price: notarySelected.base_price,
-              currency: notarySelected.currency,
+              unit_price: notaryPrice,
+              currency: currency,
             }
           : null,
       }
@@ -249,13 +265,15 @@ export function ServiceSelectionStep() {
     ]
 
     // Agregar opciones de productos notariales
+    const currency = getCurrencyForCountrySync(state.countryCode);
     notaryProducts.forEach((p) => {
       if (p.notary_service) {
+        const price = getProductPrice(p, state.countryCode);
         baseOptions.push({
           slug: p.notary_service,
           name: p.name,
           description: p.description || '',
-          price: p.base_price > 0 ? formatMoney(p.base_price, p.currency) : null,
+          price: price > 0 ? formatMoney(price, currency) : null,
           billingUnit: p.billing_unit === 'per_signer' ? 'firmante' : 'documento',
         })
       }
@@ -358,7 +376,11 @@ export function ServiceSelectionStep() {
                         <div className="flex items-center justify-between gap-3">
                           <div className="text-sm font-semibold">{p.name}</div>
                           <div className="text-sm font-semibold text-[var(--tp-buttons)]">
-                            {p.base_price > 0 ? formatMoney(p.base_price, p.currency) : 'Gratis'}
+                            {(() => {
+                              const price = getProductPrice(p, state.countryCode);
+                              const currency = getCurrencyForCountrySync(state.countryCode);
+                              return price > 0 ? formatMoney(price, currency) : 'Gratis';
+                            })()}
                             <span className="text-xs text-muted-foreground">
                               {' '}
                               / {p.billing_unit === 'per_signer' ? 'firmante' : 'documento'}

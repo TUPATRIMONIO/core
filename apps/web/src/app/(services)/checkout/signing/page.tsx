@@ -29,6 +29,7 @@ import { SignupForm } from '@/components/auth/signup-form'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
+import { getCurrencyForCountrySync, getLocalizedProductPrice } from '@/lib/pricing/countries-sync'
 
 function formatMoney(amount: number, currency: string) {
   try {
@@ -109,18 +110,18 @@ export default function SigningCheckoutPage() {
   const signature = state.signatureProduct
   const notary = state.notaryProduct
   const signersCount = state.signers.length
-  const currency = signature?.currency || notary?.currency || 'CLP'
+  const currency = getCurrencyForCountrySync(state.countryCode)
 
   const signatureSubtotal = useMemo(() => {
     if (!signature) return 0
-    const unit = Number(signature.base_price ?? 0)
+    const unit = getLocalizedProductPrice(signature, state.countryCode)
     return signature.billing_unit === 'per_signer' ? unit * signersCount : unit
-  }, [signature, signersCount])
+  }, [signature, signersCount, state.countryCode])
 
   const notarySubtotal = useMemo(() => {
     if (!notary) return 0
-    return Number(notary.base_price ?? 0)
-  }, [notary])
+    return getLocalizedProductPrice(notary, state.countryCode)
+  }, [notary, state.countryCode])
 
   const total = useMemo(() => signatureSubtotal + notarySubtotal, [notarySubtotal, signatureSubtotal])
 
@@ -263,7 +264,7 @@ export default function SigningCheckoutPage() {
               name: signature?.name,
               identifier_type: signature?.identifier_type,
               billing_unit: signature?.billing_unit,
-              unit_price: Number(signature?.base_price ?? 0),
+              unit_price: getLocalizedProductPrice(signature, state.countryCode),
               quantity: signature?.billing_unit === 'per_signer' ? signersCount : 1,
               subtotal: signatureSubtotal,
             },
@@ -273,7 +274,7 @@ export default function SigningCheckoutPage() {
                   slug: notary.slug,
                   name: notary.name,
                   notary_service: notary.notary_service,
-                  unit_price: Number(notary.base_price ?? 0),
+                  unit_price: getLocalizedProductPrice(notary, state.countryCode),
                   quantity: 1,
                   subtotal: notarySubtotal,
                 }
@@ -360,7 +361,7 @@ export default function SigningCheckoutPage() {
                       <User className="h-3 w-3" />
                       <span>{signersCount} firmante(s)</span>
                       <span>•</span>
-                      <span>{formatMoney(Number(signature?.base_price ?? 0), currency)} c/u</span>
+                      <span>{formatMoney(signature ? getLocalizedProductPrice(signature, state.countryCode) : 0, currency)} c/u</span>
                     </div>
                   </div>
                   <p className="font-bold text-lg text-[var(--tp-buttons)]">

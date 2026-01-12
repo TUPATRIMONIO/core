@@ -2,6 +2,7 @@ import { stripe } from './client';
 import { createOrGetCustomer } from './customers';
 import { createClient } from '@/lib/supabase/server';
 import { getOrder, updateOrderStatus, canPayOrder } from '../checkout/core';
+import { getCurrencyForCountry, getLocalizedProductPrice } from '../pricing/countries';
 
 export interface CreateCheckoutSessionParams {
   orgId: string;
@@ -47,7 +48,7 @@ export async function createPaymentIntentForOrder(
   }
   
   const countryCode = org.country || 'US';
-  const currency = order.currency || getCurrencyForCountry(countryCode);
+  const currency = order.currency || await getCurrencyForCountry(countryCode);
   const amount = order.amount;
   
   // Obtener datos del producto desde product_data
@@ -408,38 +409,7 @@ export function convertAmountFromStripe(amount: number, currency: string): numbe
   }
 }
 
-/**
- * Obtiene moneda para un país
- */
-export function getCurrencyForCountry(countryCode: string): string {
-  const currencyMap: Record<string, string> = {
-    CL: 'CLP',
-    AR: 'ARS',
-    CO: 'COP',
-    MX: 'MXN',
-    PE: 'PEN',
-    BR: 'BRL',
-    US: 'USD',
-  };
-  
-  return currencyMap[countryCode.toUpperCase()] || 'USD';
-}
-
-/**
- * Obtiene precio localizado según país
- */
-export function getLocalizedPrice(pkg: any, countryCode: string): number {
-  const currencyMap: Record<string, keyof typeof pkg> = {
-    CL: 'price_clp',
-    AR: 'price_ars',
-    CO: 'price_cop',
-    MX: 'price_mxn',
-    PE: 'price_pen',
-    BR: 'price_brl',
-  };
-  
-  const priceKey = currencyMap[countryCode.toUpperCase()] || 'price_usd';
-  return pkg[priceKey] || pkg.price_usd || 0;
-}
+// Funciones getCurrencyForCountry y getLocalizedPrice movidas a lib/pricing/countries.ts
+// Importadas arriba para mantener compatibilidad
 
 

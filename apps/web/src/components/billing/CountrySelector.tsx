@@ -10,23 +10,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, Globe } from 'lucide-react';
+import { Loader2, Globe, DollarSign } from 'lucide-react';
 import { updateOrganizationCountryAction } from '@/lib/billing/actions';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getCurrencyForCountrySync } from '@/lib/pricing/countries-sync';
 
 interface CountrySelectorProps {
   currentCountry: string;
 }
 
 const COUNTRIES = [
-  { code: 'US', name: 'Estados Unidos', currency: 'USD' },
-  { code: 'CL', name: 'Chile', currency: 'CLP' },
-  { code: 'AR', name: 'Argentina', currency: 'ARS' },
-  { code: 'CO', name: 'Colombia', currency: 'COP' },
-  { code: 'MX', name: 'México', currency: 'MXN' },
-  { code: 'PE', name: 'Perú', currency: 'PEN' },
-  { code: 'BR', name: 'Brasil', currency: 'BRL' },
+  { code: 'US', name: 'Estados Unidos' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'CO', name: 'Colombia' },
+  { code: 'MX', name: 'México' },
+  { code: 'PE', name: 'Perú' },
+  { code: 'BR', name: 'Brasil' },
 ];
 
 const LATAM_COUNTRIES = ['CL', 'AR', 'CO', 'MX', 'PE'];
@@ -71,6 +72,8 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
   const isLATAM = LATAM_COUNTRIES.includes(selectedCountry);
   const currentCountryInfo = COUNTRIES.find(c => c.code === currentCountry);
   const selectedCountryInfo = COUNTRIES.find(c => c.code === selectedCountry);
+  const currentCurrency = getCurrencyForCountrySync(currentCountry);
+  const selectedCurrency = getCurrencyForCountrySync(selectedCountry);
 
   return (
     <Card>
@@ -80,8 +83,8 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
           País de Facturación
         </CardTitle>
         <CardDescription>
-          El país determina el tipo de documento de facturación. 
-          Los pagos son independientes y se configuran por separado.
+          El país determina el tipo de documento de facturación y la moneda de pago. 
+          La moneda está asociada automáticamente al país seleccionado.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -96,13 +99,35 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
               <SelectValue placeholder="Selecciona un país" />
             </SelectTrigger>
             <SelectContent>
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.code} value={country.code}>
-                  {country.name}
-                </SelectItem>
-              ))}
+              {COUNTRIES.map((country) => {
+                const currency = getCurrencyForCountrySync(country.code);
+                return (
+                  <SelectItem key={country.code} value={country.code}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{country.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2">({currency})</span>
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Mostrar moneda asociada */}
+        <div className="rounded-lg border border-[var(--tp-lines-30)] bg-[var(--tp-background-light)] dark:bg-[var(--tp-background-dark)] p-3">
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <div className="flex-1">
+              <p className="text-xs text-muted-foreground">Moneda asociada</p>
+              <p className="text-sm font-semibold">
+                {selectedCurrency} - {selectedCountryInfo?.name}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            La moneda se establece automáticamente según el país y no puede modificarse manualmente.
+          </p>
         </div>
 
         {selectedCountry !== currentCountry && (
@@ -113,8 +138,8 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
               <strong>{selectedCountryInfo?.name}</strong>.
             </p>
             <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-              Esto afectará el tipo de documento de facturación disponible. 
-              La moneda de pago se configura por separado.
+              Esto afectará el tipo de documento de facturación disponible y cambiará la moneda de{' '}
+              <strong>{currentCurrency}</strong> a <strong>{selectedCurrency}</strong>.
             </p>
           </div>
         )}
@@ -126,7 +151,7 @@ export function CountrySelector({ currentCountry }: CountrySelectorProps) {
           <ul className="text-xs text-purple-700 dark:text-purple-300 mt-2 space-y-1 list-disc list-inside">
             <li>Para todas las organizaciones: Invoice con Stripe (por defecto)</li>
             <li>Organizaciones business de Chile: Pueden seleccionar Boleta o Factura Electrónica</li>
-            <li>La moneda de pago es independiente y se configura por separado</li>
+            <li>La moneda está asociada automáticamente al país seleccionado</li>
           </ul>
         </div>
 

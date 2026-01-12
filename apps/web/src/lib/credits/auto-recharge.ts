@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { addCredits } from './core';
 import { notifyAutoRechargeExecuted, notifyAutoRechargeFailed } from '@/lib/notifications/billing';
+import { getCurrencyForCountry, getLocalizedProductPrice } from '../pricing/countries';
 
 /**
  * Verifica y ejecuta auto-recarga si es necesario
@@ -101,10 +102,10 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
     .single();
   
   const countryCode = org?.country || 'US';
-  const currency = getCurrencyForCountry(countryCode);
+  const currency = await getCurrencyForCountry(countryCode);
   
   // Calcular precio según país
-  const price = getPriceForCountry(selectedPackage, countryCode);
+  const price = getLocalizedProductPrice(selectedPackage, countryCode);
   
   // Calcular impuesto
   const { data: taxRate } = await supabase.rpc('get_tax_rate', {
@@ -204,38 +205,7 @@ export async function executeAutoRecharge(orgId: string): Promise<boolean> {
   }
 }
 
-/**
- * Obtiene moneda para un país
- */
-function getCurrencyForCountry(countryCode: string): string {
-  const currencyMap: Record<string, string> = {
-    CL: 'CLP',
-    AR: 'ARS',
-    CO: 'COP',
-    MX: 'MXN',
-    PE: 'PEN',
-    BR: 'BRL',
-    US: 'USD',
-  };
-  
-  return currencyMap[countryCode.toUpperCase()] || 'USD';
-}
-
-/**
- * Obtiene precio de paquete según país
- */
-function getPriceForCountry(pkg: any, countryCode: string): number {
-  const currencyMap: Record<string, keyof typeof pkg> = {
-    CL: 'price_clp',
-    AR: 'price_ars',
-    CO: 'price_cop',
-    MX: 'price_mxn',
-    PE: 'price_pen',
-    BR: 'price_brl',
-  };
-  
-  const priceKey = currencyMap[countryCode.toUpperCase()] || 'price_usd';
-  return pkg[priceKey] || pkg.price_usd || 0;
-}
+// Funciones getCurrencyForCountry y getPriceForCountry movidas a lib/pricing/countries.ts
+// Importadas arriba para mantener compatibilidad
 
 

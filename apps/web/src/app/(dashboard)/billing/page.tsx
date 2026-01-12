@@ -2,7 +2,6 @@ import { getBillingOverviewAction } from '@/lib/billing/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { CurrencySelectorDropdown } from '@/components/shared/CurrencySelectorDropdown';
 
 export default async function BillingPage() {
   const overview = await getBillingOverviewAction();
@@ -42,27 +41,6 @@ export default async function BillingPage() {
             <Button asChild>
               <Link href="/billing/purchase-credits">Comprar Créditos</Link>
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Moneda de Pago */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Moneda de Pago</CardTitle>
-          <CardDescription>
-            Selecciona la moneda que se usará para todos tus pagos. 
-            Es independiente del país de servicios.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                La moneda seleccionada se aplicará a todas las compras y pagos futuros.
-              </p>
-            </div>
-            <CurrencySelectorDropdown variant="full" />
           </div>
         </CardContent>
       </Card>

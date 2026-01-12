@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createOrder, ProductType } from '@/lib/checkout/core';
 import { getAvailablePackages } from '@/lib/credits/packages';
-import { getCurrencyForCountry, getLocalizedPrice } from '@/lib/stripe/checkout';
+import { getCurrencyForCountry, getLocalizedProductPrice } from '@/lib/pricing/countries';
 
 /**
  * POST /api/checkout/create
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     }
     
     const countryCode = org.country || 'US';
-    const currency = getCurrencyForCountry(countryCode);
+    const currency = await getCurrencyForCountry(countryCode);
     
     // Parsear body
     const body = await request.json();
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      amount = getLocalizedPrice(selectedPackage, countryCode);
+      amount = getLocalizedProductPrice(selectedPackage, countryCode);
       productData = {
         package_id: selectedPackage.id,
         name: selectedPackage.name,
@@ -115,16 +115,29 @@ export async function POST(request: NextRequest) {
         currency,
       };
     } else {
-      // Para otros tipos de productos, se espera que vengan en metadata
-      // Permitimos amount=0 para servicios gratuitos
-      if (metadata?.amount === undefined || metadata?.amount === null) {
-        return NextResponse.json(
-          { error: 'amount es requerido en metadata para este tipo de producto' },
-          { status: 400 }
-        );
+      // Para otros tipos de productos (firma electrónica, notaría, etc.)
+      // Si viene amount en metadata, usarlo (retrocompatibilidad)
+      // Si no, intentar obtener precio desde la BD usando productId
+      if (metadata?.amount !== undefined && metadata?.amount !== null) {
+        amount = metadata.amount;
+      } else if (productId && (productType === 'electronic_signature' || productType === 'notary_service')) {
+        // Intentar obtener precio desde signing.products usando la función SQL
+        const { data: priceData, error: priceError } = await supabase.rpc('get_product_price', {
+          product_slug_param: productId,
+          country_code_param: countryCode,
+        });
+        
+        if (!priceError && priceData !== null && priceData > 0) {
+          amount = Number(priceData);
+        } else {
+          // Si no se encuentra precio, permitir amount=0 para servicios gratuitos
+          amount = 0;
+        }
+      } else {
+        // Permitimos amount=0 para servicios gratuitos
+        amount = 0;
       }
       
-      amount = metadata.amount;
       productData = {
         ...metadata,
         product_id: productId,

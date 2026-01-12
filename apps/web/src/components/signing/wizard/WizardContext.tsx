@@ -25,8 +25,14 @@ export interface SigningProduct {
   description: string | null
   category: SigningProductCategory
   country_code: string
-  base_price: number
-  currency: string
+  // Precios multi-moneda
+  price_usd: number
+  price_clp: number
+  price_ars: number
+  price_cop: number
+  price_mxn: number
+  price_pen: number
+  price_brl: number
   billing_unit: SigningProductBillingUnit
   identifier_type: SigningProductIdentifierType
   notary_service: string | null
