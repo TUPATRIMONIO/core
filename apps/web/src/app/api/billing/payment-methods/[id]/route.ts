@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { deletePaymentMethod } from '@/lib/stripe/payment-methods';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -22,21 +23,16 @@ export async function DELETE(
     }
     
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
     
-    await deletePaymentMethod(orgUser.organization_id, id);
+    await deletePaymentMethod(organizationId, id);
     
     return NextResponse.json({ success: true });
   } catch (error: any) {

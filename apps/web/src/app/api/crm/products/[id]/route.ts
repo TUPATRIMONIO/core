@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireApplicationAccess } from '@/lib/access/api-access-guard';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -30,16 +31,11 @@ export async function GET(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -49,7 +45,7 @@ export async function GET(
       .from('crm.products')
       .select('*')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (error || !product) {
@@ -96,16 +92,11 @@ export async function PATCH(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -115,7 +106,7 @@ export async function PATCH(
       .from('crm.products')
       .select('id')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!existingProduct) {
@@ -147,7 +138,7 @@ export async function PATCH(
       .from('crm.products')
       .update(updateData)
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .select()
       .single();
 
@@ -195,16 +186,11 @@ export async function DELETE(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -214,7 +200,7 @@ export async function DELETE(
       .from('crm.products')
       .select('id')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!existingProduct) {
@@ -229,7 +215,7 @@ export async function DELETE(
       .from('crm.products')
       .delete()
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id);
+      .eq('organization_id', organizationId);
 
     if (error) {
       console.error('Error deleting product:', error);

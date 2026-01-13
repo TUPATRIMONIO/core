@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { cancelSubscription } from '@/lib/stripe/subscriptions';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -18,16 +19,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -35,7 +31,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const immediately = body.immediately || false;
     
-    const result = await cancelSubscription(orgUser.organization_id, immediately);
+    const result = await cancelSubscription(organizationId, immediately);
     
     return NextResponse.json({ 
       success: true,

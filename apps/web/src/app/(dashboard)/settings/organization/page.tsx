@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ConvertToBusinessCard } from '@/components/organization/ConvertToBusinessCard'
 import { ConvertToPersonalCard } from '@/components/organization/ConvertToPersonalCard'
 import { Badge } from '@/components/ui/badge'
+import { redirect } from 'next/navigation'
 
 export default async function OrganizationSettingsPage() {
   const supabase = await createClient()
@@ -16,7 +17,38 @@ export default async function OrganizationSettingsPage() {
     return null
   }
 
-  // Obtener organización del usuario
+  // Usar la función RPC para obtener la organización activa (respeta last_active_organization_id)
+  const { data: activeOrg, error: activeOrgError } = await supabase.rpc(
+    'get_user_active_organization',
+    {
+      user_id: user.id,
+    }
+  )
+
+  // Log para debugging
+  if (activeOrgError) {
+    console.error('Error obteniendo organización activa:', activeOrgError)
+  }
+
+  // Si no tiene organización activa, redirigir a onboarding
+  if (!activeOrg || activeOrg.length === 0) {
+    redirect('/onboarding')
+  }
+
+  const activeOrgData = activeOrg[0]
+
+  // Obtener información completa de la organización activa
+  const { data: org } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('id', activeOrgData.organization_id)
+    .single()
+
+  if (!org) {
+    redirect('/onboarding')
+  }
+
+  // Obtener el rol del usuario en esta organización
   const { data: orgUser } = await supabase
     .from('organization_users')
     .select(`
@@ -24,26 +56,8 @@ export default async function OrganizationSettingsPage() {
       role:roles(slug, name)
     `)
     .eq('user_id', user.id)
+    .eq('organization_id', org.id)
     .eq('status', 'active')
-    .single()
-
-  if (!orgUser) {
-    return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground">No se encontró tu organización.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // Obtener información completa de la organización
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', orgUser.organization_id)
     .single()
 
   if (!org) {

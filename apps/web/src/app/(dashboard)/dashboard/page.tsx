@@ -212,12 +212,6 @@ export default async function DashboardPage() {
                   <span>Uso de Créditos</span>
                 </Link>
               </Button>
-              <Button variant="outline" className="h-auto flex-col p-4" asChild>
-                <Link href="/dashboard/blog">
-                  <Package className="mb-2 h-6 w-6" />
-                  <span>Blog</span>
-                </Link>
-              </Button>
             </div>
           </CardContent>
         </Card>

@@ -23,28 +23,8 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verificar si ya tiene organización
-    const { data: hasOrg, error: checkError } = await supabase.rpc(
-      'user_has_organization',
-      {
-        user_id: user.id,
-      }
-    )
-
-    if (checkError) {
-      console.error('Error verificando organización:', checkError)
-      return NextResponse.json(
-        { error: 'Error al verificar estado' },
-        { status: 500 }
-      )
-    }
-
-    if (hasOrg === true) {
-      return NextResponse.json(
-        { error: 'Ya tienes una organización asociada' },
-        { status: 400 }
-      )
-    }
+    // Para organizaciones empresariales, permitimos crear múltiples
+    // No necesitamos verificar si ya tiene organización, ya que se pueden tener varias empresariales
 
     // Parsear body
     const body = await request.json()

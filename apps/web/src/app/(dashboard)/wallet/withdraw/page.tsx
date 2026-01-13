@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { WithdrawForm } from '@/components/wallet/withdraw-form'
 import { getCreditAccount } from '@/lib/credits/core'
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org'
 
 export default async function WithdrawPage() {
     const supabase = await createClient()
@@ -13,19 +14,14 @@ export default async function WithdrawPage() {
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single()
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id)
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
         redirect('/dashboard')
     }
 
     // Obtener cuenta de créditos
-    const account = await getCreditAccount(orgUser.organization_id)
+    const account = await getCreditAccount(organizationId)
 
     return (
         <div className="container mx-auto py-8 max-w-2xl">
@@ -44,7 +40,7 @@ export default async function WithdrawPage() {
                         </div>
                     </div>
                     <WithdrawForm 
-                        organizationId={orgUser.organization_id}
+                        organizationId={organizationId}
                         availableCredits={account?.balance || 0}
                     />
                 </CardContent>

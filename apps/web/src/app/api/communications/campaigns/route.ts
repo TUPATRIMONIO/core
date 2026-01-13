@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hasSendGridAccount } from '@/lib/sendgrid/accounts';
 import { requireApplicationAccess } from '@/lib/access/api-access-guard';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export async function GET(request: NextRequest) {
   // Verificar acceso a Email Marketing
@@ -26,16 +27,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
@@ -52,7 +48,7 @@ export async function GET(request: NextRequest) {
         template:message_templates(id, name, subject),
         contact_list:contact_lists(id, name, contact_count)
       `)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
     if (status) {
@@ -91,22 +87,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
 
     // Verificar que la organización tenga cuenta SendGrid configurada
-    const hasAccount = await hasSendGridAccount(orgUser.organization_id);
+    const hasAccount = await hasSendGridAccount(organizationId);
     if (!hasAccount) {
       return NextResponse.json(
         {
@@ -133,7 +124,7 @@ export async function POST(request: NextRequest) {
       .from('message_templates')
       .select('id, is_active')
       .eq('id', template_id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!template) {
@@ -152,7 +143,7 @@ export async function POST(request: NextRequest) {
       .from('contact_lists')
       .select('id, contact_count')
       .eq('id', contact_list_id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!contactList) {
@@ -170,7 +161,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('campaigns')
       .insert({
-        organization_id: orgUser.organization_id,
+        organization_id: organizationId,
         name,
         description: description || null,
         template_id,

@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireApplicationAccess } from '@/lib/access/api-access-guard';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export async function POST(request: NextRequest) {
   // Verificar acceso a Email Marketing
@@ -29,18 +30,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
@@ -70,7 +64,7 @@ export async function POST(request: NextRequest) {
       }
 
       contactsToInsert.push({
-        organization_id: orgUser.organization_id,
+        organization_id: organizationId,
         email: email.toLowerCase().trim(),
         first_name: first_name?.trim() || null,
         last_name: last_name?.trim() || null,
@@ -94,7 +88,7 @@ export async function POST(request: NextRequest) {
     const { data: existingContacts } = await supabase
       .from('contacts')
       .select('email')
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .in('email', emailsToCheck);
 
     const existingEmails = new Set(existingContacts?.map((c) => c.email) || []);

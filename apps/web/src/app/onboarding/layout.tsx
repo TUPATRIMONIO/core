@@ -66,10 +66,8 @@ export default async function OnboardingLayout({
     hasOrg = false
   }
 
-  // Si ya tiene organización, redirigir al dashboard
-  if (hasOrg === true) {
-    redirect('/dashboard')
-  }
+  // NOTA: La redirección cuando ya tiene organización se maneja en la página
+  // para permitir el parámetro ?new=true que permite crear organizaciones adicionales
 
   return (
     <div className="min-h-screen bg-[var(--tp-background-light)]">

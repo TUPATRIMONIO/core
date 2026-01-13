@@ -189,14 +189,6 @@ const documentsMenuItems = [
   },
 ]
 
-const contentMenuItems = [
-  {
-    title: 'Blog',
-    url: '/dashboard/blog',
-    icon: BookOpen,
-  },
-]
-
 const settingsMenuItems = [
   {
     title: 'Organización',
@@ -306,7 +298,6 @@ export function DashboardSidebar() {
       const allOtherGroups = [
         ...communicationsMenuItems,
         ...billingMenuItems,
-        ...contentMenuItems,
         ...settingsMenuItems,
         ...mainMenuItems
       ]
@@ -490,29 +481,6 @@ export function DashboardSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
-
-        {/* Content */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Contenido</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {contentMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, contentMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         {/* Settings */}
         <SidebarGroup>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateInvoicePDF } from '@/lib/billing/pdf-generator';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -22,16 +23,11 @@ export async function GET(
     }
     
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -41,7 +37,7 @@ export async function GET(
       .from('documents')
       .select('*')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
     
     if (docError || !document) {
@@ -66,7 +62,7 @@ export async function GET(
     const { data: org } = await supabase
       .from('organizations')
       .select('name, email, address, tax_id')
-      .eq('id', orgUser.organization_id)
+      .eq('id', organizationId)
       .single();
     
     if (!org) {

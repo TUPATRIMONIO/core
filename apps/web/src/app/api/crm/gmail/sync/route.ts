@@ -7,6 +7,7 @@ import {
   getUnreadEmails,
   ParsedEmail,
 } from "@/lib/gmail/sync";
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 /**
  * API Route: Sincronizar emails entrantes de Gmail (CRM)
@@ -33,22 +34,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .limit(1)
-        .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
         return NextResponse.json(
-            { error: "Usuario no pertenece a ninguna organización activa" },
+            { error: orgError || "Usuario no pertenece a ninguna organización activa" },
             { status: 403 }
         );
     }
-
-    const organizationId = orgUser.organization_id;
 
     // Obtener emails (primero intentar solo no leídos, si no hay resultados, incluir leídos)
     console.log("🔄 Iniciando sincronización de emails (CRM)...");

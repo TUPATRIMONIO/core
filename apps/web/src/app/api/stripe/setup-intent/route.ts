@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSetupIntent } from '@/lib/stripe/payment-methods';
 import { createClient } from '@/lib/supabase/server';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -18,21 +19,16 @@ export async function POST(request: NextRequest) {
     }
     
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'No organization found' },
+        { error: orgError || 'No organization found' },
         { status: 400 }
       );
     }
     
-    const setupIntent = await createSetupIntent(orgUser.organization_id);
+    const setupIntent = await createSetupIntent(organizationId);
     
     return NextResponse.json({
       client_secret: setupIntent.client_secret,

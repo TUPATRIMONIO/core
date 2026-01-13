@@ -6,6 +6,7 @@ import {
   deletePaymentMethod 
 } from '@/lib/stripe/payment-methods';
 import { createClient } from '@/lib/supabase/server';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -21,21 +22,16 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'No organization found' },
+        { error: orgError || 'No organization found' },
         { status: 400 }
       );
     }
     
-    const methods = await listPaymentMethods(orgUser.organization_id);
+    const methods = await listPaymentMethods(organizationId);
     
     return NextResponse.json({ methods });
   } catch (error: any) {
@@ -59,16 +55,11 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'No organization found' },
+        { error: orgError || 'No organization found' },
         { status: 400 }
       );
     }
@@ -84,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
     
     const method = await attachPaymentMethod(
-      orgUser.organization_id,
+      organizationId,
       payment_method_id,
       set_as_default || false
     );
@@ -111,16 +102,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'No organization found' },
+        { error: orgError || 'No organization found' },
         { status: 400 }
       );
     }
@@ -135,7 +121,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    await deletePaymentMethod(orgUser.organization_id, paymentMethodId);
+    await deletePaymentMethod(organizationId, paymentMethodId);
     
     return NextResponse.json({ success: true });
   } catch (error: any) {

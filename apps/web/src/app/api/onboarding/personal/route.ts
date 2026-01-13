@@ -22,13 +22,16 @@ export async function POST() {
       )
     }
 
-    // Verificar si ya tiene organización
-    const { data: hasOrg, error: checkError } = await supabase.rpc(
-      'user_has_organization',
-      {
-        user_id: user.id,
-      }
-    )
+    // Verificar si ya tiene organización personal
+    // La función create_personal_organization ya valida esto, pero verificamos primero para dar mejor mensaje
+    const { data: userOrgs, error: checkError } = await supabase
+      .from('organization_users')
+      .select(`
+        organization_id,
+        organizations!inner(org_type)
+      `)
+      .eq('user_id', user.id)
+      .eq('status', 'active')
 
     if (checkError) {
       console.error('Error verificando organización:', checkError)
@@ -38,9 +41,12 @@ export async function POST() {
       )
     }
 
-    if (hasOrg === true) {
+    // Verificar si ya tiene una organización personal
+    const hasPersonalOrg = userOrgs?.some((ou: any) => ou.organizations?.org_type === 'personal')
+
+    if (hasPersonalOrg) {
       return NextResponse.json(
-        { error: 'Ya tienes una organización asociada' },
+        { error: 'Ya tienes una organización personal. Solo puedes tener una organización personal.' },
         { status: 400 }
       )
     }

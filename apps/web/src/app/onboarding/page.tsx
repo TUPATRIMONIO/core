@@ -27,10 +27,13 @@ function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const next = searchParams.get('next')
+  const isCreatingNew = searchParams.get('new') === 'true'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedType, setSelectedType] = useState<'personal' | 'business' | 'invitation' | null>(null)
   const [showBusinessDialog, setShowBusinessDialog] = useState(false)
+  const [hasPersonalOrg, setHasPersonalOrg] = useState(false)
+  const [isCheckingOrgs, setIsCheckingOrgs] = useState(isCreatingNew)
   const [businessForm, setBusinessForm] = useState({
     name: '',
     industry: '',
@@ -41,6 +44,21 @@ function OnboardingContent() {
   useEffect(() => {
     const checkStatus = async () => {
       try {
+        // Si estamos creando una nueva organización, verificar si ya tiene Personal
+        if (isCreatingNew) {
+          setIsCheckingOrgs(true)
+          const orgsResponse = await fetch('/api/organizations/user')
+          const orgsData = await orgsResponse.json()
+          
+          if (orgsData.success && orgsData.data) {
+            const hasPersonal = orgsData.data.some((org: any) => org.org_type === 'personal')
+            setHasPersonalOrg(hasPersonal)
+          }
+          setIsCheckingOrgs(false)
+          return
+        }
+
+        // Si no es creación nueva, verificar si tiene organización y redirigir
         const response = await fetch('/api/onboarding/status')
         const data = await response.json()
 
@@ -49,11 +67,12 @@ function OnboardingContent() {
         }
       } catch (err) {
         console.error('Error verificando estado:', err)
+        setIsCheckingOrgs(false)
       }
     }
 
     checkStatus()
-  }, [router, next])
+  }, [router, next, isCreatingNew])
 
   const handleCreatePersonal = async () => {
     setLoading(true)
@@ -72,8 +91,8 @@ function OnboardingContent() {
         return
       }
 
-      // Éxito - redirigir
-      router.push(next || '/dashboard')
+      // Éxito - redirigir con recarga completa para refrescar el contexto de organizaciones
+      window.location.href = next || '/dashboard'
     } catch (err) {
       setError('Ocurrió un error al crear tu organización. Por favor intenta de nuevo.')
       setLoading(false)
@@ -110,9 +129,9 @@ function OnboardingContent() {
         return
       }
 
-      // Éxito - cerrar dialog y redirigir
+      // Éxito - cerrar dialog y redirigir con recarga completa para refrescar el contexto de organizaciones
       setShowBusinessDialog(false)
-      router.push(next || '/dashboard')
+      window.location.href = next || '/dashboard'
     } catch (err) {
       setError('Ocurrió un error al crear tu organización. Por favor intenta de nuevo.')
       setLoading(false)
@@ -130,10 +149,12 @@ function OnboardingContent() {
             </div>
           </div>
           <h1 className="mb-2 text-3xl font-bold text-foreground sm:text-4xl">
-            Bienvenido a TuPatrimonio
+            {isCreatingNew ? 'Crear Nueva Organización' : 'Bienvenido a TuPatrimonio'}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Elige cómo quieres usar nuestra plataforma
+            {isCreatingNew 
+              ? 'Elige el tipo de organización que deseas crear'
+              : 'Elige cómo quieres usar nuestra plataforma'}
           </p>
         </div>
 
@@ -147,8 +168,9 @@ function OnboardingContent() {
         )}
 
         {/* Cards de Selección */}
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
-          {/* Uso Personal */}
+        <div className={`grid gap-4 ${isCreatingNew && hasPersonalOrg ? 'sm:grid-cols-1 md:grid-cols-2' : 'sm:grid-cols-1 md:grid-cols-3'}`}>
+          {/* Uso Personal - Ocultar si ya tiene una org Personal y está creando nueva */}
+          {!(isCreatingNew && hasPersonalOrg) && (
           <Card
             className={`cursor-pointer transition-all hover:shadow-lg ${
               selectedType === 'personal'
@@ -185,6 +207,7 @@ function OnboardingContent() {
               </ul>
             </CardContent>
           </Card>
+          )}
 
           {/* Uso Empresarial */}
           <Card
@@ -229,7 +252,8 @@ function OnboardingContent() {
             </CardContent>
           </Card>
 
-          {/* Tengo Invitación */}
+          {/* Tengo Invitación - Ocultar si está creando nueva organización */}
+          {!isCreatingNew && (
           <Card
             className={`cursor-pointer transition-all hover:shadow-lg ${
               selectedType === 'invitation'
@@ -258,10 +282,11 @@ function OnboardingContent() {
               </p>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* Botón de Continuar */}
-        {selectedType && selectedType !== 'invitation' && (
+        {selectedType && selectedType !== 'invitation' && !isCheckingOrgs && (
           <div className="mt-8 flex justify-center">
             <Button
               onClick={() => {
@@ -283,6 +308,13 @@ function OnboardingContent() {
                 'Continuar'
               )}
             </Button>
+          </div>
+        )}
+
+        {/* Loading state cuando está verificando organizaciones */}
+        {isCheckingOrgs && (
+          <div className="mt-8 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--tp-buttons)]" />
           </div>
         )}
 

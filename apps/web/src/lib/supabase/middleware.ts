@@ -50,7 +50,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Proteger rutas privadas
-  const isPrivateRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/notary')
+  const isPrivateRoute = pathname.startsWith('/dashboard') || 
+                         pathname.startsWith('/notary') || 
+                         pathname.startsWith('/settings')
 
   // Si no está autenticado e intenta acceder a ruta privada, redirigir a login
   if (!user && isPrivateRoute) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronsUpDown, Building2, Loader2 } from 'lucide-react';
+import { Check, ChevronsUpDown, Building2, Loader2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command';
 import {
   Popover,
@@ -122,6 +123,21 @@ export function OrganizationSwitcher() {
                   />
                 </CommandItem>
               ))}
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                onSelect={() => {
+                  setOpen(false);
+                  window.location.href = '/onboarding?new=true';
+                }}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded-md border border-dashed">
+                  <Plus className="h-4 w-4" />
+                </div>
+                <span className="text-sm">Crear nueva organización</span>
+              </CommandItem>
             </CommandGroup>
           </CommandList>
         </Command>

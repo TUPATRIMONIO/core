@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { requireApplicationAccess } from '@/lib/access/api-access-guard';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export async function GET(
   request: NextRequest,
@@ -30,16 +31,11 @@ export async function GET(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
@@ -53,7 +49,7 @@ export async function GET(
         contact_list:contact_lists(*)
       `)
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (campaignError || !campaign) {
@@ -120,16 +116,11 @@ export async function PATCH(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
@@ -142,7 +133,7 @@ export async function PATCH(
       .from('campaigns')
       .select('status')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!existingCampaign) {
@@ -178,7 +169,7 @@ export async function PATCH(
       .from('campaigns')
       .update(updateData)
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .select()
       .single();
 
@@ -216,16 +207,11 @@ export async function DELETE(
     }
 
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
 
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Usuario no pertenece a ninguna organización' },
+        { error: orgError || 'Usuario no pertenece a ninguna organización' },
         { status: 400 }
       );
     }
@@ -235,7 +221,7 @@ export async function DELETE(
       .from('campaigns')
       .select('status')
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .single();
 
     if (!campaign) {
@@ -261,7 +247,7 @@ export async function DELETE(
       .from('campaigns')
       .delete()
       .eq('id', id)
-      .eq('organization_id', orgUser.organization_id);
+      .eq('organization_id', organizationId);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

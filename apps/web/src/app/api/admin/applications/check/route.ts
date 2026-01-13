@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org'
 
 /**
  * POST /api/admin/applications/check
@@ -32,17 +33,10 @@ export async function POST(request: NextRequest) {
     // Obtener organización del usuario si no se proporciona
     let finalOrgId = organization_id
     if (!finalOrgId) {
-      const { data: orgUser } = await supabase
-        .from('organization_users')
-        .select('organization_id')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('joined_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (orgUser) {
-        finalOrgId = orgUser.organization_id
+      const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id)
+      
+      if (!orgError && organizationId) {
+        finalOrgId = organizationId
       }
     }
 

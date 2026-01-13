@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getActiveOrganizationId } from '@/lib/organization/get-active-org';
 
 export const runtime = 'nodejs';
 
@@ -19,16 +20,11 @@ export async function GET(request: NextRequest) {
     }
     
     // Obtener organización del usuario
-    const { data: orgUser } = await supabase
-      .from('organization_users')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
+    const { organizationId, error: orgError } = await getActiveOrganizationId(supabase, user.id);
     
-    if (!orgUser) {
+    if (orgError || !organizationId) {
       return NextResponse.json(
-        { error: 'Organización no encontrada' },
+        { error: orgError || 'Organización no encontrada' },
         { status: 400 }
       );
     }
@@ -59,7 +55,7 @@ export async function GET(request: NextRequest) {
     const { data: transactions } = await supabase
       .from('credit_transactions')
       .select('*')
-      .eq('organization_id', orgUser.organization_id)
+      .eq('organization_id', organizationId)
       .eq('type', 'spent')
       .gte('created_at', startDate.toISOString())
       .lte('created_at', now.toISOString())

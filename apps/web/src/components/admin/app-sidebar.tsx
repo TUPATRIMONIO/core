@@ -30,6 +30,7 @@ import {
   FileSignature,
   FileSearch,
   Bot,
+  Tag,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -111,9 +112,14 @@ const appsMenuItems = [
     icon: Contact,
   },
   {
-    title: 'Blog',
+    title: 'Blog Posts',
     url: '/admin/blog',
     icon: BookOpen,
+  },
+  {
+    title: 'Categorías Blog',
+    url: '/admin/blog/categories',
+    icon: Tag,
   },
   {
     title: 'Firma Electrónica',
