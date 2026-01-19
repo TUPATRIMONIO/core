@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -69,6 +70,10 @@ export function NotaryDashboardClient({
   const [uploadAssignment, setUploadAssignment] = useState<any | null>(null)
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploadDocumentId, setUploadDocumentId] = useState('') // opcional: pegar link/UUID desde QR
+  const [actionOpen, setActionOpen] = useState(false)
+  const [actionType, setActionType] = useState<AssignmentStatus | null>(null)
+  const [actionReason, setActionReason] = useState('')
+  const [actionAssignment, setActionAssignment] = useState<any | null>(null)
 
   const refresh = async () => {
     setIsRefreshing(true)
@@ -91,12 +96,22 @@ export function NotaryDashboardClient({
     }
   }
 
-  const updateStatus = async (assignmentId: string, status: AssignmentStatus) => {
+  const updateStatus = async (
+    assignmentId: string,
+    status: AssignmentStatus,
+    reason?: string
+  ) => {
     setError(null)
     try {
       const patch: any = { status }
       if (status === 'received') patch.received_at = new Date().toISOString()
       if (status === 'completed') patch.completed_at = new Date().toISOString()
+      if (status === 'needs_correction' || status === 'needs_documents') {
+        patch.correction_request = reason || null
+      }
+      if (status === 'rejected') {
+        patch.rejection_reason = reason || null
+      }
 
       const { error: updateError } = await supabase
         .from('signing_notary_assignments')
@@ -118,6 +133,27 @@ export function NotaryDashboardClient({
     setUploadFile(null)
     setUploadDocumentId('')
     setUploadOpen(true)
+  }
+
+  const openAction = (assignment: any, status: AssignmentStatus) => {
+    setActionAssignment(assignment)
+    setActionType(status)
+    setActionReason('')
+    setActionOpen(true)
+  }
+
+  const submitAction = async () => {
+    if (!actionAssignment?.id || !actionType) {
+      setError('Acción inválida.')
+      return
+    }
+
+    try {
+      await updateStatus(actionAssignment.id, actionType, actionReason.trim() || undefined)
+      setActionOpen(false)
+    } catch (e: any) {
+      setError(e?.message || 'No se pudo actualizar el estado.')
+    }
   }
 
   const submitUpload = async () => {
@@ -205,11 +241,25 @@ export function NotaryDashboardClient({
                     <div className="text-xs text-muted-foreground">
                       Cliente: {org?.name || doc?.organization_id || '—'}
                     </div>
+                    <div className="text-[11px] text-muted-foreground mt-1">
+                      Asignado: {a.assigned_at ? new Date(a.assigned_at).toLocaleString() : '—'}
+                      {a.received_at ? ` · Recibido: ${new Date(a.received_at).toLocaleString()}` : ''}
+                      {a.completed_at ? ` · Completado: ${new Date(a.completed_at).toLocaleString()}` : ''}
+                    </div>
                   </div>
                   <div className="shrink-0">{statusBadge(a.status)}</div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <a
+                    href={`/repository/${a.document_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                  >
+                    <Button size="sm" variant="outline">
+                      Ver documento
+                    </Button>
+                  </a>
                   {a.status === 'pending' && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'received')}>
                       Marcar recibido
@@ -222,13 +272,13 @@ export function NotaryDashboardClient({
                   )}
 
                   {(a.status === 'in_progress' || a.status === 'received') && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'needs_documents')}>
+                    <Button size="sm" variant="outline" onClick={() => openAction(a, 'needs_documents')}>
                       Solicitar docs
                     </Button>
                   )}
 
                   {(a.status === 'in_progress' || a.status === 'received') && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'needs_correction')}>
+                    <Button size="sm" variant="outline" onClick={() => openAction(a, 'needs_correction')}>
                       Solicitar corrección
                     </Button>
                   )}
@@ -240,7 +290,7 @@ export function NotaryDashboardClient({
                   )}
 
                   {a.status !== 'completed' && a.status !== 'rejected' && (
-                    <Button size="sm" variant="destructive" onClick={() => updateStatus(a.id, 'rejected')}>
+                    <Button size="sm" variant="destructive" onClick={() => openAction(a, 'rejected')}>
                       Rechazar
                     </Button>
                   )}
@@ -312,6 +362,38 @@ export function NotaryDashboardClient({
               ) : (
                 'Subir'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={actionOpen} onOpenChange={setActionOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Registrar observación</DialogTitle>
+            <DialogDescription>
+              Deja el motivo para que nuestro equipo interno lo gestione.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label>Motivo</Label>
+            <Textarea
+              value={actionReason}
+              onChange={(e) => setActionReason(e.target.value)}
+              placeholder="Describe el motivo de la observación o rechazo..."
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActionOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={submitAction}
+              className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+            >
+              Guardar
             </Button>
           </DialogFooter>
         </DialogContent>

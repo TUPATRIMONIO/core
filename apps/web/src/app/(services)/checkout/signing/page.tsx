@@ -211,6 +211,7 @@ export default function SigningCheckoutPage() {
           original_file_size: state.file!.size,
           original_file_type: state.file!.type || 'application/pdf',
           status: 'draft',
+          send_to_signers_on_complete: state.sendToSignersOnComplete,
           metadata: {
             country_code: state.countryCode,
             originals_bucket: 'docs-originals',

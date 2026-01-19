@@ -212,7 +212,7 @@ serve(async (req) => {
                 signaturePage = mergedPdf.addPage([595.276, 841.89]); // A4 estándar
             }
 
-            const { width: pageWidth, height: pageHeight } = signaturePage.getSize();
+            const { width: pageWidth, height: _pageHeight } = signaturePage.getSize();
             const totalPages = mergedPdf.getPageCount();
 
             // Obtener firmantes
@@ -241,7 +241,7 @@ serve(async (req) => {
                     const colWidth = contentWidth / COLUMNS;
                     const x_lower_left = MARGIN_LEFT + col * (colWidth + H_SPACING);
                     // CDS interpreta Y desde el borde superior, no desde abajo.
-                    const y_lower_left = MARGIN_TOP + row * (STAMP_HEIGHT + V_SPACING);
+                    const y_lower_left = MARGIN_TOP - row * (STAMP_HEIGHT + V_SPACING);
 
                     const x_upper_right = x_lower_left + STAMP_WIDTH;
                     const y_upper_right = y_lower_left + STAMP_HEIGHT;

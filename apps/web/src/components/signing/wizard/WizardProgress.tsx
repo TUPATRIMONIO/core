@@ -18,11 +18,19 @@ import {
 
 export function WizardProgress() {
   const {
-    state: { step, file, signers, signatureProduct, notaryProduct },
-    actions: { reset },
+    state: { step, file, uploadedFilePath, signers, signatureProduct, notaryProduct },
+    actions: { reset, setStep },
   } = useSigningWizard()
 
   const hasProgress = step > 0 || !!file || signers.length > 0 || !!signatureProduct || !!notaryProduct
+  const hasDocument = !!uploadedFilePath || !!file
+
+  const canNavigateToStep = (targetStep: number) => {
+    if (targetStep <= 0) return true
+    if (targetStep >= 1 && !hasDocument) return false
+    if (targetStep >= 2 && !signatureProduct) return false
+    return true
+  }
 
   return (
     <div className="rounded-lg border bg-background p-4 space-y-3">
@@ -64,36 +72,43 @@ export function WizardProgress() {
         {SIGNING_WIZARD_STEPS.map((s, idx) => {
           const isActive = idx === step
           const isDone = idx < step
+          const canNavigate = canNavigateToStep(idx)
 
           return (
-            <li
-              key={s.key}
-              className={cn(
-                'rounded-md border p-3 transition-colors',
-                isActive && 'border-[var(--tp-buttons)] bg-[var(--tp-buttons-10)]',
-                isDone && 'border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)]'
-              )}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={cn(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    isActive
-                      ? 'bg-[var(--tp-buttons)] text-white'
-                      : isDone
-                        ? 'bg-[var(--tp-lines-30)] text-foreground'
-                        : 'bg-muted text-muted-foreground'
-                  )}
-                >
-                  {idx + 1}
-                </div>
-                <div className="min-w-0">
-                  <div className={cn('text-sm font-semibold', !isActive && 'text-muted-foreground')}>
-                    {s.title}
+            <li key={s.key}>
+              <button
+                type="button"
+                onClick={() => setStep(idx)}
+                disabled={!canNavigate}
+                aria-current={isActive ? 'step' : undefined}
+                className={cn(
+                  'w-full rounded-md border p-3 text-left transition-colors',
+                  isActive && 'border-[var(--tp-buttons)] bg-[var(--tp-buttons-10)]',
+                  isDone && 'border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)]',
+                  !canNavigate && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
+                      isActive
+                        ? 'bg-[var(--tp-buttons)] text-white'
+                        : isDone
+                          ? 'bg-[var(--tp-lines-30)] text-foreground'
+                          : 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    {idx + 1}
                   </div>
-                  <div className="text-xs text-muted-foreground truncate">{s.description}</div>
+                  <div className="min-w-0">
+                    <div className={cn('text-sm font-semibold', !isActive && 'text-muted-foreground')}>
+                      {s.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">{s.description}</div>
+                  </div>
                 </div>
-              </div>
+              </button>
             </li>
           )
         })}

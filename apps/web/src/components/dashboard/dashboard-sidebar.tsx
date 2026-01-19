@@ -533,6 +533,12 @@ export function DashboardSidebar() {
                 align="end"
                 sideOffset={4}
               >
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/support/tickets">
+                    <Ticket />
+                    Mis tickets
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut />
                   Cerrar sesión

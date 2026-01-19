@@ -73,6 +73,7 @@ export interface SigningWizardState {
 
   signers: SignerDraft[]
   signingOrder: 'simultaneous' | 'sequential'
+  sendToSignersOnComplete: boolean
 
   orderId: string | null
 }
@@ -100,6 +101,7 @@ export interface SigningWizardActions {
 
   setSigners: (signers: SignerDraft[]) => void
   setSigningOrder: (order: 'simultaneous' | 'sequential') => void
+  setSendToSignersOnComplete: (enabled: boolean) => void
 
   setOrderId: (orderId: string | null) => void
   reset: () => void
@@ -130,6 +132,7 @@ const defaultState: SigningWizardState = {
 
   signers: [],
   signingOrder: 'simultaneous',
+  sendToSignersOnComplete: true,
 
   orderId: null,
 }
@@ -300,6 +303,8 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
 
       setSigners: (signers) => setState((s) => ({ ...s, signers })),
       setSigningOrder: (signingOrder) => setState((s) => ({ ...s, signingOrder })),
+      setSendToSignersOnComplete: (sendToSignersOnComplete) =>
+        setState((s) => ({ ...s, sendToSignersOnComplete })),
 
       setOrderId: (orderId) => setState((s) => ({ ...s, orderId })),
 

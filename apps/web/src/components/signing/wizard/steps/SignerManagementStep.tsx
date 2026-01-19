@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Trash2, AlertCircle, CheckCircle2, UserPlus, ArrowUp, ArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
@@ -51,6 +52,7 @@ export function SignerManagementStep() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
 
   const [signers, setSigners] = useState<any[]>([])
 
@@ -231,12 +233,15 @@ export function SignerManagementStep() {
     if (!state.documentId) return
     supabase
       .from('signing_documents')
-      .select('signing_order')
+      .select('signing_order, send_to_signers_on_complete')
       .eq('id', state.documentId)
       .single()
       .then(({ data, error }) => {
         if (!error && data) {
           actions.setSigningOrder(data.signing_order)
+          if (typeof data.send_to_signers_on_complete === 'boolean') {
+            actions.setSendToSignersOnComplete(data.send_to_signers_on_complete)
+          }
         }
       })
   }, [state.documentId, supabase, actions])
@@ -261,6 +266,26 @@ export function SignerManagementStep() {
     [actions, state.documentId, supabase]
   )
 
+  const handleSendToSignersChange = useCallback(
+    async (enabled: boolean) => {
+      actions.setSendToSignersOnComplete(enabled)
+      if (!state.documentId) return
+
+      try {
+        const { error: updateError } = await supabase
+          .from('signing_documents')
+          .update({ send_to_signers_on_complete: enabled })
+          .eq('id', state.documentId)
+
+        if (updateError) throw updateError
+      } catch (e: any) {
+        console.error('[SignerManagementStep] send_to_signers update error', e)
+        toast.error('Error al actualizar esta configuración')
+      }
+    },
+    [actions, state.documentId, supabase]
+  )
+
   const resetForm = useCallback(() => {
     setFirstName('')
     setLastName('')
@@ -273,252 +298,302 @@ export function SignerManagementStep() {
     setSelectedSavedSignerId(null)
   }, [requiresRutOnly])
 
-  const handleSelectSavedSigner = useCallback((signer: SavedSigner) => {
-    setFirstName(signer.first_name)
-    setLastName(signer.last_name)
-    setEmail(signer.email)
-    setPhone(signer.phone || '')
-    setIdentifierType(signer.identifier_type as SignerIdentifierType)
-    setIdentifierValue(signer.identifier_value)
-    setSelectedSavedSignerId(signer.id)
-    setSaveEnabled(false) // Ya está guardado
-  }, [])
+  const getValidationErrors = useCallback(
+    (values: {
+      firstName: string
+      lastName: string
+      email: string
+      identifierType: SignerIdentifierType
+      identifierValue: string
+    }) => {
+      const errs: string[] = []
+      const isRutValue = requiresRutOnly || values.identifierType === 'rut'
 
-  const validateForm = useCallback(() => {
-    const errs: string[] = []
+      if (!values.firstName.trim()) errs.push('Nombres es requerido')
+      if (!values.lastName.trim()) errs.push('Apellidos es requerido')
 
-    if (!firstName.trim()) errs.push('Nombres es requerido')
-    if (!lastName.trim()) errs.push('Apellidos es requerido')
+      if (!values.email.trim()) errs.push('Email es requerido')
+      else if (!/^[^@]+@[^@]+\.[^@]+$/.test(values.email.trim())) errs.push('Email inválido')
 
-    if (!email.trim()) errs.push('Email es requerido')
-    else if (!/^[^@]+@[^@]+\.[^@]+$/.test(email.trim())) errs.push('Email inválido')
-
-    const idVal = identifierValue.trim()
-    if (!idVal) errs.push('N° Identificador es requerido')
-    else if (isRutType) {
-      // Usar validación mejorada de RUT
-      const rutValidationError = getRutError(idVal)
-      if (rutValidationError) {
-        errs.push(rutValidationError)
-      }
-    } else if (idVal.length < 5) {
-      errs.push('El identificador debe tener al menos 5 caracteres')
-    }
-
-    return errs
-  }, [email, firstName, identifierValue, isRutType, lastName])
-
-  const handleAddSigner = useCallback(async () => {
-    setError(null)
-
-    if (!signatureProduct) {
-      setError('Primero debes seleccionar el tipo de firma.')
-      return
-    }
-
-    const errs = validateForm()
-    if (errs.length > 0) {
-      setError(errs[0])
-      return
-    }
-
-    try {
-      setIsSaving(true)
-
-      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
-      const rutDb = isRutType ? normalizeRutToDb(identifierValue) : null
-
-      // MODO PÚBLICO: No persistimos en DB todavía
-      if (!state.documentId) {
-        const newSigner: any = {
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          email: email.trim(),
-          phone: phone.trim() || undefined,
-          identifier_type: isRutType ? 'rut' : identifierType,
-          identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
+      const idVal = values.identifierValue.trim()
+      if (!idVal) errs.push('N° Identificador es requerido')
+      else if (isRutValue) {
+        const rutValidationError = getRutError(idVal)
+        if (rutValidationError) {
+          errs.push(rutValidationError)
         }
-        
-        const updatedSigners = [...state.signers, newSigner]
-        actions.setSigners(updatedSigners)
-        
-        // Actualizar estado local directamente para invitados
-        setSigners(updatedSigners.map((s, idx) => ({
-          id: `local-${idx}`,
-          first_name: s.first_name,
-          last_name: s.last_name,
-          email: s.email,
-          phone: s.phone,
-          signing_order: idx + 1,
-          metadata: {
-            identifier_type: s.identifier_type,
-            identifier_value: s.identifier_value,
-          }
-        })))
+      } else if (idVal.length < 5) {
+        errs.push('El identificador debe tener al menos 5 caracteres')
+      }
 
-        // Intentar guardar en saved_signers si está habilitado
-        console.log('[SavedSigner] Check conditions:', { isAuthenticated, saveEnabled, saveType })
-        if (isAuthenticated && saveEnabled) {
-          try {
-            const { data: userData } = await supabase.auth.getUser()
-            console.log('[SavedSigner] User data:', userData.user?.id)
-            const insertPayload = {
-              user_id: saveType === 'personal' ? userData.user?.id : null,
-              organization_id: saveType === 'organization' ? state.orgId : null,
-              type: saveType,
-              email: email.trim(),
-              first_name: firstName.trim(),
-              last_name: lastName.trim(),
-              phone: phone.trim() || null,
-              identifier_type: isRutType ? 'rut' : identifierType,
-              identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
-              usage_count: 0,
-              last_used_at: null
-            }
-            console.log('[SavedSigner] Insert payload:', insertPayload)
-            const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
-            
-            if (insertError) {
-              console.error('[SavedSigner] Error saving (guest mode):', insertError)
-            } else {
-              console.log('[SavedSigner] Saved successfully in guest mode')
-            }
-          } catch (err) {
-            console.error('[SavedSigner] Unexpected error (guest mode):', err)
+      return errs
+    },
+    [requiresRutOnly]
+  )
+
+  const addSigner = useCallback(
+    async (values: {
+      firstName: string
+      lastName: string
+      email: string
+      phone: string
+      identifierType: SignerIdentifierType
+      identifierValue: string
+      selectedSavedSignerId?: string | null
+    }) => {
+      setError(null)
+      setModalError(null)
+
+      if (!signatureProduct) {
+        const message = 'Primero debes seleccionar el tipo de firma.'
+        setError(message)
+        setModalError(message)
+        toast.error(message)
+        return
+      }
+
+      const errs = getValidationErrors(values)
+      if (errs.length > 0) {
+        setError(errs[0])
+        setModalError(errs[0])
+        toast.error(errs[0])
+        return
+      }
+
+      try {
+        setIsSaving(true)
+
+        const isRutValue = requiresRutOnly || values.identifierType === 'rut'
+        const normalizedIdentifierValue = isRutValue
+          ? normalizeRutToDb(values.identifierValue)
+          : values.identifierValue.trim()
+        const fullName = `${values.firstName.trim()} ${values.lastName.trim()}`.trim()
+        const rutDb = isRutValue ? normalizedIdentifierValue : null
+        const savedSignerId = values.selectedSavedSignerId ?? null
+
+        // MODO PÚBLICO: No persistimos en DB todavía
+        if (!state.documentId) {
+          const newSigner: any = {
+            first_name: values.firstName.trim(),
+            last_name: values.lastName.trim(),
+            email: values.email.trim(),
+            phone: values.phone.trim() || undefined,
+            identifier_type: isRutValue ? 'rut' : values.identifierType,
+            identifier_value: normalizedIdentifierValue,
           }
+
+          const updatedSigners = [...state.signers, newSigner]
+          actions.setSigners(updatedSigners)
+
+          // Actualizar estado local directamente para invitados
+          setSigners(updatedSigners.map((s, idx) => ({
+            id: `local-${idx}`,
+            first_name: s.first_name,
+            last_name: s.last_name,
+            email: s.email,
+            phone: s.phone,
+            signing_order: idx + 1,
+            metadata: {
+              identifier_type: s.identifier_type,
+              identifier_value: s.identifier_value,
+            }
+          })))
+
+          // Intentar guardar en saved_signers si está habilitado
+          console.log('[SavedSigner] Check conditions:', { isAuthenticated, saveEnabled, saveType })
+          if (isAuthenticated && saveEnabled) {
+            try {
+              const { data: userData } = await supabase.auth.getUser()
+              console.log('[SavedSigner] User data:', userData.user?.id)
+              const insertPayload = {
+                user_id: saveType === 'personal' ? userData.user?.id : null,
+                organization_id: saveType === 'organization' ? state.orgId : null,
+                type: saveType,
+                email: values.email.trim(),
+                first_name: values.firstName.trim(),
+                last_name: values.lastName.trim(),
+                phone: values.phone.trim() || null,
+                identifier_type: isRutValue ? 'rut' : values.identifierType,
+                identifier_value: normalizedIdentifierValue,
+                usage_count: 0,
+                last_used_at: null
+              }
+              console.log('[SavedSigner] Insert payload:', insertPayload)
+              const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
+
+              if (insertError) {
+                console.error('[SavedSigner] Error saving (guest mode):', insertError)
+              } else {
+                console.log('[SavedSigner] Saved successfully in guest mode')
+              }
+            } catch (err) {
+              console.error('[SavedSigner] Unexpected error (guest mode):', err)
+            }
+          }
+
+          toast.success('Firmante agregado')
+          resetForm()
+          setIsModalOpen(false)
+          return
+        }
+
+        // MODO LOGUEADO: Flujo original con DB
+        const { data, error: rpcError } = await supabase.rpc('add_document_signer', {
+          p_document_id: state.documentId,
+          p_email: values.email.trim(),
+          p_full_name: fullName,
+          p_rut: rutDb,
+          p_phone: values.phone.trim() || null,
+          p_is_foreigner: false,
+          p_signing_order: signers.length + 1,
+          p_user_id: null,
+        })
+
+        if (rpcError) throw new Error(rpcError.message)
+
+        const signerId = data?.id
+        if (!signerId) throw new Error('No se pudo crear el firmante')
+
+        const { error: updateError } = await supabase
+          .from('signing_signers')
+          .update({
+            first_name: values.firstName.trim(),
+            last_name: values.lastName.trim(),
+            is_foreigner: false,
+            metadata: {
+              identifier_type: isRutValue ? 'rut' : values.identifierType,
+              identifier_value: normalizedIdentifierValue,
+              country_code: state.countryCode,
+              role: role,
+            },
+          })
+          .eq('id', signerId)
+
+        if (updateError) throw updateError
+
+        // Manejar guardado de firmante si está autenticado
+        console.log('[SavedSigner] Check conditions (logged mode):', { isAuthenticated, saveEnabled, savedSignerId, saveType })
+        if (isAuthenticated) {
+          try {
+            if (savedSignerId) {
+              // Incrementar uso si se seleccionó de la lista
+              console.log('[SavedSigner] Incrementing usage for:', savedSignerId)
+              try {
+                const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
+                  p_signer_id: savedSignerId
+                })
+                if (usageError) {
+                  console.warn('[SavedSigner] Error incrementing usage (non-critical):', usageError.message || usageError)
+                }
+              } catch (err: any) {
+                console.warn('[SavedSigner] Could not increment usage (non-critical):', err?.message || err)
+              }
+            } else if (saveEnabled) {
+              // Guardar como nuevo si se marcó el checkbox
+              const { data: userData } = await supabase.auth.getUser()
+              console.log('[SavedSigner] User ID:', userData.user?.id)
+              const insertPayload = {
+                user_id: saveType === 'personal' ? userData.user?.id : null,
+                organization_id: saveType === 'organization' ? state.orgId : null,
+                type: saveType,
+                email: values.email.trim(),
+                first_name: values.firstName.trim(),
+                last_name: values.lastName.trim(),
+                phone: values.phone.trim() || null,
+                identifier_type: isRutValue ? 'rut' : values.identifierType,
+                identifier_value: normalizedIdentifierValue,
+                usage_count: 1,
+                last_used_at: new Date().toISOString()
+              }
+              console.log('[SavedSigner] Insert payload (logged mode):', insertPayload)
+              const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
+
+              if (insertError) {
+                console.error('[SavedSigner] Error saving:', insertError)
+                toast.error('Error al guardar firmante: ' + insertError.message)
+              } else {
+                console.log('[SavedSigner] Saved successfully!')
+                toast.success('Firmante guardado para uso futuro')
+              }
+            } else {
+              console.log('[SavedSigner] Not saving - saveEnabled is false')
+            }
+          } catch (err: any) {
+            console.error('[SavedSigner] Unexpected error:', err)
+          }
+        } else {
+          console.log('[SavedSigner] Not saving - not authenticated')
         }
 
         toast.success('Firmante agregado')
         resetForm()
         setIsModalOpen(false)
-        return
+        await loadSigners()
+      } catch (e: any) {
+        console.error('[SignerManagementStep] add error', e)
+        const message = e?.message || 'No se pudo agregar el firmante.'
+        setError(message)
+        setModalError(message)
+        toast.error(message)
+      } finally {
+        setIsSaving(false)
       }
+    },
+    [
+      actions,
+      getValidationErrors,
+      isAuthenticated,
+      loadSigners,
+      requiresRutOnly,
+      resetForm,
+      role,
+      saveEnabled,
+      saveType,
+      signatureProduct,
+      signers.length,
+      state.countryCode,
+      state.documentId,
+      state.orgId,
+      state.signers,
+      supabase,
+    ]
+  )
 
-      // MODO LOGUEADO: Flujo original con DB
-      const { data, error: rpcError } = await supabase.rpc('add_document_signer', {
-        p_document_id: state.documentId,
-        p_email: email.trim(),
-        p_full_name: fullName,
-        p_rut: rutDb,
-        p_phone: phone.trim() || null,
-        p_is_foreigner: false,
-        p_signing_order: signers.length + 1,
-        p_user_id: null,
+  const handleSelectSavedSigner = useCallback(
+    (signer: SavedSigner) => {
+      setFirstName(signer.first_name)
+      setLastName(signer.last_name)
+      setEmail(signer.email)
+      setPhone(signer.phone || '')
+      setIdentifierType(signer.identifier_type as SignerIdentifierType)
+      setIdentifierValue(signer.identifier_value)
+      setSelectedSavedSignerId(signer.id)
+      setSaveEnabled(false) // Ya está guardado
+
+      addSigner({
+        firstName: signer.first_name,
+        lastName: signer.last_name,
+        email: signer.email,
+        phone: signer.phone || '',
+        identifierType: signer.identifier_type as SignerIdentifierType,
+        identifierValue: signer.identifier_value,
+        selectedSavedSignerId: signer.id,
       })
+    },
+    [addSigner]
+  )
 
-      if (rpcError) throw new Error(rpcError.message)
-      
-      const signerId = data?.id
-      if (!signerId) throw new Error('No se pudo crear el firmante')
-
-      const { error: updateError } = await supabase
-        .from('signing_signers')
-        .update({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          is_foreigner: false,
-          metadata: {
-            identifier_type: isRutType ? 'rut' : identifierType,
-            identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
-            country_code: state.countryCode,
-            role: role,
-          },
-        })
-        .eq('id', signerId)
-
-      if (updateError) throw updateError
-
-      // Manejar guardado de firmante si está autenticado
-      console.log('[SavedSigner] Check conditions (logged mode):', { isAuthenticated, saveEnabled, selectedSavedSignerId, saveType })
-      if (isAuthenticated) {
-        try {
-          if (selectedSavedSignerId) {
-            // Incrementar uso si se seleccionó de la lista
-            console.log('[SavedSigner] Incrementing usage for:', selectedSavedSignerId)
-            try {
-              const { error: usageError } = await supabase.rpc('increment_saved_signer_usage', {
-                p_signer_id: selectedSavedSignerId
-              })
-              if (usageError) {
-                console.warn('[SavedSigner] Error incrementing usage (non-critical):', usageError.message || usageError)
-              }
-            } catch (err: any) {
-              // Si la función RPC no existe o hay un error, no es crítico para el flujo principal
-              console.warn('[SavedSigner] Could not increment usage (non-critical):', err?.message || err)
-            }
-          } else if (saveEnabled) {
-            // Guardar como nuevo si se marcó el checkbox
-            const { data: userData } = await supabase.auth.getUser()
-            console.log('[SavedSigner] User ID:', userData.user?.id)
-            const insertPayload = {
-              user_id: saveType === 'personal' ? userData.user?.id : null,
-              organization_id: saveType === 'organization' ? state.orgId : null,
-              type: saveType,
-              email: email.trim(),
-              first_name: firstName.trim(),
-              last_name: lastName.trim(),
-              phone: phone.trim() || null,
-              identifier_type: isRutType ? 'rut' : identifierType,
-              identifier_value: isRutType ? normalizeRutToDb(identifierValue) : identifierValue.trim(),
-              usage_count: 1,
-              last_used_at: new Date().toISOString()
-            }
-            console.log('[SavedSigner] Insert payload (logged mode):', insertPayload)
-            const { error: insertError } = await supabase.from('saved_signers').insert(insertPayload)
-            
-            if (insertError) {
-              console.error('[SavedSigner] Error saving:', insertError)
-              toast.error('Error al guardar firmante: ' + insertError.message)
-            } else {
-              console.log('[SavedSigner] Saved successfully!')
-              toast.success('Firmante guardado para uso futuro')
-            }
-          } else {
-            console.log('[SavedSigner] Not saving - saveEnabled is false')
-          }
-        } catch (err: any) {
-          console.error('[SavedSigner] Unexpected error:', err)
-        }
-      } else {
-        console.log('[SavedSigner] Not saving - not authenticated')
-      }
-
-      toast.success('Firmante agregado')
-      resetForm()
-      setIsModalOpen(false)
-      await loadSigners()
-    } catch (e: any) {
-      console.error('[SignerManagementStep] add error', e)
-      setError(e?.message || 'No se pudo agregar el firmante.')
-    } finally {
-      setIsSaving(false)
-    }
-  }, [
-    email,
-    firstName,
-    identifierType,
-    identifierValue,
-    isRutType,
-    lastName,
-    loadSigners,
-    phone,
-    resetForm,
-    role,
-    signatureProduct,
-    signers.length,
-    state.countryCode,
-    state.documentId,
-    state.orgId,
-    state.signers,
-    actions,
-    supabase,
-    validateForm,
-    // Dependencias para guardado de firmantes frecuentes
-    saveEnabled,
-    saveType,
-    isAuthenticated,
-    selectedSavedSignerId,
-  ])
+  const handleAddSigner = useCallback(() => {
+    addSigner({
+      firstName,
+      lastName,
+      email,
+      phone,
+      identifierType,
+      identifierValue,
+      selectedSavedSignerId,
+    })
+  }, [addSigner, email, firstName, identifierType, identifierValue, lastName, phone, selectedSavedSignerId])
 
   const handleRemoveSigner = useCallback(
     async (signerId: string) => {
@@ -740,8 +815,14 @@ export function SignerManagementStep() {
                 </div>
               </div>
               
-              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-xl">
+              <Dialog
+                open={isModalOpen}
+                onOpenChange={(nextOpen) => {
+                  setIsModalOpen(nextOpen)
+                  if (!nextOpen) setModalError(null)
+                }}
+              >
+                <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Nuevo firmante</DialogTitle>
                   <DialogDescription>
@@ -750,6 +831,11 @@ export function SignerManagementStep() {
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
+                  {modalError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{modalError}</AlertDescription>
+                    </Alert>
+                  )}
                   {isAuthenticated && (
                     <div className="space-y-2 pb-4 border-b">
                       <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
@@ -978,6 +1064,24 @@ export function SignerManagementStep() {
                 </Dialog>
               </div>
               </div>
+
+            <div className="rounded-lg border border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)] p-4">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="send-to-signers"
+                  checked={state.sendToSignersOnComplete}
+                  onCheckedChange={(checked) => handleSendToSignersChange(Boolean(checked))}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="send-to-signers" className="text-sm font-semibold">
+                    Enviar documento finalizado a todos los firmantes
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Si lo desactivas, el documento finalizado no se enviará automáticamente.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button variant="outline" onClick={handleBack} disabled={isSaving}>

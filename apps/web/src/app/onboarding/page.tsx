@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Home, Building2, Link2, CheckCircle, Loader2 } from 'lucide-react'
+import { Home, Building2, Link2, CheckCircle, Loader2, Stamp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -10,6 +10,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { getDefaultCountries } from '@/lib/pricing/countries-sync'
 
 export default function OnboardingPage() {
   return (
@@ -30,14 +38,23 @@ function OnboardingContent() {
   const isCreatingNew = searchParams.get('new') === 'true'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedType, setSelectedType] = useState<'personal' | 'business' | 'invitation' | null>(null)
+  const [selectedType, setSelectedType] = useState<'personal' | 'business' | 'notary' | 'invitation' | null>(null)
   const [showBusinessDialog, setShowBusinessDialog] = useState(false)
+  const [showNotaryDialog, setShowNotaryDialog] = useState(false)
   const [hasPersonalOrg, setHasPersonalOrg] = useState(false)
   const [isCheckingOrgs, setIsCheckingOrgs] = useState(isCreatingNew)
   const [businessForm, setBusinessForm] = useState({
     name: '',
     industry: '',
     size: '',
+  })
+  const [notaryForm, setNotaryForm] = useState({
+    name: '',
+    countryCode: 'CL',
+    city: '',
+    address: '',
+    email: '',
+    phone: '',
   })
 
   // Verificar estado al cargar
@@ -138,6 +155,67 @@ function OnboardingContent() {
     }
   }
 
+  const handleCreateNotary = async () => {
+    if (!notaryForm.name.trim()) {
+      setError('El nombre de la notaría es requerido')
+      return
+    }
+    if (!notaryForm.countryCode) {
+      setError('El país es requerido')
+      return
+    }
+    if (!notaryForm.city.trim()) {
+      setError('La ciudad es requerida')
+      return
+    }
+    if (!notaryForm.address.trim()) {
+      setError('La dirección es requerida')
+      return
+    }
+    if (!notaryForm.email.trim()) {
+      setError('El email de contacto es requerido')
+      return
+    }
+    if (!notaryForm.phone.trim()) {
+      setError('El teléfono es requerido')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/onboarding/notary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: notaryForm.name.trim(),
+          country_code: notaryForm.countryCode,
+          city: notaryForm.city.trim(),
+          address: notaryForm.address.trim(),
+          email: notaryForm.email.trim(),
+          phone: notaryForm.phone.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        setError(data.error)
+        setLoading(false)
+        return
+      }
+
+      setShowNotaryDialog(false)
+      window.location.href = next || '/dashboard'
+    } catch (err) {
+      setError('Ocurrió un error al crear tu notaría. Por favor intenta de nuevo.')
+      setLoading(false)
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl">
@@ -168,7 +246,7 @@ function OnboardingContent() {
         )}
 
         {/* Cards de Selección */}
-        <div className={`grid gap-4 ${isCreatingNew && hasPersonalOrg ? 'sm:grid-cols-1 md:grid-cols-2' : 'sm:grid-cols-1 md:grid-cols-3'}`}>
+        <div className={`grid gap-4 ${isCreatingNew && hasPersonalOrg ? 'sm:grid-cols-1 md:grid-cols-2' : 'sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
           {/* Uso Personal - Ocultar si ya tiene una org Personal y está creando nueva */}
           {!(isCreatingNew && hasPersonalOrg) && (
           <Card
@@ -252,6 +330,44 @@ function OnboardingContent() {
             </CardContent>
           </Card>
 
+          {/* Notaría */}
+          <Card
+            className={`relative cursor-pointer transition-all hover:shadow-lg ${
+              selectedType === 'notary'
+                ? 'border-[var(--tp-buttons)] ring-2 ring-[var(--tp-buttons-20)]'
+                : 'border-[var(--tp-lines-30)]'
+            }`}
+            onClick={() => setSelectedType('notary')}
+          >
+            <CardHeader>
+              <div className="mb-2 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--tp-buttons-20)]">
+                  <Stamp className="h-6 w-6 text-[var(--tp-buttons)]" />
+                </div>
+              </div>
+              <CardTitle>Notaría</CardTitle>
+              <CardDescription>
+                Registra tu notaría y espera la aprobación para operar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                  <span>Gestión por servicios y pesos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                  <span>Asignación automática por país</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                  <span>Requiere aprobación</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
           {/* Tengo Invitación - Ocultar si está creando nueva organización */}
           {!isCreatingNew && (
           <Card
@@ -294,6 +410,8 @@ function OnboardingContent() {
                   handleCreatePersonal()
                 } else if (selectedType === 'business') {
                   setShowBusinessDialog(true)
+                } else if (selectedType === 'notary') {
+                  setShowNotaryDialog(true)
                 }
               }}
               disabled={loading}
@@ -401,6 +519,173 @@ function OnboardingContent() {
                     </>
                   ) : (
                     'Crear Organización'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog para Registro de Notaría */}
+        <Dialog open={showNotaryDialog} onOpenChange={setShowNotaryDialog}>
+          <DialogContent className="sm:max-w-[560px]">
+            <DialogHeader>
+              <DialogTitle>Registro de Notaría</DialogTitle>
+              <DialogDescription>
+                Completa los datos para enviar tu solicitud de aprobación.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="notary-name">
+                  Nombre de la Notaría <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="notary-name"
+                  placeholder="Notaría Central"
+                  value={notaryForm.name}
+                  onChange={(e) =>
+                    setNotaryForm({ ...notaryForm, name: e.target.value })
+                  }
+                  className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>
+                  País <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={notaryForm.countryCode}
+                  onValueChange={(value) =>
+                    setNotaryForm({ ...notaryForm, countryCode: value })
+                  }
+                  disabled={loading}
+                >
+                  <SelectTrigger className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20">
+                    <SelectValue placeholder="Selecciona un país" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getDefaultCountries()
+                      .filter((country) => country.is_active)
+                      .sort((a, b) => a.display_order - b.display_order)
+                      .map((country) => (
+                        <SelectItem key={country.country_code} value={country.country_code}>
+                          {country.flag_emoji ? `${country.flag_emoji} ` : ''}
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notary-city">
+                  Ciudad <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="notary-city"
+                  placeholder="Santiago"
+                  value={notaryForm.city}
+                  onChange={(e) =>
+                    setNotaryForm({ ...notaryForm, city: e.target.value })
+                  }
+                  className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notary-address">
+                  Dirección <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="notary-address"
+                  placeholder="Av. Principal 123, Oficina 45"
+                  value={notaryForm.address}
+                  onChange={(e) =>
+                    setNotaryForm({ ...notaryForm, address: e.target.value })
+                  }
+                  className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notary-email">
+                  Email de Contacto <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="notary-email"
+                  type="email"
+                  placeholder="contacto@notaria.cl"
+                  value={notaryForm.email}
+                  onChange={(e) =>
+                    setNotaryForm({ ...notaryForm, email: e.target.value })
+                  }
+                  className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notary-phone">
+                  Teléfono <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="notary-phone"
+                  placeholder="+56 9 1234 5678"
+                  value={notaryForm.phone}
+                  onChange={(e) =>
+                    setNotaryForm({ ...notaryForm, phone: e.target.value })
+                  }
+                  className="focus:border-[var(--tp-buttons)] focus:ring-[var(--tp-buttons)]/20"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="rounded-lg border border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)] p-3 text-sm text-muted-foreground">
+                Tu solicitud quedará pendiente de aprobación. Te avisaremos apenas esté habilitada.
+              </div>
+
+              {error && (
+                <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+                  <AlertDescription className="text-red-600 dark:text-red-400">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowNotaryDialog(false)}
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleCreateNotary}
+                  disabled={
+                    loading ||
+                    !notaryForm.name.trim() ||
+                    !notaryForm.countryCode ||
+                    !notaryForm.city.trim() ||
+                    !notaryForm.address.trim() ||
+                    !notaryForm.email.trim() ||
+                    !notaryForm.phone.trim()
+                  }
+                  className="flex-1 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    'Enviar Solicitud'
                   )}
                 </Button>
               </div>

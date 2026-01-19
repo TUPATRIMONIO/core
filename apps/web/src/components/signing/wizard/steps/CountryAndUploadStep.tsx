@@ -631,6 +631,7 @@ function CountryAndUploadStepContent() {
           original_file_name: state.file.name,
           original_file_size: state.file.size,
           original_file_type: state.file.type || 'application/pdf',
+          send_to_signers_on_complete: state.sendToSignersOnComplete,
           requires_ai_review: opts.requiresAiReview,
           metadata: {
             country_code: state.countryCode,

@@ -55,6 +55,7 @@ export function DocumentDetailClient({
   const [signers, setSigners] = useState(initialSigners)
   const [reviewers, setReviewers] = useState(initialReviewers)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [notaryAssignment, setNotaryAssignment] = useState<any | null>(null)
   
   const [isSending, setIsSending] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
@@ -69,6 +70,21 @@ export function DocumentDetailClient({
     }
     getUser()
   }, [])
+
+  const fetchNotaryAssignment = async () => {
+    if (!document?.id || document.notary_service === 'none') {
+      setNotaryAssignment(null)
+      return
+    }
+
+    const { data } = await supabase
+      .from('signing_notary_assignments')
+      .select('status, notes, correction_request, rejection_reason, notary_office:signing_notary_offices(name)')
+      .eq('document_id', document.id)
+      .maybeSingle()
+
+    setNotaryAssignment(data || null)
+  }
 
   // Encontrar la revisión del usuario actual si existe
   const userReview = currentUser ? reviewers.find(r => r.user_id === currentUser.id) : null
@@ -100,7 +116,12 @@ export function DocumentDetailClient({
     if (newDoc) setDocument(newDoc)
     
     router.refresh()
+    await fetchNotaryAssignment()
   }
+  
+  useEffect(() => {
+    fetchNotaryAssignment()
+  }, [document?.id, document?.notary_service])
 
   const handleSendToSign = async () => {
     try {
@@ -178,6 +199,24 @@ export function DocumentDetailClient({
   }
 
   const canEdit = !['signed', 'notarized', 'completed', 'cancelled', 'rejected'].includes(document.status)
+  const showNotaryTracking = document.notary_service !== 'none'
+
+  const notaryStatusLabel = () => {
+    switch (document.status) {
+      case 'pending_notary':
+        return 'En notaría'
+      case 'notary_observed':
+        return 'En revisión con nuestro equipo'
+      case 'notary_rejected':
+        return 'Rechazado por notaría'
+      case 'notarized':
+        return 'Notariado'
+      case 'completed':
+        return 'Completado'
+      default:
+        return 'En proceso'
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -313,6 +352,50 @@ export function DocumentDetailClient({
           </Card>
         </div>
       </div>
+
+      {showNotaryTracking && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Seguimiento notarial</CardTitle>
+            <CardDescription>Estado general del proceso con notaría.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs text-muted-foreground">Estado</div>
+                <div className="text-sm font-semibold">{notaryStatusLabel()}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Notaría asignada</div>
+                <div className="text-sm font-semibold">
+                  {notaryAssignment?.notary_office?.name || 'Asignación en curso'}
+                </div>
+              </div>
+            </div>
+
+            {(document.status === 'notary_observed' || document.status === 'notary_rejected') && (
+              <div className="rounded-lg border border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)] p-3 text-sm text-muted-foreground">
+                Tu documento está siendo revisado por nuestro equipo. Te contactaremos si hace falta algo.
+              </div>
+            )}
+
+            <div className="grid gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[var(--tp-buttons)]" />
+                Enviado a notaría
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${document.status === 'notary_observed' ? 'bg-[var(--tp-buttons)]' : 'bg-[var(--tp-lines-30)]'}`} />
+                Revisión interna (si aplica)
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${['notarized', 'completed'].includes(document.status) ? 'bg-[var(--tp-buttons)]' : 'bg-[var(--tp-lines-30)]'}`} />
+                Notariado
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="signers" className="w-full">
         <TabsList>

@@ -31,6 +31,8 @@ import {
   FileSearch,
   Bot,
   Tag,
+  MessageSquareDot,
+  Stamp,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -69,6 +71,11 @@ const mainMenuItems = [
     icon: Building2,
   },
   {
+    title: 'Notarías',
+    url: '/admin/organizations/notaries',
+    icon: Stamp,
+  },
+  {
     title: 'Usuarios',
     url: '/admin/users',
     icon: Users,
@@ -92,6 +99,11 @@ const mainMenuItems = [
     title: 'Pedidos',
     url: '/admin/orders',
     icon: ShoppingCart,
+  },
+  {
+    title: 'Feedback',
+    url: '/admin/feedback',
+    icon: MessageSquareDot,
   },
 ]
 
@@ -134,6 +146,11 @@ const appsMenuItems = [
 ]
 
 const communicationsMenuItems = [
+  {
+    title: 'Tickets Soporte',
+    url: '/admin/support/tickets',
+    icon: Ticket,
+  },
   {
     title: 'Tickets',
     url: '/admin/communications/tickets',

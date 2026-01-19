@@ -48,6 +48,7 @@ async function getMetrics() {
   const orgDistribution = {
     personal: orgsByType?.filter((o) => o.org_type === 'personal').length || 0,
     business: orgsByType?.filter((o) => o.org_type === 'business').length || 0,
+    notary: orgsByType?.filter((o) => o.org_type === 'notary').length || 0,
     platform: orgsByType?.filter((o) => o.org_type === 'platform').length || 0,
   }
 
@@ -83,7 +84,7 @@ export default async function AdminDashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">{metrics.totalOrganizations}</div>
               <p className="text-xs text-muted-foreground mt-1">
-                {metrics.activeOrganizations} activas • {metrics.orgDistribution.personal} personal • {metrics.orgDistribution.business} business
+                {metrics.activeOrganizations} activas • {metrics.orgDistribution.personal} personal • {metrics.orgDistribution.business} business • {metrics.orgDistribution.notary} notaría
               </p>
             </CardContent>
           </Card>
@@ -157,6 +158,13 @@ export default async function AdminDashboardPage() {
                   <span className="text-sm">Business (B2B)</span>
                 </div>
                 <span className="text-sm font-medium">{metrics.orgDistribution.business}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-amber-500" />
+                  <span className="text-sm">Notaría</span>
+                </div>
+                <span className="text-sm font-medium">{metrics.orgDistribution.notary}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

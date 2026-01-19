@@ -10,7 +10,15 @@ const corsHeaders = {
 };
 
 interface NotificationPayload {
-  type: "REVIEW_REQUEST" | "SIGNING_REQUEST" | "SIGNING_COMPLETED";
+  type:
+    | "REVIEW_REQUEST"
+    | "SIGNING_REQUEST"
+    | "SIGNING_COMPLETED"
+    | "NOTARY_DOCUMENT_ASSIGNED"
+    | "NOTARY_IN_PROGRESS"
+    | "NOTARY_NEEDS_CORRECTION"
+    | "NOTARY_REJECTED"
+    | "NOTARY_COMPLETED";
   recipient_email: string;
   recipient_name: string;
   document_title: string;
@@ -298,6 +306,244 @@ ${payload.document_title}
 El proceso de firma electrónica se ha completado correctamente.
 
 Ver documento firmado: ${actionUrl}
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_DOCUMENT_ASSIGNED":
+      return {
+        subject: `Nuevo documento notarial: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #800039; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Documento Asignado a Notaría</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Equipo"},</p>
+              <p>Se ha asignado un nuevo documento para revisión notarial:</p>
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #800039; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #800039;">${payload.document_title}</h2>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #800039; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Ir al Portal Notarial
+                </a>
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:<br>
+                <a href="${actionUrl}" style="color: #800039;">${actionUrl}</a>
+              </p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Documento asignado a notaría
+
+Hola ${payload.recipient_name || "Equipo"},
+
+Se ha asignado un nuevo documento para revisión notarial:
+${payload.document_title}
+
+Ir al portal notarial: ${actionUrl}
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_IN_PROGRESS":
+      return {
+        subject: `Documento en notaría: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #6b7280; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Documento Enviado a Notaría</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Usuario"},</p>
+              <p>Tu documento ya está en revisión notarial:</p>
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #6b7280; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #6b7280;">${payload.document_title}</h2>
+              </div>
+              <p>Te avisaremos apenas tengamos novedades.</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Documento enviado a notaría
+
+Hola ${payload.recipient_name || "Usuario"},
+
+Tu documento ya está en revisión notarial:
+${payload.document_title}
+
+Te avisaremos apenas tengamos novedades.
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_NEEDS_CORRECTION":
+      return {
+        subject: `Observaciones notariales: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f59e0b; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Observaciones de Notaría</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Equipo"},</p>
+              <p>La notaría dejó observaciones para el siguiente documento:</p>
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #f59e0b;">${payload.document_title}</h2>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Ver Observaciones
+                </a>
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:<br>
+                <a href="${actionUrl}" style="color: #f59e0b;">${actionUrl}</a>
+              </p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Observaciones de notaría
+
+Hola ${payload.recipient_name || "Equipo"},
+
+La notaría dejó observaciones para el siguiente documento:
+${payload.document_title}
+
+Ver observaciones: ${actionUrl}
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_REJECTED":
+      return {
+        subject: `Rechazo notarial: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #ef4444; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Documento Rechazado</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Equipo"},</p>
+              <p>La notaría rechazó el siguiente documento:</p>
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #ef4444; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #ef4444;">${payload.document_title}</h2>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Revisar Detalles
+                </a>
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">
+                Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:<br>
+                <a href="${actionUrl}" style="color: #ef4444;">${actionUrl}</a>
+              </p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Documento rechazado por notaría
+
+Hola ${payload.recipient_name || "Equipo"},
+
+La notaría rechazó el siguiente documento:
+${payload.document_title}
+
+Revisar detalles: ${actionUrl}
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_COMPLETED":
+      return {
+        subject: `Documento notariado: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Documento Notariado</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Usuario"},</p>
+              <p>Tu documento ha sido notariado exitosamente:</p>
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #10b981; margin: 20px 0;">
+                <h2 style="margin-top: 0; color: #10b981;">${payload.document_title}</h2>
+              </div>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Ver Documento Notariado
+                </a>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Documento notariado
+
+Hola ${payload.recipient_name || "Usuario"},
+
+Tu documento ha sido notariado exitosamente:
+${payload.document_title}
+
+Ver documento notariado: ${actionUrl}
 
 Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
         `,

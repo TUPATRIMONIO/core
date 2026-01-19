@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
-import { Building2, User, Shield } from 'lucide-react'
+import { Building2, User, Shield, Stamp } from 'lucide-react'
 
-type OrgType = 'personal' | 'business' | 'platform'
+type OrgType = 'personal' | 'business' | 'platform' | 'notary'
 
 const orgTypeConfig: Record<OrgType, { label: string; icon: any; className: string }> = {
   personal: {
@@ -13,6 +13,11 @@ const orgTypeConfig: Record<OrgType, { label: string; icon: any; className: stri
     label: 'Business',
     icon: Building2,
     className: 'bg-green-100 text-green-800 border-green-200',
+  },
+  notary: {
+    label: 'Notaría',
+    icon: Stamp,
+    className: 'bg-amber-100 text-amber-800 border-amber-200',
   },
   platform: {
     label: 'Platform',

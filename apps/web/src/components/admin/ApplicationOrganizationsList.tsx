@@ -125,6 +125,7 @@ export function ApplicationOrganizationsList({ applicationId }: ApplicationOrgan
     const labels: Record<string, string> = {
       business: 'Empresa',
       personal: 'Personal',
+      notary: 'Notaría',
       platform: 'Plataforma',
     };
     return labels[type] || type;

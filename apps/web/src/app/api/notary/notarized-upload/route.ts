@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     // 3) Validar documento
     const { data: doc, error: docError } = await supabase
       .from('signing_documents')
-      .select('id, organization_id')
+      .select('id, organization_id, send_to_signers_on_complete')
       .eq('id', assignment.document_id)
       .single()
 
@@ -139,6 +139,20 @@ export async function POST(req: Request) {
         status: 'notarized',
       })
       .eq('id', doc.id)
+    if (doc.send_to_signers_on_complete) {
+      const { error: completedError } = await service
+        .from('signing_documents')
+        .update({
+          status: 'completed',
+          completed_at: now,
+        })
+        .eq('id', doc.id)
+
+      if (completedError) {
+        return NextResponse.json({ error: completedError.message }, { status: 400 })
+      }
+    }
+
 
     if (docUpdateError) {
       return NextResponse.json({ error: docUpdateError.message }, { status: 400 })
