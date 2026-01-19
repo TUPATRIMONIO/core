@@ -100,6 +100,13 @@ async function getOrderDetails(orderId: string) {
         .eq('order_id', orderId)
         .maybeSingle()
 
+    // Get invoicing document
+    const { data: invoicingDoc } = await supabase
+        .from('invoicing_documents')
+        .select('id, document_number, document_type, pdf_url, xml_url, status, external_id')
+        .eq('order_id', orderId)
+        .maybeSingle()
+
     // Get creator user if exists (using created_by_user_id)
     let creatorUser = null;
     if (order.created_by_user_id) {
@@ -130,6 +137,7 @@ async function getOrderDetails(orderId: string) {
         associations: associations || { contacts: [], tickets: [], organizations: [] },
         creatorUser,
         signing_document: signingDoc,
+        invoicing_document: invoicingDoc,
     }
 }
 
@@ -161,6 +169,16 @@ function getOrderStatusLabel(status: string): string {
         refunded: 'Reembolsado',
     }
     return labels[status] || status
+}
+
+function getInvoicingDocumentTypeLabel(type?: string): string {
+    if (!type) return 'Documento tributario'
+    const labels: Record<string, string> = {
+        factura_electronica: 'Factura electrónica',
+        boleta_electronica: 'Boleta electrónica',
+        stripe_invoice: 'Invoice Stripe',
+    }
+    return labels[type] || type
 }
 
 function formatDateTime(dateString: string): string {
@@ -453,6 +471,98 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                     </div>
                                 </div>
                             )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Associated Documents */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Documentos Asociados</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">Documento de Firma</span>
+                                </div>
+                                {order.signing_document ? (
+                                    <div className="space-y-3">
+                                        <div className="text-sm">
+                                            <div className="font-medium">
+                                                {order.signing_document.title || 'Documento de firma'}
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                <Badge variant="outline">{order.signing_document.status}</Badge>
+                                                {typeof order.signing_document.signers_count === 'number' && (
+                                                    <span>
+                                                        {order.signing_document.signed_count || 0} / {order.signing_document.signers_count} firmantes
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={`/admin/document-review/${order.signing_document.id}`}>
+                                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                                    Ver detalle
+                                                </Link>
+                                            </Button>
+                                            <Button variant="outline" size="sm" asChild>
+                                                <a href={`/api/signing/preview/${order.signing_document.id}`}>
+                                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                                    Ver PDF original
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground">
+                                        Sin documento de firma asociado
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="border-t pt-4 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">Documento Tributario</span>
+                                </div>
+                                {order.invoicing_document ? (
+                                    <div className="space-y-3">
+                                        <div className="text-sm">
+                                            <div className="font-medium">
+                                                {getInvoicingDocumentTypeLabel(order.invoicing_document.document_type)}
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                <span className="font-mono">{order.invoicing_document.document_number}</span>
+                                                <Badge variant="outline">{order.invoicing_document.status}</Badge>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            {order.invoicing_document.pdf_url ? (
+                                                <Button variant="outline" size="sm" asChild>
+                                                    <a
+                                                        href={order.invoicing_document.pdf_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer nofollow"
+                                                    >
+                                                        <ExternalLink className="h-4 w-4 mr-2" />
+                                                        Descargar PDF
+                                                    </a>
+                                                </Button>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">
+                                                    PDF no disponible
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground">
+                                        Sin documento tributario emitido
+                                    </div>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
 

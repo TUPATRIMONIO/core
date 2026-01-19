@@ -73,10 +73,16 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     // Si el firmante ya firmó, saltar verificación y mostrar estado firmado
     if (signer.status === "signed") {
       setStep("signed");
+      setCacheBuster(Date.now());
       return;
     }
     checkVigencia();
   }, [signer.signing_token, signer.status]);
+
+  const refreshSignedDocument = () => {
+    setCacheBuster(Date.now());
+    router.refresh();
+  };
 
   const checkVigencia = async () => {
     setIsLoading(true);
@@ -128,10 +134,14 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
       // CDS retorna la URL de enrolamiento directamente
       const enrollmentUrl = data.enrollment_url;
-      setEnrollmentMessage({ 
-        type: "success", 
-        message: data.message || "Para completar su enrolamiento, haga clic en el botón de abajo.",
-        url: enrollmentUrl
+      if (enrollmentUrl) {
+        window.location.assign(enrollmentUrl);
+        return;
+      }
+
+      setEnrollmentMessage({
+        type: "error",
+        message: "No pudimos obtener el enlace de enrolamiento. Inténtalo nuevamente.",
       });
     } catch (err: any) {
       setEnrollmentMessage({ type: "error", message: err.message || "Error inesperado" });
@@ -274,8 +284,8 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       
       if (data.signed) {
         setTimeout(() => {
-          router.refresh();
-        }, 3000);
+          refreshSignedDocument();
+        }, 1500);
       }
     } catch (err: any) {
       setSignError({ message: err.message || "Error inesperado al firmar" });
@@ -334,9 +344,6 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />}
                   Iniciar Enrolamiento en CDS
                 </button>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  * CDS le enviará un correo electrónico para completar el proceso. Una vez listo, regrese aquí para firmar.
-                </p>
               </div>
             </div>
           </div>
@@ -549,8 +556,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
               </p>
               <button
                 onClick={() => {
-                  setCacheBuster(Date.now());
-                  router.refresh();
+                  refreshSignedDocument();
                 }}
                 className="bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors"
               >
@@ -845,70 +851,42 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
 
   // Modal para mostrar resultado del enrolamiento
   const renderEnrollmentModal = () => (
-    enrollmentMessage && (
-      <div className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-card dark:bg-card rounded-2xl max-w-md w-full p-6 shadow-[var(--tp-shadow-2xl)] border border-border">
+    enrollmentMessage?.type === "error" && (
+      <div
+        className="fixed inset-0 bg-black/60 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+        onClick={() => setEnrollmentMessage(null)}
+      >
+        <div
+          className="bg-card dark:bg-card rounded-2xl max-w-md w-full p-6 shadow-[var(--tp-shadow-2xl)] border border-border max-h-[90vh] overflow-y-auto"
+          onClick={(event) => event.stopPropagation()}
+        >
           {/* Header con icono */}
-          <div className={`flex items-center gap-3 mb-4 ${
-            enrollmentMessage.type === "success" 
-              ? "text-[var(--tp-success)]" 
-              : "text-[var(--tp-error)]"
-          }`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              enrollmentMessage.type === "success"
-                ? "bg-[var(--tp-success)]/20"
-                : "bg-[var(--tp-error)]/20"
-            }`}>
-              {enrollmentMessage.type === "success" ? (
-                <CheckCircle2 className="w-5 h-5" />
-              ) : (
-                <AlertCircle className="w-5 h-5" />
-              )}
+          <div className="flex items-center gap-3 mb-4 text-[var(--tp-error)]">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--tp-error)]/20">
+              <AlertCircle className="w-5 h-5" />
             </div>
             <h3 className="text-lg font-semibold text-foreground">
-              {enrollmentMessage.type === "success" ? "Enrolamiento Iniciado" : "Error de Enrolamiento"}
+              Error de enrolamiento
             </h3>
           </div>
           
           {/* Mensaje */}
-          <div className={`p-4 rounded-xl mb-5 ${
-            enrollmentMessage.type === "success" 
-              ? "bg-[var(--tp-success-light)] dark:bg-[var(--tp-success)]/10 border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30" 
-              : "bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30"
-          }`}>
-            <p className={`text-sm leading-relaxed ${
-              enrollmentMessage.type === "success" 
-                ? "text-[var(--tp-success)]" 
-                : "text-[var(--tp-error)]"
-            }`}>
+          <div className="p-4 rounded-xl mb-5 bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30">
+            <p className="text-sm leading-relaxed text-[var(--tp-error)]">
               {enrollmentMessage.message}
             </p>
           </div>
           
           {/* Botón para ir a enrolarse (solo si hay URL) */}
-          {enrollmentMessage.type === "success" && enrollmentMessage.url && (
-            <a
-              href={enrollmentMessage.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full mb-4 px-4 py-3 rounded-xl font-semibold transition-colors bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white flex items-center justify-center gap-2"
-            >
-              <ExternalLink className="w-5 h-5" />
-              Ir a Enrolarme en CDS
-            </a>
-          )}
-          
           {/* Acciones */}
           <div className="flex gap-3">
             <button
               onClick={() => setEnrollmentMessage(null)}
               className={`flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors ${
-                enrollmentMessage.type === "success"
-                  ? "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
-                  : "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
+                "bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white"
               }`}
             >
-              {enrollmentMessage.type === "success" && enrollmentMessage.url ? "Cerrar" : "Entendido"}
+              Cerrar
             </button>
           </div>
         </div>

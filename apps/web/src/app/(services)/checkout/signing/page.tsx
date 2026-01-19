@@ -43,7 +43,7 @@ export default function SigningCheckoutPage() {
   const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
   const pathname = usePathname()
-  const { state, actions } = useSigningWizard()
+  const { state, actions, isInitialized } = useSigningWizard()
   const { activeOrganization, isLoading: orgLoading } = useOrganization()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -313,7 +313,7 @@ export default function SigningCheckoutPage() {
     }
   }, [actions, activeOrganization?.id, currency, notary, notarySubtotal, router, signature, signatureSubtotal, signersCount, state, supabase, total, user])
 
-  if (isLoading) {
+  if (isLoading || !isInitialized) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-[var(--tp-buttons)]" />
@@ -549,7 +549,7 @@ export default function SigningCheckoutPage() {
                     ) : (
                       <>
                         <CreditCard className="mr-3 h-6 w-6" />
-                        Pagar {formatMoney(total, currency)}
+                        Confirmar {formatMoney(total, currency)}
                       </>
                     )}
                   </Button>

@@ -224,10 +224,12 @@ serve(async (req) => {
                 .order("signing_order", { ascending: true });
 
             if (!signersError && signers) {
-                const STAMP_WIDTH = 250;
+                const STAMP_WIDTH = 140;
                 const STAMP_HEIGHT = 80;
-                const MARGIN = 30;
-                const V_SPACING = 20;
+                const MARGIN_LEFT = 100;
+                const MARGIN_TOP = 700;
+                const H_SPACING = 120;
+                const V_SPACING = 15;
                 const COLUMNS = 2;
 
                 for (let i = 0; i < signers.length; i++) {
@@ -235,13 +237,14 @@ serve(async (req) => {
                     const row = Math.floor(i / COLUMNS);
 
                     // Calcular posiciones (esquina inferior izquierda)
-                    const colWidth = (pageWidth - MARGIN * 2 - MARGIN) / COLUMNS;
-                    const x_lower_left = MARGIN + col * (colWidth + MARGIN);
-                    const y_upper = pageHeight - MARGIN - row * (STAMP_HEIGHT + V_SPACING);
-                    const y_lower_left = y_upper - STAMP_HEIGHT;
-                    
+                    const contentWidth = pageWidth - MARGIN_LEFT * 2 - H_SPACING;
+                    const colWidth = contentWidth / COLUMNS;
+                    const x_lower_left = MARGIN_LEFT + col * (colWidth + H_SPACING);
+                    // CDS interpreta Y desde el borde superior, no desde abajo.
+                    const y_lower_left = MARGIN_TOP + row * (STAMP_HEIGHT + V_SPACING);
+
                     const x_upper_right = x_lower_left + STAMP_WIDTH;
-                    const y_upper_right = y_upper;
+                    const y_upper_right = y_lower_left + STAMP_HEIGHT;
 
                     // Actualizar coordenadas en BD
                     await supabaseClient

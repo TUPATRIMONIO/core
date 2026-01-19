@@ -5,6 +5,8 @@ import { createSetupIntent } from '@/lib/stripe/payment-methods';
 import { attachPaymentMethod } from '@/lib/stripe/payment-methods';
 import { purchasePackage } from '@/lib/credits/packages';
 import { getBalance, getCreditAccount } from '@/lib/credits/core';
+import { getAvailablePackages } from '@/lib/credits/packages';
+import { getCurrencyForCountry, getLocalizedProductPrice } from '@/lib/pricing/countries';
 
 /**
  * Helper: Obtiene o crea organización para el usuario
@@ -250,6 +252,202 @@ export async function updateOrganizationCountryAction(countryCode: string) {
   if (error) {
     console.error('[updateOrganizationCountryAction] Error actualizando país:', error);
     throw new Error(`Error actualizando país: ${error.message}`);
+  }
+
+  // Actualizar órdenes pendientes con nueva moneda/monto
+  const normalizedCountry = countryCode.toUpperCase();
+  const currency = await getCurrencyForCountry(normalizedCountry);
+  const { data: pendingOrders } = await supabase
+    .from('orders')
+    .select('id, product_type, product_id, product_data, metadata, discount_code_id, amount, currency, status')
+    .eq('organization_id', organizationId)
+    .eq('status', 'pending_payment');
+
+  if (Array.isArray(pendingOrders) && pendingOrders.length > 0) {
+    for (const order of pendingOrders) {
+      try {
+        const productData = (order.product_data as Record<string, any>) || {};
+        const metadata = (order.metadata as Record<string, any>) || {};
+        let baseAmount: number | null = null;
+        let nextProductData = productData;
+        let nextMetadata = metadata;
+
+        if (order.product_type === 'credits') {
+          const packageId = order.product_id || productData.package_id || metadata.package_id;
+          if (packageId) {
+            const packages = await getAvailablePackages(normalizedCountry);
+            const selectedPackage = packages.find((pkg: any) => pkg.id === packageId);
+            if (selectedPackage) {
+              baseAmount = getLocalizedProductPrice(selectedPackage, normalizedCountry);
+              nextProductData = {
+                ...productData,
+                package_id: selectedPackage.id,
+                credits_amount: selectedPackage.credits_amount,
+                localized_price: baseAmount,
+                currency,
+              };
+              nextMetadata = {
+                ...metadata,
+                package_id: selectedPackage.id,
+                package_name: selectedPackage.name,
+                credits_amount: selectedPackage.credits_amount,
+                subtotal: baseAmount,
+                currency,
+              };
+            }
+          }
+        } else if (order.product_type === 'electronic_signature') {
+          const signersCount = Number(productData.signers_count || metadata.signers_count || 1);
+          const signatureProduct = productData.signature_product || metadata.signature_product;
+          const notaryProduct = productData.notary_product || metadata.notary_product;
+
+          let signatureUnitPrice = 0;
+          if (signatureProduct?.slug) {
+            const { data: priceData } = await supabase.rpc('get_product_price', {
+              product_slug_param: signatureProduct.slug,
+              country_code_param: normalizedCountry,
+            });
+            signatureUnitPrice = Number(priceData || 0);
+          } else if (signatureProduct?.unit_price) {
+            signatureUnitPrice = Number(signatureProduct.unit_price || 0);
+          }
+
+          const signatureQuantity =
+            signatureProduct?.billing_unit === 'per_signer' ? signersCount : 1;
+          const signatureSubtotal = signatureUnitPrice * signatureQuantity;
+
+          let notarySubtotal = 0;
+          if (notaryProduct?.slug) {
+            const { data: priceData } = await supabase.rpc('get_product_price', {
+              product_slug_param: notaryProduct.slug,
+              country_code_param: normalizedCountry,
+            });
+            notarySubtotal = Number(priceData || 0);
+          } else if (notaryProduct?.unit_price) {
+            notarySubtotal = Number(notaryProduct.unit_price || 0);
+          }
+
+          baseAmount = signatureSubtotal + notarySubtotal;
+          nextProductData = {
+            ...productData,
+            signers_count: signersCount,
+            signature_product: signatureProduct
+              ? {
+                  ...signatureProduct,
+                  unit_price: signatureUnitPrice,
+                  quantity: signatureQuantity,
+                  subtotal: signatureSubtotal,
+                }
+              : signatureProduct,
+            notary_product: notaryProduct
+              ? {
+                  ...notaryProduct,
+                  unit_price: notarySubtotal,
+                  quantity: notaryProduct ? 1 : 0,
+                  subtotal: notarySubtotal,
+                }
+              : notaryProduct,
+            total: baseAmount,
+            currency,
+          };
+          nextMetadata = {
+            ...metadata,
+            signers_count: signersCount,
+            total: baseAmount,
+            currency,
+          };
+        } else if (order.product_type === 'notary_service' && order.product_id) {
+          const { data: priceData } = await supabase.rpc('get_product_price', {
+            product_slug_param: order.product_id,
+            country_code_param: normalizedCountry,
+          });
+          baseAmount = Number(priceData || 0);
+          nextProductData = {
+            ...productData,
+            localized_price: baseAmount,
+            currency,
+          };
+          nextMetadata = {
+            ...metadata,
+            total: baseAmount,
+            currency,
+          };
+        }
+
+        if (baseAmount === null) {
+          continue;
+        }
+
+        // Actualizar monto base y moneda
+        const { error: baseUpdateError } = await supabase
+          .from('orders')
+          .update({
+            amount: baseAmount,
+            original_amount: baseAmount,
+            discount_amount: 0,
+            currency,
+            product_data: nextProductData,
+            metadata: nextMetadata,
+          })
+          .eq('id', order.id);
+
+        if (baseUpdateError) {
+          console.error('[updateOrganizationCountryAction] Error actualizando orden base:', baseUpdateError);
+          continue;
+        }
+
+        // Re-aplicar descuento si existe
+        if (order.discount_code_id) {
+          const { data: discountCode } = await supabase
+            .from('discount_codes')
+            .select('code')
+            .eq('id', order.discount_code_id)
+            .single();
+
+          if (discountCode?.code) {
+            const { data: validationData } = await supabase.rpc('validate_discount_code', {
+              p_code: discountCode.code,
+              p_order_id: order.id,
+            });
+
+            if (validationData?.success) {
+              const discountMetadata = {
+                ...nextMetadata,
+                discount_code: {
+                  code: validationData.code,
+                  type: validationData.type,
+                  value: validationData.value,
+                },
+              };
+
+              await supabase
+                .from('orders')
+                .update({
+                  discount_amount: validationData.discount_amount,
+                  amount: validationData.final_amount,
+                  metadata: discountMetadata,
+                })
+                .eq('id', order.id);
+            } else {
+              await supabase
+                .from('orders')
+                .update({
+                  discount_code_id: null,
+                  discount_amount: 0,
+                  amount: baseAmount,
+                  metadata: {
+                    ...nextMetadata,
+                    discount_code: null,
+                  },
+                })
+                .eq('id', order.id);
+            }
+          }
+        }
+      } catch (orderError: any) {
+        console.error('[updateOrganizationCountryAction] Error actualizando orden pendiente:', orderError);
+      }
+    }
   }
   
   // Revalidar la página de configuración de facturación para que se actualice

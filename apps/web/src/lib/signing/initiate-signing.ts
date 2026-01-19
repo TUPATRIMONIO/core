@@ -40,46 +40,49 @@ export async function initiateSigningProcess(
         }
 
         // 2. Generar portada con QR (OBLIGATORIO)
-        if (!document.qr_file_path) {
-            console.log("[initiate-signing] Generando portada con QR para documento:", documentId);
-            
-            try {
-                const coverResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/pdf-merge-with-cover`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-                        },
-                        body: JSON.stringify({
-                            document_id: documentId,
-                        }),
-                    }
-                );
+        console.log(
+            "[initiate-signing] Generando portada con QR para documento:",
+            documentId,
+            document.qr_file_path ? "(regenerando)" : ""
+        );
 
-                const coverResult = await coverResponse.json();
-                
-                if (!coverResult.success && !coverResult.skipped) {
-                    console.error("[initiate-signing] Error generando portada:", coverResult.error);
-                    return {
-                        success: false,
-                        error: "No se pudo generar la portada del documento.",
-                        details: coverResult.error,
-                        status: 500
-                    };
+        try {
+            const coverResponse = await fetch(
+                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/pdf-merge-with-cover`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+                    },
+                    body: JSON.stringify({
+                        document_id: documentId,
+                        force_regenerate: Boolean(document.qr_file_path),
+                    }),
                 }
-                
-                console.log("[initiate-signing] Portada generada exitosamente:", coverResult.path);
-            } catch (coverError: any) {
-                console.error("[initiate-signing] Error llamando a pdf-merge-with-cover:", coverError);
+            );
+
+            const coverResult = await coverResponse.json();
+
+            if (!coverResult.success && !coverResult.skipped) {
+                console.error("[initiate-signing] Error generando portada:", coverResult.error);
                 return {
                     success: false,
-                    error: "Error al generar la portada del documento.",
-                    details: coverError.message,
+                    error: "No se pudo generar la portada del documento.",
+                    details: coverResult.error,
                     status: 500
                 };
             }
+
+            console.log("[initiate-signing] Portada generada exitosamente:", coverResult.path);
+        } catch (coverError: any) {
+            console.error("[initiate-signing] Error llamando a pdf-merge-with-cover:", coverError);
+            return {
+                success: false,
+                error: "Error al generar la portada del documento.",
+                details: coverError.message,
+                status: 500
+            };
         }
 
         // 3. Verificar vigencia FEA de cada firmante

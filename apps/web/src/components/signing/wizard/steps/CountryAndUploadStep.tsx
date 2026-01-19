@@ -64,6 +64,7 @@ function CountryAndUploadStepContent() {
 
   const [creditCost, setCreditCost] = useState<number | null>(null)
   const [creditBalance, setCreditBalance] = useState<number | null>(null)
+  const [orgCountryCode, setOrgCountryCode] = useState<string | null>(null)
 
   const [aiReviewData, setAiReviewData] = useState<any | null>(null)
   const [countrySettings, setCountrySettings] = useState<
@@ -94,6 +95,11 @@ function CountryAndUploadStepContent() {
   const selectedCountry = useMemo(() => {
     return countries.find((c) => c.code === state.countryCode) || null
   }, [countries, state.countryCode])
+
+  const orgCountryName = useMemo(() => {
+    if (!orgCountryCode) return null
+    return countries.find((c) => c.code === orgCountryCode)?.name || orgCountryCode
+  }, [countries, orgCountryCode])
 
   const aiConfig = useMemo(() => {
     const key = (state.countryCode || '').toString().toUpperCase()
@@ -185,6 +191,7 @@ function CountryAndUploadStepContent() {
         // Si no hay organización activa, permitimos continuar.
         // El CheckoutStep se encargará de crear una organización personal automáticamente.
         console.log('[CountryAndUploadStep] Usuario logueado sin organización activa. Se creará en el checkout.')
+        setOrgCountryCode(null)
       } else {
         const organizationId = activeOrganization.id
         actions.setOrgId(organizationId)
@@ -198,23 +205,41 @@ function CountryAndUploadStepContent() {
           setCreditBalance(Number(balance ?? 0))
         }
 
-        // Default country priority: 1) global context, 2) organization.country
-        if (globalCountry?.country && !globalCountry.isLoading) {
-          actions.setCountryCode(globalCountry.country.toUpperCase())
-        } else {
-          const { data: org } = await supabase
-            .from('organizations')
-            .select('country')
-            .eq('id', organizationId)
-            .maybeSingle()
+        // Default country priority: 1) organization.country, 2) global context
+        let resolvedCountry = state.countryCode || 'CL'
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('country')
+          .eq('id', organizationId)
+          .maybeSingle()
 
-          if (org?.country) {
-            const orgCountry = org.country.toString().toUpperCase()
-            if (orgCountry && orgCountry.length === 2) {
-              actions.setCountryCode(orgCountry)
-            }
+        if (org?.country) {
+          const orgCountry = org.country.toString().toUpperCase()
+          if (orgCountry && orgCountry.length === 2) {
+            resolvedCountry = orgCountry
+            setOrgCountryCode(orgCountry)
+            actions.setCountryCode(orgCountry)
           }
+        } else if (globalCountry?.country && !globalCountry.isLoading) {
+          resolvedCountry = globalCountry.country.toUpperCase()
+          setOrgCountryCode(null)
+          actions.setCountryCode(resolvedCountry)
+        } else {
+          setOrgCountryCode(null)
         }
+
+        // Load document types for the resolved country
+        const { data: docTypes } = await supabase
+          .from('signing_document_types')
+          .select('*')
+          .eq('country_code', resolvedCountry)
+          .eq('is_active', true)
+          .order('display_order', { ascending: true })
+
+        if (docTypes) {
+          setDocumentTypes(docTypes)
+        }
+        return
       }
 
       // Load document types for the selected country
@@ -777,6 +802,14 @@ function CountryAndUploadStepContent() {
           </div>
         ) : (
           <>
+            {orgCountryCode && (
+              <Alert className="border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)]">
+                <AlertDescription>
+                  Tu país está definido por tu organización: {orgCountryName} ({orgCountryCode}). Los precios y la moneda se calculan con ese país.
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <Label>Título (opcional)</Label>
               <Input

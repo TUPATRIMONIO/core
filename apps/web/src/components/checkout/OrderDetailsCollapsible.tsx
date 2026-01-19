@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDown, ChevronUp, User, MapPin, Phone, Mail } from 'lucide-react'
+import { User, MapPin, Phone, Mail } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -33,8 +32,6 @@ export function OrderDetailsCollapsible({
   billingData,
   currency,
 }: OrderDetailsCollapsibleProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
   // Solo mostrar si es un pedido de firma electrónica
   if (productType !== 'electronic_signature' && !signingDocument) {
     return null
@@ -64,21 +61,9 @@ export function OrderDetailsCollapsible({
   return (
     <Card>
       <CardHeader className="pb-2 pt-4 px-4">
-        <Button
-          variant="ghost"
-          className="w-full justify-between p-0 h-auto hover:bg-transparent"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <CardTitle className="text-sm font-semibold">Detalles del Pedido</CardTitle>
-          {isOpen ? (
-            <ChevronUp className="h-4 w-4 text-muted-foreground" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          )}
-        </Button>
+        <CardTitle className="text-sm font-semibold">Detalles del Pedido</CardTitle>
       </CardHeader>
-      {isOpen && (
-        <CardContent className="px-4 pb-4 space-y-4">
+      <CardContent className="px-4 pb-4 space-y-4">
           {/* Producto de Firma */}
           {signatureProduct && (
             <div className="space-y-2">
@@ -254,8 +239,7 @@ export function OrderDetailsCollapsible({
               </div>
             </>
           )}
-        </CardContent>
-      )}
+      </CardContent>
     </Card>
   )
 }

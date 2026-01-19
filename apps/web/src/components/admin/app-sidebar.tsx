@@ -158,6 +158,11 @@ const billingMenuItems = [
     icon: Wallet,
   },
   {
+    title: 'Cupones',
+    url: '/admin/billing/discounts',
+    icon: Tag,
+  },
+  {
     title: 'Facturas',
     url: '/admin/billing/invoices',
     icon: Receipt,

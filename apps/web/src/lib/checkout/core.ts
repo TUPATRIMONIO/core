@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { recordDiscountUsage } from '@/lib/discounts/usage';
 
 export type OrderStatus = 'pending_payment' | 'paid' | 'cancelled' | 'refunded' | 'completed';
 export type ProductType = 
@@ -30,6 +31,9 @@ export interface Order {
   product_id?: string;
   product_data: Record<string, any>;
   amount: number;
+  original_amount?: number | null;
+  discount_amount?: number | null;
+  discount_code_id?: string | null;
   currency: string;
   payment_id?: string;
   expires_at?: string;
@@ -254,6 +258,15 @@ export async function updateOrderStatus(
       });
     } catch (error: any) {
       console.error('[updateOrderStatus] Error disparando revisión IA:', error.message);
+    }
+  }
+
+  // Registrar uso de descuento (solo una vez por orden)
+  if (status === 'paid') {
+    try {
+      await recordDiscountUsage(orderId, supabase);
+    } catch (error: any) {
+      console.warn('[updateOrderStatus] Error registrando uso de descuento:', error?.message);
     }
   }
   

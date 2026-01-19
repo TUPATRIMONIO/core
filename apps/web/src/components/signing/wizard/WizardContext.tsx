@@ -135,7 +135,7 @@ const defaultState: SigningWizardState = {
 }
 
 const SigningWizardContext = createContext<
-  { state: SigningWizardState; actions: SigningWizardActions } | undefined
+  { state: SigningWizardState; actions: SigningWizardActions; isInitialized: boolean } | undefined
 >(undefined)
 
 /**
@@ -314,7 +314,10 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
     [nextStep, prevStep, setStep]
   )
 
-  const value = useMemo(() => ({ state, actions }), [state, actions])
+  const value = useMemo(
+    () => ({ state, actions, isInitialized }),
+    [state, actions, isInitialized]
+  )
 
   return <SigningWizardContext.Provider value={value}>{children}</SigningWizardContext.Provider>
 }

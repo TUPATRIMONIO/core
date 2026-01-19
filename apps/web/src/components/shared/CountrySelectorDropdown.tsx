@@ -75,6 +75,9 @@ export function CountrySelectorDropdown({
           )}
         >
           <span className="text-base">{flag}</span>
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Servicios por país
+          </span>
           {variant !== 'compact' && (
             <span className="text-sm font-medium">{name}</span>
           )}

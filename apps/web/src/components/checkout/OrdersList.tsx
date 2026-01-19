@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, CreditCard, AlertCircle } from 'lucide-react';
+import { Loader2, Package, Clock, ArrowRight, CheckCircle2, XCircle, FileText, CreditCard, AlertCircle, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useOrganization } from '@/hooks/useOrganization';
 import type { Order, OrderStatus } from '@/lib/checkout/core';

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CheckCircle, XCircle, AlertCircle, MessageSquare, FileText, Download, Eye } from 'lucide-react'
+import { CheckCircle, XCircle, AlertCircle, MessageSquare, FileText, Download, Eye, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { DocumentMessageThread } from './document-message-thread'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -44,6 +44,7 @@ export function DocumentReviewDetailClient({
   const [comment, setComment] = useState('')
   const [isInternal, setIsInternal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRegenerating, setIsRegenerating] = useState(false)
 
   const aiReview = document.ai_review?.[0]
 
@@ -108,6 +109,36 @@ export function DocumentReviewDetailClient({
     return data?.signedUrl || null
   }
 
+  const handleRegeneratePdf = async () => {
+    setIsRegenerating(true)
+
+    try {
+      const response = await fetch('/api/admin/signing/regenerate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document_id: document.id,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'No se pudo regenerar el PDF')
+      }
+
+      toast.success('PDF regenerado correctamente')
+      router.refresh()
+    } catch (error: any) {
+      console.error('Error regenerando PDF:', error)
+      toast.error(error.message || 'Error al regenerar el PDF')
+    } finally {
+      setIsRegenerating(false)
+    }
+  }
+
   return (
     <Tabs defaultValue="review" className="space-y-6">
       <TabsList>
@@ -156,7 +187,7 @@ export function DocumentReviewDetailClient({
                   <Label className="text-sm text-muted-foreground">Firmantes</Label>
                   <p>{signers.length} firmante(s)</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {document.original_file_path && (
                     <Button
                       variant="outline"
@@ -169,6 +200,15 @@ export function DocumentReviewDetailClient({
                       Descargar PDF
                     </Button>
                   )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleRegeneratePdf}
+                    disabled={isRegenerating}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    {isRegenerating ? 'Regenerando PDF...' : 'Regenerar PDF de firmas'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>

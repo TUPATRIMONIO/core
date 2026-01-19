@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, CreditCard, XCircle, Plus, Info } from 'lucide-react';
+import { Loader2, CreditCard, XCircle, Plus, Info, CheckCircle, Gift } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { Order } from '@/lib/checkout/core';
 import type { PaymentConfig } from '@/lib/payments/availability';
 import { OneclickCardsList, type OneclickCard } from './OneclickCardsList';
 import TransbankDocumentForm, { type BillingData } from './TransbankDocumentForm';
 import BillingDataForm, { type BasicBillingData } from './BillingDataForm';
+import DiscountCodeInput from './DiscountCodeInput';
 
 interface OrderCheckoutFormProps {
   orderId: string;
@@ -28,11 +29,12 @@ export default function OrderCheckoutForm({
 }: OrderCheckoutFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // La moneda está asociada al país de la organización (order.currency)
-  const selectedCurrency = order.currency;
+  const selectedCurrency = currentOrder.currency;
   
   // Tab activa inicial basada en proveedores disponibles
   const initialProvider = paymentConfig.providers[0];
@@ -87,6 +89,10 @@ export default function OrderCheckoutForm({
 
     loadData();
   }, [paymentConfig.providers, defaultBillingData]);
+
+  useEffect(() => {
+    setCurrentOrder(order);
+  }, [order.id]);
 
   // Detectar inscripciones Oneclick exitosas
   useEffect(() => {
@@ -260,6 +266,31 @@ export default function OrderCheckoutForm({
     }
   };
 
+  // Confirmar pedido gratuito (100% descuento)
+  const handleConfirmFreeOrder = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/payments/confirm-free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error confirmando pedido');
+
+      // Redirigir a página de éxito
+      router.push(`/checkout/${orderId}/success?provider=free`);
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  // Verificar si el pedido es gratuito
+  const isFreeOrder = Number(currentOrder.amount) === 0;
+
   if (loadingInitialData) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -287,7 +318,90 @@ export default function OrderCheckoutForm({
         />
       )}
 
-      {/* Tabs de Proveedores */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumen de pago</CardTitle>
+          <CardDescription>Revisa tu total antes de pagar</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <DiscountCodeInput
+            orderId={orderId}
+            order={currentOrder}
+            onApplied={(payload) => {
+              setCurrentOrder((prev) => ({
+                ...prev,
+                ...payload.order,
+              }));
+            }}
+          />
+
+          <div className="rounded-lg border p-4 bg-muted/50 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span>Subtotal</span>
+              <span className="font-medium">
+                {new Intl.NumberFormat('es-CL', {
+                  style: 'currency',
+                  currency: currentOrder.currency,
+                  minimumFractionDigits: currentOrder.currency === 'CLP' ? 0 : 2,
+                }).format(Number(currentOrder.original_amount ?? currentOrder.amount))}
+              </span>
+            </div>
+            {Number(currentOrder.discount_amount || 0) > 0 && (
+              <div className="flex justify-between items-center text-sm text-green-700">
+                <span>Descuento</span>
+                <span className="font-medium">
+                  -{new Intl.NumberFormat('es-CL', {
+                    style: 'currency',
+                    currency: currentOrder.currency,
+                    minimumFractionDigits: currentOrder.currency === 'CLP' ? 0 : 2,
+                  }).format(Number(currentOrder.discount_amount))}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-base font-semibold">
+              <span>Total</span>
+              <span>
+                {new Intl.NumberFormat('es-CL', {
+                  style: 'currency',
+                  currency: currentOrder.currency,
+                  minimumFractionDigits: currentOrder.currency === 'CLP' ? 0 : 2,
+                }).format(Number(currentOrder.amount))}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pedido Gratuito - Confirmar sin pago */}
+      {isFreeOrder ? (
+        <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
+              <Gift className="h-5 w-5" />
+              Pedido sin costo
+            </CardTitle>
+            <CardDescription className="text-green-600 dark:text-green-400">
+              Tu descuento cubre el 100% del pedido. Solo confirma para activar el servicio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleConfirmFreeOrder} 
+              disabled={loading} 
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <CheckCircle className="mr-2 h-5 w-5" />
+              )}
+              Confirmar pedido
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+      /* Tabs de Proveedores */
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className={`grid w-full grid-cols-${paymentConfig.providers.length}`}>
           {paymentConfig.providers.map(p => (
@@ -316,7 +430,7 @@ export default function OrderCheckoutForm({
                     <div className="rounded-lg border p-4 bg-muted/50">
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Total</span>
-                        <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: currentOrder.currency }).format(Number(currentOrder.amount))}</span>
                       </div>
                     </div>
                     <Button onClick={() => handleCheckout('transbank')} disabled={loading || !billingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -369,7 +483,7 @@ export default function OrderCheckoutForm({
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Total</span>
-                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: currentOrder.currency }).format(Number(currentOrder.amount))}</span>
                   </div>
                 </div>
                 <Button onClick={() => handleCheckout('flow')} disabled={loading || !billingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -393,7 +507,7 @@ export default function OrderCheckoutForm({
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Total</span>
-                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: currentOrder.currency }).format(Number(currentOrder.amount))}</span>
                   </div>
                 </div>
                 <Button onClick={() => handleCheckout('stripe')} disabled={loading || !basicBillingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -417,7 +531,7 @@ export default function OrderCheckoutForm({
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Total</span>
-                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: order.currency }).format(order.amount)}</span>
+                    <span className="text-xl font-bold">{new Intl.NumberFormat('es-CL', { style: 'currency', currency: currentOrder.currency }).format(Number(currentOrder.amount))}</span>
                   </div>
                 </div>
                 <Button onClick={() => handleCheckout('dlocalgo')} disabled={loading || !basicBillingData} className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
@@ -429,6 +543,7 @@ export default function OrderCheckoutForm({
           </TabsContent>
         )}
       </Tabs>
+      )}
 
       {error && (
         <Alert variant="destructive">

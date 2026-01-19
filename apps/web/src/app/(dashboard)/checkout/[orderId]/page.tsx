@@ -549,64 +549,99 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
           )}
         </div>
         
-        {/* Columna derecha: Pago o Historial */}
-        <div className="lg:col-span-3 space-y-4">
-        {canPay ? (
-          // Formulario de pago o confirmación gratuita
-          isZeroAmount ? (
-            <ZeroAmountCheckoutForm
-              orderId={orderId}
-              orderAmount={order.amount}
-              orderCurrency={order.currency}
-              countryCode={countryCode}
-            />
+        {/* Columna derecha: Pago e Historial */}
+        <div className="lg:col-span-3">
+          {canPay ? (
+            // Mostrar pestañas cuando hay opción de pago
+            <Tabs defaultValue="pago" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="pago" className="flex items-center gap-2">
+                  <CreditCard className="h-4 w-4" />
+                  Pago
+                </TabsTrigger>
+                <TabsTrigger value="historial" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Historial
+                  {enrichedHistory && enrichedHistory.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                      {enrichedHistory.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="pago" className="mt-0">
+                {isZeroAmount ? (
+                  <ZeroAmountCheckoutForm
+                    orderId={orderId}
+                    orderAmount={order.amount}
+                    orderCurrency={order.currency}
+                    countryCode={countryCode}
+                  />
+                ) : (
+                  <OrderCheckoutForm
+                    orderId={orderId}
+                    order={order}
+                    paymentConfig={paymentConfig}
+                    defaultBillingData={billingData}
+                  />
+                )}
+              </TabsContent>
+              
+              <TabsContent value="historial" className="mt-0">
+                <Card>
+                  <CardHeader className="pb-2 pt-4 px-4">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      Historial del Pedido
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {enrichedHistory && enrichedHistory.length > 0 ? (
+                      <div className="max-h-[450px] overflow-y-auto">
+                        <OrderTimeline 
+                          events={enrichedHistory} 
+                          orderNumber={order.order_number}
+                          compact
+                        />
+                      </div>
+                    ) : (
+                      <div className="p-4 text-sm text-muted-foreground text-center">
+                        No hay eventos en el historial todavía
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           ) : (
-            <OrderCheckoutForm
-              orderId={orderId}
-              order={order}
-              paymentConfig={paymentConfig}
-              defaultBillingData={billingData}
-            />
-          )
-        ) : (
-            // Historial (cuando no hay formulario de pago)
+            // Mostrar solo historial cuando no hay opción de pago
             <Card>
               <CardHeader className="pb-2 pt-4 px-4">
-                <CardTitle className="text-sm font-semibold">Historial</CardTitle>
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Historial del Pedido
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="max-h-[350px] overflow-y-auto">
-                  <OrderTimeline 
-                    events={enrichedHistory || []} 
-                    orderNumber={order.order_number}
-                    compact
-                  />
-                </div>
+                {enrichedHistory && enrichedHistory.length > 0 ? (
+                  <div className="max-h-[450px] overflow-y-auto">
+                    <OrderTimeline 
+                      events={enrichedHistory} 
+                      orderNumber={order.order_number}
+                      compact
+                    />
+                  </div>
+                ) : (
+                  <div className="p-4 text-sm text-muted-foreground text-center">
+                    No hay eventos en el historial todavía
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
         </div>
       </div>
-      
-      {/* Historial al final (solo si hay formulario de pago activo) */}
-      {canPay && (
-        <div className="mt-4">
-          <Card>
-            <CardHeader className="pb-2 pt-4 px-4">
-              <CardTitle className="text-sm font-semibold">Historial</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="max-h-[200px] overflow-y-auto">
-                <OrderTimeline 
-                  events={enrichedHistory || []} 
-                  orderNumber={order.order_number}
-                  compact
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
