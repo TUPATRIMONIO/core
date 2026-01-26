@@ -14,12 +14,19 @@ export default function LoginPage() {
 
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Usar getUser() en lugar de getSession() para validar contra el servidor
+        // getSession() puede devolver sesión local aunque el usuario no exista
+        const { data: { user }, error } = await supabase.auth.getUser()
         
-        // Solo redirigir si hay una sesión válida
-        if (active && session && !error) {
+        // Solo redirigir si hay un usuario válido (sin error)
+        if (active && user && !error) {
           router.replace('/dashboard')
           router.refresh()
+        }
+        
+        // Si hay error de usuario inválido, limpiar sesión local
+        if (error?.message?.includes('User from sub claim in JWT does not exist')) {
+          await supabase.auth.signOut()
         }
       } catch (error) {
         // Si hay error al verificar sesión, permitir acceso a la página

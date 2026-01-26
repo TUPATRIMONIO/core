@@ -147,11 +147,6 @@ const appsMenuItems = [
 
 const communicationsMenuItems = [
   {
-    title: 'Tickets Soporte',
-    url: '/admin/support/tickets',
-    icon: Ticket,
-  },
-  {
     title: 'Tickets',
     url: '/admin/communications/tickets',
     icon: Ticket,

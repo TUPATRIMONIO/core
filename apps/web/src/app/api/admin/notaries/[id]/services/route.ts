@@ -26,8 +26,7 @@ export async function GET(
     const serviceSupabase = createServiceRoleClient()
 
     const { data: services, error } = await serviceSupabase
-      .schema('signing')
-      .from('notary_services')
+      .from('signing_notary_services')
       .select('*')
       .eq('notary_office_id', id)
 
@@ -84,8 +83,7 @@ export async function PUT(
     }))
 
     const { data, error } = await serviceSupabase
-      .schema('signing')
-      .from('notary_services')
+      .from('signing_notary_services')
       .upsert(payload, { onConflict: 'notary_office_id,product_id' })
       .select()
 
@@ -100,3 +98,4 @@ export async function PUT(
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
+

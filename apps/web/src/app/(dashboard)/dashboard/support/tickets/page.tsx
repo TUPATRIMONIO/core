@@ -16,15 +16,19 @@ const ITEMS_PER_PAGE = 10;
 
 function getStatusBadge(status: string) {
   const styles: Record<string, string> = {
+    new: "bg-blue-100 text-blue-800",
     open: "bg-blue-100 text-blue-800",
-    pending: "bg-yellow-100 text-yellow-800",
+    in_progress: "bg-yellow-100 text-yellow-800",
+    waiting: "bg-yellow-100 text-yellow-800",
     resolved: "bg-green-100 text-green-800",
     closed: "bg-gray-100 text-gray-800",
   };
 
   const labels: Record<string, string> = {
+    new: "Nuevo",
     open: "Abierto",
-    pending: "Pendiente",
+    in_progress: "En progreso",
+    waiting: "Pendiente",
     resolved: "Resuelto",
     closed: "Cerrado",
   };

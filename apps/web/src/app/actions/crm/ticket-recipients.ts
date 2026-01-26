@@ -93,7 +93,7 @@ export async function resolveTicketRecipients(associations: {
     // 4. Context: CRM Contact
     if (associations.contactId) {
         try {
-             const { data: contact } = await supabase.schema('crm').from('contacts').select('email, first_name, last_name').eq('id', associations.contactId).single();
+             const { data: contact } = await supabase.from('crm_contacts').select('email, first_name, last_name').eq('id', associations.contactId).single();
              if (contact) {
                  // If we already have a primary (e.g. from Order), this might be secondary? 
                  // Or if it's a contact context, it should be primary.

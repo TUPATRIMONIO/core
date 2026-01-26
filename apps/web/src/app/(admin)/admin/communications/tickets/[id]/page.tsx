@@ -43,7 +43,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
 
   // Obtener ticket básico sin relaciones cross-schema
   const { data: rawTicket, error: ticketError } = await serviceSupabase
-    .from('tickets')
+    .from('crm_tickets')
     .select(`
       *,
       contact:contacts(*),
@@ -67,22 +67,53 @@ export default async function TicketDetailPage({ params }: PageProps) {
     console.error("Error fetching associations:", assocError);
   }
 
+  let createdByUser = null;
+  if (rawTicket?.user_id) {
+    const { data: userData } = await serviceSupabase
+      .schema("core")
+      .from("users")
+      .select("id, first_name, last_name, email, avatar_url")
+      .eq("id", rawTicket.user_id)
+      .single();
+    createdByUser = userData ?? null;
+  }
+
+  let organization = null;
+  if (rawTicket?.organization_id) {
+    const { data: orgData } = await serviceSupabase
+      .schema("core")
+      .from("organizations")
+      .select("id, name, org_type")
+      .eq("id", rawTicket.organization_id)
+      .single();
+    organization = orgData ?? null;
+  }
+
   // Reconstruct ticket object with enriched data
   const ticket = {
-      ...rawTicket,
-      ...(associations || {})
+    ...rawTicket,
+    created_by_user: createdByUser,
+    organization,
+    user_email: rawTicket.user_email ?? null,
+    ...(associations || {})
   }
 
   // Obtener emails del ticket
   const { data: emails } = await serviceSupabase
-    .from('emails')
+    .from('crm_emails')
     .select('*')
     .eq('ticket_id', id)
     .order('sent_at', { ascending: true })
 
+  const { data: messages } = await serviceSupabase
+    .from('crm_ticket_messages')
+    .select('*')
+    .eq('ticket_id', id)
+    .order('created_at', { ascending: true })
+
   // Obtener actividades del ticket
   const { data: activities } = await serviceSupabase
-    .from('activities')
+    .from('crm_activities')
     .select(`
       *,
       performed_by_user:users!activities_performed_by_fkey(id, email, first_name, last_name)
@@ -110,6 +141,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
         <TicketDetailClient
           ticket={ticketWithAttachments}
           emails={emails || []}
+          messages={messages || []}
           activities={activities || []}
         />
       </div>

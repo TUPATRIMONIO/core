@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { CreateTicketButtonForUser } from '@/components/admin/create-ticket-buttons'
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
 import { UserAssociationsClient } from '@/components/admin/UserAssociationsClient'
+import { DeleteUserDialog } from '@/components/admin/delete-user-dialog'
 
 async function getUser(id: string) {
   const supabase = createServiceRoleClient()
@@ -77,6 +78,11 @@ export default async function UserDetailPage({
         description={`Detalles del usuario`}
         actions={
           <div className="flex items-center gap-2">
+            <DeleteUserDialog 
+              userId={user.id}
+              userName={user.full_name || 'Usuario'}
+              userEmail={user.email}
+            />
             <CreateTicketButtonForUser
               userId={user.id}
               userName={user.full_name || 'Usuario'}

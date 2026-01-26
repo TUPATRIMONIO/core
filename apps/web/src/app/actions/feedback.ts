@@ -60,11 +60,12 @@ export async function submitFeedback(payload: SubmitFeedbackPayload) {
     }
 
     const { data: supportTicket, error: ticketError } = await serviceSupabase
-      .from("support_tickets")
+      .from("crm_tickets")
       .insert({
         user_id: userId,
         user_email: userId ? authData?.user?.email ?? null : payload.userEmail,
         subject: payload.title,
+        description: payload.description,
         source: "feedback",
         source_feedback_id: feedbackRow?.id,
         organization_id: organizationId,
@@ -80,14 +81,26 @@ export async function submitFeedback(payload: SubmitFeedbackPayload) {
     }
 
     const messageText = payload.description.trim();
-    await serviceSupabase.from("ticket_messages").insert({
-      ticket_id: supportTicket?.id,
-      sender_type: "user",
-      sender_id: userId,
-      message_text: messageText,
-      message_html: messageText.replace(/\n/g, "<br>"),
-      is_internal: false,
-    });
+    await serviceSupabase
+      .from("crm_ticket_messages")
+      .insert({
+        ticket_id: supportTicket?.id,
+        sender_type: "user",
+        sender_id: userId,
+        message_text: messageText,
+        message_html: messageText.replace(/\n/g, "<br>"),
+        is_internal: false,
+      });
+
+    // Crear asociación automática del usuario con el ticket
+    if (userId && supportTicket?.id) {
+      await serviceSupabase
+        .from("crm_ticket_users")
+        .insert({
+          ticket_id: supportTicket.id,
+          user_id: userId,
+        });
+    }
 
     return { success: true };
   } catch (error: any) {
@@ -194,7 +207,7 @@ export async function getFeedbackById(id: string) {
   }
 
   const { data: linkedTicket } = await supabase
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("id, ticket_number")
     .eq("source_feedback_id", data.id)
     .maybeSingle();

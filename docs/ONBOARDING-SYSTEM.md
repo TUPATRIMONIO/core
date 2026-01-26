@@ -274,6 +274,31 @@ Vista: Panel de administración global
 11. Puede invitar otros usuarios (futuro)
 ```
 
+### Flujo 4: Crear Empresa Adicional desde Cuenta Personal
+
+```
+1. Usuario con organización personal ingresa a su cuenta
+2. Abre la tarjeta "Crear Organización Empresarial"
+3. Completa:
+   - Nombre de empresa
+   - Industria (opcional)
+   - Tamaño (opcional)
+   - País
+   - Datos de facturación
+4. Click "Crear Empresa"
+   ↓
+   API POST /api/organizations/create-business
+   ↓
+   SQL: create_business_organization()
+   ↓
+   Crea:
+   - Org empresarial NUEVA
+   - Asigna como owner
+   - Guarda país + datos de facturación
+   - Mantiene la org personal intacta
+5. ✅ Usuario puede alternar entre su org personal y empresarial
+```
+
 ### Flujo 3: Login Existente
 
 ```

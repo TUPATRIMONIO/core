@@ -1,10 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Building2, Users, Mail, Phone, Globe } from 'lucide-react'
+import { ArrowLeft, Building2, Users, Mail, Phone, Globe, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { ConvertToBusinessCard } from '@/components/organization/ConvertToBusinessCard'
-import { ConvertToPersonalCard } from '@/components/organization/ConvertToPersonalCard'
 import { Badge } from '@/components/ui/badge'
 import { redirect } from 'next/navigation'
 
@@ -118,7 +117,7 @@ export default async function OrganizationSettingsPage() {
 
   return (
     <div className="container mx-auto py-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/dashboard">
@@ -132,6 +131,12 @@ export default async function OrganizationSettingsPage() {
             </p>
           </div>
         </div>
+        <Button asChild className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white">
+          <Link href="/onboarding?new=true">
+            <Plus className="mr-2 h-4 w-4" />
+            Nueva Organización
+          </Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -241,21 +246,12 @@ export default async function OrganizationSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Convertir organización - Mostrar componente según tipo */}
+        {/* Crear nueva organización empresarial - Solo mostrar para cuentas personales */}
         {org.org_type === 'personal' && (
           <div className="lg:col-span-2">
             <ConvertToBusinessCard 
               organizationType={org.org_type}
               organizationName={org.name}
-            />
-          </div>
-        )}
-        {org.org_type === 'business' && (
-          <div className="lg:col-span-2">
-            <ConvertToPersonalCard 
-              organizationType={org.org_type}
-              organizationName={org.name}
-              organizationId={org.id}
             />
           </div>
         )}

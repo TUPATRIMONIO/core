@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { sendNotaryRegistrationNotification } from '@/lib/notifications/notary'
 
-export const runtime = 'nodejs'
-
 /**
  * POST /api/onboarding/notary
  * Crea una organización tipo notaría para el usuario autenticado
@@ -20,6 +18,10 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser()
 
     if (userError || !user) {
+      console.error('Error de autenticación en /api/onboarding/notary:', {
+        userError: userError?.message || 'Sin error',
+        hasUser: !!user,
+      })
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
     }
 

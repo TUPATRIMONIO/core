@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 12, 2026 (Precios Multi-Moneda Paquetes Créditos + Sistema de Precios Multi-Moneda Centralizado + FESB Disponible Globalmente + Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
+> **📅 Última actualización:** Enero 22, 2026 (Creación de Organización Empresarial Separada + Validación RUT en Vivo + Limpieza Sistema Conversión + Precios Multi-Moneda Paquetes Créditos + Sistema de Precios Multi-Moneda Centralizado + FESB Disponible Globalmente + Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -10,8 +10,7 @@
 > **CORRECCIÓN SISTEMA NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y
 > FUNCIONANDO (Stripe, Transbank, Flow, dLocal Go)** ✅ +
 > **SIMPLIFICACIÓN HISTORIAL DE PEDIDOS** ✅ + **SISTEMA DE FACTURACIÓN
-> INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL
-> B2C ↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
+> INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CREACIÓN DE ORGANIZACIÓN EMPRESARIAL SEPARADA (B2C → B2B) COMPLETA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS
 > COMPLETO (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕
 > SISTEMA DE FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS COMPLETA +
 > PORTAL DE FIRMA `/sign/[token]` FUNCIONANDO** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN `/signing/new` CON PERSISTENCIA INDEXEDDB** ✅ + **🆕 SISTEMA DE BETA SIGNUP
@@ -21,7 +20,7 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅ + **🆕 CREACIÓN DE EMPRESA SEPARADA: FORMULARIO COMPLETO + VALIDACIÓN RUT EN VIVO** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -33,8 +32,7 @@ DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN
 COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA
 NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe,
 Transbank Webpay Plus, Transbank OneClick, Flow, DLocal Go)** ✅ + **SISTEMA DE FACTURACIÓN
-INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CONVERSIÓN BIDIRECCIONAL B2C
-↔ B2B COMPLETA Y PROBADA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
+INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CREACIÓN DE ORGANIZACIÓN EMPRESARIAL SEPARADA (B2C → B2B) COMPLETA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
 (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
 FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE & MULTIPLE)
 COMPLETOS** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN CON PERSISTENCIA** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl** ✅ + **PRÓXIMO: Políticas RLS públicas + Testing flujo completo, portal de firma
@@ -52,10 +50,12 @@ páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS.
 **NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular
 (B2C/B2B) sin restricciones, usando la organización platform cuando no tienen
 organización personal. Helper `getUserActiveOrganization()` implementado para
-manejo automático de organizaciones. **NUEVO (Dic 2025):** Sistema de conversión
-bidireccional B2C ↔ B2B completamente implementado y probado - Los usuarios
-pueden convertir su organización entre tipos personal y empresarial desde la
-interfaz, con advertencias automáticas y actualización de límites del CRM.
+manejo automático de organizaciones. **NUEVO (Ene 2026):** Sistema de creación de
+organización empresarial separada (B2C → B2B) completamente implementado - Los
+usuarios pueden crear una nueva empresa manteniendo su cuenta personal separada,
+con formulario completo de facturación y validación de RUT en vivo. El sistema
+anterior de "conversión" fue eliminado para evitar mezcla de datos personales y
+empresariales.
 
 - **NUEVO (Ene 12, 2026):** Sistema de Precios Multi-Moneda Centralizado. **Problema:** Moneda mostrada (ARS) no correspondía al país del usuario (Chile). La organización se creaba sin país y existía un selector de moneda independiente del país. **Solución:** Implementación de tabla centralizada `core.supported_countries` que define la relación fija País → Moneda. Migración de `signing.products` a estructura multi-moneda (7 columnas: `price_usd`, `price_clp`, `price_ars`, `price_cop`, `price_mxn`, `price_pen`, `price_brl`). Creación de librería centralizada `lib/pricing/countries.ts` para funciones de país/moneda. **Cambios principales:** Eliminación de selectores de moneda independientes del país. CountrySelector ahora muestra la moneda asociada (readonly). Todos los servicios tienen precios definidos en todas las monedas, incluso si solo funcionan en un país específico. **Archivos:** `supabase/migrations/20260112000001_create_supported_countries.sql`, `supabase/migrations/20260112000002_migrate_signing_products_multi_currency.sql`, `supabase/migrations/20260112000003_seed_signing_products_all_currencies.sql`, `apps/web/src/lib/pricing/countries.ts`, `apps/web/src/lib/pricing/countries-sync.ts`. **Beneficios:** Escalable, consistente, elimina confusión usuario, facilita expansión a nuevos países.
 
@@ -347,95 +347,54 @@ READY:
 - ✅ **LISTO PARA PRODUCCIÓN** 🚀
 - ✅ Listo para escalar a cientos de organizaciones
 
-**🔄 CONVERSIÓN B2C → B2B - 100% COMPLETO** (Enero 2025):
+**🔄 CREACIÓN DE ORGANIZACIÓN EMPRESARIAL SEPARADA (B2C → B2B) - 100% COMPLETO** (Enero 2026):
 
 **✅ FUNCIONALIDADES COMPLETAS:**
 
-- ✅ Función SQL `convert_organization_b2c_to_b2b()` - Conversión automática
-  completa
-- ✅ Endpoint API `/api/organizations/convert-to-business` - Seguro y validado
-- ✅ Componente UI `ConvertToBusinessCard` - Interfaz amigable para usuarios
-- ✅ Página `/settings/organization` - Configuración completa de organización
-- ✅ Validaciones de seguridad (solo org_owner, solo personal → business)
-- ✅ Actualización automática de límites del CRM (100→1000 contactos, 1→5
-  usuarios, API access)
-- ✅ Actualización de settings y tipo de organización
-- ✅ Integrado en sidebar del dashboard
+- ✅ Endpoint API `/api/organizations/create-business` - Crea una nueva empresa
+  separada de la cuenta personal
+- ✅ Componente UI `ConvertToBusinessCard` - Refactorizado como modal de creación
+  con formulario completo
+- ✅ Formulario de Facturación Integrado - Captura RUT, Razón Social, Giro, etc.
+- ✅ **Validación RUT en Vivo** - Formateo automático y validación de dígito
+  verificador en tiempo real
+- ✅ Bloqueo de creación si los datos de facturación o RUT son inválidos
+- ✅ Actualización automática de límites del CRM para la nueva empresa
+- ✅ Redirección inteligente - Establece la nueva empresa como activa y recarga
+  la app
+- ✅ **Aislamiento Total** - Los datos personales se mantienen separados de los
+  empresariales
 
-**📄 ARCHIVOS CREADOS:**
+**📄 ARCHIVOS CREADOS/MODIFICADOS:**
 
-- Migración: `20251202000003_convert_b2c_to_b2b_function.sql`
-- API Route: `apps/web/src/app/api/organizations/convert-to-business/route.ts`
+- API Route: `apps/web/src/app/api/organizations/create-business/route.ts`
 - Componente: `apps/web/src/components/organization/ConvertToBusinessCard.tsx`
 - Página: `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
-- Sidebar actualizado: `apps/web/src/components/dashboard/dashboard-sidebar.tsx`
+- Documentación: `docs/ONBOARDING-SYSTEM.md`
 
 **🔒 SEGURIDAD:**
 
-- ✅ Solo usuarios autenticados pueden convertir
-- ✅ Solo `org_owner` puede convertir su organización
-- ✅ Solo organizaciones `personal` pueden convertirse
-- ✅ Validaciones en backend y frontend
-- ✅ Manejo completo de errores
+- ✅ Solo usuarios autenticados pueden crear empresas
+- ✅ Solo `org_owner` de cuenta personal ve la opción de crear empresa
+- ✅ Validaciones robustas en backend y frontend
+- ✅ Sistema de "conversión" antigua ELIMINADO para evitar pérdida de espacio
+  personal
 
-**🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
+**🎯 BENEFICIOS DEL NUEVO MODELO:**
 
-- `org_type`: `personal` → `business`
-- `settings.user_type`: `b2c` → `b2b`
-- CRM `max_contacts`: 100 → 1,000
-- CRM `max_users`: 1 → 5
-- CRM `api_access`: false → true
+- ✅ Usuario mantiene su espacio personal intacto
+- ✅ Flexibilidad para tener múltiples empresas bajo el mismo usuario
+- ✅ Datos de facturación configurados desde el inicio
+- ✅ Experiencia de usuario profesional y guiada
 
-**🔄 CONVERSIÓN B2B → B2C - 100% COMPLETO Y PROBADO** (Diciembre 2025):
+**⚠️ SISTEMA DE CONVERSIÓN B2B → B2C (ELIMINADO):**
 
-**✅ FUNCIONALIDADES COMPLETAS:**
-
-- ✅ Función SQL `convert_organization_b2b_to_b2c()` - Conversión automática
-  completa
-- ✅ Endpoint API `/api/organizations/convert-to-personal` - Seguro y validado
-  con advertencias
-- ✅ Componente UI `ConvertToPersonalCard` - Interfaz amigable con advertencias
-  destacadas
-- ✅ Validaciones de seguridad (solo org_owner, solo business → personal)
-- ✅ Advertencias automáticas si hay usuarios adicionales o contactos excedentes
-- ✅ Actualización automática de límites del CRM (1000→100 contactos, 5→1
-  usuarios, API access deshabilitado)
-- ✅ Actualización de settings y tipo de organización
-- ✅ Los datos existentes se mantienen (solo se reducen límites)
-- ✅ **PROBADO EXITOSAMENTE** - Migración aplicada y funcionando correctamente
-
-**📄 ARCHIVOS CREADOS:**
-
-- Migración: `20251203000000_convert_b2b_to_b2c_function.sql`
-- API Route: `apps/web/src/app/api/organizations/convert-to-personal/route.ts`
-- Componente: `apps/web/src/components/organization/ConvertToPersonalCard.tsx`
-- Página actualizada:
-  `apps/web/src/app/(dashboard)/settings/organization/page.tsx`
-
-**🔒 SEGURIDAD:**
-
-- ✅ Solo usuarios autenticados pueden convertir
-- ✅ Solo `org_owner` puede convertir su organización
-- ✅ Solo organizaciones `business` pueden convertirse
-- ✅ Validaciones en backend y frontend
-- ✅ Manejo completo de errores
-
-**⚠️ ADVERTENCIAS Y CONSIDERACIONES:**
-
-- ✅ Si hay más de 1 usuario: Se muestra advertencia pero se permite conversión
-  (usuarios mantienen acceso hasta remoción manual)
-- ✅ Si hay más de 100 contactos: Se muestra advertencia pero se permite
-  conversión (datos se mantienen pero límite se reduce)
-- ✅ API Access se deshabilita automáticamente
-- ✅ Advertencias se muestran en UI y en respuesta del API
-
-**🎯 CAMBIOS REALIZADOS AL CONVERTIR:**
-
-- `org_type`: `business` → `personal`
-- `settings.user_type`: `b2b` → `b2c`
-- CRM `max_contacts`: 1,000 → 100
-- CRM `max_users`: 5 → 1
-- CRM `api_access`: true → false
+- ❌ El sistema de conversión bidireccional fue removido en favor del modelo de
+  organizaciones separadas.
+- ❌ Eliminada API `/api/organizations/convert-to-personal`
+- ❌ Eliminado componente `ConvertToPersonalCard`
+- ❌ Razón: Evitar la mezcla de datos personales y empresariales que causaba
+  confusión legal y operativa.
 
 ---
 
@@ -4992,25 +4951,15 @@ core.roles:
 
 ##### **Ventajas del Modelo Híbrido:**
 
-✅ Misma arquitectura para ambos segmentos ✅ Usuario B2C puede "upgradear" a
-B2B **← IMPLEMENTADO (Enero 2025)**
+✅ Misma arquitectura para ambos segmentos ✅ Usuario B2C puede crear una empresa
+B2B separada **← IMPLEMENTADO (Enero 2026)**
 
-- Función SQL `convert_organization_b2c_to_b2b()` disponible
-- Endpoint API `/api/organizations/convert-to-business` funcionando
-- UI completa en `/settings/organization` para conversión desde frontend
-- Conversión automática de límites y configuración del CRM ✅ Usuario B2B puede
-  "downgradear" a B2C **← IMPLEMENTADO Y PROBADO (Diciembre 2025)**
-- Función SQL `convert_organization_b2b_to_b2c()` disponible y funcionando
-- Endpoint API `/api/organizations/convert-to-personal` funcionando
-  correctamente
-- UI completa con advertencias en `/settings/organization` para conversión desde
-  frontend
-- Conversión automática de límites (reducción) y configuración del CRM
-- Sistema de advertencias para usuarios adicionales y contactos excedentes
-- Migración aplicada y probada exitosamente en producción ✅ Mercado más amplio
-  (individuales + empresas) ✅ Sistema de créditos/IA unificado ✅ No duplicar
-  código ni infraestructura ✅ Flexibilidad total: conversión bidireccional
-  según necesidades del usuario
+- Endpoint API `/api/organizations/create-business` disponible
+- UI completa en `/settings/organization` para creación desde frontend
+- Configuración automática de límites y datos de facturación del CRM ✅ Usuario
+  mantiene su cuenta personal intacta para máxima privacidad y orden legal.
+- El sistema anterior de conversión bidireccional fue eliminado para evitar
+  mezcla de datos.
 
 #### ✅ Implementación COMPLETADA:
 

@@ -46,13 +46,12 @@ export async function createSupportTicket(input: CreateSupportTicketInput) {
 
   const serviceSupabase = createServiceRoleClient();
   const { data: ticket, error } = await serviceSupabase
-    .schema("communications")
-    .from("support_tickets")
+    .from("crm_tickets")
     .insert({
       user_id: user.id,
       user_email: user.email,
       subject: input.subject.trim(),
-      source: "user_created",
+      description: input.message.trim(),
       organization_id: organizationId,
       priority: "medium",
       status: "open",
@@ -67,20 +66,27 @@ export async function createSupportTicket(input: CreateSupportTicketInput) {
 
   const messageText = input.message.trim();
   const { error: messageError } = await serviceSupabase
-    .schema("communications")
-    .from("ticket_messages")
+    .from("crm_ticket_messages")
     .insert({
-    ticket_id: ticket.id,
-    sender_type: "user",
-    sender_id: user.id,
-    message_text: messageText,
-    message_html: messageText.replace(/\n/g, "<br>"),
-    is_internal: false,
+      ticket_id: ticket.id,
+      sender_type: "user",
+      sender_id: user.id,
+      message_text: messageText,
+      message_html: messageText.replace(/\n/g, "<br>"),
+      is_internal: false,
     });
 
   if (messageError) {
     console.error("createSupportTicket message error:", messageError);
   }
+
+  // Crear asociación automática del usuario con el ticket
+  await serviceSupabase
+    .from("crm_ticket_users")
+    .insert({
+      ticket_id: ticket.id,
+      user_id: user.id,
+    });
 
   return { success: true, ticketId: ticket.id };
 }
@@ -103,8 +109,7 @@ export async function getMySupportTickets(params: {
     user.email ? `user_id.eq.${user.id},user_email.eq.${user.email}` : `user_id.eq.${user.id}`;
 
   const { data, error, count } = await serviceSupabase
-    .schema("communications")
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("id, ticket_number, subject, status, priority, created_at, updated_at", {
       count: "exact",
     })
@@ -131,15 +136,10 @@ export async function getMySupportTicketById(ticketId: string) {
   }
 
   const serviceSupabase = createServiceRoleClient();
-  const filter =
-    user.email ? `user_id.eq.${user.id},user_email.eq.${user.email}` : `user_id.eq.${user.id}`;
-
   const { data: ticket, error } = await serviceSupabase
-    .schema("communications")
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("*")
     .eq("id", ticketId)
-    .or(filter)
     .single();
 
   if (error || !ticket) {
@@ -147,9 +147,15 @@ export async function getMySupportTicketById(ticketId: string) {
     return { ticket: null, messages: [] };
   }
 
+  const hasAccess =
+    ticket.user_id === user.id || (ticket.user_email && ticket.user_email === user.email);
+
+  if (!hasAccess) {
+    return { ticket: null, messages: [] };
+  }
+
   const { data: messages } = await serviceSupabase
-    .schema("communications")
-    .from("ticket_messages")
+    .from("crm_ticket_messages")
     .select("*")
     .eq("ticket_id", ticketId)
     .order("created_at", { ascending: true });
@@ -180,8 +186,7 @@ export async function addUserTicketMessage(params: {
     user.email ? `user_id.eq.${user.id},user_email.eq.${user.email}` : `user_id.eq.${user.id}`;
 
   const { data: ticket } = await serviceSupabase
-    .schema("communications")
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("id")
     .eq("id", params.ticketId)
     .or(filter)
@@ -192,15 +197,14 @@ export async function addUserTicketMessage(params: {
   }
 
   const { error } = await serviceSupabase
-    .schema("communications")
-    .from("ticket_messages")
+    .from("crm_ticket_messages")
     .insert({
-    ticket_id: params.ticketId,
-    sender_type: "user",
-    sender_id: user.id,
-    message_text: messageText,
-    message_html: messageText.replace(/\n/g, "<br>"),
-    is_internal: false,
+      ticket_id: params.ticketId,
+      sender_type: "user",
+      sender_id: user.id,
+      message_text: messageText,
+      message_html: messageText.replace(/\n/g, "<br>"),
+      is_internal: false,
     });
 
   if (error) {
@@ -227,7 +231,7 @@ export async function getAdminSupportTickets(params: {
 
   const supabase = createServiceRoleClient();
   let query = supabase
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false });
 
@@ -294,7 +298,7 @@ export async function getAdminSupportTicketById(ticketId: string) {
 
   const supabase = createServiceRoleClient();
   const { data: ticket, error } = await supabase
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("*")
     .eq("id", ticketId)
     .single();
@@ -305,7 +309,7 @@ export async function getAdminSupportTicketById(ticketId: string) {
   }
 
   const { data: messages } = await supabase
-    .from("ticket_messages")
+    .from("crm_ticket_messages")
     .select("*")
     .eq("ticket_id", ticketId)
     .order("created_at", { ascending: true });
@@ -355,7 +359,7 @@ export async function addAdminTicketMessage(params: {
 
   const serviceSupabase = createServiceRoleClient();
   const { data: ticket } = await serviceSupabase
-    .from("support_tickets")
+    .from("crm_tickets")
     .select("*")
     .eq("id", params.ticketId)
     .single();
@@ -364,15 +368,16 @@ export async function addAdminTicketMessage(params: {
     return { success: false, error: "Ticket no encontrado." };
   }
 
-  const { error } = await serviceSupabase.from("ticket_messages").insert({
-    ticket_id: params.ticketId,
-    sender_type: "admin",
-    sender_id: user.id,
-    message_text: messageText,
-    message_html: messageText.replace(/\n/g, "<br>"),
-    is_internal: false,
-    email_sent_at: new Date().toISOString(),
-  });
+  const { error } = await serviceSupabase
+    .from("crm_ticket_messages")
+    .insert({
+      ticket_id: params.ticketId,
+      sender_type: "admin",
+      sender_id: user.id,
+      message_text: messageText,
+      message_html: messageText.replace(/\n/g, "<br>"),
+      is_internal: false,
+    });
 
   if (error) {
     console.error("addAdminTicketMessage error:", error);
@@ -381,9 +386,9 @@ export async function addAdminTicketMessage(params: {
 
   if (params.status) {
     await serviceSupabase
-      .from("support_tickets")
+      .from("crm_tickets")
       .update({
-        status: params.status,
+        status: params.status as any,
         resolved_at: params.status === "resolved" ? new Date().toISOString() : null,
       })
       .eq("id", params.ticketId);

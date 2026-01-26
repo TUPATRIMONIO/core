@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { TicketsView } from '@/components/crm/tickets/TicketsView';
 
 interface PageProps {
@@ -16,6 +16,7 @@ interface PageProps {
 
 export default async function AdminTicketsPage({ searchParams }: PageProps) {
   const supabase = await createClient();
+  const serviceSupabase = createServiceRoleClient();
   const filters = await searchParams;
 
   // Verificar si es platform admin
@@ -53,12 +54,16 @@ export default async function AdminTicketsPage({ searchParams }: PageProps) {
     );
   }
 
-  // Construir query base
-  let query = supabase
-    .from('tickets')
+  // Construir query base usando service role para bypassear RLS
+  let query = serviceSupabase
+    .from('crm_tickets')
     .select('*')
-    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false });
+
+  // Si no es platform admin, filtrar por organización
+  if (!isPlatformAdmin && organizationId) {
+    query = query.eq('organization_id', organizationId);
+  }
 
   // Aplicar filtros si existen (simulando lógica de búsqueda avanzada)
   // Nota: La vista 'tickets' podría no tener todas las columnas de emails joinadas para filtrar.

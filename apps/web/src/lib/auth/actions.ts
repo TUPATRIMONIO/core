@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 
 // Función helper para obtener origin URL
@@ -18,6 +18,7 @@ type ActionResult = {
   error?: string
   success?: boolean
   message?: string
+  requiresEmailConfirmation?: boolean
   waitSeconds?: number // Tiempo en segundos que debe esperar antes de intentar de nuevo
 }
 
@@ -41,7 +42,7 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient()
   const origin = await getURL()
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -55,12 +56,43 @@ export async function signUp(formData: FormData): Promise<ActionResult> {
     return { error: translated.message, waitSeconds: translated.waitSeconds }
   }
 
-  // Redirigir a onboarding (el usuario completará el onboarding antes de usar el sistema)
-  if (redirectTo && redirectTo.startsWith('/')) {
-    redirect(`/onboarding?next=${encodeURIComponent(redirectTo)}`)
+  const userId = data?.user?.id
+  if (userId) {
+    try {
+      const serviceSupabase = createServiceRoleClient()
+      const emailParts = email.split('@')[0] || ''
+      const firstName = emailParts.split('.')[0] || emailParts || null
+
+      const { error: orgError } = await serviceSupabase.rpc(
+        'create_personal_organization',
+        {
+          user_id: userId,
+          user_email: email,
+          user_first_name: firstName,
+        }
+      )
+
+      if (orgError) {
+        console.error('Error creando organización personal en signUp:', orgError)
+      }
+    } catch (orgCreateError) {
+      console.error('Error inesperado creando org personal en signUp:', orgCreateError)
+    }
   }
 
-  redirect('/onboarding')
+  if (!data?.session) {
+    return {
+      success: true,
+      message: 'Te enviamos un email de confirmación. Revisa tu bandeja de entrada para activar tu cuenta.',
+      requiresEmailConfirmation: true,
+    }
+  }
+
+  if (redirectTo && redirectTo.startsWith('/')) {
+    redirect(redirectTo)
+  }
+
+  redirect('/dashboard')
 }
 
 /**
@@ -127,10 +159,25 @@ export async function signIn(formData: FormData): Promise<ActionResult> {
       console.warn('Error al revalidar path (no crítico, login exitoso):', revalidateError)
     }
 
-    // Si no tiene organización, redirigir a onboarding
+    // Si no tiene organización, crear org personal automáticamente
     if (!hasOrg) {
-      redirect('/onboarding')
-      return { success: true } // Nunca se ejecutará por el redirect, pero TypeScript lo requiere
+      const emailParts = user.email?.split('@')[0] || ''
+      const firstName = emailParts.split('.')[0] || emailParts || null
+
+      const { error: createError } = await supabase.rpc(
+        'create_personal_organization',
+        {
+          user_id: user.id,
+          user_email: user.email || '',
+          user_first_name: firstName,
+        }
+      )
+
+      if (createError) {
+        console.error('Error creando org personal en signIn:', createError)
+        redirect('/onboarding')
+        return { success: true }
+      }
     }
   }
 

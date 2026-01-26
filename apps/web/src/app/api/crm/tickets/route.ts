@@ -270,8 +270,7 @@ export async function POST(request: NextRequest) {
         // Resolve email if no user email found
         if (toEmails.length === 0) {
              const { data: contact } = await serviceSupabase
-              .schema("crm") // Explicit schema just in case
-              .from("contacts")
+              .from("crm_contacts")
               .select("email")
               .eq("id", associations.contactId)
               .single();

@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   XCircle,
   RefreshCw,
+  Building2,
 } from 'lucide-react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -53,6 +54,16 @@ interface Activity {
     first_name: string | null
     last_name: string | null
   } | null
+}
+
+interface TicketMessage {
+  id: string
+  sender_type: 'user' | 'admin' | 'system'
+  sender_id: string | null
+  message_text: string
+  message_html: string | null
+  is_internal: boolean
+  created_at: string
 }
 
 // Update Ticket interface
@@ -138,6 +149,20 @@ interface Ticket {
   }[]
   // Explicitly remove single 'order' if it's not used or expected
   order?: any 
+  user_id?: string | null
+  user_email?: string | null
+  created_by_user?: {
+    id: string
+    first_name: string | null
+    last_name: string | null
+    email: string | null
+    avatar_url?: string | null
+  } | null
+  organization?: {
+    id: string
+    name: string
+    org_type?: string | null
+  } | null
 }
 
 import { AssociationsPanel, AssociationSection } from '@/components/shared/AssociationsPanel'
@@ -146,17 +171,20 @@ import { AssociationSelector } from '@/components/crm/tickets/AssociationSelecto
 import { AttachmentList } from '@/components/crm/tickets/AttachmentList'
 import { linkEntity, unlinkEntity, AssociationType } from '@/app/actions/crm/associations'
 import { uploadAttachment, deleteAttachment } from '@/app/actions/crm/attachments'
+import { addCrmTicketMessage } from '@/app/actions/crm/ticket-messages'
 import { toast } from 'sonner'
 
 interface TicketDetailClientProps {
   ticket: Ticket
   emails: Email[]
+  messages: TicketMessage[]
   activities: Activity[]
 }
 
 export function TicketDetailClient({
   ticket,
   emails: initialEmails,
+  messages: initialMessages,
   activities,
 }: TicketDetailClientProps) {
 
@@ -166,6 +194,9 @@ export function TicketDetailClient({
   const [replySubject, setReplySubject] = useState(`Re: ${ticket.subject}`)
   const [replyBody, setReplyBody] = useState('')
   const [sending, setSending] = useState(false)
+  const [messageText, setMessageText] = useState('')
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const [notifyUser, setNotifyUser] = useState(false)
   const [status, setStatus] = useState(ticket.status)
   const [priority, setPriority] = useState(ticket.priority)
   const [updating, setUpdating] = useState(false)
@@ -292,9 +323,43 @@ export function TicketDetailClient({
     return result
   }
 
+  const handleSendMessage = async () => {
+    if (!messageText.trim()) {
+      toast.error('Escribe un mensaje antes de enviar.')
+      return
+    }
+
+    setSendingMessage(true)
+    const result = await addCrmTicketMessage({
+      ticketId: ticket.id,
+      message: messageText,
+      isInternal: !notifyUser,
+      sendEmailNotification: notifyUser,
+    })
+
+    if (result?.success) {
+      setMessageText('')
+      setNotifyUser(false)
+      router.refresh()
+      toast.success('Mensaje enviado.')
+    } else {
+      toast.error(result?.error || 'No pudimos enviar el mensaje.')
+    }
+
+    setSendingMessage(false)
+  }
+
   const handleReply = async () => {
-    // Usar el primer contacto disponible para responder
-    const targetEmail = ticket.contact?.email || ticket.ticket_contacts?.[0]?.contact.email;
+    // Buscar email del usuario en este orden de prioridad:
+    // 1. user_email del ticket (si es ticket de soporte)
+    // 2. ticket_users (usuarios asociados)
+    // 3. contact directo
+    // 4. ticket_contacts
+    const targetEmail = 
+      ticket.user_email ||
+      ticket.ticket_users?.[0]?.user.email ||
+      ticket.contact?.email || 
+      ticket.ticket_contacts?.[0]?.contact.email;
 
     if (!replyBody.trim() || !targetEmail) {
         if (!targetEmail) toast.error('No hay un contacto asociado para responder.');
@@ -531,6 +596,77 @@ export function TicketDetailClient({
           </CardContent>
         </Card>
 
+        {/* Mensajes internos */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Mensajes</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {initialMessages.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Aún no hay mensajes internos en este ticket.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {initialMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`rounded-lg border p-4 ${
+                      message.sender_type === 'admin'
+                        ? 'bg-[var(--tp-bg-light-10)] border-[var(--tp-lines-30)]'
+                        : 'bg-card'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                      <span>
+                        {message.sender_type === 'admin'
+                          ? 'Equipo'
+                          : message.sender_type === 'system'
+                            ? 'Sistema'
+                            : 'Usuario'}
+                      </span>
+                      <span>{format(new Date(message.created_at), 'PPpp', { locale: es })}</span>
+                    </div>
+                    {message.is_internal && (
+                      <Badge variant="secondary" className="mb-2">
+                        Interno
+                      </Badge>
+                    )}
+                    <p className="text-sm whitespace-pre-wrap">
+                      {message.message_text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="notify-user"
+                  checked={notifyUser}
+                  onChange={(event) => setNotifyUser(event.target.checked)}
+                  disabled={!ticket.user_email}
+                  className="h-4 w-4"
+                />
+                <label htmlFor="notify-user" className="text-sm text-muted-foreground">
+                  Notificar al usuario por email
+                </label>
+              </div>
+              <Textarea
+                value={messageText}
+                onChange={(event) => setMessageText(event.target.value)}
+                placeholder="Escribe un mensaje claro y útil para el equipo."
+                rows={4}
+              />
+              <Button onClick={handleSendMessage} disabled={sendingMessage}>
+                {sendingMessage ? 'Enviando...' : 'Enviar mensaje'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Editor de respuesta */}
         {replying ? (
           <Card>
@@ -542,7 +678,13 @@ export function TicketDetailClient({
                 <label className="text-sm font-medium mb-2 block">Para:</label>
                 <input
                   type="text"
-                  value={ticket.contact?.email || ticket.ticket_contacts?.[0]?.contact.email || ''} // Mostrar el principal
+                  value={
+                    ticket.user_email ||
+                    ticket.ticket_users?.[0]?.user.email ||
+                    ticket.contact?.email || 
+                    ticket.ticket_contacts?.[0]?.contact.email || 
+                    ''
+                  }
                   disabled
                   className="w-full px-3 py-2 border rounded-md bg-muted"
                 />
@@ -691,6 +833,35 @@ export function TicketDetailClient({
                 <span className="text-muted-foreground">
                   Asignado a:{' '}
                   {ticket.assigned_user.first_name || ticket.assigned_user.email}
+                </span>
+              </div>
+            )}
+            {ticket.user_id && ticket.created_by_user && (
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  Creado por:{' '}
+                  <Link
+                    href={`/admin/users/${ticket.user_id}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {ticket.created_by_user.first_name} {ticket.created_by_user.last_name}
+                  </Link>
+                  {ticket.user_email && ` (${ticket.user_email})`}
+                </span>
+              </div>
+            )}
+            {ticket.organization && (
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  Organización:{' '}
+                  <Link
+                    href={`/admin/organizations/${ticket.organization.id}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {ticket.organization.name}
+                  </Link>
                 </span>
               </div>
             )}

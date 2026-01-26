@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Checkout Unificado e Invitados Activo** 🚀  
-> **📅 Actualización:** 8 Enero 2026  
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Creación de Empresas Separadas Activo** 🚀  
+> **📅 Actualización:** 22 Enero 2026  
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -16,7 +16,8 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad, notaría digital
 - **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación con persistencia de progreso
 - **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares
-- **📧 Email-to-Ticket**: Creación automática de tickets desde emails entrantes
+- **📧 Sistema de soporte unificado**: Tickets de soporte y CRM fusionados en `crm.tickets`
+- **💬 Mensajes internos en tickets**: Conversación interna y externa del equipo en el panel admin
 - **🎨 Design System**: Colores dual, dark mode, componentes Shadcn/UI
 
 ---
@@ -97,7 +98,7 @@ Cada servicio tiene su propio schema para mejor organización:
 |--------|-----------|--------|
 | `core` | Foundation multi-tenant (orgs, users, roles, suscripciones) - 13 tablas | ✅ Completo |
 | `marketing` | Blog, KB, leads, reviews, testimonios - 11 tablas | ✅ Completo |
-| `crm` | CRM completo estilo HubSpot: contacts, companies, deals, tickets, products, quotes, email multi-cuenta, pipelines configurables - 16+ tablas | ✅ Sistema Universal |
+| `crm` | CRM completo estilo HubSpot: contacts, companies, deals, tickets, ticket_messages, products, quotes, email multi-cuenta, pipelines configurables - 16+ tablas | ✅ Sistema Universal |
 | `signatures` | Firma electrónica y procesos notariales | ✅ Completo |
 | `ai_customer_service` | Chatbot IA con RAG | 📋 Fase 9 |
 | `ai_document_review` | Análisis de docs IA (Interno y Público) | ✅ Operativo |
