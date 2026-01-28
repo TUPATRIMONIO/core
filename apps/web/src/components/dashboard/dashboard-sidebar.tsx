@@ -28,6 +28,8 @@ import {
   FileEdit,
   FolderOpen,
   Coins,
+  Clock,
+  CheckCircle,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -197,6 +199,40 @@ const settingsMenuItems = [
   },
 ]
 
+const notaryMenuItems = [
+  {
+    title: 'Dashboard Notarial',
+    url: '/dashboard/notary',
+    icon: LayoutDashboard,
+  },
+]
+
+const notaryDocumentsMenuItems = [
+  {
+    title: 'Pendientes',
+    url: '/dashboard/notary/pending',
+    icon: Clock,
+  },
+  {
+    title: 'Completados',
+    url: '/dashboard/notary/completed',
+    icon: CheckCircle,
+  },
+]
+
+const notaryConfigMenuItems = [
+  {
+    title: 'Servicios Notariales',
+    url: '/dashboard/notary/services',
+    icon: Settings,
+  },
+  {
+    title: 'Estadísticas',
+    url: '/dashboard/notary/stats',
+    icon: BarChart3,
+  },
+]
+
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -204,6 +240,7 @@ export function DashboardSidebar() {
   const [enabledAppSlugs, setEnabledAppSlugs] = useState<Set<string>>(new Set())
   const [isLoadingApps, setIsLoadingApps] = useState(true)
   const { activeOrganization, isLoading: isLoadingOrg } = useOrganization()
+  const isNotaryOrg = activeOrganization?.org_type === 'notary'
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -329,6 +366,32 @@ export function DashboardSidebar() {
     return 'TP'
   }
 
+  // Si está cargando la organización, mostrar estado de carga
+  // para evitar el "flash" del menú por defecto (clientes)
+  if (isLoadingOrg) {
+    return (
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <div className="h-12 w-full animate-pulse bg-muted rounded-lg" />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="p-4 space-y-4">
+            <div className="h-4 w-24 animate-pulse bg-muted rounded" />
+            <div className="space-y-2">
+              <div className="h-8 w-full animate-pulse bg-muted rounded" />
+              <div className="h-8 w-full animate-pulse bg-muted rounded" />
+            </div>
+          </div>
+        </SidebarContent>
+        <SidebarRail />
+      </Sidebar>
+    )
+  }
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -340,170 +403,291 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Principal</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, mainMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isNotaryOrg ? (
+          <>
+            {/* Notary Principal */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Principal</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {notaryMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, notaryMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        {/* CRM - Solo mostrar si la aplicación está habilitada */}
-        {!isLoadingApps && enabledAppSlugs.has('crm_sales') && (
-          <SidebarGroup>
-            <SidebarGroupLabel>CRM</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {crmMenuItems.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive(item.url, crmMenuItems)}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+            {/* Notary Documents */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Documentos</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {notaryDocumentsMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, notaryDocumentsMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Notary Config */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Gestión</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {notaryConfigMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, notaryConfigMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Billing (Reused) */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Facturación</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {billingMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, billingMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Settings (Reused) */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Configuración</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {settingsMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, settingsMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        ) : (
+          <>
+            {/* Main Navigation */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Principal</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {mainMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, mainMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* CRM - Solo mostrar si la aplicación está habilitada */}
+            {!isLoadingApps && enabledAppSlugs.has('crm_sales') && (
+              <SidebarGroup>
+                <SidebarGroupLabel>CRM</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {crmMenuItems.map((item) => (
+                      <SidebarMenuItem key={item.url}>
+                        <SidebarMenuButton 
+                          asChild 
+                          isActive={isActive(item.url, crmMenuItems)}
+                          tooltip={item.title}
+                        >
+                          <Link href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+
+            {/* Firma Electrónica */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Firma Electrónica</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {signingMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, signingMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Editor de Documentos */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Editor</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {documentsMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, documentsMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Billing */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Facturación</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {billingMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, billingMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Communications - Solo mostrar si Email Marketing está habilitado */}
+            {!isLoadingApps && enabledAppSlugs.has('email_marketing') && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {communicationsMenuItems.map((item) => (
+                      <SidebarMenuItem key={item.url}>
+                        <SidebarMenuButton 
+                          asChild 
+                          isActive={isActive(item.url, communicationsMenuItems)}
+                          tooltip={item.title}
+                        >
+                          <Link href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+
+            {/* Settings */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Configuración</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {settingsMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.url, settingsMenuItems)}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
-
-        {/* Firma Electrónica */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Firma Electrónica</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {signingMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, signingMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Editor de Documentos */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Editor</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {documentsMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, documentsMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Billing */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Facturación</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {billingMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, billingMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Communications - Solo mostrar si Email Marketing está habilitado */}
-        {!isLoadingApps && enabledAppSlugs.has('email_marketing') && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Comunicaciones</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {communicationsMenuItems.map((item) => (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive(item.url, communicationsMenuItems)}
-                      tooltip={item.title}
-                    >
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        {/* Settings */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Configuración</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsMenuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.url, settingsMenuItems)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
