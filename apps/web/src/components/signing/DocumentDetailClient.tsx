@@ -3,23 +3,20 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-// PageHeader no se usa en este componente, se eliminó la importación
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { 
-  FileText, 
   Users, 
-  History, 
   Send, 
   FileCheck,
-  Download,
   MoreVertical,
   Loader2,
   Lock,
   Eye,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -36,6 +33,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { AlertTriangle, CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { 
+  getDocumentStatusInfo, 
+  getNextStepMessage,
+  isDocumentEditable 
+} from '@/lib/signing/document-status'
 
 interface DocumentDetailClientProps {
   initialDocument: any
@@ -56,11 +72,28 @@ export function DocumentDetailClient({
   const [reviewers, setReviewers] = useState(initialReviewers)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [notaryAssignment, setNotaryAssignment] = useState<any | null>(null)
+  const [aiReview, setAiReview] = useState<any | null>(null)
   
   const [isSending, setIsSending] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [showAiReviewDialog, setShowAiReviewDialog] = useState(false)
 
   const supabase = createClient()
+
+  // Cargar revisión de IA
+  const fetchAiReview = async () => {
+    if (!document?.id) return
+    
+    const { data } = await supabase
+      .from('signing_ai_reviews')
+      .select('status, passed, confidence_score, reasons, risk_accepted_at')
+      .eq('document_id', document.id)
+      .order('started_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    
+    setAiReview(data || null)
+  }
 
   useEffect(() => {
     // Obtener usuario actual para determinar si es revisor
@@ -69,7 +102,8 @@ export function DocumentDetailClient({
       setCurrentUser(user)
     }
     getUser()
-  }, [])
+    fetchAiReview()
+  }, [document?.id])
 
   const fetchNotaryAssignment = async () => {
     if (!document?.id || document.notary_service === 'none') {
@@ -117,6 +151,7 @@ export function DocumentDetailClient({
     
     router.refresh()
     await fetchNotaryAssignment()
+    await fetchAiReview()
   }
   
   useEffect(() => {
@@ -198,25 +233,10 @@ export function DocumentDetailClient({
     }
   }
 
-  const canEdit = !['signed', 'notarized', 'completed', 'cancelled', 'rejected'].includes(document.status)
+  const canEdit = isDocumentEditable(document.status)
   const showNotaryTracking = document.notary_service !== 'none'
-
-  const notaryStatusLabel = () => {
-    switch (document.status) {
-      case 'pending_notary':
-        return 'En notaría'
-      case 'notary_observed':
-        return 'En revisión con nuestro equipo'
-      case 'notary_rejected':
-        return 'Rechazado por notaría'
-      case 'notarized':
-        return 'Notariado'
-      case 'completed':
-        return 'Completado'
-      default:
-        return 'En proceso'
-    }
-  }
+  const statusInfo = getDocumentStatusInfo(document.status)
+  const nextStepMessage = getNextStepMessage(document.status, document.notary_service)
 
   return (
     <div className="space-y-6">
@@ -239,15 +259,34 @@ export function DocumentDetailClient({
         {/* Header con acciones */}
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold tracking-tight">{document.title}</h1>
-              <Badge variant="outline">{document.status}</Badge>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge 
+                      className={`${statusInfo.bgClass} ${statusInfo.textClass} ${statusInfo.borderClass} hover:opacity-90 cursor-help`}
+                    >
+                      {statusInfo.label}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{statusInfo.description}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <p className="text-sm text-muted-foreground">
               ID: <span className="font-mono">{document.qr_identifier || document.id}</span>
               {' • '}
               Creado el {format(new Date(document.created_at), "d MMM yyyy", { locale: es })}
             </p>
+            {nextStepMessage && (
+              <p className="text-sm text-[var(--tp-buttons)] flex items-center gap-1.5">
+                <Info className="h-4 w-4" />
+                {nextStepMessage}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {document.status === 'draft' && (
@@ -306,17 +345,39 @@ export function DocumentDetailClient({
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            className={document.requires_ai_review && aiReview ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''}
+            onClick={() => document.requires_ai_review && aiReview && setShowAiReviewDialog(true)}
+          >
             <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Revisión AI</CardTitle>
               <FileCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="text-2xl font-bold">
-                {/* TODO: Mostrar status de IA */} ?
+                {!document.requires_ai_review ? (
+                  <span className="text-muted-foreground">-</span>
+                ) : !aiReview ? (
+                  <span className="text-muted-foreground">Pendiente</span>
+                ) : aiReview.passed ? (
+                  <span className="text-green-600">Aprobado</span>
+                ) : aiReview.risk_accepted_at ? (
+                  <span className="text-blue-600">Aceptado</span>
+                ) : aiReview.status === 'needs_changes' ? (
+                  <span className="text-orange-600">Observado</span>
+                ) : aiReview.status === 'rejected' ? (
+                  <span className="text-red-600">Rechazado</span>
+                ) : (
+                  <span className="text-yellow-600">En proceso</span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {document.requires_ai_review ? 'Requerida' : 'No requerida'}
+                {!document.requires_ai_review 
+                  ? 'No requerida' 
+                  : aiReview?.reasons?.length 
+                    ? `${aiReview.reasons.length} observación(es) - Click para ver`
+                    : 'Requerida'
+                }
               </p>
             </CardContent>
           </Card>
@@ -356,41 +417,105 @@ export function DocumentDetailClient({
       {showNotaryTracking && (
         <Card>
           <CardHeader>
-            <CardTitle>Seguimiento notarial</CardTitle>
-            <CardDescription>Estado general del proceso con notaría.</CardDescription>
+            <CardTitle>Seguimiento del pedido</CardTitle>
+            <CardDescription>Estado general de tu solicitud de firma y notarización.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-muted-foreground">Estado</div>
-                <div className="text-sm font-semibold">{notaryStatusLabel()}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Notaría asignada</div>
-                <div className="text-sm font-semibold">
-                  {notaryAssignment?.notary_office?.name || 'Asignación en curso'}
+            {/* Estado actual destacado */}
+            <div className="rounded-lg border border-[var(--tp-lines-30)] bg-gradient-to-r from-[var(--tp-bg-light-10)] to-transparent p-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Estado actual</div>
+                  <Badge 
+                    className={`${statusInfo.bgClass} ${statusInfo.textClass} ${statusInfo.borderClass} text-sm px-3 py-1`}
+                  >
+                    {statusInfo.label}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Notaría asignada</div>
+                  <div className="text-sm font-semibold">
+                    {notaryAssignment?.notary_office?.name || 'Asignación en curso'}
+                  </div>
                 </div>
               </div>
             </div>
 
             {(document.status === 'notary_observed' || document.status === 'notary_rejected') && (
-              <div className="rounded-lg border border-[var(--tp-lines-30)] bg-[var(--tp-bg-light-10)] p-3 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800">
                 Tu documento está siendo revisado por nuestro equipo. Te contactaremos si hace falta algo.
               </div>
             )}
 
-            <div className="grid gap-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[var(--tp-buttons)]" />
-                Enviado a notaría
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`h-2 w-2 rounded-full ${document.status === 'notary_observed' ? 'bg-[var(--tp-buttons)]' : 'bg-[var(--tp-lines-30)]'}`} />
-                Revisión interna (si aplica)
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`h-2 w-2 rounded-full ${['notarized', 'completed'].includes(document.status) ? 'bg-[var(--tp-buttons)]' : 'bg-[var(--tp-lines-30)]'}`} />
-                Notariado
+            {/* Timeline del proceso */}
+            <div className="space-y-3">
+              <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Progreso del pedido</div>
+              <div className="grid gap-2">
+                {/* Paso 1: Firmas */}
+                <div className="flex items-center gap-3">
+                  <span className={`h-3 w-3 rounded-full ${
+                    ['pending_signature', 'partially_signed'].includes(document.status) 
+                      ? 'bg-yellow-500 animate-pulse' 
+                      : ['signed', 'pending_notary', 'notary_observed', 'notarized', 'completed'].includes(document.status)
+                        ? 'bg-green-500' 
+                        : 'bg-gray-300'
+                  }`} />
+                  <span className={`text-sm ${
+                    ['signed', 'pending_notary', 'notary_observed', 'notarized', 'completed'].includes(document.status)
+                      ? 'font-medium text-green-700'
+                      : ['pending_signature', 'partially_signed'].includes(document.status)
+                        ? 'font-medium'
+                        : 'text-muted-foreground'
+                  }`}>
+                    Firma electrónica ({document.signed_count}/{document.signers_count} firmantes)
+                  </span>
+                </div>
+                
+                {/* Paso 2: Enviado a notaría */}
+                <div className="flex items-center gap-3">
+                  <span className={`h-3 w-3 rounded-full ${
+                    document.status === 'pending_notary' 
+                      ? 'bg-purple-500 animate-pulse' 
+                      : ['notary_observed', 'notarized', 'completed'].includes(document.status)
+                        ? 'bg-green-500' 
+                        : 'bg-gray-300'
+                  }`} />
+                  <span className={`text-sm ${
+                    ['notary_observed', 'notarized', 'completed'].includes(document.status)
+                      ? 'font-medium text-green-700'
+                      : document.status === 'pending_notary'
+                        ? 'font-medium'
+                        : 'text-muted-foreground'
+                  }`}>
+                    Enviado a notaría
+                  </span>
+                </div>
+                
+                {/* Paso 3 (opcional): En revisión */}
+                {document.status === 'notary_observed' && (
+                  <div className="flex items-center gap-3">
+                    <span className="h-3 w-3 rounded-full bg-orange-500 animate-pulse" />
+                    <span className="text-sm font-medium text-orange-700">
+                      En revisión interna
+                    </span>
+                  </div>
+                )}
+                
+                {/* Paso 4: Notariado */}
+                <div className="flex items-center gap-3">
+                  <span className={`h-3 w-3 rounded-full ${
+                    ['notarized', 'completed'].includes(document.status) 
+                      ? 'bg-green-500' 
+                      : 'bg-gray-300'
+                  }`} />
+                  <span className={`text-sm ${
+                    ['notarized', 'completed'].includes(document.status)
+                      ? 'font-medium text-green-700'
+                      : 'text-muted-foreground'
+                  }`}>
+                    Documento notariado
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -444,6 +569,109 @@ export function DocumentDetailClient({
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog de Revisión AI */}
+      <Dialog open={showAiReviewDialog} onOpenChange={setShowAiReviewDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5" />
+              Detalle de Revisión AI
+            </DialogTitle>
+            <DialogDescription>
+              Análisis automático realizado por inteligencia artificial
+            </DialogDescription>
+          </DialogHeader>
+          
+          {aiReview && (
+            <div className="space-y-4">
+              {/* Estado general */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-3">
+                  {aiReview.passed ? (
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  ) : aiReview.risk_accepted_at ? (
+                    <CheckCircle className="h-6 w-6 text-blue-500" />
+                  ) : aiReview.status === 'needs_changes' ? (
+                    <AlertTriangle className="h-6 w-6 text-orange-500" />
+                  ) : aiReview.status === 'rejected' ? (
+                    <AlertCircle className="h-6 w-6 text-red-500" />
+                  ) : (
+                    <Clock className="h-6 w-6 text-yellow-500" />
+                  )}
+                  <div>
+                    <div className="font-semibold text-foreground">
+                      {aiReview.passed ? 'Aprobado' : 
+                       aiReview.risk_accepted_at ? 'Riesgo Aceptado' :
+                       aiReview.status === 'needs_changes' ? 'Requiere Revisión' :
+                       aiReview.status === 'rejected' ? 'Rechazado' : 'En Proceso'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Confianza: {aiReview.confidence_score ? `${(parseFloat(aiReview.confidence_score) * 100).toFixed(0)}%` : 'N/A'}
+                    </div>
+                  </div>
+                </div>
+                {aiReview.risk_accepted_at && (
+                  <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30">
+                    Riesgo aceptado
+                  </Badge>
+                )}
+              </div>
+
+              {/* Lista de observaciones */}
+              {aiReview.reasons && aiReview.reasons.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Observaciones encontradas</h4>
+                  {aiReview.reasons.map((reason: any, index: number) => (
+                    <div 
+                      key={index}
+                      className={`p-3 rounded-lg border ${
+                        reason.level === 'high' || reason.level === 'critical'
+                          ? 'border-red-500/30 bg-red-500/10'
+                          : reason.level === 'medium'
+                            ? 'border-orange-500/30 bg-orange-500/10'
+                            : 'border-yellow-500/30 bg-yellow-500/10'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`shrink-0 text-xs ${
+                            reason.level === 'high' || reason.level === 'critical'
+                              ? 'border-red-500/50 text-red-500'
+                              : reason.level === 'medium'
+                                ? 'border-orange-500/50 text-orange-500'
+                                : 'border-yellow-500/50 text-yellow-500'
+                          }`}
+                        >
+                          {reason.level === 'high' || reason.level === 'critical' ? 'Alto' :
+                           reason.level === 'medium' ? 'Medio' : 'Bajo'}
+                        </Badge>
+                        <div className="space-y-1">
+                          <p className="text-sm text-foreground">{reason.text || reason.explanation}</p>
+                          {reason.clause && (
+                            <p className="text-xs text-muted-foreground italic">
+                              Cláusula: {reason.clause}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Sin observaciones */}
+              {(!aiReview.reasons || aiReview.reasons.length === 0) && aiReview.passed && (
+                <div className="text-center py-6">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                  <p className="text-muted-foreground">No se encontraron observaciones. El documento fue aprobado.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

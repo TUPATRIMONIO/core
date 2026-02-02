@@ -17,7 +17,6 @@ import {
   MoreHorizontal, 
   Eye, 
   Download,
-  History,
   Trash2,
   Stamp
 } from 'lucide-react'
@@ -31,6 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { getDocumentStatusInfo } from '@/lib/signing/document-status'
 
 interface DocumentListProps {
   initialDocuments: any[]
@@ -56,32 +56,14 @@ export function DocumentList({ initialDocuments, basePath = '/dashboard/signing/
   }
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return <Badge variant="outline">Borrador</Badge>
-      case 'pending_review':
-        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100/80 border-orange-200">En Revisión</Badge>
-      case 'approved':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100/80 border-blue-200">Aprobado</Badge>
-      case 'pending_signature':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80 border-yellow-200">Pendiente Firma</Badge>
-      case 'partially_signed':
-        return <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-100/80 border-indigo-200">Firmando</Badge>
-      case 'signed':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100/80 border-green-200">Firmado</Badge>
-      case 'completed':
-        return <Badge className="bg-green-600 text-white hover:bg-green-700">Completado</Badge>
-      case 'pending_notary':
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100/80 border-purple-200">En Notaría</Badge>
-      case 'rejected':
-      case 'notary_rejected':
-      case 'ai_rejected':
-        return <Badge variant="destructive">Rechazado</Badge>
-      case 'cancelled':
-        return <Badge variant="secondary">Cancelado</Badge>
-      default:
-        return <Badge variant="outline">{status}</Badge>
-    }
+    const statusInfo = getDocumentStatusInfo(status)
+    return (
+      <Badge 
+        className={`${statusInfo.bgClass} ${statusInfo.textClass} ${statusInfo.borderClass} hover:opacity-90`}
+      >
+        {statusInfo.label}
+      </Badge>
+    )
   }
 
   return (

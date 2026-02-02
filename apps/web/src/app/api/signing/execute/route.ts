@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 /**
  * API Route: POST /api/signing/execute
@@ -8,8 +8,10 @@ import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
  */
 export async function POST(request: NextRequest) {
     try {
-        const supabase = await createClient();
-        const adminClient = createServiceRoleClient(); // Para operaciones que requieren bypass de RLS
+        // Usamos Service Role para bypass de RLS ya que es una página pública
+        // La seguridad la da el token único de firma
+        const supabase = createServiceRoleClient();
+        const adminClient = supabase; // Alias para mantener compatibilidad con el resto del código
         const body = await request.json();
         const {
             signing_token,
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 1. Obtener firmante por token
+        // 1. Obtener firmante por token (con Service Role para bypass RLS en página pública)
         const { data: signer, error: signerError } = await supabase
             .from("signing_signers")
             .select(`
@@ -215,18 +217,20 @@ export async function POST(request: NextRequest) {
                 errorCode === "125" || errorCode === 125
             ) {
                 const { error: updateError } = await adminClient
-                    .from("signing_signers")
-                    .update({ status: "certificate_blocked" })
-                    .eq("id", signer.id);
+                    .rpc("update_signer_status_admin", {
+                        p_signer_id: signer.id,
+                        p_status: "certificate_blocked",
+                    });
                 
                 if (updateError) {
                     console.error("Error actualizando estado a certificate_blocked:", updateError);
                 }
             } else if (errorCode === "134" || errorCode === 134) {
                 const { error: updateError } = await adminClient
-                    .from("signing_signers")
-                    .update({ status: "sf_blocked" })
-                    .eq("id", signer.id);
+                    .rpc("update_signer_status_admin", {
+                        p_signer_id: signer.id,
+                        p_status: "sf_blocked",
+                    });
                 
                 if (updateError) {
                     console.error("Error actualizando estado a sf_blocked:", updateError);
@@ -300,30 +304,36 @@ export async function POST(request: NextRequest) {
                 }
             }
 
-            // Actualizar estado del firmante
-            const { error: updateSignerError } = await adminClient
-                .from("signing_signers")
-                .update({
-                    status: "signed",
-                    signed_at: new Date().toISOString(),
-                    signature_ip: request.headers.get("x-forwarded-for") ||
-                        request.headers.get("x-real-ip"),
-                    signature_user_agent: request.headers.get("user-agent"),
-                })
-                .eq("id", signer.id);
+            // Actualizar estado del firmante usando función RPC con SECURITY DEFINER
+            // Esto bypasea RLS para firmantes externos sin autenticación
+            const { data: updateResult, error: updateSignerError } = await adminClient
+                .rpc("update_signer_status_admin", {
+                    p_signer_id: signer.id,
+                    p_status: "signed",
+                    p_signed_at: new Date().toISOString(),
+                    p_signature_ip: request.headers.get("x-forwarded-for") ||
+                        request.headers.get("x-real-ip") || null,
+                    p_signature_user_agent: request.headers.get("user-agent") || null,
+                });
             
-            if (updateSignerError) {
-                console.error("Error actualizando estado del firmante a signed:", updateSignerError);
+            if (updateSignerError || !updateResult?.success) {
+                console.error("Error actualizando estado del firmante a signed:", {
+                    error: updateSignerError,
+                    result: updateResult,
+                    signerId: signer.id,
+                });
                 // Si falla la actualización del firmante, retornar error para que el frontend lo maneje
                 return NextResponse.json(
                     {
                         success: false,
                         error: "Error al actualizar el estado de la firma. Por favor, recarga la página.",
-                        details: updateSignerError.message,
+                        details: updateSignerError?.message || updateResult?.error,
                     },
                     { status: 500 },
                 );
             }
+            
+            console.log("Firmante actualizado exitosamente:", updateResult);
 
             // Si es firma secuencial, notificar al siguiente firmante
             if (signer.document.signing_order === "sequential") {
@@ -354,11 +364,10 @@ export async function POST(request: NextRequest) {
 
         // Si CDS no retorna el documento inmediatamente, marcar como "signing" y esperar webhook
         const { error: updateSigningError } = await adminClient
-            .from("signing_signers")
-            .update({
-                status: "signing",
-            })
-            .eq("id", signer.id);
+            .rpc("update_signer_status_admin", {
+                p_signer_id: signer.id,
+                p_status: "signing",
+            });
         
         if (updateSigningError) {
             console.error("Error actualizando estado del firmante a signing:", updateSigningError);
