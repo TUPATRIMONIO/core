@@ -252,6 +252,7 @@ export default function SigningCheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          organizationId: organizationId, // Pasar explícitamente la org usada para crear el documento
           productType: 'electronic_signature',
           productId: null,
           metadata: {

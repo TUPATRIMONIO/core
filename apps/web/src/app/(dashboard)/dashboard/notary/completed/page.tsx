@@ -22,7 +22,7 @@ export default async function NotaryCompletedPage() {
     redirect('/onboarding')
   }
 
-  const organizationId = activeOrg[0].id
+  const organizationId = activeOrg[0].organization_id
 
   const { data: office, error: officeError } = await supabase
     .from('signing_notary_offices')

@@ -80,6 +80,9 @@ export default async function NotaryServicesPage() {
     redirect('/login')
   }
 
+  // Verificar si el usuario es administrador de la plataforma
+  const { data: isPlatformAdmin } = await supabase.rpc('is_platform_admin')
+
   const { data: activeOrg } = await supabase.rpc('get_user_active_organization', {
     user_id: user.id,
   })
@@ -88,7 +91,7 @@ export default async function NotaryServicesPage() {
     redirect('/onboarding')
   }
 
-  const data = await getNotaryServicesData(activeOrg[0].id)
+  const data = await getNotaryServicesData(activeOrg[0].organization_id)
 
   if (!data) {
     notFound()
@@ -98,7 +101,10 @@ export default async function NotaryServicesPage() {
     <div className="flex flex-1 flex-col space-y-6">
       <PageHeader
         title="Servicios Notariales"
-        description="Configura los trámites que tu notaría puede recibir y sus pesos"
+        description={isPlatformAdmin 
+          ? "Configura los trámites que tu notaría puede recibir y sus pesos"
+          : "Visualiza los servicios que tu notaría puede recibir"
+        }
       />
 
       <div className="flex-1 space-y-6">
@@ -113,6 +119,7 @@ export default async function NotaryServicesPage() {
               products={data.products}
               notaryServices={data.notaryServices}
               totalWeightByProduct={data.totalWeightByProduct}
+              isAdmin={isPlatformAdmin || false}
             />
           </CardContent>
         </Card>

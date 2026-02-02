@@ -53,7 +53,7 @@ export default async function NotaryStatsPage() {
     redirect('/onboarding')
   }
 
-  const data = await getNotaryStats(activeOrg[0].id)
+  const data = await getNotaryStats(activeOrg[0].organization_id)
 
   if (!data) {
     notFound()

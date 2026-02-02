@@ -1,17 +1,13 @@
 'use client'
 
-import { SigningWizardProvider, useSigningWizard } from './WizardContext'
+import { useSigningWizard } from './WizardContext'
 import { WizardProgress } from './WizardProgress'
 import { CountryAndUploadStep } from './steps/CountryAndUploadStep'
 import { ServiceSelectionStep } from './steps/ServiceSelectionStep'
 import { SignerManagementStep } from './steps/SignerManagementStep'
 
 export function DocumentRequestWizard() {
-  return (
-    <SigningWizardProvider>
-      <WizardInner />
-    </SigningWizardProvider>
-  )
+  return <WizardInner />
 }
 
 function WizardInner() {

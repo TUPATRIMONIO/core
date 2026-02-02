@@ -23,7 +23,7 @@ export default async function NotaryDashboardPage() {
     redirect('/onboarding')
   }
 
-  const organizationId = activeOrg[0].id
+  const organizationId = activeOrg[0].organization_id
 
   // Notaría asociada (por organización activa)
   const { data: office, error: officeError } = await supabase

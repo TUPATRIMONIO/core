@@ -18,7 +18,8 @@ interface NotificationPayload {
     | "NOTARY_IN_PROGRESS"
     | "NOTARY_NEEDS_CORRECTION"
     | "NOTARY_REJECTED"
-    | "NOTARY_COMPLETED";
+    | "NOTARY_COMPLETED"
+    | "NOTARY_BATCH_COMPLETED";
   recipient_email: string;
   recipient_name: string;
   document_title: string;
@@ -26,6 +27,12 @@ interface NotificationPayload {
   org_id: string;
   document_id?: string;
   signer_id?: string;
+  batch_results?: {
+    total: number;
+    successful: number;
+    failed: number;
+    documents: Array<{ filename: string; status: string; error?: string }>;
+  };
 }
 
 serve(async (req) => {
@@ -544,6 +551,99 @@ Tu documento ha sido notariado exitosamente:
 ${payload.document_title}
 
 Ver documento notariado: ${actionUrl}
+
+Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "NOTARY_BATCH_COMPLETED":
+      const results = payload.batch_results;
+      const successList = results?.documents
+        ?.filter(d => d.status === 'success')
+        ?.map(d => `<li style="color: #10b981;">✓ ${d.filename}</li>`)
+        ?.join('') || '';
+      
+      const failureList = results?.documents
+        ?.filter(d => d.status === 'failed')
+        ?.map(d => `<li style="color: #ef4444;">✗ ${d.filename} - ${d.error || 'Error desconocido'}</li>`)
+        ?.join('') || '';
+
+      return {
+        subject: `Procesamiento de lote completado - ${results?.successful || 0}/${results?.total || 0} exitosos`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #800039; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Procesamiento de Documentos Completado</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola ${payload.recipient_name || "Notaría"},</p>
+              <p>El lote de documentos notarizados ha sido procesado:</p>
+              
+              <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-around; text-align: center;">
+                  <div>
+                    <div style="font-size: 32px; font-weight: bold; color: #800039;">${results?.total || 0}</div>
+                    <div style="font-size: 12px; color: #666;">Total</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 32px; font-weight: bold; color: #10b981;">${results?.successful || 0}</div>
+                    <div style="font-size: 12px; color: #666;">Exitosos</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 32px; font-weight: bold; color: #ef4444;">${results?.failed || 0}</div>
+                    <div style="font-size: 12px; color: #666;">Fallidos</div>
+                  </div>
+                </div>
+              </div>
+
+              ${results?.successful ? `
+              <div style="margin: 20px 0;">
+                <h3 style="color: #10b981;">Documentos procesados exitosamente:</h3>
+                <ul style="list-style: none; padding-left: 0;">${successList}</ul>
+              </div>
+              ` : ''}
+
+              ${results?.failed ? `
+              <div style="margin: 20px 0;">
+                <h3 style="color: #ef4444;">Documentos con error:</h3>
+                <ul style="list-style: none; padding-left: 0;">${failureList}</ul>
+              </div>
+              ` : ''}
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #800039; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Ver Dashboard
+                </a>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+Procesamiento de Documentos Completado
+
+Hola ${payload.recipient_name || "Notaría"},
+
+El lote de documentos notarizados ha sido procesado:
+
+Total: ${results?.total || 0}
+Exitosos: ${results?.successful || 0}
+Fallidos: ${results?.failed || 0}
+
+${results?.successful ? `\nDocumentos exitosos:\n${results.documents.filter(d => d.status === 'success').map(d => `- ${d.filename}`).join('\n')}` : ''}
+
+${results?.failed ? `\nDocumentos con error:\n${results.documents.filter(d => d.status === 'failed').map(d => `- ${d.filename}: ${d.error}`).join('\n')}` : ''}
+
+Ver dashboard: ${actionUrl}
 
 Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
         `,

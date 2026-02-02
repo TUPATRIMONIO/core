@@ -36,6 +36,7 @@ interface NotaryServicesManagerProps {
   products: NotaryServiceProduct[]
   notaryServices: NotaryServiceConfig[]
   totalWeightByProduct: Record<string, number>
+  isAdmin?: boolean
 }
 
 interface EditableService {
@@ -51,6 +52,7 @@ export function NotaryServicesManager({
   products,
   notaryServices,
   totalWeightByProduct,
+  isAdmin = false,
 }: NotaryServicesManagerProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [items, setItems] = useState<EditableService[]>(() => {
@@ -144,24 +146,29 @@ export function NotaryServicesManager({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Activa los servicios y define el peso para ajustar la distribución.
+          {isAdmin 
+            ? 'Activa los servicios y define el peso para ajustar la distribución.'
+            : 'Los servicios activos que tu notaría puede recibir. La configuración de distribución es gestionada por los administradores.'
+          }
         </div>
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
-        >
-          {isSaving ? 'Guardando...' : 'Guardar cambios'}
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
+          >
+            {isSaving ? 'Guardando...' : 'Guardar cambios'}
+          </Button>
+        )}
       </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Servicio</TableHead>
             <TableHead>Activo</TableHead>
-            <TableHead>Peso</TableHead>
-            <TableHead>Límite diario</TableHead>
-            <TableHead>Proporción</TableHead>
+            {isAdmin && <TableHead>Peso</TableHead>}
+            {isAdmin && <TableHead>Límite diario</TableHead>}
+            {isAdmin && <TableHead>Proporción</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -178,46 +185,64 @@ export function NotaryServicesManager({
                   <div className="text-xs text-muted-foreground">{product.country_code}</div>
                 </TableCell>
                 <TableCell>
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(product.id)}
-                    className="text-sm"
-                  >
-                    {item?.isActive ? (
-                      <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline">
-                        Activo
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">Inactivo</Badge>
-                    )}
-                  </button>
+                  {isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(product.id)}
+                      className="text-sm"
+                    >
+                      {item?.isActive ? (
+                        <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline">
+                          Activo
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">Inactivo</Badge>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="text-sm">
+                      {item?.isActive ? (
+                        <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline">
+                          Activo
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">Inactivo</Badge>
+                      )}
+                    </div>
+                  )}
                 </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={item?.weight ?? 1}
-                    onChange={(event) => handleWeightChange(product.id, event.target.value)}
-                    className="w-24"
-                    disabled={!item?.isActive}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={item?.maxDailyDocuments ?? ''}
-                    onChange={(event) => handleMaxDailyChange(product.id, event.target.value)}
-                    className="w-28"
-                    placeholder="Sin límite"
-                    disabled={!item?.isActive}
-                  />
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">
-                    {item?.isActive ? `${ratio}%` : '—'}
-                  </span>
-                </TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={item?.weight ?? 1}
+                      onChange={(event) => handleWeightChange(product.id, event.target.value)}
+                      className="w-24"
+                      disabled={!item?.isActive}
+                    />
+                  </TableCell>
+                )}
+                {isAdmin && (
+                  <TableCell>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={item?.maxDailyDocuments ?? ''}
+                      onChange={(event) => handleMaxDailyChange(product.id, event.target.value)}
+                      className="w-28"
+                      placeholder="Sin límite"
+                      disabled={!item?.isActive}
+                    />
+                  </TableCell>
+                )}
+                {isAdmin && (
+                  <TableCell>
+                    <span className="text-sm">
+                      {item?.isActive ? `${ratio}%` : '—'}
+                    </span>
+                  </TableCell>
+                )}
               </TableRow>
             )
           })}

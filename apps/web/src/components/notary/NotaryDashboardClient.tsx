@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
+import { BulkUploadDialog } from './BulkUploadDialog'
 
 type AssignmentStatus =
   | 'pending'
@@ -65,6 +66,10 @@ export function NotaryDashboardClient({
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Subida masiva (nuevo flujo principal)
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false)
+
+  // Subida individual (flujo legacy - opcional)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadAssignment, setUploadAssignment] = useState<any | null>(null)
@@ -311,6 +316,14 @@ export function NotaryDashboardClient({
         </Alert>
       )}
 
+      {/* Subida masiva (nuevo flujo principal) */}
+      <BulkUploadDialog
+        open={bulkUploadOpen}
+        onOpenChange={setBulkUploadOpen}
+        onComplete={refresh}
+      />
+
+      {/* Subida individual (legacy - mantener como backup) */}
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
         <DialogContent>
           <DialogHeader>
@@ -399,21 +412,30 @@ export function NotaryDashboardClient({
         </DialogContent>
       </Dialog>
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="text-sm text-muted-foreground">Notaría</div>
           <div className="text-lg font-bold">{officeName}</div>
         </div>
-        <Button variant="outline" onClick={refresh} disabled={isRefreshing}>
-          {isRefreshing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Actualizando...
-            </>
-          ) : (
-            'Actualizar'
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setBulkUploadOpen(true)}
+            className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Subir documentos notarizados
+          </Button>
+          <Button variant="outline" onClick={refresh} disabled={isRefreshing}>
+            {isRefreshing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Actualizando...
+              </>
+            ) : (
+              'Actualizar'
+            )}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="pending" className="w-full">

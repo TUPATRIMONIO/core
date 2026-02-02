@@ -21,19 +21,45 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Obtener organización del usuario
-    const { data: activeOrg } = await supabase.rpc('get_user_active_organization', {
-      user_id: user.id
-    });
+    // Parsear body primero para ver si viene organizationId
+    const body = await request.json();
+    const { productType, productId, metadata, organizationId: explicitOrgId } = body;
     
-    if (!activeOrg || activeOrg.length === 0) {
-      return NextResponse.json(
-        { error: 'No se encontró organización activa' },
-        { status: 400 }
-      );
+    let orgId: string;
+    
+    // Si viene organizationId explícito, validar que el usuario pertenece a esa organización
+    if (explicitOrgId) {
+      const { data: membership } = await supabase
+        .from('organization_users')
+        .select('organization_id')
+        .eq('organization_id', explicitOrgId)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      
+      if (!membership) {
+        return NextResponse.json(
+          { error: 'No tienes acceso a la organización especificada' },
+          { status: 403 }
+        );
+      }
+      
+      orgId = explicitOrgId;
+    } else {
+      // Obtener organización activa del usuario (fallback)
+      const { data: activeOrg } = await supabase.rpc('get_user_active_organization', {
+        user_id: user.id
+      });
+      
+      if (!activeOrg || activeOrg.length === 0) {
+        return NextResponse.json(
+          { error: 'No se encontró organización activa' },
+          { status: 400 }
+        );
+      }
+      
+      orgId = activeOrg[0].organization_id;
     }
-    
-    const orgId = activeOrg[0].organization_id;
     
     // Obtener país de la organización
     const { data: org } = await supabase
@@ -52,10 +78,7 @@ export async function POST(request: NextRequest) {
     const countryCode = org.country || 'US';
     const currency = await getCurrencyForCountry(countryCode);
     
-    // Parsear body
-    const body = await request.json();
-    const { productType, productId, metadata } = body;
-    
+    // Validar que productType venga en el body
     if (!productType) {
       return NextResponse.json(
         { error: 'productType es requerido' },
