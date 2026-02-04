@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,9 +11,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Loader2, Upload } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Loader2, Upload, Download, Eye, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { BulkUploadDialog } from './BulkUploadDialog'
+import { DocumentViewerModal } from './DocumentViewerModal'
 
 type AssignmentStatus =
   | 'pending'
@@ -30,6 +32,7 @@ interface NotaryDashboardClientProps {
   initialAssignments: any[]
   documentsById: Record<string, any>
   orgsById: Record<string, any>
+  ordersById: Record<string, { id: string; order_number: string }>
 }
 
 function statusBadge(status: AssignmentStatus) {
@@ -53,18 +56,36 @@ function statusBadge(status: AssignmentStatus) {
   }
 }
 
+const notaryServiceLabels: Record<string, string> = {
+  'none': 'Sin notarización',
+  'legalized_copy': 'Copia legalizada',
+  'protocolization': 'Protocolización',
+  'authorized_signature': 'Firma autorizada'
+}
+
 export function NotaryDashboardClient({
   officeId,
   officeName,
   initialAssignments,
   documentsById,
   orgsById,
+  ordersById,
 }: NotaryDashboardClientProps) {
   const supabase = useMemo(() => createClient(), [])
 
   const [assignments, setAssignments] = useState<any[]>(initialAssignments)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Selección múltiple
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Modal de visualización
+  const [viewerDocumentId, setViewerDocumentId] = useState<string | null>(null)
+  const [viewerOpen, setViewerOpen] = useState(false)
+
+  // Descarga masiva
+  const [isDownloadingBulk, setIsDownloadingBulk] = useState(false)
 
   // Subida masiva (nuevo flujo principal)
   const [bulkUploadOpen, setBulkUploadOpen] = useState(false)
@@ -79,6 +100,120 @@ export function NotaryDashboardClient({
   const [actionType, setActionType] = useState<AssignmentStatus | null>(null)
   const [actionReason, setActionReason] = useState('')
   const [actionAssignment, setActionAssignment] = useState<any | null>(null)
+
+  // Sincronizar estado cuando cambien las props iniciales
+  useEffect(() => {
+    setAssignments(initialAssignments)
+    // Limpiar selección si los assignments cambian
+    setSelectedIds(new Set())
+  }, [initialAssignments])
+
+  const toggleSelection = (documentId: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(documentId)) {
+        newSet.delete(documentId)
+      } else {
+        newSet.add(documentId)
+      }
+      return newSet
+    })
+  }
+
+  const toggleSelectAll = (list: any[]) => {
+    const listDocIds = list.map((a) => a.document_id).filter(Boolean)
+    const allSelected = listDocIds.every((id) => selectedIds.has(id))
+
+    if (allSelected) {
+      // Deseleccionar todos de esta lista
+      setSelectedIds((prev) => {
+        const newSet = new Set(prev)
+        listDocIds.forEach((id) => newSet.delete(id))
+        return newSet
+      })
+    } else {
+      // Seleccionar todos de esta lista
+      setSelectedIds((prev) => {
+        const newSet = new Set(prev)
+        listDocIds.forEach((id) => newSet.add(id))
+        return newSet
+      })
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+  }
+
+  const openViewer = (documentId: string) => {
+    setViewerDocumentId(documentId)
+    setViewerOpen(true)
+  }
+
+  const handleDownloadSingle = async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/notary/document-info?documentId=${documentId}`)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'No se pudo obtener información del documento')
+      }
+
+      const { signedUrl, title } = await response.json()
+
+      // Descargar archivo
+      const link = document.createElement('a')
+      link.href = signedUrl
+      link.download = `${title}.pdf`
+      link.click()
+
+      toast.success('Descarga iniciada')
+    } catch (error: any) {
+      console.error('Error downloading document:', error)
+      toast.error(error.message || 'Error al descargar el documento')
+    }
+  }
+
+  const handleBulkDownload = async () => {
+    if (selectedIds.size === 0) {
+      toast.error('No hay documentos seleccionados')
+      return
+    }
+
+    try {
+      setIsDownloadingBulk(true)
+
+      const response = await fetch('/api/notary/bulk-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentIds: Array.from(selectedIds),
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Error al descargar documentos')
+      }
+
+      // Descargar el ZIP
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `documentos-notaria-${new Date().toISOString().split('T')[0]}.zip`
+      link.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success(`${selectedIds.size} documento(s) descargado(s)`)
+      clearSelection()
+    } catch (error: any) {
+      console.error('Error bulk download:', error)
+      toast.error(error.message || 'Error al descargar documentos')
+    } finally {
+      setIsDownloadingBulk(false)
+    }
+  }
 
   const refresh = async () => {
     setIsRefreshing(true)
@@ -231,20 +366,55 @@ export function NotaryDashboardClient({
       )
     }
 
+    const listDocIds = list.map((a) => a.document_id).filter(Boolean)
+    const allSelected = listDocIds.length > 0 && listDocIds.every((id) => selectedIds.has(id))
+    const someSelected = listDocIds.some((id) => selectedIds.has(id))
+
     return (
       <div className="space-y-3">
+        {/* Selector "todos" */}
+        {list.length > 1 && (
+          <div className="flex items-center gap-2 px-2 py-1">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={() => toggleSelectAll(list)}
+              aria-label="Seleccionar todos"
+            />
+            <span className="text-sm text-muted-foreground">
+              {allSelected ? 'Deseleccionar todos' : 'Seleccionar todos'}
+            </span>
+          </div>
+        )}
+
         {list.map((a) => {
           const doc = documentsById[a.document_id]
           const org = doc?.organization_id ? orgsById[doc.organization_id] : null
+          const order = doc?.order_id ? ordersById[doc.order_id] : null
+          const isSelected = selectedIds.has(a.document_id)
 
           return (
-            <Card key={a.id}>
+            <Card key={a.id} className={isSelected ? 'ring-2 ring-primary' : ''}>
               <CardContent className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+                <div className="flex items-start gap-3">
+                  {/* Checkbox de selección */}
+                  <div className="pt-1">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleSelection(a.document_id)}
+                      aria-label={`Seleccionar ${doc?.title || a.document_id}`}
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold truncate">{doc?.title || a.document_id}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Cliente: {org?.name || doc?.organization_id || '—'}
+                    <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
+                      {order?.order_number && (
+                        <div>N° Pedido: <span className="font-mono">{order.order_number}</span></div>
+                      )}
+                      <div>Cliente: {org?.name || doc?.organization_id || '—'}</div>
+                      {doc?.notary_service && (
+                        <div>Tipo: {notaryServiceLabels[doc.notary_service] || doc.notary_service}</div>
+                      )}
                     </div>
                     <div className="text-[11px] text-muted-foreground mt-1">
                       Asignado: {a.assigned_at ? new Date(a.assigned_at).toLocaleString() : '—'}
@@ -256,15 +426,22 @@ export function NotaryDashboardClient({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <a
-                    href={`/repository/${a.document_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => openViewer(a.document_id)}
                   >
-                    <Button size="sm" variant="outline">
-                      Ver documento
-                    </Button>
-                  </a>
+                    <Eye className="h-4 w-4 mr-1" />
+                    Ver documento
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownloadSingle(a.document_id)}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    Descargar
+                  </Button>
                   {a.status === 'pending' && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'received')}>
                       Marcar recibido
@@ -315,6 +492,13 @@ export function NotaryDashboardClient({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      {/* Modal de visualización de documentos */}
+      <DocumentViewerModal
+        documentId={viewerDocumentId}
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+      />
 
       {/* Subida masiva (nuevo flujo principal) */}
       <BulkUploadDialog
@@ -411,6 +595,47 @@ export function NotaryDashboardClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Barra de acciones masivas */}
+      {selectedIds.size > 0 && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="text-base px-3 py-1">
+                  {selectedIds.size} seleccionado(s)
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Deseleccionar todos
+                </Button>
+              </div>
+              <Button
+                onClick={handleBulkDownload}
+                disabled={isDownloadingBulk}
+                className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]"
+              >
+                {isDownloadingBulk ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Descargando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Descargar seleccionados (ZIP)
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>

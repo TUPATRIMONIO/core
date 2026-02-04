@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/page-header'
 import { NotaryDashboardClient } from '@/components/notary/NotaryDashboardClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NotaryDashboardPage() {
   const supabase = await createClient()
 
@@ -57,7 +59,7 @@ export default async function NotaryDashboardPage() {
   const { data: docs } = documentIds.length
     ? await supabase
         .from('signing_documents')
-        .select('id, title, organization_id, status, notary_service, created_at')
+        .select('id, title, organization_id, status, notary_service, created_at, order_id')
         .in('id', documentIds)
     : { data: [] as any[] }
 
@@ -73,6 +75,17 @@ export default async function NotaryDashboardPage() {
 
   const orgsById = Object.fromEntries((orgs || []).map((o: any) => [o.id, o]))
 
+  // Obtener pedidos asociados a los documentos
+  const orderIds = Array.from(
+    new Set((docs || []).map((d: any) => d.order_id).filter(Boolean))
+  )
+
+  const { data: orders } = orderIds.length
+    ? await supabase.from('orders').select('id, order_number').in('id', orderIds)
+    : { data: [] as any[] }
+
+  const ordersById = Object.fromEntries((orders || []).map((o: any) => [o.id, o]))
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -86,6 +99,7 @@ export default async function NotaryDashboardPage() {
         initialAssignments={assignmentRows}
         documentsById={documentsById}
         orgsById={orgsById}
+        ordersById={ordersById}
       />
     </div>
   )

@@ -46,6 +46,7 @@
     "@tupatrimonio/ui": "*",
     "@tupatrimonio/update-notifier": "*",
     "@types/pdfkit": "^0.17.3",
+    "archiver": "^7.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -72,6 +73,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

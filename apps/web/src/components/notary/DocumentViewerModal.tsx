@@ -1,0 +1,178 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2, Download, ExternalLink, FileText, AlertCircle } from 'lucide-react'
+
+interface DocumentViewerModalProps {
+  documentId: string | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+interface DocumentInfo {
+  documentId: string
+  title: string
+  bucket: string
+  path: string
+  signedUrl: string
+}
+
+/**
+ * Modal para visualizar documentos PDF del dashboard notarial
+ * Muestra el PDF en un iframe y permite descargar o abrir en nueva pestaña
+ */
+export function DocumentViewerModal({
+  documentId,
+  open,
+  onOpenChange,
+}: DocumentViewerModalProps) {
+  const [documentInfo, setDocumentInfo] = useState<DocumentInfo | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [iframeError, setIframeError] = useState(false)
+
+  // Cargar información del documento cuando se abre el modal
+  useEffect(() => {
+    if (!open || !documentId) {
+      setDocumentInfo(null)
+      setError(null)
+      setIframeError(false)
+      return
+    }
+
+    const fetchDocumentInfo = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(`/api/notary/document-info?documentId=${documentId}`)
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Error ${response.status}`)
+        }
+
+        const data = await response.json()
+        setDocumentInfo(data)
+      } catch (error: any) {
+        console.error('Error fetching document info:', error)
+        setError(error.message || 'Error al cargar información del documento')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchDocumentInfo()
+  }, [documentId, open])
+
+  const handleDownload = () => {
+    if (documentInfo?.signedUrl) {
+      const link = document.createElement('a')
+      link.href = documentInfo.signedUrl
+      link.download = `${documentInfo.title}.pdf`
+      link.click()
+    }
+  }
+
+  const handleOpenNewTab = () => {
+    if (documentInfo?.signedUrl) {
+      window.open(documentInfo.signedUrl, '_blank', 'noopener,noreferrer,nofollow')
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>
+            {documentInfo?.title || 'Visualizar Documento'}
+          </DialogTitle>
+          <DialogDescription>
+            Vista previa del documento PDF
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {isLoading ? (
+            <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-lg">
+              <div className="text-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mx-auto" />
+                <p className="text-sm text-muted-foreground">Cargando documento...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <Alert variant="destructive" className="m-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : documentInfo?.signedUrl ? (
+            <>
+              {/* Barra de acciones */}
+              <div className="flex gap-2 mb-3 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownload}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Descargar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenNewTab}
+                  className="flex-1 sm:flex-none"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Abrir en nueva pestaña
+                </Button>
+              </div>
+
+              {/* Visor PDF */}
+              <div className="flex-1 rounded-lg border overflow-hidden bg-muted/20">
+                {!iframeError ? (
+                  <iframe
+                    src={documentInfo.signedUrl}
+                    className="w-full h-full border-0"
+                    title={documentInfo.title || 'Documento'}
+                    onError={() => setIframeError(true)}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                    <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      Tu navegador no puede mostrar el PDF directamente.
+                    </p>
+                    <Button onClick={handleOpenNewTab}>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Abrir en nueva pestaña
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-lg">
+              <div className="text-center space-y-3">
+                <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
+                <p className="text-sm text-muted-foreground">
+                  No hay documento disponible para visualizar
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

@@ -20,6 +20,7 @@ import { OrderRestartAdminAction } from '@/components/admin/OrderRestartAdminAct
 import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-buttons'
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
 import { OrderTicketsPanel } from '@/components/admin/OrderTicketsPanel'
+import { DocumentActions } from '@/components/signing/DocumentActions'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -93,10 +94,16 @@ async function getOrderDetails(orderId: string) {
     // Get associations for this order
     const { data: associations } = await supabase.rpc('get_order_associations', { p_order_id: orderId })
 
-    // Get signing document
+    // Get signing document with file paths and notary assignment
     const { data: signingDoc } = await supabase
         .from('signing_documents')
-        .select('*')
+        .select(`
+            *,
+            notary_assignment:signing_notary_assignments(
+                notarized_file_path,
+                status
+            )
+        `)
         .eq('order_id', orderId)
         .maybeSingle()
 
@@ -507,13 +514,17 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                                     Ver detalle
                                                 </Link>
                                             </Button>
-                                            <Button variant="outline" size="sm" asChild>
-                                                <a href={`/api/signing/preview/${order.signing_document.id}`}>
-                                                    <ExternalLink className="h-4 w-4 mr-2" />
-                                                    Ver PDF original
-                                                </a>
-                                            </Button>
                                         </div>
+                                        <DocumentActions
+                                            originalFilePath={order.signing_document.original_file_path}
+                                            signedFilePath={order.signing_document.current_signed_file_path}
+                                            notarizedFilePath={
+                                                Array.isArray(order.signing_document.notary_assignment)
+                                                    ? order.signing_document.notary_assignment[0]?.notarized_file_path
+                                                    : order.signing_document.notary_assignment?.notarized_file_path
+                                            }
+                                            size="sm"
+                                        />
                                     </div>
                                 ) : (
                                     <div className="text-sm text-muted-foreground">

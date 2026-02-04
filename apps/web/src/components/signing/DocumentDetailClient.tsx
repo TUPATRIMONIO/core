@@ -26,6 +26,7 @@ import { ReviewerManager } from './ReviewerManager'
 import { ApprovalInterface } from './ApprovalInterface'
 import { PDFViewer } from './PDFViewer'
 import { CorrectionView } from './CorrectionView'
+import { DocumentActions } from './DocumentActions'
 import { toast } from 'sonner'
 import {
   DropdownMenu,
@@ -113,7 +114,7 @@ export function DocumentDetailClient({
 
     const { data } = await supabase
       .from('signing_notary_assignments')
-      .select('status, notes, correction_request, rejection_reason, notary_office:signing_notary_offices(name)')
+      .select('status, notes, correction_request, rejection_reason, notarized_file_path, notary_office:signing_notary_offices(name)')
       .eq('document_id', document.id)
       .maybeSingle()
 
@@ -327,6 +328,13 @@ export function DocumentDetailClient({
             </DropdownMenu>
           </div>
         </div>
+
+        {/* Botones para ver documentos */}
+        <DocumentActions
+          originalFilePath={document.original_file_path}
+          signedFilePath={document.current_signed_file_path}
+          notarizedFilePath={notaryAssignment?.notarized_file_path}
+        />
 
         {/* Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

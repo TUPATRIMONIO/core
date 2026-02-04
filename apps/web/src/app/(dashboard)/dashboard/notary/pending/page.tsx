@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/page-header'
 import { NotaryDashboardClient } from '@/components/notary/NotaryDashboardClient'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NotaryPendingPage() {
   const supabase = await createClient()
 
