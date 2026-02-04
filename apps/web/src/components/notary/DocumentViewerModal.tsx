@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -74,12 +72,30 @@ export function DocumentViewerModal({
     fetchDocumentInfo()
   }, [documentId, open])
 
-  const handleDownload = () => {
-    if (documentInfo?.signedUrl) {
+  const handleDownload = async () => {
+    if (!documentInfo?.signedUrl) return
+
+    try {
+      // Descargar archivo como blob para forzar descarga (no abrir en navegador)
+      const response = await fetch(documentInfo.signedUrl)
+      if (!response.ok) {
+        throw new Error('No se pudo descargar el archivo')
+      }
+
+      const blob = await response.blob()
+      const blobUrl = window.URL.createObjectURL(blob)
+
       const link = document.createElement('a')
-      link.href = documentInfo.signedUrl
+      link.href = blobUrl
       link.download = `${documentInfo.title}.pdf`
+      document.body.appendChild(link)
       link.click()
+      document.body.removeChild(link)
+
+      // Liberar el objeto URL después de un momento
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100)
+    } catch (error) {
+      console.error('Error downloading file:', error)
     }
   }
 
@@ -91,19 +107,39 @@ export function DocumentViewerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>
-            {documentInfo?.title || 'Visualizar Documento'}
-          </DialogTitle>
-          <DialogDescription>
-            Vista previa del documento PDF
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="!w-[80vw] !max-w-[80vw] sm:!max-w-[80vw] md:!max-w-[80vw] lg:!max-w-[1600px] h-[90vh] flex flex-col p-0">
+        {/* Header compacto con botones integrados */}
+        <div className="flex items-center justify-between px-6 py-3 border-b">
+          <div className="min-w-0 flex-1 mr-4">
+            <DialogTitle className="truncate text-base">
+              {documentInfo?.title || 'Visualizar Documento'}
+            </DialogTitle>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              disabled={isLoading || !!error}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Descargar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleOpenNewTab}
+              disabled={isLoading || !!error}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Abrir en nueva pestaña
+            </Button>
+          </div>
+        </div>
 
         <div className="flex-1 overflow-hidden flex flex-col">
           {isLoading ? (
-            <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-lg">
+            <div className="flex-1 flex items-center justify-center bg-muted/20">
               <div className="text-center space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mx-auto" />
                 <p className="text-sm text-muted-foreground">Cargando documento...</p>
@@ -115,54 +151,30 @@ export function DocumentViewerModal({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : documentInfo?.signedUrl ? (
-            <>
-              {/* Barra de acciones */}
-              <div className="flex gap-2 mb-3 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDownload}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Descargar
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleOpenNewTab}
-                  className="flex-1 sm:flex-none"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Abrir en nueva pestaña
-                </Button>
-              </div>
-
-              {/* Visor PDF */}
-              <div className="flex-1 rounded-lg border overflow-hidden bg-muted/20">
-                {!iframeError ? (
-                  <iframe
-                    src={documentInfo.signedUrl}
-                    className="w-full h-full border-0"
-                    title={documentInfo.title || 'Documento'}
-                    onError={() => setIframeError(true)}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                    <FileText className="w-16 h-16 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      Tu navegador no puede mostrar el PDF directamente.
-                    </p>
-                    <Button onClick={handleOpenNewTab}>
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Abrir en nueva pestaña
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </>
+            /* Visor PDF */
+            <div className="flex-1 overflow-hidden bg-muted/20">
+              {!iframeError ? (
+                <iframe
+                  src={documentInfo.signedUrl}
+                  className="w-full h-full border-0"
+                  title={documentInfo.title || 'Documento'}
+                  onError={() => setIframeError(true)}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                  <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">
+                    Tu navegador no puede mostrar el PDF directamente.
+                  </p>
+                  <Button onClick={handleOpenNewTab}>
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Abrir en nueva pestaña
+                  </Button>
+                </div>
+              )}
+            </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-muted/20 rounded-lg">
+            <div className="flex-1 flex items-center justify-center bg-muted/20">
               <div className="text-center space-y-3">
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto" />
                 <p className="text-sm text-muted-foreground">

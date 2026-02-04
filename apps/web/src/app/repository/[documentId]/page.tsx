@@ -1,11 +1,13 @@
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { DocumentViewer } from './DocumentViewer'
 
 function isUuid(input: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(input)
+}
+
+function isQrIdentifier(input: string) {
+  return /^DOC-[0-9A-F]{8,}-[0-9A-F]{8,}$/i.test(input)
 }
 
 export default async function RepositoryDocumentPage({
@@ -15,105 +17,137 @@ export default async function RepositoryDocumentPage({
 }) {
   const { documentId } = await params
 
-  if (!isUuid(documentId)) notFound()
+  // Validar que sea UUID o QR identifier
+  if (!isUuid(documentId) && !isQrIdentifier(documentId)) notFound()
 
   const service = createServiceRoleClient()
 
-  const { data: doc } = await service
-    .from('signing_documents')
-    .select('id, title, status, created_at, organization_id')
-    .eq('id', documentId)
-    .maybeSingle()
+  // Buscar por UUID o por qr_identifier
+  let doc
+  if (isUuid(documentId)) {
+    const { data } = await service
+      .from('signing_documents')
+      .select('id, title, status, created_at, organization_id, order_id, original_file_path, qr_identifier')
+      .eq('id', documentId)
+      .maybeSingle()
+    doc = data
+  } else {
+    // Es un QR identifier
+    const { data } = await service
+      .from('signing_documents')
+      .select('id, title, status, created_at, organization_id, order_id, original_file_path, qr_identifier')
+      .eq('qr_identifier', documentId)
+      .maybeSingle()
+    doc = data
+  }
 
   if (!doc) notFound()
 
-  // Prioridad: notarizado (si existe), luego firmado
-  let bucket: string | null = null
-  let path: string | null = null
+  // Obtener firmantes
+  const { data: signers } = await service
+    .from('signing_signers')
+    .select('id, name, email, status, signing_order')
+    .eq('document_id', doc.id)
+    .neq('status', 'removed')
+    .order('signing_order', { ascending: true })
 
+  // Obtener información del pedido si existe
+  let orderNumber = null
+  if (doc.order_id) {
+    const { data: order } = await service
+      .from('orders')
+      .select('order_number')
+      .eq('id', doc.order_id)
+      .maybeSingle()
+    orderNumber = order?.order_number
+  }
+
+  // Obtener todas las versiones disponibles del documento
+  type DocumentVersion = {
+    name: string
+    bucket: string
+    path: string
+    url: string | null
+    type: 'original' | 'signed' | 'notarized'
+  }
+
+  const versions: DocumentVersion[] = []
+
+  // 1. Documento notarizado (si existe)
   const { data: assignment } = await service
     .from('signing_notary_assignments')
     .select('status, notarized_file_path, completed_at')
-    .eq('document_id', documentId)
+    .eq('document_id', doc.id)
     .maybeSingle()
 
   if (assignment?.notarized_file_path && assignment.status === 'completed') {
-    bucket = 'docs-notarized'
-    path = assignment.notarized_file_path
-  } else {
-    // Buscar versión fully_signed más reciente
-    const { data: signedVersion } = await service
-      .from('signing_document_versions')
-      .select('file_path, version_type, version_number')
-      .eq('document_id', documentId)
-      .eq('version_type', 'fully_signed')
-      .order('version_number', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-
-    if (signedVersion?.file_path) {
-      bucket = 'docs-signed'
-      path = signedVersion.file_path
-    }
+    const { data: urlData } = await service.storage
+      .from('docs-notarized')
+      .createSignedUrl(assignment.notarized_file_path, 3600)
+    
+    versions.push({
+      name: 'Documento Notarizado',
+      bucket: 'docs-notarized',
+      path: assignment.notarized_file_path,
+      url: urlData?.signedUrl || null,
+      type: 'notarized'
+    })
   }
 
-  let signedUrl: string | null = null
-  if (bucket && path) {
-    const { data } = await service.storage.from(bucket).createSignedUrl(path, 60)
-    signedUrl = data?.signedUrl || null
+  // 2. Documento firmado (versión fully_signed más reciente)
+  const { data: signedVersion } = await service
+    .from('signing_document_versions')
+    .select('file_path, version_type, version_number')
+    .eq('document_id', doc.id)
+    .eq('version_type', 'fully_signed')
+    .order('version_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (signedVersion?.file_path) {
+    const { data: urlData } = await service.storage
+      .from('docs-signed')
+      .createSignedUrl(signedVersion.file_path, 3600)
+    
+    versions.push({
+      name: 'Documento Firmado',
+      bucket: 'docs-signed',
+      path: signedVersion.file_path,
+      url: urlData?.signedUrl || null,
+      type: 'signed'
+    })
   }
 
-  const statusLabel = doc.status?.toString?.() || 'unknown'
+  // 3. Documento original (si existe)
+  if (doc.original_file_path) {
+    const { data: urlData } = await service.storage
+      .from('docs-originals')
+      .createSignedUrl(doc.original_file_path, 3600)
+    
+    versions.push({
+      name: 'Documento Original',
+      bucket: 'docs-originals',
+      path: doc.original_file_path,
+      url: urlData?.signedUrl || null,
+      type: 'original'
+    })
+  }
+
+  // Seleccionar versión por defecto (prioridad: notarizado > firmado > original)
+  const defaultVersion = versions.find(v => v.type === 'notarized') 
+    || versions.find(v => v.type === 'signed')
+    || versions.find(v => v.type === 'original')
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8 space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Repositorio de Documento</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <div className="text-xs text-muted-foreground">Documento</div>
-            <div className="text-sm font-semibold">{doc.title || doc.id}</div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="text-xs text-muted-foreground">ID</div>
-              <div className="text-xs font-mono break-all">{doc.id}</div>
-            </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Estado</div>
-              <div className="text-sm font-semibold">{statusLabel}</div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {signedUrl ? (
-            <div className="space-y-2">
-              <div className="text-sm">Puedes descargar el último documento disponible.</div>
-              <a href={signedUrl} target="_blank" rel="noopener noreferrer nofollow">
-                <Button className="w-full bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)]">
-                  Descargar PDF
-                </Button>
-              </a>
-              <div className="text-xs text-muted-foreground">
-                Este enlace expira en 60 segundos.
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground">
-              Aún no hay un documento firmado/notariado disponible para descarga.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="text-xs text-muted-foreground">
-        Este repositorio es público y se valida por el ID del documento.
-      </div>
-    </div>
+    <DocumentViewer
+      documentTitle={doc.title || 'Documento'}
+      documentId={doc.qr_identifier || doc.id}
+      status={doc.status || 'unknown'}
+      orderNumber={orderNumber}
+      signers={signers || []}
+      versions={versions}
+      defaultVersion={defaultVersion}
+    />
   )
 }
 

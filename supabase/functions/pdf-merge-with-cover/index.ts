@@ -144,7 +144,7 @@ serve(async (req) => {
 
         // 8. Generar QR con URL del repositorio
         const qrIdentifier = document.qr_identifier || `DOC-${document_id.substring(0, 8).toUpperCase()}`;
-        const repositoryUrl = `${APP_URL}/repository/${document_id}`;
+        const repositoryUrl = `${APP_URL}/repository/${qrIdentifier}`;
         
         // Generar QR usando api.qrserver.com
         const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(repositoryUrl)}`;

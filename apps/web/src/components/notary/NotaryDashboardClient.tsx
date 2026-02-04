@@ -161,11 +161,24 @@ export function NotaryDashboardClient({
 
       const { signedUrl, title } = await response.json()
 
-      // Descargar archivo
+      // Descargar archivo como blob para forzar descarga (no abrir en navegador)
+      const fileResponse = await fetch(signedUrl)
+      if (!fileResponse.ok) {
+        throw new Error('No se pudo descargar el archivo')
+      }
+
+      const blob = await fileResponse.blob()
+      const blobUrl = window.URL.createObjectURL(blob)
+
       const link = document.createElement('a')
-      link.href = signedUrl
+      link.href = blobUrl
       link.download = `${title}.pdf`
+      document.body.appendChild(link)
       link.click()
+      document.body.removeChild(link)
+
+      // Liberar el objeto URL después de un momento
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 100)
 
       toast.success('Descarga iniciada')
     } catch (error: any) {
