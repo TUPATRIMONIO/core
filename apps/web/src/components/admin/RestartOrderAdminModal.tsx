@@ -135,6 +135,7 @@ export function RestartOrderAdminModal({
                         id="confirm-notary" 
                         checked={confirmNotary}
                         onCheckedChange={(checked) => setConfirmNotary(checked as boolean)}
+                        className="border-red-400 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
                       />
                       <Label htmlFor="confirm-notary" className="text-xs font-bold cursor-pointer">
                         Confirmo que avisé a la notaría para detener el proceso.
@@ -155,6 +156,7 @@ export function RestartOrderAdminModal({
                         id="confirm-completed" 
                         checked={confirmCompleted}
                         onCheckedChange={(checked) => setConfirmCompleted(checked as boolean)}
+                        className="border-orange-400 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
                       />
                       <Label htmlFor="confirm-completed" className="text-xs font-bold cursor-pointer">
                         Confirmo que cuento con aprobación de gerencia para rehacerlo.

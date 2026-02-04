@@ -426,17 +426,19 @@ export function DocumentReviewClient({
       </CardContent>
 
       <Dialog open={!!previewDoc} onOpenChange={(open) => !open && setPreviewDoc(null)}>
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Previsualización: {previewDoc?.title}</DialogTitle>
+        <DialogContent className="w-[90vw] max-w-[90vw] md:w-[80vw] md:max-w-[80vw] h-[90vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b shrink-0 bg-background">
+            <DialogTitle className="text-base truncate pr-8">
+              Previsualización: {previewDoc?.title}
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden mt-4">
+          <div className="flex-1 overflow-hidden">
             {previewDoc && (
               <PDFViewer
                 bucket={['docs-signed', 'docs-originals']}
                 filePath={previewDoc.current_signed_file_path || previewDoc.original_file_path || ''}
                 documentTitle={previewDoc.title}
-                className="h-full border-0"
+                className="h-full border-0 rounded-none"
               />
             )}
           </div>

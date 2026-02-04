@@ -307,6 +307,7 @@ export default function SigningCheckoutPage() {
       
       toast.success('Orden creada. Redirigiendo a pago...')
       router.push(checkoutUrl)
+      router.refresh()
     } catch (e: any) {
       console.error('[SigningCheckout] error', e)
       setError(e?.message || 'No se pudo crear la orden.')

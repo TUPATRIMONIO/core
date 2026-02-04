@@ -198,34 +198,81 @@ notarial_services.priority_level        # low, normal, high, urgent
 
 ---
 
-## 📦 Schemas Futuros (Roadmap)
+### 5. Schema `identity_verifications` ⭐ NUEVO
 
-### 5. Schema `signatures` (Fase 7)
+**Propósito**: Sistema de verificación de identidad (KYC) independiente del proveedor
 
-**Propósito**: Servicio de firma electrónica
+**Responsabilidad**: Gestión de verificaciones de identidad con biometría, documentos y liveness checks. Repositorio centralizado para auditorías judiciales e internas.
 
-**Tablas estimadas**:
+**Tablas principales** (7):
 ```
-signatures.documents
-signatures.signers
-signatures.workflows
-signatures.templates
-signatures.certificates
+# Proveedores y Configuración
+identity_verifications.providers              # Catálogo de proveedores (Veriff, Onfido, etc.)
+identity_verifications.provider_configs       # Configuración por organización
+
+# Sesiones de Verificación
+identity_verifications.verification_sessions  # Sesión principal de verificación
+identity_verifications.verification_attempts  # Intentos dentro de una sesión
+identity_verifications.verification_documents # Documentos de identidad capturados
+identity_verifications.verification_media     # Archivos multimedia (fotos, selfies, videos)
+
+# Auditoría
+identity_verifications.audit_log              # Log inmutable para auditorías
 ```
+
+**ENUMs**:
+```
+identity_verifications.verification_purpose   # fes_signing, fea_signing, kyc_onboarding, etc.
+identity_verifications.session_status         # pending, started, submitted, approved, declined, etc.
+identity_verifications.attempt_status         # pending, in_progress, completed, failed
+identity_verifications.document_type          # national_id, passport, drivers_license, etc.
+identity_verifications.media_type             # face_photo, document_front, selfie, liveness_video
+identity_verifications.provider_type          # biometric, document, liveness, combined
+identity_verifications.actor_type             # system, webhook, user, admin
+```
+
+**Edge Functions**:
+```
+veriff-webhook                                # Procesa webhooks de Veriff
+identity-verification                         # API interna para gestión de verificaciones
+```
+
+**Storage**:
+```
+Bucket: identity-verifications                # Archivos multimedia (privado, 50MB max)
+Estructura: /{org_id}/{session_id}/{media_type}_{timestamp}.{ext}
+```
+
+**Características**:
+- **Multi-tenant estricto**: Aislamiento total por `organization_id`
+- **RLS robusto**: Cada org solo ve sus verificaciones
+- **Independiente del proveedor**: Arquitectura agnóstica con Veriff como proveedor inicial
+- **Retención indefinida**: Almacenamiento completo de evidencia para auditorías
+- **Audit log inmutable**: Registro completo de eventos sin UPDATE/DELETE
+- **Integración con signing**: Vinculación con firmantes para FES/FEA
+- **Reutilizable**: Sistema KYC general para múltiples servicios
+
+**Usado por**: 
+- Schema `signing` (FES y FEA)
+- Servicios futuros que requieran KYC
 
 ---
 
-### 6. Schema `verifications` (Fase 8)
+## 📦 Schemas Futuros (Roadmap)
+
+### 6. Schema `signatures` (Fase 7)
+
+**Propósito**: Servicio de firma electrónica
+
+**Estado**: ✅ IMPLEMENTADO (ver schema `signing` actual)
+
+---
+
+### 7. Schema `verifications` (Fase 8)
 
 **Propósito**: Verificación de identidad (KYC)
 
-**Tablas estimadas**:
-```
-verifications.requests
-verifications.results
-verifications.documents
-verifications.identity_records
-```
+**Estado**: ✅ IMPLEMENTADO como `identity_verifications`
 
 ---
 
@@ -344,10 +391,10 @@ USING (
 |--------|--------|--------|-----------|--------------|
 | `core` | ✅ Completo | 13 | Foundation del sistema | Nativo |
 | `marketing` | ✅ Completo | 11 | Marketing site y leads | No (público) |
-| `crm` | ✅ Schema completo | 16+ | CRM B2B vendible estilo HubSpot | ✅ Sí |
-| `notarial_services` | 📋 Pendiente | 12+ | Servicios notariales (copia legalizada, protocolización, firma autorizada) | ✅ Sí |
-| `signatures` | 📋 Pendiente | - | Firma electrónica | ✅ Sí |
-| `verifications` | 📋 Pendiente | - | KYC/Identidad | ✅ Sí |
+| `crm` | ✅ Completo | 16+ | CRM B2B vendible estilo HubSpot | ✅ Sí |
+| `signing` | ✅ Completo | 11 | Firma electrónica (FES/FEA) | ✅ Sí |
+| `identity_verifications` | ✅ Completo | 7 | KYC/Verificación de identidad | ✅ Sí |
+| `notarial_services` | 📋 Pendiente | 12+ | Servicios notariales | ✅ Sí |
 | `ai_customer_service` | 📋 Pendiente | - | Chatbot IA | ✅ Sí |
 | `ai_document_review` | 📋 Pendiente | - | Análisis documentos | ✅ Sí |
 | `analytics` | 📋 Pendiente | - | Métricas y reportes | ✅ Sí |
@@ -418,7 +465,7 @@ A medida que el producto crece:
 
 ---
 
-**Última actualización**: Diciembre 2024  
-**Schemas implementados**: 3 de 9 planificados  
-**Tablas totales**: 52+ (13 core + 11 marketing + 16+ crm + 12+ notarial_services planificadas)
+**Última actualización**: Febrero 2026  
+**Schemas implementados**: 5 de 9 planificados  
+**Tablas totales**: 58+ (13 core + 11 marketing + 16+ crm + 11 signing + 7 identity_verifications)
 

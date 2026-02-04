@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useOrganization } from '@/hooks/useOrganization';
 import type { Order, OrderStatus } from '@/lib/checkout/core';
 import { RestartOrderModal } from './RestartOrderModal';
+import { OrderStatusBadges } from './OrderStatusBadges';
 
 interface OrdersListProps {
   status?: OrderStatus | 'all';
@@ -44,42 +45,7 @@ interface OrderWithRelations extends Order {
   } | null;
 }
 
-const getStatusBadge = (status: OrderStatus) => {
-  const variants: Record<OrderStatus, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; className?: string }> = {
-    pending_payment: {
-      variant: 'secondary',
-      label: 'Pendiente',
-      className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-    },
-    paid: {
-      variant: 'default',
-      label: 'Pagada',
-      className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-    },
-    completed: {
-      variant: 'default',
-      label: 'Completada',
-      className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-    },
-    cancelled: {
-      variant: 'destructive',
-      label: 'Cancelada',
-      className: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-    },
-    refunded: {
-      variant: 'outline',
-      label: 'Reembolsada',
-      className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-    }
-  };
-
-  const config = variants[status];
-  return (
-    <Badge className={config.className}>
-      {config.label}
-    </Badge>
-  );
-};
+// Función obsoleta - reemplazada por OrderStatusBadges component
 
 const getEmptyStateMessage = (status: OrderStatus | 'all') => {
   const messages: Record<string, string> = {
@@ -216,7 +182,10 @@ export default function OrdersList({ status = 'all' }: OrdersListProps) {
                   </CardDescription>
                 </div>
                 <div className="flex-shrink-0">
-                  {getStatusBadge(order.status)}
+                  <OrderStatusBadges 
+                    orderStatus={order.status} 
+                    signingDocument={order.signing_document}
+                  />
                 </div>
               </div>
             </CardHeader>

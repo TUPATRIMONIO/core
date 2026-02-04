@@ -17,6 +17,9 @@ import { SignupForm } from '@/components/auth/signup-form';
 import ZeroAmountCheckoutForm from '@/components/checkout/ZeroAmountCheckoutForm';
 import { OrderDetailsCollapsible } from '@/components/checkout/OrderDetailsCollapsible';
 
+// Forzar renderizado dinámico para evitar 404 con órdenes recién creadas
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ orderId: string }>;
 }
@@ -276,7 +279,7 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
   let signingDocument = null;
   const { data: signingDocData } = await supabase
     .from('signing_documents')
-    .select('id, title, send_to_signers_on_complete')
+    .select('id, title, status, signers_count, signed_count, send_to_signers_on_complete')
     .eq('order_id', orderId)
     .maybeSingle();
   
@@ -312,7 +315,17 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-lg font-bold">Orden #{order.order_number}</h1>
-            {getStatusBadge(order.status, expired)}
+            {expired && order.status === 'pending_payment' ? (
+              <Badge variant="destructive" className="gap-1">
+                <XCircle className="h-3 w-3" />
+                Expirada
+              </Badge>
+            ) : (
+              <OrderStatusBadges 
+                orderStatus={order.status} 
+                signingDocument={signingDocument}
+              />
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
             {new Date(order.created_at).toLocaleDateString('es-CL', {

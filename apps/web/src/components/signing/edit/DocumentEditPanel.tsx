@@ -189,6 +189,7 @@ export function DocumentEditPanel({ document, onUpdate }: DocumentEditPanelProps
       // 4. Redirigir a checkout
       toast.info('Redirigiendo al checkout...')
       router.push(orderResult.checkoutUrl || `/checkout/${orderResult.orderId}`)
+      router.refresh()
 
     } catch (e: any) {
       console.error('[DocumentEditPanel] pay resend error', e)

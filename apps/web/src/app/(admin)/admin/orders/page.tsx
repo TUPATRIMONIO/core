@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/admin/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { OrdersDateFilter } from '@/components/admin/orders-date-filter'
 import { OrderRestartAdminAction } from '@/components/admin/OrderRestartAdminAction'
+import { OrderStatusBadges } from '@/components/checkout/OrderStatusBadges'
 
 interface Order {
     id: string
@@ -346,9 +347,14 @@ export default async function OrdersPage({ searchParams }: PageProps) {
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                <Badge className={getOrderStatusColor(order.status)}>
-                                                    {getOrderStatusLabel(order.status)}
-                                                </Badge>
+                                                <OrderStatusBadges 
+                                                    orderStatus={order.status as any}
+                                                    signingDocument={order.signing_documents?.[0] ? {
+                                                        status: order.signing_documents[0].status,
+                                                        signers_count: order.signing_documents[0].signers_count,
+                                                        signed_count: order.signing_documents[0].signed_count
+                                                    } : null}
+                                                />
                                             </TableCell>
                                             <TableCell>
                                                 {new Date(order.created_at).toLocaleDateString('es-CL')}

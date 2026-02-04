@@ -21,6 +21,7 @@ import { CreateTicketButtonForOrder } from '@/components/admin/create-ticket-but
 import { DetailPageLayout } from '@/components/shared/DetailPageLayout'
 import { OrderTicketsPanel } from '@/components/admin/OrderTicketsPanel'
 import { DocumentActions } from '@/components/signing/DocumentActions'
+import { OrderStatusBadges, DocumentStatusBadge } from '@/components/checkout/OrderStatusBadges'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -407,6 +408,17 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                     <div className="text-sm text-muted-foreground">Monto</div>
                                     <div className="font-mono font-bold">{formatCurrency(order.amount)}</div>
                                 </div>
+                                <div className="col-span-2">
+                                    <div className="text-sm text-muted-foreground mb-2">Estado del Pedido</div>
+                                    <OrderStatusBadges 
+                                        orderStatus={order.status as any}
+                                        signingDocument={order.signing_document ? {
+                                            status: order.signing_document.status,
+                                            signers_count: order.signing_document.signers_count,
+                                            signed_count: order.signing_document.signed_count
+                                        } : null}
+                                    />
+                                </div>
                                 {order.expires_at && (
                                     <div className="col-span-2">
                                         <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -498,13 +510,12 @@ export default async function OrderDetailPage({ params }: PageProps) {
                                             <div className="font-medium">
                                                 {order.signing_document.title || 'Documento de firma'}
                                             </div>
-                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                                <Badge variant="outline">{order.signing_document.status}</Badge>
-                                                {typeof order.signing_document.signers_count === 'number' && (
-                                                    <span>
-                                                        {order.signing_document.signed_count || 0} / {order.signing_document.signers_count} firmantes
-                                                    </span>
-                                                )}
+                                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                                                <DocumentStatusBadge 
+                                                    status={order.signing_document.status}
+                                                    signersCount={order.signing_document.signers_count}
+                                                    signedCount={order.signing_document.signed_count}
+                                                />
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-2">
