@@ -84,11 +84,12 @@ export async function POST(
     // Generar firma SHA256(sessionId + apiSecret)
     const signature = await generateVeriffSignature(veriffSessionId, apiSecret);
 
-    // Consultar los 3 endpoints de Veriff Station API
-    const [personData, attemptsData, decisionData] = await Promise.all([
+    // Consultar los 4 endpoints de Veriff Station API
+    const [personData, attemptsData, decisionData, mediaData] = await Promise.all([
       fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, apiKey, signature),
       fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, apiKey, signature),
       fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, apiKey, signature),
+      fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, apiKey, signature),
     ]);
 
     let updatedFields = 0;
@@ -215,6 +216,58 @@ export async function POST(
       updatedFields++;
     }
 
+    // Descargar y guardar media si hay datos
+    let mediaCount = 0;
+    if (mediaData?.images && mediaData.images.length > 0) {
+      for (const img of mediaData.images) {
+        try {
+          // Verificar si ya existe por provider_media_id
+          const { data: existingMedia } = await adminClient
+            .from('identity_verification_media')
+            .select('id')
+            .eq('session_id', sessionId)
+            .eq('provider_media_id', img.id)
+            .single();
+
+          if (existingMedia) continue; // Ya descargado
+
+          const dlRes = await fetch(img.url);
+          if (!dlRes.ok) continue;
+          const buffer = await (await dlRes.blob()).arrayBuffer();
+
+          const mediaType = mapMediaType(img.context);
+          const ext = img.mimeType === 'video/mp4' ? 'mp4' : 'jpg';
+          const path = `${session.organization_id}/${sessionId}/${mediaType}_${Date.now()}.${ext}`;
+
+          await adminClient.storage.from('identity-verifications').upload(path, buffer, {
+            contentType: img.mimeType || 'image/jpeg',
+          });
+
+          // Calcular checksum
+          const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+          const checksum = Array.from(new Uint8Array(hashBuffer))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
+
+          await adminClient.from('identity_verification_media').insert({
+            session_id: sessionId,
+            media_type: mediaType,
+            provider_media_id: img.id,
+            storage_path: path,
+            file_size: buffer.byteLength,
+            mime_type: img.mimeType || 'image/jpeg',
+            downloaded_at: new Date().toISOString(),
+            checksum,
+          });
+
+          mediaCount++;
+        } catch (e) {
+          console.error('Error descargando media individual:', e);
+        }
+      }
+      if (mediaCount > 0) updatedFields++;
+    }
+
     // Registrar en audit log
     await adminClient.from('identity_verification_audit_log').insert({
       session_id: sessionId,
@@ -236,6 +289,7 @@ export async function POST(
         person: personData !== null,
         attempts: attemptsData?.attempts?.length || 0,
         decision: decisionData !== null,
+        media: mediaCount,
       },
     });
   } catch (error: any) {
@@ -303,4 +357,15 @@ function mapAttemptStatus(status: string): string {
     expired: 'failed',
   };
   return map[status] || 'pending';
+}
+
+function mapMediaType(context: string): string {
+  const map: Record<string, string> = {
+    'document-front': 'document_front',
+    'document-back': 'document_back',
+    face: 'face_photo',
+    selfie: 'selfie',
+    video: 'liveness_video',
+  };
+  return map[context] || 'selfie';
 }

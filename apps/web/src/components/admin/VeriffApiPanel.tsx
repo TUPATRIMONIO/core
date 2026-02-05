@@ -8,9 +8,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Code, Loader2, RefreshCw, User, ListChecks, ShieldCheck } from 'lucide-react';
+import { Code, Loader2, RefreshCw, User, ListChecks, ShieldCheck, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface VeriffApiPanelProps {
@@ -19,13 +18,14 @@ interface VeriffApiPanelProps {
   organizationId?: string;
 }
 
-type DataType = 'all' | 'person' | 'attempts' | 'decision';
+type DataType = 'all' | 'person' | 'attempts' | 'decision' | 'media';
 
 const dataTypeLabels: Record<DataType, string> = {
-  all: 'Todos los datos',
+  all: 'Todos',
   person: 'Persona',
   attempts: 'Intentos',
   decision: 'Decisión',
+  media: 'Media',
 };
 
 const dataTypeIcons: Record<DataType, any> = {
@@ -33,9 +33,10 @@ const dataTypeIcons: Record<DataType, any> = {
   person: User,
   attempts: ListChecks,
   decision: ShieldCheck,
+  media: ImageIcon,
 };
 
-const individualTypes: DataType[] = ['person', 'attempts', 'decision'];
+const individualTypes: DataType[] = ['person', 'attempts', 'decision', 'media'];
 
 export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: VeriffApiPanelProps) {
   const [loading, setLoading] = useState<Record<DataType, boolean>>({
@@ -43,6 +44,7 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
     person: false,
     attempts: false,
     decision: false,
+    media: false,
   });
   
   const [data, setData] = useState<Record<DataType, any>>({
@@ -50,6 +52,7 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
     person: null,
     attempts: null,
     decision: null,
+    media: null,
   });
 
   const [lastQueried, setLastQueried] = useState<Record<DataType, string | null>>({
@@ -57,6 +60,7 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
     person: null,
     attempts: null,
     decision: null,
+    media: null,
   });
 
   if (!veriffSessionId) {
@@ -102,10 +106,52 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
   };
 
   const endpointLabels: Record<DataType, string> = {
-    all: 'GET /v1/sessions/{id}/person + attempts + decision',
+    all: 'GET /v1/sessions/{id}/ (person + attempts + decision + media)',
     person: 'GET /v1/sessions/{id}/person',
     attempts: 'GET /v1/sessions/{id}/attempts',
     decision: 'GET /v1/sessions/{id}/decision',
+    media: 'GET /v1/sessions/{id}/media',
+  };
+
+  // Proxy URL para cargar imágenes de Veriff con autenticación
+  const getProxyUrl = (originalUrl: string) => {
+    return `/api/verifications/proxy-media?url=${encodeURIComponent(originalUrl)}`;
+  };
+
+  // Renderizar imágenes de media si están disponibles
+  const renderMediaPreview = (mediaData: any) => {
+    if (!mediaData) return null;
+    const images = mediaData.images || [];
+    if (images.length === 0) return null;
+
+    return (
+      <div className="space-y-4 mb-4">
+        <h4 className="text-sm font-medium">Vista previa ({images.length} archivos)</h4>
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+          {images.map((img: any, idx: number) => (
+            <div key={img.id || idx} className="rounded-lg border overflow-hidden">
+              {img.mimeType?.startsWith('video') ? (
+                <div className="bg-muted flex items-center justify-center h-32">
+                  <p className="text-xs text-muted-foreground">🎥 Video</p>
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img 
+                  src={getProxyUrl(img.url)} 
+                  alt={img.context || `Imagen ${idx + 1}`} 
+                  className="w-full h-32 object-cover bg-muted"
+                  loading="lazy"
+                />
+              )}
+              <div className="p-2 bg-muted/50">
+                <p className="text-xs font-medium capitalize">{(img.context || 'desconocido').replace('-', ' ')}</p>
+                <p className="text-[10px] text-muted-foreground">{img.mimeType}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -132,12 +178,12 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             {(['all', ...individualTypes] as DataType[]).map((type) => {
               const Icon = dataTypeIcons[type];
               return (
                 <TabsTrigger key={type} value={type}>
-                  <Icon className="mr-2 h-4 w-4" />
+                  <Icon className="mr-1 h-4 w-4" />
                   <span className="hidden sm:inline">{dataTypeLabels[type]}</span>
                 </TabsTrigger>
               );
@@ -169,6 +215,10 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
                   </Button>
                 </div>
 
+                {/* Vista previa de imágenes para media */}
+                {type === 'media' && renderMediaPreview(data[type])}
+                {type === 'all' && data[type]?.media && renderMediaPreview(data[type].media)}
+
                 {data[type] ? (
                   <div className="rounded-md bg-muted p-4 overflow-auto max-h-[500px]">
                     <pre className="text-xs">
@@ -188,7 +238,7 @@ export function VeriffApiPanel({ sessionId, veriffSessionId, organizationId }: V
         <div className="mt-6 rounded-md bg-blue-50 p-4">
           <p className="text-sm text-blue-900">
             <strong>Nota:</strong> Esta consulta obtiene datos directamente de la API de Veriff sin guardarlos en la base de datos local. 
-            Usa el botón "Refrescar desde Veriff" en Acciones si quieres actualizar los datos guardados.
+            Usa el botón "Refrescar desde Veriff" en Acciones si quieres actualizar los datos guardados y descargar las fotos.
           </p>
         </div>
       </CardContent>

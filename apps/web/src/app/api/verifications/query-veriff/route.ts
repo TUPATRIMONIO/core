@@ -9,7 +9,7 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
 
 const VERIFF_BASE_URL = 'https://stationapi.veriff.com';
 
-type DataType = 'all' | 'person' | 'attempts' | 'decision';
+type DataType = 'all' | 'person' | 'attempts' | 'decision' | 'media';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,9 +38,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['all', 'person', 'attempts', 'decision'].includes(dataType)) {
+    if (!['all', 'person', 'attempts', 'decision', 'media'].includes(dataType)) {
       return NextResponse.json(
-        { error: 'dataType debe ser: all, person, attempts o decision' },
+        { error: 'dataType debe ser: all, person, attempts, decision o media' },
         { status: 400 }
       );
     }
@@ -116,17 +116,19 @@ export async function POST(request: NextRequest) {
     let data: any;
 
     if (dataType === 'all') {
-      // Consultar los 3 endpoints disponibles en paralelo
-      const [personRes, attemptsRes, decisionRes] = await Promise.all([
+      // Consultar los 4 endpoints disponibles en paralelo
+      const [personRes, attemptsRes, decisionRes, mediaRes] = await Promise.all([
         fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, headers),
         fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, headers),
         fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, headers),
+        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, headers),
       ]);
 
       data = {
         person: personRes,
         attempts: attemptsRes,
         decision: decisionRes,
+        media: mediaRes,
       };
     } else {
       // Consultar un endpoint individual
@@ -134,6 +136,7 @@ export async function POST(request: NextRequest) {
         person: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`,
         attempts: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`,
         decision: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`,
+        media: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`,
       };
 
       const url = endpointMap[dataType];
