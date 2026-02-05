@@ -43,6 +43,7 @@ interface Document {
   updated_at: string
   original_file_path?: string
   current_signed_file_path?: string
+  qr_identifier?: string
   organization?: {
     id: string
     name: string
@@ -227,7 +228,12 @@ export function DocumentReviewClient({
                   <TableBody>
                     {documents.map((doc) => (
                       <TableRow key={doc.id}>
-                        <TableCell className="font-medium">{doc.title}</TableCell>
+                        <TableCell>
+                          <div className="font-medium">{doc.title}</div>
+                          {doc.qr_identifier && (
+                            <div className="text-xs text-muted-foreground font-mono">{doc.qr_identifier}</div>
+                          )}
+                        </TableCell>
                         <TableCell>{doc.organization?.name || 'N/A'}</TableCell>
                         <TableCell>{getStatusBadge(doc.status)}</TableCell>
                         <TableCell>{getAiReviewStatus(doc)}</TableCell>
@@ -337,7 +343,12 @@ export function DocumentReviewClient({
                       const lastReviewDate = review?.completed_at || doc.updated_at
                       return (
                         <TableRow key={doc.id}>
-                          <TableCell className="font-medium">{doc.title}</TableCell>
+                          <TableCell>
+                            <div className="font-medium">{doc.title}</div>
+                            {doc.qr_identifier && (
+                              <div className="text-xs text-muted-foreground font-mono">{doc.qr_identifier}</div>
+                            )}
+                          </TableCell>
                           <TableCell>{doc.organization?.name || 'N/A'}</TableCell>
                           <TableCell>{getStatusBadge(doc.status)}</TableCell>
                           <TableCell>

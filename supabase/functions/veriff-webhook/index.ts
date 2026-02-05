@@ -4,9 +4,8 @@
 // Created: 2026-02-04
 // =====================================================
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
+import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -237,6 +236,12 @@ async function handleDecision(
     await saveDocument(supabase, sessionId, decision);
   }
 
+  // Obtener y guardar intentos
+  const attempts = await fetchVeriffAttempts(payload.id);
+  if (attempts && attempts.length > 0) {
+    await saveAttempts(supabase, sessionId, attempts);
+  }
+
   // Descargar y guardar media
   if (ourStatus === "approved" || ourStatus === "declined") {
     await downloadAndSaveMedia(supabase, sessionId, payload.id);
@@ -350,6 +355,32 @@ async function fetchVeriffMedia(veriffSessionId: string): Promise<any[]> {
   }
 }
 
+async function fetchVeriffAttempts(veriffSessionId: string): Promise<any[]> {
+  try {
+    const baseUrl = "https://stationapi.veriff.com";
+    const url = `${baseUrl}/v1/sessions/${veriffSessionId}/attempts`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "X-AUTH-CLIENT": VERIFF_API_KEY,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Error obteniendo attempts de Veriff:", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.attempts || [];
+  } catch (error) {
+    console.error("Error en fetchVeriffAttempts:", error);
+    return [];
+  }
+}
+
 async function downloadAndStoreMedia(
   supabase: any,
   sessionId: string,
@@ -440,6 +471,46 @@ async function saveDocument(
   } catch (error) {
     console.error("Error guardando documento:", error);
   }
+}
+
+async function saveAttempts(supabase: any, sessionId: string, attempts: any[]) {
+  try {
+    for (let i = 0; i < attempts.length; i++) {
+      const attempt = attempts[i];
+      
+      // Verificar si ya existe para evitar duplicados
+      const { data: existing } = await supabase
+        .from("identity_verifications.verification_attempts")
+        .select("id")
+        .eq("session_id", sessionId)
+        .eq("attempt_number", i + 1)
+        .single();
+
+      if (existing) continue;
+
+      await supabase.from("identity_verifications.verification_attempts").insert({
+        session_id: sessionId,
+        attempt_number: i + 1,
+        provider_attempt_id: attempt.id || null,
+        status: mapAttemptStatus(attempt.status),
+        failure_reason: attempt.reason || null,
+        raw_response: attempt,
+        started_at: attempt.timestamp || new Date().toISOString(),
+        completed_at: attempt.timestamp || null,
+      });
+    }
+    console.log(`${attempts.length} intento(s) guardado(s) para sesión ${sessionId}`);
+  } catch (error) {
+    console.error("Error guardando intentos:", error);
+  }
+}
+
+function mapAttemptStatus(s: string): string {
+  const m: Record<string, string> = {
+    created: "pending", started: "in_progress", submitted: "completed",
+    approved: "completed", declined: "failed", expired: "failed",
+  };
+  return m[s] || "pending";
 }
 
 // =====================================================

@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Enero 22, 2026 (Creación de Organización Empresarial Separada + Validación RUT en Vivo + Limpieza Sistema Conversión + Precios Multi-Moneda Paquetes Créditos + Sistema de Precios Multi-Moneda Centralizado + FESB Disponible Globalmente + Corrección Flujo Retorno Pagos + Firmantes Frecuentes + Checkout Unificado v2 + Flow + DLocal Go)\
+> **📅 Última actualización:** Febrero 5, 2026 (Sistema de Consulta On-Demand Veriff API + Firma HMAC + Panel Admin Veriff + Refresh Masivo + Migración a /admin)
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -20,7 +20,7 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅ + **🆕 CREACIÓN DE EMPRESA SEPARADA: FORMULARIO COMPLETO + VALIDACIÓN RUT EN VIVO** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅ + **🆕 CREACIÓN DE EMPRESA SEPARADA: FORMULARIO COMPLETO + VALIDACIÓN RUT EN VIVO** ✅ + **🆕 CORRECCIÓN REHACER PEDIDO: REINICIO AUTOMÁTICO DE FLUJO IA Y FIRMAS** ✅ + **🆕 VERIFF API ON-DEMAND: REFRESH MANUAL + PANEL ADMIN + FIRMA HMAC COMPLETADO** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
 ## 📊 Resumen Ejecutivo (Dic 2025)
@@ -2122,6 +2122,26 @@ apps/web/src/app/(admin)/admin/
 - Detección automática de tipo de usuario
 - Layouts separados pero consistentes
 - Páginas de admin para billing, CRM y blog
+
+### 🔧 **MEJORAS RECIENTES - Veriff API On-Demand (Febrero 2026)**
+
+**Objetivo:** Implementar consulta directa a la API de Veriff para actualización de datos y auditoría técnica sin depender únicamente de webhooks.
+
+**Funcionalidades Implementadas:**
+
+- ✅ **Refresh On-Demand**: Nuevo endpoint `/api/verifications/[id]/refresh` que consulta los 4 endpoints de Veriff (person, attempts, decision) y actualiza la base de datos local instantáneamente.
+- ✅ **Firma HMAC SHA256**: Implementación de seguridad `X-HMAC-SIGNATURE` requerida por Veriff para endpoints de lectura, asegurando la autenticidad de las peticiones.
+- ✅ **Panel Admin Veriff**: Nuevo componente `VeriffApiPanel` integrado en el detalle de verificación (solo admin) que permite ver el JSON crudo de la API de Veriff para debugging y auditoría.
+- ✅ **Refresh Masivo**: Capacidad de seleccionar múltiples verificaciones en el listado de admin y refrescar sus estados secuencialmente con respeto a los rate limits de la API.
+- ✅ **Migración a /admin**: Todas las herramientas de gestión de verificaciones e importación manual fueron movidas de `/dashboard` a `/admin` para restringir el acceso exclusivamente a platform admins.
+- ✅ **Sincronización de Attempts**: Ahora se capturan y guardan todos los intentos de verificación (`verification_attempts`) desde Veriff, no solo la decisión final.
+
+**Archivos Creados/Modificados:**
+
+- API Routes: `api/admin/verifications/route.ts`, `api/admin/verifications/[id]/route.ts`, `api/verifications/[id]/refresh/route.ts`, `api/verifications/query-veriff/route.ts`.
+- Componentes: `VeriffApiPanel.tsx`, `SyncVerificationsButton.tsx` (refactorizado).
+- Páginas Admin: `admin/verifications/page.tsx`, `admin/verifications/[id]/page.tsx`.
+- Edge Functions: `veriff-sync` y `veriff-webhook` actualizados para soportar guardado de intentos.
 
 ### 🔧 **MEJORAS RECIENTES - Admin Panel (Diciembre 2025)**
 

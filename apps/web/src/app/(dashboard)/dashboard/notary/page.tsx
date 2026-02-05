@@ -59,7 +59,7 @@ export default async function NotaryDashboardPage() {
   const { data: docs } = documentIds.length
     ? await supabase
         .from('signing_documents')
-        .select('id, title, organization_id, status, notary_service, created_at, order_id')
+        .select('id, title, organization_id, status, notary_service, created_at, order_id, qr_identifier')
         .in('id', documentIds)
     : { data: [] as any[] }
 

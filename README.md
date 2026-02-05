@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Creación de Empresas Separadas Activo** 🚀  
-> **📅 Actualización:** 22 Enero 2026  
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Veriff API On-Demand Activo** 🚀  
+> **📅 Actualización:** 5 Febrero 2026  
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -13,8 +13,9 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🌍 Multi-País**: Detección automática y contenido localizado (Chile, México, Colombia)
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
-- **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad, notaría digital
+- **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad (KYC Veriff con Refresh On-Demand), notaría digital
 - **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación con persistencia de progreso
+- **🛡️ Admin Veriff**: Herramientas avanzadas en `/admin/verifications` para consulta directa de API y sincronización manual con firma HMAC.
 - **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares
 - **📧 Sistema de soporte unificado**: Tickets de soporte y CRM fusionados en `crm.tickets`
 - **💬 Mensajes internos en tickets**: Conversación interna y externa del equipo en el panel admin

@@ -38,6 +38,22 @@ interface FileWithStatus {
   error?: string
 }
 
+interface BatchResult {
+  filename: string
+  success: boolean
+  documentId?: string
+  error?: string
+}
+
+interface BatchDetails {
+  status: string
+  total_files: number
+  processed_files: number
+  successful_files: number
+  failed_files: number
+  results: BatchResult[] | null
+}
+
 const MAX_FILES = 50
 const MAX_SIZE_MB = 500
 
@@ -48,8 +64,15 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
   const [uploadProgress, setUploadProgress] = useState(0)
   const [batchId, setBatchId] = useState<string | null>(null)
   const [processingStatus, setProcessingStatus] = useState<string | null>(null)
+  const [batchDetails, setBatchDetails] = useState<BatchDetails | null>(null)
+  const [processingLogs, setProcessingLogs] = useState<string[]>([])
 
   const supabase = createClient()
+  
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString('es-CL')
+    setProcessingLogs(prev => [...prev, `[${timestamp}] ${message}`])
+  }
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -130,14 +153,20 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
     try {
       setIsUploading(true)
       setUploadProgress(0)
+      setProcessingLogs([])
+      setBatchDetails(null)
+
+      addLog(`📤 Subiendo ${files.length} archivo(s)...`)
 
       // Crear FormData con todos los archivos
       const formData = new FormData()
       files.forEach((fileStatus, index) => {
         formData.append(`file_${index}`, fileStatus.file)
+        addLog(`  - ${fileStatus.file.name} (${(fileStatus.file.size / 1024).toFixed(0)} KB)`)
       })
 
       // Subir archivos
+      addLog('🔄 Enviando archivos al servidor...')
       const response = await fetch('/api/notary/bulk-upload', {
         method: 'POST',
         body: formData,
@@ -146,6 +175,7 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
       const result = await response.json()
 
       if (!response.ok || !result.success) {
+        addLog(`❌ Error del servidor: ${result.error || 'Error desconocido'}`)
         throw new Error(result.error || 'Error en la subida')
       }
 
@@ -153,44 +183,92 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
       setBatchId(result.batch_id)
       setProcessingStatus('processing')
 
+      addLog(`✅ Archivos subidos correctamente`)
+      addLog(`📋 Lote creado: ${result.batch_id.substring(0, 8)}...`)
+      addLog(`📊 Subidos: ${result.uploaded_successfully}/${result.total_files}`)
+      
+      if (result.upload_failures > 0) {
+        addLog(`⚠️ Fallos en subida: ${result.upload_failures}`)
+      }
+
+      addLog('🔍 Iniciando procesamiento de QR...')
       toast.success(result.message || 'Archivos subidos. Procesando...')
 
       // Polling del estado del batch
       pollBatchStatus(result.batch_id)
     } catch (error: any) {
       console.error('[BulkUpload] Error:', error)
+      addLog(`❌ Error: ${error.message}`)
       toast.error(error.message || 'Error en la subida masiva')
       setIsUploading(false)
     }
   }
 
   const pollBatchStatus = async (batchId: string) => {
-    const maxAttempts = 60 // 5 minutos (cada 5 segundos)
+    const maxAttempts = 20 // Máximo 1 minuto (cada 3 segundos)
     let attempts = 0
+    let lastStatus = ''
+
+    addLog(`Iniciando monitoreo del lote: ${batchId.substring(0, 8)}...`)
 
     const poll = async () => {
+      attempts++
+      
       try {
         const { data: batch, error } = await supabase
           .from('signing_notary_upload_batches')
-          .select('status, processed_files, total_files, successful_files, failed_files')
+          .select('status, processed_files, total_files, successful_files, failed_files, results')
           .eq('id', batchId)
           .single()
 
         if (error) {
           console.error('[pollBatchStatus] Error:', error)
+          addLog(`❌ Error consultando estado: ${error.message}`)
+          setIsUploading(false)
+          setProcessingStatus('error')
           return
+        }
+
+        // Actualizar detalles del batch
+        setBatchDetails({
+          status: batch.status,
+          total_files: batch.total_files,
+          processed_files: batch.processed_files,
+          successful_files: batch.successful_files,
+          failed_files: batch.failed_files,
+          results: batch.results as BatchResult[] | null
+        })
+
+        // Solo loguear si cambió el estado
+        const currentStatus = `${batch.status}|${batch.processed_files}`
+        if (currentStatus !== lastStatus) {
+          addLog(`Estado: ${batch.status} | Procesados: ${batch.processed_files}/${batch.total_files}`)
+          lastStatus = currentStatus
         }
 
         if (batch.status === 'completed' || batch.status === 'failed') {
           setProcessingStatus('completed')
           setIsUploading(false)
 
+          // Mostrar detalles de cada archivo
+          if (batch.results && Array.isArray(batch.results)) {
+            for (const result of batch.results as BatchResult[]) {
+              if (result.success) {
+                addLog(`✅ ${result.filename}: Documento asociado (${result.documentId?.substring(0, 8)}...)`)
+              } else {
+                addLog(`❌ ${result.filename}: ${result.error || 'Error desconocido'}`)
+              }
+            }
+          }
+
           if (batch.successful_files > 0) {
             toast.success(`${batch.successful_files} documento(s) procesado(s) exitosamente`)
+            addLog(`🎉 ${batch.successful_files} documento(s) procesado(s) exitosamente`)
           }
 
           if (batch.failed_files > 0) {
             toast.warning(`${batch.failed_files} documento(s) con error. Revisa los detalles.`)
+            addLog(`⚠️ ${batch.failed_files} documento(s) con error`)
           }
 
           if (onComplete) {
@@ -200,22 +278,27 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
           return
         }
 
-        // Continuar polling
-        attempts++
-        if (attempts < maxAttempts) {
-          setTimeout(poll, 5000) // Cada 5 segundos
-        } else {
+        // Verificar timeout
+        if (attempts >= maxAttempts) {
           setProcessingStatus('timeout')
           setIsUploading(false)
-          toast.warning('El procesamiento está tomando más tiempo de lo esperado. Revisa el estado después.')
+          addLog('⏱️ Tiempo de espera agotado (1 min). La función puede estar fallando.')
+          addLog('💡 Revisa los logs con: npx supabase functions logs process-notarized-documents')
+          toast.warning('El procesamiento está tomando mucho tiempo. Revisa los logs de la función.')
+          return
         }
+
+        // Continuar polling
+        setTimeout(poll, 3000)
       } catch (error) {
         console.error('[pollBatchStatus] Exception:', error)
+        addLog(`❌ Error inesperado: ${error}`)
         setIsUploading(false)
+        setProcessingStatus('error')
       }
     }
 
-    setTimeout(poll, 3000) // Primera consulta después de 3 segundos
+    setTimeout(poll, 2000) // Primera consulta después de 2 segundos
   }
 
   const handleClose = () => {
@@ -224,6 +307,8 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
       setBatchId(null)
       setProcessingStatus(null)
       setUploadProgress(0)
+      setBatchDetails(null)
+      setProcessingLogs([])
       onOpenChange(false)
     }
   }
@@ -355,20 +440,113 @@ export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadD
                     </span>
                   </div>
                   <Progress value={uploadProgress} className="h-2" />
-                  <p className="text-xs text-muted-foreground">
-                    {processingStatus === 'processing'
-                      ? 'El sistema está leyendo los códigos QR y asociando cada documento. Esto puede tardar unos minutos.'
-                      : 'Subiendo archivos al servidor...'}
-                  </p>
+                  
+                  {/* Detalles del batch */}
+                  {batchDetails && (
+                    <div className="text-xs text-muted-foreground bg-muted/50 rounded p-2">
+                      <div className="flex justify-between">
+                        <span>Estado:</span>
+                        <Badge variant="outline" className="text-xs h-5">
+                          {batchDetails.status}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Procesados:</span>
+                        <span>{batchDetails.processed_files}/{batchDetails.total_files}</span>
+                      </div>
+                      {batchDetails.successful_files > 0 && (
+                        <div className="flex justify-between mt-1 text-green-600">
+                          <span>Exitosos:</span>
+                          <span>{batchDetails.successful_files}</span>
+                        </div>
+                      )}
+                      {batchDetails.failed_files > 0 && (
+                        <div className="flex justify-between mt-1 text-red-600">
+                          <span>Con error:</span>
+                          <span>{batchDetails.failed_files}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Logs de procesamiento */}
+              {processingLogs.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-muted-foreground">
+                    Registro de actividad:
+                  </div>
+                  <div className="h-32 overflow-y-auto rounded border bg-black/5 dark:bg-white/5 p-2">
+                    <div className="space-y-1 font-mono text-xs">
+                      {processingLogs.map((log, i) => (
+                        <div key={i} className="text-muted-foreground whitespace-pre-wrap">
+                          {log}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Resultados detallados */}
+              {processingStatus === 'completed' && batchDetails?.results && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold">Resultados por archivo:</div>
+                  <div className="max-h-40 overflow-y-auto space-y-2">
+                    {batchDetails.results.map((result, i) => (
+                      <div 
+                        key={i} 
+                        className={`text-xs p-2 rounded border ${
+                          result.success 
+                            ? 'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800' 
+                            : 'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-800'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {result.success ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                          )}
+                          <span className="font-medium truncate">{result.filename}</span>
+                        </div>
+                        {result.success && result.documentId && (
+                          <div className="mt-1 text-green-700 dark:text-green-400 pl-6">
+                            Documento: {result.documentId.substring(0, 8)}...
+                          </div>
+                        )}
+                        {!result.success && result.error && (
+                          <div className="mt-1 text-red-700 dark:text-red-400 pl-6 break-words">
+                            {result.error}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* Estado de procesamiento */}
               {processingStatus === 'completed' && (
-                <Alert className="bg-green-50 border-green-200">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription className="text-green-800">
-                    Procesamiento completado. Revisa los resultados en tu dashboard.
+                <Alert className={
+                  batchDetails?.successful_files && batchDetails.successful_files > 0
+                    ? "bg-green-50 border-green-200"
+                    : "bg-amber-50 border-amber-200"
+                }>
+                  {batchDetails?.successful_files && batchDetails.successful_files > 0 ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                  )}
+                  <AlertDescription className={
+                    batchDetails?.successful_files && batchDetails.successful_files > 0
+                      ? "text-green-800"
+                      : "text-amber-800"
+                  }>
+                    {batchDetails?.successful_files && batchDetails.successful_files > 0
+                      ? `Procesamiento completado. ${batchDetails.successful_files} documento(s) asociado(s).`
+                      : 'Procesamiento completado pero ningún documento pudo ser asociado. Revisa los errores arriba.'}
                   </AlertDescription>
                 </Alert>
               )}

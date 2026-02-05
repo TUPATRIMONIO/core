@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,10 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Loader2, Upload, Download, Eye, X } from 'lucide-react'
+import { Loader2, Upload, Download, Eye, X, Wifi, WifiOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { BulkUploadDialog } from './BulkUploadDialog'
 import { DocumentViewerModal } from './DocumentViewerModal'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 type AssignmentStatus =
   | 'pending'
@@ -72,10 +73,12 @@ export function NotaryDashboardClient({
   ordersById,
 }: NotaryDashboardClientProps) {
   const supabase = useMemo(() => createClient(), [])
+  const channelRef = useRef<RealtimeChannel | null>(null)
 
   const [assignments, setAssignments] = useState<any[]>(initialAssignments)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false)
 
   // Selección múltiple
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -107,6 +110,81 @@ export function NotaryDashboardClient({
     // Limpiar selección si los assignments cambian
     setSelectedIds(new Set())
   }, [initialAssignments])
+
+  // Función para refrescar datos (memorizada para usar en realtime)
+  const fetchAssignments = useCallback(async () => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('signing_notary_assignments')
+        .select('*')
+        .eq('notary_office_id', officeId)
+        .order('assigned_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+      setAssignments(data || [])
+    } catch (e: any) {
+      console.error('[NotaryDashboard] fetch error', e)
+    }
+  }, [supabase, officeId])
+
+  // Suscripción en tiempo real a cambios en assignments
+  useEffect(() => {
+    // Crear canal de realtime para la tabla signing_notary_assignments
+    const channel = supabase
+      .channel(`notary-assignments-${officeId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'signing_notary_assignments',
+          filter: `notary_office_id=eq.${officeId}`,
+        },
+        (payload) => {
+          console.log('[NotaryDashboard] Realtime event:', payload.eventType)
+          
+          if (payload.eventType === 'INSERT') {
+            // Nuevo documento asignado
+            const newAssignment = payload.new as any
+            setAssignments(prev => {
+              // Evitar duplicados
+              if (prev.some(a => a.id === newAssignment.id)) return prev
+              // Agregar al inicio (más reciente primero)
+              return [newAssignment, ...prev]
+            })
+            toast.success('Nuevo documento recibido', {
+              description: 'Se ha asignado un nuevo documento a esta notaría',
+            })
+          } else if (payload.eventType === 'UPDATE') {
+            // Documento actualizado
+            const updatedAssignment = payload.new as any
+            setAssignments(prev => 
+              prev.map(a => a.id === updatedAssignment.id ? updatedAssignment : a)
+            )
+          } else if (payload.eventType === 'DELETE') {
+            // Documento eliminado
+            const deletedId = payload.old?.id
+            if (deletedId) {
+              setAssignments(prev => prev.filter(a => a.id !== deletedId))
+            }
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[NotaryDashboard] Realtime status:', status)
+        setIsRealtimeConnected(status === 'SUBSCRIBED')
+      })
+
+    channelRef.current = channel
+
+    // Cleanup: desuscribirse al desmontar
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
+  }, [supabase, officeId])
 
   const toggleSelection = (documentId: string) => {
     setSelectedIds((prev) => {
@@ -233,14 +311,7 @@ export function NotaryDashboardClient({
     setError(null)
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('signing_notary_assignments')
-        .select('*')
-        .eq('notary_office_id', officeId)
-        .order('assigned_at', { ascending: false })
-
-      if (fetchError) throw fetchError
-      setAssignments(data || [])
+      await fetchAssignments()
     } catch (e: any) {
       console.error('[NotaryDashboard] refresh error', e)
       setError(e?.message || 'No se pudo actualizar el listado.')
@@ -421,6 +492,7 @@ export function NotaryDashboardClient({
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold truncate">{doc?.title || a.document_id}</div>
                     <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
+                      <div>ID Documento: <span className="font-mono text-[10px] bg-muted px-1 rounded">{doc?.qr_identifier || a.document_id}</span></div>
                       {order?.order_number && (
                         <div>N° Pedido: <span className="font-mono">{order.order_number}</span></div>
                       )}
@@ -429,10 +501,10 @@ export function NotaryDashboardClient({
                         <div>Tipo: {notaryServiceLabels[doc.notary_service] || doc.notary_service}</div>
                       )}
                     </div>
-                    <div className="text-[11px] text-muted-foreground mt-1">
-                      Asignado: {a.assigned_at ? new Date(a.assigned_at).toLocaleString() : '—'}
-                      {a.received_at ? ` · Recibido: ${new Date(a.received_at).toLocaleString()}` : ''}
-                      {a.completed_at ? ` · Completado: ${new Date(a.completed_at).toLocaleString()}` : ''}
+                    <div className="text-[11px] text-muted-foreground mt-1" suppressHydrationWarning>
+                      Asignado: {a.assigned_at ? new Date(a.assigned_at).toLocaleString('es-CL') : '—'}
+                      {a.received_at ? ` · Recibido: ${new Date(a.received_at).toLocaleString('es-CL')}` : ''}
+                      {a.completed_at ? ` · Completado: ${new Date(a.completed_at).toLocaleString('es-CL')}` : ''}
                     </div>
                   </div>
                   <div className="shrink-0">{statusBadge(a.status)}</div>
@@ -653,7 +725,35 @@ export function NotaryDashboardClient({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <div className="text-sm text-muted-foreground">Notaría</div>
-          <div className="text-lg font-bold">{officeName}</div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold">{officeName}</span>
+            {/* Indicador de conexión en tiempo real */}
+            <div 
+              className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                isRealtimeConnected 
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                  : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+              }`}
+              title={isRealtimeConnected ? 'Actualización automática activa' : 'Conectando...'}
+            >
+              {isRealtimeConnected ? (
+                <>
+                  <Wifi className="h-3 w-3" />
+                  <span className="hidden sm:inline">En vivo</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  <span className="hidden sm:inline">Conectando...</span>
+                </>
+              )}
+            </div>
+          </div>
+          {isRealtimeConnected && (
+            <div className="text-xs text-muted-foreground mt-0.5">
+              Los documentos aparecerán automáticamente
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <Button

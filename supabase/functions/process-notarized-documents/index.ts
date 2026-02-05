@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import jsQR from "https://esm.sh/jsqr@1.4.0";
+import * as pdfjs from "https://esm.sh/pdfjs-dist@3.11.174/legacy/build/pdf.mjs";
 
 // Configuración CORS
 const corsHeaders = {
@@ -16,88 +17,149 @@ interface ProcessRequest {
 }
 
 /**
- * Convierte una página PDF a datos de imagen (ImageData) para lectura de QR
- * Usa canvas para renderizar la página
+ * Renderiza una página de PDF a ImageData para lectura de QR usando pdf.js
  */
-async function pdfPageToImageData(
+async function renderPageToImageData(
     pdfBytes: Uint8Array,
-    pageIndex: number,
-): Promise<ImageData | null> {
+    pageNum: number = 1,
+): Promise<{ width: number; height: number; data: Uint8ClampedArray } | null> {
     try {
-        // Cargar PDF
-        const pdfDoc = await PDFDocument.load(pdfBytes);
-        const pages = pdfDoc.getPages();
-
-        if (pageIndex >= pages.length) {
+        console.log(`[renderPageToImageData] Cargando PDF con pdf.js...`);
+        
+        const pdf = await pdfjs.getDocument({ data: pdfBytes }).promise;
+        console.log(`[renderPageToImageData] PDF cargado, ${pdf.numPages} páginas`);
+        
+        const page = await pdf.getPage(pageNum);
+        
+        // Escala para tener suficiente resolución para leer QR
+        const scale = 2.0;
+        const viewport = page.getViewport({ scale });
+        
+        console.log(`[renderPageToImageData] Viewport: ${viewport.width}x${viewport.height}`);
+        
+        // Crear un canvas virtual usando OffscreenCanvas
+        const canvas = new OffscreenCanvas(
+            Math.floor(viewport.width),
+            Math.floor(viewport.height)
+        );
+        const context = canvas.getContext('2d');
+        
+        if (!context) {
+            console.error("[renderPageToImageData] No se pudo crear contexto 2D");
             return null;
         }
-
-        const page = pages[pageIndex];
-        const { width, height } = page.getSize();
-
-        // Para Deno, necesitamos una forma de renderizar el PDF
-        // Como no tenemos Canvas nativo, usaremos un enfoque alternativo:
-        // Retornar null y dejar que el QR sea detectado de otra forma
-        // En producción, se podría usar un servicio externo de conversión PDF->imagen
         
-        console.log(
-            `[pdfPageToImageData] PDF página ${pageIndex} tamaño: ${width}x${height}`,
-        );
-
-        // Por ahora, retornamos null para indicar que necesitamos otro método
-        return null;
+        console.log(`[renderPageToImageData] Renderizando página...`);
+        
+        await page.render({
+            canvasContext: context as any,
+            viewport: viewport,
+        }).promise;
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        
+        console.log(`[renderPageToImageData] Página renderizada: ${imageData.width}x${imageData.height}`);
+        
+        return {
+            width: imageData.width,
+            height: imageData.height,
+            data: imageData.data,
+        };
     } catch (error) {
-        console.error(
-            `[pdfPageToImageData] Error procesando página ${pageIndex}:`,
-            error,
-        );
+        console.error("[renderPageToImageData] Error:", error);
         return null;
     }
 }
 
 /**
- * Busca QR en un PDF escaneando todas las páginas
- * NOTA: Esta es una implementación simplificada
- * En producción, se debería usar un servicio externo de OCR/QR
+ * Busca QR Identifier en un PDF
+ * 1. Primero intenta leer el QR de la imagen de la primera página
+ * 2. Si falla, busca en el texto del PDF
  */
-async function searchQRInPDF(pdfBytes: Uint8Array): Promise<string | null> {
+async function searchQRInPDF(pdfBytes: Uint8Array): Promise<{ identifier: string | null; debug: string }> {
+    const debugInfo: string[] = [];
+    const qrIdentifierPattern = /DOC-[A-F0-9]{8}-[A-F0-9]{8}/gi;
+    
     try {
-        const pdfDoc = await PDFDocument.load(pdfBytes);
-        const pageCount = pdfDoc.getPageCount();
-
-        console.log(`[searchQRInPDF] PDF tiene ${pageCount} páginas`);
-
-        // Intentar extraer texto del PDF buscando patrones de URL
-        // Este es un enfoque simplificado que busca UUIDs directamente en el contenido
-        const textContent = await extractTextFromPDF(pdfBytes);
-
-        // Buscar patrón de UUID en el texto
-        const uuidPattern =
-            /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
-        const matches = textContent.match(uuidPattern);
-
-        if (matches && matches.length > 0) {
-            // Retornar el primer UUID encontrado (asumiendo que es del documento)
-            console.log(`[searchQRInPDF] UUID encontrado: ${matches[0]}`);
-            return matches[0];
+        // 1. Intentar leer QR de la primera página (donde está la portada)
+        console.log("[searchQRInPDF] Intentando leer QR de imagen...");
+        
+        try {
+            const imageData = await renderPageToImageData(pdfBytes, 1);
+            
+            if (imageData) {
+                debugInfo.push(`Imagen: ${imageData.width}x${imageData.height}`);
+                
+                // Usar jsQR para leer el código
+                const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (qrCode && qrCode.data) {
+                    console.log(`[searchQRInPDF] QR detectado: ${qrCode.data}`);
+                    debugInfo.push(`QR: ${qrCode.data}`);
+                    
+                    // Extraer el identifier de la URL del QR
+                    const match = qrCode.data.match(qrIdentifierPattern);
+                    if (match && match[0]) {
+                        const identifier = match[0].toUpperCase();
+                        console.log(`[searchQRInPDF] Identifier extraído: ${identifier}`);
+                        return { identifier, debug: `QR leído: ${qrCode.data}` };
+                    }
+                } else {
+                    debugInfo.push("QR no detectado en página 1");
+                    console.log("[searchQRInPDF] No se detectó QR en página 1");
+                }
+            } else {
+                debugInfo.push("Error renderizando página");
+            }
+        } catch (renderError) {
+            console.error(`[searchQRInPDF] Error en render/QR: ${renderError}`);
+            debugInfo.push(`Error render: ${String(renderError).substring(0, 50)}`);
         }
 
-        console.log("[searchQRInPDF] No se encontró UUID en el PDF");
-        return null;
+        // 2. Buscar en texto del PDF (fallback)
+        console.log("[searchQRInPDF] Buscando en texto del PDF...");
+        const textContent = extractTextFromPDF(pdfBytes);
+        debugInfo.push(`Texto: ${textContent.length} chars`);
+        
+        const textMatches = textContent.match(qrIdentifierPattern);
+        if (textMatches && textMatches.length > 0) {
+            const identifier = textMatches[0].toUpperCase();
+            console.log(`[searchQRInPDF] Identifier en texto: ${identifier}`);
+            return { identifier, debug: `Encontrado en texto` };
+        }
+
+        console.log("[searchQRInPDF] No se encontró QR Identifier");
+        return { identifier: null, debug: debugInfo.join(' | ') };
     } catch (error) {
         console.error("[searchQRInPDF] Error:", error);
-        return null;
+        return { identifier: null, debug: `Error: ${error}` };
     }
 }
 
+// Nota: La descompresión FlateDecode es compleja y puede causar hangs
+// Por ahora buscamos directamente en el contenido raw del PDF
+
 /**
- * Extrae texto de un PDF (método simplificado)
+ * Extrae texto de un PDF
+ * Busca en el contenido binario patrones de texto
  */
-async function extractTextFromPDF(pdfBytes: Uint8Array): Promise<string> {
+function extractTextFromPDF(pdfBytes: Uint8Array): string {
     try {
-        // Convertir bytes a string y buscar patrones
-        const text = new TextDecoder().decode(pdfBytes);
-        return text;
+        // Convertir bytes a string usando latin1 para preservar todos los bytes
+        const rawContent = Array.from(pdfBytes)
+            .map(byte => String.fromCharCode(byte))
+            .join('');
+        
+        // También intentamos con UTF-8 para texto legible
+        let utf8Content = '';
+        try {
+            utf8Content = new TextDecoder('utf-8', { fatal: false }).decode(pdfBytes);
+        } catch {
+            // Ignorar errores de decodificación
+        }
+        
+        // Combinar ambos para mayor cobertura
+        return rawContent + '\n' + utf8Content;
     } catch (error) {
         console.error("[extractTextFromPDF] Error:", error);
         return "";
@@ -134,50 +196,46 @@ async function processFile(
 
         const pdfBytes = new Uint8Array(await fileData.arrayBuffer());
 
-        // 2. Buscar QR/UUID en el PDF
-        const qrData = await searchQRInPDF(pdfBytes);
+        // 2. Buscar QR Identifier en el PDF (formato: DOC-XXXXXXXX-XXXXXXXX)
+        const { identifier: qrIdentifier, debug: qrDebug } = await searchQRInPDF(pdfBytes);
+        
+        console.log(`[processFile] Debug QR: ${qrDebug}`);
 
-        if (!qrData) {
+        if (!qrIdentifier) {
             throw new Error(
-                "No se encontró código QR o UUID en el documento",
+                `No se encontró código QR (DOC-XXXXXXXX-XXXXXXXX) en el documento. ${qrDebug}`,
             );
         }
 
-        // 3. Extraer UUID del QR (usando función SQL)
-        const { data: documentId, error: extractError } = await supabase.rpc(
-            "extract_uuid_from_qr_url",
-            { qr_text: qrData },
-        );
+        console.log(`[processFile] QR Identifier encontrado: ${qrIdentifier}`);
 
-        if (extractError || !documentId) {
+        // 3. Buscar documento por qr_identifier
+        const { data: document, error: docError } = await supabase
+            .from("signing_documents")
+            .select("id, title, organization_id, status, notary_service, qr_identifier")
+            .eq("qr_identifier", qrIdentifier)
+            .maybeSingle();
+
+        if (docError || !document) {
             throw new Error(
-                `No se pudo extraer UUID válido del QR: ${qrData}`,
+                `No se encontró documento con QR: ${qrIdentifier}`,
             );
         }
 
-        console.log(`[processFile] UUID extraído: ${documentId}`);
+        const documentId = document.id;
+        console.log(`[processFile] Documento encontrado: ${documentId} - ${document.title}`);
 
-        // 4. Validar que el documento existe y tiene asignación a esta notaría
+        // 4. Validar que el documento tiene asignación a esta notaría
         const { data: assignment, error: assignmentError } = await supabase
             .from("signing_notary_assignments")
-            .select(`
-        id,
-        status,
-        document:signing_documents(
-          id,
-          title,
-          organization_id,
-          status,
-          notary_service
-        )
-      `)
+            .select("id, status")
             .eq("document_id", documentId)
             .eq("notary_office_id", notaryOfficeId)
             .maybeSingle();
 
         if (assignmentError || !assignment) {
             throw new Error(
-                "Documento no encontrado o no asignado a esta notaría",
+                `Documento ${qrIdentifier} no está asignado a esta notaría`,
             );
         }
 
@@ -193,11 +251,9 @@ async function processFile(
             throw new Error(`Estado inválido para procesar: ${assignment.status}`);
         }
 
-        const doc = assignment.document;
-
         // 5. Copiar archivo a bucket final (docs-notarized)
         const finalPath =
-            `${doc.organization_id}/${doc.id}/v1/notarized.pdf`;
+            `${document.organization_id}/${document.id}/v1/notarized.pdf`;
 
         const { error: uploadError } = await supabase.storage
             .from("docs-notarized")
@@ -234,7 +290,7 @@ async function processFile(
                 status: "notarized",
                 updated_at: now,
             })
-            .eq("id", doc.id);
+            .eq("id", document.id);
 
         if (docUpdateError) {
             throw new Error(`Error actualizando documento: ${docUpdateError.message}`);
@@ -244,7 +300,7 @@ async function processFile(
         const { data: latestVersion } = await supabase
             .from("signing_document_versions")
             .select("version_number")
-            .eq("document_id", doc.id)
+            .eq("document_id", document.id)
             .order("version_number", { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -252,7 +308,7 @@ async function processFile(
         const nextVersionNumber = (latestVersion?.version_number || 0) + 1;
 
         await supabase.from("signing_document_versions").insert({
-            document_id: doc.id,
+            document_id: document.id,
             version_number: nextVersionNumber,
             version_type: "notarized",
             file_path: finalPath,
@@ -266,12 +322,12 @@ async function processFile(
             .remove([fileRecord.temp_storage_path]);
 
         console.log(
-            `[processFile] ✓ Documento ${doc.title} procesado exitosamente`,
+            `[processFile] ✓ Documento ${document.title} (${qrIdentifier}) procesado exitosamente`,
         );
 
         return {
             success: true,
-            documentId: doc.id,
+            documentId: document.id,
         };
     } catch (error: any) {
         console.error(
@@ -337,8 +393,8 @@ async function processBatch(
                 await supabase
                     .from("signing_notary_upload_files")
                     .update({
-                        status: "success",
-                        document_id: result.documentId,
+                        status: "matched",
+                        detected_document_id: result.documentId,
                         processed_at: new Date().toISOString(),
                     })
                     .eq("id", file.id);
@@ -347,7 +403,7 @@ async function processBatch(
                 await supabase
                     .from("signing_notary_upload_files")
                     .update({
-                        status: "failed",
+                        status: "error",
                         error_message: result.error,
                         processed_at: new Date().toISOString(),
                     })
@@ -371,7 +427,6 @@ async function processBatch(
                 successful_files: successCount,
                 failed_files: failureCount,
                 results: results,
-                completed_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
             })
             .eq("id", batchId);

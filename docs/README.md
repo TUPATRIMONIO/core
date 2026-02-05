@@ -39,6 +39,20 @@ Bienvenido a la documentación técnica del ecosistema TuPatrimonio. Esta docume
   - admin-setup.md - Setup centralizado del admin
   - update-notifications/ - Sistema de notificaciones de actualización
 
+### 🔐 Verificación de Identidad (KYC)
+
+- **[VERIFF-QUICKSTART.md](./VERIFF-QUICKSTART.md)** - ⭐ Guía rápida para empezar
+- **[VERIFF-SISTEMA-COMPLETO.md](./VERIFF-SISTEMA-COMPLETO.md)** - 🎯 Resumen ejecutivo completo
+- **[VERIFF-FRONTEND-PAGES.md](./VERIFF-FRONTEND-PAGES.md)** - 📱 Páginas frontend disponibles
+- **[FRONTEND-IDENTITY-VERIFICATION.md](./FRONTEND-IDENTITY-VERIFICATION.md)** - 💻 Guía de uso en frontend
+- **[VERIFF-SYNC.md](./VERIFF-SYNC.md)** - 🔄 Sincronización de sesiones externas
+- **[IDENTITY-VERIFICATIONS.md](./IDENTITY-VERIFICATIONS.md)** - 🏗️ Documentación técnica completa
+
+**Rutas Frontend:**
+- `/dashboard/verifications` - Ver todas las verificaciones
+- `/dashboard/verifications/[id]` - Detalle con evidencia multimedia
+- `/dashboard/test-verification` - Página de prueba
+
 ### 🚀 Deployment y Configuración
 
 - **[deployment/](./deployment/)** - Guías de deploy y configuración
