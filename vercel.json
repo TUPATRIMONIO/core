@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/retry-ai-reviews",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/sync-veriff",
+      "schedule": "0 3 * * *"
     }
   ]
 }
