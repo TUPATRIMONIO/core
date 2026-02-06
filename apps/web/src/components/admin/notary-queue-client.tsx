@@ -133,9 +133,8 @@ export function NotaryQueueClient({ initialAssignments }: NotaryQueueClientProps
           const fileName = `${selectedAssignment.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
           const filePath = `notary-attachments/${fileName}`
 
-          // Usar bucket 'docs' o el que esté disponible
           const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('docs')
+            .from('notary-attachments')
             .upload(filePath, file)
 
           if (uploadError) {

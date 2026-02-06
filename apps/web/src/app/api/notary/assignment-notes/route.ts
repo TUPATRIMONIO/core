@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,51 +19,57 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Usamos service role para evitar problemas de RLS entre tablas de distintos esquemas
+    const adminSupabase = createServiceRoleClient()
+
     // 1. Consultar notas de la tabla nueva
-    const { data: notes, error } = await supabase
+    const { data: notes, error } = await adminSupabase
       .from('signing_notary_assignment_notes')
       .select('*')
       .eq('assignment_id', assignmentId)
       .order('created_at', { ascending: true })
 
     if (error) {
-      console.error('Error fetching notes:', error)
-      return NextResponse.json({ error: 'Error fetching notes' }, { status: 500 })
+      console.error('[assignment-notes] Error fetching notes:', error)
     }
 
-    // 2. Consultar datos legacy para construir historial completo
-    const { data: assignment } = await supabase
+    // 2. Consultar datos legacy del assignment
+    const { data: assignment, error: assignmentError } = await adminSupabase
       .from('signing_notary_assignments')
       .select('admin_notes, correction_request, rejection_reason, updated_at')
       .eq('id', assignmentId)
       .maybeSingle()
 
-    // Consultar adjuntos legacy (si la tabla existe)
+    if (assignmentError) {
+      console.error('[assignment-notes] Error fetching assignment:', assignmentError)
+    }
+
+    // 3. Consultar adjuntos legacy
     let legacyAttachments: any[] = []
-    try {
-      const { data: attachments } = await supabase
-        .from('signing_notary_assignment_attachments')
-        .select('*')
-        .eq('assignment_id', assignmentId)
-      
-      if (attachments) legacyAttachments = attachments
-    } catch (e) {
-      // Ignorar error si la tabla no existe
+    const { data: attachmentsData, error: attachmentsError } = await adminSupabase
+      .from('signing_notary_assignment_attachments')
+      .select('*')
+      .eq('assignment_id', assignmentId)
+
+    if (attachmentsError) {
+      console.error('[assignment-notes] Error fetching legacy attachments:', attachmentsError)
+    } else if (attachmentsData) {
+      legacyAttachments = attachmentsData
     }
 
     const combinedNotes = [...(notes || [])]
 
-    // Agregar notas legacy si no están duplicadas
+    // 4. Construir notas legacy si no están duplicadas
     if (assignment || legacyAttachments.length > 0) {
-      // Nota de admin legacy
       let adminNoteExists = false
+
+      // Nota de admin legacy (admin_notes en la tabla de assignments)
       if (assignment?.admin_notes) {
-        const isDuplicated = notes?.some(n => 
+        const isDuplicated = (notes || []).some(n => 
           n.sender_type === 'admin' && n.message === assignment.admin_notes
         )
 
         if (!isDuplicated) {
-          // Asociar adjuntos legacy a esta nota
           const attachmentsForNote = legacyAttachments.map(att => ({
             path: att.file_path,
             name: att.file_name,
@@ -85,33 +91,43 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Si hay adjuntos legacy pero NO se creó una nota de admin (porque no había texto),
-      // creamos una nota de "Adjuntos enviados" para mostrarlos.
+      // Si hay adjuntos legacy huérfanos (sin nota de admin)
       if (!adminNoteExists && legacyAttachments.length > 0) {
-        // Verificar si estos adjuntos ya están en alguna nota nueva (poco probable si son legacy)
-        // Asumimos que si no hay nota de admin legacy, estos adjuntos están huérfanos de visualización
-        const attachmentsForNote = legacyAttachments.map(att => ({
-          path: att.file_path,
-          name: att.file_name,
-          size: att.file_size,
-          type: att.mime_type
-        }))
+        // Verificar que estos adjuntos no están ya en alguna nota nueva
+        const allNewAttachmentPaths = new Set<string>()
+        for (const n of (notes || [])) {
+          const atts = Array.isArray(n.attachments) ? n.attachments : []
+          for (const a of atts) {
+            if (a.path) allNewAttachmentPaths.add(a.path)
+          }
+        }
 
-        combinedNotes.push({
-          id: 'legacy-attachments-note',
-          assignment_id: assignmentId,
-          sender_type: 'admin',
-          sender_id: null,
-          message: 'Documentos adjuntos enviados',
-          action_type: 'resolved',
-          attachments: attachmentsForNote,
-          created_at: assignment?.updated_at || new Date().toISOString()
-        })
+        const orphanAttachments = legacyAttachments
+          .filter(att => !allNewAttachmentPaths.has(att.file_path))
+          .map(att => ({
+            path: att.file_path,
+            name: att.file_name,
+            size: att.file_size,
+            type: att.mime_type
+          }))
+
+        if (orphanAttachments.length > 0) {
+          combinedNotes.push({
+            id: 'legacy-attachments-note',
+            assignment_id: assignmentId,
+            sender_type: 'admin',
+            sender_id: null,
+            message: 'Documentos adjuntos enviados',
+            action_type: 'resolved',
+            attachments: orphanAttachments,
+            created_at: legacyAttachments[0]?.created_at || assignment?.updated_at || new Date().toISOString()
+          })
+        }
       }
 
       // Nota de corrección legacy
       if (assignment?.correction_request) {
-        const isDuplicated = notes?.some(n => 
+        const isDuplicated = (notes || []).some(n => 
           n.sender_type === 'notary' && n.message === assignment.correction_request
         )
 
@@ -131,7 +147,7 @@ export async function GET(request: NextRequest) {
 
       // Nota de rechazo legacy
       if (assignment?.rejection_reason) {
-        const isDuplicated = notes?.some(n => 
+        const isDuplicated = (notes || []).some(n => 
           n.sender_type === 'notary' && n.message === assignment.rejection_reason
         )
 
@@ -150,26 +166,47 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Ordenar combinado por fecha
+    // 5. También verificar si alguna nota nueva tiene adjuntos como JSONB guardado incorrectamente
+    // (por si se guardó como string en vez de array)
+    for (const note of combinedNotes) {
+      if (typeof note.attachments === 'string') {
+        try {
+          note.attachments = JSON.parse(note.attachments)
+        } catch {
+          note.attachments = []
+        }
+      }
+      if (!Array.isArray(note.attachments)) {
+        note.attachments = []
+      }
+    }
+
+    // 6. Ordenar por fecha
     combinedNotes.sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     )
 
-    // Enriquecer con URLs firmadas
+    // 7. Generar URLs firmadas para adjuntos
     const enrichedNotes = await Promise.all(combinedNotes.map(async (note) => {
-      if (!note.attachments || !Array.isArray(note.attachments) || note.attachments.length === 0) {
+      if (!note.attachments || note.attachments.length === 0) {
         return note
       }
 
       const attachmentsWithUrls = await Promise.all(note.attachments.map(async (att: any) => {
         if (att.signedUrl) return att
 
-        const bucket = 'docs' 
+        const bucket = 'notary-attachments'
         const path = att.path
 
-        const { data } = await supabase.storage
+        if (!path) return att
+
+        const { data, error: signError } = await adminSupabase.storage
           .from(bucket)
-          .createSignedUrl(path, 3600) // 1 hora
+          .createSignedUrl(path, 3600)
+
+        if (signError) {
+          console.error('[assignment-notes] Error signing URL:', path, signError)
+        }
 
         return {
           ...att,
@@ -185,7 +222,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(enrichedNotes)
   } catch (error: any) {
-    console.error('Error in assignment-notes API:', error)
+    console.error('[assignment-notes] Unexpected error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
