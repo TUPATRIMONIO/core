@@ -743,7 +743,7 @@ export function SignerManagementStep() {
     
     actions.setSigners(signersToSync)
     
-    router.push('/checkout/signing')
+    router.push('/signing/checkout')
   }, [router, signers, state.documentId, actions])
 
   return (
