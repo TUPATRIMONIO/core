@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package, Clock, CheckCircle2, XCircle, AlertCircle, FileText, Download, RefreshCcw, Ban, CreditCard, PenTool, ChevronDown, ChevronUp, User, MapPin, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, CheckCircle2, XCircle, AlertCircle, FileText, Download, RefreshCcw, Ban, CreditCard, PenTool, ChevronDown, ChevronUp, User, MapPin, Phone, Mail } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import OrderCheckoutForm from '@/components/checkout/OrderCheckoutForm';
@@ -403,283 +404,187 @@ export default async function CheckoutOrderPage({ params }: PageProps) {
         </div>
       )}
       
-      {/* Grid principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Columna izquierda: Resumen */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Resumen del pedido */}
+      {/* Acciones del pedido - Diseño Premium */}
+      {(isCompleted || isCancelled || isRefunded) && (
+        <Card className="mb-6 border-none shadow-md bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-900 dark:to-zinc-950 overflow-hidden ring-1 ring-zinc-200 dark:ring-zinc-800 relative">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[var(--tp-buttons)]" />
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+              <div className="space-y-2 max-w-xl">
+                <h3 className="text-lg font-bold flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                  <div className="p-2 rounded-full bg-[var(--tp-bg-light-10)] text-[var(--tp-buttons)]">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  Gestión del Documento
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {signingDocument?.id 
+                    ? "Tu documento está listo para ser gestionado. Accede a los detalles para revisar el estado de las firmas o descargar copias."
+                    : "Revisa los detalles de tu orden y descarga los documentos tributarios asociados."}
+                </p>
+              </div>
+              
+              {signingDocument?.id && (
+                <Button 
+                  size="lg" 
+                  className="w-full md:w-auto shrink-0 bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" 
+                  asChild
+                >
+                  <Link href={`/dashboard/signing/documents/${signingDocument.id}`} className="flex items-center justify-center gap-2 px-6">
+                    <span className="font-semibold">Ver Detalles del Documento</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+
+            {(invoiceDocument?.pdf_url || invoiceDocument?.xml_url || (isCompleted && order.status === 'completed' && payment)) && (
+              <>
+                <Separator className="my-5 bg-zinc-100 dark:bg-zinc-800" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
+                    Documentos y Ayuda:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {invoiceDocument?.pdf_url && (
+                      <Button variant="outline" size="sm" className="h-8 bg-white dark:bg-zinc-900" asChild>
+                        <a 
+                          href={invoiceDocument.pdf_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer nofollow"
+                          className="flex items-center gap-2"
+                        >
+                          <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>{getDocumentLabel(invoiceDocument.document_type)}</span>
+                        </a>
+                      </Button>
+                    )}
+                    
+                    {invoiceDocument?.xml_url && (
+                      <Button variant="outline" size="sm" className="h-8 bg-white dark:bg-zinc-900" asChild>
+                        <a 
+                          href={invoiceDocument.xml_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer nofollow"
+                          className="flex items-center gap-2"
+                        >
+                          <Download className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>XML</span>
+                        </a>
+                      </Button>
+                    )}
+                    
+                    {isCompleted && order.status === 'completed' && payment && (
+                      <ClientRefundModal
+                        orderId={order.id}
+                        orderAmount={order.amount}
+                        orderCurrency={order.currency}
+                        orderStatus={order.status}
+                        hasPayment={!!payment}
+                      />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Contenido principal con pestañas */}
+      <Tabs defaultValue={canPay ? "pago" : "detalles"} className="w-full">
+        <TabsList className={`grid w-full ${canPay ? 'grid-cols-3' : 'grid-cols-2'} mb-4`}>
+          {canPay && (
+            <TabsTrigger value="pago" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Pago
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="detalles" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Detalles
+          </TabsTrigger>
+          <TabsTrigger value="historial" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Historial
+            {enrichedHistory && enrichedHistory.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                {enrichedHistory.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+        
+        {/* Pestaña de Pago */}
+        {canPay && (
+          <TabsContent value="pago" className="mt-0">
+            {isZeroAmount ? (
+              <ZeroAmountCheckoutForm
+                orderId={orderId}
+                orderAmount={order.amount}
+                orderCurrency={order.currency}
+                countryCode={countryCode}
+              />
+            ) : (
+              <OrderCheckoutForm
+                orderId={orderId}
+                order={order}
+                paymentConfig={paymentConfig}
+                defaultBillingData={billingData}
+              />
+            )}
+          </TabsContent>
+        )}
+        
+        {/* Pestaña de Detalles */}
+        <TabsContent value="detalles" className="mt-0 space-y-4">
           <Card>
             <CardHeader className="pb-2 pt-4 px-4">
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                <Package className="h-4 w-4" />
-                Resumen
+              <CardTitle className="text-sm font-semibold">Detalles del Pedido</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 space-y-4">
+              <OrderDetailsCollapsible
+                productData={productData}
+                productType={order.product_type}
+                signers={signers}
+                signingDocument={signingDocument}
+                billingData={order.metadata?.billing_data || null}
+                currency={order.currency}
+                hideCard
+              />
+            </CardContent>
+          </Card>
+          
+          {/* Acciones del pedido (movido arriba) */}
+        </TabsContent>
+        
+        {/* Pestaña de Historial */}
+        <TabsContent value="historial" className="mt-0">
+          <Card>
+            <CardHeader className="pb-2 pt-4 px-4">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                Historial del Pedido
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4 space-y-3">
-              <div>
-                <h3 className="font-semibold text-base">
-                  {productData.name || `Producto ${order.product_type}`}
-                </h3>
-                {productData.description && (
-                  <p className="text-xs text-muted-foreground">
-                    {productData.description}
-                  </p>
-                )}
-              </div>
-              
-              {order.product_type === 'credits' && productData.credits_amount && (
-                <div className="flex items-center justify-between py-2 border-y text-sm">
-                  <span className="text-muted-foreground">Créditos</span>
-                  <span className="font-semibold text-[var(--tp-buttons)]">
-                    {productData.credits_amount.toLocaleString()}
-                  </span>
+            <CardContent className="p-0">
+              {enrichedHistory && enrichedHistory.length > 0 ? (
+                <div className="max-h-[450px] overflow-y-auto">
+                  <OrderTimeline 
+                    events={enrichedHistory} 
+                    orderNumber={order.order_number}
+                    compact
+                  />
                 </div>
-              )}
-              
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-sm">Total</span>
-                <span className="text-lg font-bold text-[var(--tp-buttons)]">
-                  {new Intl.NumberFormat('es-CL', {
-                    style: 'currency',
-                    currency: order.currency,
-                  }).format(order.amount)}
-                </span>
-              </div>
-              
-              {/* Medio de pago usado - Mostrar siempre que haya un pago */}
-              {payment && (
-                <div className="flex items-center justify-between py-2 border-t text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <CreditCard className="h-3 w-3" />
-                    Medio de pago
-                  </span>
-                  <span className="font-semibold">
-                    {getPaymentProviderLabel(payment.provider, payment.metadata)}
-                  </span>
-                </div>
-              )}
-              
-              {/* Información de reembolsos - Solo si hay reembolsos completados */}
-              {refunds.length > 0 && (
-                <div className="py-2 border-t space-y-2">
-                  <div className="text-xs text-muted-foreground mb-1">Reembolsos realizados:</div>
-                  {refunds.map((refund) => (
-                    <div key={refund.id} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <RefreshCcw className="h-3 w-3" />
-                        {getRefundDestinationLabel(refund.refund_destination)}
-                      </span>
-                      <div className="flex flex-col items-end">
-                        <span className="font-semibold">
-                          {new Intl.NumberFormat('es-CL', {
-                            style: 'currency',
-                            currency: refund.currency,
-                          }).format(refund.amount)}
-                        </span>
-                        {refund.processed_at && (
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(refund.processed_at).toLocaleDateString('es-CL', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {order.expires_at && canPay && (
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground pt-2 border-t">
-                  <Clock className="h-3 w-3" />
-                  <span>Expira: {new Date(order.expires_at).toLocaleString('es-CL')}</span>
+              ) : (
+                <div className="p-4 text-sm text-muted-foreground text-center">
+                  No hay eventos en el historial todavía
                 </div>
               )}
             </CardContent>
           </Card>
-
-          {/* Detalles del pedido - Colapsable */}
-          <OrderDetailsCollapsible
-            productData={productData}
-            productType={order.product_type}
-            signers={signers}
-            signingDocument={signingDocument}
-            billingData={order.metadata?.billing_data || null}
-            currency={order.currency}
-          />
-          
-          {/* Acciones del pedido - Escalable para futuros botones */}
-          {(isCompleted || isCancelled || isRefunded) && (
-            <Card>
-              <CardHeader className="pb-2 pt-4 px-4">
-                <CardTitle className="text-sm font-semibold">Acciones</CardTitle>
-              </CardHeader>
-              <CardContent className="px-4 pb-4">
-                <div className="flex flex-wrap gap-2">
-                  {/* Documento tributario */}
-                  {invoiceDocument?.pdf_url && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a 
-                        href={invoiceDocument.pdf_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer nofollow"
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        {getDocumentLabel(invoiceDocument.document_type)}
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {/* XML (si existe) - Para empresas que necesitan el XML */}
-                  {invoiceDocument?.xml_url && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a 
-                        href={invoiceDocument.xml_url} 
-                        target="_blank" 
-                        rel="noopener noreferrer nofollow"
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        XML
-                      </a>
-                    </Button>
-                  )}
-                  
-                  {/* Solicitar reembolso */}
-                  {isCompleted && order.status === 'completed' && payment && (
-                    <ClientRefundModal
-                      orderId={order.id}
-                      orderAmount={order.amount}
-                      orderCurrency={order.currency}
-                      orderStatus={order.status}
-                      hasPayment={!!payment}
-                    />
-                  )}
-                  
-                  {/* Administración del flujo de firmas */}
-                  {signingDocument?.id && (
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/dashboard/signing/documents/${signingDocument.id}`}>
-                        <PenTool className="mr-2 h-4 w-4" />
-                        Gestionar Firmas
-                      </Link>
-                    </Button>
-                  )}
-                  
-                  {/* Placeholder: Anular (futuro) - solo visible para admin */}
-                  {/* 
-                  <Button variant="ghost" size="sm" disabled className="opacity-50 text-destructive">
-                    <Ban className="mr-2 h-4 w-4" />
-                    Anular
-                  </Button>
-                  */}
-                </div>
-                
-                {/* Mensaje si no hay acciones disponibles */}
-                {!invoiceDocument?.pdf_url && !isRefunded && (
-                  <p className="text-xs text-muted-foreground">
-                    No hay acciones disponibles para esta orden
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-        
-        {/* Columna derecha: Pago e Historial */}
-        <div className="lg:col-span-3">
-          {canPay ? (
-            // Mostrar pestañas cuando hay opción de pago
-            <Tabs defaultValue="pago" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="pago" className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4" />
-                  Pago
-                </TabsTrigger>
-                <TabsTrigger value="historial" className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Historial
-                  {enrichedHistory && enrichedHistory.length > 0 && (
-                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                      {enrichedHistory.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="pago" className="mt-0">
-                {isZeroAmount ? (
-                  <ZeroAmountCheckoutForm
-                    orderId={orderId}
-                    orderAmount={order.amount}
-                    orderCurrency={order.currency}
-                    countryCode={countryCode}
-                  />
-                ) : (
-                  <OrderCheckoutForm
-                    orderId={orderId}
-                    order={order}
-                    paymentConfig={paymentConfig}
-                    defaultBillingData={billingData}
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="historial" className="mt-0">
-                <Card>
-                  <CardHeader className="pb-2 pt-4 px-4">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      Historial del Pedido
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    {enrichedHistory && enrichedHistory.length > 0 ? (
-                      <div className="max-h-[450px] overflow-y-auto">
-                        <OrderTimeline 
-                          events={enrichedHistory} 
-                          orderNumber={order.order_number}
-                          compact
-                        />
-                      </div>
-                    ) : (
-                      <div className="p-4 text-sm text-muted-foreground text-center">
-                        No hay eventos en el historial todavía
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            // Mostrar solo historial cuando no hay opción de pago
-            <Card>
-              <CardHeader className="pb-2 pt-4 px-4">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  Historial del Pedido
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                {enrichedHistory && enrichedHistory.length > 0 ? (
-                  <div className="max-h-[450px] overflow-y-auto">
-                    <OrderTimeline 
-                      events={enrichedHistory} 
-                      orderNumber={order.order_number}
-                      compact
-                    />
-                  </div>
-                ) : (
-                  <div className="p-4 text-sm text-muted-foreground text-center">
-                    No hay eventos en el historial todavía
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

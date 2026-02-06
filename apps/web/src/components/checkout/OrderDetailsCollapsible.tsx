@@ -22,6 +22,7 @@ interface OrderDetailsCollapsibleProps {
   } | null
   billingData: any
   currency: string
+  hideCard?: boolean
 }
 
 export function OrderDetailsCollapsible({
@@ -31,6 +32,7 @@ export function OrderDetailsCollapsible({
   signingDocument,
   billingData,
   currency,
+  hideCard = false,
 }: OrderDetailsCollapsibleProps) {
   // Solo mostrar si es un pedido de firma electrónica
   if (productType !== 'electronic_signature' && !signingDocument) {
@@ -58,12 +60,8 @@ export function OrderDetailsCollapsible({
     }
   }
 
-  return (
-    <Card>
-      <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="text-sm font-semibold">Detalles del Pedido</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 pb-4 space-y-4">
+  const content = (
+    <div className={hideCard ? "space-y-4" : ""}>
           {/* Producto de Firma */}
           {signatureProduct && (
             <div className="space-y-2">
@@ -150,7 +148,7 @@ export function OrderDetailsCollapsible({
                   {signers.map((signer, index) => (
                     <div key={`${signer.email}-${index}`} className="text-sm">
                       <div className="font-semibold">
-                        Firmante {signer.signing_order + 1}:
+                        Firmante {index + 1}:
                       </div>
                       <div className="text-muted-foreground ml-2">
                         {signer.email}
@@ -239,6 +237,20 @@ export function OrderDetailsCollapsible({
               </div>
             </>
           )}
+    </div>
+  )
+
+  if (hideCard) {
+    return content
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-2 pt-4 px-4">
+        <CardTitle className="text-sm font-semibold">Detalles del Pedido</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 pb-4 space-y-4">
+        {content}
       </CardContent>
     </Card>
   )

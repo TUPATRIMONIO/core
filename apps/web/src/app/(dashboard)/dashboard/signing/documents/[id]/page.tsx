@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { DocumentDetailClient } from '@/components/signing/DocumentDetailClient'
 import { getUserActiveOrganization } from '@/lib/organization/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,7 +47,30 @@ export default async function DocumentDetailPage({ params }: PageProps) {
       .single()
 
     if (docExists && docExists.organization_id !== organization.id) {
-      // El documento existe pero pertenece a otra organización
+      // Verificar si el usuario es miembro de la organización del documento
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const { data: membership } = await supabase
+          .from('organization_users')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('organization_id', docExists.organization_id)
+          .eq('status', 'active')
+          .single()
+
+        if (membership) {
+          // El usuario es miembro, cambiar organización activa y recargar
+          await supabase
+            .from('users')
+            .update({ last_active_organization_id: docExists.organization_id })
+            .eq('id', user.id)
+
+          redirect(`/dashboard/signing/documents/${id}`)
+        }
+      }
+
+      // El documento existe pero pertenece a otra organización y el usuario no es miembro
       return (
         <div className="flex items-center justify-center min-h-[50vh] px-4">
           <Card className="max-w-md w-full">
@@ -57,7 +80,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               </div>
               <CardTitle>Documento de otra organización</CardTitle>
               <CardDescription>
-                Este documento pertenece a una organización diferente. Cambia de organización en el selector del sidebar para acceder a él.
+                Este documento pertenece a una organización diferente a la que no tienes acceso.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">

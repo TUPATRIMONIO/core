@@ -12,10 +12,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Loader2, Upload, Download, Eye, X, Wifi, WifiOff } from 'lucide-react'
+import { Loader2, Upload, Download, Eye, X, Wifi, WifiOff, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 import { BulkUploadDialog } from './BulkUploadDialog'
 import { DocumentViewerModal } from './DocumentViewerModal'
+import { NotaryAssignmentChat } from './NotaryAssignmentChat'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
 type AssignmentStatus =
@@ -86,6 +87,10 @@ export function NotaryDashboardClient({
   // Modal de visualización
   const [viewerDocumentId, setViewerDocumentId] = useState<string | null>(null)
   const [viewerOpen, setViewerOpen] = useState(false)
+
+  // Chat
+  const [chatAssignmentId, setChatAssignmentId] = useState<string | null>(null)
+  const [chatOpen, setChatOpen] = useState(false)
 
   // Descarga masiva
   const [isDownloadingBulk, setIsDownloadingBulk] = useState(false)
@@ -228,6 +233,11 @@ export function NotaryDashboardClient({
     setViewerOpen(true)
   }
 
+  const openChat = (assignmentId: string) => {
+    setChatAssignmentId(assignmentId)
+    setChatOpen(true)
+  }
+
   const handleDownloadSingle = async (documentId: string) => {
     try {
       const response = await fetch(`/api/notary/document-info?documentId=${documentId}`)
@@ -343,6 +353,32 @@ export function NotaryDashboardClient({
         .eq('id', assignmentId)
 
       if (updateError) throw updateError
+
+      // Insertar nota de historial si hay razón
+      if (reason) {
+        const { error: noteError } = await supabase
+          .from('signing_notary_assignment_notes')
+          .insert({
+            assignment_id: assignmentId,
+            sender_type: 'notary',
+            message: reason,
+            action_type: status
+          })
+        
+        if (noteError) console.error('Error inserting note:', noteError)
+      } else if (status === 'received' || status === 'in_progress' || status === 'completed') {
+        // También registrar cambios de estado simples
+        const { error: noteError } = await supabase
+          .from('signing_notary_assignment_notes')
+          .insert({
+            assignment_id: assignmentId,
+            sender_type: 'notary',
+            action_type: status,
+            message: status === 'completed' ? 'Documento completado' : `Estado cambiado a ${status}`
+          })
+          
+        if (noteError) console.error('Error inserting note:', noteError)
+      }
 
       toast.success('Estado actualizado')
       await refresh()
@@ -527,6 +563,17 @@ export function NotaryDashboardClient({
                     <Download className="h-4 w-4 mr-1" />
                     Descargar
                   </Button>
+                  
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                    onClick={() => openChat(a.id)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Conversación
+                  </Button>
+
                   {a.status === 'pending' && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus(a.id, 'received')}>
                       Marcar recibido
@@ -583,6 +630,14 @@ export function NotaryDashboardClient({
         documentId={viewerDocumentId}
         open={viewerOpen}
         onOpenChange={setViewerOpen}
+      />
+
+      {/* Chat de historial */}
+      <NotaryAssignmentChat
+        assignmentId={chatAssignmentId}
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        title="Historial del Documento"
       />
 
       {/* Subida masiva (nuevo flujo principal) */}
@@ -800,4 +855,3 @@ export function NotaryDashboardClient({
     </div>
   )
 }
-
