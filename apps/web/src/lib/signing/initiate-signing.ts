@@ -221,7 +221,7 @@ async function sendSigningNotification(
     signer: any,
 ) {
     try {
-        const signUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sign/${signer.signing_token}`;
+        const signUrl = `/sign/${signer.signing_token}`;
         const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-signing-notification`;
 
         const resp = await fetch(notificationUrl, {
