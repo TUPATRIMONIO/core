@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Building2, Link2, CheckCircle, Loader2, Stamp } from 'lucide-react'
+import { Building2, Link2, CheckCircle, Loader2, Stamp, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -38,7 +38,7 @@ function OnboardingContent() {
   const isCreatingNew = searchParams.get('new') === 'true'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedType, setSelectedType] = useState<'business' | 'notary' | 'invitation' | null>(null)
+  const [selectedType, setSelectedType] = useState<'personal' | 'business' | 'notary' | 'invitation' | null>(null)
   const [showBusinessDialog, setShowBusinessDialog] = useState(false)
   const [showNotaryDialog, setShowNotaryDialog] = useState(false)
   const [isCheckingOrgs, setIsCheckingOrgs] = useState(isCreatingNew)
@@ -81,6 +81,27 @@ function OnboardingContent() {
 
     checkStatus()
   }, [router, next, isCreatingNew])
+
+  const handleCreatePersonal = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await fetch('/api/onboarding/personal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await response.json()
+      if (data.error) {
+        setError(data.error)
+        setLoading(false)
+        return
+      }
+      window.location.href = next || '/dashboard'
+    } catch (err) {
+      setError('Ocurrió un error al crear tu espacio personal. Por favor intenta de nuevo.')
+      setLoading(false)
+    }
+  }
 
   const handleCreateBusiness = async () => {
     if (!businessForm.name.trim()) {
@@ -197,7 +218,7 @@ function OnboardingContent() {
             Crear Nueva Organización
           </h1>
           <p className="text-lg text-muted-foreground">
-            Agrega una organización empresarial o una notaría
+            Elige cómo quieres usar TuPatrimonio
           </p>
         </div>
 
@@ -212,6 +233,46 @@ function OnboardingContent() {
 
         {/* Cards de Selección */}
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+
+          {/* Uso Personal - Ocultar si está creando nueva organización */}
+          {!isCreatingNew && (
+            <Card
+              className={`relative cursor-pointer transition-all hover:shadow-lg ${
+                selectedType === 'personal'
+                  ? 'border-[var(--tp-buttons)] ring-2 ring-[var(--tp-buttons-20)]'
+                  : 'border-[var(--tp-lines-30)]'
+              }`}
+              onClick={() => setSelectedType('personal')}
+            >
+              <CardHeader>
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--tp-buttons-20)]">
+                    <User className="h-6 w-6 text-[var(--tp-buttons)]" />
+                  </div>
+                </div>
+                <CardTitle>Uso Personal</CardTitle>
+                <CardDescription>
+                  Para personas que quieren gestionar sus trámites y documentos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                    <span>Gestión de documentos personales</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                    <span>Sin costo inicial</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tp-buttons)]" />
+                    <span>Ideal para personas naturales</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Uso Empresarial */}
           <Card
@@ -332,7 +393,9 @@ function OnboardingContent() {
           <div className="mt-8 flex justify-center">
             <Button
               onClick={() => {
-                if (selectedType === 'business') {
+                if (selectedType === 'personal') {
+                  handleCreatePersonal()
+                } else if (selectedType === 'business') {
                   setShowBusinessDialog(true)
                 } else if (selectedType === 'notary') {
                   setShowNotaryDialog(true)
@@ -633,4 +696,3 @@ function OnboardingContent() {
     </main>
   )
 }
-
