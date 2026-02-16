@@ -76,11 +76,11 @@ export async function POST(request: NextRequest) {
       if (!signResult.success) {
         console.error("[action] Error al iniciar firma automática:", signResult.error);
         return NextResponse.json({ 
-          success: true, 
+          success: false, 
           message: "Documento aprobado, pero hubo un error al iniciar la firma automática.",
-          warning: signResult.error,
+          error: signResult.error,
           details: signResult.details
-        });
+        }, { status: 500 });
       }
       
       return NextResponse.json({ 

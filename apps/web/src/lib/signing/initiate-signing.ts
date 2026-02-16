@@ -39,7 +39,7 @@ export async function initiateSigningProcess(
             return { success: false, error: "El documento debe tener al menos un firmante", status: 400 };
         }
 
-        // 2. Generar portada con QR (OBLIGATORIO)
+        // 2. Generar portada con QR (OBLIGATORIO - Pero no bloqueante)
         console.log(
             "[initiate-signing] Generando portada con QR para documento:",
             documentId,
@@ -65,24 +65,14 @@ export async function initiateSigningProcess(
             const coverResult = await coverResponse.json();
 
             if (!coverResult.success && !coverResult.skipped) {
-                console.error("[initiate-signing] Error generando portada:", coverResult.error);
-                return {
-                    success: false,
-                    error: "No se pudo generar la portada del documento.",
-                    details: coverResult.error,
-                    status: 500
-                };
+                console.error("[initiate-signing] Error generando portada (no bloqueante):", coverResult.error);
+                // No retornamos error, solo logueamos
+            } else {
+                console.log("[initiate-signing] Portada generada exitosamente:", coverResult.path);
             }
-
-            console.log("[initiate-signing] Portada generada exitosamente:", coverResult.path);
         } catch (coverError: any) {
-            console.error("[initiate-signing] Error llamando a pdf-merge-with-cover:", coverError);
-            return {
-                success: false,
-                error: "Error al generar la portada del documento.",
-                details: coverError.message,
-                status: 500
-            };
+            console.error("[initiate-signing] Error llamando a pdf-merge-with-cover (no bloqueante):", coverError);
+            // No retornamos error, solo logueamos
         }
 
         // 3. Verificar vigencia FEA de cada firmante
@@ -176,42 +166,17 @@ export async function initiateSigningProcess(
             throw updateError;
         }
 
-        // 5. Enviar notificaciones a firmantes enrolados
-        const enrolledSigners = signersStatus.filter((s) => s.status === "enrolled");
-
-        if (enrolledSigners.length > 0) {
-            // Recargar firmantes para tener los estados actualizados
-            const { data: updatedSigners } = await supabase
-                .from("signing_signers")
-                .select("*")
-                .eq("document_id", documentId);
-
-            if (updatedSigners) {
-                if (document.signing_order === "sequential") {
-                    const firstSigner = updatedSigners
-                        .sort((a: any, b: any) => a.signing_order - b.signing_order)[0];
-
-                    if (firstSigner && firstSigner.status === "enrolled") {
-                        await sendSigningNotification(supabase, document, firstSigner);
-                    }
-                } else {
-                    for (const signer of updatedSigners) {
-                        if (signer.status === "enrolled") {
-                            await sendSigningNotification(supabase, document, signer);
-                        }
-                    }
-                }
-            }
-        }
+        // 5. Notificaciones:
+        // El envío de correos es manejado automáticamente por el trigger de base de datos
+        // 'notify_signers_on_status_change' cuando el estado cambia a 'pending_signature'.
+        // No enviamos correos desde aquí para evitar duplicados.
 
         return {
             success: true,
             message: "Proceso de firma iniciado",
             document_id: documentId,
             signers_status: signersStatus,
-            next_steps: signersStatus.some((s) => s.needs_enrollment)
-                ? "Algunos firmantes necesitan enrolamiento FEA"
-                : "Notificaciones enviadas a firmantes",
+            next_steps: "Notificaciones enviadas automáticamente a firmantes",
         };
     } catch (error: any) {
         console.error("Error in initiateSigningProcess:", error);
@@ -224,37 +189,4 @@ export async function initiateSigningProcess(
     }
 }
 
-/**
- * Envía notificación a un firmante
- */
-async function sendSigningNotification(
-    supabase: any,
-    document: any,
-    signer: any,
-) {
-    try {
-        const signUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sign/${signer.signing_token}`;
-        const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-signing-notification`;
-
-        await fetch(notificationUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({
-                type: "SIGNING_REQUEST",
-                recipient_email: signer.email,
-                recipient_name: signer.full_name,
-                document_title: document.title,
-                action_url: signUrl,
-                org_id: document.organization_id,
-                document_id: document.id,
-                signer_id: signer.id,
-            }),
-        });
-    } catch (error) {
-        console.error(`Error enviando notificación a ${signer.email}:`, error);
-    }
-}
 

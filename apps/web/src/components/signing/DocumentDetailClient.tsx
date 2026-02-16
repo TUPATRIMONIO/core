@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   Users, 
   Send, 
@@ -16,7 +17,10 @@ import {
   Lock,
   Eye,
   CheckCircle2,
-  Info
+  Info,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -74,26 +78,38 @@ export function DocumentDetailClient({
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [notaryAssignment, setNotaryAssignment] = useState<any | null>(null)
   const [aiReview, setAiReview] = useState<any | null>(null)
+  const [aiReviewHistory, setAiReviewHistory] = useState<any[]>([])
+  const [docMessages, setDocMessages] = useState<any[]>([])
   
   const [isSending, setIsSending] = useState(false)
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [showAiReviewDialog, setShowAiReviewDialog] = useState(false)
+  const [expandedReviews, setExpandedReviews] = useState<string[]>([])
 
   const supabase = createClient()
 
-  // Cargar revisión de IA
-  const fetchAiReview = async () => {
+  // Cargar historial de revisiones (IA y manuales)
+  const fetchAiReviews = async () => {
     if (!document?.id) return
     
-    const { data } = await supabase
+    // Todas las revisiones IA
+    const { data: reviews } = await supabase
       .from('signing_ai_reviews')
-      .select('status, passed, confidence_score, reasons, risk_accepted_at')
+      .select('id, status, passed, confidence_score, reasons, risk_accepted_at, started_at, completed_at, review_type')
       .eq('document_id', document.id)
       .order('started_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
     
-    setAiReview(data || null)
+    // Mensajes del documento (acciones admin)
+    const { data: messages } = await supabase
+      .from('signing_document_messages')
+      .select('id, message, is_internal, created_at, user_id')
+      .eq('document_id', document.id)
+      .order('created_at', { ascending: false })
+    
+    setAiReviewHistory(reviews || [])
+    setDocMessages(messages || [])
+    // Mantener el mas reciente para la tarjeta (solo si es de IA)
+    setAiReview(reviews?.[0] || null)
   }
 
   useEffect(() => {
@@ -103,7 +119,7 @@ export function DocumentDetailClient({
       setCurrentUser(user)
     }
     getUser()
-    fetchAiReview()
+    fetchAiReviews()
   }, [document?.id])
 
   const fetchNotaryAssignment = async () => {
@@ -152,7 +168,7 @@ export function DocumentDetailClient({
     
     router.refresh()
     await fetchNotaryAssignment()
-    await fetchAiReview()
+    await fetchAiReviews()
   }
   
   useEffect(() => {
@@ -234,10 +250,37 @@ export function DocumentDetailClient({
     }
   }
 
+  const toggleReviewExpansion = (reviewId: string) => {
+    setExpandedReviews(prev => 
+      prev.includes(reviewId) 
+        ? prev.filter(id => id !== reviewId)
+        : [...prev, reviewId]
+    )
+  }
+
+  const getTimelineEvents = () => {
+    const events = [
+      ...(aiReviewHistory || []).map(review => ({
+        type: 'ai_review',
+        date: new Date(review.completed_at || review.started_at),
+        data: review
+      })),
+      ...(docMessages || []).map(msg => ({
+        type: 'message',
+        date: new Date(msg.created_at),
+        data: msg
+      }))
+    ]
+    
+    return events.sort((a, b) => b.date.getTime() - a.date.getTime())
+  }
+
   const canEdit = isDocumentEditable(document.status)
   const showNotaryTracking = document.notary_service !== 'none'
   const statusInfo = getDocumentStatusInfo(document.status)
   const nextStepMessage = getNextStepMessage(document.status, document.notary_service)
+  const timelineEvents = getTimelineEvents()
+  const hasHistory = timelineEvents.length > 0
 
   return (
     <div className="space-y-6">
@@ -354,36 +397,39 @@ export function DocumentDetailClient({
           </Card>
           
           <Card 
-            className={document.requires_ai_review && aiReview ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''}
-            onClick={() => document.requires_ai_review && aiReview && setShowAiReviewDialog(true)}
+            className={hasHistory ? 'cursor-pointer hover:bg-accent/50 transition-colors' : ''}
+            onClick={() => hasHistory && setShowAiReviewDialog(true)}
           >
             <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Revisión AI</CardTitle>
+              <CardTitle className="text-sm font-medium">Revisión</CardTitle>
               <FileCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="text-2xl font-bold">
-                {!document.requires_ai_review ? (
+                {!document.requires_ai_review && !hasHistory ? (
                   <span className="text-muted-foreground">-</span>
-                ) : !aiReview ? (
+                ) : !hasHistory ? (
                   <span className="text-muted-foreground">Pendiente</span>
-                ) : aiReview.passed ? (
+                ) : aiReview?.passed ? (
                   <span className="text-green-600">Aprobado</span>
-                ) : aiReview.risk_accepted_at ? (
+                ) : aiReview?.risk_accepted_at ? (
                   <span className="text-blue-600">Aceptado</span>
-                ) : aiReview.status === 'needs_changes' ? (
+                ) : aiReview?.status === 'needs_changes' ? (
                   <span className="text-orange-600">Observado</span>
-                ) : aiReview.status === 'rejected' ? (
+                ) : aiReview?.status === 'rejected' ? (
                   <span className="text-red-600">Rechazado</span>
-                ) : (
+                ) : aiReview ? (
                   <span className="text-yellow-600">En proceso</span>
+                ) : (
+                  // Si no hay aiReview pero hay historial (ej: mensajes manuales), mostramos el estado general del documento
+                  <span className={statusInfo.textClass}>{statusInfo.label}</span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                {!document.requires_ai_review 
+                {!document.requires_ai_review && !hasHistory
                   ? 'No requerida' 
-                  : aiReview?.reasons?.length 
-                    ? `${aiReview.reasons.length} observación(es) - Click para ver`
+                  : hasHistory
+                    ? `${timelineEvents.length} revisión(es) - Click para ver`
                     : 'Requerida'
                 }
               </p>
@@ -578,106 +624,144 @@ export function DocumentDetailClient({
         </TabsContent>
       </Tabs>
 
-      {/* Dialog de Revisión AI */}
+      {/* Dialog de Historial de Revisiones */}
       <Dialog open={showAiReviewDialog} onOpenChange={setShowAiReviewDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2">
             <DialogTitle className="flex items-center gap-2">
               <FileCheck className="h-5 w-5" />
-              Detalle de Revisión AI
+              Historial de Revisiones
             </DialogTitle>
             <DialogDescription>
-              Análisis automático realizado por inteligencia artificial
+              Registro de todas las revisiones realizadas al documento
             </DialogDescription>
           </DialogHeader>
           
-          {aiReview && (
-            <div className="space-y-4">
-              {/* Estado general */}
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-3">
-                  {aiReview.passed ? (
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  ) : aiReview.risk_accepted_at ? (
-                    <CheckCircle className="h-6 w-6 text-blue-500" />
-                  ) : aiReview.status === 'needs_changes' ? (
-                    <AlertTriangle className="h-6 w-6 text-orange-500" />
-                  ) : aiReview.status === 'rejected' ? (
-                    <AlertCircle className="h-6 w-6 text-red-500" />
-                  ) : (
-                    <Clock className="h-6 w-6 text-yellow-500" />
-                  )}
-                  <div>
-                    <div className="font-semibold text-foreground">
-                      {aiReview.passed ? 'Aprobado' : 
-                       aiReview.risk_accepted_at ? 'Riesgo Aceptado' :
-                       aiReview.status === 'needs_changes' ? 'Requiere Revisión' :
-                       aiReview.status === 'rejected' ? 'Rechazado' : 'En Proceso'}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Confianza: {aiReview.confidence_score ? `${(parseFloat(aiReview.confidence_score) * 100).toFixed(0)}%` : 'N/A'}
-                    </div>
-                  </div>
-                </div>
-                {aiReview.risk_accepted_at && (
-                  <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30">
-                    Riesgo aceptado
-                  </Badge>
-                )}
-              </div>
-
-              {/* Lista de observaciones */}
-              {aiReview.reasons && aiReview.reasons.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm">Observaciones encontradas</h4>
-                  {aiReview.reasons.map((reason: any, index: number) => (
-                    <div 
-                      key={index}
-                      className={`p-3 rounded-lg border ${
-                        reason.level === 'high' || reason.level === 'critical'
-                          ? 'border-red-500/30 bg-red-500/10'
-                          : reason.level === 'medium'
-                            ? 'border-orange-500/30 bg-orange-500/10'
-                            : 'border-yellow-500/30 bg-yellow-500/10'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <Badge 
-                          variant="outline" 
-                          className={`shrink-0 text-xs ${
-                            reason.level === 'high' || reason.level === 'critical'
-                              ? 'border-red-500/50 text-red-500'
-                              : reason.level === 'medium'
-                                ? 'border-orange-500/50 text-orange-500'
-                                : 'border-yellow-500/50 text-yellow-500'
-                          }`}
-                        >
-                          {reason.level === 'high' || reason.level === 'critical' ? 'Alto' :
-                           reason.level === 'medium' ? 'Medio' : 'Bajo'}
-                        </Badge>
-                        <div className="space-y-1">
-                          <p className="text-sm text-foreground">{reason.text || reason.explanation}</p>
-                          {reason.clause && (
-                            <p className="text-xs text-muted-foreground italic">
-                              Cláusula: {reason.clause}
-                            </p>
+          <ScrollArea className="flex-1 p-6 pt-2">
+            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+              {timelineEvents.map((event, index) => {
+                if (event.type === 'ai_review') {
+                  const review = event.data
+                  const isExpanded = expandedReviews.includes(review.id)
+                  
+                  return (
+                    <div key={`review-${review.id}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                      {/* Icono central */}
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                        {review.passed ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : review.risk_accepted_at ? (
+                          <CheckCircle className="h-5 w-5 text-blue-500" />
+                        ) : review.status === 'needs_changes' ? (
+                          <AlertTriangle className="h-5 w-5 text-orange-500" />
+                        ) : review.status === 'rejected' ? (
+                          <AlertCircle className="h-5 w-5 text-red-500" />
+                        ) : (
+                          <Clock className="h-5 w-5 text-yellow-500" />
+                        )}
+                      </div>
+                      
+                      {/* Contenido */}
+                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 shadow-sm bg-white">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-bold text-slate-900">Revisión Automática</div>
+                          <time className="font-caveat font-medium text-amber-500 text-xs">
+                            {format(event.date, "d MMM, HH:mm", { locale: es })}
+                          </time>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant={review.passed ? "default" : "outline"} className={
+                            review.passed ? "bg-green-500 hover:bg-green-600" :
+                            review.risk_accepted_at ? "text-blue-600 border-blue-200 bg-blue-50" :
+                            review.status === 'needs_changes' ? "text-orange-600 border-orange-200 bg-orange-50" :
+                            review.status === 'rejected' ? "text-red-600 border-red-200 bg-red-50" :
+                            "text-yellow-600 border-yellow-200 bg-yellow-50"
+                          }>
+                            {review.passed ? 'Aprobado' : 
+                             review.risk_accepted_at ? 'Riesgo Aceptado' :
+                             review.status === 'needs_changes' ? 'Observado' :
+                             review.status === 'rejected' ? 'Rechazado' : 'En Proceso'}
+                          </Badge>
+                          {review.confidence_score && (
+                            <span className="text-xs text-muted-foreground">
+                              Confianza: {(parseFloat(review.confidence_score) * 100).toFixed(0)}%
+                            </span>
                           )}
                         </div>
+
+                        {review.reasons && review.reasons.length > 0 && (
+                          <div className="mt-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full justify-between h-8 text-xs"
+                              onClick={() => toggleReviewExpansion(review.id)}
+                            >
+                              <span>{review.reasons.length} observación(es)</span>
+                              {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </Button>
+                            
+                            {isExpanded && (
+                              <div className="mt-2 space-y-2">
+                                {review.reasons.map((reason: any, idx: number) => (
+                                  <div key={idx} className="text-xs p-2 bg-slate-50 rounded border border-slate-100">
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <span className={`w-1.5 h-1.5 rounded-full ${
+                                        reason.level === 'high' || reason.level === 'critical' ? 'bg-red-500' :
+                                        reason.level === 'medium' ? 'bg-orange-500' : 'bg-yellow-500'
+                                      }`} />
+                                      <span className="font-medium text-slate-700">
+                                        {reason.level === 'high' || reason.level === 'critical' ? 'Alto' :
+                                         reason.level === 'medium' ? 'Medio' : 'Bajo'}
+                                      </span>
+                                    </div>
+                                    <p className="text-slate-600">{reason.text || reason.explanation}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  )
+                } else {
+                  const msg = event.data
+                  return (
+                    <div key={`msg-${msg.id}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                      {/* Icono central */}
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                        <MessageSquare className="h-5 w-5 text-blue-500" />
+                      </div>
+                      
+                      {/* Contenido */}
+                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded border border-slate-200 shadow-sm bg-white">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="font-bold text-slate-900">Acción del Equipo</div>
+                          <time className="font-caveat font-medium text-amber-500 text-xs">
+                            {format(event.date, "d MMM, HH:mm", { locale: es })}
+                          </time>
+                        </div>
+                        <p className="text-sm text-slate-600 mt-1">
+                          {msg.message}
+                        </p>
+                        {msg.is_internal && (
+                          <Badge variant="outline" className="mt-2 text-[10px] h-5">Interno</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )
+                }
+              })}
 
-              {/* Sin observaciones */}
-              {(!aiReview.reasons || aiReview.reasons.length === 0) && aiReview.passed && (
-                <div className="text-center py-6">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                  <p className="text-muted-foreground">No se encontraron observaciones. El documento fue aprobado.</p>
+              {timelineEvents.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay historial de revisiones disponible
                 </div>
               )}
             </div>
-          )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
