@@ -91,11 +91,28 @@ export function SavedSignersSelector({ onSelect, organizationId }: SavedSignersS
   const loadSavedSigners = useCallback(async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      
+      // Obtener usuario actual para filtro de seguridad (defensa en profundidad)
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      let query = supabase
         .from('saved_signers')
         .select('*')
         .order('is_favorite', { ascending: false })
         .order('usage_count', { ascending: false })
+
+      // Aplicar filtro explícito si tenemos usuario
+      if (user) {
+        if (organizationId) {
+          // Si hay organización, mostrar personales + organización
+          query = query.or(`user_id.eq.${user.id},organization_id.eq.${organizationId}`)
+        } else {
+          // Si no hay contexto de organización, mostrar solo personales
+          query = query.eq('user_id', user.id)
+        }
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
       setSavedSigners(data || [])
@@ -105,7 +122,7 @@ export function SavedSignersSelector({ onSelect, organizationId }: SavedSignersS
     } finally {
       setLoading(false)
     }
-  }, [supabase])
+  }, [supabase, organizationId])
 
   useEffect(() => {
     loadSavedSigners()
