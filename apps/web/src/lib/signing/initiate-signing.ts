@@ -166,17 +166,41 @@ export async function initiateSigningProcess(
             throw updateError;
         }
 
-        // 5. Notificaciones:
-        // El envío de correos es manejado automáticamente por el trigger de base de datos
-        // 'notify_signers_on_status_change' cuando el estado cambia a 'pending_signature'.
-        // No enviamos correos desde aquí para evitar duplicados.
+        // 5. Enviar notificaciones a TODOS los firmantes (enrolled y needs_enrollment)
+        const notifiableSigners = signersStatus.filter(
+            (s) => s.status === "enrolled" || s.status === "needs_enrollment"
+        );
+
+        if (notifiableSigners.length > 0) {
+            const { data: updatedSigners } = await supabase
+                .from("signing_signers")
+                .select("*")
+                .eq("document_id", documentId);
+
+            if (updatedSigners) {
+                const signersSorted = updatedSigners
+                    .filter((s: any) => s.status === "enrolled" || s.status === "needs_enrollment")
+                    .sort((a: any, b: any) => a.signing_order - b.signing_order);
+
+                if (document.signing_order === "sequential") {
+                    const firstSigner = signersSorted[0];
+                    if (firstSigner) {
+                        await sendSigningNotification(document, firstSigner);
+                    }
+                } else {
+                    for (const signer of signersSorted) {
+                        await sendSigningNotification(document, signer);
+                    }
+                }
+            }
+        }
 
         return {
             success: true,
             message: "Proceso de firma iniciado",
             document_id: documentId,
             signers_status: signersStatus,
-            next_steps: "Notificaciones enviadas automáticamente a firmantes",
+            next_steps: "Notificaciones enviadas a firmantes",
         };
     } catch (error: any) {
         console.error("Error in initiateSigningProcess:", error);
@@ -189,4 +213,41 @@ export async function initiateSigningProcess(
     }
 }
 
+/**
+ * Envía notificación de firma a un firmante vía edge function
+ */
+async function sendSigningNotification(
+    document: any,
+    signer: any,
+) {
+    try {
+        const signUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sign/${signer.signing_token}`;
+        const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-signing-notification`;
 
+        const resp = await fetch(notificationUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({
+                type: "SIGNING_REQUEST",
+                recipient_email: signer.email,
+                recipient_name: signer.full_name,
+                document_title: document.title,
+                action_url: signUrl,
+                org_id: document.organization_id,
+                document_id: document.id,
+                signer_id: signer.id,
+            }),
+        });
+
+        if (!resp.ok) {
+            console.error(`[initiate-signing] Error enviando notificación a ${signer.email}:`, await resp.text());
+        } else {
+            console.log(`[initiate-signing] Notificación enviada a ${signer.email}`);
+        }
+    } catch (error) {
+        console.error(`[initiate-signing] Error enviando notificación a ${signer.email}:`, error);
+    }
+}
