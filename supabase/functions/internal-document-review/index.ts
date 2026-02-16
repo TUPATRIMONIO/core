@@ -546,6 +546,65 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 7) Si la revisión fue aprobada, verificar si el documento pasó a pending_signature
+    //    y enviar notificaciones a los firmantes (el trigger de BD no puede enviar correos)
+    if (status === "approved") {
+      try {
+        const { data: updatedDoc } = await supabase
+          .from("signing_documents")
+          .select("id, status, title, organization_id, signing_order")
+          .eq("id", documentId)
+          .single();
+
+        if (updatedDoc?.status === "pending_signature") {
+          console.log("[internal-document-review] Documento aprobado y en pending_signature, enviando notificaciones...");
+
+          const { data: signers } = await supabase
+            .from("signing_signers")
+            .select("id, email, full_name, signing_token, signing_order, status")
+            .eq("document_id", documentId)
+            .in("status", ["pending", "enrolled", "needs_enrollment"])
+            .order("signing_order", { ascending: true });
+
+          if (signers && signers.length > 0) {
+            const signersToNotify = updatedDoc.signing_order === "sequential"
+              ? [signers[0]]
+              : signers;
+
+            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-signing-notification`;
+            const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+            for (const signer of signersToNotify) {
+              try {
+                await fetch(notificationUrl, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${serviceKey}`,
+                  },
+                  body: JSON.stringify({
+                    type: "SIGNING_REQUEST",
+                    recipient_email: signer.email,
+                    recipient_name: signer.full_name,
+                    document_title: updatedDoc.title,
+                    action_url: `/sign/${signer.signing_token}`,
+                    org_id: updatedDoc.organization_id,
+                    document_id: updatedDoc.id,
+                    signer_id: signer.id,
+                  }),
+                });
+                console.log(`[internal-document-review] Notificación enviada a ${signer.email}`);
+              } catch (notifErr) {
+                console.error(`[internal-document-review] Error enviando notificación a ${signer.email}:`, notifErr);
+              }
+            }
+          }
+        }
+      } catch (notifError) {
+        console.error("[internal-document-review] Error en envío de notificaciones (no bloqueante):", notifError);
+      }
+    }
+
     return jsonResponse(200, {
       success: true,
       document_id: documentId,
