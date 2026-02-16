@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { triggerAIReviewForOrder } from '@/lib/signing/trigger-ai-review'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -80,6 +81,12 @@ export async function POST(
         if (!data.success) {
             return NextResponse.json({ error: data.error }, { status: 400 })
         }
+
+        // Disparar revisión IA de forma asíncrona usando la función centralizada
+        // triggerAIReviewForOrder verifica internamente si los documentos requieren revisión
+        triggerAIReviewForOrder(id).catch(err => {
+            console.error('[restart] Error disparando revisión IA:', err)
+        })
 
         return NextResponse.json({
             success: true,
