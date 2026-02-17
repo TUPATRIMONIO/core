@@ -4,7 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
  * Inicia el proceso de firma de un documento:
  * 1. Valida que el documento existe y está listo
  * 2. Genera portada con QR (si no existe)
- * 3. Verifica vigencia FEA de cada firmante
+ * 3. Verifica vigencia FEA de cada firmante (si aplica)
  * 4. Actualiza estado del documento a 'pending_signature'
  * 5. Envía notificaciones a firmantes
  */
@@ -76,12 +76,38 @@ export async function initiateSigningProcess(
         }
 
         // 3. Verificar vigencia FEA de cada firmante
+        // Determinar si es FES o FEA
+        const productSlug = document.metadata?.signature_product?.slug || "";
+        const isFES = productSlug.startsWith("fes"); // fes_cl, fesb_cl, fes_claveunica_cl
+
         const edgeFunctionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/cds-signature`;
         const signersStatus = [];
 
         for (const signer of document.signers) {
             try {
-                // Solo verificar firmantes chilenos con RUT
+                // Si es FES, no verificamos vigencia en CDS, pasan directo a enrolled
+                if (isFES) {
+                    await supabase
+                        .from("signing_signers")
+                        .update({
+                            status: "enrolled",
+                            // FES no tiene certificado FEA, así que estos quedan null o false
+                            fea_vigente: null,
+                            fea_fecha_vencimiento: null,
+                        })
+                        .eq("id", signer.id);
+
+                    signersStatus.push({
+                        signer_id: signer.id,
+                        email: signer.email,
+                        status: "enrolled",
+                        needs_enrollment: false,
+                        note: "Firma Simple (FES) - Verificación CDS omitida",
+                    });
+                    continue;
+                }
+
+                // Si es FEA, verificar vigencia (solo chilenos con RUT)
                 if (!signer.is_foreigner && signer.rut) {
                     const response = await fetch(edgeFunctionUrl, {
                         method: "POST",

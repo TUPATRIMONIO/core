@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
-> **📅 Actualización:** 16 Febrero 2026
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
+> **📅 Actualización:** 17 Febrero 2026
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---

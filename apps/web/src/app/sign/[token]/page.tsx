@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import SigningPageClient from "./SigningPageClient";
+import SigningPageClientFES from "./SigningPageClientFES";
 
 interface PageProps {
   params: Promise<{
@@ -25,8 +26,6 @@ export default async function SigningPage({ params }: PageProps) {
   
   // Usamos Service Role para hacer bypass de RLS ya que es una página pública
   // La seguridad la da el token único
-  // IMPORTANTE: createServiceRoleClient es sincrono, no usar await si no retorna promesa
-  // Revisando server.ts, retorna el cliente directamente.
   const supabase = createServiceRoleClient();
 
   // 1. Obtener firmante por token
@@ -89,9 +88,14 @@ export default async function SigningPage({ params }: PageProps) {
     }
   };
 
-  // Si ya firmó, el SigningPageClient manejará el estado "signed" y mostrará el documento
-  // Ya no renderizamos una vista estática separada para mantener consistencia y mostrar el preview
+  // Determinar tipo de firma
+  const productSlug = document.metadata?.signature_product?.slug || "";
+  const isFES = productSlug.startsWith("fes"); // fes_cl, fesb_cl, fes_claveunica_cl
 
-  // Renderizar componente cliente con datos del servidor
+  // Renderizar componente cliente correspondiente
+  if (isFES) {
+    return <SigningPageClientFES signer={signer} />;
+  }
+
   return <SigningPageClient signer={signer} />;
 }
