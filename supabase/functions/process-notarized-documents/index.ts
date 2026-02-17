@@ -162,7 +162,7 @@ async function processFile(
         // 3. Buscar documento por qr_identifier
         const { data: document, error: docError } = await supabase
             .from("signing_documents")
-            .select("id, title, organization_id, status, notary_service, qr_identifier, order_id")
+            .select("id, title, organization_id, status, notary_service, qr_identifier, order_id, manager_id, created_by, send_to_signers_on_complete, current_signed_file_path")
             .eq("qr_identifier", qrIdentifier)
             .maybeSingle();
 
