@@ -171,19 +171,19 @@ export async function POST(req: Request) {
       if (signedVersion?.file_path) {
         const { data } = await service.storage
           .from('docs-signed')
-          .createSignedUrl(signedVersion.file_path, 3600)
+          .createSignedUrl(signedVersion.file_path, 31536000)
         signedUrl = data?.signedUrl || ''
       } else if (doc.current_signed_file_path) {
         const { data } = await service.storage
           .from('docs-signed')
-          .createSignedUrl(doc.current_signed_file_path, 3600)
+          .createSignedUrl(doc.current_signed_file_path, 31536000)
         signedUrl = data?.signedUrl || ''
       }
 
       if (notarizedVersion?.file_path) {
         const { data } = await service.storage
           .from('docs-notarized')
-          .createSignedUrl(notarizedVersion.file_path, 3600)
+          .createSignedUrl(notarizedVersion.file_path, 31536000)
         notarizedUrl = data?.signedUrl || ''
       }
 

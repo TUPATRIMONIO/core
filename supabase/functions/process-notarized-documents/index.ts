@@ -269,19 +269,19 @@ async function processFile(
             if (signedVersion?.file_path) {
                 const { data } = await supabase.storage
                     .from("docs-signed")
-                    .createSignedUrl(signedVersion.file_path, 3600);
+                    .createSignedUrl(signedVersion.file_path, 31536000);
                 signedUrl = data?.signedUrl || "";
             } else if (document.current_signed_file_path) {
                 const { data } = await supabase.storage
                     .from("docs-signed")
-                    .createSignedUrl(document.current_signed_file_path, 3600);
+                    .createSignedUrl(document.current_signed_file_path, 31536000);
                 signedUrl = data?.signedUrl || "";
             }
 
             if (notarizedVersion?.file_path) {
                 const { data } = await supabase.storage
                     .from("docs-notarized")
-                    .createSignedUrl(notarizedVersion.file_path, 3600);
+                    .createSignedUrl(notarizedVersion.file_path, 31536000);
                 notarizedUrl = data?.signedUrl || "";
             }
 

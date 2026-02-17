@@ -710,7 +710,7 @@ Este es un email automático de TuPatrimonio. Por favor, no respondas a este men
 
               <!-- Download Section -->
               <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f0f0f0; border-radius: 8px;">
-                  <p style="margin-top: 0; font-size: 14px; color: #666; margin-bottom: 15px;">Descarga tus documentos aquí (enlaces válidos por 60 min):</p>
+                  <p style="margin-top: 0; font-size: 14px; color: #666; margin-bottom: 15px;">Descarga tus documentos aquí:</p>
                   ${downloadButtons}
               </div>
 
@@ -752,8 +752,6 @@ Hola ${payload.recipient_name || "Usuario"},
 Te informamos que el proceso para el documento "${payload.document_title}" ha finalizado exitosamente.
 
 ${textLinks}
-
-(Los enlaces son válidos por 60 minutos)
 
 ---
 ¿Qué te pareció nuestro servicio?
