@@ -489,7 +489,7 @@ export function DocumentDetailClient({
                 <div>
                   <div className="text-xs text-muted-foreground mb-1">Notaría asignada</div>
                   <div className="text-sm font-semibold">
-                    {notaryAssignment ? 'Notaría asignada' : 'Asignación en curso'}
+                    {notaryAssignment ? 'Sí' : 'Pendiente'}
                   </div>
                 </div>
               </div>
