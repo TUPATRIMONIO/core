@@ -135,7 +135,7 @@ export default function OrderCheckoutForm({
     setError(null);
 
     // Determinar qué datos de facturación usar
-    const currentBilling = (paymentConfig.country === 'CL' && paymentConfig.orgType === 'business') 
+    const currentBilling = (paymentConfig.country === 'CL') 
       ? billingData 
       : basicBillingData;
 
@@ -302,7 +302,7 @@ export default function OrderCheckoutForm({
   return (
     <div className="space-y-6">
       {/* Formulario de Facturación Apropiado */}
-      {paymentConfig.country === 'CL' && paymentConfig.orgType === 'business' ? (
+      {paymentConfig.country === 'CL' ? (
         <TransbankDocumentForm
           countryCode={paymentConfig.country}
           defaultData={billingData || undefined}
@@ -314,7 +314,7 @@ export default function OrderCheckoutForm({
           defaultData={basicBillingData || undefined}
           onDataChange={setBasicBillingData}
           title="Datos de Facturación (Invoice)"
-          description={paymentConfig.country === 'CL' ? 'Para clientes personales se emite Invoice vía Stripe.' : 'Necesitamos tus datos para el Invoice internacional.'}
+          description="Necesitamos tus datos para el Invoice internacional."
         />
       )}
 

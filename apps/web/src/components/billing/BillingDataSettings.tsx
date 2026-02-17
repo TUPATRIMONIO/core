@@ -59,8 +59,8 @@ export default function BillingDataSettings({ countryCode = 'CL', orgType = 'per
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const isChile = countryCode === 'CL';
-  const isBusiness = orgType === 'business';
-  const showChileanBusinessFields = isChile && isBusiness;
+  // const isBusiness = orgType === 'business'; // Ya no se usa para distinguir campos
+  const showChileanBusinessFields = isChile; // Mostrar campos chilenos para todos en Chile
   const taxIdLabel = isChile ? 'RUT' : 'Tax ID';
 
   // Cargar configuración existente

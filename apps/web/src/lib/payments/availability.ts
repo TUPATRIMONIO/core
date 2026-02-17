@@ -52,15 +52,9 @@ export async function getPaymentConfig(
   let documentTypes: ('boleta_electronica' | 'factura_electronica' | 'stripe_invoice')[] = [];
 
   if (isChile) {
-    if (isBusiness) {
-      // Chile + Business: Transbank (Webpay/Oneclick), Flow
-      providers = ['transbank', 'flow'];
-      documentTypes = ['boleta_electronica', 'factura_electronica'];
-    } else {
-      // Chile + Personal: Stripe, DLocalGo
-      providers = ['stripe', 'dlocalgo'];
-      documentTypes = ['stripe_invoice'];
-    }
+    // Chile (Business o Personal): Transbank (Webpay/Oneclick), Flow
+    providers = ['transbank', 'flow'];
+    documentTypes = ['boleta_electronica', 'factura_electronica'];
   } else {
     // Otros países: Stripe, DLocalGo
     providers = ['stripe', 'dlocalgo'];
