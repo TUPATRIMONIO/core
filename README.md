@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Veriff API On-Demand Activo** 🚀  
-> **📅 Actualización:** 5 Febrero 2026  
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
+> **📅 Actualización:** 16 Febrero 2026
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -11,9 +11,16 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 ## 🎯 Características Principales
 
 - **🌍 Multi-País**: Detección automática y contenido localizado (Chile, México, Colombia)
+- **💳 Facturación Unificada por País**: Todas las organizaciones de Chile (personales y empresas) emiten Boleta/Factura vía Haulmer con medios de pago chilenos. Organizaciones internacionales usan Stripe Invoice.
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
 - **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad (KYC Veriff con Refresh On-Demand), notaría digital
+- **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
+- **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
+- **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".
+- **🔄 Finalización Automática**: Los pedidos se completan automáticamente cuando todos los documentos están firmados/notarizados.
+- **Reasignación Automática de Notarías**: Sistema de cronjob que reintenta asignar notarías a documentos pendientes cada 5 minutos cuando hay disponibilidad.
+- **Gestión Avanzada de Notarías**: Panel administrativo para gestionar servicios notariales con sistema de pesos para distribución equitativa de documentos y límites diarios de capacidad.
 - **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación con persistencia de progreso
 - **🛡️ Admin Veriff**: Herramientas avanzadas en `/admin/verifications` para consulta directa de API y sincronización manual con firma HMAC.
 - **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares

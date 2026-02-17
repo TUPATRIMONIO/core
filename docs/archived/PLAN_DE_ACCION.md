@@ -1,6 +1,6 @@
 # 🗺️ Hoja de Ruta - Ecosistema TuPatrimonio
 
-> **📅 Última actualización:** Febrero 5, 2026 (Sistema de Consulta On-Demand Veriff API + Firma HMAC + Panel Admin Veriff + Refresh Masivo + Migración a /admin)
+> **📅 Última actualización:** Febrero 16, 2026 (Facturación Unificada por País)
 > **📊 Estado:** Fase 0 COMPLETA ✅ + **ADMIN PANEL CORE 100% FUNCIONAL** ✅ +
 > **FASE 2: CRÉDITOS Y BILLING 100% COMPLETA** ✅ + **SIDEBARS COMPLETOS PARA
 > ADMIN Y USUARIOS** ✅ + **MEJORAS ADMIN PANEL: VISIBILIDAD COMPLETA** ✅ +
@@ -20,10 +20,10 @@
 > CHECKOUT: LÓGICA EXPIRACIÓN Y TIMEOUT INVOICING** ✅ + **🆕 CORRECCIÓN CRÍTICA
 > WEBHOOKS STRIPE: ERROR net.http_post RESUELTO** ✅ + **🆕 CORRECCIÓN FLUJO
 > FIRMA CDS: ACTUALIZACIÓN ESTADO FIRMANTE** ✅ + **🆕 REVISIÓN IA: FLUJO INTERNO
-> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅ + **🆕 CREACIÓN DE EMPRESA SEPARADA: FORMULARIO COMPLETO + VALIDACIÓN RUT EN VIVO** ✅ + **🆕 CORRECCIÓN REHACER PEDIDO: REINICIO AUTOMÁTICO DE FLUJO IA Y FIRMAS** ✅ + **🆕 VERIFF API ON-DEMAND: REFRESH MANUAL + PANEL ADMIN + FIRMA HMAC COMPLETADO** ✅\
+> Y VISIBILIDAD ADMIN PANEL COMPLETOS** ✅ + **🆕 AUTOMATIZACIÓN POST-APROBACIÓN: FIRMA INMEDIATA (IA Y MANUAL)** ✅ + **🆕 VISTA PREVIA DOCUMENTO: INTEGRADA EN ADMIN PANEL** ✅ + **🆕 CRONJOB DE RECUPERACIÓN IA: REINTENTOS AUTOMÁTICOS COMPLETADOS** ✅ + **🆕 CHECKOUT UNIFICADO V2: FLOW + DLOCAL GO + CARGA OPTIMIZADA** ✅ + **🆕 BILLING SETTINGS: FIX RLS + FORMULARIO CONDICIONAL POR PAÍS** ✅ + **🆕 FIRMANTES FRECUENTES: GUARDADO PERSONAL Y POR ORGANIZACIÓN COMPLETADO** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl PARA TODOS LOS PROVEEDORES** ✅ + **🆕 SISTEMA DE PRECIOS MULTI-MONEDA CENTRALIZADO: PAÍS → MONEDA FIJA** ✅ + **🆕 CREACIÓN DE EMPRESA SEPARADA: FORMULARIO COMPLETO + VALIDACIÓN RUT EN VIVO** ✅ + **🆕 CORRECCIÓN REHACER PEDIDO: REINICIO AUTOMÁTICO DE FLUJO IA Y FIRMAS** ✅ + **🆕 VERIFF API ON-DEMAND: REFRESH MANUAL + PANEL ADMIN + FIRMA HMAC COMPLETADO** ✅ + **🆕 FACTURACIÓN UNIFICADA POR PAÍS: CHILE (HAULMER) VS INTERNACIONAL (STRIPE) COMPLETADO** ✅\
 > **🎯 Próximo milestone:** Testing flujo múltiples firmantes + Verificación pública + Panel de Notarías 📋
 
-## 📊 Resumen Ejecutivo (Dic 2025)
+## 📊 Resumen Ejecutivo (Feb 2026)
 
 **Estado General:** ✅ **FASE 0 COMPLETA AL 100%** ✅ + **ADMIN PANEL CORE
 FUNCIONAL** ✅ + **FASE 2: CRÉDITOS Y BILLING COMPLETA** ✅ + **MEJORAS ADMIN
@@ -31,8 +31,7 @@ PANEL: VISIBILIDAD COMPLETA** ✅ + **PLATFORM ADMINS: ACCESO COMPLETO AL
 DASHBOARD** ✅ + **FASE 3: COMUNICACIONES COMPLETA** ✅ + **AUTENTICACIÓN
 COMPLETA (Correo, OTP, Google, Facebook, GitHub)** ✅ + **CORRECCIÓN SISTEMA
 NUMERACIÓN FACTURAS** ✅ + **SISTEMA DE PAGOS COMPLETO Y FUNCIONANDO (Stripe,
-Transbank Webpay Plus, Transbank OneClick, Flow, DLocal Go)** ✅ + **SISTEMA DE FACTURACIÓN
-INDEPENDIENTE COMPLETO (Haulmer + Stripe)** ✅ + **CREACIÓN DE ORGANIZACIÓN EMPRESARIAL SEPARADA (B2C → B2B) COMPLETA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
+Transbank Webpay Plus, Transbank OneClick, Flow, DLocal Go)** ✅ + **SISTEMA DE FACTURACIÓN UNIFICADO POR PAÍS (Haulmer para Chile, Stripe para Internacional)** ✅ + **CREACIÓN DE ORGANIZACIÓN EMPRESARIAL SEPARADA (B2C → B2B) COMPLETA** ✅ + **SISTEMA DE OPERACIONES Y REEMBOLSOS COMPLETO
 (Panel, Pipelines, Reembolsos, Comunicaciones, Retiros)** ✅ + **🆕 SISTEMA DE
 FIRMA ELECTRÓNICA: WIZARD + CHECKOUT + INTEGRACIÓN CDS (SIMPLE & MULTIPLE)
 COMPLETOS** ✅ + **🆕 FLUJO PÚBLICO DE FIRMA SIN LOGIN CON PERSISTENCIA** ✅ + **🆕 AUTOMATIZACIÓN DE FIRMA Y VISTA PREVIA INTEGRADA** ✅ + **🆕 CORRECCIÓN FLUJO RETORNO PAGOS: SISTEMA GENÉRICO CON cancelUrl** ✅ + **PRÓXIMO: Políticas RLS públicas + Testing flujo completo, portal de firma
@@ -43,19 +42,17 @@ optimizaciones están implementadas y funcionando. El sitio marketing está
 completamente operacional con contenido real. **NUEVO:** Sistema de
 administración completo para gestionar el schema core multi-tenant implementado
 y probado exitosamente. **NUEVO:** Sistema completo de créditos y facturación
-con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Dic 2025):**
-Correcciones críticas en admin panel - Platform admin ahora tiene visibilidad
-completa de todos los usuarios (incluye usuarios sin organizaciones) y todas las
-páginas de admin usan ServiceRoleClient para acceso sin restricciones de RLS.
-**NUEVO (Dic 2025):** Platform admins ahora pueden acceder al dashboard regular
-(B2C/B2B) sin restricciones, usando la organización platform cuando no tienen
-organización personal. Helper `getUserActiveOrganization()` implementado para
-manejo automático de organizaciones. **NUEVO (Ene 2026):** Sistema de creación de
-organización empresarial separada (B2C → B2B) completamente implementado - Los
-usuarios pueden crear una nueva empresa manteniendo su cuenta personal separada,
-con formulario completo de facturación y validación de RUT en vivo. El sistema
-anterior de "conversión" fue eliminado para evitar mezcla de datos personales y
-empresariales.
+con integraciones Stripe y dLocal funcionando al 100%. **NUEVO (Feb 2026):**
+Facturación unificada por país - Todas las organizaciones de Chile (personales y
+empresariales) ahora usan medios de pago chilenos (Transbank/Flow) y emiten
+documentos tributarios vía Haulmer (Boleta/Factura). Las organizaciones fuera de
+Chile usan Stripe con Invoice internacional.
+
+- **NUEVO (Feb 16, 2026):** Mejora Interfaz Gestión de Servicios de Notaría. **Objetivo:** Facilitar la administración de servicios y pesos para la distribución de documentos. **Cambios:** Rediseño completo del componente `NotaryServicesManager` con una interfaz mobile-first basada en cards, switches para activación y barras de progreso para visualizar la proporción de asignación. Se corrigió un bug crítico que impedía la edición por parte de los administradores. **Archivos:** `apps/web/src/components/admin/notary-services-manager.tsx`, `apps/web/src/app/(admin)/admin/organizations/notaries/[id]/services/page.tsx`.
+- **NUEVO (Feb 16, 2026):** Reasignación Automática de Notarías y Privacidad UI. **Objetivo:** Asegurar que los documentos no queden estancados si no hay notarías al momento de la firma y proteger la confidencialidad de los proveedores. **Cambios:** Implementación de cronjob `retry-pending-notary-assignments` (cada 5 min) que busca documentos en `pending_notary` sin asignación e intenta asignarlos siguiendo las reglas de pesos. En el frontend, se reemplazó el nombre de la notaría por el texto genérico "Notaría asignada" para evitar contactos directos no deseados. **Archivos:** `supabase/migrations/20260216215047_retry_pending_notary_cron.sql`, `apps/web/src/components/signing/DocumentDetailClient.tsx`.
+- **NUEVO (Feb 16, 2026):** Facturación Unificada por País. **Objetivo:** Simplificar la experiencia de usuario en Chile y asegurar el cumplimiento tributario local para todos los clientes nacionales. **Cambios:** Eliminación de la distinción entre organizaciones personales y empresariales para la selección de medios de pago en Chile. Actualización del trigger `invoicing.on_order_completed` para determinar el proveedor de facturación basado en el país de la organización en lugar del medio de pago. Unificación de formularios de facturación en el checkout para mostrar campos de DTE (RUT, Giro, etc.) a todos los usuarios en Chile. **Archivos:** `supabase/migrations/20260216233809_unify_invoicing_by_country.sql`, `apps/web/src/lib/payments/availability.ts`, `apps/web/src/components/checkout/OrderCheckoutForm.tsx`, `apps/web/src/components/billing/BillingDataSettings.tsx`.
+
+- **NUEVO (Feb 17, 2026):** Sistema de Notificaciones de Pedido Completado y Finalización Automática. **Objetivo:** Automatizar el cierre del ciclo de vida del pedido y mejorar la experiencia post-venta. **Cambios:** Implementación de trigger `signing.auto_complete_order_on_document_done` que completa automáticamente el pedido (`billing.orders.status = 'completed'`) cuando todos los documentos asociados están finalizados (firmados o notarizados). Nuevo sistema de notificaciones implementado directamente en TypeScript (reemplazando triggers SQL fallidos) que envía correos al gestor y firmantes cuando el pedido se completa. El correo incluye enlaces de descarga con validez de 1 año (signed URLs de larga duración) y una sección de incentivo para dejar reseñas en Google (5 estrellas = 20% descuento). Soporte completo para re-subida de documentos notarizados (correcciones), lo que actualiza la fecha de término y re-envía las notificaciones automáticamente. **Archivos:** `supabase/migrations/20260216230016_auto_complete_order_on_document_done.sql`, `supabase/migrations/20260216235223_fix_auto_complete_trigger_columns.sql`, `supabase/migrations/20260217000829_remove_sql_notification_triggers.sql`, `supabase/functions/send-signing-notification/index.ts` (nuevo tipo ORDER_COMPLETED), `apps/web/src/app/api/notary/notarized-upload/route.ts`, `supabase/functions/process-notarized-documents/index.ts`, `supabase/functions/signature-webhook/index.ts`.
 
 - **NUEVO (Ene 12, 2026):** Sistema de Precios Multi-Moneda Centralizado. **Problema:** Moneda mostrada (ARS) no correspondía al país del usuario (Chile). La organización se creaba sin país y existía un selector de moneda independiente del país. **Solución:** Implementación de tabla centralizada `core.supported_countries` que define la relación fija País → Moneda. Migración de `signing.products` a estructura multi-moneda (7 columnas: `price_usd`, `price_clp`, `price_ars`, `price_cop`, `price_mxn`, `price_pen`, `price_brl`). Creación de librería centralizada `lib/pricing/countries.ts` para funciones de país/moneda. **Cambios principales:** Eliminación de selectores de moneda independientes del país. CountrySelector ahora muestra la moneda asociada (readonly). Todos los servicios tienen precios definidos en todas las monedas, incluso si solo funcionan en un país específico. **Archivos:** `supabase/migrations/20260112000001_create_supported_countries.sql`, `supabase/migrations/20260112000002_migrate_signing_products_multi_currency.sql`, `supabase/migrations/20260112000003_seed_signing_products_all_currencies.sql`, `apps/web/src/lib/pricing/countries.ts`, `apps/web/src/lib/pricing/countries-sync.ts`. **Beneficios:** Escalable, consistente, elimina confusión usuario, facilita expansión a nuevos países.
 
@@ -6627,6 +6624,12 @@ test('Escalates low confidence responses', async () => {
 ## 🤖 **Fase 10: Servicios de IA - Document Review (Semanas 67-74)**
 
 ### **Objetivo:** Análisis automático de documentos legales/comerciales con IA
+
+> **✅ ESTADO ACTUAL:** El sistema de análisis de documentos ya cuenta con una funcionalidad de **lectura de QR robusta** implementada en la Edge Function `process-notarized-documents`. Esta funcionalidad utiliza una estrategia de 3 niveles:
+> 1. **Nivel 1 (Texto via pdfjs-serverless):** Extracción de texto real descomprimiendo streams PDF (el método más confiable).
+> 2. **Nivel 2 (Imagen via jsQR):** Renderizado de páginas a imagen con escala 3.0 (fallback si el texto no es legible).
+> 3. **Nivel 3 (Bytes crudos):** Búsqueda binaria en el archivo (último recurso).
+> Esto permite asociar automáticamente documentos notarizados con sus registros originales en la plataforma.
 
 ### 10.1 Schema AI Document Review
 
