@@ -39,12 +39,13 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
     1.  Revisión del documento.
     2.  **Validación de Identidad**:
         *   Confirmación/Edición de datos (Nombre, RUT/ID).
-        *   Captura de firma manuscrita (Canvas).
+        *   Captura de firma manuscrita (Dibujo en Canvas o **Subida de Imagen**).
+        *   **Persistencia**: La firma se guarda y se precarga automáticamente para futuros documentos del mismo firmante.
         *   Registro de IP.
     3.  Estampa inmediata de certificado simple.
 *   **Campos Enviados**:
     *   **Requeridos**: `pdf_base64`, `signer_name`, `signer_email`, `signer_contact_id`, `signer_type_contact_id`.
-    *   **Opcionales**: `ip`, `order_number`, `transaction_id`, `url_qr`, `page_sign`, `coords`.
+    *   **Opcionales**: `ip`, `order_number`, `transaction_id`, `url_qr`, `page_sign`, `coords`, `signature_image_base64`.
 *   **Productos**: `fes_cl`, `fesb_cl` (Biométrica), `fes_claveunica_cl`.
 *   **Ventaja**: Flujo mucho más rápido y directo, sin necesidad de enrolamiento previo en proveedores externos.
 

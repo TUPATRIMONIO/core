@@ -201,6 +201,9 @@ export async function POST(request: NextRequest) {
                             signer.coord_x_upper_right,
                             signer.coord_y_upper_right,
                         ] : undefined,
+                        signature_image_base64: signature_image 
+                            ? signature_image.replace(/^data:image\/\w+;base64,/, '') 
+                            : undefined,
                     },
                 },
             );

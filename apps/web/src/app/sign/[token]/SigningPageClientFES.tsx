@@ -53,7 +53,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const [confirmedIdValue, setConfirmedIdValue] = useState(
     signer.rut || signer.metadata?.identifier_value || ""
   );
-  const [signatureBase64, setSignatureBase64] = useState<string | null>(null);
+  const [signatureBase64, setSignatureBase64] = useState<string | null>(signer.previousSignatureBase64 || null);
   const [clientIp, setClientIp] = useState<string>("");
 
   // 1. Verificar si ya firmó al cargar
@@ -254,11 +254,19 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                     Tu firma manuscrita
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    Dibuja tu firma en el recuadro usando tu dedo o mouse.
+                    Dibuja tu firma en el recuadro usando tu dedo o mouse, o sube una imagen.
                   </p>
                   
+                  {signer.previousSignatureBase64 && (
+                    <div className="bg-blue-50 text-blue-700 text-xs p-3 rounded-lg flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <p>Se ha cargado tu firma anterior. Puedes usarla o crear una nueva.</p>
+                    </div>
+                  )}
+
                   <SignaturePad 
                     onSignatureChange={setSignatureBase64}
+                    initialSignature={signer.previousSignatureBase64}
                     className="w-full"
                   />
                 </div>

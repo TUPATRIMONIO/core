@@ -78,9 +78,32 @@ export default async function SigningPage({ params }: PageProps) {
     orderNumber = order?.order_number || null;
   }
 
+  // 6. Buscar firma previa de este firmante (por email)
+  let previousSignatureBase64: string | null = null;
+  const { data: prevSigner } = await supabase
+      .from("signing_signers")
+      .select("handwritten_signature_path")
+      .eq("email", signerRaw.email)
+      .not("handwritten_signature_path", "is", null)
+      .order("signed_at", { ascending: false })
+      .limit(1)
+      .single();
+
+  if (prevSigner?.handwritten_signature_path) {
+      // Descargar imagen de Storage y convertir a base64
+      const { data: imgData } = await supabase.storage
+          .from("docs-signed")
+          .download(prevSigner.handwritten_signature_path);
+      if (imgData) {
+          const buffer = await imgData.arrayBuffer();
+          previousSignatureBase64 = `data:image/png;base64,${Buffer.from(buffer).toString("base64")}`;
+      }
+  }
+
   // Construir objeto completo para el cliente
   const signer = {
     ...signerRaw,
+    previousSignatureBase64,
     document: {
       ...document,
       order_number: orderNumber,

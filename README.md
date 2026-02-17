@@ -21,7 +21,7 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🔄 Finalización Automática**: Los pedidos se completan automáticamente cuando todos los documentos están firmados/notarizados.
 - **Reasignación Automática de Notarías**: Sistema de cronjob que reintenta asignar notarías a documentos pendientes cada 5 minutos cuando hay disponibilidad.
 - **Gestión Avanzada de Notarías**: Panel administrativo para gestionar servicios notariales con sistema de pesos para distribución equitativa de documentos y límites diarios de capacidad.
-- **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación con persistencia de progreso
+- **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación (inicia siempre desde cero)
 - **🛡️ Admin Veriff**: Herramientas avanzadas en `/admin/verifications` para consulta directa de API y sincronización manual con firma HMAC.
 - **📊 CRM Universal**: Sistema configurable con pipelines, custom properties y permisos granulares
 - **📧 Sistema de soporte unificado**: Tickets de soporte y CRM fusionados en `crm.tickets`

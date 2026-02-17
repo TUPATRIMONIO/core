@@ -21,6 +21,7 @@ interface FESRequest {
     page_sign?: number | string;
     coords?: string | number[];
     transaction_id?: string;
+    signature_image_base64?: string;
 }
 
 interface FESResponse {
