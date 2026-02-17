@@ -66,7 +66,7 @@ export function OrderDetailsCollapsible({
           {signatureProduct && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase">
-                Firma Electrónica Avanzada
+                Firma Electrónica
               </div>
               <div className="text-sm space-y-1">
                 <div className="flex justify-between">

@@ -392,11 +392,11 @@ USING (
 | `core` | ✅ Completo | 13 | Foundation del sistema | Nativo |
 | `marketing` | ✅ Completo | 11 | Marketing site y leads | No (público) |
 | `crm` | ✅ Completo | 16+ | CRM B2B vendible estilo HubSpot | ✅ Sí |
-| `signing` | ✅ Completo | 11 | Firma electrónica (FES/FEA) | ✅ Sí |
-| `identity_verifications` | ✅ Completo | 7 | KYC/Verificación de identidad | ✅ Sí |
-| `notarial_services` | 📋 Pendiente | 12+ | Servicios notariales | ✅ Sí |
+| `signing` | ✅ Completo | 11 | Firma electrónica (FES/FEA) y procesos notariales | ✅ Sí |
+| `identity_verifications` | ✅ Completo | 7 | KYC/Verificación de identidad (Veriff) | ✅ Sí |
+| `notarial_services` | ✅ Operativo | 12+ | Servicios notariales | ✅ Sí |
 | `ai_customer_service` | 📋 Pendiente | - | Chatbot IA | ✅ Sí |
-| `ai_document_review` | 📋 Pendiente | - | Análisis documentos | ✅ Sí |
+| `ai_document_review` | ✅ Operativo | - | Análisis documentos | ✅ Sí |
 | `analytics` | 📋 Pendiente | - | Métricas y reportes | ✅ Sí |
 
 ---
@@ -465,7 +465,7 @@ A medida que el producto crece:
 
 ---
 
-**Última actualización**: Febrero 2026  
-**Schemas implementados**: 5 de 9 planificados  
-**Tablas totales**: 58+ (13 core + 11 marketing + 16+ crm + 11 signing + 7 identity_verifications)
+**Última actualización**: 17 Febrero 2026  
+**Schemas implementados**: 6 de 9 planificados  
+**Tablas totales**: 70+ (13 core + 11 marketing + 16+ crm + 11 signing + 7 identity_verifications + 12+ notarial_services)
 
