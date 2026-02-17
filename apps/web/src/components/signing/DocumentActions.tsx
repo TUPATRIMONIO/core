@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FileText, Download, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 interface DocumentActionsProps {
@@ -24,8 +23,6 @@ export function DocumentActions({
   variant = 'outline',
 }: DocumentActionsProps) {
   const [loadingDoc, setLoadingDoc] = useState<'original' | 'signed' | 'notarized' | null>(null)
-  const supabase = createClient()
-
   const handleViewDocument = async (
     bucket: string,
     path: string,
@@ -33,11 +30,18 @@ export function DocumentActions({
   ) => {
     setLoadingDoc(type)
     try {
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .createSignedUrl(path, 3600)
+      const response = await fetch('/api/storage/signed-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucket, path, expiresIn: 3600 })
+      })
 
-      if (error) throw error
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Error al generar la URL del documento')
+      }
+
+      const data = await response.json()
 
       if (data?.signedUrl) {
         window.open(data.signedUrl, '_blank', 'noopener,noreferrer,nofollow')

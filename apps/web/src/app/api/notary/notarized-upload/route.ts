@@ -133,14 +133,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: assignUpdateError.message }, { status: 400 })
     }
 
-    // Determinar estado final del documento según la configuración
-    const finalStatus = doc.send_to_signers_on_complete ? 'completed' : 'notarized'
+    // Determinar estado final del documento
+    // Siempre completamos el documento cuando la notaría lo sube
+    const finalStatus = 'completed'
     
     const { error: docUpdateError } = await service
       .from('signing_documents')
       .update({
         status: finalStatus,
-        ...(finalStatus === 'completed' ? { completed_at: now } : {})
+        completed_at: now
       })
       .eq('id', doc.id)
 

@@ -233,11 +233,12 @@ async function processFile(
             throw new Error(`Error actualizando asignación: ${assignUpdateError.message}`);
         }
 
-        // 7. Actualizar documento a notarized
+        // 7. Actualizar documento a completed (siempre completed cuando notaría sube)
         const { error: docUpdateError } = await supabase
             .from("signing_documents")
             .update({
-                status: "notarized",
+                status: "completed",
+                completed_at: now,
                 updated_at: now,
             })
             .eq("id", document.id);
