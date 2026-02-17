@@ -191,7 +191,7 @@ serve(async (req) => {
                         ) {
                             const notificationUrl = `${
                                 Deno.env.get("SUPABASE_URL")
-                            }/functions/v1/send-order-completed-notification`;
+                            }/functions/v1/send-signing-notification`;
 
                             await fetch(notificationUrl, {
                                 method: "POST",
@@ -202,7 +202,14 @@ serve(async (req) => {
                                     }`,
                                 },
                                 body: JSON.stringify({
-                                    order_id: updatedDoc.order_id,
+                                    type: "ORDER_COMPLETED",
+                                    recipient_email: signer.email,
+                                    recipient_name: signer.full_name,
+                                    document_title: document.title,
+                                    action_url: "",
+                                    org_id: document.organization_id,
+                                    document_id: document.id,
+                                    has_notary_service: false
                                 }),
                             });
                             console.log(
@@ -369,7 +376,7 @@ serve(async (req) => {
                         ) {
                             const notificationUrl = `${
                                 Deno.env.get("SUPABASE_URL")
-                            }/functions/v1/send-order-completed-notification`;
+                            }/functions/v1/send-signing-notification`;
 
                             await fetch(notificationUrl, {
                                 method: "POST",
@@ -380,7 +387,14 @@ serve(async (req) => {
                                     }`,
                                 },
                                 body: JSON.stringify({
-                                    order_id: updatedDoc.order_id,
+                                    type: "ORDER_COMPLETED",
+                                    recipient_email: signer.email,
+                                    recipient_name: signer.full_name,
+                                    document_title: document.title,
+                                    action_url: "",
+                                    org_id: document.organization_id,
+                                    document_id: document.id,
+                                    has_notary_service: false
                                 }),
                             });
                             console.log(

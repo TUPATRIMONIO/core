@@ -342,7 +342,7 @@ async function processFile(
                         recipient_email: recipient.email,
                         recipient_name: recipient.name,
                         document_title: document.title,
-                        action_url: "", // No se usa en este template pero es requerido
+                        action_url: `${Deno.env.get("PUBLIC_APP_URL") || "https://tupatrimonio.cl"}/dashboard/signing/documents/${document.id}`,
                         org_id: document.organization_id,
                         document_id: document.id,
                         signed_url: signedUrl,
