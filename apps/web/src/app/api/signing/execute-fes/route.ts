@@ -194,13 +194,14 @@ export async function POST(request: NextRequest) {
                         order_number: orderNumber,
                         transaction_id: signer.document.id, // Usamos ID del documento como transacción
                         url_qr: "https://tupatrimon.io/repositorio/", // URL fija por ahora
-                        page_sign: signer.use_custom_coordinates ? signer.signature_page : undefined,
-                        coords: signer.use_custom_coordinates ? [
-                            signer.coord_x_lower_left,
-                            signer.coord_y_lower_left,
-                            signer.coord_x_upper_right,
-                            signer.coord_y_upper_right,
-                        ] : undefined,
+                        // coords deshabilitado temporalmente - la API FES espera 2 valores, no 4
+                        // page_sign: signer.use_custom_coordinates ? signer.signature_page : undefined,
+                        // coords: signer.use_custom_coordinates ? [
+                        //     signer.coord_x_lower_left,
+                        //     signer.coord_y_lower_left,
+                        //     signer.coord_x_upper_right,
+                        //     signer.coord_y_upper_right,
+                        // ] : undefined,
                         signature_image_base64: signature_image 
                             ? signature_image.replace(/^data:image\/\w+;base64,/, '') 
                             : undefined,
