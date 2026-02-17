@@ -9,7 +9,11 @@ import {
   Loader2,
   CheckCircle2,
   FileSignature,
+  UserCheck,
+  MapPin,
+  PenLine,
 } from "lucide-react";
+import SignaturePad from "@/components/signing/SignaturePad";
 
 // Dynamic import to avoid SSR issues with pdf.js
 const PDFViewer = dynamic(() => import("@/components/shared/PDFViewer"), {
@@ -27,6 +31,7 @@ interface SigningPageClientFESProps {
 
 type SigningStep =
   | "reviewing"
+  | "identity_validation"
   | "signing"
   | "success"
   | "signed" // Cuando el firmante ya firmó (recarga de página)
@@ -40,6 +45,17 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   // Cache buster para evitar que el navegador sirva PDFs cacheados corruptos
   const [cacheBuster, setCacheBuster] = useState(() => Date.now());
 
+  // Identity Validation State
+  const [confirmedName, setConfirmedName] = useState(signer.full_name || "");
+  const [confirmedIdType, setConfirmedIdType] = useState(
+    signer.metadata?.identifier_type || (signer.rut ? "rut" : "other")
+  );
+  const [confirmedIdValue, setConfirmedIdValue] = useState(
+    signer.rut || signer.metadata?.identifier_value || ""
+  );
+  const [signatureBase64, setSignatureBase64] = useState<string | null>(null);
+  const [clientIp, setClientIp] = useState<string>("");
+
   // 1. Verificar si ya firmó al cargar
   useEffect(() => {
     if (signer.status === "signed") {
@@ -47,6 +63,14 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
       setCacheBuster(Date.now());
     }
   }, [signer.status]);
+
+  // 2. Obtener IP del cliente
+  useEffect(() => {
+    fetch("/api/signing/client-ip")
+      .then((res) => res.json())
+      .then((data) => setClientIp(data.ip))
+      .catch(() => setClientIp("No disponible"));
+  }, []);
 
   const refreshSignedDocument = () => {
     setCacheBuster(Date.now());
@@ -64,6 +88,11 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           signing_token: signer.signing_token,
+          confirmed_name: confirmedName,
+          confirmed_id_type: confirmedIdType,
+          confirmed_id_value: confirmedIdValue,
+          signature_image: signatureBase64,
+          client_ip: clientIp,
         }),
       });
 
@@ -123,7 +152,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                   <FileSignature className="w-5 h-5 text-[var(--tp-brand)]" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">
-                  Confirmar Firma
+                  Revisar Documento
                 </h3>
               </div>
               
@@ -136,26 +165,130 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Al hacer clic en "Firmar Documento", usted acepta firmar electrónicamente este documento.
+                  Por favor revise el documento cuidadosamente antes de proceder a la firma.
                 </p>
 
                 <button
-                  onClick={handleSign}
-                  disabled={isLoading}
-                  className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setStep("identity_validation")}
+                  className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors"
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                      Procesando firma...
-                    </>
-                  ) : (
-                    <>
-                      <FileSignature className="w-5 h-5 mr-2" />
-                      Firmar Documento
-                    </>
-                  )}
+                  Continuar
                 </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "identity_validation":
+        return (
+          <div className="space-y-6">
+            <div className="bg-secondary dark:bg-secondary/50 border border-border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-brand-10)] dark:bg-[var(--tp-brand)]/20 flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-[var(--tp-brand)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Validación de Identidad
+                </h3>
+              </div>
+
+              <div className="space-y-6">
+                {/* 1. Confirmar Datos */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[var(--tp-brand)]" />
+                    Confirma tus datos
+                  </h4>
+                  
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">Nombre Completo</label>
+                      <input
+                        type="text"
+                        value={confirmedName}
+                        onChange={(e) => setConfirmedName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="col-span-1 space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground">Tipo ID</label>
+                        <select
+                          value={confirmedIdType}
+                          onChange={(e) => setConfirmedIdType(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                        >
+                          <option value="rut">RUT</option>
+                          <option value="dni">DNI</option>
+                          <option value="passport">Pasaporte</option>
+                          <option value="other">Otro</option>
+                        </select>
+                      </div>
+                      <div className="col-span-2 space-y-2">
+                        <label className="text-xs font-medium text-muted-foreground">Número ID</label>
+                        <input
+                          type="text"
+                          value={confirmedIdValue}
+                          onChange={(e) => setConfirmedIdValue(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                          placeholder="12.345.678-9"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/50 p-2 rounded-lg border border-border/50">
+                      <MapPin className="w-3 h-3" />
+                      <span>IP registrada: {clientIp || "Cargando..."}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-border/50 my-4"></div>
+
+                {/* 2. Firma Manuscrita */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <PenLine className="w-4 h-4 text-[var(--tp-brand)]" />
+                    Tu firma manuscrita
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Dibuja tu firma en el recuadro usando tu dedo o mouse.
+                  </p>
+                  
+                  <SignaturePad 
+                    onSignatureChange={setSignatureBase64}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={handleSign}
+                    disabled={isLoading || !confirmedName || !confirmedIdValue || !signatureBase64}
+                    className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        Procesando firma...
+                      </>
+                    ) : (
+                      <>
+                        <FileSignature className="w-5 h-5 mr-2" />
+                        Confirmar y Firmar
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setStep("reviewing")}
+                    disabled={isLoading}
+                    className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Volver a revisar
+                  </button>
+                </div>
               </div>
             </div>
           </div>

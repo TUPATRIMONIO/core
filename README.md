@@ -14,7 +14,7 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **💳 Facturación Unificada por País**: Todas las organizaciones de Chile (personales y empresas) emiten Boleta/Factura vía Haulmer con medios de pago chilenos. Organizaciones internacionales usan Stripe Invoice.
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
-- **✍️ Servicios Core**: Firmas electrónicas con flujo público sin login, verificación de identidad (KYC Veriff con Refresh On-Demand), notaría digital
+- **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
 - **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
 - **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
 - **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".
@@ -108,9 +108,11 @@ Cada servicio tiene su propio schema para mejor organización:
 | `marketing` | Blog, KB, leads, reviews, testimonios - 11 tablas | ✅ Completo |
 | `crm` | CRM completo estilo HubSpot: contacts, companies, deals, tickets, ticket_messages, products, quotes, email multi-cuenta, pipelines configurables - 16+ tablas | ✅ Sistema Universal |
 | `signing` | Firma electrónica (FES/FEA) y procesos notariales - 11 tablas | ✅ Completo |
-| `identity_verifications` | KYC y verificación de identidad con biometría (Veriff) - 7 tablas | ✅ Completo |
+| `identity_verifications` | KYC y verificación de identidad con biometría (Veriff) | ✅ Completo |
 | `ai_customer_service` | Chatbot IA con RAG | 📋 Fase 9 |
 | `ai_document_review` | Análisis de docs IA (Interno y Público) | ✅ Operativo |
+| `notarial_services` | Servicios notariales multi-tenant | ✅ Operativo |
+| `analytics` | Métricas y reportes | 📋 Fase 11 |
 
 📖 **Arquitectura completa**: [`docs/schemas/ARCHITECTURE-SCHEMAS.md`](docs/schemas/ARCHITECTURE-SCHEMAS.md)
 

@@ -13,8 +13,14 @@ interface FESRequest {
     signer_email: string;
     signer_contact_id: string;
     signer_type_contact_id: string;
-    transaction_id: string;
-    url_qr: string;
+    // Opcionales
+    ip?: string;
+    city?: string;
+    order_number?: string;
+    url_qr?: string;
+    page_sign?: number | string;
+    coords?: string | number[];
+    transaction_id?: string;
 }
 
 interface FESResponse {
@@ -38,12 +44,10 @@ serve(async (req) => {
             !payload.signer_name ||
             !payload.signer_email ||
             !payload.signer_contact_id ||
-            !payload.signer_type_contact_id ||
-            !payload.transaction_id ||
-            !payload.url_qr
+            !payload.signer_type_contact_id
         ) {
             throw new Error(
-                "Faltan campos requeridos: pdf_base64, signer_name, signer_email, signer_contact_id, signer_type_contact_id, transaction_id, url_qr",
+                "Faltan campos requeridos: pdf_base64, signer_name, signer_email, signer_contact_id, signer_type_contact_id",
             );
         }
 

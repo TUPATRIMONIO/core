@@ -12,7 +12,14 @@ export async function POST(request: NextRequest) {
         const supabase = createServiceRoleClient();
         const adminClient = supabase;
         const body = await request.json();
-        const { signing_token } = body;
+        const { 
+            signing_token,
+            confirmed_name,
+            confirmed_id_type,
+            confirmed_id_value,
+            signature_image,
+            client_ip
+        } = body;
 
         // Validar campos requeridos
         if (!signing_token) {
@@ -127,40 +134,73 @@ export async function POST(request: NextRequest) {
         const base64Document = Buffer.from(arrayBuffer).toString("base64");
 
         // 3. Preparar datos para FES API
-        // Determinar ID y tipo de ID
+        // Determinar ID y tipo de ID (usar confirmados si existen)
         let signerContactId = "";
         let signerTypeContactId = "ID DOC";
+        const finalName = confirmed_name || signer.full_name;
 
-        if (signer.rut) {
+        // Prioridad: datos confirmados > datos en BD
+        if (confirmed_id_value) {
+            signerContactId = confirmed_id_value;
+            // Mapear tipo confirmado
+            if (confirmed_id_type === "rut") signerTypeContactId = "RUT";
+            else if (confirmed_id_type === "passport") signerTypeContactId = "PASSPORT";
+            else if (confirmed_id_type === "dni") signerTypeContactId = "DNI";
+            else signerTypeContactId = "ID DOC";
+        } else if (signer.rut) {
             signerContactId = signer.rut;
-            signerTypeContactId = "RUT"; // Asumimos RUT si está presente
+            signerTypeContactId = "RUT";
         } else if (signer.metadata?.identifier_value) {
             signerContactId = signer.metadata.identifier_value;
-            // Mapear tipo de identificador
             const idType = signer.metadata.identifier_type;
             if (idType === "passport") signerTypeContactId = "PASSPORT";
             else if (idType === "dni") signerTypeContactId = "DNI";
             else signerTypeContactId = "ID DOC";
         } else {
-            // Fallback si no hay identificador (no debería pasar si se validó al crear)
             signerContactId = "N/A";
         }
 
         // 4. Llamar a Edge Function para firmar
         console.log("Invocando fes-signature para:", signer.email);
         
+        // Obtener order_number si existe
+        let orderNumber = undefined;
+        if (signer.document.order_id) {
+            const { data: order } = await adminClient
+                .from("orders")
+                .select("order_number")
+                .eq("id", signer.document.order_id)
+                .single();
+            if (order) {
+                orderNumber = order.order_number;
+            }
+        }
+
+        // Usar IP confirmada o headers
+        const finalIp = client_ip || request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip");
+
         const { data: result, error: invokeError } = await supabase.functions
             .invoke(
                 "fes-signature",
                 {
                     body: {
                         pdf_base64: base64Document,
-                        signer_name: signer.full_name,
+                        signer_name: finalName,
                         signer_email: signer.email,
                         signer_contact_id: signerContactId,
                         signer_type_contact_id: signerTypeContactId,
+                        // Opcionales
+                        ip: finalIp,
+                        order_number: orderNumber,
                         transaction_id: signer.document.id, // Usamos ID del documento como transacción
                         url_qr: "https://tupatrimon.io/repositorio/", // URL fija por ahora
+                        page_sign: signer.use_custom_coordinates ? signer.signature_page : undefined,
+                        coords: signer.use_custom_coordinates ? [
+                            signer.coord_x_lower_left,
+                            signer.coord_y_lower_left,
+                            signer.coord_x_upper_right,
+                            signer.coord_y_upper_right,
+                        ] : undefined,
                     },
                 },
             );
@@ -245,14 +285,38 @@ export async function POST(request: NextRequest) {
             console.error("Error actualizando current_signed_file_path:", updatePathError);
         }
 
+        // 5.5 Guardar firma manuscrita si existe
+        let signaturePath = null;
+        if (signature_image) {
+            try {
+                const signatureBuffer = Buffer.from(signature_image.replace(/^data:image\/png;base64,/, ''), 'base64');
+                const sigPath = `${signer.document.organization_id}/${signer.document.id}/signatures/handwritten_${signer.id}_${Date.now()}.png`;
+                
+                const { error: sigUploadError } = await adminClient
+                    .storage
+                    .from("docs-signed")
+                    .upload(sigPath, signatureBuffer, {
+                        contentType: "image/png",
+                        upsert: false
+                    });
+                
+                if (!sigUploadError) {
+                    signaturePath = sigPath;
+                } else {
+                    console.error("Error uploading handwritten signature:", sigUploadError);
+                }
+            } catch (e) {
+                console.error("Error processing handwritten signature:", e);
+            }
+        }
+
         // 6. Actualizar estado del firmante a signed
         const { data: updateResult, error: updateSignerError } = await adminClient
             .rpc("update_signer_status_admin", {
                 p_signer_id: signer.id,
                 p_status: "signed",
                 p_signed_at: new Date().toISOString(),
-                p_signature_ip: request.headers.get("x-forwarded-for") ||
-                    request.headers.get("x-real-ip") || null,
+                p_signature_ip: finalIp,
                 p_signature_user_agent: request.headers.get("user-agent") || null,
             });
         
@@ -262,14 +326,24 @@ export async function POST(request: NextRequest) {
                 result: updateResult,
                 signerId: signer.id,
             });
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: "Error al actualizar el estado de la firma. Por favor, recarga la página.",
-                    details: updateSignerError?.message || updateResult?.error,
-                },
-                { status: 500 },
-            );
+            // No retornamos error aquí porque el documento ya se firmó y guardó
+        } else {
+             // 6.5 Actualizar datos confirmados
+            const { error: confirmError } = await adminClient
+                .from("signing_signers")
+                .update({
+                    confirmed_full_name: confirmed_name || null,
+                    confirmed_identifier_type: confirmed_id_type || null,
+                    confirmed_identifier_value: confirmed_id_value || null,
+                    identity_confirmed_at: new Date().toISOString(),
+                    handwritten_signature_path: signaturePath,
+                    client_ip: finalIp
+                })
+                .eq("id", signer.id);
+
+            if (confirmError) {
+                console.error("Error saving confirmed identity data:", confirmError);
+            }
         }
         
         console.log("Firmante FES actualizado exitosamente:", updateResult);

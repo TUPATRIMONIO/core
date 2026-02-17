@@ -15,8 +15,9 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
     *   `pdf-merge-with-cover`: Generación de portadas con QR y consolidación de PDFs.
 3.  **API Routes (Next.js)**:
     *   `/api/signing/execute`: Ejecución de firma FEA.
-    *   `/api/signing/execute-fes`: Ejecución de firma FES.
+    *   `/api/signing/execute-fes`: Ejecución de firma FES con validación de identidad.
     *   `/api/signing/initiate`: Orquestador del inicio del proceso de firma.
+    *   `/api/signing/client-ip`: Obtención de IP del cliente para auditoría.
 
 ---
 
@@ -36,8 +37,14 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 *   **Proveedor**: API Propia (`cert-fes.tupatrimonio.app`).
 *   **Flujo**:
     1.  Revisión del documento.
-    2.  Confirmación de identidad (en desarrollo).
+    2.  **Validación de Identidad**:
+        *   Confirmación/Edición de datos (Nombre, RUT/ID).
+        *   Captura de firma manuscrita (Canvas).
+        *   Registro de IP.
     3.  Estampa inmediata de certificado simple.
+*   **Campos Enviados**:
+    *   **Requeridos**: `pdf_base64`, `signer_name`, `signer_email`, `signer_contact_id`, `signer_type_contact_id`.
+    *   **Opcionales**: `ip`, `order_number`, `transaction_id`, `url_qr`, `page_sign`, `coords`.
 *   **Productos**: `fes_cl`, `fesb_cl` (Biométrica), `fes_claveunica_cl`.
 *   **Ventaja**: Flujo mucho más rápido y directo, sin necesidad de enrolamiento previo en proveedores externos.
 
@@ -53,10 +60,15 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
     *   Envía notificaciones por email.
 3.  **Ejecución**: El firmante accede al portal.
     *   Si es FEA: Sigue flujo de clave + SMS.
-    *   Si es FES: Presiona "Firmar Documento" y la estampa es inmediata.
+    *   Si es FES: 
+        *   Revisa el documento.
+        *   Confirma sus datos y dibuja su firma.
+        *   Presiona "Confirmar y Firmar".
+        *   La firma manuscrita se guarda como imagen en Storage (auditoría).
+        *   La FES estampa el documento (PDF).
 4.  **Finalización**:
     *   El PDF firmado se guarda en el bucket `docs-signed`.
-    *   Se actualiza el estado del firmante a `signed`.
+    *   Se actualiza el estado del firmante a `signed` con datos confirmados.
     *   Si es secuencial, se notifica al siguiente.
     *   Al completar todas las firmas, el documento pasa a `signed` o `completed`.
 
@@ -66,6 +78,7 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 
 *   `signing.documents`: Registro principal del documento, rutas de archivos y metadata del producto.
 *   `signing.signers`: Datos de los firmantes, tokens de acceso, estados y registros de auditoría de la firma (IP, User Agent).
+    *   **Nuevos campos de validación**: `confirmed_full_name`, `confirmed_identifier_type`, `confirmed_identifier_value`, `handwritten_signature_path`, `client_ip`.
 *   `signing.products`: Catálogo de tipos de firma disponibles por país.
 
 ---
