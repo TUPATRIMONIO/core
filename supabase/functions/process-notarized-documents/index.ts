@@ -247,6 +247,8 @@ async function processFile(
         // Enviar notificación de pedido completado (si corresponde)
         if (document.order_id) {
             const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-order-completed-notification`;
+            
+            // No usamos await para no bloquear el procesamiento
             fetch(notificationUrl, {
                 method: "POST",
                 headers: {
@@ -254,7 +256,16 @@ async function processFile(
                     "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
                 },
                 body: JSON.stringify({ order_id: document.order_id }),
-            }).catch((err) => console.error('[processFile] Error enviando notificacion:', err));
+            })
+            .then(async (resp) => {
+                if (!resp.ok) {
+                    const text = await resp.text();
+                    console.error(`[processFile] Error enviando notificación: ${resp.status} - ${text}`);
+                } else {
+                    console.log(`[processFile] Notificación enviada exitosamente para orden ${document.order_id}`);
+                }
+            })
+            .catch((err) => console.error('[processFile] Error de red enviando notificacion:', err));
         }
 
         // 8. Registrar versión en document_versions
