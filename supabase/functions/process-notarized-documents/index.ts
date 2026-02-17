@@ -162,7 +162,7 @@ async function processFile(
         // 3. Buscar documento por qr_identifier
         const { data: document, error: docError } = await supabase
             .from("signing_documents")
-            .select("id, title, organization_id, status, notary_service, qr_identifier")
+            .select("id, title, organization_id, status, notary_service, qr_identifier, order_id")
             .eq("qr_identifier", qrIdentifier)
             .maybeSingle();
 
@@ -242,6 +242,19 @@ async function processFile(
 
         if (docUpdateError) {
             throw new Error(`Error actualizando documento: ${docUpdateError.message}`);
+        }
+
+        // Enviar notificación de pedido completado (si corresponde)
+        if (document.order_id) {
+            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-order-completed-notification`;
+            fetch(notificationUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                },
+                body: JSON.stringify({ order_id: document.order_id }),
+            }).catch((err) => console.error('[processFile] Error enviando notificacion:', err));
         }
 
         // 8. Registrar versión en document_versions

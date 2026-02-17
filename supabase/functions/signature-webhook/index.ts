@@ -174,6 +174,48 @@ serve(async (req) => {
                 // Check if all signed to update document status?
                 // (Existing logic handles sequential, but Simple Flow might be different.
                 //  For now, we just mark the signer. The existing logic handled 'sequential' notifications.)
+
+                // Verificar si el documento se completó (el trigger check_all_signed lo hace automáticamente)
+                // Esperamos un momento para que el trigger se ejecute
+                setTimeout(async () => {
+                    try {
+                        const { data: updatedDoc } = await supabaseClient
+                            .from("signing_documents")
+                            .select("status, order_id")
+                            .eq("id", document.id)
+                            .single();
+
+                        if (
+                            updatedDoc?.status === "completed" &&
+                            updatedDoc.order_id
+                        ) {
+                            const notificationUrl = `${
+                                Deno.env.get("SUPABASE_URL")
+                            }/functions/v1/send-order-completed-notification`;
+
+                            await fetch(notificationUrl, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${
+                                        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+                                    }`,
+                                },
+                                body: JSON.stringify({
+                                    order_id: updatedDoc.order_id,
+                                }),
+                            });
+                            console.log(
+                                "Order completion notification sent via fetch",
+                            );
+                        }
+                    } catch (err) {
+                        console.error(
+                            "Error checking document completion status:",
+                            err,
+                        );
+                    }
+                }, 1000);
             }
 
             return new Response("OK", {
@@ -310,6 +352,48 @@ serve(async (req) => {
                         result.next_signer_notified = true;
                     }
                 }
+
+                // Verificar si el documento se completó (el trigger check_all_signed lo hace automáticamente)
+                // Esperamos un momento para que el trigger se ejecute
+                setTimeout(async () => {
+                    try {
+                        const { data: updatedDoc } = await supabaseClient
+                            .from("signing_documents")
+                            .select("status, order_id")
+                            .eq("id", document.id)
+                            .single();
+
+                        if (
+                            updatedDoc?.status === "completed" &&
+                            updatedDoc.order_id
+                        ) {
+                            const notificationUrl = `${
+                                Deno.env.get("SUPABASE_URL")
+                            }/functions/v1/send-order-completed-notification`;
+
+                            await fetch(notificationUrl, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${
+                                        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+                                    }`,
+                                },
+                                body: JSON.stringify({
+                                    order_id: updatedDoc.order_id,
+                                }),
+                            });
+                            console.log(
+                                "Order completion notification sent via fetch",
+                            );
+                        }
+                    } catch (err) {
+                        console.error(
+                            "Error checking document completion status:",
+                            err,
+                        );
+                    }
+                }, 1000);
             }
 
             result.action = "signature_completed";

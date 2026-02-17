@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     // 3) Validar documento
     const { data: doc, error: docError } = await supabase
       .from('signing_documents')
-      .select('id, organization_id, send_to_signers_on_complete')
+      .select('id, organization_id, send_to_signers_on_complete, order_id')
       .eq('id', assignment.document_id)
       .single()
 
@@ -147,6 +147,19 @@ export async function POST(req: Request) {
 
     if (docUpdateError) {
       return NextResponse.json({ error: docUpdateError.message }, { status: 400 })
+    }
+
+    // Enviar notificación de pedido completado (si corresponde)
+    if (doc.order_id) {
+      const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-order-completed-notification`
+      fetch(notificationUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ order_id: doc.order_id }),
+      }).catch((err) => console.error('[notarized-upload] Error enviando notificacion:', err))
     }
 
     // 6) Registrar versión (document_versions)
