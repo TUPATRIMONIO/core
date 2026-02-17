@@ -151,15 +151,106 @@ export async function POST(req: Request) {
 
     // Enviar notificación de pedido completado (si corresponde)
     if (doc.order_id) {
-      const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-order-completed-notification`
-      fetch(notificationUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        },
-        body: JSON.stringify({ order_id: doc.order_id }),
-      }).catch((err) => console.error('[notarized-upload] Error enviando notificacion:', err))
+      const notificationUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-signing-notification`
+      
+      // 1. Obtener versiones del documento (firmado y notariado)
+      const { data: versions } = await supabase
+        .from('signing_document_versions')
+        .select('*')
+        .eq('document_id', doc.id)
+        .in('version_type', ['fully_signed', 'notarized'])
+        .order('version_number', { ascending: false })
+
+      const signedVersion = versions?.find((v) => v.version_type === 'fully_signed')
+      const notarizedVersion = versions?.find((v) => v.version_type === 'notarized')
+
+      // 2. Generar Signed URLs (60 min validez)
+      let signedUrl = ''
+      let notarizedUrl = ''
+
+      if (signedVersion?.file_path) {
+        const { data } = await service.storage
+          .from('docs-signed')
+          .createSignedUrl(signedVersion.file_path, 3600)
+        signedUrl = data?.signedUrl || ''
+      } else if (doc.current_signed_file_path) {
+        const { data } = await service.storage
+          .from('docs-signed')
+          .createSignedUrl(doc.current_signed_file_path, 3600)
+        signedUrl = data?.signedUrl || ''
+      }
+
+      if (notarizedVersion?.file_path) {
+        const { data } = await service.storage
+          .from('docs-notarized')
+          .createSignedUrl(notarizedVersion.file_path, 3600)
+        notarizedUrl = data?.signedUrl || ''
+      }
+
+      // 3. Obtener Gestor
+      const managerId = doc.manager_id || doc.created_by
+      let managerEmail = ''
+      let managerName = 'Gestor'
+
+      if (managerId) {
+        const { data: userData } = await supabase.auth.admin.getUserById(managerId)
+        managerEmail = userData?.user?.email || ''
+        
+        const { data: profileData } = await supabase
+          .from('users') // core.users via public view
+          .select('full_name')
+          .eq('id', managerId)
+          .single()
+        managerName = profileData?.full_name || 'Gestor'
+      }
+
+      // 4. Obtener Firmantes
+      const { data: signers } = await supabase
+        .from('signing_signers')
+        .select('email, full_name')
+        .eq('document_id', doc.id)
+        .neq('status', 'removed')
+
+      // 5. Preparar lista de destinatarios
+      const recipients = []
+
+      // Agregar gestor
+      if (managerEmail) {
+        recipients.push({ email: managerEmail, name: managerName, type: 'manager' })
+      }
+
+      // Agregar firmantes si corresponde
+      if (doc.send_to_signers_on_complete && signers) {
+        signers.forEach((s) => {
+          // Evitar duplicados si el gestor también es firmante
+          if (s.email !== managerEmail) {
+            recipients.push({ email: s.email, name: s.full_name, type: 'signer' })
+          }
+        })
+      }
+
+      // 6. Enviar notificaciones
+      for (const recipient of recipients) {
+        fetch(notificationUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            type: 'ORDER_COMPLETED',
+            recipient_email: recipient.email,
+            recipient_name: recipient.name,
+            document_title: doc.title, // doc.title existe en signing_documents
+            action_url: '', 
+            org_id: doc.organization_id,
+            document_id: doc.id,
+            signed_url: signedUrl,
+            notarized_url: notarizedUrl,
+            has_notary_service: true // Si estamos en notarized-upload, tiene notaria
+          }),
+        }).catch((err) => console.error('[notarized-upload] Error enviando notificacion:', err))
+      }
     }
 
     // 6) Registrar versión (document_versions)

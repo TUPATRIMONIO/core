@@ -19,7 +19,8 @@ interface NotificationPayload {
     | "NOTARY_NEEDS_CORRECTION"
     | "NOTARY_REJECTED"
     | "NOTARY_COMPLETED"
-    | "NOTARY_BATCH_COMPLETED";
+    | "NOTARY_BATCH_COMPLETED"
+    | "ORDER_COMPLETED";
   recipient_email: string;
   recipient_name: string;
   document_title: string;
@@ -27,6 +28,10 @@ interface NotificationPayload {
   org_id: string;
   document_id?: string;
   signer_id?: string;
+  signed_url?: string;
+  notarized_url?: string;
+  google_review_url?: string;
+  has_notary_service?: boolean;
   batch_results?: {
     total: number;
     successful: number;
@@ -646,6 +651,121 @@ ${results?.failed ? `\nDocumentos con error:\n${results.documents.filter(d => d.
 Ver dashboard: ${actionUrl}
 
 Este es un email automático de TuPatrimonio. Por favor, no respondas a este mensaje.
+        `,
+      };
+
+    case "ORDER_COMPLETED":
+      const signedUrl = payload.signed_url;
+      const notarizedUrl = payload.notarized_url;
+      const googleReviewUrl = payload.google_review_url || "https://g.page/Tu-patrimonio-chile/review?gm";
+      const hasNotaryService = payload.has_notary_service;
+
+      // Botones de descarga
+      let downloadButtons = "";
+      let textLinks = "";
+
+      if (signedUrl) {
+          downloadButtons += `
+              <a href="${signedUrl}" style="background-color: #800039; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 5px;">
+                  Descargar Firmado
+              </a>
+          `;
+          textLinks += `Descargar Firmado: ${signedUrl}\n`;
+      }
+
+      if (notarizedUrl) {
+          downloadButtons += `
+              <a href="${notarizedUrl}" style="background-color: #4a4a4a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin: 5px;">
+                  Descargar Notarizado
+              </a>
+          `;
+          textLinks += `Descargar Notarizado: ${notarizedUrl}\n`;
+      }
+
+      return {
+        subject: `Tu documento está listo: ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f9f9f9;">
+            
+            <!-- Header -->
+            <div style="background-color: #10b981; color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 0 0;">
+              <h1 style="margin: 0; font-size: 24px;">¡Tu documento está listo!</h1>
+            </div>
+
+            <div style="background-color: white; padding: 30px; margin: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <p style="font-size: 16px;">Hola <strong>${payload.recipient_name || "Usuario"}</strong>,</p>
+              
+              <p>Te informamos que el proceso para el documento <strong>"${payload.document_title}"</strong> ha finalizado exitosamente.</p>
+              
+              ${hasNotaryService ? 
+                  '<p>El documento ha sido firmado por todas las partes y legalizado ante notario.</p>' : 
+                  '<p>El documento ha sido firmado electrónicamente por todas las partes.</p>'
+              }
+
+              <!-- Download Section -->
+              <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f0f0f0; border-radius: 8px;">
+                  <p style="margin-top: 0; font-size: 14px; color: #666; margin-bottom: 15px;">Descarga tus documentos aquí (enlaces válidos por 60 min):</p>
+                  ${downloadButtons}
+              </div>
+
+              <!-- Review Section -->
+              <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 30px; text-align: center;">
+                  <h3 style="color: #800039; margin-bottom: 10px;">¿Qué te pareció nuestro servicio?</h3>
+                  
+                  <p style="font-size: 18px; margin-bottom: 5px;">⭐⭐⭐⭐⭐</p>
+                  
+                  <p style="font-size: 15px; color: #444; max-width: 400px; margin: 0 auto 20px auto;">
+                      Déjanos una reseña de <strong>5 estrellas en Google</strong> y obtén un <span style="color: #10b981; font-weight: bold;">20% de descuento</span> en tu próxima compra.
+                  </p>
+
+                  <a href="${googleReviewUrl}" style="background-color: #fff; color: #800039; border: 2px solid #800039; padding: 10px 20px; text-decoration: none; border-radius: 50px; display: inline-block; font-weight: bold; font-size: 14px;">
+                      Dejar mi reseña en Google
+                  </a>
+
+                  <p style="font-size: 12px; color: #888; margin-top: 15px;">
+                      *Para reclamar tu descuento, envíanos una captura de tu reseña a <a href="mailto:contacto@tupatrimonio.app" style="color: #888;">contacto@tupatrimonio.app</a>
+                  </p>
+              </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+              <p style="margin: 5px 0;">TuPatrimonio.app - Simplificando tus trámites legales</p>
+              <p style="margin: 5px 0;">Este es un mensaje automático, por favor no responder.</p>
+            </div>
+
+          </body>
+          </html>
+        `,
+        text: `
+¡Tu documento está listo!
+
+Hola ${payload.recipient_name || "Usuario"},
+
+Te informamos que el proceso para el documento "${payload.document_title}" ha finalizado exitosamente.
+
+${textLinks}
+
+(Los enlaces son válidos por 60 minutos)
+
+---
+¿Qué te pareció nuestro servicio?
+
+Déjanos una reseña de 5 estrellas en Google y obtén un 20% de descuento en tu próxima compra.
+
+Enlace para reseña: ${googleReviewUrl}
+
+Para reclamar tu descuento, envíanos una captura de tu reseña a contacto@tupatrimonio.app
+---
+
+TuPatrimonio.app
         `,
       };
 

@@ -246,26 +246,115 @@ async function processFile(
 
         // Enviar notificación de pedido completado (si corresponde)
         if (document.order_id) {
-            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-order-completed-notification`;
+            const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-signing-notification`;
             
-            // No usamos await para no bloquear el procesamiento
-            fetch(notificationUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-                },
-                body: JSON.stringify({ order_id: document.order_id }),
-            })
-            .then(async (resp) => {
-                if (!resp.ok) {
-                    const text = await resp.text();
-                    console.error(`[processFile] Error enviando notificación: ${resp.status} - ${text}`);
-                } else {
-                    console.log(`[processFile] Notificación enviada exitosamente para orden ${document.order_id}`);
-                }
-            })
-            .catch((err) => console.error('[processFile] Error de red enviando notificacion:', err));
+            // 1. Obtener versiones del documento (firmado y notariado)
+            const { data: versions } = await supabase
+                .from("signing_document_versions")
+                .select("*")
+                .eq("document_id", document.id)
+                .in("version_type", ["fully_signed", "notarized"])
+                .order("version_number", { ascending: false });
+
+            const signedVersion = versions?.find((v: any) => v.version_type === 'fully_signed');
+            const notarizedVersion = versions?.find((v: any) => v.version_type === 'notarized');
+
+            // 2. Generar Signed URLs (60 min validez)
+            let signedUrl = "";
+            let notarizedUrl = "";
+
+            if (signedVersion?.file_path) {
+                const { data } = await supabase.storage
+                    .from("docs-signed")
+                    .createSignedUrl(signedVersion.file_path, 3600);
+                signedUrl = data?.signedUrl || "";
+            } else if (document.current_signed_file_path) {
+                const { data } = await supabase.storage
+                    .from("docs-signed")
+                    .createSignedUrl(document.current_signed_file_path, 3600);
+                signedUrl = data?.signedUrl || "";
+            }
+
+            if (notarizedVersion?.file_path) {
+                const { data } = await supabase.storage
+                    .from("docs-notarized")
+                    .createSignedUrl(notarizedVersion.file_path, 3600);
+                notarizedUrl = data?.signedUrl || "";
+            }
+
+            // 3. Obtener Gestor
+            const managerId = document.manager_id || document.created_by;
+            let managerEmail = "";
+            let managerName = "Gestor";
+
+            if (managerId) {
+                const { data: userData } = await supabase.auth.admin.getUserById(managerId);
+                managerEmail = userData?.user?.email || "";
+                
+                const { data: profileData } = await supabase
+                    .from("users") // core.users via public view
+                    .select("full_name")
+                    .eq("id", managerId)
+                    .single();
+                managerName = profileData?.full_name || "Gestor";
+            }
+
+            // 4. Obtener Firmantes
+            const { data: signers } = await supabase
+                .from("signing_signers")
+                .select("email, full_name")
+                .eq("document_id", document.id)
+                .neq("status", "removed");
+
+            // 5. Preparar lista de destinatarios
+            const recipients = [];
+
+            // Agregar gestor
+            if (managerEmail) {
+                recipients.push({ email: managerEmail, name: managerName, type: "manager" });
+            }
+
+            // Agregar firmantes si corresponde
+            if (document.send_to_signers_on_complete && signers) {
+                signers.forEach((s: any) => {
+                    // Evitar duplicados si el gestor también es firmante
+                    if (s.email !== managerEmail) {
+                        recipients.push({ email: s.email, name: s.full_name, type: "signer" });
+                    }
+                });
+            }
+
+            // 6. Enviar notificaciones
+            for (const recipient of recipients) {
+                fetch(notificationUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+                    },
+                    body: JSON.stringify({ 
+                        type: "ORDER_COMPLETED",
+                        recipient_email: recipient.email,
+                        recipient_name: recipient.name,
+                        document_title: document.title,
+                        action_url: "", // No se usa en este template pero es requerido
+                        org_id: document.organization_id,
+                        document_id: document.id,
+                        signed_url: signedUrl,
+                        notarized_url: notarizedUrl,
+                        has_notary_service: document.notary_service !== 'none'
+                    }),
+                })
+                .then(async (resp) => {
+                    if (!resp.ok) {
+                        const text = await resp.text();
+                        console.error(`[processFile] Error enviando notificación a ${recipient.email}: ${resp.status} - ${text}`);
+                    } else {
+                        console.log(`[processFile] Notificación enviada a ${recipient.email}`);
+                    }
+                })
+                .catch((err) => console.error('[processFile] Error de red enviando notificacion:', err));
+            }
         }
 
         // 8. Registrar versión en document_versions
