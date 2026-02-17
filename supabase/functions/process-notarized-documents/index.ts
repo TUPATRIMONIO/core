@@ -189,14 +189,11 @@ async function processFile(
             );
         }
 
-        if (assignment.status === "completed") {
-            throw new Error("Este documento ya fue procesado");
-        }
-
         if (
             assignment.status !== "pending" &&
             assignment.status !== "in_progress" &&
-            assignment.status !== "received"
+            assignment.status !== "received" &&
+            assignment.status !== "completed"
         ) {
             throw new Error(`Estado inválido para procesar: ${assignment.status}`);
         }
