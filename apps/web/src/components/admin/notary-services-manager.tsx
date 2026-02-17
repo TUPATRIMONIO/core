@@ -5,14 +5,18 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Info, Save } from 'lucide-react'
 
 interface NotaryServiceProduct {
   id: string
@@ -68,6 +72,22 @@ export function NotaryServicesManager({
     })
   })
 
+  // Check if there are unsaved changes
+  const hasChanges = useMemo(() => {
+    return items.some((item) => {
+      const originalService = notaryServices.find(s => s.product_id === item.productId)
+      const originalIsActive = originalService?.is_active ?? false
+      const originalWeight = originalService?.weight ?? 1
+      const originalMaxDaily = originalService?.max_daily_documents?.toString() ?? ''
+
+      return (
+        item.isActive !== originalIsActive ||
+        (item.isActive && item.weight !== originalWeight) ||
+        (item.isActive && item.maxDailyDocuments !== originalMaxDaily)
+      )
+    })
+  }, [items, notaryServices])
+
   const totalsByProduct = useMemo(() => {
     const totals: Record<string, number> = { ...totalWeightByProduct }
     for (const item of items) {
@@ -78,11 +98,11 @@ export function NotaryServicesManager({
     return totals
   }, [items, totalWeightByProduct])
 
-  const handleToggle = (productId: string) => {
+  const handleToggle = (productId: string, checked: boolean) => {
     setItems((prev) =>
       prev.map((item) =>
         item.productId === productId
-          ? { ...item, isActive: !item.isActive }
+          ? { ...item, isActive: checked }
           : item
       )
     )
@@ -108,6 +128,8 @@ export function NotaryServicesManager({
   }
 
   const handleSave = async () => {
+    if (!hasChanges) return
+
     setIsSaving(true)
     try {
       const response = await fetch(`/api/admin/notaries/${notaryId}/services`, {
@@ -129,12 +151,15 @@ export function NotaryServicesManager({
       }
 
       toast.success('Servicios actualizados')
+      // Update original weights to current ones to reset calculation base
       setItems((prev) =>
         prev.map((item) => ({
           ...item,
           originalWeight: item.isActive ? item.weight : 0,
         }))
       )
+      // Force refresh of the page to get latest data from server would be ideal, 
+      // but for now we rely on local state update which is enough for the UI
     } catch (error: any) {
       toast.error(error.message || 'Error guardando servicios')
     } finally {
@@ -143,111 +168,153 @@ export function NotaryServicesManager({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 relative pb-20">
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {isAdmin 
             ? 'Activa los servicios y define el peso para ajustar la distribución.'
-            : 'Los servicios activos que tu notaría puede recibir. La configuración de distribución es gestionada por los administradores.'
+            : 'Los servicios activos que tu notaría puede recibir.'
           }
         </div>
-        {isAdmin && (
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white"
-          >
-            {isSaving ? 'Guardando...' : 'Guardar cambios'}
-          </Button>
-        )}
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Servicio</TableHead>
-            <TableHead>Activo</TableHead>
-            {isAdmin && <TableHead>Peso</TableHead>}
-            {isAdmin && <TableHead>Límite diario</TableHead>}
-            {isAdmin && <TableHead>Proporción</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((product) => {
-            const item = items.find((entry) => entry.productId === product.id)
-            const totalWeight = totalsByProduct[product.id] || 0
-            const weight = item?.isActive ? item?.weight || 0 : 0
-            const ratio = totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0
 
-            return (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <div className="font-medium">{product.name}</div>
-                  <div className="text-xs text-muted-foreground">{product.country_code}</div>
-                </TableCell>
-                <TableCell>
+      <div className="grid gap-4 md:grid-cols-2">
+        {products.map((product) => {
+          const item = items.find((entry) => entry.productId === product.id)
+          if (!item) return null
+
+          const totalWeight = totalsByProduct[product.id] || 0
+          const weight = item.isActive ? item.weight : 0
+          const ratio = totalWeight > 0 ? Math.round((weight / totalWeight) * 1000) / 10 : 0
+
+          return (
+            <Card key={product.id} className={`transition-all duration-200 ${item.isActive ? 'border-[var(--tp-buttons)]/20 shadow-sm' : 'opacity-80'}`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                  <CardTitle className="text-base font-medium leading-none">
+                    {product.name}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">{product.country_code}</p>
+                </div>
+                {isAdmin ? (
+                  <Switch
+                    checked={item.isActive}
+                    onCheckedChange={(checked) => handleToggle(product.id, checked)}
+                  />
+                ) : (
+                  <Badge variant={item.isActive ? "default" : "outline"} className={item.isActive ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" : ""}>
+                    {item.isActive ? "Activo" : "Inactivo"}
+                  </Badge>
+                )}
+              </CardHeader>
+              
+              {item.isActive && (
+                <CardContent className="pt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <Separator />
+                  
                   {isAdmin ? (
-                    <button
-                      type="button"
-                      onClick={() => handleToggle(product.id)}
-                      className="text-sm"
-                    >
-                      {item?.isActive ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline">
-                          Activo
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">Inactivo</Badge>
-                      )}
-                    </button>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`weight-${product.id}`} className="text-xs font-medium">
+                            Peso
+                          </Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">Define la probabilidad de asignación frente a otras notarías.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <Input
+                          id={`weight-${product.id}`}
+                          type="number"
+                          min={1}
+                          value={item.weight}
+                          onChange={(e) => handleWeightChange(product.id, e.target.value)}
+                          className="h-8"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`limit-${product.id}`} className="text-xs font-medium">
+                            Límite diario
+                          </Label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">Cantidad máxima de documentos por día. Vacío es sin límite.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <Input
+                          id={`limit-${product.id}`}
+                          type="number"
+                          min={1}
+                          value={item.maxDailyDocuments}
+                          onChange={(e) => handleMaxDailyChange(product.id, e.target.value)}
+                          placeholder="∞"
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
                   ) : (
-                    <div className="text-sm">
-                      {item?.isActive ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-200" variant="outline">
-                          Activo
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">Inactivo</Badge>
-                      )}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                       <div>
+                         <span className="text-muted-foreground text-xs block">Límite diario</span>
+                         <span className="font-medium">{item.maxDailyDocuments || 'Sin límite'}</span>
+                       </div>
                     </div>
                   )}
-                </TableCell>
-                {isAdmin && (
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={item?.weight ?? 1}
-                      onChange={(event) => handleWeightChange(product.id, event.target.value)}
-                      className="w-24"
-                      disabled={!item?.isActive}
-                    />
-                  </TableCell>
-                )}
-                {isAdmin && (
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={item?.maxDailyDocuments ?? ''}
-                      onChange={(event) => handleMaxDailyChange(product.id, event.target.value)}
-                      className="w-28"
-                      placeholder="Sin límite"
-                      disabled={!item?.isActive}
-                    />
-                  </TableCell>
-                )}
-                {isAdmin && (
-                  <TableCell>
-                    <span className="text-sm">
-                      {item?.isActive ? `${ratio}%` : '—'}
-                    </span>
-                  </TableCell>
-                )}
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Proporción de asignación</span>
+                      <span className="font-medium">{ratio}%</span>
+                    </div>
+                    <Progress value={ratio} className="h-2" />
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+
+      {isAdmin && hasChanges && (
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 animate-in slide-in-from-bottom-4">
+          <div className="bg-background border shadow-lg rounded-full px-6 py-3 flex items-center gap-4 max-w-md w-full justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+              <span className="text-sm font-medium">Cambios sin guardar</span>
+            </div>
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              size="sm"
+              className="bg-[var(--tp-buttons)] hover:bg-[var(--tp-buttons-hover)] text-white rounded-full px-6"
+            >
+              {isSaving ? (
+                'Guardando...'
+              ) : (
+                <>
+                  <Save className="mr-2 h-3 w-3" />
+                  Guardar
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -104,6 +104,7 @@ export default async function NotaryServicesPage({
               products={data.products}
               notaryServices={data.notaryServices}
               totalWeightByProduct={data.totalWeightByProduct}
+              isAdmin={true}
             />
           </CardContent>
         </Card>
