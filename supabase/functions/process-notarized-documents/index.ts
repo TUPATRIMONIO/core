@@ -244,8 +244,11 @@ async function processFile(
             throw new Error(`Error actualizando documento: ${docUpdateError.message}`);
         }
 
+        console.log(`[processFile] Order ID para notificacion: ${document.order_id}`);
+
         // Enviar notificación de pedido completado (si corresponde)
         if (document.order_id) {
+            console.log(`[processFile] Iniciando envio de notificacion para orden ${document.order_id}`);
             const notificationUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-signing-notification`;
             
             // 1. Obtener versiones del documento (firmado y notariado)
@@ -326,7 +329,9 @@ async function processFile(
 
             // 6. Enviar notificaciones
             for (const recipient of recipients) {
-                fetch(notificationUrl, {
+                console.log(`[processFile] Enviando a ${recipient.email} (${recipient.type})`);
+                // Usamos await para asegurar que el fetch se complete antes de que la función lambda termine
+                await fetch(notificationUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -355,6 +360,8 @@ async function processFile(
                 })
                 .catch((err) => console.error('[processFile] Error de red enviando notificacion:', err));
             }
+        } else {
+            console.warn(`[processFile] No se envia notificacion: documento sin order_id`);
         }
 
         // 8. Registrar versión en document_versions
