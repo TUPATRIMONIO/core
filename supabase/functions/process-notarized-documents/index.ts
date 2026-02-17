@@ -1,8 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
-import jsQR from "https://esm.sh/jsqr@1.4.0";
-import * as pdfjs from "https://esm.sh/pdfjs-dist@3.11.174/legacy/build/pdf.mjs";
+import { getDocument } from "https://esm.sh/pdfjs-serverless@1.1.0";
 
 // Configuración CORS
 const corsHeaders = {
@@ -17,32 +15,32 @@ interface ProcessRequest {
 }
 
 /**
- * Extrae texto de un PDF usando pdf.js (Nivel 1 - Más confiable)
+ * Extrae texto de un PDF usando pdfjs-serverless (Nivel 1 - Más confiable)
  * Descomprime content streams y extrae texto correctamente de todas las páginas
  */
 async function extractTextWithPdfJs(pdfBytes: Uint8Array): Promise<string[]> {
     try {
-        console.log(`[extractTextWithPdfJs] Cargando PDF para extracción de texto...`);
-        const pdf = await pdfjs.getDocument({ data: pdfBytes }).promise;
+        console.log("[extractTextWithPdfJs] Cargando PDF para extracción de texto...");
+        const pdf = await getDocument({ data: pdfBytes, useSystemFonts: true }).promise;
         console.log(`[extractTextWithPdfJs] PDF cargado, ${pdf.numPages} páginas`);
-        
+
         const pageTexts: string[] = [];
-        
-        // Extraer texto de todas las páginas
+
         for (let i = 1; i <= pdf.numPages; i++) {
             try {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
                 const text = textContent.items
                     .map((item: any) => item.str)
-                    .join(' ');
+                    .join(" ");
                 pageTexts.push(text);
+                console.log(`[extractTextWithPdfJs] Página ${i}: ${text.length} chars extraídos`);
             } catch (pageError) {
                 console.warn(`[extractTextWithPdfJs] Error en página ${i}:`, pageError);
-                pageTexts.push(""); // Placeholder para mantener índice
+                pageTexts.push("");
             }
         }
-        
+
         return pageTexts;
     } catch (error) {
         console.error("[extractTextWithPdfJs] Error:", error);
@@ -51,105 +49,43 @@ async function extractTextWithPdfJs(pdfBytes: Uint8Array): Promise<string[]> {
 }
 
 /**
- * Renderiza una página de PDF a ImageData para lectura de QR usando pdf.js (Nivel 2)
+ * Extrae texto de un PDF buscando en bytes crudos (Nivel 2 - Fallback)
  */
-async function renderPageToImageData(
-    pdfBytes: Uint8Array,
-    pageNum: number = 1,
-): Promise<{ width: number; height: number; data: Uint8ClampedArray } | null> {
+function extractTextFromRawBytes(pdfBytes: Uint8Array): string {
     try {
-        // Verificar si OffscreenCanvas está disponible (puede fallar en algunos entornos Deno)
-        if (typeof OffscreenCanvas === 'undefined') {
-            console.warn("[renderPageToImageData] OffscreenCanvas no disponible en este entorno");
-            return null;
-        }
-
-        console.log(`[renderPageToImageData] Cargando PDF página ${pageNum}...`);
-        
-        const pdf = await pdfjs.getDocument({ data: pdfBytes }).promise;
-        
-        if (pageNum > pdf.numPages) {
-            console.warn(`[renderPageToImageData] Página ${pageNum} fuera de rango (total ${pdf.numPages})`);
-            return null;
-        }
-
-        const page = await pdf.getPage(pageNum);
-        
-        // Escala 3.0 para mejor resolución del QR
-        const scale = 3.0;
-        const viewport = page.getViewport({ scale });
-        
-        console.log(`[renderPageToImageData] Viewport: ${viewport.width}x${viewport.height}`);
-        
-        // Crear un canvas virtual usando OffscreenCanvas
-        const canvas = new OffscreenCanvas(
-            Math.floor(viewport.width),
-            Math.floor(viewport.height)
-        );
-        const context = canvas.getContext('2d');
-        
-        if (!context) {
-            console.error("[renderPageToImageData] No se pudo crear contexto 2D");
-            return null;
-        }
-        
-        await page.render({
-            canvasContext: context as any,
-            viewport: viewport,
-        }).promise;
-        
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        
-        return {
-            width: imageData.width,
-            height: imageData.height,
-            data: imageData.data,
-        };
-    } catch (error) {
-        console.error(`[renderPageToImageData] Error en página ${pageNum}:`, error);
-        return null;
-    }
-}
-
-/**
- * Extrae texto de un PDF (Nivel 3 - Fallback bytes crudos)
- * Busca en el contenido binario patrones de texto
- */
-function extractTextFromPDF(pdfBytes: Uint8Array): string {
-    try {
-        // Convertir bytes a string usando latin1 para preservar todos los bytes
         const rawContent = Array.from(pdfBytes)
-            .map(byte => String.fromCharCode(byte))
-            .join('');
-        
-        // También intentamos con UTF-8 para texto legible
-        let utf8Content = '';
+            .map((byte) => String.fromCharCode(byte))
+            .join("");
+
+        let utf8Content = "";
         try {
-            utf8Content = new TextDecoder('utf-8', { fatal: false }).decode(pdfBytes);
+            utf8Content = new TextDecoder("utf-8", { fatal: false }).decode(pdfBytes);
         } catch {
             // Ignorar errores de decodificación
         }
-        
-        // Combinar ambos para mayor cobertura
-        return rawContent + '\n' + utf8Content;
+
+        return rawContent + "\n" + utf8Content;
     } catch (error) {
-        console.error("[extractTextFromPDF] Error:", error);
+        console.error("[extractTextFromRawBytes] Error:", error);
         return "";
     }
 }
 
 /**
- * Busca QR Identifier en un PDF con estrategia de 3 niveles
+ * Busca QR Identifier en un PDF con estrategia de 2 niveles
+ *
+ * Nivel 1: Extracción de texto con pdfjs-serverless (descomprime streams, más confiable)
+ * Nivel 2: Búsqueda en bytes crudos del PDF (fallback)
  */
 async function searchQRInPDF(pdfBytes: Uint8Array): Promise<{ identifier: string | null; debug: string }> {
     const debugInfo: string[] = [];
     const qrIdentifierPattern = /DOC-[A-F0-9]{8}-[A-F0-9]{8}/gi;
-    
+
     try {
-        // --- NIVEL 1: Extracción de texto con pdf.js (Más confiable y rápido) ---
-        console.log("[searchQRInPDF] Nivel 1: Buscando en texto extraído con pdf.js...");
+        // --- NIVEL 1: Extracción de texto con pdfjs-serverless ---
+        console.log("[searchQRInPDF] Nivel 1: Extrayendo texto con pdfjs-serverless...");
         const pageTexts = await extractTextWithPdfJs(pdfBytes);
-        
+
         for (let i = 0; i < pageTexts.length; i++) {
             const matches = pageTexts[i].match(qrIdentifierPattern);
             if (matches && matches.length > 0) {
@@ -160,59 +96,23 @@ async function searchQRInPDF(pdfBytes: Uint8Array): Promise<{ identifier: string
         }
         debugInfo.push(`Nivel 1: No encontrado en ${pageTexts.length} páginas`);
 
-        // --- NIVEL 2: Lectura de QR por imagen (Primeras 3 páginas) ---
-        console.log("[searchQRInPDF] Nivel 2: Intentando leer QR de imágenes...");
-        
-        // Probar hasta las primeras 3 páginas (por si agregaron carátula de notaría al inicio)
-        const pagesToCheck = Math.min(3, pageTexts.length || 3);
-        
-        for (let pageNum = 1; pageNum <= pagesToCheck; pageNum++) {
-            try {
-                const imageData = await renderPageToImageData(pdfBytes, pageNum);
-                
-                if (imageData) {
-                    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-                    
-                    if (qrCode && qrCode.data) {
-                        console.log(`[searchQRInPDF] QR detectado en página ${pageNum}: ${qrCode.data}`);
-                        
-                        const match = qrCode.data.match(qrIdentifierPattern);
-                        if (match && match[0]) {
-                            const identifier = match[0].toUpperCase();
-                            console.log(`[searchQRInPDF] ✓ Encontrado en Nivel 2 (Página ${pageNum}): ${identifier}`);
-                            return { identifier, debug: `Nivel 2 (QR Pág ${pageNum})` };
-                        } else {
-                            debugInfo.push(`Nivel 2 Pág ${pageNum}: QR sin formato válido`);
-                        }
-                    } else {
-                        debugInfo.push(`Nivel 2 Pág ${pageNum}: Sin QR`);
-                    }
-                } else {
-                    debugInfo.push(`Nivel 2 Pág ${pageNum}: Fallo render`);
-                }
-            } catch (err) {
-                debugInfo.push(`Nivel 2 Pág ${pageNum}: Error ${err}`);
-            }
-        }
-
-        // --- NIVEL 3: Búsqueda en bytes crudos (Fallback final) ---
-        console.log("[searchQRInPDF] Nivel 3: Buscando en bytes crudos...");
-        const rawText = extractTextFromPDF(pdfBytes);
+        // --- NIVEL 2: Búsqueda en bytes crudos (Fallback) ---
+        console.log("[searchQRInPDF] Nivel 2: Buscando en bytes crudos...");
+        const rawText = extractTextFromRawBytes(pdfBytes);
         const rawMatches = rawText.match(qrIdentifierPattern);
-        
+
         if (rawMatches && rawMatches.length > 0) {
             const identifier = rawMatches[0].toUpperCase();
-            console.log(`[searchQRInPDF] ✓ Encontrado en Nivel 3: ${identifier}`);
-            return { identifier, debug: `Nivel 3 (Bytes crudos)` };
+            console.log(`[searchQRInPDF] ✓ Encontrado en Nivel 2: ${identifier}`);
+            return { identifier, debug: `Nivel 2 (Bytes crudos)` };
         }
-        debugInfo.push(`Nivel 3: No encontrado`);
+        debugInfo.push("Nivel 2: No encontrado");
 
         console.log("[searchQRInPDF] ❌ No se encontró QR Identifier en ningún nivel");
-        return { identifier: null, debug: debugInfo.join(' | ') };
-
+        return { identifier: null, debug: debugInfo.join(" | ") };
     } catch (error) {
         console.error("[searchQRInPDF] Error general:", error);
-        return { identifier: null, debug: `Error General: ${error}` };
+        return { identifier: null, debug: `Error: ${error}` };
     }
 }
 
@@ -248,7 +148,7 @@ async function processFile(
 
         // 2. Buscar QR Identifier en el PDF (formato: DOC-XXXXXXXX-XXXXXXXX)
         const { identifier: qrIdentifier, debug: qrDebug } = await searchQRInPDF(pdfBytes);
-        
+
         console.log(`[processFile] Debug QR: ${qrDebug}`);
 
         if (!qrIdentifier) {
