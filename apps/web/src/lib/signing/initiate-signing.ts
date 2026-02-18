@@ -105,34 +105,9 @@ export async function initiateSigningProcess(
                         note: "Firma Simple (FES) - Verificación CDS omitida",
                     });
 
-                    // Si es fes_claveunica_cl, crear solicitud de validación en Identyz
-                    if (productSlug === "fes_claveunica_cl" && signer.rut) {
-                        try {
-                            const identyzUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/identyz-claveunica`;
-                            const identyzResp = await fetch(identyzUrl, {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-                                },
-                                body: JSON.stringify({
-                                    signer_id: signer.id,
-                                    signer_rut: signer.rut,
-                                    signer_name: signer.full_name,
-                                    document_id: documentId,
-                                    signing_token: signer.signing_token,
-                                }),
-                            });
-                            const identyzResult = await identyzResp.json();
-                            if (identyzResult.success) {
-                                console.log(`[initiate-signing] ClaveÚnica solicitada para ${signer.email}`);
-                            } else {
-                                console.error(`[initiate-signing] Error Identyz para ${signer.email}:`, identyzResult.error);
-                            }
-                        } catch (identyzErr: any) {
-                            console.error(`[initiate-signing] Error llamando identyz-claveunica para ${signer.email}:`, identyzErr.message);
-                        }
-                    }
+                    // Si es fes_claveunica_cl, no hacemos nada aquí.
+                    // La solicitud a Identyz se genera on-demand cuando el firmante visita el portal.
+                    // Esto hace el sistema más resiliente a fallos de API.
 
                     continue;
                 }

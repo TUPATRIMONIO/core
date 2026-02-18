@@ -106,6 +106,44 @@ export default async function SigningPage({ params }: PageProps) {
   const isFES = productSlug.startsWith("fes"); // fes_cl, fesb_cl, fes_claveunica_cl
   const isClaveunica = productSlug === "fes_claveunica_cl";
 
+  // Generación on-demand del enlace ClaveÚnica
+  if (isClaveunica && signerRaw.status !== "signed") {
+    const needsGeneration = !signerRaw.claveunica_signer_url || signerRaw.claveunica_status === "failed";
+    
+    if (needsGeneration && signerRaw.rut) {
+      try {
+        console.log(`[page.tsx] Generando enlace ClaveÚnica on-demand para ${signerRaw.email}`);
+        const resp = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/identyz-claveunica`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({
+            signer_id: signerRaw.id,
+            signer_rut: signerRaw.rut,
+            signer_name: signerRaw.full_name,
+            document_id: document.id,
+            signing_token: token,
+          }),
+        });
+        
+        const result = await resp.json();
+        
+        if (result.success) {
+          console.log(`[page.tsx] Enlace generado exitosamente: ${result.signerURL}`);
+          // Actualizar objeto local para pasarlo al cliente
+          signerRaw.claveunica_signer_url = result.signerURL;
+          signerRaw.claveunica_status = "pending";
+        } else {
+          console.error("[page.tsx] Error en respuesta Identyz:", result.error);
+        }
+      } catch (e) {
+        console.error("[page.tsx] Error generando enlace ClaveUnica:", e);
+      }
+    }
+  }
+
   // Construir objeto completo para el cliente
   const signer = {
     ...signerRaw,
