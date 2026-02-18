@@ -82,13 +82,18 @@ serve(async (req) => {
             });
         }
 
-        const apiKey = Deno.env.get("IDENTYZ_API_KEY");
+        let apiKey = Deno.env.get("IDENTYZ_API_KEY");
         if (!apiKey) {
             console.error("[identyz-webhook] IDENTYZ_API_KEY no configurada");
             return new Response(JSON.stringify({ received: true }), {
                 status: 200,
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
+        }
+
+        // Sanitize API Key: remove "Bearer " prefix if present
+        if (apiKey.toLowerCase().startsWith("bearer ")) {
+            apiKey = apiKey.substring(7).trim();
         }
 
         const statusResponse = await fetch(

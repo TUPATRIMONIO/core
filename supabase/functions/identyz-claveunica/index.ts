@@ -34,13 +34,18 @@ serve(async (req) => {
     }
 
     try {
-        const apiKey = Deno.env.get("IDENTYZ_API_KEY");
+        let apiKey = Deno.env.get("IDENTYZ_API_KEY");
         const webhookSecretSuffix = Deno.env.get("IDENTYZ_WEBHOOK_SECRET_SUFFIX");
         const supabaseUrl = Deno.env.get("SUPABASE_URL");
         const publicAppUrl = Deno.env.get("PUBLIC_APP_URL") || "https://tupatrimonio.cl";
 
         if (!apiKey) {
             throw new Error("IDENTYZ_API_KEY no configurada");
+        }
+
+        // Sanitize API Key: remove "Bearer " prefix if present
+        if (apiKey.toLowerCase().startsWith("bearer ")) {
+            apiKey = apiKey.substring(7).trim();
         }
         if (!supabaseUrl) {
             throw new Error("SUPABASE_URL no configurada");
