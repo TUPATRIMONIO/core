@@ -1,4 +1,9 @@
 // =====================================================
+// DEPRECATED: This function is no longer used.
+// Webhooks are now handled by Next.js API route: /api/webhooks/veriff
+// =====================================================
+
+// =====================================================
 // Edge Function: veriff-webhook
 // Description: Procesa webhooks de Veriff para actualizar sesiones de verificación
 // Created: 2026-02-04

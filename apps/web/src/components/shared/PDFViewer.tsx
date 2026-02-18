@@ -1,6 +1,7 @@
 "use client";
 
 import { PDFCanvasViewer } from "@/components/shared/PDFCanvasViewer";
+import { PDFErrorBoundary } from "./PDFErrorBoundary";
 
 interface PDFViewerProps {
   url: string;
@@ -14,11 +15,13 @@ interface PDFViewerProps {
 export default function PDFViewer({ url, className = "" }: PDFViewerProps) {
   return (
     <div className={`flex flex-col ${className}`}>
-      <PDFCanvasViewer 
-        url={url} 
-        className="h-full border-0 rounded-lg"
-        title="Vista previa del documento"
-      />
+      <PDFErrorBoundary>
+        <PDFCanvasViewer 
+          url={url} 
+          className="h-full border-0 rounded-lg"
+          title="Vista previa del documento"
+        />
+      </PDFErrorBoundary>
     </div>
   );
 }

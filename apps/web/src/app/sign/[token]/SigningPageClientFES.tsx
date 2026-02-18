@@ -74,7 +74,6 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   useEffect(() => {
     if (signer.status === "signed") {
       setStep("signed");
-      setCacheBuster(Date.now());
     }
   }, [signer.status]);
 

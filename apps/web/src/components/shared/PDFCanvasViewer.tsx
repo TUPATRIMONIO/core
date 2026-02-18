@@ -286,6 +286,7 @@ export function PDFCanvasViewer({
           </div>
         ) : (
           <Document
+            key={url}
             file={url}
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}

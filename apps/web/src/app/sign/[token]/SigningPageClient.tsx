@@ -74,7 +74,6 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     // Si el firmante ya firmó, saltar verificación y mostrar estado firmado
     if (signer.status === "signed") {
       setStep("signed");
-      setCacheBuster(Date.now());
       return;
     }
     checkVigencia();

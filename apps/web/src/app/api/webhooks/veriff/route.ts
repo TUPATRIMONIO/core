@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { processVeriffSession } from '@/lib/veriff/process-verification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     const adminClient = createServiceRoleClient();
     const { data: config } = await adminClient
       .from('identity_verification_provider_configs')
-      .select('credentials')
+      .select('id, provider_id, credentials, organization_id')
       .eq('is_active', true)
       .limit(1)
       .single();
@@ -55,33 +56,81 @@ export async function POST(request: NextRequest) {
 
     const eventType = `${feature}.${action}`;
 
-    // Guardar en cola de sincronización
-    const { error: insertError } = await adminClient
+    // Guardar en cola de sincronización (upsert para manejar reintentos o nuevos eventos)
+    const { data: queuedItem, error: upsertError } = await adminClient
       .from('pending_veriff_syncs')
-      .insert({
+      .upsert({
         veriff_session_id: veriffSessionId,
         event_type: eventType,
         event_payload: payload,
         status: 'pending',
-      })
+        error_message: null,
+        processed_at: null,
+        retry_count: 0
+      }, { onConflict: 'veriff_session_id' })
       .select()
       .single();
 
-    if (insertError) {
-      // Si ya existe (UNIQUE constraint), ignorar
-      if (insertError.code === '23505') {
-        console.log(`Session ${veriffSessionId} ya está en la cola`);
-        return NextResponse.json({ message: 'Already queued' });
-      }
-      
-      console.error('Error guardando webhook:', insertError);
+    if (upsertError) {
+      console.error('Error guardando webhook:', upsertError);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    console.log(`Webhook recibido: ${eventType} para session ${veriffSessionId}`);
+    console.log(`Webhook recibido y encolado: ${eventType} para session ${veriffSessionId}`);
+
+    // Intentar procesar inmediatamente
+    // No esperamos el resultado para no bloquear el webhook response demasiado tiempo,
+    // pero idealmente deberíamos esperar un poco o lanzar en background.
+    // Vercel functions tienen límite de tiempo, así que mejor esperar y responder.
+    try {
+      const result = await processVeriffSession(
+        veriffSessionId,
+        {
+          apiKey: config.credentials.api_key,
+          apiSecret: config.credentials.api_secret,
+          organizationId: config.organization_id,
+          providerId: config.provider_id,
+          providerConfigId: config.id,
+        },
+        eventType
+      );
+
+      if (result.success) {
+        // Marcar como procesado en la cola
+        await adminClient
+          .from('pending_veriff_syncs')
+          .update({ 
+            status: 'processed',
+            processed_at: new Date().toISOString(),
+          })
+          .eq('id', queuedItem.id);
+        
+        console.log(`✅ Procesamiento inmediato exitoso para ${veriffSessionId}`);
+      } else {
+        console.warn(`⚠️ Procesamiento inmediato falló para ${veriffSessionId}, quedará para el cron: ${result.error}`);
+        // Opcional: actualizar error_message en la cola
+        await adminClient
+          .from('pending_veriff_syncs')
+          .update({ 
+            error_message: result.error,
+            // No cambiamos status a failed para que el cron lo intente de nuevo si es necesario,
+            // aunque el cron busca 'pending'. Si falló aquí, quizás es transitorio.
+          })
+          .eq('id', queuedItem.id);
+      }
+    } catch (processError: any) {
+      console.error(`❌ Error crítico en procesamiento inmediato de ${veriffSessionId}:`, processError);
+      // Actualizar error en la cola
+      await adminClient
+          .from('pending_veriff_syncs')
+          .update({ 
+            error_message: processError.message || 'Unknown error',
+          })
+          .eq('id', queuedItem.id);
+    }
 
     return NextResponse.json({ 
-      message: 'Webhook received',
+      message: 'Webhook received and processed',
       sessionId: veriffSessionId,
       eventType,
     });
