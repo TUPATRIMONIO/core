@@ -77,17 +77,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }
   }, [signer.status]);
 
-  // 2. Si es ClaveÚnica y ya está verificado, ir directo a identity_validation. Si está pendiente, ir a waiting.
+  // 2. Si es ClaveÚnica y ya está verificado, precargar datos (sin saltar de paso)
   useEffect(() => {
-    if (isClaveunica) {
-      if (signer.claveunica_status === "verified") {
-        setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
-        setConfirmedIdType("rut");
-        setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
-        setStep("identity_validation");
-      } else if (signer.claveunica_status === "pending") {
-        setStep("claveunica_waiting");
-      }
+    if (isClaveunica && signer.claveunica_status === "verified") {
+      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
+      setConfirmedIdType("rut");
+      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
     }
   }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
 
@@ -224,7 +219,17 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                 </p>
 
                 <button
-                  onClick={() => setStep(isClaveunica ? "claveunica_validation" : "identity_validation")}
+                  onClick={() => {
+                    if (!isClaveunica) {
+                      setStep("identity_validation");
+                    } else if (signer.claveunica_status === "verified") {
+                      setStep("identity_validation");
+                    } else if (signer.claveunica_status === "pending") {
+                      setStep("claveunica_waiting");
+                    } else {
+                      setStep("claveunica_validation");
+                    }
+                  }}
                   className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors"
                 >
                   Continuar
