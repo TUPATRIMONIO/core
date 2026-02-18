@@ -78,13 +78,18 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   }, [signer.status]);
 
   // 2. Si es ClaveÚnica y ya está verificado, precargar datos (sin saltar de paso)
+  // Si está pendiente y estamos en reviewing, saltar a waiting (solo para ClaveÚnica)
   useEffect(() => {
-    if (isClaveunica && signer.claveunica_status === "verified") {
-      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
-      setConfirmedIdType("rut");
-      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
+    if (isClaveunica) {
+      if (signer.claveunica_status === "verified") {
+        setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
+        setConfirmedIdType("rut");
+        setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
+      } else if (signer.claveunica_status === "pending" && step === "reviewing") {
+        setStep("claveunica_waiting");
+      }
     }
-  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
+  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut, step]);
 
   // 3. Si vuelve de ClaveÚnica con ?claveunica=completed, ir a waiting
   useEffect(() => {
@@ -220,14 +225,16 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
                 <button
                   onClick={() => {
-                    if (!isClaveunica) {
-                      setStep("identity_validation");
-                    } else if (signer.claveunica_status === "verified") {
-                      setStep("identity_validation");
-                    } else if (signer.claveunica_status === "pending") {
-                      setStep("claveunica_waiting");
+                    if (isClaveunica) {
+                      if (signer.claveunica_status === "verified") {
+                        setStep("identity_validation");
+                      } else if (signer.claveunica_status === "pending") {
+                        setStep("claveunica_waiting");
+                      } else {
+                        setStep("claveunica_validation");
+                      }
                     } else {
-                      setStep("claveunica_validation");
+                      setStep("identity_validation");
                     }
                   }}
                   className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors"
