@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import SigningPageClient from "./SigningPageClient";
 import SigningPageClientFES from "./SigningPageClientFES";
@@ -100,10 +101,18 @@ export default async function SigningPage({ params }: PageProps) {
       }
   }
 
+  // Determinar tipo de firma
+  const productSlug = document.metadata?.signature_product?.slug || "";
+  const isFES = productSlug.startsWith("fes"); // fes_cl, fesb_cl, fes_claveunica_cl
+  const isClaveunica = productSlug === "fes_claveunica_cl";
+
   // Construir objeto completo para el cliente
   const signer = {
     ...signerRaw,
     previousSignatureBase64,
+    is_claveunica: isClaveunica,
+    claveunica_status: signerRaw.claveunica_status || "none",
+    claveunica_signer_url: signerRaw.claveunica_signer_url || null,
     document: {
       ...document,
       order_number: orderNumber,
@@ -111,13 +120,17 @@ export default async function SigningPage({ params }: PageProps) {
     }
   };
 
-  // Determinar tipo de firma
-  const productSlug = document.metadata?.signature_product?.slug || "";
-  const isFES = productSlug.startsWith("fes"); // fes_cl, fesb_cl, fes_claveunica_cl
-
   // Renderizar componente cliente correspondiente
   if (isFES) {
-    return <SigningPageClientFES signer={signer} />;
+    return (
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="animate-pulse text-[var(--tp-brand)]">Cargando...</div>
+        </div>
+      }>
+        <SigningPageClientFES signer={signer} />
+      </Suspense>
+    );
   }
 
   return <SigningPageClient signer={signer} />;

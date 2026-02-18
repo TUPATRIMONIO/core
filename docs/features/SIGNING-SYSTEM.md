@@ -12,10 +12,13 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 2.  **Edge Functions**:
     *   `cds-signature`: Integración con CDS para Firma Electrónica Avanzada (FEA).
     *   `fes-signature`: Integración con API propia para Firma Electrónica Simple (FES).
+    *   `identyz-claveunica`: Crea solicitud de validación ClaveÚnica en Identyz (para `fes_claveunica_cl`).
+    *   `identyz-webhook`: Recibe notificación de Identyz y actualiza firmantes con datos verificados.
     *   `pdf-merge-with-cover`: Generación de portadas con QR y consolidación de PDFs.
 3.  **API Routes (Next.js)**:
     *   `/api/signing/execute`: Ejecución de firma FEA.
-    *   `/api/signing/execute-fes`: Ejecución de firma FES con validación de identidad.
+    *   `/api/signing/execute-fes`: Ejecución de firma FES con validación de identidad y soporte de imagen de firma.
+    *   `/api/signing/claveunica-status`: Estado de validación ClaveÚnica (polling).
     *   `/api/signing/initiate`: Orquestador del inicio del proceso de firma.
     *   `/api/signing/client-ip`: Obtención de IP del cliente para auditoría.
 
@@ -37,15 +40,17 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 *   **Proveedor**: API Propia (`cert-fes.tupatrimonio.app`).
 *   **Flujo**:
     1.  Revisión del documento.
-    2.  **Validación de Identidad**:
-        *   Confirmación/Edición de datos (Nombre, RUT/ID).
+    2.  **Validación de Identidad** (o **ClaveÚnica** si es `fes_claveunica_cl`):
+        *   Para `fes_claveunica_cl`: Validación con ClaveÚnica (Identyz) como paso previo. Los datos verificados se usan sin edición.
+        *   Para otros FES: Confirmación/Edición de datos (Nombre, RUT/ID).
         *   Captura de firma manuscrita (Dibujo en Canvas o **Subida de Imagen**).
-        *   **Persistencia**: La firma se guarda y se precarga automáticamente para futuros documentos del mismo firmante.
+        *   **Persistencia**: La firma se guarda y se precarga automáticamente para futuros documentos del mismo firmante (basado en email).
         *   Registro de IP.
     3.  Estampa inmediata de certificado simple.
 *   **Campos Enviados**:
     *   **Requeridos**: `pdf_base64`, `signer_name`, `signer_email`, `signer_contact_id`, `signer_type_contact_id`.
-    *   **Opcionales**: `ip`, `order_number`, `transaction_id`, `url_qr`, `page_sign`, `coords`, `signature_image_base64`.
+    *   **Opcionales**: `ip`, `order_number`, `transaction_id`, `url_qr`, `signature_image_base64`.
+    *   **Nota sobre Coordenadas**: El envío de `coords` y `page_sign` está deshabilitado temporalmente debido a discrepancias en el formato esperado por la API (espera 2 valores, se enviaban 4).
 *   **Productos**: `fes_cl`, `fesb_cl` (Biométrica), `fes_claveunica_cl`.
 *   **Ventaja**: Flujo mucho más rápido y directo, sin necesidad de enrolamiento previo en proveedores externos.
 
@@ -57,13 +62,14 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 2.  **Iniciación**: Se llama a `initiateSigningProcess`.
     *   Genera portada con QR.
     *   Si es FEA: Verifica vigencia en CDS.
-    *   Si es FES: Salta verificación y pone a firmantes en `enrolled`.
+    *   Si es FES: Salta verificación y pone a firmantes en `enrolled`. Si es `fes_claveunica_cl`, crea solicitud de validación en Identyz.
     *   Envía notificaciones por email.
 3.  **Ejecución**: El firmante accede al portal.
     *   Si es FEA: Sigue flujo de clave + SMS.
     *   Si es FES: 
         *   Revisa el documento.
-        *   Confirma sus datos y dibuja su firma.
+        *   Si es `fes_claveunica_cl`: Valida con ClaveÚnica, espera webhook, luego muestra datos verificados (solo lectura) y firma manuscrita.
+        *   Si no: Confirma sus datos y dibuja su firma.
         *   Presiona "Confirmar y Firmar".
         *   La firma manuscrita se guarda como imagen en Storage (auditoría).
         *   La FES estampa el documento (PDF).
@@ -84,11 +90,42 @@ El sistema está diseñado para ser multi-proveedor y multi-país, operando prin
 
 ---
 
+## 🔐 Validación ClaveÚnica (FES + ClaveÚnica)
+
+Para el producto `fes_claveunica_cl` (usado con FAN - Firma Autorizada por Notario), se requiere validación de identidad con ClaveÚnica antes de la estampa FES.
+
+### Flujo
+1. **Iniciación**: Al iniciar el proceso de firma, se crea una solicitud de validación en Identyz por cada firmante.
+2. **Portal**: El firmante revisa el documento y hace clic en "Validar con ClaveÚnica".
+3. **ClaveÚnica**: Se redirige al sitio oficial del Gobierno para autenticarse.
+4. **Retorno**: Tras la validación, vuelve al portal con estado de espera.
+5. **Webhook**: Identyz notifica vía webhook; se consultan los datos verificados.
+6. **Firma FES**: Los datos verificados (nombre, RUT) se usan para la estampa FES.
+
+### Componentes
+*   **Edge Function `identyz-claveunica`**: Crea la solicitud de validación en Identyz.
+*   **Edge Function `identyz-webhook`**: Recibe la notificación y actualiza el firmante con datos verificados.
+*   **API `/api/signing/claveunica-status`**: Permite al frontend hacer polling del estado.
+
+### Campos en `signing.signers`
+*   `claveunica_doc_id`, `claveunica_request_id`, `claveunica_status`, `claveunica_signer_url`, `claveunica_verified_at`, `claveunica_user_info`.
+
+---
+
 ## 🛠️ Configuración (Variables de Entorno)
 
-Para el funcionamiento de FES, se requieren los siguientes secrets en Supabase:
+### Supabase Edge Functions
+
+**FES**:
 *   `FES_API_URL`: URL de la API de estampa.
 *   `FES_API_KEY`: Clave de autenticación para la API.
+
+**Identyz (ClaveÚnica)**:
+*   `IDENTYZ_API_KEY`: Bearer token de la API de Identyz.
+*   `IDENTYZ_WEBHOOK_SECRET_SUFFIX`: Sufijo para el secret del webhook (ej: cadena de 50 caracteres).
+*   `PUBLIC_APP_URL`: URL base de la aplicación (ej: `https://tupatrimonio.cl`) para construir `redirect_uri`.
+
+Configurar en: Supabase Dashboard > Settings > Edge Functions > Environment Variables.
 
 ---
 

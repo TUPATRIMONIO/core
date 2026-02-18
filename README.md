@@ -2,7 +2,7 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) + ClaveÚnica Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
 > **📅 Actualización:** 17 Febrero 2026
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
@@ -14,7 +14,7 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **💳 Facturación Unificada por País**: Todas las organizaciones de Chile (personales y empresas) emiten Boleta/Factura vía Haulmer con medios de pago chilenos. Organizaciones internacionales usan Stripe Invoice.
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
-- **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
+- **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación ClaveÚnica (Identyz) para FAN, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
 - **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
 - **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
 - **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".

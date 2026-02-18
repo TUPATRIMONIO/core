@@ -87,6 +87,25 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        const productSlug = signer.document?.metadata?.signature_product?.slug || "";
+        let finalConfirmedName = confirmed_name;
+        let finalConfirmedIdType = confirmed_id_type;
+        let finalConfirmedIdValue = confirmed_id_value;
+
+        if (productSlug === "fes_claveunica_cl") {
+            if (signer.claveunica_status !== "verified") {
+                return NextResponse.json(
+                    {
+                        error: "Debe completar la validación con ClaveÚnica antes de firmar",
+                    },
+                    { status: 400 },
+                );
+            }
+            finalConfirmedName = signer.confirmed_full_name;
+            finalConfirmedIdValue = signer.confirmed_identifier_value;
+            finalConfirmedIdType = "rut";
+        }
+
         // 2. Obtener archivo PDF desde Storage (docs-originals o docs-signed si ya tiene firmas)
         const filePath = signer.document.current_signed_file_path ||
             signer.document.qr_file_path ||
@@ -137,15 +156,15 @@ export async function POST(request: NextRequest) {
         // Determinar ID y tipo de ID (usar confirmados si existen)
         let signerContactId = "";
         let signerTypeContactId = "ID DOC";
-        const finalName = confirmed_name || signer.full_name;
+        const finalName = finalConfirmedName || signer.full_name;
 
         // Prioridad: datos confirmados > datos en BD
-        if (confirmed_id_value) {
-            signerContactId = confirmed_id_value;
+        if (finalConfirmedIdValue) {
+            signerContactId = finalConfirmedIdValue;
             // Mapear tipo confirmado
-            if (confirmed_id_type === "rut") signerTypeContactId = "RUT";
-            else if (confirmed_id_type === "passport") signerTypeContactId = "PASSPORT";
-            else if (confirmed_id_type === "dni") signerTypeContactId = "DNI";
+            if (finalConfirmedIdType === "rut") signerTypeContactId = "RUT";
+            else if (finalConfirmedIdType === "passport") signerTypeContactId = "PASSPORT";
+            else if (finalConfirmedIdType === "dni") signerTypeContactId = "DNI";
             else signerTypeContactId = "ID DOC";
         } else if (signer.rut) {
             signerContactId = signer.rut;
@@ -332,13 +351,13 @@ export async function POST(request: NextRequest) {
             });
             // No retornamos error aquí porque el documento ya se firmó y guardó
         } else {
-             // 6.5 Actualizar datos confirmados
+             // 6.5 Actualizar datos confirmados (para fes_claveunica_cl ya vienen del webhook)
             const { error: confirmError } = await adminClient
                 .from("signing_signers")
                 .update({
-                    confirmed_full_name: confirmed_name || null,
-                    confirmed_identifier_type: confirmed_id_type || null,
-                    confirmed_identifier_value: confirmed_id_value || null,
+                    confirmed_full_name: finalConfirmedName || null,
+                    confirmed_identifier_type: finalConfirmedIdType || null,
+                    confirmed_identifier_value: finalConfirmedIdValue || null,
                     identity_confirmed_at: new Date().toISOString(),
                     handwritten_signature_path: signaturePath,
                     client_ip: finalIp

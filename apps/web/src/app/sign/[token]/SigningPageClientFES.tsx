@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   ShieldCheck,
@@ -12,6 +12,7 @@ import {
   UserCheck,
   MapPin,
   PenLine,
+  KeyRound,
 } from "lucide-react";
 import SignaturePad from "@/components/signing/SignaturePad";
 
@@ -31,14 +32,20 @@ interface SigningPageClientFESProps {
 
 type SigningStep =
   | "reviewing"
+  | "claveunica_validation"
+  | "claveunica_waiting"
   | "identity_validation"
   | "signing"
   | "success"
   | "signed" // Cuando el firmante ya firmó (recarga de página)
   | "error";
 
+const POLL_INTERVAL_MS = 3000;
+
 export default function SigningPageClientFES({ signer }: SigningPageClientFESProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isClaveunica = Boolean(signer.is_claveunica);
   const [step, setStep] = useState<SigningStep>("reviewing");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -46,15 +53,21 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const [cacheBuster, setCacheBuster] = useState(() => Date.now());
 
   // Identity Validation State
-  const [confirmedName, setConfirmedName] = useState(signer.full_name || "");
+  const [confirmedName, setConfirmedName] = useState(signer.confirmed_full_name || signer.full_name || "");
   const [confirmedIdType, setConfirmedIdType] = useState(
     signer.metadata?.identifier_type || (signer.rut ? "rut" : "other")
   );
   const [confirmedIdValue, setConfirmedIdValue] = useState(
-    signer.rut || signer.metadata?.identifier_value || ""
+    signer.confirmed_identifier_value || signer.rut || signer.metadata?.identifier_value || ""
   );
   const [signatureBase64, setSignatureBase64] = useState<string | null>(signer.previousSignatureBase64 || null);
   const [clientIp, setClientIp] = useState<string>("");
+
+  const pollClaveunicaStatus = useCallback(async () => {
+    const res = await fetch(`/api/signing/claveunica-status?token=${signer.signing_token}`);
+    const data = await res.json();
+    return data;
+  }, [signer.signing_token]);
 
   // 1. Verificar si ya firmó al cargar
   useEffect(() => {
@@ -64,7 +77,45 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }
   }, [signer.status]);
 
-  // 2. Obtener IP del cliente
+  // 2. Si es ClaveÚnica y ya está verificado, ir directo a identity_validation
+  useEffect(() => {
+    if (isClaveunica && signer.claveunica_status === "verified") {
+      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
+      setConfirmedIdType("rut");
+      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
+      setStep("identity_validation");
+    }
+  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
+
+  // 3. Si vuelve de ClaveÚnica con ?claveunica=completed, ir a waiting
+  useEffect(() => {
+    if (isClaveunica && searchParams.get("claveunica") === "completed" && step === "reviewing") {
+      setStep("claveunica_waiting");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [isClaveunica, searchParams, step]);
+
+  // 4. Polling cuando está en claveunica_waiting
+  useEffect(() => {
+    if (step !== "claveunica_waiting") return;
+    const check = async () => {
+      const data = await pollClaveunicaStatus();
+      if (data.status === "verified") {
+        setConfirmedName(data.verified_name || "");
+        setConfirmedIdType("rut");
+        setConfirmedIdValue(data.verified_rut || "");
+        setStep("identity_validation");
+      } else if (data.status === "failed") {
+        setError("La validación con ClaveÚnica no pudo completarse.");
+        setStep("error");
+      }
+    };
+    const id = setInterval(check, POLL_INTERVAL_MS);
+    check();
+    return () => clearInterval(id);
+  }, [step, pollClaveunicaStatus]);
+
+  // 5. Obtener IP del cliente
   useEffect(() => {
     fetch("/api/signing/client-ip")
       .then((res) => res.json())
@@ -169,11 +220,70 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                 </p>
 
                 <button
-                  onClick={() => setStep("identity_validation")}
+                  onClick={() => setStep(isClaveunica ? "claveunica_validation" : "identity_validation")}
                   className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center transition-colors"
                 >
                   Continuar
                 </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "claveunica_validation":
+        return (
+          <div className="space-y-6">
+            <div className="bg-secondary dark:bg-secondary/50 border border-border rounded-xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[var(--tp-brand-10)] dark:bg-[var(--tp-brand)]/20 flex items-center justify-center">
+                  <KeyRound className="w-5 h-5 text-[var(--tp-brand)]" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Validar con ClaveÚnica
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Para este documento necesitamos que valides tu identidad con ClaveÚnica.
+                Serás redirigido al sitio oficial del Gobierno de Chile para autenticarte de forma segura.
+              </p>
+              {signer.claveunica_signer_url ? (
+                <button
+                  onClick={() => {
+                    setStep("claveunica_waiting");
+                    window.location.href = signer.claveunica_signer_url;
+                  }}
+                  className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                >
+                  <KeyRound className="w-5 h-5" />
+                  Validar con ClaveÚnica
+                </button>
+              ) : (
+                <div className="bg-[var(--tp-warning)]/10 border border-[var(--tp-warning)]/30 rounded-xl p-4 text-sm text-muted-foreground">
+                  No se pudo generar el enlace de validación. Por favor contacta al remitente del documento.
+                </div>
+              )}
+              <button
+                onClick={() => setStep("reviewing")}
+                className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Volver
+              </button>
+            </div>
+          </div>
+        );
+
+      case "claveunica_waiting":
+        return (
+          <div className="space-y-6">
+            <div className="bg-secondary dark:bg-secondary/50 border border-border rounded-xl p-6">
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Verificando tu identidad</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md">
+                  Hemos recibido tu validación con ClaveÚnica. Estamos procesando los datos.
+                  Si acabas de regresar, esta página se actualizará en unos segundos.
+                </p>
+                <p className="text-xs text-muted-foreground mt-4">No cierres esta ventana.</p>
               </div>
             </div>
           </div>
@@ -193,55 +303,75 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
               </div>
 
               <div className="space-y-6">
-                {/* 1. Confirmar Datos */}
+                {/* 1. Confirmar Datos (o mostrar datos verificados por ClaveÚnica) */}
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[var(--tp-brand)]" />
-                    Confirma tus datos
+                    {isClaveunica ? "Datos verificados con ClaveÚnica" : "Confirma tus datos"}
                   </h4>
                   
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground">Nombre Completo</label>
-                      <input
-                        type="text"
-                        value={confirmedName}
-                        onChange={(e) => setConfirmedName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
-                        placeholder="Tu nombre completo"
-                      />
+                      {isClaveunica ? (
+                        <div className="w-full px-3 py-2 rounded-lg border border-input bg-muted/50 text-sm">
+                          {confirmedName || "—"}
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={confirmedName}
+                          onChange={(e) => setConfirmedName(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                          placeholder="Tu nombre completo"
+                        />
+                      )}
                     </div>
 
                     <div className="grid grid-cols-3 gap-4">
                       <div className="col-span-1 space-y-2">
                         <label className="text-xs font-medium text-muted-foreground">Tipo ID</label>
-                        <select
-                          value={confirmedIdType}
-                          onChange={(e) => setConfirmedIdType(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
-                        >
-                          <option value="rut">RUT</option>
-                          <option value="dni">DNI</option>
-                          <option value="passport">Pasaporte</option>
-                          <option value="other">Otro</option>
-                        </select>
+                        {isClaveunica ? (
+                          <div className="w-full px-3 py-2 rounded-lg border border-input bg-muted/50 text-sm">
+                            RUT
+                          </div>
+                        ) : (
+                          <select
+                            value={confirmedIdType}
+                            onChange={(e) => setConfirmedIdType(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                          >
+                            <option value="rut">RUT</option>
+                            <option value="dni">DNI</option>
+                            <option value="passport">Pasaporte</option>
+                            <option value="other">Otro</option>
+                          </select>
+                        )}
                       </div>
                       <div className="col-span-2 space-y-2">
                         <label className="text-xs font-medium text-muted-foreground">Número ID</label>
-                        <input
-                          type="text"
-                          value={confirmedIdValue}
-                          onChange={(e) => setConfirmedIdValue(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
-                          placeholder="12.345.678-9"
-                        />
+                        {isClaveunica ? (
+                          <div className="w-full px-3 py-2 rounded-lg border border-input bg-muted/50 text-sm">
+                            {confirmedIdValue || "—"}
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            value={confirmedIdValue}
+                            onChange={(e) => setConfirmedIdValue(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-[var(--tp-brand)] focus:border-transparent outline-none"
+                            placeholder="12.345.678-9"
+                          />
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/50 p-2 rounded-lg border border-border/50">
-                      <MapPin className="w-3 h-3" />
-                      <span>IP registrada: {clientIp || "Cargando..."}</span>
-                    </div>
+                    {!isClaveunica && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/50 p-2 rounded-lg border border-border/50">
+                        <MapPin className="w-3 h-3" />
+                        <span>IP registrada: {clientIp || "Cargando..."}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -406,7 +536,10 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
             <h3 className="text-lg font-semibold text-foreground mb-2">Error</h3>
             <p className="text-muted-foreground mb-6">{error}</p>
             <button
-              onClick={() => setStep("reviewing")}
+              onClick={() => {
+                setError("");
+                setStep(isClaveunica ? "claveunica_validation" : "reviewing");
+              }}
               className="px-6 py-2.5 bg-[var(--tp-error)] hover:bg-[var(--tp-error)]/90 text-white rounded-xl font-semibold transition-colors"
             >
               Volver a intentar
