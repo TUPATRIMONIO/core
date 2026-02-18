@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         const { data: signer, error } = await supabase
             .from("signing_signers")
             .select(
-                "claveunica_status, confirmed_full_name, confirmed_identifier_value",
+                "claveunica_status, confirmed_full_name, confirmed_identifier_value, status",
             )
             .eq("signing_token", token)
             .single();
@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             status: signer.claveunica_status || "none",
+            signer_status: signer.status,
             verified_name: signer.confirmed_full_name || null,
             verified_rut: signer.confirmed_identifier_value || null,
         });

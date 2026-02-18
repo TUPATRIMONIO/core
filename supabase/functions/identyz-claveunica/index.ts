@@ -73,7 +73,7 @@ serve(async (req) => {
             );
         }
 
-        const idInput = `${signer_rut.replace(/\s/g, "").replace(/\./g, "")}-${document_id}`;
+        const idInput = `${signer_rut.replace(/\s/g, "").replace(/\./g, "")}-${document_id}-${Date.now()}`;
         const requestId = await sha256Hex(idInput);
         const secret = webhookSecretSuffix
             ? `${requestId}${webhookSecretSuffix}`

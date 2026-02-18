@@ -99,12 +99,10 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     if (step !== "claveunica_waiting") return;
     const check = async () => {
       const data = await pollClaveunicaStatus();
-      if (data.status === "verified") {
-        setConfirmedName(data.verified_name || "");
-        setConfirmedIdType("rut");
-        setConfirmedIdValue(data.verified_rut || "");
-        // Ejecutar firma automaticamente
-        handleSignClaveunica(data.verified_name, data.verified_rut);
+      // Si está verificado O ya está firmado (por el webhook)
+      if (data.status === "verified" || data.signer_status === "signed") {
+        // Recargar para que el server component detecte el cambio de estado y muestre "Documento Firmado"
+        router.refresh();
       } else if (data.status === "failed") {
         setError("La validación con ClaveÚnica no pudo completarse.");
         setStep("error");
@@ -113,7 +111,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     const id = setInterval(check, POLL_INTERVAL_MS);
     check();
     return () => clearInterval(id);
-  }, [step, pollClaveunicaStatus]);
+  }, [step, pollClaveunicaStatus, router]);
 
   // 5. Obtener IP del cliente
   useEffect(() => {
@@ -126,47 +124,6 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const refreshSignedDocument = () => {
     setCacheBuster(Date.now());
     router.refresh();
-  };
-
-  const handleSignClaveunica = async (verifiedName: string, verifiedRut: string) => {
-    setIsLoading(true);
-    setError("");
-    setStep("signing");
-
-    try {
-      const response = await fetch("/api/signing/execute-fes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          signing_token: signer.signing_token,
-          confirmed_name: verifiedName,
-          confirmed_id_type: "rut",
-          confirmed_id_value: verifiedRut,
-          client_ip: clientIp,
-          // Sin signature_image
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || data.details || "Error al firmar documento");
-      }
-
-      setStep("success");
-
-      if (data.signed) {
-        setTimeout(() => {
-          refreshSignedDocument();
-        }, 1500);
-      }
-    } catch (err: any) {
-      console.error("Error signing:", err);
-      setError(err.message || "Error inesperado al firmar");
-      setStep("error");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleSign = async () => {
@@ -264,7 +221,8 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                   onClick={() => {
                     if (isClaveunica) {
                       if (signer.claveunica_status === "verified") {
-                        handleSignClaveunica(confirmedName, confirmedIdValue);
+                        // Si ya está verificado, ir a waiting para que el polling detecte la firma del webhook
+                        setStep("claveunica_waiting");
                       } else {
                         setStep("claveunica_validation");
                       }
