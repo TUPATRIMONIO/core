@@ -181,6 +181,11 @@ El sistema soporta múltiples proveedores de pago con un patrón unificado:
 - **✅ Transbank Webpay Plus** - Pagos con tarjeta (Chile)
 - **✅ Transbank OneClick** - Pagos recurrentes (Chile)
 
+### Documentación de API
+
+Para detalles sobre la creación de órdenes y manejo de monedas, ver:
+- [`docs/features/checkout-api.md`](features/checkout-api.md)
+
 ### Directrices para Agregar Nuevos Medios de Pago
 
 **Reglas fundamentales que DEBEN seguirse:**

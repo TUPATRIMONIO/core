@@ -15,6 +15,9 @@ Documentación de implementaciones específicas de features complejos.
 ### Sistema de Notificaciones
 - **[update-notifications/](./update-notifications/)** - Notificaciones de actualización de la app
 
+### Sistema de Pagos
+- **[checkout-api.md](./checkout-api.md)** - API de Checkout y manejo de monedas
+
 ### Componentes Específicos
 - **[USERS-COUNT-IMPLEMENTATION.md](./USERS-COUNT-IMPLEMENTATION.md)** - Contador de usuarios en marketing
 

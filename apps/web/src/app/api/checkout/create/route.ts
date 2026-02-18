@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const countryCode = org.country || 'US';
+    // Priorizar country_code del metadata (lo que el usuario vio en el wizard)
+    // Fallback al pais de la organizacion, y finalmente a 'US'
+    const countryCode = metadata?.country_code || org.country || 'US';
     const currency = await getCurrencyForCountry(countryCode);
     
     // Validar que productType venga en el body
