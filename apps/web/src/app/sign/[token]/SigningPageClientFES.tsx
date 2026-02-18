@@ -244,12 +244,11 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
               </div>
               <p className="text-sm text-muted-foreground mb-6">
                 Para este documento necesitamos que valides tu identidad con ClaveÚnica.
-                Serás redirigido al sitio oficial del Gobierno de Chile para autenticarte de forma segura.
+                Serás redirigido para autenticarte de forma segura.
               </p>
               {signer.claveunica_signer_url ? (
                 <button
                   onClick={() => {
-                    setStep("claveunica_waiting");
                     window.location.href = signer.claveunica_signer_url;
                   }}
                   className="w-full bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
