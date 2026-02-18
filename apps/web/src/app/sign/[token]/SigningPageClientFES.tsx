@@ -20,7 +20,7 @@ import SignaturePad from "@/components/signing/SignaturePad";
 const PDFViewer = dynamic(() => import("@/components/shared/PDFViewer"), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-[500px] bg-gray-100 rounded-lg">
+    <div className="flex items-center justify-center h-[300px] md:h-[500px] bg-gray-100 rounded-lg">
       <Loader2 className="w-8 h-8 text-[#800039] animate-spin" />
     </div>
   ),
@@ -183,22 +183,15 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   // --- Render Helpers ---
 
   const renderHeader = () => (
-    <div className="bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] p-8 text-white">
-      <h1 className="text-3xl font-bold mb-2 text-white">Firmar Documento</h1>
-      <p className="text-white/90 mb-3">{signer.document.title}</p>
+    <div className="bg-gradient-to-r from-[var(--tp-brand)] to-[var(--tp-brand-light)] p-4 md:p-8 text-white">
+      <h1 className="text-xl md:text-3xl font-bold mb-2 text-white">Firmar Documento</h1>
+      <p className="text-white/90 mb-3 text-sm md:text-base">{signer.document.title}</p>
       <div className="flex flex-wrap gap-3 text-xs">
         {signer.document.order_number && (
           <span className="bg-white/20 px-3 py-1 rounded-full">
             Pedido: #{signer.document.order_number}
           </span>
         )}
-        <span className="bg-white/20 px-3 py-1 rounded-full">
-          Doc: {signer.document.id}
-        </span>
-        <span className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-1">
-          <FileSignature className="w-3 h-3" />
-          Firma Simple
-        </span>
       </div>
     </div>
   );
@@ -589,12 +582,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   };
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-background py-4 md:py-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-card shadow-[var(--tp-shadow-xl)] rounded-2xl overflow-hidden border border-border">
           {renderHeader()}
 
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {/* Document Preview */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -604,7 +597,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
               <div className="border border-border rounded-xl overflow-hidden shadow-[var(--tp-shadow-md)]">
                 <PDFViewer
                   url={`/api/signing/preview/${signer.document.id}?token=${signer.signing_token}&_t=${cacheBuster}`}
-                  className="h-[550px]"
+                  className="h-[350px] md:h-[550px]"
                 />
               </div>
             </div>

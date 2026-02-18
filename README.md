@@ -2,7 +2,7 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) + ClaveÚnica Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍 | **Experiencia de Firma Mejorada** ⏳
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) + ClaveÚnica Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍 | **Experiencia de Firma Mejorada** ⏳ | **Visor PDF Mobile Optimizado** 📱
 > **📅 Actualización:** 18 Febrero 2026
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
@@ -15,11 +15,13 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
 - **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación ClaveÚnica (Identyz) para FAN, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
-- **⏳ Experiencia de Firma Mejorada**: Cuenta regresiva visual de 5 segundos post-firma para asegurar la correcta generación del documento final en todos los flujos (FES, FEA, ClaveÚnica).
+- **⏳ Experiencia de Firma Mejorada**: Interfaz simplificada y limpia, ocultando detalles técnicos (ID documento, tipo firma) para mayor claridad. Cuenta regresiva visual de 5 segundos post-firma para asegurar la correcta generación del documento final en todos los flujos (FES, FEA, ClaveÚnica).
+- **📱 Visor PDF Optimizado**: Nuevo visor basado en Canvas (`react-pdf`) que permite visualizar documentos directamente en dispositivos móviles sin necesidad de descargas o pestañas externas. Incluye zoom, navegación y ajuste responsive automático.
 - **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
 - **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
 - **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".
 - **🔄 Finalización Automática**: Los pedidos se completan automáticamente cuando todos los documentos están firmados/notarizados.
+- **🔄 Actualización en Tiempo Real**: Tableros de control (Órdenes, Revisión de Documentos, Asignación Notarial) con actualizaciones automáticas vía Supabase Realtime y polling de respaldo.
 - **Reasignación Automática de Notarías**: Sistema de cronjob que reintenta asignar notarías a documentos pendientes cada 5 minutos cuando hay disponibilidad.
 - **Gestión Avanzada de Notarías**: Panel administrativo para gestionar servicios notariales con sistema de pesos para distribución equitativa de documentos y límites diarios de capacidad.
 - **🔓 Flujo Público**: Ruta `/signing/new` accesible sin autenticación (inicia siempre desde cero)

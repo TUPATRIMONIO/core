@@ -144,6 +144,21 @@ Para mejorar la conversión, se implementó un flujo que permite a los usuarios 
 - **Country preference**: Persistent en localStorage 24h
 - **Static assets**: CDN caching automático
 
+## 🔄 Estrategia de Actualización en Tiempo Real
+
+### Enfoque Híbrido (Realtime + Polling)
+Para garantizar que los usuarios siempre vean la información más actualizada sin sobrecargar el servidor ni depender exclusivamente de una conexión WebSocket estable, utilizamos una estrategia híbrida.
+
+**Componentes:**
+1. **Supabase Realtime**: Canal principal. Escucha cambios en la base de datos (`postgres_changes`) y actualiza la UI inmediatamente.
+2. **Polling (Fallback)**: Mecanismo de respaldo. Si la conexión Realtime falla o se desconecta, un intervalo (ej. 30s) consulta los datos periódicamente.
+3. **Router Refresh**: En Next.js App Router, preferimos usar `router.refresh()` para re-ejecutar los Server Components y obtener datos frescos, manteniendo la seguridad y lógica en el servidor.
+
+**Implementaciones:**
+- **Tablero de Órdenes**: Actualización de estados de pago.
+- **Revisión de Documentos**: Nuevos documentos para revisar.
+- **Asignación Notarial**: Cambios en estado de notaría.
+
 ## 🔮 Future Considerations
 
 ### Scaling to More Countries

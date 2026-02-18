@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Eye, CheckCircle, XCircle, MessageSquare, AlertCircle, FileSearch } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, MessageSquare, AlertCircle, FileSearch, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/admin/empty-state'
@@ -89,10 +89,74 @@ export function DocumentReviewClient({
   const tab = initialTab
   const [isLoading, setIsLoading] = useState(false)
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null)
+  
+  // Estados para Realtime
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const refreshTimeoutRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout>()
+  const channelRef = useRef<any>()
 
   useEffect(() => {
     setIsLoading(false)
   }, [initialDocuments, initialTab, initialStatus, initialPage])
+
+  const refreshData = useCallback(() => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current)
+    }
+
+    setIsRefreshing(true)
+    refreshTimeoutRef.current = setTimeout(() => {
+      router.refresh()
+      // Pequeño delay para que se note la actualización visual
+      setTimeout(() => setIsRefreshing(false), 1000)
+    }, 1000)
+  }, [router])
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    // Configurar suscripción Realtime
+    const setupRealtime = () => {
+      const channel = supabase
+        .channel('document-review-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'signing',
+            table: 'documents',
+          },
+          () => {
+            refreshData()
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'CHANNEL_ERROR') {
+            console.error('Error en canal Realtime, activando polling fallback')
+            // Activar polling si falla realtime
+            if (!intervalRef.current) {
+              intervalRef.current = setInterval(refreshData, 30000)
+            }
+          }
+        })
+
+      channelRef.current = channel
+    }
+
+    setupRealtime()
+
+    // Polling de respaldo (cada 30s) por si acaso
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(refreshData, 30000)
+    }
+
+    return () => {
+      if (channelRef.current) supabase.removeChannel(channelRef.current)
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current)
+    }
+  }, [refreshData])
 
   const totalPages = Math.ceil(initialTotal / 20)
 
@@ -173,7 +237,23 @@ export function DocumentReviewClient({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Revisión de Documentos</CardTitle>
+          <CardTitle className="flex items-center">
+            Revisión de Documentos
+            {isRefreshing ? (
+              <Badge variant="outline" className="ml-3 text-xs font-normal text-green-600 border-green-200 bg-green-50">
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                Actualizando...
+              </Badge>
+            ) : (
+              <div className="flex items-center text-xs font-normal text-muted-foreground ml-3" title="Actualización en tiempo real activa">
+                <span className="relative flex h-2 w-2 mr-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                En vivo
+              </div>
+            )}
+          </CardTitle>
           {tab === 'pendientes' && (
             <Select value={status} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-[200px]">
@@ -212,16 +292,16 @@ export function DocumentReviewClient({
                 description="No hay documentos en cola de revisión manual"
               />
             ) : (
-              <>
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Documento</TableHead>
-                      <TableHead>Organización</TableHead>
+                      <TableHead className="hidden md:table-cell">Organización</TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead>Revisión IA</TableHead>
+                      <TableHead className="hidden md:table-cell">Revisión IA</TableHead>
                       <TableHead>Mensajes</TableHead>
-                      <TableHead>Actualizado</TableHead>
+                      <TableHead className="hidden md:table-cell">Actualizado</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -234,9 +314,9 @@ export function DocumentReviewClient({
                             <div className="text-xs text-muted-foreground font-mono">{doc.qr_identifier}</div>
                           )}
                         </TableCell>
-                        <TableCell>{doc.organization?.name || 'N/A'}</TableCell>
+                        <TableCell className="hidden md:table-cell">{doc.organization?.name || 'N/A'}</TableCell>
                         <TableCell>{getStatusBadge(doc.status)}</TableCell>
-                        <TableCell>{getAiReviewStatus(doc)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{getAiReviewStatus(doc)}</TableCell>
                         <TableCell>
                           {getMessageCount(doc) > 0 ? (
                             <div className="flex items-center gap-1">
@@ -247,7 +327,7 @@ export function DocumentReviewClient({
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           {new Date(doc.updated_at).toLocaleDateString('es-CL', {
                             day: '2-digit',
                             month: '2-digit',
@@ -278,7 +358,9 @@ export function DocumentReviewClient({
                     ))}
                   </TableBody>
                 </Table>
-                {totalPages > 1 && (
+              </div>
+            )}
+            {documents.length > 0 && totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
                       Página {page} de {totalPages}
@@ -323,17 +405,17 @@ export function DocumentReviewClient({
                 description="Aún no hay documentos que hayan pasado por el proceso de revisión"
               />
             ) : (
-              <>
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Documento</TableHead>
-                      <TableHead>Organización</TableHead>
+                      <TableHead className="hidden md:table-cell">Organización</TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead>Tipo Revisión</TableHead>
-                      <TableHead>Revisión IA</TableHead>
+                      <TableHead className="hidden md:table-cell">Tipo Revisión</TableHead>
+                      <TableHead className="hidden md:table-cell">Revisión IA</TableHead>
                       <TableHead>Mensajes</TableHead>
-                      <TableHead>Última Revisión</TableHead>
+                      <TableHead className="hidden md:table-cell">Última Revisión</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -349,12 +431,12 @@ export function DocumentReviewClient({
                               <div className="text-xs text-muted-foreground font-mono">{doc.qr_identifier}</div>
                             )}
                           </TableCell>
-                          <TableCell>{doc.organization?.name || 'N/A'}</TableCell>
+                          <TableCell className="hidden md:table-cell">{doc.organization?.name || 'N/A'}</TableCell>
                           <TableCell>{getStatusBadge(doc.status)}</TableCell>
-                          <TableCell>
+                          <TableCell className="hidden md:table-cell">
                             <Badge variant="outline">{getReviewType(doc)}</Badge>
                           </TableCell>
-                          <TableCell>{getAiReviewStatus(doc)}</TableCell>
+                          <TableCell className="hidden md:table-cell">{getAiReviewStatus(doc)}</TableCell>
                           <TableCell>
                             {getMessageCount(doc) > 0 ? (
                               <div className="flex items-center gap-1">
@@ -365,7 +447,7 @@ export function DocumentReviewClient({
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden md:table-cell">
                             {new Date(lastReviewDate).toLocaleDateString('es-CL', {
                               day: '2-digit',
                               month: '2-digit',
@@ -397,7 +479,9 @@ export function DocumentReviewClient({
                     })}
                   </TableBody>
                 </Table>
-                {totalPages > 1 && (
+              </div>
+            )}
+            {documents.length > 0 && totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
                       Página {page} de {totalPages}

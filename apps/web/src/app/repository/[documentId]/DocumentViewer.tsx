@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Download, FileText, CheckCircle2, Users, FileCheck, FileSignature, FileArchive } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PDFCanvasViewer } from '@/components/shared/PDFCanvasViewer'
 
 type DocumentVersion = {
   name: string
@@ -36,12 +37,6 @@ const versionIcons = {
   notarized: FileCheck,
   signed: FileSignature,
   original: FileArchive
-}
-
-const versionColors = {
-  notarized: 'text-green-600 bg-green-50 border-green-200',
-  signed: 'text-blue-600 bg-blue-50 border-blue-200',
-  original: 'text-gray-600 bg-gray-50 border-gray-200'
 }
 
 const statusTranslations: Record<string, string> = {
@@ -206,12 +201,11 @@ export function DocumentViewer({
         {selectedVersion?.url ? (
           <Card className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="relative w-full bg-gray-100" style={{ height: 'calc(100vh - 280px)', minHeight: '500px' }}>
-                <iframe
-                  src={`${selectedVersion.url}#view=FitH`}
-                  className="w-full h-full border-0"
+              <div className="relative w-full bg-gray-100 h-[calc(100vh-200px)] md:h-[calc(100vh-280px)] min-h-[300px] md:min-h-[500px]">
+                <PDFCanvasViewer 
+                  url={selectedVersion.url} 
                   title={`Previsualización - ${selectedVersion.name}`}
-                  loading="lazy"
+                  className="h-full border-0 rounded-none"
                 />
               </div>
             </CardContent>

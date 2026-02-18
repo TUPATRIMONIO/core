@@ -400,7 +400,7 @@ export function DocumentReviewDetailClient({
         </div>
       </TabsContent>
 
-      <TabsContent value="preview" className="min-h-[800px]">
+      <TabsContent value="preview" className="min-h-[400px] md:min-h-[800px]">
         <PDFViewer
           bucket={['docs-signed', 'docs-originals']}
           filePath={document.current_signed_file_path || document.original_file_path || ''}

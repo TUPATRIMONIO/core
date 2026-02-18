@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Download, ExternalLink, FileText, AlertCircle } from 'lucide-react'
+import { PDFCanvasViewer } from '@/components/shared/PDFCanvasViewer'
 
 interface DocumentViewerModalProps {
   documentId: string | null
@@ -26,7 +27,7 @@ interface DocumentInfo {
 
 /**
  * Modal para visualizar documentos PDF del dashboard notarial
- * Muestra el PDF en un iframe y permite descargar o abrir en nueva pestaña
+ * Muestra el PDF usando PDFCanvasViewer para compatibilidad mobile
  */
 export function DocumentViewerModal({
   documentId,
@@ -36,14 +37,12 @@ export function DocumentViewerModal({
   const [documentInfo, setDocumentInfo] = useState<DocumentInfo | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [iframeError, setIframeError] = useState(false)
 
   // Cargar información del documento cuando se abre el modal
   useEffect(() => {
     if (!open || !documentId) {
       setDocumentInfo(null)
       setError(null)
-      setIframeError(false)
       return
     }
 
@@ -107,9 +106,9 @@ export function DocumentViewerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!w-[80vw] !max-w-[80vw] sm:!max-w-[80vw] md:!max-w-[80vw] lg:!max-w-[1600px] h-[90vh] flex flex-col p-0">
+      <DialogContent className="!w-[95vw] !max-w-[95vw] sm:!w-[85vw] sm:!max-w-[85vw] md:!w-[80vw] md:!max-w-[80vw] lg:!max-w-[1600px] h-[85vh] sm:h-[90vh] flex flex-col p-0">
         {/* Header compacto con botones integrados */}
-        <div className="flex items-center justify-between px-6 py-3 border-b">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-3 border-b">
           <div className="min-w-0 flex-1 mr-4">
             <DialogTitle className="truncate text-base">
               {documentInfo?.title || 'Visualizar Documento'}
@@ -121,18 +120,20 @@ export function DocumentViewerModal({
               size="sm"
               onClick={handleDownload}
               disabled={isLoading || !!error}
+              className="h-8 px-2 sm:px-3"
             >
-              <Download className="w-4 h-4 mr-2" />
-              Descargar
+              <Download className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Descargar</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={handleOpenNewTab}
               disabled={isLoading || !!error}
+              className="h-8 px-2 sm:px-3"
             >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Abrir en nueva pestaña
+              <ExternalLink className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Abrir en nueva pestaña</span>
             </Button>
           </div>
         </div>
@@ -153,25 +154,11 @@ export function DocumentViewerModal({
           ) : documentInfo?.signedUrl ? (
             /* Visor PDF */
             <div className="flex-1 overflow-hidden bg-muted/20">
-              {!iframeError ? (
-                <iframe
-                  src={documentInfo.signedUrl}
-                  className="w-full h-full border-0"
-                  title={documentInfo.title || 'Documento'}
-                  onError={() => setIframeError(true)}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                  <FileText className="w-16 h-16 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground mb-4">
-                    Tu navegador no puede mostrar el PDF directamente.
-                  </p>
-                  <Button onClick={handleOpenNewTab}>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Abrir en nueva pestaña
-                  </Button>
-                </div>
-              )}
+              <PDFCanvasViewer 
+                url={documentInfo.signedUrl} 
+                title={documentInfo.title}
+                className="h-full border-0 rounded-none"
+              />
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-muted/20">
