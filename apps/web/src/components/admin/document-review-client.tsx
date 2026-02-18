@@ -292,6 +292,7 @@ export function DocumentReviewClient({
                 description="No hay documentos en cola de revisión manual"
               />
             ) : (
+              <>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -359,7 +360,6 @@ export function DocumentReviewClient({
                   </TableBody>
                 </Table>
               </div>
-            )}
             {documents.length > 0 && totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
@@ -372,7 +372,6 @@ export function DocumentReviewClient({
                         disabled={page === 1}
                         onClick={() => {
                           const newPage = page - 1
-                          setPage(newPage)
                           router.push(`/admin/document-review?tab=${tab}&status=${status}&page=${newPage}`)
                         }}
                       >
@@ -384,7 +383,6 @@ export function DocumentReviewClient({
                         disabled={page >= totalPages}
                         onClick={() => {
                           const newPage = page + 1
-                          setPage(newPage)
                           router.push(`/admin/document-review?tab=${tab}&status=${status}&page=${newPage}`)
                         }}
                       >
@@ -405,6 +403,7 @@ export function DocumentReviewClient({
                 description="Aún no hay documentos que hayan pasado por el proceso de revisión"
               />
             ) : (
+              <>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -480,7 +479,6 @@ export function DocumentReviewClient({
                   </TableBody>
                 </Table>
               </div>
-            )}
             {documents.length > 0 && totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
@@ -493,7 +491,6 @@ export function DocumentReviewClient({
                         disabled={page === 1}
                         onClick={() => {
                           const newPage = page - 1
-                          setPage(newPage)
                           router.push(`/admin/document-review?tab=${tab}&status=${status}&page=${newPage}`)
                         }}
                       >
@@ -505,7 +502,6 @@ export function DocumentReviewClient({
                         disabled={page >= totalPages}
                         onClick={() => {
                           const newPage = page + 1
-                          setPage(newPage)
                           router.push(`/admin/document-review?tab=${tab}&status=${status}&page=${newPage}`)
                         }}
                       >

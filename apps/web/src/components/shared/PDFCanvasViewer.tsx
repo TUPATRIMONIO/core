@@ -17,8 +17,8 @@ import {
 import { cn } from '@/lib/utils'
 
 // Import styles
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
-import 'react-pdf/dist/esm/Page/TextLayer.css'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 
 // Configure worker - compatible with Next.js App Router
 // We use the unpkg CDN as a fallback if local worker fails to load
