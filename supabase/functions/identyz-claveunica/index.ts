@@ -79,7 +79,7 @@ serve(async (req) => {
             ? `${requestId}${webhookSecretSuffix}`
             : requestId;
 
-        const redirectUri = `${publicAppUrl.replace(/\/$/, "")}/sign/${signing_token}?claveunica=completed`;
+        const redirectUri = `${publicAppUrl.replace(/\/$/, "")}/sign/${signing_token}/verificacion-exitosa`;
         const webhookUrl = `${supabaseUrl}/functions/v1/identyz-webhook`;
 
         const identyzPayload = [

@@ -2,8 +2,8 @@
 
 Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e inmobiliarios con IA avanzada.
 
-> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) + ClaveÚnica Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍
-> **📅 Actualización:** 17 Febrero 2026
+> **📊 Estado:** Fase 0 COMPLETA ✅ | **Firma Simple (FES) + ClaveÚnica Integrada** ✍️ | **Veriff API On-Demand Activo** 🚀 | **Notificaciones Pedido Completado** 📧 | **Lectura de QR Robustecida** 🔍 | **Experiencia de Firma Mejorada** ⏳
+> **📅 Actualización:** 18 Febrero 2026
 > **📋 Roadmap:** [`docs/archived/PLAN_DE_ACCION.md`](docs/archived/PLAN_DE_ACCION.md)
 
 ---
@@ -15,6 +15,7 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🏠 B2C + 🏢 B2B**: Modelo híbrido con organizaciones personales y empresariales
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
 - **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación ClaveÚnica (Identyz) para FAN, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
+- **⏳ Experiencia de Firma Mejorada**: Cuenta regresiva visual de 5 segundos post-firma para asegurar la correcta generación del documento final en todos los flujos (FES, FEA, ClaveÚnica).
 - **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
 - **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
 - **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".
