@@ -16,7 +16,7 @@ Plataforma multi-tenant B2C + B2B que digitaliza procesos legales, notariales e 
 - **🤖 IA Integrada**: Chatbot inteligente + análisis automático de documentos
 - **✍️ Servicios Core**: Firmas electrónicas (FES/FEA) con flujo público sin login, validación ClaveÚnica (Identyz) para FAN, validación de identidad con biometría (Veriff) y firma manuscrita, notaría digital
 - **⏳ Experiencia de Firma Mejorada**: Interfaz simplificada y limpia, ocultando detalles técnicos (ID documento, tipo firma) para mayor claridad. Cuenta regresiva visual de 5 segundos post-firma para asegurar la correcta generación del documento final en todos los flujos (FES, FEA, ClaveÚnica).
-- **📱 Visor PDF Optimizado**: Nuevo visor basado en Canvas (`react-pdf`) que permite visualizar documentos directamente en dispositivos móviles sin necesidad de descargas o pestañas externas. Incluye zoom, navegación y ajuste responsive automático.
+- **📱 Visor PDF Optimizado**: Nuevo visor basado en Canvas (`react-pdf`) que permite visualizar documentos directamente en dispositivos móviles sin necesidad de descargas o pestañas externas. Incluye zoom visible en móviles, scroll continuo de todas las páginas y ajuste responsive automático.
 - **🔍 Lectura de QR Robusta**: Sistema de 3 niveles (Texto PDFjs > Imagen jsQR > Bytes crudos) para asociar documentos notarizados automáticamente.
 - **📧 Notificaciones Inteligentes**: Sistema de correos automáticos al completar pedidos con enlaces de descarga (1 año validez) e incentivos de reseña
 - **🎨 UI/UX Refinada**: Interfaz limpia y profesional que prioriza la tranquilidad del usuario, ocultando detalles técnicos sensibles (como nombres de notarías) tras estados simples como "Sí" o "Notaría asignada".

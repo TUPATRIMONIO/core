@@ -9878,3 +9878,29 @@ completo. Permitirá:
 
 - **Antes**: Solo se veían documentos en cola de revisión manual (2 estados)
 - **Después**: Vista completa de 9+ estados diferentes con historial trazable de todas las revisiones
+
+### ✅ COMPLETADO - Mejoras en Visor PDF (Mobile + Scroll)
+
+**Fecha:** 18 Febrero 2026
+
+**Objetivo:** Mejorar la experiencia de usuario al visualizar documentos PDF, especialmente en dispositivos móviles.
+
+**Cambios Realizados:**
+
+1.  **Zoom Visible en Móviles:**
+    - Se eliminaron las clases que ocultaban los controles de zoom en pantallas pequeñas.
+    - Ahora los usuarios móviles tienen acceso directo a botones de +/- zoom y porcentaje actual.
+
+2.  **Scroll Continuo:**
+    - Se reemplazó la visualización de "una página a la vez" por un scroll vertical continuo de todas las páginas del documento.
+    - Implementación de `IntersectionObserver` para detectar automáticamente qué página está más visible en el viewport.
+    - Actualización del indicador de página (ej: "3 / 15") basado en la posición del scroll.
+    - Los botones de navegación "Anterior/Siguiente" ahora hacen scroll suave a la página correspondiente en lugar de reemplazar el contenido.
+
+**Archivo Modificado:**
+- `apps/web/src/components/shared/PDFCanvasViewer.tsx`
+
+**Impacto:**
+- Mejor experiencia de lectura en móviles (scroll natural).
+- Mayor control para el usuario (zoom accesible).
+- Navegación más intuitiva y fluida.

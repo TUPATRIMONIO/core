@@ -52,6 +52,15 @@ export function PDFCanvasViewer({
   const [containerWidth, setContainerWidth] = useState<number>(0)
   
   const containerRef = useRef<HTMLDivElement>(null)
+  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+
+  const setPageRef = useCallback((pageNum: number, el: HTMLDivElement | null) => {
+    if (el) {
+      pageRefs.current.set(pageNum, el)
+    } else {
+      pageRefs.current.delete(pageNum)
+    }
+  }, [])
   
   // ResizeObserver to handle responsive width
   useEffect(() => {
@@ -75,6 +84,36 @@ export function PDFCanvasViewer({
     }
   }, [])
 
+  // IntersectionObserver to detect current page
+  useEffect(() => {
+    if (!numPages || !containerRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let maxRatio = 0
+        let mostVisiblePage = -1
+        entries.forEach((entry) => {
+          const page = Number(entry.target.getAttribute('data-page-number'))
+          if (entry.intersectionRatio > maxRatio) {
+            maxRatio = entry.intersectionRatio
+            mostVisiblePage = page
+          }
+        })
+        if (maxRatio > 0 && mostVisiblePage !== -1) {
+          setPageNumber(mostVisiblePage)
+        }
+      },
+      {
+        root: containerRef.current,
+        threshold: [0, 0.25, 0.5, 0.75, 1],
+      }
+    )
+
+    pageRefs.current.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [numPages])
+
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages)
     setLoading(false)
@@ -88,16 +127,19 @@ export function PDFCanvasViewer({
     if (onError) onError()
   }
 
-  function changePage(offset: number) {
-    setPageNumber(prevPageNumber => {
-      const newPage = prevPageNumber + offset
-      // Ensure page number is within bounds 1..numPages
-      if (numPages) {
-        return Math.max(1, Math.min(newPage, numPages))
-      }
-      return 1
-    })
-  }
+  const scrollToPage = useCallback((page: number) => {
+    // Ensure page number is within bounds 1..numPages
+    if (numPages) {
+      page = Math.max(1, Math.min(page, numPages))
+    } else {
+      page = 1
+    }
+    
+    const el = pageRefs.current.get(page)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [numPages])
 
   function changeScale(delta: number) {
     setScale(prevScale => {
@@ -135,7 +177,7 @@ export function PDFCanvasViewer({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => changePage(-1)}
+              onClick={() => scrollToPage(pageNumber - 1)}
               disabled={pageNumber <= 1 || loading || !!error}
               className="h-8 w-8"
               title="Página anterior"
@@ -148,7 +190,7 @@ export function PDFCanvasViewer({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => changePage(1)}
+              onClick={() => scrollToPage(pageNumber + 1)}
               disabled={pageNumber >= (numPages || 1) || loading || !!error}
               className="h-8 w-8"
               title="Página siguiente"
@@ -164,12 +206,12 @@ export function PDFCanvasViewer({
               size="icon"
               onClick={() => changeScale(-0.25)}
               disabled={scale <= 0.5 || loading || !!error}
-              className="h-8 w-8 hidden sm:inline-flex"
+              className="h-8 w-8"
               title="Reducir zoom"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <span className="text-xs sm:text-sm font-medium w-[40px] text-center hidden sm:inline-block">
+            <span className="text-xs sm:text-sm font-medium w-[40px] text-center">
               {Math.round(scale * 100)}%
             </span>
             <Button
@@ -177,7 +219,7 @@ export function PDFCanvasViewer({
               size="icon"
               onClick={() => changeScale(0.25)}
               disabled={scale >= 3.0 || loading || !!error}
-              className="h-8 w-8 hidden sm:inline-flex"
+              className="h-8 w-8"
               title="Aumentar zoom"
             >
               <ZoomIn className="h-4 w-4" />
@@ -248,21 +290,30 @@ export function PDFCanvasViewer({
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
             loading={null}
-            className="shadow-lg max-w-full"
+            className="flex flex-col items-center"
           >
-            <Page 
-              pageNumber={pageNumber} 
-              scale={scale} 
-              width={containerWidth ? Math.min(containerWidth - 32, 1000) : undefined}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              className="bg-white max-w-full"
-              loading={
-                <div className="h-[500px] w-full bg-white flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                </div>
-              }
-            />
+            {numPages && Array.from({ length: numPages }, (_, i) => i + 1).map((page) => (
+              <div
+                key={page}
+                ref={(el) => setPageRef(page, el)}
+                data-page-number={page}
+                className="mb-4 shadow-lg"
+              >
+                <Page 
+                  pageNumber={page} 
+                  scale={scale} 
+                  width={containerWidth ? Math.min(containerWidth - 32, 1000) : undefined}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="bg-white max-w-full"
+                  loading={
+                    <div className="h-[500px] w-full bg-white flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                    </div>
+                  }
+                />
+              </div>
+            ))}
           </Document>
         )}
       </div>
