@@ -77,13 +77,17 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }
   }, [signer.status]);
 
-  // 2. Si es ClaveÚnica y ya está verificado, ir directo a identity_validation
+  // 2. Si es ClaveÚnica y ya está verificado, ir directo a identity_validation. Si está pendiente, ir a waiting.
   useEffect(() => {
-    if (isClaveunica && signer.claveunica_status === "verified") {
-      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
-      setConfirmedIdType("rut");
-      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
-      setStep("identity_validation");
+    if (isClaveunica) {
+      if (signer.claveunica_status === "verified") {
+        setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
+        setConfirmedIdType("rut");
+        setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
+        setStep("identity_validation");
+      } else if (signer.claveunica_status === "pending") {
+        setStep("claveunica_waiting");
+      }
     }
   }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
 
