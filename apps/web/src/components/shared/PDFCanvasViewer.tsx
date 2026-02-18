@@ -160,18 +160,18 @@ export function PDFCanvasViewer({
 
   if (!url) {
     return (
-      <div className={cn("flex flex-col items-center justify-center bg-gray-100 rounded-lg min-h-[300px] p-8", className)}>
+      <div className={cn("flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 rounded-lg min-h-[300px] p-8", className)}>
         <FileText className="w-12 h-12 text-gray-400 mb-4" />
-        <p className="text-gray-500">No hay documento para visualizar</p>
+        <p className="text-gray-500 dark:text-gray-400">No hay documento para visualizar</p>
       </div>
     )
   }
 
   return (
-    <div className={cn("flex flex-col bg-gray-100 rounded-lg overflow-hidden border border-gray-200 h-full", className)}>
+    <div className={cn("flex flex-col bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 h-full", className)}>
       {/* Toolbar */}
       {showToolbar && (
-        <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
           {/* Page Navigation */}
           <div className="flex items-center gap-1">
             <Button
@@ -255,22 +255,22 @@ export function PDFCanvasViewer({
       {/* PDF Content */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-auto bg-gray-100 relative min-h-[300px] md:min-h-[500px] flex justify-center p-4"
+        className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 relative min-h-[300px] md:min-h-[500px] flex justify-center p-4"
       >
         {loading && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 z-10">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100/80 dark:bg-gray-900/80 z-10">
             <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
-            <p className="text-sm text-gray-500">Cargando documento...</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Cargando documento...</p>
           </div>
         )}
 
         {error ? (
           <div className="flex flex-col items-center justify-center p-8 text-center h-full w-full">
-            <div className="bg-red-50 p-4 rounded-full mb-4">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-full mb-4">
               <FileText className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No se pudo cargar el documento</h3>
-            <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No se pudo cargar el documento</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs mx-auto">
               Hubo un problema al intentar visualizar el PDF. Puedes intentar descargarlo o abrirlo en una nueva pestaña.
             </p>
             <div className="flex gap-3 flex-wrap justify-center">
