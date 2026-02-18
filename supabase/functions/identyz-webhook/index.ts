@@ -180,7 +180,13 @@ serve(async (req) => {
                     }
 
                     const arrayBuffer = await fileData.arrayBuffer();
-                    const base64Document = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                    const bytes = new Uint8Array(arrayBuffer);
+                    let binary = "";
+                    const chunkSize = 8192;
+                    for (let i = 0; i < bytes.length; i += chunkSize) {
+                        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+                    }
+                    const base64Document = btoa(binary);
 
                     // 3. Obtener order_number
                     let orderNumber = undefined;

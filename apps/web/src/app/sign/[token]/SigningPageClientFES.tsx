@@ -94,14 +94,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }
   }, [isClaveunica, searchParams, step]);
 
-  // 4. Polling cuando está en claveunica_waiting
+  // 4. Polling cuando está en claveunica_waiting: espera hasta que el webhook complete la firma
   useEffect(() => {
     if (step !== "claveunica_waiting") return;
     const check = async () => {
       const data = await pollClaveunicaStatus();
-      // Si está verificado O ya está firmado (por el webhook)
-      if (data.status === "verified" || data.signer_status === "signed") {
-        // Recargar para que el server component detecte el cambio de estado y muestre "Documento Firmado"
+      if (data.signer_status === "signed") {
         router.refresh();
       } else if (data.status === "failed") {
         setError("La validación con ClaveÚnica no pudo completarse.");
@@ -286,10 +284,10 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
             <div className="bg-secondary dark:bg-secondary/50 border border-border rounded-xl p-6">
               <div className="flex flex-col items-center justify-center py-8">
                 <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Verificando tu identidad</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Procesando tu firma</h3>
                 <p className="text-sm text-muted-foreground text-center max-w-md">
-                  Hemos recibido tu validación con ClaveÚnica. Estamos procesando los datos.
-                  Si acabas de regresar, esta página se actualizará en unos segundos.
+                  Estamos validando tu identidad y firmando el documento automáticamente.
+                  Esta página se actualizará cuando esté listo.
                 </p>
                 <p className="text-xs text-muted-foreground mt-4">No cierres esta ventana.</p>
               </div>
