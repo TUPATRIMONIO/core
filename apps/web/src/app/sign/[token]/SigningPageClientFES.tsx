@@ -78,18 +78,13 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   }, [signer.status]);
 
   // 2. Si es ClaveÚnica y ya está verificado, precargar datos (sin saltar de paso)
-  // Si está pendiente y estamos en reviewing, saltar a waiting (solo para ClaveÚnica)
   useEffect(() => {
-    if (isClaveunica) {
-      if (signer.claveunica_status === "verified") {
-        setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
-        setConfirmedIdType("rut");
-        setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
-      } else if (signer.claveunica_status === "pending" && step === "reviewing") {
-        setStep("claveunica_waiting");
-      }
+    if (isClaveunica && signer.claveunica_status === "verified") {
+      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
+      setConfirmedIdType("rut");
+      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
     }
-  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut, step]);
+  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
 
   // 3. Si vuelve de ClaveÚnica con ?claveunica=completed, ir a waiting
   useEffect(() => {
