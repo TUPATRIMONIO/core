@@ -62,6 +62,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   );
   const [signatureBase64, setSignatureBase64] = useState<string | null>(signer.previousSignatureBase64 || null);
   const [clientIp, setClientIp] = useState<string>("");
+  const [countdown, setCountdown] = useState(5);
 
   const pollClaveunicaStatus = useCallback(async () => {
     const res = await fetch(`/api/signing/claveunica-status?token=${signer.signing_token}`);
@@ -117,6 +118,26 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
       .catch(() => setClientIp("No disponible"));
   }, []);
 
+  // 6. Countdown para estado success
+  useEffect(() => {
+    if (step !== "success") return;
+    
+    setCountdown(5); // Reset countdown
+    
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          refreshSignedDocument();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [step]);
+
   const refreshSignedDocument = () => {
     setCacheBuster(Date.now());
     router.refresh();
@@ -149,11 +170,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
       setStep("success");
 
-      if (data.signed) {
-        setTimeout(() => {
-          refreshSignedDocument();
-        }, 1500);
-      }
+      // El countdown se encarga de refrescar
     } catch (err: any) {
       console.error("Error signing:", err);
       setError(err.message || "Error inesperado al firmar");
@@ -446,6 +463,8 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
         );
 
       case "success":
+        const progressPercentage = ((5 - countdown) / 5) * 100;
+        
         return (
           <div className="bg-card dark:bg-card rounded-2xl shadow-[var(--tp-shadow-xl)] border border-[var(--tp-success-border)] dark:border-[var(--tp-success)]/30 p-8">
             <div className="flex items-center gap-4 mb-6">
@@ -476,17 +495,30 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
               </div>
             </div>
 
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-4">
-                El documento firmado ahora está disponible para visualización.
+            <div className="mb-8">
+              <div className="flex justify-between text-sm font-medium text-foreground mb-2">
+                <span>Actualizando documento...</span>
+                <span>{countdown}s</span>
+              </div>
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[var(--tp-success)] transition-all duration-1000 ease-linear"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Estamos procesando el documento final para que pueda visualizarlo.
               </p>
+            </div>
+
+            <div className="text-center">
               <button
                 onClick={() => {
                   refreshSignedDocument();
                 }}
-                className="bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors"
+                className="bg-[var(--tp-success)] hover:bg-[var(--tp-success)]/90 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors w-full sm:w-auto"
               >
-                Ver Documento Firmado
+                Ver Documento Ahora
               </button>
             </div>
           </div>
