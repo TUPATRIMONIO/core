@@ -265,8 +265,6 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                     if (isClaveunica) {
                       if (signer.claveunica_status === "verified") {
                         handleSignClaveunica(confirmedName, confirmedIdValue);
-                      } else if (signer.claveunica_status === "pending") {
-                        setStep("claveunica_waiting");
                       } else {
                         setStep("claveunica_validation");
                       }
