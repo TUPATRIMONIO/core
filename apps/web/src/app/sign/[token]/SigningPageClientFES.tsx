@@ -108,7 +108,8 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
         setConfirmedName(data.verified_name || "");
         setConfirmedIdType("rut");
         setConfirmedIdValue(data.verified_rut || "");
-        setStep("identity_validation");
+        // Ejecutar firma automaticamente
+        handleSignClaveunica(data.verified_name, data.verified_rut);
       } else if (data.status === "failed") {
         setError("La validación con ClaveÚnica no pudo completarse.");
         setStep("error");
@@ -130,6 +131,47 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const refreshSignedDocument = () => {
     setCacheBuster(Date.now());
     router.refresh();
+  };
+
+  const handleSignClaveunica = async (verifiedName: string, verifiedRut: string) => {
+    setIsLoading(true);
+    setError("");
+    setStep("signing");
+
+    try {
+      const response = await fetch("/api/signing/execute-fes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          signing_token: signer.signing_token,
+          confirmed_name: verifiedName,
+          confirmed_id_type: "rut",
+          confirmed_id_value: verifiedRut,
+          client_ip: clientIp,
+          // Sin signature_image
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || "Error al firmar documento");
+      }
+
+      setStep("success");
+
+      if (data.signed) {
+        setTimeout(() => {
+          refreshSignedDocument();
+        }, 1500);
+      }
+    } catch (err: any) {
+      console.error("Error signing:", err);
+      setError(err.message || "Error inesperado al firmar");
+      setStep("error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSign = async () => {
@@ -227,7 +269,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                   onClick={() => {
                     if (isClaveunica) {
                       if (signer.claveunica_status === "verified") {
-                        setStep("identity_validation");
+                        handleSignClaveunica(confirmedName, confirmedIdValue);
                       } else if (signer.claveunica_status === "pending") {
                         setStep("claveunica_waiting");
                       } else {
