@@ -77,14 +77,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }
   }, [signer.status]);
 
-  // 2. Si es ClaveÚnica y ya está verificado, precargar datos (sin saltar de paso)
+  // 2. Si es ClaveÚnica verificado pero aún no firmado, ir a waiting (firma en proceso por webhook)
   useEffect(() => {
-    if (isClaveunica && signer.claveunica_status === "verified") {
-      setConfirmedName(signer.confirmed_full_name || signer.full_name || "");
-      setConfirmedIdType("rut");
-      setConfirmedIdValue(signer.confirmed_identifier_value || signer.rut || "");
+    if (isClaveunica && signer.claveunica_status === "verified" && signer.status !== "signed") {
+      setStep("claveunica_waiting");
     }
-  }, [isClaveunica, signer.claveunica_status, signer.confirmed_full_name, signer.confirmed_identifier_value, signer.full_name, signer.rut]);
+  }, [isClaveunica, signer.claveunica_status, signer.status]);
 
   // 3. Si vuelve de ClaveÚnica con ?claveunica=completed, ir a waiting
   useEffect(() => {
