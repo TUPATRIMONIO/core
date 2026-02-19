@@ -6,6 +6,7 @@
 // =====================================================
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2, XCircle, Clock, Eye, Search, RefreshCw } from 'lucide-react';
-import { SyncVerificationsButton } from '@/components/admin/SyncVerificationsButton';
+import { CheckCircle2, XCircle, Clock, Eye, Search, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import type { VerificationSession } from '@/types/identity-verification';
@@ -34,6 +34,7 @@ const statusConfig: Record<string, { label: string; icon: any; color: string }> 
 };
 
 export default function AdminVerificationsPage() {
+  const router = useRouter();
   const [verifications, setVerifications] = useState<VerificationSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,6 +42,10 @@ export default function AdminVerificationsPage() {
   const [purposeFilter, setPurposeFilter] = useState<string>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkRefreshing, setBulkRefreshing] = useState(false);
+  
+  // Nuevo estado para búsqueda por ID
+  const [lookupId, setLookupId] = useState('');
+  const [lookingUp, setLookingUp] = useState(false);
 
   const loadVerifications = useCallback(async () => {
     setLoading(true);
@@ -116,25 +121,76 @@ export default function AdminVerificationsPage() {
     }
   };
 
+  const handleLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!lookupId.trim()) return;
+
+    setLookingUp(true);
+    try {
+      const response = await fetch('/api/admin/verifications/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ veriffSessionId: lookupId.trim() }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al buscar verificación');
+      }
+
+      if (result.found) {
+        if (result.source === 'veriff') {
+          toast.success('Verificación importada exitosamente desde Veriff');
+        } else {
+          toast.info('Verificación encontrada en base de datos local');
+        }
+        // Redirigir al detalle
+        router.push(`/admin/verifications/${result.sessionId}`);
+      } else {
+        toast.error('No se encontró la verificación en Veriff ni en local');
+      }
+    } catch (error: any) {
+      console.error('Error en lookup:', error);
+      toast.error(error.message || 'Error al buscar verificación');
+    } finally {
+      setLookingUp(false);
+    }
+  };
+
   return (
     <div className="py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2">Verificaciones de Identidad</h1>
           <p className="text-muted-foreground">
             Administración de todas las verificaciones de todas las organizaciones
           </p>
         </div>
-        <div className="flex gap-2">
-          {selectedIds.size > 0 && (
-            <Button onClick={bulkRefreshFromVeriff} disabled={bulkRefreshing} variant="outline">
-              <RefreshCw className={`mr-2 h-4 w-4 ${bulkRefreshing ? 'animate-spin' : ''}`} />
-              Refrescar ({selectedIds.size})
-            </Button>
-          )}
-          <SyncVerificationsButton />
-        </div>
+        
+        {/* Buscador por ID (Lookup) */}
+        <Card className="w-full md:w-auto min-w-[350px]">
+          <CardContent className="p-4">
+            <form onSubmit={handleLookup} className="flex gap-2">
+              <div className="relative flex-1">
+                <Input 
+                  placeholder="Pegar Veriff Session ID..." 
+                  value={lookupId}
+                  onChange={(e) => setLookupId(e.target.value)}
+                  disabled={lookingUp}
+                  className="pr-8"
+                />
+              </div>
+              <Button type="submit" disabled={lookingUp || !lookupId.trim()}>
+                {lookingUp ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              </Button>
+            </form>
+            <p className="text-xs text-muted-foreground mt-2">
+              Busca en BD local o importa desde Veriff automáticamente
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
@@ -178,11 +234,20 @@ export default function AdminVerificationsPage() {
               </Select>
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
-            <Button variant="outline" onClick={loadVerifications} disabled={loading}>Actualizar</Button>
-            <Button variant="ghost" onClick={() => { setSearchTerm(''); setStatusFilter('all'); setPurposeFilter('all'); }}>
-              Limpiar filtros
-            </Button>
+          <div className="flex gap-2 mt-4 justify-between items-center">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={loadVerifications} disabled={loading}>Actualizar</Button>
+              <Button variant="ghost" onClick={() => { setSearchTerm(''); setStatusFilter('all'); setPurposeFilter('all'); }}>
+                Limpiar filtros
+              </Button>
+            </div>
+            
+            {selectedIds.size > 0 && (
+              <Button onClick={bulkRefreshFromVeriff} disabled={bulkRefreshing} variant="outline">
+                <RefreshCw className={`mr-2 h-4 w-4 ${bulkRefreshing ? 'animate-spin' : ''}`} />
+                Refrescar ({selectedIds.size})
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -193,7 +258,7 @@ export default function AdminVerificationsPage() {
         <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Aprobadas</p><p className="text-2xl font-bold text-green-600">{verifications.filter(v => v.status === 'approved').length}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Rechazadas</p><p className="text-2xl font-bold text-red-600">{verifications.filter(v => v.status === 'declined').length}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Pendientes</p><p className="text-2xl font-bold text-blue-600">{verifications.filter(v => ['pending', 'started', 'submitted'].includes(v.status)).length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Importadas</p><p className="text-2xl font-bold text-purple-600">{verifications.filter(v => v.metadata?.imported).length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Importadas</p><p className="text-2xl font-bold text-purple-600">{verifications.filter(v => v.metadata?.imported || v.metadata?.auto_synced).length}</p></CardContent></Card>
       </div>
 
       {/* Tabla */}
@@ -210,7 +275,7 @@ export default function AdminVerificationsPage() {
           ) : filteredVerifications.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-lg font-medium mb-2">No hay verificaciones</p>
-              <p className="text-sm">Importa sesiones desde Veriff con el botón de arriba</p>
+              <p className="text-sm">Usa el buscador superior para importar una nueva</p>
             </div>
           ) : (
             <div className="rounded-md border overflow-x-auto">
@@ -255,7 +320,7 @@ export default function AdminVerificationsPage() {
                         <TableCell><span className="text-xs capitalize">{v.purpose.replace('_', ' ')}</span></TableCell>
                         <TableCell>
                           <Badge variant="outline" className={cfg.color}><Icon className="mr-1 h-3 w-3" />{cfg.label}</Badge>
-                          {v.metadata?.imported && <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800">Importada</Badge>}
+                          {(v.metadata?.imported || v.metadata?.auto_synced) && <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800">Auto</Badge>}
                         </TableCell>
                         <TableCell>
                           {v.risk_score !== null ? (

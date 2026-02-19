@@ -144,6 +144,33 @@ Puedes ir ahí para probar todo el sistema de manera interactiva.
 
 ---
 
+## 🔌 API de Activación Externa (M2M)
+
+Si tienes un sistema externo que recibe el `sessionId` de Veriff y quieres activar el procesamiento en TuPatrimonio:
+
+**Endpoint:** `POST /api/verifications/trigger`
+
+```bash
+curl -X POST https://app.tupatrimonio.app/api/verifications/trigger \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "c5f73e02-4f61-4f2c-a7fc-f1cebc64d7dc"}'
+```
+
+**Respuesta Exitosa:**
+```json
+{
+  "success": true,
+  "status": "approved",
+  "isNew": true,
+  "sessionId": "c5f73e02-4f61-4f2c-a7fc-f1cebc64d7dc",
+  "message": "Verificación procesada exitosamente"
+}
+```
+
+Este endpoint es público y no requiere autenticación, diseñado para integraciones servidor a servidor.
+
+---
+
 ## 🔄 Flujo de Webhook y Sincronización
 
 El sistema utiliza una estrategia de "Procesamiento Inmediato con Respaldo en Cola":
