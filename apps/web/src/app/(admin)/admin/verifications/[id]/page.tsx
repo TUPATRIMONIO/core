@@ -119,7 +119,10 @@ export default function AdminVerificationDetailPage() {
   }
 
   const session = data.session;
-  const config = statusConfig[session.status] || statusConfig.pending;
+  // Extraer status desde attempts si no hay decision
+  const attemptsStatus = session.raw_response?.attempts?.verifications?.[0]?.status;
+  const rawStatus = session.status === 'pending' && attemptsStatus ? attemptsStatus : session.status;
+  const config = statusConfig[rawStatus] || statusConfig.pending;
   const Icon = config.icon;
 
   // Extraer datos del webhook si las tablas están vacías
@@ -127,6 +130,12 @@ export default function AdminVerificationDetailPage() {
   const apiPerson = session.raw_response?.person?.person || session.raw_response?.person;
   const apiDoc = session.raw_response?.decision?.document;
   
+  // Si no hay media de la API, usar las de raw_response
+  if (veriffMedia.length === 0) {
+    const savedMedia = result.session?.raw_response?.media?.images;
+    if (savedMedia?.length > 0) setVeriffMedia(savedMedia);
+  }
+
   const personInfo = {
     firstName: data.documents?.[0]?.first_name 
       || webhookData?.person?.firstName?.value 
@@ -151,6 +160,7 @@ export default function AdminVerificationDetailPage() {
     idNumber: data.documents?.[0]?.document_number 
       || webhookData?.person?.idNumber?.value 
       || apiPerson?.idNumber 
+      || apiPerson?.idCode
       || session.subject_identifier 
       || '-',
   };
@@ -163,10 +173,12 @@ export default function AdminVerificationDetailPage() {
     number: data.documents?.[0]?.document_number 
       || webhookData?.document?.number?.value 
       || apiDoc?.number 
+      || apiPerson?.idCode
       || '-',
     country: data.documents?.[0]?.document_country 
       || webhookData?.document?.country?.value 
       || apiDoc?.country 
+      || apiPerson?.nationality
       || '-',
     validUntil: data.documents?.[0]?.expiry_date 
       || webhookData?.document?.validUntil?.value 

@@ -64,7 +64,8 @@ export async function processVeriffSession(
 
     // Extraer datos
     const person = personData?.person || personData || extractPersonFromWebhook(webhookVerification);
-    const rawStatus = decisionData?.verification?.status || webhookDecision;
+    const attemptsStatus = attemptsData?.verifications?.[0]?.status;
+    const rawStatus = decisionData?.verification?.status || webhookDecision || attemptsStatus;
     const status = mapStatus(rawStatus);
     const riskScore = (decisionData?.verification?.riskLabels || webhookVerification?.riskLabels)
       ? Math.min((decisionData?.verification?.riskLabels || webhookVerification?.riskLabels).length * 20, 100)
@@ -114,7 +115,7 @@ export async function processVeriffSession(
           provider_config_id: config.providerConfigId,
           provider_session_id: veriffSessionId,
           purpose: 'general',
-          subject_identifier: documentData?.number?.value || documentData?.number || null,
+          subject_identifier: documentData?.number?.value || documentData?.number || person?.idCode || person?.idNumber || null,
           subject_email: person?.email || null,
           subject_name: person
             ? `${person.firstName || ''} ${person.lastName || ''}`.trim() || null
@@ -150,11 +151,16 @@ export async function processVeriffSession(
     // Guardar documento
     if (documentData) {
       await saveDocument(adminClient, sessionId, documentData, person, decisionData?.verification || webhookVerification);
+    } else if (person?.idCode || person?.idNumber) {
+      await saveDocumentFromPerson(adminClient, sessionId, person);
     }
 
     // Guardar intentos
     if (attemptsData?.attempts?.length > 0) {
       await saveAttempts(adminClient, sessionId, attemptsData.attempts);
+    } else if (attemptsData?.verifications?.length > 0) {
+      // Formato alternativo de attempts
+      await saveAttempts(adminClient, sessionId, attemptsData.verifications);
     }
 
     // Descargar media
@@ -168,6 +174,12 @@ export async function processVeriffSession(
         config.apiSecret,
         signature
       );
+    } else {
+      // Fallback: descargar desde URLs sin firma (raw_response ya las tiene)
+      const allMediaImages = mediaData?.images || [];
+      if (allMediaImages.length > 0) {
+        await downloadMediaDirect(adminClient, sessionId, config.organizationId, allMediaImages);
+      }
     }
 
     return { success: true, status, isNew: !existing };
@@ -386,7 +398,90 @@ async function downloadMedia(
   }
 }
 
-function mapMediaType(c: string): string {
+async function saveDocumentFromPerson(adminClient: any, sessionId: string, person: any) {
+  try {
+    // Verificar si ya existe documento
+    const { data: existingDoc } = await adminClient
+        .from('identity_verification_documents')
+        .select('id')
+        .eq('session_id', sessionId)
+        .limit(1)
+        .single();
+
+    if (existingDoc) return;
+
+    await adminClient.from('identity_verification_documents').insert({
+        session_id: sessionId,
+        document_type: 'national_id', // Asumimos national_id si solo hay datos de persona
+        document_country: person?.nationality?.value || person?.nationality,
+        document_number: person?.idCode || person?.idNumber?.value || person?.idNumber,
+        first_name: person?.firstName?.value || person?.firstName,
+        last_name: person?.lastName?.value || person?.lastName,
+        date_of_birth: person?.dateOfBirth?.value || person?.dateOfBirth,
+        expiry_date: null,
+        is_expired: null,
+        validation_checks: {},
+        confidence_score: 0.5,
+    });
+  } catch (e) {
+    console.error('Error guardando documento desde persona:', e);
+  }
+}
+
+async function downloadMediaDirect(
+  adminClient: any,
+  sessionId: string,
+  orgId: string,
+  images: any[]
+) {
+  try {
+    for (const img of images) {
+      try {
+        // Verificar si ya existe este media
+        const { data: existingMedia } = await adminClient
+            .from('identity_verification_media')
+            .select('id')
+            .eq('provider_media_id', img.id)
+            .single();
+            
+        if (existingMedia) continue;
+
+        const dlRes = await fetch(img.url);
+        if (!dlRes.ok) continue;
+        const buffer = await (await dlRes.blob()).arrayBuffer();
+
+        const mediaType = mapMediaType(img.context);
+        const ext = img.mimetype === 'video/mp4' ? 'mp4' : 'jpg';
+        const path = `${orgId}/${sessionId}/${mediaType}_${Date.now()}.${ext}`;
+
+        await adminClient.storage.from('identity-verifications').upload(path, buffer, {
+          contentType: img.mimetype || 'image/jpeg',
+        });
+
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        const checksum = Array.from(new Uint8Array(hashBuffer))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        await adminClient.from('identity_verification_media').insert({
+          session_id: sessionId,
+          media_type: mediaType,
+          provider_media_id: img.id,
+          storage_path: path,
+          file_size: buffer.byteLength,
+          mime_type: img.mimetype || 'image/jpeg',
+          original_url: img.url,
+          downloaded_at: new Date().toISOString(),
+          checksum,
+        });
+      } catch (e) {
+        console.error('Error descargando media directo:', e);
+      }
+    }
+  } catch (e) {
+    console.error('Error en downloadMediaDirect:', e);
+  }
+}
   const m: Record<string, string> = {
     'document-front': 'document_front',
     'document-back': 'document_back',
