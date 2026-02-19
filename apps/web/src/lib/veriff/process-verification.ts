@@ -165,6 +165,7 @@ export async function processVeriffSession(
 
     // Descargar media
     if (mediaData?.images?.length > 0) {
+      // Intentar con firma HMAC (funciona solo para la misma integración)
       await downloadMedia(
         adminClient,
         sessionId,
@@ -174,12 +175,10 @@ export async function processVeriffSession(
         config.apiSecret,
         signature
       );
-    } else {
-      // Fallback: descargar desde URLs sin firma (raw_response ya las tiene)
-      const allMediaImages = mediaData?.images || [];
-      if (allMediaImages.length > 0) {
-        await downloadMediaDirect(adminClient, sessionId, config.organizationId, allMediaImages);
-      }
+      // Fallback: si downloadMedia no guardó nada (otra integración), 
+      // intentar descarga directa sin firma. downloadMediaDirect verifica 
+      // duplicados internamente, así que no descargará lo que ya se guardó.
+      await downloadMediaDirect(adminClient, sessionId, config.organizationId, mediaData.images);
     }
 
     return { success: true, status, isNew: !existing };
@@ -290,12 +289,17 @@ async function saveDocument(adminClient: any, sessionId: string, doc: any, perso
 
 function mapDocType(t: string): string {
   const m: Record<string, string> = {
-    ID_CARD: 'national_id',
-    PASSPORT: 'passport',
-    DRIVERS_LICENSE: 'drivers_license',
-    RESIDENCE_PERMIT: 'residence_permit',
+    'id_card': 'national_id',
+    'ID_CARD': 'national_id',
+    'national_id': 'national_id',
+    'passport': 'passport',
+    'PASSPORT': 'passport',
+    'drivers_license': 'drivers_license',
+    'DRIVERS_LICENSE': 'drivers_license',
+    'residence_permit': 'residence_permit',
+    'RESIDENCE_PERMIT': 'residence_permit',
   };
-  return m[t] || 'other';
+  return m[t] || m[t?.toLowerCase()] || 'other';
 }
 
 async function saveAttempts(adminClient: any, sessionId: string, attempts: any[]) {

@@ -56,15 +56,51 @@ export default function AdminVerificationDetailPage() {
       if (!response.ok) throw new Error(result.error);
       setData(result);
       
-      // Si hay session ID de Veriff, cargar media directamente
-      if (result.session?.provider_session_id) {
-        loadVeriffMedia(result.session.provider_session_id, result.session.organization_id);
+      // Prioridad 1: Cargar media desde Storage (si existe en la tabla)
+      if (result.media && result.media.length > 0 && result.media.some((m: any) => m.storage_path)) {
+        await loadStorageMediaUrls(result.media);
+      } else {
+        // Prioridad 2: Fallback a raw_response (URLs de Veriff)
+        const savedMedia = result.session?.raw_response?.media?.images;
+        if (savedMedia?.length > 0) {
+          setVeriffMedia(savedMedia);
+        } else if (result.session?.provider_session_id) {
+          // Prioridad 3: Consultar API en vivo
+          loadVeriffMedia(result.session.provider_session_id, result.session.organization_id);
+        }
       }
     } catch (error) {
       console.error('Error cargando verificación:', error);
       toast.error('Error al cargar la verificación');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStorageMediaUrls = async (mediaItems: any[]) => {
+    setLoadingMedia(true);
+    try {
+      const mediaWithUrls = await Promise.all(mediaItems.map(async (item) => {
+        if (!item.storage_path) return item;
+        try {
+          const res = await fetch(`/api/verifications/${sessionId}/media?path=${encodeURIComponent(item.storage_path)}`);
+          const data = await res.json();
+          return {
+            ...item,
+            url: data.url, // Usamos la signedUrl como url principal
+            signedUrl: data.url,
+            context: item.media_type,
+            mimeType: item.mime_type
+          };
+        } catch {
+          return item;
+        }
+      }));
+      setVeriffMedia(mediaWithUrls);
+    } catch (error) {
+      console.error('Error generando URLs de storage:', error);
+    } finally {
+      setLoadingMedia(false);
     }
   };
 
@@ -130,7 +166,7 @@ export default function AdminVerificationDetailPage() {
   const apiPerson = session.raw_response?.person?.person || session.raw_response?.person;
   const apiDoc = session.raw_response?.decision?.document;
   
-  // Si no hay media de la API, usar las de raw_response
+  // Si no hay media cargada, intentar con los fallbacks en render
   if (veriffMedia.length === 0) {
     const savedMedia = data.session?.raw_response?.media?.images;
     if (savedMedia?.length > 0) setVeriffMedia(savedMedia);
@@ -157,23 +193,32 @@ export default function AdminVerificationDetailPage() {
       || webhookData?.person?.nationality?.value 
       || apiPerson?.nationality 
       || '-',
-    idNumber: data.documents?.[0]?.document_number 
-      || webhookData?.person?.idNumber?.value 
+    // Priorizar ID personal (RUT) sobre numero de documento
+    idNumber: webhookData?.person?.idNumber?.value 
+      || apiPerson?.idCode 
       || apiPerson?.idNumber 
-      || apiPerson?.idCode
       || session.subject_identifier 
       || '-',
   };
 
   const docInfo = {
-    type: data.documents?.[0]?.document_type 
-      || webhookData?.document?.type?.value 
-      || apiDoc?.type 
-      || '-',
+    type: (() => {
+      const raw = data.documents?.[0]?.document_type 
+        || webhookData?.document?.type?.value 
+        || apiDoc?.type || '-';
+      const typeMap: Record<string, string> = {
+        'id_card': 'Cédula de Identidad',
+        'national_id': 'Cédula de Identidad',
+        'passport': 'Pasaporte',
+        'drivers_license': 'Licencia de Conducir',
+        'residence_permit': 'Permiso de Residencia',
+      };
+      return typeMap[raw.toLowerCase()] || raw;
+    })(),
+    // Priorizar numero de serie del documento
     number: data.documents?.[0]?.document_number 
       || webhookData?.document?.number?.value 
       || apiDoc?.number 
-      || apiPerson?.idCode
       || '-',
     country: data.documents?.[0]?.document_country 
       || webhookData?.document?.country?.value 
@@ -311,7 +356,7 @@ export default function AdminVerificationDetailPage() {
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img 
-                        src={getProxyUrl(media.url)} 
+                        src={media.signedUrl || getProxyUrl(media.url)} 
                         alt={media.context || `Imagen ${idx + 1}`}
                         className="w-full h-full object-contain"
                         loading="lazy"
@@ -320,12 +365,12 @@ export default function AdminVerificationDetailPage() {
                   </div>
                   <div className="p-3 border-t bg-white">
                     <p className="font-medium text-sm capitalize mb-1">
-                      {(media.context || 'desconocido').replace(/-/g, ' ')}
+                      {(media.context || media.media_type || 'desconocido').replace(/-/g, ' ').replace(/_/g, ' ')}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">{media.mimeType}</span>
+                      <span className="text-xs text-muted-foreground">{media.mimeType || media.mime_type}</span>
                       <a 
-                        href={getProxyUrl(media.url)} 
+                        href={media.signedUrl || getProxyUrl(media.url)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-xs text-blue-600 hover:underline flex items-center"
