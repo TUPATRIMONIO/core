@@ -11,21 +11,49 @@ import { processVeriffSession } from '@/lib/veriff/process-verification';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId } = body;
+    const { sessionId, apiKey, apiSecret } = body;
 
     if (!sessionId) {
       return NextResponse.json({ error: 'sessionId requerido' }, { status: 400 });
     }
 
     const adminClient = createServiceRoleClient();
+    let config = null;
 
-    // Obtener configuración activa de Veriff
-    const { data: config } = await adminClient
-      .from('identity_verification_provider_configs')
-      .select('id, provider_id, credentials, organization_id')
-      .eq('is_active', true)
-      .limit(1)
-      .single();
+    // Si se proporcionan credenciales, usarlas directamente
+    if (apiKey && apiSecret) {
+      // Necesitamos un organization_id y provider_id por defecto para guardar la sesión
+      // Buscamos la configuración por defecto solo para obtener esos IDs
+      const { data: defaultConfig } = await adminClient
+        .from('identity_verification_provider_configs')
+        .select('id, provider_id, organization_id')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+
+      if (!defaultConfig) {
+        return NextResponse.json({ 
+          error: 'No se encontró configuración base para asociar la verificación' 
+        }, { status: 500 });
+      }
+
+      config = {
+        id: defaultConfig.id,
+        provider_id: defaultConfig.provider_id,
+        organization_id: defaultConfig.organization_id,
+        credentials: { api_key: apiKey, api_secret: apiSecret }
+      };
+    } else {
+      // Obtener configuración activa de Veriff desde la BD
+      const { data: dbConfig } = await adminClient
+        .from('identity_verification_provider_configs')
+        .select('id, provider_id, credentials, organization_id')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+      
+      config = dbConfig;
+    }
 
     if (!config?.credentials?.api_key || !config?.credentials?.api_secret) {
       return NextResponse.json({ 

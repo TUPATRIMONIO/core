@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
           providerId: config.provider_id,
           providerConfigId: config.id,
         },
-        eventType
+        eventType,
+        payload // Pasar payload completo del webhook
       );
 
       if (result.success) {

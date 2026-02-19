@@ -18,7 +18,8 @@ export async function processVeriffSession(
     providerId: string;
     providerConfigId: string;
   },
-  eventType?: string
+  eventType?: string,
+  webhookPayload?: any
 ): Promise<ProcessVerificationResult> {
   const adminClient = createServiceRoleClient();
 
@@ -52,17 +53,25 @@ export async function processVeriffSession(
       fetchVeriff(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, config.apiKey, signature),
     ]);
 
-    if (!decisionData && !personData) {
+    if (!decisionData && !personData && !webhookPayload) {
       console.error(`❌ No se encontró data para ${veriffSessionId}`);
       return { success: false, error: 'No data found in Veriff' };
     }
 
+    // Extraer datos del webhook si la API falló
+    const webhookVerification = webhookPayload?.data?.verification;
+    const webhookDecision = webhookVerification?.decision;
+
     // Extraer datos
-    const person = personData?.person || personData;
-    const status = mapStatus(decisionData?.verification?.status);
-    const riskScore = decisionData?.verification?.riskLabels
-      ? Math.min(decisionData.verification.riskLabels.length * 20, 100)
+    const person = personData?.person || personData || extractPersonFromWebhook(webhookVerification);
+    const rawStatus = decisionData?.verification?.status || webhookDecision;
+    const status = mapStatus(rawStatus);
+    const riskScore = (decisionData?.verification?.riskLabels || webhookVerification?.riskLabels)
+      ? Math.min((decisionData?.verification?.riskLabels || webhookVerification?.riskLabels).length * 20, 100)
       : null;
+    
+    // Documento desde API o Webhook
+    const documentData = decisionData?.document || webhookVerification?.document;
 
     let sessionId = existing?.id;
 
@@ -72,15 +81,16 @@ export async function processVeriffSession(
         .from('identity_verification_sessions')
         .update({
           status: status,
-          decision_code: decisionData?.verification?.code?.toString() || null,
-          decision_reason: decisionData?.verification?.reason || null,
+          decision_code: decisionData?.verification?.code?.toString() || webhookVerification?.code?.toString() || null,
+          decision_reason: decisionData?.verification?.reason || webhookVerification?.reason || null,
           risk_score: riskScore,
-          verified_at: decisionData?.verification?.acceptanceTime || null,
+          verified_at: decisionData?.verification?.acceptanceTime || webhookPayload?.acceptanceTime || null,
           raw_response: { 
             decision: decisionData, 
             person: personData,
             attempts: attemptsData,
             media: mediaData,
+            webhook: webhookPayload
           },
           metadata: {
             last_synced_at: new Date().toISOString(),
@@ -104,21 +114,22 @@ export async function processVeriffSession(
           provider_config_id: config.providerConfigId,
           provider_session_id: veriffSessionId,
           purpose: 'general',
-          subject_identifier: decisionData?.document?.number || null,
+          subject_identifier: documentData?.number?.value || documentData?.number || null,
           subject_email: person?.email || null,
           subject_name: person
             ? `${person.firstName || ''} ${person.lastName || ''}`.trim() || null
             : null,
           status: status,
-          decision_code: decisionData?.verification?.code?.toString() || null,
-          decision_reason: decisionData?.verification?.reason || null,
+          decision_code: decisionData?.verification?.code?.toString() || webhookVerification?.code?.toString() || null,
+          decision_reason: decisionData?.verification?.reason || webhookVerification?.reason || null,
           risk_score: riskScore,
-          verified_at: decisionData?.verification?.acceptanceTime || null,
+          verified_at: decisionData?.verification?.acceptanceTime || webhookPayload?.acceptanceTime || null,
           raw_response: { 
             decision: decisionData, 
             person: personData,
             attempts: attemptsData,
             media: mediaData,
+            webhook: webhookPayload
           },
           metadata: {
             auto_synced: true,
@@ -137,8 +148,8 @@ export async function processVeriffSession(
     }
 
     // Guardar documento
-    if (decisionData?.document) {
-      await saveDocument(adminClient, sessionId, decisionData, person);
+    if (documentData) {
+      await saveDocument(adminClient, sessionId, documentData, person, decisionData?.verification || webhookVerification);
     }
 
     // Guardar intentos
@@ -212,9 +223,8 @@ function mapStatus(s: string | undefined): string {
   return m[s] || 'pending';
 }
 
-async function saveDocument(adminClient: any, sessionId: string, decisionData: any, person: any) {
+async function saveDocument(adminClient: any, sessionId: string, doc: any, person: any, verificationData: any) {
   try {
-    const doc = decisionData.document;
     // Verificar si ya existe documento para esta sesión para evitar duplicados/errores
     const { data: existingDoc } = await adminClient
         .from('identity_verification_documents')
@@ -223,37 +233,42 @@ async function saveDocument(adminClient: any, sessionId: string, decisionData: a
         .limit(1)
         .single();
 
+    const docType = doc.type?.value || doc.type;
+    const docCountry = doc.country?.value || doc.country;
+    const docNumber = doc.number?.value || doc.number;
+    const validUntil = doc.validUntil?.value || doc.validUntil;
+
     if (existingDoc) {
         // Podríamos actualizar, pero por ahora solo insertamos si no existe
         // O podríamos borrar y reinsertar. Vamos a hacer upsert o update.
         await adminClient.from('identity_verification_documents')
             .update({
-                document_type: mapDocType(doc.type),
-                document_country: doc.country,
-                document_number: doc.number,
+                document_type: mapDocType(docType),
+                document_country: docCountry,
+                document_number: docNumber,
                 first_name: person?.firstName,
                 last_name: person?.lastName,
                 date_of_birth: person?.dateOfBirth,
-                expiry_date: doc.validUntil,
-                is_expired: doc.validUntil ? new Date(doc.validUntil) < new Date() : null,
-                validation_checks: decisionData.verification || {},
-                confidence_score: decisionData.verification?.code === 9001 ? 1.0 : 0.5,
+                expiry_date: validUntil,
+                is_expired: validUntil ? new Date(validUntil) < new Date() : null,
+                validation_checks: verificationData || {},
+                confidence_score: verificationData?.code === 9001 ? 1.0 : 0.5,
                 updated_at: new Date().toISOString()
             })
             .eq('id', existingDoc.id);
     } else {
         await adminClient.from('identity_verification_documents').insert({
             session_id: sessionId,
-            document_type: mapDocType(doc.type),
-            document_country: doc.country,
-            document_number: doc.number,
+            document_type: mapDocType(docType),
+            document_country: docCountry,
+            document_number: docNumber,
             first_name: person?.firstName,
             last_name: person?.lastName,
             date_of_birth: person?.dateOfBirth,
-            expiry_date: doc.validUntil,
-            is_expired: doc.validUntil ? new Date(doc.validUntil) < new Date() : null,
-            validation_checks: decisionData.verification || {},
-            confidence_score: decisionData.verification?.code === 9001 ? 1.0 : 0.5,
+            expiry_date: validUntil,
+            is_expired: validUntil ? new Date(validUntil) < new Date() : null,
+            validation_checks: verificationData || {},
+            confidence_score: verificationData?.code === 9001 ? 1.0 : 0.5,
         });
     }
   } catch (e) {
@@ -372,6 +387,29 @@ async function downloadMedia(
 }
 
 function mapMediaType(c: string): string {
+  const m: Record<string, string> = {
+    'document-front': 'document_front',
+    'document-back': 'document_back',
+    face: 'face_photo',
+    selfie: 'selfie',
+    video: 'liveness_video',
+  };
+  return m[c] || 'selfie';
+}
+
+function extractPersonFromWebhook(verification: any) {
+  if (!verification?.person) return null;
+  const p = verification.person;
+  return {
+    firstName: p.firstName?.value,
+    lastName: p.lastName?.value,
+    dateOfBirth: p.dateOfBirth?.value,
+    gender: p.gender?.value,
+    idNumber: p.idNumber?.value,
+    nationality: p.nationality?.value,
+    email: null // El webhook no suele traer email en el objeto person
+  };
+}
   const m: Record<string, string> = {
     'document-front': 'document_front',
     'document-back': 'document_back',
