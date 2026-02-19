@@ -42,19 +42,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Extraer datos del evento
-    const {
-      id: veriffSessionId,
-      feature,
-      action,
-      vendorData,
-    } = payload;
+    const veriffSessionId = payload.sessionId || payload.id;
+    const eventType = payload.eventType || `${payload.feature}.${payload.action}`;
+    const vendorData = payload.vendorData;
 
     if (!veriffSessionId) {
       console.error('Webhook sin session ID:', payload);
       return NextResponse.json({ error: 'Missing session ID' }, { status: 400 });
     }
-
-    const eventType = `${feature}.${action}`;
 
     // Guardar en cola de sincronización (upsert para manejar reintentos o nuevos eventos)
     const { data: queuedItem, error: upsertError } = await adminClient
