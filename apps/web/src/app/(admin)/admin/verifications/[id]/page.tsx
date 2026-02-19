@@ -132,7 +132,7 @@ export default function AdminVerificationDetailPage() {
   
   // Si no hay media de la API, usar las de raw_response
   if (veriffMedia.length === 0) {
-    const savedMedia = result.session?.raw_response?.media?.images;
+    const savedMedia = data.session?.raw_response?.media?.images;
     if (savedMedia?.length > 0) setVeriffMedia(savedMedia);
   }
 
