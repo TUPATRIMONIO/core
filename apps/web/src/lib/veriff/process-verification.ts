@@ -482,6 +482,7 @@ async function downloadMediaDirect(
     console.error('Error en downloadMediaDirect:', e);
   }
 }
+function mapMediaType(c: string): string {
   const m: Record<string, string> = {
     'document-front': 'document_front',
     'document-back': 'document_back',
