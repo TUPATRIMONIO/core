@@ -410,12 +410,3 @@ function extractPersonFromWebhook(verification: any) {
     email: null // El webhook no suele traer email en el objeto person
   };
 }
-  const m: Record<string, string> = {
-    'document-front': 'document_front',
-    'document-back': 'document_back',
-    face: 'face_photo',
-    selfie: 'selfie',
-    video: 'liveness_video',
-  };
-  return m[c] || 'selfie';
-}
