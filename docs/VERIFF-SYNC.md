@@ -192,6 +192,14 @@ Para asegurar que tienes **TODO** respaldado:
 2. Capturas cualquier sesión que se haya perdido
 3. **Garantía:** Backup completo para auditorías
 
+### Caso 4: Integraciones con Credenciales Diferentes
+
+Si tienes integraciones externas que usan **diferentes credenciales de Veriff** (API Key/Secret distintos a los principales):
+
+1. **Configuración:** Agrega las credenciales secundarias en la tabla `identity_verification_provider_configs` columna `secondary_credentials`.
+2. **Sincronización:** El sistema intentará descargar la media usando las credenciales principales.
+3. **Fallback:** Si falla, probará automáticamente con cada set de credenciales secundarias hasta tener éxito.
+
 ---
 
 ## 🔐 Seguridad

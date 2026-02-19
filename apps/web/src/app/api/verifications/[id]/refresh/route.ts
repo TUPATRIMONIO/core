@@ -65,7 +65,7 @@ export async function POST(
     // Obtener configuración de Veriff
     const { data: config } = await adminClient
       .from('identity_verification_provider_configs')
-      .select('credentials')
+      .select('credentials, secondary_credentials')
       .eq('provider_id', session.provider_id)
       .eq('is_active', true)
       .single();
@@ -219,6 +219,19 @@ export async function POST(
     // Descargar y guardar media si hay datos
     let mediaCount = 0;
     if (mediaData?.images && mediaData.images.length > 0) {
+      
+      // Preparar lista de credenciales para media (incluyendo secundarias)
+      const mediaCredentials = [
+        { apiKey: config.credentials.api_key, apiSecret: config.credentials.api_secret }
+      ];
+      if (config.secondary_credentials && Array.isArray(config.secondary_credentials)) {
+        for (const cred of config.secondary_credentials) {
+          if (cred.api_key && cred.api_secret) {
+            mediaCredentials.push({ apiKey: cred.api_key, apiSecret: cred.api_secret });
+          }
+        }
+      }
+
       for (const img of mediaData.images) {
         try {
           // Verificar si ya existe por provider_media_id
@@ -231,8 +244,36 @@ export async function POST(
 
           if (existingMedia) continue; // Ya descargado
 
-          const dlRes = await fetch(img.url);
-          if (!dlRes.ok) continue;
+          // Extraer mediaId de la URL para generar firma HMAC
+          const urlObj = new URL(img.url);
+          const pathMatch = urlObj.pathname.match(/\/v1\/media\/([a-f0-9-]+)/i);
+          const mediaId = pathMatch?.[1];
+
+          let dlRes: Response | null = null;
+
+          // Intentar descargar con cada set de credenciales
+          for (const cred of mediaCredentials) {
+            try {
+              let headers: Record<string, string> = {};
+              if (mediaId) {
+                const signature = await generateHmacSignature(mediaId, cred.apiSecret);
+                headers = {
+                  'X-AUTH-CLIENT': cred.apiKey,
+                  'X-HMAC-SIGNATURE': signature,
+                };
+              }
+              
+              const res = await fetch(img.url, { headers });
+              if (res.ok) {
+                dlRes = res;
+                break;
+              }
+            } catch (e) {
+              // Ignorar error y probar siguiente credencial
+            }
+          }
+
+          if (!dlRes || !dlRes.ok) continue;
           const buffer = await (await dlRes.blob()).arrayBuffer();
 
           const mediaType = mapMediaType(img.context);
@@ -256,6 +297,7 @@ export async function POST(
             storage_path: path,
             file_size: buffer.byteLength,
             mime_type: img.mimeType || 'image/jpeg',
+            original_url: img.url,
             downloaded_at: new Date().toISOString(),
             checksum,
           });
@@ -368,4 +410,19 @@ function mapMediaType(context: string): string {
     video: 'liveness_video',
   };
   return map[context] || 'selfie';
+}
+
+async function generateHmacSignature(payload: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }

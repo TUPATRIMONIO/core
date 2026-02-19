@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     const adminClient = createServiceRoleClient();
     const { data: config } = await adminClient
       .from('identity_verification_provider_configs')
-      .select('credentials')
+      .select('credentials, secondary_credentials')
       .eq('is_active', true)
       .limit(1)
       .single();
@@ -67,23 +67,47 @@ export async function GET(request: NextRequest) {
       return new NextResponse('Sin configuración de Veriff', { status: 500 });
     }
 
-    const apiKey = config.credentials.api_key;
-    const apiSecret = config.credentials.api_secret;
+    // Preparar lista de credenciales para intentar
+    const credentialsList = [
+      { apiKey: config.credentials.api_key, apiSecret: config.credentials.api_secret }
+    ];
 
-    // Generar firma HMAC-SHA256 del media ID
-    const signature = await generateHmacSignature(mediaId, apiSecret);
+    if (config.secondary_credentials && Array.isArray(config.secondary_credentials)) {
+      for (const cred of config.secondary_credentials) {
+        if (cred.api_key && cred.api_secret) {
+          credentialsList.push({ apiKey: cred.api_key, apiSecret: cred.api_secret });
+        }
+      }
+    }
 
-    // Descargar imagen desde Veriff con autenticación correcta
-    const response = await fetch(imageUrl, {
-      headers: {
-        'X-AUTH-CLIENT': apiKey,
-        'X-HMAC-SIGNATURE': signature,
-      },
-    });
+    let response: Response | null = null;
 
-    if (!response.ok) {
-      console.error(`Error descargando media de Veriff: ${response.status} ${response.statusText}`);
-      return new NextResponse(`Error descargando imagen: ${response.status}`, { status: response.status });
+    // Intentar descargar con cada set de credenciales
+    for (const cred of credentialsList) {
+      try {
+        // Generar firma HMAC-SHA256 del media ID
+        const signature = await generateHmacSignature(mediaId, cred.apiSecret);
+
+        // Descargar imagen desde Veriff con autenticación correcta
+        const res = await fetch(imageUrl, {
+          headers: {
+            'X-AUTH-CLIENT': cred.apiKey,
+            'X-HMAC-SIGNATURE': signature,
+          },
+        });
+
+        if (res.ok) {
+          response = res;
+          break; // Éxito, salir del loop
+        }
+      } catch (e) {
+        console.error('Error intentando credencial:', e);
+      }
+    }
+
+    if (!response || !response.ok) {
+      console.error(`Error descargando media de Veriff: ${response?.status} ${response?.statusText}`);
+      return new NextResponse(`Error descargando imagen: ${response?.status || 500}`, { status: response?.status || 500 });
     }
 
     const contentType = response.headers.get('content-type') || 'image/jpeg';

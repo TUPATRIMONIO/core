@@ -178,7 +178,15 @@ export async function processVeriffSession(
       // Fallback: si downloadMedia no guardó nada (otra integración), 
       // intentar descarga directa sin firma. downloadMediaDirect verifica 
       // duplicados internamente, así que no descargará lo que ya se guardó.
-      await downloadMediaDirect(adminClient, sessionId, config.organizationId, mediaData.images);
+      await downloadMediaDirect(
+        adminClient,
+        sessionId,
+        config.organizationId,
+        mediaData.images,
+        config.apiKey,
+        config.apiSecret,
+        config.providerConfigId
+      );
     }
 
     return { success: true, status, isNew: !existing };
@@ -436,9 +444,14 @@ async function downloadMediaDirect(
   adminClient: any,
   sessionId: string,
   orgId: string,
-  images: any[]
+  images: any[],
+  apiKey: string,
+  apiSecret: string,
+  providerConfigId?: string
 ) {
   try {
+    let secondaryCredentials: any[] | null = null;
+
     for (const img of images) {
       try {
         // Verificar si ya existe este media
@@ -450,8 +463,37 @@ async function downloadMediaDirect(
             
         if (existingMedia) continue;
 
-        const dlRes = await fetch(img.url);
-        if (!dlRes.ok) continue;
+        // Extraer mediaId de la URL para generar firma HMAC
+        // URL típica: https://stationapi.veriff.com/v1/media/{mediaId}
+        const urlObj = new URL(img.url);
+        const pathMatch = urlObj.pathname.match(/\/v1\/media\/([a-f0-9-]+)/i);
+        const mediaId = pathMatch?.[1];
+
+        // Intentar con credenciales principales
+        let dlRes = await tryDownload(img.url, mediaId, apiKey, apiSecret);
+
+        // Si falla y tenemos providerConfigId, intentar con credenciales secundarias
+        if ((!dlRes || !dlRes.ok) && providerConfigId) {
+          if (secondaryCredentials === null) {
+             const { data: config } = await adminClient
+              .from('identity_verification_provider_configs')
+              .select('secondary_credentials')
+              .eq('id', providerConfigId)
+              .single();
+             secondaryCredentials = config?.secondary_credentials || [];
+          }
+
+          if (secondaryCredentials && secondaryCredentials.length > 0) {
+            for (const cred of secondaryCredentials) {
+              if (cred.api_key && cred.api_secret) {
+                dlRes = await tryDownload(img.url, mediaId, cred.api_key, cred.api_secret);
+                if (dlRes?.ok) break; // Éxito con credencial secundaria
+              }
+            }
+          }
+        }
+
+        if (!dlRes || !dlRes.ok) continue;
         const buffer = await (await dlRes.blob()).arrayBuffer();
 
         const mediaType = mapMediaType(img.context);
@@ -486,6 +528,38 @@ async function downloadMediaDirect(
     console.error('Error en downloadMediaDirect:', e);
   }
 }
+
+async function tryDownload(url: string, mediaId: string | undefined | null, key: string, secret: string) {
+  try {
+    let headers: Record<string, string> = {};
+    if (mediaId && key && secret) {
+      const hmacSignature = await generateHmacSignature(mediaId, secret);
+      headers = {
+        'X-AUTH-CLIENT': key,
+        'X-HMAC-SIGNATURE': hmacSignature,
+      };
+    }
+    return await fetch(url, { headers });
+  } catch {
+    return null;
+  }
+}
+
+async function generateHmacSignature(payload: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 function mapMediaType(c: string): string {
   const m: Record<string, string> = {
     'document-front': 'document_front',
