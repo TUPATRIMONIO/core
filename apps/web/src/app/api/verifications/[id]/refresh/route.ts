@@ -77,20 +77,44 @@ export async function POST(
       );
     }
 
-    const apiKey = config.credentials.api_key;
-    const apiSecret = config.credentials.api_secret;
+    // Preparar lista de credenciales para probar (primarias + secundarias)
+    const allCredentials = [
+      { apiKey: config.credentials.api_key, apiSecret: config.credentials.api_secret }
+    ];
+    if (config.secondary_credentials && Array.isArray(config.secondary_credentials)) {
+      for (const cred of config.secondary_credentials) {
+        if (cred.api_key && cred.api_secret) {
+          allCredentials.push({ apiKey: cred.api_key, apiSecret: cred.api_secret });
+        }
+      }
+    }
+
     const veriffSessionId = session.provider_session_id;
+    let personData = null, attemptsData = null, decisionData = null, mediaData = null;
+    let usedApiKey = '', usedApiSecret = '';
 
-    // Generar firma SHA256(sessionId + apiSecret)
-    const signature = await generateVeriffSignature(veriffSessionId, apiSecret);
+    // Intentar con cada set de credenciales hasta encontrar datos
+    for (const cred of allCredentials) {
+      const signature = await generateVeriffSignature(veriffSessionId, cred.apiSecret);
+      
+      const [p, a, d, m] = await Promise.all([
+        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, cred.apiKey, signature),
+        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, cred.apiKey, signature),
+        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, cred.apiKey, signature),
+        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, cred.apiKey, signature),
+      ]);
 
-    // Consultar los 4 endpoints de Veriff Station API
-    const [personData, attemptsData, decisionData, mediaData] = await Promise.all([
-      fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, apiKey, signature),
-      fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, apiKey, signature),
-      fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, apiKey, signature),
-      fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, apiKey, signature),
-    ]);
+      // Si alguno de los endpoints retorna datos, asumimos que estas son las credenciales correctas
+      if (p || a || d || m) {
+        personData = p;
+        attemptsData = a;
+        decisionData = d;
+        mediaData = m;
+        usedApiKey = cred.apiKey;
+        usedApiSecret = cred.apiSecret;
+        break;
+      }
+    }
 
     let updatedFields = 0;
 
@@ -133,6 +157,11 @@ export async function POST(
 
       if (attemptsData) {
         updateData.raw_response.attempts = attemptsData;
+      }
+
+      // Guardar mediaData en raw_response para fallback
+      if (mediaData) {
+        updateData.raw_response.media = mediaData;
       }
 
       const { error: updateError } = await adminClient
@@ -220,17 +249,11 @@ export async function POST(
     let mediaCount = 0;
     if (mediaData?.images && mediaData.images.length > 0) {
       
-      // Preparar lista de credenciales para media (incluyendo secundarias)
-      const mediaCredentials = [
-        { apiKey: config.credentials.api_key, apiSecret: config.credentials.api_secret }
-      ];
-      if (config.secondary_credentials && Array.isArray(config.secondary_credentials)) {
-        for (const cred of config.secondary_credentials) {
-          if (cred.api_key && cred.api_secret) {
-            mediaCredentials.push({ apiKey: cred.api_key, apiSecret: cred.api_secret });
-          }
-        }
-      }
+      // Si encontramos credenciales válidas, las ponemos primero en la lista
+      // Si no (raro si mediaData existe), usamos la lista completa como fallback
+      const mediaCredentials = usedApiKey && usedApiSecret 
+        ? [{ apiKey: usedApiKey, apiSecret: usedApiSecret }, ...allCredentials.filter(c => c.apiKey !== usedApiKey)]
+        : allCredentials;
 
       for (const img of mediaData.images) {
         try {
@@ -318,6 +341,7 @@ export async function POST(
         user_id: user.id,
         refreshed_at: new Date().toISOString(),
         fields_updated: updatedFields,
+        used_secondary_credentials: usedApiKey !== config.credentials.api_key
       },
       actor_type: 'user',
       actor_id: user.id,
@@ -359,7 +383,11 @@ async function fetchVeriffEndpoint(url: string, apiKey: string, signature: strin
     });
 
     if (!response.ok) {
-      console.error(`Error fetching ${url}:`, response.status);
+      // No loguear error 404/403 si estamos probando múltiples credenciales, 
+      // ya que es esperado que falle con las incorrectas
+      if (response.status !== 404 && response.status !== 403) {
+        console.error(`Error fetching ${url}:`, response.status);
+      }
       return null;
     }
 

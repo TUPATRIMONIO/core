@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Obtener configuración de Veriff de cualquier org activa (solo necesitamos el API key)
     const { data: config } = await adminClient
       .from('identity_verification_provider_configs')
-      .select('credentials, provider:identity_verification_providers(slug)')
+      .select('credentials, secondary_credentials, provider:identity_verification_providers(slug)')
       .eq('is_active', true)
       .limit(1)
       .single();
@@ -94,68 +94,93 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = config.credentials.api_key;
-    const apiSecret = config.credentials.api_secret;
-
-    if (!apiSecret) {
-      return NextResponse.json(
-        { error: 'Falta api_secret en la configuración. Veriff requiere firma HMAC.' },
-        { status: 500 }
-      );
+    // Preparar lista de credenciales para probar (primarias + secundarias)
+    const allCredentials = [
+      { apiKey: config.credentials.api_key, apiSecret: config.credentials.api_secret }
+    ];
+    if (config.secondary_credentials && Array.isArray(config.secondary_credentials)) {
+      for (const cred of config.secondary_credentials) {
+        if (cred.api_key && cred.api_secret) {
+          allCredentials.push({ apiKey: cred.api_key, apiSecret: cred.api_secret });
+        }
+      }
     }
 
-    // Generar firma SHA256(sessionId + apiSecret)
-    const signature = await generateVeriffSignature(veriffSessionId, apiSecret);
-
-    const headers = {
-      'X-AUTH-CLIENT': apiKey,
-      'X-SIGNATURE': signature,
-      'Content-Type': 'application/json',
-    };
-
     let data: any;
+    let success = false;
+    let lastError = '';
 
-    if (dataType === 'all') {
-      // Consultar los 4 endpoints disponibles en paralelo
-      const [personRes, attemptsRes, decisionRes, mediaRes] = await Promise.all([
-        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, headers),
-        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, headers),
-        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, headers),
-        fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, headers),
-      ]);
+    // Intentar con cada set de credenciales
+    for (const cred of allCredentials) {
+      if (!cred.apiSecret) continue;
 
-      data = {
-        person: personRes,
-        attempts: attemptsRes,
-        decision: decisionRes,
-        media: mediaRes,
-      };
-    } else {
-      // Consultar un endpoint individual
-      const endpointMap: Record<string, string> = {
-        person: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`,
-        attempts: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`,
-        decision: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`,
-        media: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`,
+      // Generar firma SHA256(sessionId + apiSecret)
+      const signature = await generateVeriffSignature(veriffSessionId, cred.apiSecret);
+
+      const headers = {
+        'X-AUTH-CLIENT': cred.apiKey,
+        'X-SIGNATURE': signature,
+        'Content-Type': 'application/json',
       };
 
-      const url = endpointMap[dataType];
-      const response = await fetch(url, { method: 'GET', headers });
+      if (dataType === 'all') {
+        // Consultar los 4 endpoints disponibles en paralelo
+        const [personRes, attemptsRes, decisionRes, mediaRes] = await Promise.all([
+          fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`, headers),
+          fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`, headers),
+          fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`, headers),
+          fetchVeriffEndpoint(`${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`, headers),
+        ]);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Error consultando Veriff ${dataType}:`, response.status, errorText);
-        return NextResponse.json(
-          {
-            error: 'Error consultando Veriff',
-            status: response.status,
-            details: errorText,
-          },
-          { status: response.status }
-        );
+        // Verificar si al menos uno retornó éxito (no error)
+        if (!personRes.error || !attemptsRes.error || !decisionRes.error || !mediaRes.error) {
+          data = {
+            person: personRes,
+            attempts: attemptsRes,
+            decision: decisionRes,
+            media: mediaRes,
+          };
+          success = true;
+          break;
+        } else {
+            lastError = personRes.error || attemptsRes.error || decisionRes.error || mediaRes.error;
+        }
+
+      } else {
+        // Consultar un endpoint individual
+        const endpointMap: Record<string, string> = {
+          person: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/person`,
+          attempts: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/attempts`,
+          decision: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/decision`,
+          media: `${VERIFF_BASE_URL}/v1/sessions/${veriffSessionId}/media`,
+        };
+
+        const url = endpointMap[dataType];
+        const response = await fetch(url, { method: 'GET', headers });
+
+        if (response.ok) {
+          data = await response.json();
+          success = true;
+          break;
+        } else {
+          lastError = `HTTP ${response.status}`;
+          // Si es 404 o 403, probablemente credenciales incorrectas, seguimos probando
+          if (response.status !== 404 && response.status !== 403) {
+             const errorText = await response.text();
+             console.error(`Error consultando Veriff ${dataType}:`, response.status, errorText);
+          }
+        }
       }
+    }
 
-      data = await response.json();
+    if (!success) {
+       return NextResponse.json(
+          {
+            error: 'No se pudo obtener datos de Veriff con ninguna credencial configurada',
+            details: lastError,
+          },
+          { status: 404 } // Asumimos 404 si no se encontró con ninguna credencial
+        );
     }
 
     // Registrar consulta en audit log (si tenemos session local)
@@ -199,7 +224,7 @@ async function fetchVeriffEndpoint(url: string, headers: Record<string, string>)
   try {
     const response = await fetch(url, { method: 'GET', headers });
     if (!response.ok) {
-      console.error(`Error fetching ${url}:`, response.status);
+      // No loguear error si estamos probando credenciales
       return { error: `HTTP ${response.status}`, status: response.status };
     }
     return await response.json();
