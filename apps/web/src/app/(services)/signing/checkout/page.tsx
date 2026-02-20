@@ -216,6 +216,7 @@ export default function SigningCheckoutPage() {
             country_code: state.countryCode,
             originals_bucket: 'docs-originals',
             originals_version: 1,
+            require_veriff_identity: state.requireVeriffIdentity,
           }
         }).eq('id', currentDocId)
         if (docUpdateError) throw docUpdateError

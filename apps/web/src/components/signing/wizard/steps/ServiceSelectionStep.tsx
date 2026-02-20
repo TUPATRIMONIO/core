@@ -59,7 +59,7 @@ export function ServiceSelectionStep() {
   )
   // Luego el tipo de firma
   const [signatureId, setSignatureId] = useState<string>(state.signatureProduct?.id || '')
-  const [requireVeriff, setRequireVeriff] = useState(false)
+  const [requireVeriff, setRequireVeriff] = useState(state.requireVeriffIdentity || false)
 
   // Productos por categoría
   const signatureProducts = useMemo(
@@ -189,6 +189,7 @@ export function ServiceSelectionStep() {
       // Guardar en contexto
       actions.setSignatureProduct(signatureSelected)
       actions.setNotaryProduct(notarySelected)
+      actions.setRequireVeriffIdentity(requireVeriff)
 
       // Si no hay documentId (flujo público), solo avanzamos de paso.
       // Los datos ya están en el contexto global del wizard.
