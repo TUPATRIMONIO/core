@@ -70,6 +70,7 @@ export interface SigningWizardState {
 
   signatureProduct: SigningProduct | null
   notaryProduct: SigningProduct | null
+  requireVeriffIdentity: boolean
 
   signers: SignerDraft[]
   signingOrder: 'simultaneous' | 'sequential'
@@ -98,6 +99,7 @@ export interface SigningWizardActions {
 
   setSignatureProduct: (product: SigningProduct | null) => void
   setNotaryProduct: (product: SigningProduct | null) => void
+  setRequireVeriffIdentity: (enabled: boolean) => void
 
   setSigners: (signers: SignerDraft[]) => void
   setSigningOrder: (order: 'simultaneous' | 'sequential') => void
@@ -129,6 +131,7 @@ const defaultState: SigningWizardState = {
 
   signatureProduct: null,
   notaryProduct: null,
+  requireVeriffIdentity: false,
 
   signers: [],
   signingOrder: 'simultaneous',
@@ -300,6 +303,7 @@ export function SigningWizardProvider({ children }: { children: ReactNode }) {
 
       setSignatureProduct: (signatureProduct) => setState((s) => ({ ...s, signatureProduct })),
       setNotaryProduct: (notaryProduct) => setState((s) => ({ ...s, notaryProduct })),
+      setRequireVeriffIdentity: (requireVeriffIdentity) => setState((s) => ({ ...s, requireVeriffIdentity })),
 
       setSigners: (signers) => setState((s) => ({ ...s, signers })),
       setSigningOrder: (signingOrder) => setState((s) => ({ ...s, signingOrder })),

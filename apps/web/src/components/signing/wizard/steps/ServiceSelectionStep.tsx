@@ -261,7 +261,7 @@ export function ServiceSelectionStep() {
     } finally {
       setIsSaving(false)
     }
-  }, [actions, notarySelected, signatureSelected, state.countryCode, state.documentId, supabase])
+  }, [actions, notarySelected, signatureSelected, state.countryCode, state.documentId, supabase, requireVeriff])
 
   // Opciones de servicio notarial (siempre las mismas 4)
   const notaryOptions = useMemo(() => {
