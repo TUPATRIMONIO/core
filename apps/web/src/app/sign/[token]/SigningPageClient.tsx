@@ -15,7 +15,8 @@ import {
   Lock,
   AlertTriangle,
   Eye,
-  EyeOff
+  EyeOff,
+  Camera
 } from "lucide-react";
 
 // Dynamic import to avoid SSR issues with pdf.js
@@ -34,6 +35,7 @@ interface SigningPageClientProps {
 
 type SigningStep = 
   | "verifying" 
+  | "needs_veriff"
   | "needs_enrollment" 
   | "ready_for_2fa" 
   | "waiting_code" 
@@ -76,7 +78,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
       setStep("signed");
       return;
     }
-    checkVigencia();
+    checkStatus();
   }, [signer.signing_token, signer.status]);
 
   // Countdown para estado success
@@ -104,10 +106,23 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     router.refresh();
   };
 
-  const checkVigencia = async () => {
+  const checkStatus = async () => {
     setIsLoading(true);
     setError("");
     try {
+      // 1. Verificar si requiere Veriff
+      const veriffResponse = await fetch(`/api/signing/verification-status?token=${signer.signing_token}`);
+      const veriffData = await veriffResponse.json();
+
+      if (!veriffResponse.ok) throw new Error(veriffData.error || "Error al verificar estado");
+
+      if (veriffData.requiresVeriff && !veriffData.isVerified) {
+        setStep("needs_veriff");
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Verificar vigencia FEA (si Veriff no es requerido o ya está verificado)
       const response = await fetch(`/api/signing/check-fea?token=${signer.signing_token}`);
       const data = await response.json();
 
@@ -128,6 +143,34 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
     } catch (err: any) {
       setError(err.message || "Error al verificar su estado de firma");
       setStep("error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartVeriff = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/signing/start-veriff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signing_token: signer.signing_token })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Error al iniciar verificación de identidad");
+        return;
+      }
+
+      if (data.verificationUrl) {
+        window.location.href = data.verificationUrl;
+      } else {
+        setError("No se pudo obtener la URL de verificación");
+      }
+    } catch (err: any) {
+      setError(err.message || "Error inesperado");
     } finally {
       setIsLoading(false);
     }
@@ -333,6 +376,32 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
           <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
             <p className="text-muted-foreground font-medium">Verificando su estado de firma avanzada...</p>
+          </div>
+        );
+
+      case "needs_veriff":
+        return (
+          <div className="bg-[var(--tp-info)]/10 dark:bg-[var(--tp-info)]/20 border border-[var(--tp-info)]/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[var(--tp-info)]/20 flex items-center justify-center flex-shrink-0">
+                <Camera className="w-5 h-5 text-[var(--tp-info)]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Verificación de Identidad Requerida</h3>
+                <p className="text-muted-foreground mb-4">
+                  Para continuar con el proceso de firma, es necesario verificar su identidad mediante biometría facial.
+                  Por favor tenga su documento de identidad a mano.
+                </p>
+                <button
+                  onClick={handleStartVeriff}
+                  disabled={isLoading}
+                  className="bg-[var(--tp-info)] hover:bg-[var(--tp-info)]/90 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
+                  Iniciar Verificación Facial
+                </button>
+              </div>
+            </div>
           </div>
         );
 
@@ -643,7 +712,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
             <h3 className="text-lg font-semibold text-foreground mb-2">Error</h3>
             <p className="text-muted-foreground mb-6">{error}</p>
             <button
-              onClick={checkVigencia}
+              onClick={checkStatus}
               className="px-6 py-2.5 bg-[var(--tp-error)] hover:bg-[var(--tp-error)]/90 text-white rounded-xl font-semibold transition-colors"
             >
               Reintentar verificación
@@ -864,7 +933,7 @@ export default function SigningPageClient({ signer }: SigningPageClientProps) {
                 onClick={() => {
                   setSignError(null);
                   // Re-verificar vigencia para actualizar el estado desde CDS
-                  checkVigencia();
+                  checkStatus();
                 }}
                 className="flex-1 px-4 py-2.5 rounded-xl font-semibold transition-colors bg-secondary hover:bg-secondary/80 text-secondary-foreground"
               >

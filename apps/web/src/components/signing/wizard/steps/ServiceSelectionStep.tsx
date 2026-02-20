@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, FileCheck, Stamp, Shield, PenTool } from 'lucide-react'
@@ -58,6 +59,7 @@ export function ServiceSelectionStep() {
   )
   // Luego el tipo de firma
   const [signatureId, setSignatureId] = useState<string>(state.signatureProduct?.id || '')
+  const [requireVeriff, setRequireVeriff] = useState(false)
 
   // Productos por categoría
   const signatureProducts = useMemo(
@@ -133,6 +135,19 @@ export function ServiceSelectionStep() {
       })) as SigningProduct[]
 
       setProducts(normalized)
+
+      // Cargar metadata actual para requireVeriff
+      if (state.documentId) {
+        const { data: doc } = await supabase
+          .from('signing_documents')
+          .select('metadata')
+          .eq('id', state.documentId)
+          .single()
+        
+        if (doc?.metadata?.require_veriff_identity) {
+          setRequireVeriff(true)
+        }
+      }
     } catch (e: any) {
       console.error('[ServiceSelectionStep] load error', e)
       const errorMsg = e?.message || e?.error_description || 'No se pudieron cargar los servicios.'
@@ -198,6 +213,7 @@ export function ServiceSelectionStep() {
 
       const nextMeta = {
         ...currentMeta,
+        require_veriff_identity: requireVeriff,
         country_code: state.countryCode,
         signature_product: {
           id: signatureSelected.id,
@@ -403,7 +419,28 @@ export function ServiceSelectionStep() {
               )}
             </div>
 
-
+            {/* PASO 3: Opciones Adicionales */}
+            <div className="space-y-3">
+              <div className="text-sm font-semibold">3. Opciones de Seguridad</div>
+              <div className="flex items-start space-x-2 border rounded-lg p-4">
+                <Checkbox 
+                  id="require-veriff" 
+                  checked={requireVeriff} 
+                  onCheckedChange={(checked) => setRequireVeriff(checked as boolean)}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="require-veriff"
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
+                    Exigir Verificación de Identidad con Veriff
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Los firmantes deberán verificar su identidad mediante biometría facial antes de firmar.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button variant="outline" onClick={handleBack} disabled={isSaving}>

@@ -13,6 +13,7 @@ import {
   MapPin,
   PenLine,
   KeyRound,
+  Camera
 } from "lucide-react";
 import SignaturePad from "@/components/signing/SignaturePad";
 
@@ -31,6 +32,8 @@ interface SigningPageClientFESProps {
 }
 
 type SigningStep =
+  | "verifying"
+  | "needs_veriff"
   | "reviewing"
   | "claveunica_validation"
   | "claveunica_waiting"
@@ -46,7 +49,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const router = useRouter();
   const searchParams = useSearchParams();
   const isClaveunica = Boolean(signer.is_claveunica);
-  const [step, setStep] = useState<SigningStep>("reviewing");
+  const [step, setStep] = useState<SigningStep>("verifying");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   // Cache buster para evitar que el navegador sirva PDFs cacheados corruptos
@@ -70,27 +73,41 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     return data;
   }, [signer.signing_token]);
 
-  // 1. Verificar si ya firmó al cargar
+  // 0. Verificar estado inicial (Veriff + estado firma)
   useEffect(() => {
-    if (signer.status === "signed") {
-      setStep("signed");
-    }
-  }, [signer.status]);
+    const checkStatus = async () => {
+      if (signer.status === "signed") {
+        setStep("signed");
+        return;
+      }
 
-  // 2. Si es ClaveÚnica verificado pero aún no firmado, ir a waiting (firma en proceso por webhook)
-  useEffect(() => {
-    if (isClaveunica && signer.claveunica_status === "verified" && signer.status !== "signed") {
-      setStep("claveunica_waiting");
-    }
-  }, [isClaveunica, signer.claveunica_status, signer.status]);
+      try {
+        // Verificar si requiere Veriff
+        const veriffResponse = await fetch(`/api/signing/verification-status?token=${signer.signing_token}`);
+        const veriffData = await veriffResponse.json();
 
-  // 3. Si vuelve de ClaveÚnica con ?claveunica=completed, ir a waiting
-  useEffect(() => {
-    if (isClaveunica && searchParams.get("claveunica") === "completed" && step === "reviewing") {
-      setStep("claveunica_waiting");
-      window.history.replaceState({}, "", window.location.pathname);
-    }
-  }, [isClaveunica, searchParams, step]);
+        if (veriffData.requiresVeriff && !veriffData.isVerified) {
+          setStep("needs_veriff");
+          return;
+        }
+
+        // Si no requiere Veriff o ya está listo, proceder al flujo normal
+        if (isClaveunica && signer.claveunica_status === "verified") {
+          setStep("claveunica_waiting");
+        } else if (isClaveunica && searchParams.get("claveunica") === "completed") {
+          setStep("claveunica_waiting");
+        } else {
+          setStep("reviewing");
+        }
+      } catch (error) {
+        console.error("Error checking status:", error);
+        // En caso de error, intentar ir a reviewing como fallback
+        setStep("reviewing");
+      }
+    };
+
+    checkStatus();
+  }, [signer.status, signer.signing_token, isClaveunica, signer.claveunica_status, searchParams]);
 
   // 4. Polling cuando está en claveunica_waiting: espera hasta que el webhook complete la firma
   useEffect(() => {
@@ -140,6 +157,34 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const refreshSignedDocument = () => {
     setCacheBuster(Date.now());
     router.refresh();
+  };
+
+  const handleStartVeriff = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/signing/start-veriff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signing_token: signer.signing_token })
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Error al iniciar verificación de identidad");
+        return;
+      }
+
+      if (data.verificationUrl) {
+        window.location.href = data.verificationUrl;
+      } else {
+        setError("No se pudo obtener la URL de verificación");
+      }
+    } catch (err: any) {
+      setError(err.message || "Error inesperado");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSign = async () => {
@@ -197,6 +242,40 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
   const renderStatus = () => {
     switch (step) {
+      case "verifying":
+        return (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
+            <p className="text-muted-foreground font-medium">Verificando estado...</p>
+          </div>
+        );
+
+      case "needs_veriff":
+        return (
+          <div className="bg-[var(--tp-info)]/10 dark:bg-[var(--tp-info)]/20 border border-[var(--tp-info)]/30 rounded-xl p-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[var(--tp-info)]/20 flex items-center justify-center flex-shrink-0">
+                <Camera className="w-5 h-5 text-[var(--tp-info)]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Verificación de Identidad Requerida</h3>
+                <p className="text-muted-foreground mb-4">
+                  Para continuar con el proceso de firma, es necesario verificar su identidad mediante biometría facial.
+                  Por favor tenga su documento de identidad a mano.
+                </p>
+                <button
+                  onClick={handleStartVeriff}
+                  disabled={isLoading}
+                  className="bg-[var(--tp-info)] hover:bg-[var(--tp-info)]/90 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Camera className="w-4 h-4 mr-2" />}
+                  Iniciar Verificación Facial
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
       case "reviewing":
         return (
           <div className="space-y-6">

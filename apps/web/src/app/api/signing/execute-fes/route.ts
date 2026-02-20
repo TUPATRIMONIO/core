@@ -106,6 +106,61 @@ export async function POST(request: NextRequest) {
             finalConfirmedIdType = "rut";
         }
 
+        // 2.5 Si se requiere Veriff, obtener datos de la sesión para estampa
+        const requireVeriff = signer.document?.metadata?.require_veriff_identity === true;
+        
+        if (requireVeriff) {
+            if (!signer.identity_verification_id) {
+                 return NextResponse.json(
+                    { error: "Se requiere verificación de identidad pero no se encontró ninguna asociada" },
+                    { status: 400 }
+                );
+            }
+
+            const { data: session } = await adminClient
+                .from('identity_verification_sessions')
+                .select('status, raw_response')
+                .eq('id', signer.identity_verification_id)
+                .single();
+            
+            if (!session || session.status !== 'approved') {
+                return NextResponse.json(
+                    { error: "La verificación de identidad requerida no está aprobada" },
+                    { status: 400 }
+                );
+            }
+
+            // Extraer datos de Veriff para la estampa
+            const person = session.raw_response?.person || session.raw_response?.decision?.person;
+            const document = session.raw_response?.document || session.raw_response?.decision?.document;
+            
+            if (person) {
+                const firstName = person.firstName || "";
+                const lastName = person.lastName || "";
+                finalConfirmedName = `${firstName} ${lastName}`.trim();
+                
+                // Identificador: Preferir idNumber de persona, luego número de documento
+                const idNumber = person.idNumber || document?.number;
+                if (idNumber) {
+                    finalConfirmedIdValue = idNumber;
+                    
+                    // Mapear tipo de documento
+                    const docType = document?.type;
+                    if (docType === 'PASSPORT') {
+                        finalConfirmedIdType = 'passport';
+                    } else if (docType === 'DRIVERS_LICENSE') {
+                        finalConfirmedIdType = 'other'; // O lo que corresponda
+                    } else {
+                        // ID_CARD o similar
+                        // Heurística simple para RUT vs DNI si no está explícito
+                        finalConfirmedIdType = idNumber.includes('-') ? 'rut' : 'dni';
+                    }
+                }
+            }
+            
+            console.log("Usando datos de Veriff para firma FES:", { finalConfirmedName, finalConfirmedIdValue });
+        }
+
         // 2. Obtener archivo PDF desde Storage (docs-originals o docs-signed si ya tiene firmas)
         const filePath = signer.document.current_signed_file_path ||
             signer.document.qr_file_path ||

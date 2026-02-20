@@ -102,6 +102,48 @@ export async function POST(request: NextRequest) {
           .eq('id', queuedItem.id);
         
         console.log(`✅ Procesamiento inmediato exitoso para ${veriffSessionId}`);
+
+        // Vincular verificación al firmante si corresponde
+        try {
+          const { data: session } = await adminClient
+            .from('identity_verification_sessions')
+            .select('id, reference_type, reference_id, status, verified_at, risk_score')
+            .eq('provider_session_id', veriffSessionId)
+            .single();
+
+          if (session && session.reference_type === 'signer' && session.reference_id && session.status === 'approved') {
+            console.log(`Linking verification ${session.id} to signer ${session.reference_id}`);
+            
+            // Intentar usar RPC primero
+            const { error: rpcError } = await adminClient.rpc('link_verification_to_signer', {
+              p_signer_id: session.reference_id,
+              p_verification_session_id: session.id
+            });
+
+            if (rpcError) {
+              console.warn("RPC link_verification_to_signer failed, trying direct update:", rpcError.message);
+              // Fallback: update directo
+              const { error: updateError } = await adminClient
+                .from('signing_signers')
+                .update({
+                  identity_verification_id: session.id,
+                  identity_verified_at: session.verified_at,
+                  identity_verification_score: session.risk_score
+                })
+                .eq('id', session.reference_id);
+              
+              if (updateError) {
+                console.error("Error linking verification via direct update:", updateError);
+              } else {
+                console.log("Successfully linked verification via direct update");
+              }
+            } else {
+              console.log("Successfully linked verification to signer via RPC");
+            }
+          }
+        } catch (linkErr) {
+          console.error("Error in linking logic:", linkErr);
+        }
       } else {
         console.warn(`⚠️ Procesamiento inmediato falló para ${veriffSessionId}, quedará para el cron: ${result.error}`);
         // Opcional: actualizar error_message en la cola
