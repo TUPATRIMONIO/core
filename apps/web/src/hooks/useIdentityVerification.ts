@@ -59,7 +59,7 @@ export function useIdentityVerification() {
 
       try {
         const { data, error: rpcError } = await supabase.rpc(
-          'identity_verifications.get_verification_session_full',
+          'iv_get_verification_session_full',
           { p_session_id: sessionId }
         );
 
@@ -84,7 +84,7 @@ export function useIdentityVerification() {
     async (sessionId: string): Promise<boolean> => {
       try {
         const { data, error: rpcError } = await supabase.rpc(
-          'identity_verifications.is_verification_valid',
+          'iv_is_verification_valid',
           { p_session_id: sessionId }
         );
 
@@ -114,7 +114,7 @@ export function useIdentityVerification() {
 
       try {
         const { data, error: rpcError } = await supabase.rpc(
-          'identity_verifications.find_previous_verifications',
+          'iv_find_previous_verifications',
           {
             p_organization_id: organizationId,
             p_subject_identifier: subjectIdentifier || null,
@@ -152,7 +152,7 @@ export function useIdentityVerification() {
 
       try {
         const { data, error: rpcError } = await supabase.rpc(
-          'identity_verifications.get_verification_stats',
+          'iv_get_verification_stats',
           {
             p_organization_id: organizationId,
             p_start_date: startDate?.toISOString() || null,

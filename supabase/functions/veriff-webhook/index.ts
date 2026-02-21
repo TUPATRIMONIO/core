@@ -55,7 +55,6 @@ interface VeriffDecision {
 }
 
 serve(async (req) => {
-  // Solo aceptar POST
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
@@ -66,25 +65,21 @@ serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Leer el payload
     const payload: VeriffWebhookPayload = await req.json();
     console.log("Webhook recibido:", payload);
 
-    // Registrar en audit log
-    await supabase.rpc("identity_verifications.log_audit_event", {
+    await supabase.rpc("iv_log_audit_event", {
       p_event_type: "webhook_received",
       p_event_data: payload,
       p_actor_type: "webhook",
     });
 
-    // Validar que tenemos el session ID de Veriff
     if (!payload.id) {
       throw new Error("Missing Veriff session ID");
     }
 
-    // Buscar la sesión en nuestra base de datos
     const { data: session, error: sessionError } = await supabase
-      .from("identity_verifications.verification_sessions")
+      .from("identity_verification_sessions")
       .select("*")
       .eq("provider_session_id", payload.id)
       .single();
@@ -92,7 +87,6 @@ serve(async (req) => {
     if (sessionError || !session) {
       console.error("Sesión no encontrada:", payload.id);
       
-      // Aún así respondemos 200 para que Veriff no reintente
       return new Response(
         JSON.stringify({ 
           received: true, 
@@ -105,7 +99,6 @@ serve(async (req) => {
       );
     }
 
-    // Procesar según el action
     switch (payload.action) {
       case "started":
         await handleStarted(supabase, session.id, payload);
@@ -127,7 +120,6 @@ serve(async (req) => {
         console.log("Action no manejado:", payload.action);
     }
 
-    // Responder con éxito
     return new Response(
       JSON.stringify({ 
         received: true,
@@ -141,7 +133,6 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error procesando webhook:", error);
 
-    // Aún así respondemos 200 para evitar reintentos
     return new Response(
       JSON.stringify({ 
         received: true, 
@@ -166,12 +157,12 @@ async function handleStarted(
 ) {
   console.log("Usuario inició verificación:", sessionId);
 
-  await supabase.rpc("identity_verifications.update_session_status", {
+  await supabase.rpc("iv_update_session_status", {
     p_session_id: sessionId,
     p_status: "started",
   });
 
-  await supabase.rpc("identity_verifications.log_audit_event", {
+  await supabase.rpc("iv_log_audit_event", {
     p_session_id: sessionId,
     p_event_type: "verification_started",
     p_event_data: payload,
@@ -186,12 +177,12 @@ async function handleSubmitted(
 ) {
   console.log("Usuario completó verificación:", sessionId);
 
-  await supabase.rpc("identity_verifications.update_session_status", {
+  await supabase.rpc("iv_update_session_status", {
     p_session_id: sessionId,
     p_status: "submitted",
   });
 
-  await supabase.rpc("identity_verifications.log_audit_event", {
+  await supabase.rpc("iv_log_audit_event", {
     p_session_id: sessionId,
     p_event_type: "verification_submitted",
     p_event_data: payload,
@@ -206,10 +197,8 @@ async function handleDecision(
 ) {
   console.log("Decisión recibida para sesión:", sessionId, "Action:", payload.action);
 
-  // Obtener los datos completos de la decisión desde Veriff API
   const decision = await fetchVeriffDecision(payload.id);
 
-  // Mapear el status de Veriff a nuestro enum
   const statusMap: Record<string, string> = {
     approved: "approved",
     declined: "declined",
@@ -220,14 +209,12 @@ async function handleDecision(
 
   const ourStatus = statusMap[payload.action] || "declined";
 
-  // Calcular risk score (simplificado)
   let riskScore = null;
   if (decision?.verification?.riskLabels) {
     riskScore = Math.min(decision.verification.riskLabels.length * 20, 100);
   }
 
-  // Actualizar la sesión
-  await supabase.rpc("identity_verifications.update_session_status", {
+  await supabase.rpc("iv_update_session_status", {
     p_session_id: sessionId,
     p_status: ourStatus,
     p_decision_code: decision?.verification?.code?.toString(),
@@ -236,24 +223,20 @@ async function handleDecision(
     p_raw_response: decision,
   });
 
-  // Si tenemos datos de documento, guardarlos
   if (decision?.document) {
     await saveDocument(supabase, sessionId, decision);
   }
 
-  // Obtener y guardar intentos
   const attempts = await fetchVeriffAttempts(payload.id);
   if (attempts && attempts.length > 0) {
     await saveAttempts(supabase, sessionId, attempts);
   }
 
-  // Descargar y guardar media
   if (ourStatus === "approved" || ourStatus === "declined") {
     await downloadAndSaveMedia(supabase, sessionId, payload.id);
   }
 
-  // Registrar en audit log
-  await supabase.rpc("identity_verifications.log_audit_event", {
+  await supabase.rpc("iv_log_audit_event", {
     p_session_id: sessionId,
     p_event_type: "decision_received",
     p_event_data: {
@@ -301,16 +284,14 @@ async function downloadAndSaveMedia(
   veriffSessionId: string
 ) {
   try {
-    // Obtener la sesión para saber la org
     const { data: session } = await supabase
-      .from("identity_verifications.verification_sessions")
+      .from("identity_verification_sessions")
       .select("organization_id")
       .eq("id", sessionId)
       .single();
 
     if (!session) return;
 
-    // Obtener URLs de media de Veriff
     const mediaUrls = await fetchVeriffMedia(veriffSessionId);
 
     if (!mediaUrls || mediaUrls.length === 0) {
@@ -318,7 +299,6 @@ async function downloadAndSaveMedia(
       return;
     }
 
-    // Descargar y guardar cada archivo
     for (const mediaItem of mediaUrls) {
       await downloadAndStoreMedia(
         supabase,
@@ -393,21 +373,17 @@ async function downloadAndStoreMedia(
   mediaItem: any
 ) {
   try {
-    // Descargar el archivo
     const response = await fetch(mediaItem.url);
     if (!response.ok) return;
 
     const blob = await response.blob();
     const buffer = await blob.arrayBuffer();
 
-    // Determinar tipo de media
     const mediaType = mapVeriffMediaType(mediaItem.context);
 
-    // Construir path
     const ext = getExtensionFromMimeType(mediaItem.mimeType || "image/jpeg");
     const storagePath = `${organizationId}/${sessionId}/${mediaType}_${Date.now()}.${ext}`;
 
-    // Subir a Storage
     const { error: uploadError } = await supabase.storage
       .from("identity-verifications")
       .upload(storagePath, buffer, {
@@ -420,14 +396,12 @@ async function downloadAndStoreMedia(
       return;
     }
 
-    // Calcular checksum
     const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
     const checksum = Array.from(new Uint8Array(hashBuffer))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Guardar registro en la tabla
-    await supabase.from("identity_verifications.verification_media").insert({
+    await supabase.from("identity_verification_media").insert({
       session_id: sessionId,
       media_type: mediaType,
       provider_media_id: mediaItem.id,
@@ -458,7 +432,7 @@ async function saveDocument(
 
     const docType = mapVeriffDocType(doc.type);
 
-    await supabase.from("identity_verifications.verification_documents").insert({
+    await supabase.from("identity_verification_documents").insert({
       session_id: sessionId,
       document_type: docType,
       document_country: doc.country,
@@ -483,9 +457,8 @@ async function saveAttempts(supabase: any, sessionId: string, attempts: any[]) {
     for (let i = 0; i < attempts.length; i++) {
       const attempt = attempts[i];
       
-      // Verificar si ya existe para evitar duplicados
       const { data: existing } = await supabase
-        .from("identity_verifications.verification_attempts")
+        .from("identity_verification_attempts")
         .select("id")
         .eq("session_id", sessionId)
         .eq("attempt_number", i + 1)
@@ -493,7 +466,7 @@ async function saveAttempts(supabase: any, sessionId: string, attempts: any[]) {
 
       if (existing) continue;
 
-      await supabase.from("identity_verifications.verification_attempts").insert({
+      await supabase.from("identity_verification_attempts").insert({
         session_id: sessionId,
         attempt_number: i + 1,
         provider_attempt_id: attempt.id || null,

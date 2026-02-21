@@ -15,17 +15,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServiceRoleClient();
 
-    // 1. Obtener firmante y documento
+    // 1. Obtener firmante (sin JOIN a traves de vista)
     const { data: signer, error: signerError } = await supabase
       .from("signing_signers")
-      .select(`
-        id,
-        status,
-        identity_verification_id,
-        document:signing_documents (
-          metadata
-        )
-      `)
+      .select("id, status, identity_verification_id, document_id")
       .eq("signing_token", token)
       .single();
 
@@ -36,8 +29,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Verificar si se requiere Veriff
-    const requireVeriff = signer.document?.metadata?.require_veriff_identity === true;
+    // 2. Obtener documento y metadata
+    const { data: document, error: docError } = await supabase
+      .from("signing_documents")
+      .select("metadata")
+      .eq("id", signer.document_id)
+      .single();
+
+    if (docError || !document) {
+      return NextResponse.json(
+        { error: "Documento no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // 3. Verificar si se requiere Veriff
+    const requireVeriff = document.metadata?.require_veriff_identity === true;
 
     if (!requireVeriff) {
       return NextResponse.json({
@@ -47,36 +54,30 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 3. Verificar estado de la verificación
-    // Usamos la función RPC existente para verificar validez
-    const { data: isValid, error: rpcError } = await supabase.rpc(
-      "signer_has_valid_verification",
-      { p_signer_id: signer.id }
-    );
-
-    if (rpcError) {
-      console.error("Error verificando estado Veriff:", rpcError);
-      return NextResponse.json(
-        { error: "Error verificando estado" },
-        { status: 500 }
-      );
-    }
-
-    // Si tiene ID pero no es válido, obtener detalles de la sesión para saber por qué (opcional)
+    // 4. Verificar estado de la verificación directamente
+    let isVerified = false;
     let verificationDetails = null;
+
     if (signer.identity_verification_id) {
         const { data: session } = await supabase
             .from("identity_verification_sessions")
-            .select("status, decision_reason, verification_url")
+            .select("status, decision_reason, verification_url, expires_at")
             .eq("id", signer.identity_verification_id)
             .single();
-        verificationDetails = session;
+        
+        if (session) {
+            verificationDetails = session;
+            // Validar que esté aprobada y no expirada
+            const isApproved = session.status === 'approved';
+            const isNotExpired = !session.expires_at || new Date(session.expires_at) > new Date();
+            isVerified = isApproved && isNotExpired;
+        }
     }
 
     return NextResponse.json({
       requiresVeriff: true,
-      isVerified: isValid,
-      status: isValid ? "verified" : (verificationDetails?.status || "pending"),
+      isVerified: isVerified,
+      status: isVerified ? "verified" : (verificationDetails?.status || "pending"),
       verificationUrl: verificationDetails?.verification_url
     });
 

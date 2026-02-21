@@ -130,7 +130,7 @@ async function handleCreateSession(req: Request, supabase: any, userId: string) 
 
   // Crear sesión en nuestra base de datos
   const { data: sessionId, error: createError } = await supabase.rpc(
-    "identity_verifications.create_verification_session",
+    "iv_create_verification_session",
     {
       p_organization_id: body.organizationId,
       p_provider_slug: body.providerSlug || "veriff",
@@ -155,7 +155,7 @@ async function handleCreateSession(req: Request, supabase: any, userId: string) 
 
   // Obtener configuración del proveedor
   const { data: providerConfig, error: configError } = await supabase.rpc(
-    "identity_verifications.get_provider_config",
+    "iv_get_provider_config",
     {
       p_organization_id: body.organizationId,
       p_provider_slug: body.providerSlug || "veriff",
@@ -189,7 +189,7 @@ async function handleCreateSession(req: Request, supabase: any, userId: string) 
 
   // Actualizar nuestra sesión con los datos de Veriff
   await supabase
-    .from("identity_verifications.verification_sessions")
+    .from("identity_verification_sessions")
     .update({
       provider_session_id: veriffSession.verification.id,
       verification_url: veriffSession.verification.url,
@@ -201,7 +201,7 @@ async function handleCreateSession(req: Request, supabase: any, userId: string) 
     .eq("id", sessionId);
 
   // Registrar en audit log
-  await supabase.rpc("identity_verifications.log_audit_event", {
+  await supabase.rpc("iv_log_audit_event", {
     p_session_id: sessionId,
     p_event_type: "session_created",
     p_event_data: {
@@ -233,7 +233,7 @@ async function handleCreateSession(req: Request, supabase: any, userId: string) 
 
 async function handleGetSession(supabase: any, sessionId: string) {
   const { data, error } = await supabase.rpc(
-    "identity_verifications.get_verification_session_full",
+    "iv_get_verification_session_full",
     {
       p_session_id: sessionId,
     }
@@ -273,7 +273,7 @@ async function handleGetHistory(
   }
 
   const { data, error } = await supabase.rpc(
-    "identity_verifications.find_previous_verifications",
+    "iv_find_previous_verifications",
     {
       p_organization_id: orgId,
       p_subject_identifier: identifier,
@@ -311,7 +311,7 @@ async function handleVerifyStatus(req: Request, supabase: any) {
   }
 
   const { data: isValid, error } = await supabase.rpc(
-    "identity_verifications.is_verification_valid",
+    "iv_is_verification_valid",
     {
       p_session_id: sessionId,
     }
@@ -356,7 +356,7 @@ async function createVeriffSession(
           firstName: body.subjectName?.split(" ")[0] || "",
           lastName: body.subjectName?.split(" ").slice(1).join(" ") || "",
         },
-        vendorData: ourSessionId, // Nuestro ID para correlacionar
+        vendorData: ourSessionId,
         timestamp: new Date().toISOString(),
       },
     };

@@ -34,7 +34,22 @@ const nextConfig: NextConfig = {
     // Configurar PDFKit para servidor (copiar archivos de fuentes)
     if (isServer) {
       config.externals = config.externals || [];
-      // No externalizar pdfkit en el servidor para que funcione correctamente
+    }
+
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        canvas: false,
+      };
+
+      config.module.rules.push({
+        test: /\.mjs$/,
+        include: /node_modules[\\/]pdfjs-dist/,
+        type: "javascript/auto",
+        resolve: {
+          fullySpecified: false,
+        },
+      });
     }
 
     return config;

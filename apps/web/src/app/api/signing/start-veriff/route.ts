@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Obtener configuración de Veriff
     const { data: configData, error: configError } = await supabase.rpc(
-      "identity_verifications.get_provider_config",
+      "iv_get_provider_config",
       {
         p_organization_id: organizationId,
         p_provider_slug: "veriff",
@@ -64,11 +64,11 @@ export async function POST(request: NextRequest) {
 
     // 3. Crear sesión de verificación en BD local
     const { data: sessionId, error: createError } = await supabase.rpc(
-      "identity_verifications.create_verification_session",
+      "iv_create_verification_session",
       {
         p_organization_id: organizationId,
         p_provider_slug: "veriff",
-        p_purpose: "signing_verification", // Propósito específico para firma
+        p_purpose: "signing_verification",
         p_subject_identifier: signer.rut || null,
         p_subject_email: signer.email,
         p_subject_name: signer.full_name,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         p_reference_type: "signer",
         p_reference_id: signer.id,
         p_metadata: {
-          signing_token: signing_token, // Útil para debug o recuperación
+          signing_token: signing_token,
           document_id: signer.document_id,
           source: "signing_page"
         },
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           firstName: signer.full_name.split(" ")[0] || "",
           lastName: signer.full_name.split(" ").slice(1).join(" ") || "",
         },
-        vendorData: sessionId, // IMPORTANTE: Nuestro ID para correlación
+        vendorData: sessionId,
         timestamp: new Date().toISOString(),
       },
     };
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     // 5. Actualizar sesión local con datos de Veriff
     const { error: updateError } = await supabase
-      .from("identity_verification_sessions") // Usar nombre de vista pública si es posible, o esquema directo
+      .from("identity_verification_sessions")
       .update({
         provider_session_id: veriffSessionId,
         verification_url: verificationUrl,
@@ -149,14 +149,12 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", sessionId);
 
-    // Nota: Si falla el update, la sesión queda inconsistente pero el usuario tiene la URL.
-    // Idealmente deberíamos manejar esto, pero por ahora logueamos.
     if (updateError) {
         console.error("Error actualizando sesión local con datos Veriff:", updateError);
     }
 
     // 6. Registrar audit log
-    await supabase.rpc("identity_verifications.log_audit_event", {
+    await supabase.rpc("iv_log_audit_event", {
       p_session_id: sessionId,
       p_event_type: "session_created",
       p_event_data: {
@@ -164,7 +162,7 @@ export async function POST(request: NextRequest) {
         provider: "veriff",
         veriff_session_id: veriffSessionId,
       },
-      p_actor_type: "system", // Iniciado por sistema a petición del usuario anónimo
+      p_actor_type: "system",
     });
 
     return NextResponse.json({
