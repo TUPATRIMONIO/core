@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       {
         p_organization_id: organizationId,
         p_provider_slug: "veriff",
-        p_purpose: "signing_verification",
+        p_purpose: "fes_signing",
         p_subject_identifier: signer.rut || null,
         p_subject_email: signer.email,
         p_subject_name: signer.full_name,
@@ -96,12 +96,20 @@ export async function POST(request: NextRequest) {
     const apiKey = configData.credentials.api_key;
     
     // Usar webhook de Next.js por defecto
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-    const webhookUrl = configData.webhook_url || `${appUrl}/api/webhooks/veriff`;
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "";
+    
+    // Veriff requiere HTTPS para URLs de retorno (excepto localhost a veces, pero mejor asegurar)
+    // Si la URL es http://app.tupatrimonio.app (producción), forzamos https
+    if (appUrl.startsWith("http://") && !appUrl.includes("localhost")) {
+      appUrl = appUrl.replace("http://", "https://");
+    }
+
+    // El callback es donde el usuario es redirigido al finalizar, no el webhook
+    const callbackUrl = `${appUrl}/sign/${signing_token}`;
 
     const veriffBody = {
       verification: {
-        callback: webhookUrl,
+        callback: callbackUrl,
         person: {
           firstName: signer.full_name.split(" ")[0] || "",
           lastName: signer.full_name.split(" ").slice(1).join(" ") || "",
@@ -158,7 +166,7 @@ export async function POST(request: NextRequest) {
       p_session_id: sessionId,
       p_event_type: "session_created",
       p_event_data: {
-        purpose: "signing_verification",
+        purpose: "fes_signing",
         provider: "veriff",
         veriff_session_id: veriffSessionId,
       },
