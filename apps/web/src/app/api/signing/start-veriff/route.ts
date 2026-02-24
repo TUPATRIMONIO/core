@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // El callback es donde el usuario es redirigido al finalizar, no el webhook
-    const callbackUrl = `${appUrl}/sign/${signing_token}`;
+    const callbackUrl = `${appUrl}/sign/${signing_token}?veriff_returned=true`;
 
     const veriffBody = {
       verification: {

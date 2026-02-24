@@ -34,6 +34,7 @@ interface SigningPageClientFESProps {
 type SigningStep =
   | "verifying"
   | "needs_veriff"
+  | "veriff_processing"
   | "reviewing"
   | "claveunica_validation"
   | "claveunica_waiting"
@@ -76,6 +77,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   // 0. Verificar estado inicial (Veriff + estado firma)
   useEffect(() => {
     const checkStatus = async () => {
+      // Si viene retornando de Veriff, mostrar countdown
+      if (searchParams.get("veriff_returned") === "true") {
+        setStep("veriff_processing");
+        return;
+      }
+
       if (signer.status === "signed") {
         setStep("signed");
         return;
@@ -134,17 +141,19 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
       .catch(() => setClientIp("No disponible"));
   }, []);
 
-  // 6. Countdown para estado success
+  // 6. Countdown para estado success o veriff_processing
   useEffect(() => {
-    if (step !== "success") return;
+    if (step !== "success" && step !== "veriff_processing") return;
     
-    setCountdown(5); // Reset countdown
+    // Para veriff_processing usamos 4 segundos, para success 5
+    const initialCountdown = step === "veriff_processing" ? 4 : 5;
+    setCountdown(initialCountdown); 
     
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          refreshSignedDocument();
+          setTimeout(() => refreshSignedDocument(), 0);
           return 0;
         }
         return prev - 1;
@@ -273,6 +282,34 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                 </button>
               </div>
             </div>
+          </div>
+        );
+
+      case "veriff_processing":
+        const veriffProgress = ((4 - countdown) / 4) * 100;
+        return (
+          <div className="bg-card dark:bg-card rounded-2xl shadow-[var(--tp-shadow-xl)] border border-[var(--tp-info)]/30 p-8">
+             <div className="flex flex-col items-center justify-center py-6">
+                <Loader2 className="w-12 h-12 text-[var(--tp-brand)] animate-spin mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Procesando verificación...</h3>
+                <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
+                  Estamos confirmando el resultado de su verificación de identidad.
+                  Por favor espere un momento.
+                </p>
+                
+                <div className="w-full max-w-xs mb-2">
+                  <div className="flex justify-between text-xs font-medium text-foreground mb-2">
+                    <span>Actualizando...</span>
+                    <span>{countdown}s</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-[var(--tp-brand)] transition-all duration-1000 ease-linear"
+                      style={{ width: `${veriffProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
           </div>
         );
 
