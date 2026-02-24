@@ -19,9 +19,37 @@ La integración con Veriff permite verificar la identidad de los firmantes media
    - Veriff envía eventos asíncronos a nuestro webhook: `/api/webhooks/veriff`.
    - El webhook procesa el evento `verification.submitted` o `verification.approved`.
    - Actualiza el estado en la base de datos local.
-7. **Finalización**:
-   - La página de firma (`SigningPageClientFES`) detecta que la verificación está completa (vía polling o recarga).
-   - Permite al usuario continuar con la firma del documento.
+7. **Validación de Identidad**:
+   - El sistema compara automáticamente los datos del firmante (nombre, RUT) con los datos verificados por Veriff.
+   - Si los datos no coinciden, se bloquea el proceso de firma y se instruye al usuario a contactar al gestor.
+8. **Finalización**:
+   - Si la identidad coincide, la página de firma (`SigningPageClientFES`) permite al usuario continuar con la firma del documento.
+
+## Validación de Identidad (Identity Match)
+
+Para garantizar que la persona que se verifica es efectivamente el firmante designado, implementamos una lógica de comparación estricta pero flexible:
+
+### Algoritmo de Comparación
+
+1. **Nombres (Coincidencia Parcial)**:
+   - Se normalizan los nombres (minúsculas, sin acentos).
+   - Se verifica que todas las palabras del nombre del firmante estén presentes en el nombre verificado por Veriff.
+   - Ejemplo: "Juan Perez" hace match con "Juan Carlos Perez Gonzalez".
+
+2. **Identificador (Coincidencia Exacta)**:
+   - Se normalizan los identificadores (solo alfanuméricos, sin puntos ni guiones).
+   - Si ambos tienen identificador (RUT/DNI), deben coincidir exactamente.
+
+3. **Regla Global**:
+   - Si hay identificador en ambos lados, ambos (nombre e ID) deben coincidir.
+   - Si alguno no tiene identificador, solo se valida el nombre.
+
+### Bloqueo por No Coincidencia
+
+Si la validación falla:
+- El usuario ve una pantalla de error "No pudimos confirmar tu identidad".
+- Se impide continuar con la firma.
+- El backend (`execute-fes`) tiene una guardia adicional que rechaza la firma si la identidad no coincide.
 
 ## Configuración
 
@@ -56,3 +84,10 @@ Asegúrese de que `start-veriff/route.ts` esté usando la URL de la página de f
 1. Verificar logs de Vercel/Supabase para errores en `/api/webhooks/veriff`.
 2. Verificar que `VERIFF_API_SECRET` coincida con la configuración en Veriff Station.
 3. Revisar la tabla `pending_veriff_syncs` para ver si el evento llegó pero falló al procesarse.
+
+### Bloqueo de Identidad Incorrecto
+
+Si un usuario legítimo es bloqueado:
+1. Verificar los datos ingresados por el gestor en `signing_signers`.
+2. Verificar los datos devueltos por Veriff en `identity_verification_sessions.raw_response`.
+3. Si hay discrepancias (ej: error de tipeo en el RUT del gestor), corregir los datos del firmante en la base de datos o panel de administración.

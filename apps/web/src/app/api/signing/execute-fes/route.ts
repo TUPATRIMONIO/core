@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { compareSignerWithVeriff } from "@/lib/signing/identity-match";
 
 /**
  * API Route: POST /api/signing/execute-fes
@@ -126,6 +127,19 @@ export async function POST(request: NextRequest) {
             if (!session || session.status !== 'approved') {
                 return NextResponse.json(
                     { error: "La verificación de identidad requerida no está aprobada" },
+                    { status: 400 }
+                );
+            }
+
+            // Validar coincidencia de identidad
+            const identityMatch = compareSignerWithVeriff(signer, session.raw_response);
+            if (!identityMatch.overallMatch) {
+                console.warn("Bloqueo de firma por no coincidencia de identidad:", {
+                    signerId: signer.id,
+                    matchResult: identityMatch
+                });
+                return NextResponse.json(
+                    { error: "La identidad verificada no coincide con los datos del firmante. Por favor contacte al remitente." },
                     { status: 400 }
                 );
             }

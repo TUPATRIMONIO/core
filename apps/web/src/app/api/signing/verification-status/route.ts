@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { compareSignerWithVeriff } from "@/lib/signing/identity-match";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     // 1. Obtener firmante (sin JOIN a traves de vista)
     const { data: signer, error: signerError } = await supabase
       .from("signing_signers")
-      .select("id, status, identity_verification_id, document_id")
+      .select("id, status, identity_verification_id, document_id, first_name, last_name, full_name, rut, metadata")
       .eq("signing_token", token)
       .single();
 
@@ -57,11 +58,12 @@ export async function GET(request: NextRequest) {
     // 4. Verificar estado de la verificación directamente
     let isVerified = false;
     let verificationDetails = null;
+    let identityMatch = null;
 
     if (signer.identity_verification_id) {
         const { data: session } = await supabase
             .from("identity_verification_sessions")
-            .select("status, decision_reason, verification_url, expires_at")
+            .select("status, decision_reason, verification_url, expires_at, raw_response")
             .eq("id", signer.identity_verification_id)
             .single();
         
@@ -71,6 +73,11 @@ export async function GET(request: NextRequest) {
             const isApproved = session.status === 'approved';
             const isNotExpired = !session.expires_at || new Date(session.expires_at) > new Date();
             isVerified = isApproved && isNotExpired;
+
+            // Si está verificado, comparamos identidad
+            if (isVerified) {
+              identityMatch = compareSignerWithVeriff(signer, session.raw_response);
+            }
         }
     }
 
@@ -78,7 +85,8 @@ export async function GET(request: NextRequest) {
       requiresVeriff: true,
       isVerified: isVerified,
       status: isVerified ? "verified" : (verificationDetails?.status || "pending"),
-      verificationUrl: verificationDetails?.verification_url
+      verificationUrl: verificationDetails?.verification_url,
+      identityMatch: identityMatch
     });
 
   } catch (error: any) {

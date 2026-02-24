@@ -42,6 +42,7 @@ type SigningStep =
   | "signing"
   | "success"
   | "signed" // Cuando el firmante ya firmó (recarga de página)
+  | "identity_mismatch"
   | "error";
 
 const POLL_INTERVAL_MS = 3000;
@@ -95,6 +96,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
         if (veriffData.requiresVeriff && !veriffData.isVerified) {
           setStep("needs_veriff");
+          return;
+        }
+
+        // Verificar si hay coincidencia de identidad
+        if (veriffData.isVerified && veriffData.identityMatch && veriffData.identityMatch.overallMatch === false) {
+          setStep("identity_mismatch");
           return;
         }
 
@@ -668,6 +675,26 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
             <p className="text-sm text-muted-foreground text-center">
               Puede descargar el documento firmado desde el visor de arriba.
             </p>
+          </div>
+        );
+
+      case "identity_mismatch":
+        return (
+          <div className="bg-[var(--tp-error-light)] dark:bg-[var(--tp-error)]/10 border border-[var(--tp-error-border)] dark:border-[var(--tp-error)]/30 rounded-xl p-6 text-center">
+            <div className="w-12 h-12 bg-[var(--tp-error)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <UserCheck className="w-6 h-6 text-[var(--tp-error)]" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No pudimos confirmar tu identidad</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Los datos verificados no coinciden con la información del firmante registrada en este documento.
+              Por favor, contacta a la persona que te envió el documento para que corrija tus datos.
+            </p>
+            <div className="bg-background/50 p-4 rounded-lg border border-border/50 text-sm text-left max-w-sm mx-auto mb-6">
+              <p className="font-medium mb-1">¿Por qué ocurre esto?</p>
+              <p className="text-muted-foreground text-xs">
+                Por seguridad, el nombre y RUT/ID verificados deben coincidir con los datos del destinatario del documento.
+              </p>
+            </div>
           </div>
         );
 
