@@ -68,6 +68,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   const [signatureBase64, setSignatureBase64] = useState<string | null>(signer.previousSignatureBase64 || null);
   const [clientIp, setClientIp] = useState<string>("");
   const [countdown, setCountdown] = useState(5);
+  const [identityMatchDetails, setIdentityMatchDetails] = useState<any>(null);
 
   const pollClaveunicaStatus = useCallback(async () => {
     const res = await fetch(`/api/signing/claveunica-status?token=${signer.signing_token}`);
@@ -101,6 +102,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
         // Verificar si hay coincidencia de identidad
         if (veriffData.isVerified && veriffData.identityMatch && veriffData.identityMatch.overallMatch === false) {
+          setIdentityMatchDetails(veriffData.identityMatch.details);
           setStep("identity_mismatch");
           return;
         }
@@ -171,6 +173,12 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   }, [step]);
 
   const refreshSignedDocument = () => {
+    // Si estamos en veriff_processing, limpiar la URL para evitar loop infinito
+    if (step === "veriff_processing") {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("veriff_returned");
+      router.replace(newUrl.toString());
+    }
     setCacheBuster(Date.now());
     router.refresh();
   };
@@ -689,12 +697,46 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
               Los datos verificados no coinciden con la información del firmante registrada en este documento.
               Por favor, contacta a la persona que te envió el documento para que corrija tus datos.
             </p>
+
+            {identityMatchDetails && (
+              <div className="bg-background/50 rounded-lg border border-border/50 overflow-hidden mb-6 max-w-lg mx-auto text-left">
+                <div className="grid grid-cols-3 bg-muted/30 text-xs font-medium text-muted-foreground p-3 border-b border-border/50">
+                  <div className="col-span-1">Dato</div>
+                  <div className="col-span-1">Registrado</div>
+                  <div className="col-span-1">Verificado</div>
+                </div>
+                
+                <div className="grid grid-cols-3 text-sm p-3 border-b border-border/50 items-center">
+                  <div className="font-medium text-muted-foreground">Nombre</div>
+                  <div className="truncate pr-2" title={identityMatchDetails.signerName}>{identityMatchDetails.signerName}</div>
+                  <div className={`truncate pr-2 ${!identityMatchDetails.nameMatch ? "text-[var(--tp-error)] font-medium" : "text-[var(--tp-success)]"}`} title={identityMatchDetails.veriffName}>
+                    {identityMatchDetails.veriffName}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 text-sm p-3 items-center">
+                  <div className="font-medium text-muted-foreground">RUT/ID</div>
+                  <div className="truncate pr-2" title={identityMatchDetails.signerId}>{identityMatchDetails.signerId || "—"}</div>
+                  <div className={`truncate pr-2 ${!identityMatchDetails.identifierMatch ? "text-[var(--tp-error)] font-medium" : "text-[var(--tp-success)]"}`} title={identityMatchDetails.veriffId}>
+                    {identityMatchDetails.veriffId || "—"}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-background/50 p-4 rounded-lg border border-border/50 text-sm text-left max-w-sm mx-auto mb-6">
               <p className="font-medium mb-1">¿Por qué ocurre esto?</p>
               <p className="text-muted-foreground text-xs">
                 Por seguridad, el nombre y RUT/ID verificados deben coincidir con los datos del destinatario del documento.
               </p>
             </div>
+
+            <button
+              onClick={handleStartVeriff}
+              className="px-6 py-2.5 bg-[var(--tp-brand)] hover:bg-[var(--tp-brand-light)] text-white rounded-xl font-semibold transition-colors text-sm"
+            >
+              Intentar verificar nuevamente
+            </button>
           </div>
         );
 
