@@ -30,6 +30,35 @@ export interface VeriffData {
   };
 }
 
+/**
+ * Extrae y normaliza los datos de la respuesta cruda de Veriff
+ * Maneja diferentes estructuras (API, Webhook) y formatos de valor (string vs object {value: ...})
+ */
+export function extractVeriffData(rawResponse: any): VeriffData {
+  const personApi = rawResponse?.person?.person;
+  const decisionVerification = rawResponse?.decision?.verification;
+  const webhookPerson = rawResponse?.webhook?.data?.verification?.person;
+  const webhookDoc = rawResponse?.webhook?.data?.verification?.document;
+
+  const extractVal = (v: any) => {
+    if (!v) return null;
+    if (typeof v === 'string') return v;
+    if (v.value !== undefined) return v.value;
+    return null;
+  };
+
+  return {
+    person: {
+      firstName: extractVal(personApi?.firstName) || extractVal(decisionVerification?.person?.firstName) || extractVal(webhookPerson?.firstName),
+      lastName: extractVal(personApi?.lastName) || extractVal(decisionVerification?.person?.lastName) || extractVal(webhookPerson?.lastName),
+      idNumber: extractVal(personApi?.idNumber) || extractVal(personApi?.idCode) || extractVal(decisionVerification?.person?.idNumber) || extractVal(webhookPerson?.idNumber),
+    },
+    document: {
+      number: extractVal(decisionVerification?.document?.number) || extractVal(webhookDoc?.number),
+    },
+  };
+}
+
 export interface IdentityMatchResult {
   nameMatch: boolean;
   identifierMatch: boolean;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { compareSignerWithVeriff } from "@/lib/signing/identity-match";
+import { compareSignerWithVeriff, extractVeriffData } from "@/lib/signing/identity-match";
 
 /**
  * API Route: POST /api/signing/execute-fes
@@ -132,7 +132,8 @@ export async function POST(request: NextRequest) {
             }
 
             // Validar coincidencia de identidad
-            const identityMatch = compareSignerWithVeriff(signer, session.raw_response);
+            const veriffData = extractVeriffData(session.raw_response);
+            const identityMatch = compareSignerWithVeriff(signer, veriffData);
             if (!identityMatch.overallMatch) {
                 console.warn("Bloqueo de firma por no coincidencia de identidad:", {
                     signerId: signer.id,
@@ -145,8 +146,8 @@ export async function POST(request: NextRequest) {
             }
 
             // Extraer datos de Veriff para la estampa
-            const person = session.raw_response?.person || session.raw_response?.decision?.person;
-            const document = session.raw_response?.document || session.raw_response?.decision?.document;
+            const person = veriffData.person;
+            const document = veriffData.document;
             
             if (person) {
                 const firstName = person.firstName || "";

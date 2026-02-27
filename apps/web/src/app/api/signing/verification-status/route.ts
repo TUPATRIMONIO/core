@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
-import { compareSignerWithVeriff } from "@/lib/signing/identity-match";
+import { compareSignerWithVeriff, extractVeriffData } from "@/lib/signing/identity-match";
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,7 +76,8 @@ export async function GET(request: NextRequest) {
 
             // Si está verificado, comparamos identidad
             if (isVerified) {
-              identityMatch = compareSignerWithVeriff(signer, session.raw_response);
+              const veriffData = extractVeriffData(session.raw_response);
+              identityMatch = compareSignerWithVeriff(signer, veriffData);
             }
         }
     }
