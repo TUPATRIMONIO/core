@@ -159,6 +159,27 @@ Para garantizar que los usuarios siempre vean la información más actualizada s
 - **Revisión de Documentos**: Nuevos documentos para revisar.
 - **Asignación Notarial**: Cambios en estado de notaría.
 
+## 🛡️ Validación y Seguridad de Documentos
+
+### Sistema de Integridad PDF
+Para garantizar que los documentos generados (especialmente aquellos con firma notarial) cumplan con los estándares legales y técnicos, se implementó un sistema de validación robusto en el edge function `pdf-merge-with-cover`.
+
+**Validaciones Críticas:**
+1. **Inserción de Portada QR**: Verifica que la portada sea la primera página (índice 0).
+2. **Integridad de Páginas Originales**: Confirma que el número de páginas coincida con el original + portada.
+3. **Página de Firmas**: Si aplica, verifica que se haya insertado correctamente al final del documento.
+
+**Sistema de Alertas:**
+- **Detección**: Si alguna validación falla, el proceso se detiene inmediatamente (fail-fast).
+- **Notificación**: Se envía una alerta crítica (`PLATFORM_ADMIN_ALERT`) al administrador de la plataforma vía SendGrid.
+- **Detalle**: El correo incluye ID del documento, organización, tipo de error y stack trace.
+- **Acción**: Enlace directo al dashboard para inspección manual.
+
+**Beneficios:**
+- Evita la generación de documentos corruptos o incompletos.
+- Notificación proactiva de errores en producción.
+- Trazabilidad de fallos en el proceso de notarización.
+
 ## 🔮 Future Considerations
 
 ### Scaling to More Countries

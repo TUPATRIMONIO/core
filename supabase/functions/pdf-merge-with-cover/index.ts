@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { PDFDocument, rgb, StandardFonts } from "https://esm.sh/pdf-lib@1.17.1";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { sendPlatformAdminAlert } from "../_shared/admin-alert.ts";
 
 const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -16,24 +17,31 @@ serve(async (req) => {
         return new Response("ok", { headers: corsHeaders });
     }
 
+    let document_id: string | undefined;
+    let document: any;
+
     try {
         const supabaseClient = createClient(
             Deno.env.get("SUPABASE_URL") ?? "",
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
         );
 
-        const { document_id, cover_path, force_regenerate = false } = await req.json();
+        const body = await req.json();
+        document_id = body.document_id;
+        const { cover_path, force_regenerate = false } = body;
 
         if (!document_id) {
             throw new Error("document_id es requerido");
         }
 
         // 1. Obtener datos del documento desde signing.documents (usando vista signing_documents)
-        const { data: document, error: docError } = await supabaseClient
+        const { data: docData, error: docError } = await supabaseClient
             .from("signing_documents")
             .select("*")
             .eq("id", document_id)
             .single();
+        
+        document = docData;
 
         if (docError || !document) {
             throw new Error(`Error obteniendo documento: ${docError?.message}`);
@@ -142,6 +150,11 @@ serve(async (req) => {
         const [coverPage] = await mergedPdf.copyPages(coverPdf, [0]);
         mergedPdf.addPage(coverPage);
 
+        // VALIDACIÓN A: Verificar que la portada se insertó correctamente
+        if (mergedPdf.getPageCount() !== 1) {
+            throw new Error(`Error crítico: La portada no se insertó correctamente. Páginas actuales: ${mergedPdf.getPageCount()}`);
+        }
+
         // 8. Generar QR con URL del repositorio
         const qrIdentifier = document.qr_identifier || `DOC-${document_id.substring(0, 8).toUpperCase()}`;
         const repositoryUrl = `${APP_URL}/repository/${qrIdentifier}`;
@@ -195,13 +208,21 @@ serve(async (req) => {
 
         // 11. Copiar todas las paginas del documento original
         const originalPageIndices = originalPdf.getPageIndices();
+        const originalPageCount = originalPageIndices.length;
         const copiedOriginalPages = await mergedPdf.copyPages(originalPdf, originalPageIndices);
         copiedOriginalPages.forEach((page) => {
             mergedPdf.addPage(page);
         });
 
+        // VALIDACIÓN B: Verificar que las páginas originales se insertaron correctamente
+        const expectedPagesAfterOriginal = 1 + originalPageCount;
+        if (mergedPdf.getPageCount() !== expectedPagesAfterOriginal) {
+            throw new Error(`Error crítico: Las páginas originales no se insertaron correctamente. Esperadas: ${expectedPagesAfterOriginal}, Actuales: ${mergedPdf.getPageCount()}`);
+        }
+
         // 11.5. Agregar página de firmas (si aplica)
         if (hasElectronicSignature) {
+            const pagesBeforeSignature = mergedPdf.getPageCount();
             let signaturePage;
             if (signaturePagePdfBytes) {
                 const signaturePdf = await PDFDocument.load(signaturePagePdfBytes);
@@ -210,6 +231,11 @@ serve(async (req) => {
             } else {
                 // Crear página en blanco si no hay template
                 signaturePage = mergedPdf.addPage([595.276, 841.89]); // A4 estándar
+            }
+
+            // VALIDACIÓN C: Verificar que la página de firmas se insertó correctamente
+            if (mergedPdf.getPageCount() !== pagesBeforeSignature + 1) {
+                throw new Error(`Error crítico: La página de firmas no se insertó correctamente. Esperadas: ${pagesBeforeSignature + 1}, Actuales: ${mergedPdf.getPageCount()}`);
             }
 
             const { width: pageWidth, height: _pageHeight } = signaturePage.getSize();
@@ -310,6 +336,16 @@ serve(async (req) => {
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Error desconocido";
         console.error("Error en pdf-merge-with-cover:", errorMessage);
+
+        // Enviar alerta a admin
+        await sendPlatformAdminAlert({
+            documentId: document_id || "unknown",
+            documentTitle: document?.title || "Documento desconocido",
+            organizationId: document?.organization_id || "unknown",
+            errorType: "PDF_PROCESSING_ERROR",
+            errorDetails: errorMessage
+        });
+
         return new Response(
             JSON.stringify({
                 success: false,

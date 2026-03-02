@@ -20,7 +20,8 @@ interface NotificationPayload {
     | "NOTARY_REJECTED"
     | "NOTARY_COMPLETED"
     | "NOTARY_BATCH_COMPLETED"
-    | "ORDER_COMPLETED";
+    | "ORDER_COMPLETED"
+    | "PLATFORM_ADMIN_ALERT";
   recipient_email: string;
   recipient_name: string;
   document_title: string;
@@ -32,6 +33,7 @@ interface NotificationPayload {
   notarized_url?: string;
   google_review_url?: string;
   has_notary_service?: boolean;
+  alert_details?: string;
   batch_results?: {
     total: number;
     successful: number;
@@ -764,6 +766,64 @@ Para reclamar tu descuento, envíanos una captura de tu reseña a contacto@tupat
 ---
 
 TuPatrimonio.app
+        `,
+      };
+
+    case "PLATFORM_ADMIN_ALERT":
+      const timestamp = new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" });
+      return {
+        subject: `ALERTA CRÍTICA: Error en procesamiento - ${payload.document_title}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #ef4444; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">⚠️ ALERTA DE SISTEMA</h1>
+            </div>
+            <div style="background-color: #f7f7f7; padding: 30px; border-radius: 0 0 8px 8px;">
+              <p>Hola Admin,</p>
+              <p>Se ha detectado un error crítico en el procesamiento de un documento:</p>
+              
+              <div style="background-color: white; padding: 20px; border-left: 4px solid #ef4444; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #ef4444;">${payload.document_title}</h3>
+                <p><strong>ID Documento:</strong> ${payload.document_id || 'N/A'}</p>
+                <p><strong>Organización:</strong> ${payload.org_id}</p>
+                <p><strong>Fecha/Hora:</strong> ${timestamp}</p>
+              </div>
+
+              <div style="background-color: #fee2e2; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #fca5a5;">
+                <h4 style="margin-top: 0; color: #b91c1c;">Detalle del Error:</h4>
+                <pre style="white-space: pre-wrap; font-family: monospace; font-size: 12px; color: #b91c1c;">${payload.alert_details || 'Sin detalles'}</pre>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${actionUrl}" style="background-color: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                  Ver Documento en Dashboard
+                </a>
+              </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+              <p>Alerta automática del sistema TuPatrimonio.</p>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+⚠️ ALERTA DE SISTEMA: Error en procesamiento
+
+Documento: ${payload.document_title}
+ID: ${payload.document_id || 'N/A'}
+Organización: ${payload.org_id}
+Fecha: ${timestamp}
+
+Detalle del Error:
+${payload.alert_details || 'Sin detalles'}
+
+Ver documento: ${actionUrl}
         `,
       };
 
