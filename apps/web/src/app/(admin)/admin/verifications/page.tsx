@@ -17,7 +17,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { CheckCircle2, XCircle, Clock, Eye, Search, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Eye, Search, RefreshCw, Loader2, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import type { VerificationSession } from '@/types/identity-verification';
@@ -43,6 +43,12 @@ export default function AdminVerificationsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkRefreshing, setBulkRefreshing] = useState(false);
   
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [limit, setLimit] = useState(10);
+  
   // Nuevo estado para búsqueda por ID
   const [lookupId, setLookupId] = useState('');
   const [lookingUp, setLookingUp] = useState(false);
@@ -53,6 +59,8 @@ export default function AdminVerificationsPage() {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.set('status', statusFilter);
       if (purposeFilter !== 'all') params.set('purpose', purposeFilter);
+      params.set('page', currentPage.toString());
+      params.set('limit', limit.toString());
 
       const response = await fetch(`/api/admin/verifications?${params}`);
       const result = await response.json();
@@ -60,16 +68,26 @@ export default function AdminVerificationsPage() {
       if (!response.ok) throw new Error(result.error);
 
       setVerifications(result.data || []);
+      
+      if (result.meta) {
+        setTotalPages(result.meta.totalPages);
+        setTotalItems(result.meta.total);
+      }
     } catch (error) {
       console.error('Error cargando verificaciones:', error);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, purposeFilter]);
+  }, [statusFilter, purposeFilter, currentPage, limit]);
 
   useEffect(() => {
     loadVerifications();
   }, [loadVerifications]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, purposeFilter]);
 
   const filteredVerifications = verifications.filter((v) => {
     if (!searchTerm) return true;
@@ -198,7 +216,7 @@ export default function AdminVerificationsPage() {
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Buscar</label>
+              <label className="text-sm font-medium">Buscar en resultados</label>
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Nombre, email, RUT, Session ID..." value={searchTerm}
@@ -252,20 +270,36 @@ export default function AdminVerificationsPage() {
         </CardContent>
       </Card>
 
-      {/* Stats */}
+      {/* Stats - Nota: Reflejan la página actual o el total global según corresponda */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total</p><p className="text-2xl font-bold">{verifications.length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Aprobadas</p><p className="text-2xl font-bold text-green-600">{verifications.filter(v => v.status === 'approved').length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Rechazadas</p><p className="text-2xl font-bold text-red-600">{verifications.filter(v => v.status === 'declined').length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Pendientes</p><p className="text-2xl font-bold text-blue-600">{verifications.filter(v => ['pending', 'started', 'submitted'].includes(v.status)).length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Importadas</p><p className="text-2xl font-bold text-purple-600">{verifications.filter(v => v.metadata?.imported || v.metadata?.auto_synced).length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total Registros</p><p className="text-2xl font-bold">{totalItems}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Aprobadas (Pág)</p><p className="text-2xl font-bold text-green-600">{verifications.filter(v => v.status === 'approved').length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Rechazadas (Pág)</p><p className="text-2xl font-bold text-red-600">{verifications.filter(v => v.status === 'declined').length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Pendientes (Pág)</p><p className="text-2xl font-bold text-blue-600">{verifications.filter(v => ['pending', 'started', 'submitted'].includes(v.status)).length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Importadas (Pág)</p><p className="text-2xl font-bold text-purple-600">{verifications.filter(v => v.metadata?.imported || v.metadata?.auto_synced).length}</p></CardContent></Card>
       </div>
 
       {/* Tabla */}
       <Card>
-        <CardHeader>
-          <CardTitle>Verificaciones ({filteredVerifications.length})</CardTitle>
-          <CardDescription>Click en una fila para ver detalles completos y evidencia</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Verificaciones ({filteredVerifications.length})</CardTitle>
+            <CardDescription>Mostrando página {currentPage} de {totalPages}</CardDescription>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={limit.toString()} onValueChange={(val) => { setLimit(parseInt(val)); setCurrentPage(1); }}>
+              <SelectTrigger className="w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground">por pág.</span>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -275,71 +309,98 @@ export default function AdminVerificationsPage() {
           ) : filteredVerifications.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <p className="text-lg font-medium mb-2">No hay verificaciones</p>
-              <p className="text-sm">Usa el buscador superior para importar una nueva</p>
+              <p className="text-sm">No se encontraron resultados en esta página</p>
             </div>
           ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]">
-                      <input type="checkbox"
-                        checked={selectedIds.size > 0 && selectedIds.size === filteredVerifications.filter(v => v.provider_session_id).length}
-                        onChange={(e) => handleSelectAll(e.target.checked)} className="cursor-pointer" />
-                    </TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Sujeto</TableHead>
-                    <TableHead>RUT/DNI</TableHead>
-                    <TableHead>Propósito</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredVerifications.map((v) => {
-                    const cfg = statusConfig[v.status] || statusConfig.pending;
-                    const Icon = cfg.icon;
-                    return (
-                      <TableRow key={v.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          {v.provider_session_id && (
-                            <input type="checkbox" checked={selectedIds.has(v.id)}
-                              onChange={(e) => handleSelectOne(v.id, e.target.checked)} className="cursor-pointer" />
-                          )}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {new Date(v.created_at).toLocaleDateString()}<br />
-                          <span className="text-muted-foreground">{new Date(v.created_at).toLocaleTimeString()}</span>
-                        </TableCell>
-                        <TableCell>
-                          <p className="font-medium">{v.subject_name || '-'}</p>
-                          <p className="text-xs text-muted-foreground">{v.subject_email}</p>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">{v.subject_identifier || '-'}</TableCell>
-                        <TableCell><span className="text-xs capitalize">{v.purpose.replace('_', ' ')}</span></TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={cfg.color}><Icon className="mr-1 h-3 w-3" />{cfg.label}</Badge>
-                          {(v.metadata?.imported || v.metadata?.auto_synced) && <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800">Auto</Badge>}
-                        </TableCell>
-                        <TableCell>
-                          {v.risk_score !== null ? (
-                            <span className={`font-bold ${v.risk_score < 30 ? 'text-green-600' : v.risk_score < 70 ? 'text-orange-600' : 'text-red-600'}`}>
-                              {v.risk_score.toFixed(1)}%
-                            </span>
-                          ) : <span className="text-muted-foreground">-</span>}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Link href={`/admin/verifications/${v.id}`}>
-                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
-                          </Link>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+            <>
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[40px]">
+                        <input type="checkbox"
+                          checked={selectedIds.size > 0 && selectedIds.size === filteredVerifications.filter(v => v.provider_session_id).length}
+                          onChange={(e) => handleSelectAll(e.target.checked)} className="cursor-pointer" />
+                      </TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Sujeto</TableHead>
+                      <TableHead>RUT/DNI</TableHead>
+                      <TableHead>Propósito</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredVerifications.map((v) => {
+                      const cfg = statusConfig[v.status] || statusConfig.pending;
+                      const Icon = cfg.icon;
+                      return (
+                        <TableRow key={v.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            {v.provider_session_id && (
+                              <input type="checkbox" checked={selectedIds.has(v.id)}
+                                onChange={(e) => handleSelectOne(v.id, e.target.checked)} className="cursor-pointer" />
+                            )}
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            {new Date(v.created_at).toLocaleDateString()}<br />
+                            <span className="text-muted-foreground">{new Date(v.created_at).toLocaleTimeString()}</span>
+                          </TableCell>
+                          <TableCell>
+                            <p className="font-medium">{v.subject_name || '-'}</p>
+                            <p className="text-xs text-muted-foreground">{v.subject_email}</p>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">{v.subject_identifier || '-'}</TableCell>
+                          <TableCell><span className="text-xs capitalize">{v.purpose.replace('_', ' ')}</span></TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={cfg.color}><Icon className="mr-1 h-3 w-3" />{cfg.label}</Badge>
+                            {(v.metadata?.imported || v.metadata?.auto_synced) && <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800">Auto</Badge>}
+                          </TableCell>
+                          <TableCell>
+                            {v.risk_score !== null ? (
+                              <span className={`font-bold ${v.risk_score < 30 ? 'text-green-600' : v.risk_score < 70 ? 'text-orange-600' : 'text-red-600'}`}>
+                                {v.risk_score.toFixed(1)}%
+                              </span>
+                            ) : <span className="text-muted-foreground">-</span>}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Link href={`/admin/verifications/${v.id}`}>
+                              <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Controles de Paginación */}
+              <div className="flex items-center justify-end space-x-2 py-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1 || loading}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <div className="text-sm font-medium">
+                  Página {currentPage} de {totalPages}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages || loading}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

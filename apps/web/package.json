@@ -45,6 +45,7 @@
     "@tupatrimonio/assets": "*",
     "@tupatrimonio/ui": "*",
     "@tupatrimonio/update-notifier": "*",
+    "@veriff/incontext-sdk": "^2.5.0",
     "@types/pdfkit": "^0.17.3",
     "archiver": "^7.0.1",
     "class-variance-authority": "^0.7.1",

@@ -49,7 +49,7 @@ useIdentityVerification() {
 }
 
 // 2. Componentes listos
-<VerifyIdentityButton />        // Botón simple
+<VerifyIdentityButton />        // Botón simple (InContext SDK)
 <VerificationStatusCard />       // Card de estado
 <SignerVerificationPanel />      // Panel completo
 ```
@@ -94,7 +94,7 @@ import { VerifyIdentityButton } from '@/components/signing/VerifyIdentityButton'
    ↓
 3. Sistema crea sesión en Veriff API
    ↓
-4. Usuario es redirigido a Veriff
+4. Se abre Modal InContext SDK (Sin salir de la app)
    ↓
 5. Usuario toma foto de documento + selfie
    ↓
@@ -121,8 +121,8 @@ import { VerifyIdentityButton } from '@/components/signing/VerifyIdentityButton'
 API Key: e80366e4-def3-4e69-a221-e611c72ba6d8
 Shared Secret: [Configurado en variables de entorno] ✅
 Base URL: https://stationapi.veriff.com
-Webhook: https://tsefchkedlkwhiexqbrs.supabase.co/functions/v1/veriff-webhook
-Organización: TuPatrimonio Platform (6b11e191-b26d-4e9f-ba14-8dde0be8e437)
+Webhook: https://app.tupatrimonio.app/api/webhooks/veriff
+Organización: TuPatrimonio Platform
 Modo: Producción ✅
 ```
 
@@ -160,7 +160,7 @@ http://localhost:3000/dashboard/test-verification
 - Click "Verificar Identidad"
 
 ### Paso 4: Completar en Veriff
-- Serás redirigido a Veriff
+- Se abrirá un modal de Veriff
 - Sigue las instrucciones
 - Toma foto de tu documento
 - Toma un selfie

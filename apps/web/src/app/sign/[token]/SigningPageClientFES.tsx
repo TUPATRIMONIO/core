@@ -16,6 +16,7 @@ import {
   Camera
 } from "lucide-react";
 import SignaturePad from "@/components/signing/SignaturePad";
+import { createVeriffFrame, MESSAGES } from '@veriff/incontext-sdk';
 
 // Dynamic import to avoid SSR issues with pdf.js
 const PDFViewer = dynamic(() => import("@/components/shared/PDFViewer"), {
@@ -79,7 +80,7 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
   // 0. Verificar estado inicial (Veriff + estado firma)
   useEffect(() => {
     const checkStatus = async () => {
-      // Si viene retornando de Veriff, mostrar countdown
+      // Si viene retornando de Veriff (fallback), mostrar countdown
       if (searchParams.get("veriff_returned") === "true") {
         setStep("veriff_processing");
         return;
@@ -150,12 +151,32 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
       .catch(() => setClientIp("No disponible"));
   }, []);
 
-  // 6. Countdown para estado success o veriff_processing
+  // 6. Polling y Countdown para estado success o veriff_processing
   useEffect(() => {
     if (step !== "success" && step !== "veriff_processing") return;
     
-    // Para veriff_processing usamos 4 segundos, para success 5
-    const initialCountdown = step === "veriff_processing" ? 4 : 5;
+    // Para veriff_processing usamos un polling real además del countdown visual
+    if (step === "veriff_processing") {
+      const checkVeriffStatus = async () => {
+        try {
+          const res = await fetch(`/api/signing/verification-status?token=${signer.signing_token}`);
+          const data = await res.json();
+          
+          if (data.isVerified) {
+            // Si ya está verificado, refrescamos para que el useEffect inicial nos lleve al siguiente paso
+            refreshSignedDocument();
+          }
+        } catch (e) {
+          console.error("Error polling veriff status:", e);
+        }
+      };
+
+      const pollId = setInterval(checkVeriffStatus, 2000); // Poll cada 2s
+      return () => clearInterval(pollId);
+    }
+
+    // Para success mantenemos el countdown visual
+    const initialCountdown = 5;
     setCountdown(initialCountdown); 
     
     const timer = setInterval(() => {
@@ -170,14 +191,16 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [step]);
+  }, [step, signer.signing_token]);
 
   const refreshSignedDocument = () => {
     // Si estamos en veriff_processing, limpiar la URL para evitar loop infinito
     if (step === "veriff_processing") {
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete("veriff_returned");
-      router.replace(newUrl.toString());
+      if (newUrl.searchParams.has("veriff_returned")) {
+        newUrl.searchParams.delete("veriff_returned");
+        router.replace(newUrl.toString());
+      }
     }
     setCacheBuster(Date.now());
     router.refresh();
@@ -196,17 +219,43 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
 
       if (!response.ok) {
         setError(data.error || "Error al iniciar verificación de identidad");
+        setIsLoading(false);
         return;
       }
 
       if (data.verificationUrl) {
-        window.location.href = data.verificationUrl;
+        // Usar InContext SDK en lugar de redirect
+        createVeriffFrame({
+          url: data.verificationUrl,
+          onEvent: function(msg) {
+            switch(msg) {
+              case MESSAGES.FINISHED:
+                // El usuario terminó el flujo, pasamos a procesando
+                setStep("veriff_processing");
+                break;
+              case MESSAGES.CANCELED:
+                // El usuario cerró el modal
+                setIsLoading(false);
+                break;
+              case MESSAGES.RELOAD_REQUEST:
+                // Edge case para Safari iOS (permisos de cámara)
+                window.location.reload();
+                break;
+              default:
+                break;
+            }
+          },
+          lang: 'es' // Forzar idioma español
+        });
+        
+        // No ponemos isLoading(false) aquí porque el modal se abre y queremos evitar doble click
+        // Se reseteará si el usuario cancela o si ocurre un error
       } else {
         setError("No se pudo obtener la URL de verificación");
+        setIsLoading(false);
       }
     } catch (err: any) {
       setError(err.message || "Error inesperado");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -301,7 +350,6 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
         );
 
       case "veriff_processing":
-        const veriffProgress = ((4 - countdown) / 4) * 100;
         return (
           <div className="bg-card dark:bg-card rounded-2xl shadow-[var(--tp-shadow-xl)] border border-[var(--tp-info)]/30 p-8">
              <div className="flex flex-col items-center justify-center py-6">
@@ -314,13 +362,11 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
                 
                 <div className="w-full max-w-xs mb-2">
                   <div className="flex justify-between text-xs font-medium text-foreground mb-2">
-                    <span>Actualizando...</span>
-                    <span>{countdown}s</span>
+                    <span>Verificando...</span>
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[var(--tp-brand)] transition-all duration-1000 ease-linear"
-                      style={{ width: `${veriffProgress}%` }}
+                      className="h-full bg-[var(--tp-brand)] animate-pulse w-full"
                     />
                   </div>
                 </div>

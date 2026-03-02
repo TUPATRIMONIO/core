@@ -33,6 +33,7 @@ import {
   Tag,
   MessageSquareDot,
   Stamp,
+  UserCheck,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -142,6 +143,11 @@ const appsMenuItems = [
     title: 'Revisión Documentos',
     url: '/admin/document-review',
     icon: FileSearch,
+  },
+  {
+    title: 'Verificaciones',
+    url: '/admin/verifications',
+    icon: UserCheck,
   },
 ]
 

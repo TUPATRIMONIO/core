@@ -11,7 +11,7 @@ Todos los tipos TypeScript necesarios
 Hook personalizado con todas las operaciones
 
 ### 3. Componentes
-- `VerifyIdentityButton` - Botón para iniciar verificación
+- `VerifyIdentityButton` - Botón para iniciar verificación (usa InContext SDK)
 - `VerificationStatusCard` - Card para mostrar estado
 - `SignerVerificationPanel` - Panel completo para firmantes
 
@@ -40,7 +40,7 @@ export function MyComponent() {
       }}
       onVerificationStarted={(sessionId, url) => {
         console.log('Sesión creada:', sessionId);
-        // El usuario será redirigido automáticamente a Veriff
+        // El modal de Veriff se abrirá automáticamente
       }}
     />
   );
@@ -117,6 +117,7 @@ Si necesitas más control, usa el hook directamente:
 
 ```tsx
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { createVeriffFrame, MESSAGES } from '@veriff/incontext-sdk';
 
 export function MyCustomComponent() {
   const {
@@ -138,8 +139,20 @@ export function MyCustomComponent() {
     });
 
     if (response) {
-      // Redirigir al usuario
-      window.location.href = response.verificationUrl;
+      // Abrir modal InContext
+      createVeriffFrame({
+        url: response.verificationUrl,
+        onEvent: function(msg) {
+          switch(msg) {
+            case MESSAGES.FINISHED:
+              console.log('Verificación finalizada por el usuario');
+              break;
+            case MESSAGES.CANCELED:
+              console.log('Verificación cancelada');
+              break;
+          }
+        }
+      });
     }
   };
 
@@ -340,6 +353,7 @@ Ejemplo usando toast notifications:
 ```tsx
 import { toast } from 'sonner';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { createVeriffFrame } from '@veriff/incontext-sdk';
 
 export function VerificationWithToast() {
   const { createSession } = useIdentityVerification();
@@ -357,10 +371,8 @@ export function VerificationWithToast() {
         loading: 'Creando sesión de verificación...',
         success: (response) => {
           if (response) {
-            setTimeout(() => {
-              window.location.href = response.verificationUrl;
-            }, 500);
-            return '¡Redirigiendo a Veriff!';
+            createVeriffFrame({ url: response.verificationUrl });
+            return '¡Abriendo verificación!';
           }
           return 'Sesión creada';
         },

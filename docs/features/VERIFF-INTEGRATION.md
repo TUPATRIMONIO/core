@@ -2,27 +2,35 @@
 
 ## Descripción General
 
-La integración con Veriff permite verificar la identidad de los firmantes mediante biometría facial y validación de documentos de identidad.
+La integración con Veriff permite verificar la identidad de los firmantes mediante biometría facial y validación de documentos de identidad. Se utiliza el **InContext SDK** para ofrecer una experiencia fluida dentro de la aplicación, sin redirigir al usuario a una página externa.
 
 ## Flujo de Verificación
 
-1. **Inicio**: El usuario hace clic en "Verificar Identidad" en la página de firma.
+1. **Inicio**: El usuario hace clic en "Iniciar Verificación Facial" en la página de firma.
 2. **Creación de Sesión**:
    - Se llama a `/api/signing/start-veriff`.
    - Se crea una sesión en la base de datos local (`identity_verification_sessions`).
    - Se crea una sesión en la API de Veriff.
-   - **IMPORTANTE**: Se configura el `callback` de Veriff para que redirija al usuario de vuelta a la página de firma: `${NEXT_PUBLIC_SITE_URL}/sign/${token}`.
-3. **Redirección**: El usuario es redirigido a la URL de Veriff (`verificationUrl`).
-4. **Verificación**: El usuario completa el proceso en Veriff (toma fotos, etc.).
-5. **Retorno**: Veriff redirige al usuario a la URL de `callback` (la página de firma).
-6. **Webhook**:
-   - Veriff envía eventos asíncronos a nuestro webhook: `/api/webhooks/veriff`.
+   - Se configura el `callback` de Veriff como fallback (por si el SDK falla).
+3. **Apertura del Modal (InContext SDK)**:
+   - La aplicación abre un modal seguro (`iframe`) proporcionado por el SDK de Veriff.
+   - **En Mobile**: El usuario accede directamente a la cámara para realizar la verificación.
+   - **En Desktop**: El usuario ve opciones para continuar en el móvil (QR, SMS) o usar la cámara web.
+4. **Verificación**: El usuario completa el proceso dentro del modal.
+5. **Finalización**:
+   - El SDK emite un evento `FINISHED` al frontend.
+   - El modal se cierra automáticamente.
+   - La aplicación pasa al estado `veriff_processing`.
+6. **Procesamiento y Polling**:
+   - La aplicación consulta periódicamente (`/api/signing/verification-status`) el estado de la verificación.
+   - Paralelamente, Veriff envía un webhook asíncrono a `/api/webhooks/veriff`.
+7. **Webhook**:
    - El webhook procesa el evento `verification.submitted` o `verification.approved`.
    - Actualiza el estado en la base de datos local.
-7. **Validación de Identidad**:
+8. **Validación de Identidad**:
    - El sistema compara automáticamente los datos del firmante (nombre, RUT) con los datos verificados por Veriff.
    - Si los datos no coinciden, se bloquea el proceso de firma y se instruye al usuario a contactar al gestor.
-8. **Finalización**:
+9. **Continuación**:
    - Si la identidad coincide, la página de firma (`SigningPageClientFES`) permite al usuario continuar con la firma del documento.
 
 ## Validación de Identidad (Identity Match)
@@ -57,13 +65,13 @@ Si la validación falla:
 
 - `VERIFF_API_KEY`: Public Key de Veriff.
 - `VERIFF_API_SECRET`: Private Key de Veriff (para firmar requests y verificar webhooks).
-- `NEXT_PUBLIC_APP_URL` o `NEXT_PUBLIC_SITE_URL`: URL base de la aplicación (usada para construir el callback).
+- `NEXT_PUBLIC_APP_URL` o `NEXT_PUBLIC_SITE_URL`: URL base de la aplicación.
 
 ### Base de Datos
 
 La configuración del proveedor se almacena en `identity_verification_provider_configs`.
 
-- `webhook_url`: Debe apuntar a `https://app.tupatrimonio.app/api/webhooks/veriff` (aunque el callback dinámico tiene preferencia para la redirección del usuario).
+- `webhook_url`: Debe apuntar a `https://app.tupatrimonio.app/api/webhooks/veriff`.
 
 ## Webhooks
 
@@ -74,19 +82,17 @@ El endpoint `/api/webhooks/veriff` maneja las notificaciones de Veriff.
 
 ## Solución de Problemas
 
-### Redirección Incorrecta (404)
-
-Si el usuario es redirigido a una página 404 después de Veriff (ej: `/api/webhooks/veriff`), significa que el `callback` enviado al crear la sesión estaba mal configurado.
-Asegúrese de que `start-veriff/route.ts` esté usando la URL de la página de firma (`/sign/{token}`) y no la URL del webhook como callback.
+### El modal no se abre
+- Verificar que la API Key sea correcta.
+- Revisar la consola del navegador para errores de CSP (Content Security Policy).
+- Asegurarse de que el dominio esté permitido en la configuración de Veriff Station.
 
 ### Webhook no actualiza estado
-
 1. Verificar logs de Vercel/Supabase para errores en `/api/webhooks/veriff`.
 2. Verificar que `VERIFF_API_SECRET` coincida con la configuración en Veriff Station.
 3. Revisar la tabla `pending_veriff_syncs` para ver si el evento llegó pero falló al procesarse.
 
 ### Bloqueo de Identidad Incorrecto
-
 Si un usuario legítimo es bloqueado:
 1. Verificar los datos ingresados por el gestor en `signing_signers`.
 2. Verificar los datos devueltos por Veriff en `identity_verification_sessions.raw_response`.

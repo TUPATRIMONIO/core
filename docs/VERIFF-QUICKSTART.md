@@ -16,6 +16,7 @@ El sistema de verificaciones de identidad con Veriff está **100% operativo** y 
 - Sincronización de sesiones externas disponible
 
 ### Frontend ✅
+- **InContext SDK Integrado**: Verificación modal sin salir de la app
 - Hook `useIdentityVerification` con todas las operaciones
 - 3 componentes React listos para usar
 - Tipos TypeScript completos
@@ -56,7 +57,7 @@ export function MiPagina() {
 
 El botón:
 - ✅ Creará la sesión automáticamente
-- ✅ Redirigirá al usuario a Veriff
+- ✅ Abrirá un modal seguro (InContext SDK)
 - ✅ Procesará los resultados via webhook
 - ✅ Descargará toda la evidencia
 - ✅ Guardará todo para auditorías
@@ -77,7 +78,7 @@ El botón:
 
 3. **Completa el formulario y presiona "Verificar Identidad"**
 
-4. **Serás redirigido a Veriff** donde deberás:
+4. **Se abrirá un modal de Veriff** donde deberás:
    - Tomar foto de tu documento (cédula/pasaporte)
    - Tomar un selfie
    - Completar el proceso (toma ~2 minutos)
@@ -206,7 +207,7 @@ sequenceDiagram
     E->>V: POST /v1/sessions
     V-->>E: {verificationUrl, sessionId}
     E-->>F: {verificationUrl}
-    F->>U: Redirigir a Veriff
+    F->>U: Abrir Modal InContext SDK
     
     U->>V: Completar verificación
     V->>W: POST /veriff-webhook (decision)
@@ -269,14 +270,11 @@ console.log(stats);
    npx supabase functions list
    ```
 
-### Usuario redirigido pero no aparece en Veriff
+### El modal no se abre
 
-**Causa:** URL de Veriff no válida o sesión expirada.
+**Causa:** Problemas de CSP o API Key incorrecta.
 
-**Solución:** Verifica los logs:
-```bash
-npx supabase functions logs identity-verification
-```
+**Solución:** Verifica la consola del navegador y la configuración de dominios en Veriff Station.
 
 ---
 
