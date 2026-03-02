@@ -163,8 +163,17 @@ export default function SigningPageClientFES({ signer }: SigningPageClientFESPro
           const data = await res.json();
           
           if (data.isVerified) {
-            // Si ya está verificado, refrescamos para que el useEffect inicial nos lleve al siguiente paso
-            refreshSignedDocument();
+            // Si ya está verificado, transicionar directamente al siguiente paso
+            if (data.identityMatch && data.identityMatch.overallMatch === false) {
+              setIdentityMatchDetails(data.identityMatch.details);
+              setStep("identity_mismatch");
+            } else if (isClaveunica && signer.claveunica_status === "verified") {
+              setStep("claveunica_waiting");
+            } else if (isClaveunica) {
+              setStep("claveunica_validation");
+            } else {
+              setStep("reviewing");
+            }
           }
         } catch (e) {
           console.error("Error polling veriff status:", e);
